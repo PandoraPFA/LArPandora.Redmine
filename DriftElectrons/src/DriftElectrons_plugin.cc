@@ -23,7 +23,6 @@
 
 #include "DriftElectrons/inc/DriftElectrons.h"
 #include "Geometry/inc/geo.h"
-#include "Header/inc/Header.h"
 #include "Simulation/inc/LArVoxelList.h"
 #include "Simulation/inc/LArVoxelData.h"
 #include "Simulation/inc/Electrons.h"
