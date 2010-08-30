@@ -118,13 +118,12 @@ namespace dfe{
     // Read in the LArVoxelList object(s).
     edm::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
     evt.getByLabel(fLArG4ModuleLabel,vxlistHandle);
-    const std::vector<sim::LArVoxelData> &larVoxelList(*vxlistHandle);
 
-    fNumVoxels->Fill(larVoxelList.size());
+    fNumVoxels->Fill(vxlistHandle->size());
 
     // There's probably only one LArVoxelList per event, but FMWK
     // always reads a vector of pointers.  For each LArVoxelList:
-    for(unsigned int i = 0; i < larVoxelList.size(); ++i){
+    for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
 
       // Get the reference to the LArVoxelID in the LArVoxelList.
       edm::Ptr<sim::LArVoxelData> voxel(vxlistHandle, i);
