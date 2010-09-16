@@ -4,7 +4,6 @@
 # messier@indiana.edu
 #
 include SoftRelTools/arch_spec_root.mk
-include SoftRelTools/arch_spec_art.mk
 
 PACKAGE     := DriftElectrons
 LIB_TYPE    := shared
@@ -17,3 +16,4 @@ LIBLINK    := $(LOADLIBES) -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PU
 
 ########################################################################
 include SoftRelTools/standard.mk
+include SoftRelTools/arch_spec_art.mk
