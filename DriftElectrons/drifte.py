@@ -38,7 +38,7 @@ process.Geometry = drifte.Service(
     "Geometry",
     SurfaceY = drifte.double(130.0e2), # in cm
     Name     = drifte.string("argoneut"),
-    GDML     = drifte.string("/grid/fermiapp/lbne/lar/larsoft/Geometry/gdml/argoneut.gdml")
+    GDML     = drifte.string("argoneut.gdml")
 )
 
 # Define the service for passing voxel parameters
