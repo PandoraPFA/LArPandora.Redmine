@@ -19,11 +19,6 @@ class TH1D;
 namespace sim {
   class Electrons;
 }
-namespace edm {
-  class EDAnalyzer;
-  class Event;
-  class ParameterSet;
-}
 
 ///Drifting of electrons
 namespace dfe {
