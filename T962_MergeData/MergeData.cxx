@@ -45,7 +45,7 @@ int no_distance_cut=0,no_degree_cut=0,no_all_cuts=0;
 MergeData::MergeData(edm::ParameterSet const& pset) : 
   
   fdaq_modulelabel(pset.getParameter< std::string >("daq")),
-  file(pset.getParameter< std::string >("file")),
+  //file(pset.getParameter< std::string >("file")),
   
   foundbeaminfo(false),
   foundpaddleinfo(false),
@@ -246,9 +246,9 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
 
 void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
 {
-  
+  std::cout<<"in mergebeam"<<std::endl;
   time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
-  
+  std::cout<<"1***"<<std::endl;
   // std::cout<<"DAQ480(in MergeBeam()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
   // std::cout << "Run " << fDAQHeader[fDAQHeader.size()-1]->GetRun() << " Event = " << fDAQHeader[fDAQHeader.size()-1]->GetEvent() 
@@ -475,14 +475,14 @@ void MergeData::MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll)
   
   //std::cout<<"!!!!!!!!!!!file="<<file.front()<<std::endl;
   
-  std::string::size_type pos_start=file.rfind("/");
+  //std::string::size_type pos_start=file.rfind("/");
   // std::cout<<"pos_start= "<<pos_start<<std::endl;
   
-  std::string::size_type pos_end=file.rfind("root");
+  //std::string::size_type pos_end=file.rfind("root");
   //std::cout<<"pos_end= "<<pos_end<<std::endl;
   
-  std::string finalname;
-  finalname=file.substr(pos_start+2,pos_end-pos_start-3);//changing pos_start+1 to pos_start+2 for mR729.root (extra m in front) and "pos_end-pos_start-2" to pos_end-pos_start-3
+ // std::string finalname;
+ // finalname=file.substr(pos_start+2,pos_end-pos_start-3);//changing pos_start+1 to pos_start+2 for mR729.root (extra m in front) and "pos_end-pos_start-2" to pos_end-pos_start-3
   
   //std::cout<<"WILL BE READING:"<<finalname<<std::endl;
   
