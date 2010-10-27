@@ -48,7 +48,7 @@ process.source = mergedata.Source("PoolSource",
 
 process.merge = mergedata.EDProducer(
     "MergeData",
-    daq   = mergedata.string("DAQ")
+    daq   = mergedata.string("LArRawInput")
    # file       = mergedata.double(1.0),
     
     )    

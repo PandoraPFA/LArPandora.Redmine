@@ -167,14 +167,14 @@ namespace merge {
     void MergePMT(std::auto_ptr<std::vector <raw::Paddles> >Paddles_coll);                 ///method to merge pmt data
     void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
 
-    edm::PtrVector<raw::DAQHeader>  fDAQHeader; ///< header for the event, as set during binary conversion of DAQ480.
-
+   
+	edm::Ptr<raw::DAQHeader>  daq;
     raw::BeamInfo  fBeamInfo;
     raw::Paddles   fPaddles;
     
 	 
     ///<parameters to set
-    std::string  fdaq_modulelabel;               ///< folder for input 
+   std::string  fdaq_modulelabel;               ///< folder for input 
    std::string file;	
    
     bool foundbeaminfo;

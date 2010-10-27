@@ -229,8 +229,14 @@ std::auto_ptr<std::vector<raw::Paddles> > Paddles_coll(new std::vector<raw::Padd
 std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS > );
   
   edm::Handle< std::vector<raw::DAQHeader> > daqHandle;
-    evt.getByLabel(fdaq_modulelabel,daqHandle);
+  evt.getByLabel(fdaq_modulelabel,daqHandle);
+   
+    // for(unsigned int ii=0; ii<daqHandle->size()-1; ++ii)
+//     {
+     daq(daqHandle, daqHandle->size()-1);
+   
     
+   // }
   
     MergeBeam(Beam_coll); 
     MergePMT(Paddles_coll);
@@ -247,7 +253,7 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
 void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
 {
   std::cout<<"in mergebeam"<<std::endl;
-  time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
+  time_t spilltime = daq.GetTimeStamp();//time info. from DAQ480 software
   std::cout<<"1***"<<std::endl;
   // std::cout<<"DAQ480(in MergeBeam()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
@@ -286,7 +292,7 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
     //  std::cout<<std::setprecision(9)<<first<<"  "<<run<<"  "<<event<<"  "<<tms<<" "<<tor101<<"  "<< tortgt <<"  "<< trtgtd <<std::endl;
     
     
-    if((fDAQHeader[fDAQHeader.size()-1]->GetRun()==run)&&(fDAQHeader[fDAQHeader.size()-1]->GetEvent()==event ) ){ foundbeaminfo=true;}
+    if((daq.GetRun()==run)&&(daq.GetEvent()==event ) ){ foundbeaminfo=true;}
     
     
     if(foundbeaminfo){
@@ -316,7 +322,10 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
 void MergeData::MergePMT(std::auto_ptr<std::vector<raw::Paddles> >Paddles_coll)
 
 {
-  time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
+  //time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time 
+  time_t spilltime= daq->GetTimeStamp();
+  
+  //info. from DAQ480 software
   // std::cout<<"DAQ480(in MergePMT()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
   // std::cout << "Run " << fDAQHeader[fDAQHeader.size()-1]->GetRun() << " Event = " << fDAQHeader[fDAQHeader.size()-1]->GetEvent() 
@@ -444,7 +453,11 @@ void MergeData::MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll)
 {
   
   
-  time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
+ // time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
+  
+  time_t spilltime=daq.GetTimeStamp();
+  
+  
   ////////////////////////////////////////////////////////////////////////////////////
   
   tm *timeinfo = localtime(&spilltime);
@@ -666,7 +679,7 @@ v_z_start_a.clear();
       //  std::cout <<"run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex << " Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
        
       //if we can match DAQ with matched file
-      if((run_== fDAQHeader[fDAQHeader.size()-1]->GetRun()) && (event==fDAQHeader[fDAQHeader.size()-1]->GetEvent()))
+      if((run_== daq.GetRun()) && (event==daq.GetEvent()))
 	{
 	  no_events_daq++;
 	   
@@ -806,7 +819,7 @@ v_z_start_a.clear();
 
 
 		       
-		      std::cout<<"spilltime= "<<std::setprecision(13)<<spilltime<< " utc= "<<std::setprecision(13)<<utc<<" trtgtd_m= "<<std::setprecision(13)<<trtgtd_m<<"   "<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tor101_m= "<<std::setprecision(13)<<tor101_m<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt_m= "<<std::setprecision(13)<<tortgt_m<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Run = "<<fDAQHeader[fDAQHeader.size()-1]->GetRun()  <<" Event = "<< fDAQHeader[fDAQHeader.size()-1]->GetEvent() <<"tms="<<tms<<std::endl;
+		      std::cout<<"spilltime= "<<std::setprecision(13)<<spilltime<< " utc= "<<std::setprecision(13)<<utc<<" trtgtd_m= "<<std::setprecision(13)<<trtgtd_m<<"   "<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tor101_m= "<<std::setprecision(13)<<tor101_m<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt_m= "<<std::setprecision(13)<<tortgt_m<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Run = "<<daq.GetRun()  <<" Event = "<< daq.GetEvent() <<"tms="<<tms<<std::endl;
 		       
 		       
 		      std::cout<< " Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
@@ -939,7 +952,7 @@ v_z_start_a.clear();
 			   
 			  // if((Run== fDAQHeader[fDAQHeader.size()-1]->GetRun()) && (Event==fDAQHeader[fDAQHeader.size()-1]->GetEvent()) && (fabs(Cosx-trkdcosx )<1) && (fabs(Cosy-trkdcosy )<1) && (fabs(Cosz-trkdcosz )<1)){
 			   
-			  if((Run== fDAQHeader[fDAQHeader.size()-1]->GetRun()) && (Event==fDAQHeader[fDAQHeader.size()-1]->GetEvent())){
+			  if((Run== daq.GetRun()) && (Event==daq.GetEvent())){
 			     
 			    std::cout<<"found a match in our 3d reco file for event "<<Event<<std::endl;
 			    in_argoneut=1;
