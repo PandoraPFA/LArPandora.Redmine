@@ -168,7 +168,7 @@ namespace merge {
     void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
 
    
-	edm::Ptr<raw::DAQHeader>  daq;
+	edm::Ptr<raw::DAQHeader> fdaq;
     raw::BeamInfo  fBeamInfo;
     raw::Paddles   fPaddles;
     
