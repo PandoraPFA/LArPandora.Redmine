@@ -32,6 +32,9 @@
 #include "TH1.h"
 #include "TH2.h"
 #include<dirent.h>
+#include <time.h>
+#include <stdio.h>
+#include<cstdlib>
 
 namespace merge{
 
@@ -55,6 +58,7 @@ MergeData::MergeData(edm::ParameterSet const& pset) :
   
   void MergeData::beginJob(edm::EventSetup const&)
   {
+  std::cout<<"in beginJob"<<std::endl;
   // get access to the TFile service
     edm::Service<edm::TFileService> tfs;
     
@@ -223,19 +227,20 @@ MergeData::~MergeData()
 
 void MergeData::produce(edm::Event& evt, edm::EventSetup const&)
 {
+std::cout<<"in produce"<<std::endl;
 
 std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll(new std::vector<raw::BeamInfo> );
 std::auto_ptr<std::vector<raw::Paddles> > Paddles_coll(new std::vector<raw::Paddles> );
 std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS > );
-  
+  std::cout<<"p1***"<<std::endl;
   edm::Handle< std::vector<raw::DAQHeader> > daqHandle;
   evt.getByLabel(fdaq_modulelabel,daqHandle);
-   
+   std::cout<<"p2***"<<std::endl;
     // for(unsigned int ii=0; ii<daqHandle->size()-1; ++ii)
 //     {
      //daq(daqHandle, daqHandle->size()-1);
      fdaq = edm::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
-   
+   std::cout<<"p3***"<<std::endl;
     
    // }
   
@@ -255,9 +260,12 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
 {
   std::cout<<"in mergebeam"<<std::endl;
   time_t spilltime = fdaq->GetTimeStamp();//time info. from DAQ480 software
+  std::cout<<"spilltime="<<spilltime<<std::endl;
   std::cout<<"1***"<<std::endl;
   // std::cout<<"DAQ480(in MergeBeam()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
+  std::cout<<"timeinfo="<<timeinfo<<std::endl;
+  std::cout<<"1-1***"<<std::endl;
   // std::cout << "Run " << fDAQHeader[fDAQHeader.size()-1]->GetRun() << " Event = " << fDAQHeader[fDAQHeader.size()-1]->GetEvent() 
   //<< " time = " << fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp() << " pretty = " << ctime(&spilltime) << std::endl;
   // printf("Date is (in MergeBeam) %d/%02d/%02d\n",timeinfo->tm_year+1900,timeinfo->tm_mon+1,timeinfo->tm_mday);
@@ -266,15 +274,16 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
   char beamfilename[20];
   
   
+  std::cout<<"1-2***"<<std::endl;
   sprintf(beamfilename,"matched_%02d_%02d_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
-  
+  std::cout<<"1-3***"<<std::endl;
   std::ifstream beamfile(beamfilename);
   
   if(!beamfile.is_open()){
     std::cerr << "MergeBeam:  Could not open file named " << beamfilename << std::endl;
     return;
   }
-  
+  std::cout<<"2***"<<std::endl;
   long long int tms;
   double tor101;
   double tortgt;
@@ -323,6 +332,7 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
 void MergeData::MergePMT(std::auto_ptr<std::vector<raw::Paddles> >Paddles_coll)
 
 {
+std::cout<<"in mergePMT"<<std::endl;
   //time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time 
   time_t spilltime= fdaq->GetTimeStamp();
   
@@ -452,7 +462,7 @@ void MergeData::MergePMT(std::auto_ptr<std::vector<raw::Paddles> >Paddles_coll)
 void MergeData::MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll)
 
 {
-  
+  std::cout<<"in mergeMinos"<<std::endl;
   
  // time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
   

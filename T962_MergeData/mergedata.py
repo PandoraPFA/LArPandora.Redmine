@@ -15,7 +15,7 @@ process = mergedata.Process("MergeData")
 
 # Maximum number of events to do.
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(3) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(1) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.
@@ -48,7 +48,7 @@ process.source = mergedata.Source("PoolSource",
 
 process.merge = mergedata.EDProducer(
     "MergeData",
-    daq   = mergedata.string("LArRawInput")
+    daq   = mergedata.string("source") 
    # file       = mergedata.double(1.0),
     
     )    
