@@ -41,9 +41,6 @@ namespace merge {
 
   protected: 
 
-
-    void MergeScanned( merge::ScanInfo& scan, edm::Ptr<raw::DAQHeader> daq);   ///method to merge beam data
-
     ///<parameters to set
    std::string  daq_modulelabel;               ///< folder for input 
    std::vector<std::string> scanners;
