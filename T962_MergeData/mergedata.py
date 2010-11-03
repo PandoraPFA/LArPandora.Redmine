@@ -15,7 +15,7 @@ process = mergedata.Process("MergeData")
 
 # Maximum number of events to do.
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(5) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(2) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.

@@ -232,10 +232,10 @@ std::cout<<"in produce"<<std::endl;
 std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll(new std::vector<raw::BeamInfo> );
 std::auto_ptr<std::vector<raw::Paddles> > Paddles_coll(new std::vector<raw::Paddles> );
 std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS > );
-  std::cout<<"p1***"<<std::endl;
+  
   edm::Handle< std::vector<raw::DAQHeader> > daqHandle;
   evt.getByLabel(fdaq_modulelabel,daqHandle);
-   std::cout<<"p2***"<<std::endl;
+  
     // for(unsigned int ii=0; ii<daqHandle->size()-1; ++ii)
 //     {
      //daq(daqHandle, daqHandle->size()-1);
@@ -249,22 +249,54 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
    
     std::cout<<"run: "<<run<<" event: "<<event<<std::endl;
     //std::cout<<"ts: "<<ts<<std::endl;
-   std::cout<<"p3***"<<std::endl;
+   
     
    // }
-  
+  std::cout<<"BEFORE CREATION***"<<std::endl;
     MergeBeam(Beam_coll); 
     MergePMT(Paddles_coll);
     MergeMINOS(Minos_coll);
+    std::cout<<"AFTER CREATION***"<<std::endl;
     
-  if(foundpaddleinfo){  evt.put(Beam_coll);}
-    evt.put(Paddles_coll);
-    evt.put(Minos_coll);
+    if(foundbeaminfo==true)std::cout<<"foundbeaminfo==true"<<std::endl;
+    else {std::cout<<"foundbeaminfo==false"<<std::endl;}
+    
+    if(foundpaddleinfo==true)std::cout<<"foundpaddleinfo==true"<<std::endl;
+    else {std::cout<<"foundpaddleinfo==false"<<std::endl;}
+    
+    if(foundminosinfo==true)std::cout<<"foundminosinfo==true"<<std::endl;
+    else {std::cout<<"foundminosinfo==false"<<std::endl;}
     
     
+    
+    
+    
+  if(foundbeaminfo)  {  
+  // std::vector<raw::BeamInfo> beam;
+//   MergeBeam(beam);
+//   Beam_coll->push_back(beam);
+std::cout<<"foundbeaminfo and putting in evt"<<std::endl;
+  evt.put(Beam_coll);}
+  
+  if(foundpaddleinfo){ 
+  // std::auto_ptr<std::vector<raw::Paddles> > paddles;
+//   MergePMT(paddles);
+//   Paddles_coll->push_back(paddles);
+std::cout<<"founpaddleinfo and putting in evt"<<std::endl;
+  evt.put(Paddles_coll);}
+  //void MergeData::MergePMT(std::auto_ptr<std::vector<raw::Paddles> >Paddles_coll)
+  if(foundminosinfo) { 
+  // std::auto_ptr<std::vector<raw::MINOS> > minos;
+//   MergeMINOS(minos);
+//   Minos_coll->push_back(minos);
+std::cout<<"HEYYYYYYYYYYAAAA"<<std::endl;
+std::cout<<"foundminosinfo and putting in evt"<<std::endl;
+  evt.put(Minos_coll);}
+    
+   //void MergeData::MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll) 
    
     //std::cout<<"run= "<<run<<" event= "<<event<<" ts= "<<ts<<" tsval= "<<tsval<<std::endl;
-    
+    std::cout<<"ending the jon: Kinga"<<std::endl;
  return;
 }
 
@@ -275,22 +307,20 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
   std::cout<<"in mergebeam"<<std::endl;
   edm::Timestamp  timestamp=fdaq->GetTimeStamp();
   time_t spilltime = fdaq->GetTimeStamp();//time info. from DAQ480 software
+  spilltime = spilltime >> 32;
   std::cout<<"doing event# "<<fdaq->GetEvent()<<std::endl;
   unsigned long long int tsval= timestamp.value();
   std::cout<<"spilltime="<<spilltime<<std::endl;
   std::cout<<"tsval=    "<<tsval<<std::endl;
-  // const unsigned long int mask32= 0xFFFFFFFFUL;
-//   unsigned long int lup=(ul64>>32) & mask32;
-//   TTimeStamp tts(lup,llo);
-//   std::cout<<"tts"<<tts<<std::endl;
+ 
   
   
   
-  std::cout<<"1***"<<std::endl;
+ 
   // std::cout<<"DAQ480(in MergeBeam()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
   std::cout<<"timeinfo="<<timeinfo<<std::endl;
-  std::cout<<"1-1***"<<std::endl;
+ 
   // std::cout << "Run " << fDAQHeader[fDAQHeader.size()-1]->GetRun() << " Event = " << fDAQHeader[fDAQHeader.size()-1]->GetEvent() 
   //<< " time = " << fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp() << " pretty = " << ctime(&spilltime) << std::endl;
   // printf("Date is (in MergeBeam) %d/%02d/%02d\n",timeinfo->tm_year+1900,timeinfo->tm_mon+1,timeinfo->tm_mday);
@@ -299,16 +329,16 @@ void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
   char beamfilename[20];
   
   
-  std::cout<<"1-2***"<<std::endl;
+ 
   sprintf(beamfilename,"matched_%02d_%02d_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
-  std::cout<<"1-3***"<<std::endl;
+  
   std::ifstream beamfile(beamfilename);
   
   if(!beamfile.is_open()){
     std::cerr << "MergeBeam:  Could not open file named " << beamfilename << std::endl;
     return;
   }
-  std::cout<<"2***"<<std::endl;
+  
   long long int tms;
   double tor101;
   double tortgt;
@@ -360,7 +390,7 @@ void MergeData::MergePMT(std::auto_ptr<std::vector<raw::Paddles> >Paddles_coll)
 std::cout<<"in mergePMT"<<std::endl;
   //time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time 
   time_t spilltime= fdaq->GetTimeStamp();
-  
+  spilltime = spilltime >> 32;
   //info. from DAQ480 software
   // std::cout<<"DAQ480(in MergePMT()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
@@ -493,7 +523,7 @@ void MergeData::MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll)
   
   time_t spilltime=fdaq->GetTimeStamp();
   
-  
+  spilltime = spilltime >> 32;
   ////////////////////////////////////////////////////////////////////////////////////
   
   tm *timeinfo = localtime(&spilltime);
@@ -777,20 +807,20 @@ v_z_start_a.clear();
 		  minitree->SetBranchAddress("tor101",&tor101);
 		  minitree->SetBranchAddress("tortgt",&tortgt);
 
-		  minitree->SetBranchAddress("charge",&charge);
- 		  minitree->SetBranchAddress("trkmom",&trkmom);
-		  minitree->SetBranchAddress("trkstpU",&trkstpU);
-		  minitree->SetBranchAddress("trkstpV",&trkstpV);
-		  minitree->SetBranchAddress("ntrkstp",&ntrkstp);
-		  minitree->SetBranchAddress("trkstpX",&trkstpX);
-		  minitree->SetBranchAddress("trkstpY",&trkstpY);
-		  minitree->SetBranchAddress("trkstpZ",&trkstpZ);
-		  minitree->SetBranchAddress("trkeqp",&trkeqp);
-		  minitree->SetBranchAddress("trkVtxeX",&trkVtxeX);
-		  minitree->SetBranchAddress("trkVtxeY",&trkVtxeY);
+		  // minitree->SetBranchAddress("charge",&charge);
+//  		  minitree->SetBranchAddress("trkmom",&trkmom);
+// 		  minitree->SetBranchAddress("trkstpU",&trkstpU);
+// 		  minitree->SetBranchAddress("trkstpV",&trkstpV);
+// 		  minitree->SetBranchAddress("ntrkstp",&ntrkstp);
+// 		  minitree->SetBranchAddress("trkstpX",&trkstpX);
+// 		  minitree->SetBranchAddress("trkstpY",&trkstpY);
+// 		  minitree->SetBranchAddress("trkstpZ",&trkstpZ);
+// 		  minitree->SetBranchAddress("trkeqp",&trkeqp);
+// 		  minitree->SetBranchAddress("trkVtxeX",&trkVtxeX);
+// 		  minitree->SetBranchAddress("trkVtxeY",&trkVtxeY);
 		  
 
- 
+	 std::cout<<"after minitrees"<<std::endl;	
 		  //...................................................
 
 	
@@ -1074,12 +1104,16 @@ v_z_start_a.clear();
 		      trkVtxe.push_back(trkVtxeY);
 		      
 		      
-		      raw::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,
-		      vtx,trkErange,sgate53,trkqp,trkVtx, trkdcos,month,trkmom, charge, trkstp,trkeqp,trkVtxe,0);
+		      
+		      // FOR NEWEST MINOS FILE***:
+		      //raw::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtx,trkErange,sgate53,trkqp,trkVtx, trkdcos,month,trkmom, charge, trkstp,trkeqp,trkVtxe,0);
+		      
+		       //for OLD MINOS FILE: ***:
+		      raw::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtxX,vtxY,vtxZ,trkErange,sgate53,trkqp,trkVtxX,trkVtxY,trkVtxZ, trkdcosx,trkdcosy,trkdcosz,month,0);
+		      
 		      Minos_coll->push_back(my_minos);
 		       
-		       
-		      
+		     
 		       
 		       
 		       
