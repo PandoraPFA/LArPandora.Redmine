@@ -272,31 +272,18 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
     
     
   if(foundbeaminfo)  {  
-  // std::vector<raw::BeamInfo> beam;
-//   MergeBeam(beam);
-//   Beam_coll->push_back(beam);
-std::cout<<"foundbeaminfo and putting in evt"<<std::endl;
   evt.put(Beam_coll);}
   
   if(foundpaddleinfo){ 
-  // std::auto_ptr<std::vector<raw::Paddles> > paddles;
-//   MergePMT(paddles);
-//   Paddles_coll->push_back(paddles);
-std::cout<<"founpaddleinfo and putting in evt"<<std::endl;
   evt.put(Paddles_coll);}
-  //void MergeData::MergePMT(std::auto_ptr<std::vector<raw::Paddles> >Paddles_coll)
+ 
   if(foundminosinfo) { 
-  // std::auto_ptr<std::vector<raw::MINOS> > minos;
-//   MergeMINOS(minos);
-//   Minos_coll->push_back(minos);
-std::cout<<"HEYYYYYYYYYYAAAA"<<std::endl;
-std::cout<<"foundminosinfo and putting in evt"<<std::endl;
   evt.put(Minos_coll);}
     
-   //void MergeData::MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll) 
+  
    
     //std::cout<<"run= "<<run<<" event= "<<event<<" ts= "<<ts<<" tsval= "<<tsval<<std::endl;
-    std::cout<<"ending the jon: Kinga"<<std::endl;
+    
  return;
 }
 
