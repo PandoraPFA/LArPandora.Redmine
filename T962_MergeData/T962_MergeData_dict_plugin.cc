@@ -1,4 +1,4 @@
-// Generated at Wed Nov  3 13:14:36 2010. Do not modify it
+// Generated at Wed Nov  3 15:40:04 2010. Do not modify it
 
 /*
 GCC-XML version 0.7.0
@@ -52,19 +52,19 @@ namespace {
   Type type_218 = TypeBuilder("long");
   Type type_1249 = TypedefTypeBuilder("ptrdiff_t", type_218);
   Type type_2332c = ConstBuilder(type_2332);
-  Type type_13156 = ReferenceBuilder(type_2332c);
+  Type type_13159 = ReferenceBuilder(type_2332c);
   Type type_1703 = TypeBuilder("std::vector<merge::ScanInfo>");
   Type type_1703c = ConstBuilder(type_1703);
-  Type type_10377 = ReferenceBuilder(type_1703c);
-  Type type_13157 = ReferenceBuilder(type_1703);
+  Type type_10380 = ReferenceBuilder(type_1703c);
+  Type type_13160 = ReferenceBuilder(type_1703);
   Type type_3576 = TypeBuilder("bool");
   Type type_3102 = TypeBuilder("edm::EDProduct");
   Type type_1779 = TypeBuilder("std::auto_ptr<std::vector<merge::ScanInfo> >");
-  Type type_10432 = PointerBuilder(type_1703c);
+  Type type_10435 = PointerBuilder(type_1703c);
   Type type_2401 = TypeBuilder("std::type_info");
   Type type_2401c = ConstBuilder(type_2401);
   Type type_2407 = ReferenceBuilder(type_2401c);
-  Type type_13814 = PointerBuilder(type_1703);
+  Type type_13817 = PointerBuilder(type_1703);
   Type type_3083 = TypeBuilder("edm::Wrapper<std::vector<merge::ScanInfo> >");
 } // unnamed namespace
 
@@ -83,6 +83,7 @@ class __merge__ScanInfo {
   int vertindwire;
   int vertcolwire;
   int numshower;
+  int scanner;
 };
 class __std__vector_merge__ScanInfo_ : protected ::std::_Vector_base<merge::ScanInfo,std::allocator<merge::ScanInfo> > {
   public:
@@ -99,15 +100,15 @@ class __edm__Wrapper_std__vector_merge__ScanInfo_s_ : public ::edm::EDProduct {
 
 namespace {
 //------Stub functions for class ScanInfo -------------------------------
-static void* constructor_10187( void* mem, const std::vector<void*>& arg, void*) {
+static void* constructor_10188( void* mem, const std::vector<void*>& arg, void*) {
   return ::new(mem) ::merge::ScanInfo(*(const ::merge::ScanInfo*)arg[0]);
 }
 
-static void* constructor_10188( void* mem, const std::vector<void*>&, void*) {
+static void* constructor_10189( void* mem, const std::vector<void*>&, void*) {
   return ::new(mem) ::merge::ScanInfo();
 }
 
-static void* constructor_10189( void* mem, const std::vector<void*>& arg, void*) {
+static void* constructor_10190( void* mem, const std::vector<void*>& arg, void*) {
   return ::new(mem) ::merge::ScanInfo(*(int*)arg[0],
                                       *(int*)arg[1],
                                       *(int*)arg[2],
@@ -117,139 +118,153 @@ static void* constructor_10189( void* mem, const std::vector<void*>& arg, void*)
                                       *(int*)arg[6],
                                       *(int*)arg[7],
                                       *(int*)arg[8],
-                                      *(int*)arg[9]);
+                                      *(int*)arg[9],
+                                      *(int*)arg[10]);
 }
 
-static void* destructor_10190(void * o, const std::vector<void*>&, void *) {
+static void* destructor_10191(void * o, const std::vector<void*>&, void *) {
   ((::merge::ScanInfo*)o)->~ScanInfo(); return 0;
 }
-static void* method_10191( void* o, const std::vector<void*>&, void*)
+static void* method_10192( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_IsNeutrino();
   return &ret;
 }
 
-static void* method_10192( void* o, const std::vector<void*>&, void*)
+static void* method_10193( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_IsnotNeutrino();
   return &ret;
 }
 
-static void* method_10193( void* o, const std::vector<void*>&, void*)
+static void* method_10194( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_IsMaybeNeutrino();
   return &ret;
 }
 
-static void* method_10194( void* o, const std::vector<void*>&, void*)
+static void* method_10195( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_TrackInd();
   return &ret;
 }
 
-static void* method_10195( void* o, const std::vector<void*>&, void*)
+static void* method_10196( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_TrackCol();
   return &ret;
 }
 
-static void* method_10196( void* o, const std::vector<void*>&, void*)
+static void* method_10197( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_VertIndTime();
   return &ret;
 }
 
-static void* method_10197( void* o, const std::vector<void*>&, void*)
+static void* method_10198( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_VertColTime();
   return &ret;
 }
 
-static void* method_10198( void* o, const std::vector<void*>&, void*)
+static void* method_10199( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_VertIndWire();
   return &ret;
 }
 
-static void* method_10199( void* o, const std::vector<void*>&, void*)
+static void* method_10200( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_VertColWire();
   return &ret;
 }
 
-static void* method_10200( void* o, const std::vector<void*>&, void*)
+static void* method_10201( void* o, const std::vector<void*>&, void*)
 {
   static int ret;
   ret = ((const ::merge::ScanInfo*)o)->Get_NumShower();
   return &ret;
 }
 
-static void* method_10201( void* o, const std::vector<void*>& arg, void*)
+static void* method_10202( void* o, const std::vector<void*>&, void*)
+{
+  static int ret;
+  ret = ((const ::merge::ScanInfo*)o)->Get_Scanner();
+  return &ret;
+}
+
+static void* method_10203( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetIsNeutrino(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10202( void* o, const std::vector<void*>& arg, void*)
+static void* method_10204( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetIsnotNeutrino(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10203( void* o, const std::vector<void*>& arg, void*)
+static void* method_10205( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetIsMaybeNeutrino(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10204( void* o, const std::vector<void*>& arg, void*)
+static void* method_10206( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetTrackInd(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10205( void* o, const std::vector<void*>& arg, void*)
+static void* method_10207( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetTrackCol(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10206( void* o, const std::vector<void*>& arg, void*)
+static void* method_10208( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetVertIndTime(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10207( void* o, const std::vector<void*>& arg, void*)
+static void* method_10209( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetVertColTime(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10208( void* o, const std::vector<void*>& arg, void*)
+static void* method_10210( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetVertIndWire(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10209( void* o, const std::vector<void*>& arg, void*)
+static void* method_10211( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetVertColWire(*(int*)arg[0]);
   return 0;
 }
 
-static void* method_10210( void* o, const std::vector<void*>& arg, void*)
+static void* method_10212( void* o, const std::vector<void*>& arg, void*)
 {
   ((::merge::ScanInfo*)o)->SetNumShower(*(int*)arg[0]);
+  return 0;
+}
+
+static void* method_10213( void* o, const std::vector<void*>& arg, void*)
+{
+  ((::merge::ScanInfo*)o)->SetScanner(*(int*)arg[0]);
   return 0;
 }
 
@@ -277,30 +292,33 @@ void __merge__ScanInfo_dict() {
   .AddDataMember(type_202, "vertindwire", OffsetOf(__shadow__::__merge__ScanInfo, vertindwire), PRIVATE)
   .AddDataMember(type_202, "vertcolwire", OffsetOf(__shadow__::__merge__ScanInfo, vertcolwire), PRIVATE)
   .AddDataMember(type_202, "numshower", OffsetOf(__shadow__::__merge__ScanInfo, numshower), PRIVATE)
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_5577), "ScanInfo", constructor_10187, 0, "_ctor_arg", PUBLIC | ARTIFICIAL | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void), "ScanInfo", constructor_10188, 0, 0, PUBLIC | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202), "ScanInfo", constructor_10189, 0, "isneutrino;isnotneutrino;maybeneutrino;trackind;trackcol;vertindtime;vertcoltime;vertindwire;vertcolwire;vnumshower", PUBLIC | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void), "~ScanInfo", destructor_10190, 0, 0, PUBLIC | DESTRUCTOR )
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_IsNeutrino", method_10191, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_IsnotNeutrino", method_10192, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_IsMaybeNeutrino", method_10193, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_TrackInd", method_10194, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_TrackCol", method_10195, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertIndTime", method_10196, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertColTime", method_10197, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertIndWire", method_10198, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertColWire", method_10199, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_NumShower", method_10200, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetIsNeutrino", method_10201, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetIsnotNeutrino", method_10202, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetIsMaybeNeutrino", method_10203, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetTrackInd", method_10204, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetTrackCol", method_10205, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertIndTime", method_10206, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertColTime", method_10207, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertIndWire", method_10208, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertColWire", method_10209, 0, "val", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetNumShower", method_10210, 0, "val", PUBLIC)
+  .AddDataMember(type_202, "scanner", OffsetOf(__shadow__::__merge__ScanInfo, scanner), PRIVATE)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_5577), "ScanInfo", constructor_10188, 0, "_ctor_arg", PUBLIC | ARTIFICIAL | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void), "ScanInfo", constructor_10189, 0, 0, PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202, type_202), "ScanInfo", constructor_10190, 0, "isneutrino;isnotneutrino;maybeneutrino;trackind;trackcol;vertindtime;vertcoltime;vertindwire;vertcolwire;vnumshower;scanner", PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void), "~ScanInfo", destructor_10191, 0, 0, PUBLIC | DESTRUCTOR )
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_IsNeutrino", method_10192, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_IsnotNeutrino", method_10193, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_IsMaybeNeutrino", method_10194, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_TrackInd", method_10195, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_TrackCol", method_10196, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertIndTime", method_10197, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertColTime", method_10198, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertIndWire", method_10199, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_VertColWire", method_10200, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_NumShower", method_10201, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_202), "Get_Scanner", method_10202, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetIsNeutrino", method_10203, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetIsnotNeutrino", method_10204, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetIsMaybeNeutrino", method_10205, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetTrackInd", method_10206, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetTrackCol", method_10207, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertIndTime", method_10208, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertColTime", method_10209, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertIndWire", method_10210, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetVertColWire", method_10211, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetNumShower", method_10212, 0, "val", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_202), "SetScanner", method_10213, 0, "val", PUBLIC)
   .AddFunctionMember<void*(void)>("__getNewDelFunctions", method_x0, 0, 0, PUBLIC | ARTIFICIAL);
 }
 
@@ -565,11 +583,11 @@ void __std__vector_merge__ScanInfo__dict() {
   .AddTypedef(type_1248, "std::vector<merge::ScanInfo>::size_type")
   .AddTypedef(type_1249, "std::vector<merge::ScanInfo>::difference_type")
   .AddTypedef(type_2332, "std::vector<merge::ScanInfo>::allocator_type")
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_13156), "vector", constructor_5586, 0, "__a=<gccxml-cast-expr>", PUBLIC | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_1248, type_5577, type_13156), "vector", constructor_5587, 0, "__n;__value=<gccxml-cast-expr>;__a=<gccxml-cast-expr>", PUBLIC | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_10377), "vector", constructor_5588, 0, "__x", PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_13159), "vector", constructor_5586, 0, "__a=<gccxml-cast-expr>", PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_1248, type_5577, type_13159), "vector", constructor_5587, 0, "__n;__value=<gccxml-cast-expr>;__a=<gccxml-cast-expr>", PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_10380), "vector", constructor_5588, 0, "__x", PUBLIC | CONSTRUCTOR)
   .AddFunctionMember(FunctionTypeBuilder(type_void), "~vector", destructor_5589, 0, 0, PUBLIC | DESTRUCTOR )
-  .AddFunctionMember(FunctionTypeBuilder(type_13157, type_10377), "operator=", operator_5590, 0, "__x", PUBLIC | OPERATOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_13160, type_10380), "operator=", operator_5590, 0, "__x", PUBLIC | OPERATOR)
   .AddFunctionMember(FunctionTypeBuilder(type_909, type_1248, type_5577), "assign", method_5591, 0, "__n;__val", PUBLIC)
   .AddFunctionMember(FunctionTypeBuilder(type_3419), "begin", method_5592, 0, 0, PUBLIC)
   .AddFunctionMember(FunctionTypeBuilder(type_3412), "begin", method_5593, 0, 0, PUBLIC | CONST)
@@ -597,7 +615,7 @@ void __std__vector_merge__ScanInfo__dict() {
   .AddFunctionMember(FunctionTypeBuilder(type_909, type_3419, type_1248, type_5577), "insert", method_5620, 0, "__position;__n;__x", PUBLIC)
   .AddFunctionMember(FunctionTypeBuilder(type_3419, type_3419), "erase", method_5621, 0, "__position", PUBLIC)
   .AddFunctionMember(FunctionTypeBuilder(type_3419, type_3419, type_3419), "erase", method_5622, 0, "__first;__last", PUBLIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_909, type_13157), "swap", method_5623, 0, "__x", PUBLIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_909, type_13160), "swap", method_5623, 0, "__x", PUBLIC)
   .AddFunctionMember(FunctionTypeBuilder(type_909), "clear", method_5624, 0, 0, PUBLIC)
   .AddFunctionMember(FunctionTypeBuilder(type_void), "vector", constructor_x1, 0, 0, PUBLIC | ARTIFICIAL | CONSTRUCTOR)
   .AddFunctionMember<void*(void)>("__getNewDelFunctions", method_x2, 0, 0, PUBLIC | ARTIFICIAL)
@@ -606,38 +624,38 @@ void __std__vector_merge__ScanInfo__dict() {
 }
 
 //------Stub functions for class Wrapper<std::vector<merge::ScanInfo, std::allocator<merge::ScanInfo> > > -------------------------------
-static void* constructor_10816( void* mem, const std::vector<void*>&, void*) {
+static void* constructor_10819( void* mem, const std::vector<void*>&, void*) {
   return ::new(mem) ::edm::Wrapper<std::vector<merge::ScanInfo> >();
 }
 
-static void* constructor_10817( void* mem, const std::vector<void*>& arg, void*) {
+static void* constructor_10820( void* mem, const std::vector<void*>& arg, void*) {
   return ::new(mem) ::edm::Wrapper<std::vector<merge::ScanInfo> >(*(::std::auto_ptr<std::vector<merge::ScanInfo> >*)arg[0]);
 }
 
-static void* destructor_10818(void * o, const std::vector<void*>&, void *) {
+static void* destructor_10821(void * o, const std::vector<void*>&, void *) {
   ((::edm::Wrapper<std::vector<merge::ScanInfo> >*)o)->~Wrapper(); return 0;
 }
-static void* method_10819( void* o, const std::vector<void*>&, void*)
+static void* method_10822( void* o, const std::vector<void*>&, void*)
 {
   return (void*)((const ::edm::Wrapper<std::vector<merge::ScanInfo> >*)o)->product();
 }
 
-static void* operator_10820( void* o, const std::vector<void*>&, void*)
+static void* operator_10823( void* o, const std::vector<void*>&, void*)
 {
   return (void*)((const ::edm::Wrapper<std::vector<merge::ScanInfo> >*)o)->operator->();
 }
 
-static void* method_10821( void* o, const std::vector<void*>&, void*)
+static void* method_10824( void* o, const std::vector<void*>&, void*)
 {
   return (void*)&((::edm::Wrapper<std::vector<merge::ScanInfo> >*)o)->productTypeInfo();
 }
 
-static void* method_10822( void* o, const std::vector<void*>&, void*)
+static void* method_10825( void* o, const std::vector<void*>&, void*)
 {
   return (void*)&((::edm::Wrapper<std::vector<merge::ScanInfo> >*)o)->typeInfo();
 }
 
-static void* constructor_10823( void* mem, const std::vector<void*>& arg, void*) {
+static void* constructor_10826( void* mem, const std::vector<void*>& arg, void*) {
   return ::new(mem) ::edm::Wrapper<std::vector<merge::ScanInfo> >((::std::vector<merge::ScanInfo>*)arg[0]);
 }
 
@@ -669,14 +687,14 @@ void __edm__Wrapper_std__vector_merge__ScanInfo_s__dict() {
   .AddDataMember(type_1703, "obj", OffsetOf(__shadow__::__edm__Wrapper_std__vector_merge__ScanInfo_s_, obj), PRIVATE)
   .AddTypedef(type_1703, "edm::Wrapper<std::vector<merge::ScanInfo> >::value_type")
   .AddTypedef(type_1703, "edm::Wrapper<std::vector<merge::ScanInfo> >::wrapped_type")
-  .AddFunctionMember(FunctionTypeBuilder(type_void), "Wrapper", constructor_10816, 0, 0, PUBLIC | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_1779), "Wrapper", constructor_10817, 0, "ptr", PUBLIC | CONSTRUCTOR)
-  .AddFunctionMember(FunctionTypeBuilder(type_void), "~Wrapper", destructor_10818, 0, 0, PUBLIC | VIRTUAL | DESTRUCTOR )
-  .AddFunctionMember(FunctionTypeBuilder(type_10432), "product", method_10819, 0, 0, PUBLIC | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_10432), "operator->", operator_10820, 0, 0, PUBLIC | OPERATOR | CONST)
-  .AddFunctionMember(FunctionTypeBuilder(type_2407), "productTypeInfo", method_10821, 0, 0, PUBLIC | STATIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_2407), "typeInfo", method_10822, 0, 0, PUBLIC | STATIC)
-  .AddFunctionMember(FunctionTypeBuilder(type_void, type_13814), "Wrapper", constructor_10823, 0, "ptr", PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void), "Wrapper", constructor_10819, 0, 0, PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_1779), "Wrapper", constructor_10820, 0, "ptr", PUBLIC | CONSTRUCTOR)
+  .AddFunctionMember(FunctionTypeBuilder(type_void), "~Wrapper", destructor_10821, 0, 0, PUBLIC | VIRTUAL | DESTRUCTOR )
+  .AddFunctionMember(FunctionTypeBuilder(type_10435), "product", method_10822, 0, 0, PUBLIC | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_10435), "operator->", operator_10823, 0, 0, PUBLIC | OPERATOR | CONST)
+  .AddFunctionMember(FunctionTypeBuilder(type_2407), "productTypeInfo", method_10824, 0, 0, PUBLIC | STATIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_2407), "typeInfo", method_10825, 0, 0, PUBLIC | STATIC)
+  .AddFunctionMember(FunctionTypeBuilder(type_void, type_13817), "Wrapper", constructor_10826, 0, "ptr", PUBLIC | CONSTRUCTOR)
   .AddFunctionMember<void*(void)>("__getNewDelFunctions", method_x5, 0, 0, PUBLIC | ARTIFICIAL)
   .AddFunctionMember<void*(void)>("__getBasesTable", method_x6, 0, 0, PUBLIC | ARTIFICIAL);
 }

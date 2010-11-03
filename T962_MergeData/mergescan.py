@@ -48,7 +48,9 @@ process.source = mergescan.Source("PoolSource",
 
 process.merge = mergescan.EDProducer(
     "MergeScan",
-    daq   = mergescan.string("source") 
+    daq   = mergescan.string("source"),
+    scanners = mergescan.vstring("spitz7","patch")
+    
    # file       = mergescan.double(1.0),
     
     )    

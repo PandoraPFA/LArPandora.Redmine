@@ -27,11 +27,12 @@ namespace merge{
     vertindwire=-1;
     vertcolwire=-1;
     numshower=-1;
+    scanner=-1;
   }
   
   ScanInfo::~ScanInfo(){ }
 
-  ScanInfo::ScanInfo(int visneutrino,int visnotneutrino,int vismaybeneutrino, int vtrackind, int vtrackcol, int vvertindtime,int vvertcoltime,int vvertindwire,int vvertcolwire, int vnumshower)
+  ScanInfo::ScanInfo(int visneutrino,int visnotneutrino,int vismaybeneutrino, int vtrackind, int vtrackcol, int vvertindtime,int vvertcoltime,int vvertindwire,int vvertcolwire, int vnumshower, int vscanner)
   {
     isneutrino=visneutrino;
     isnotneutrino=visnotneutrino;
@@ -43,6 +44,7 @@ namespace merge{
     vertindwire=vvertindwire;
     vertcolwire=vvertcolwire;
     numshower=vnumshower;
+    scanner=vscanner;
   }
   
   
@@ -76,6 +78,9 @@ namespace merge{
   
   int ScanInfo::Get_NumShower() const
   {return numshower;}
+  
+  int ScanInfo::Get_Scanner() const
+  {return scanner;}
 
 
   void ScanInfo::SetIsNeutrino(int val) 
@@ -104,14 +109,18 @@ namespace merge{
   void ScanInfo::SetVertColWire(int val) 
   {vertcolwire=val;}  
 
-   void ScanInfo::SetNumShower(int val) 
+  void ScanInfo::SetNumShower(int val) 
   {numshower=val;} 
+  
+    void ScanInfo::SetScanner(int val) 
+  {scanner=val;} 
+  
 
 
   std::ostream& operator<<( std::ostream& os, const merge::ScanInfo& o ){//output operator
   
   
-    os<<o.Get_IsnotNeutrino()<<"\t"<<o.Get_IsMaybeNeutrino()<<"\t"<<o.Get_IsNeutrino()<<"\t"<<o.Get_TrackInd()<<"\t"<<o.Get_TrackCol()<<"\t"<<o.Get_VertIndTime()<<"\t"<<o.Get_VertColTime()<<o.Get_VertIndWire()<<"\t"<<o.Get_VertColWire()<<"\t"<<o.Get_NumShower();
+    os<<o.Get_IsnotNeutrino()<<"\t"<<o.Get_IsMaybeNeutrino()<<"\t"<<o.Get_IsNeutrino()<<"\t"<<o.Get_TrackInd()<<"\t"<<o.Get_TrackCol()<<"\t"<<o.Get_VertIndTime()<<"\t"<<o.Get_VertColTime()<<o.Get_VertIndWire()<<"\t"<<o.Get_VertColWire()<<"\t"<<o.Get_NumShower()<<"\t"<<o.Get_Scanner();
     
     return os;
   }

@@ -46,6 +46,7 @@ namespace merge {
 
     ///<parameters to set
    std::string  daq_modulelabel;               ///< folder for input 
+   std::vector<std::string> scanners;
    std::string file;	
    
     bool foundscaninfo;
