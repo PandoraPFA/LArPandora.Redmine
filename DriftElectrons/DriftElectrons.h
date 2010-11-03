@@ -36,8 +36,9 @@ namespace dfe {
   private:
         
     TRandom3 fRandom;              ///< random number generator
-    
-    double fRecombFactor;          ///< Recombination factor
+
+    double fRecombA;               ///< factor for calculating recombination
+    double fRecombk;               ///< factor for calculating recombination
     double fGeV2Elect;             ///< Conversion from GeV energy loss to electrons
     double fDriftVel;              ///< Electron drift velocity (cm/ns)
     double fLongDiff;              ///< Longitudinal diffusion coefficient (cm^2/ns)

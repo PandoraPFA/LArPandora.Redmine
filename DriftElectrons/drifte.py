@@ -71,7 +71,8 @@ process.driftel = drifte.EDProducer(
     LongDiff                 = drifte.double(6.2e-9), #in cm^2/ns
     TranDiff                 = drifte.double(16.3e-9),#in cm^2/ns
     DriftVel                 = drifte.double(1.55e-4),#in cm/ns
-    RecombinationFactor      = drifte.double(0.7),
+    RecombA                  = drifte.double(0.8),
+    Recombk                  = drifte.double(0.097),  #in g/(MeVcm^{2})
     ClusterSize              = drifte.double(600.0)
 )
 

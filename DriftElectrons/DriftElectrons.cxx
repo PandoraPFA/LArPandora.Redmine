@@ -24,6 +24,7 @@
 #include "DriftElectrons/DriftElectrons.h"
 #include "Geometry/geo.h"
 #include "Simulation/sim.h"
+#include "Simulation/LArVoxelCalculator.h"
 
 #include "TH1.h"
 #include "TMath.h"
@@ -39,7 +40,8 @@ namespace dfe{
 
   //-----------------------------------------------------
   DriftElectrons::DriftElectrons(edm::ParameterSet const& pset) :
-    fRecombFactor    (pset.getParameter< double >("RecombinationFactor")),
+    fRecombA         (pset.getParameter< double >("RecombA")),
+    fRecombk         (pset.getParameter< double >("Recombk")),
     fLongDiff        (pset.getParameter< double >("LongDiff")),
     fTranDiff        (pset.getParameter< double >("TranDiff")),
     fDriftVel        (pset.getParameter< double >("DriftVel")),
@@ -51,7 +53,7 @@ namespace dfe{
     // Conversion from GeV energy loss to electrons
     // 0.7 = recombination factor for 500 V/cm
     // 23.6 eV per ion pair * 1E9 ev/GeV
-    fGeV2Elect = fRecombFactor * 1.E9/23.6 ;
+    fGeV2Elect = 1.E9/23.6 ;
 
     // There's a factor of two in the diffusion equation
     fLongDiff *= 2.;
@@ -126,8 +128,18 @@ namespace dfe{
       // Get the energy calculated by the LArVoxelList method.
       double Energy = voxel->Energy();
       fVoxelEnergy->Fill(Energy);
-      
-      double nElectrons = fGeV2Elect * Energy;
+
+      // Get the recombination factor for this voxel - Nucl.Instrum.Meth.A523:275-286,2004
+      // R = A/(1 + (dE/dx)*k)
+      // dE/dx is given by the voxel energy deposition, but have to convert it to MeV/cm
+      // from GeV/voxel width
+      // A = 0.800 +/- 0.003
+      // k = (0.097+/-0.001) g/(MeVcm^2)
+
+      edm::Service<sim::LArVoxelCalculator> lvc;
+      double recomb = fRecombA/(1. + Energy*(1e3/lvc->VoxelSizeX())*fRecombk);
+
+      double nElectrons = fGeV2Elect * Energy * recomb;
       // X drift distance
       double XDrift = voxel->VoxelID().X() - xyz[0];
       
