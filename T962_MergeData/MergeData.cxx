@@ -240,6 +240,15 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
 //     {
      //daq(daqHandle, daqHandle->size()-1);
      fdaq = edm::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
+     
+      edm::RunNumber_t run = evt.run();
+    edm::EventNumber_t event = evt.id().event();
+    edm::Timestamp ts = evt.time();
+    unsigned long long int tsval = ts.value();
+    std::cout<<"tsval= "<<std::setprecision(15)<<tsval<<std::endl;
+   
+    std::cout<<"run: "<<run<<" event: "<<event<<std::endl;
+    //std::cout<<"ts: "<<ts<<std::endl;
    std::cout<<"p3***"<<std::endl;
     
    // }
@@ -251,6 +260,11 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
   if(foundpaddleinfo){  evt.put(Beam_coll);}
     evt.put(Paddles_coll);
     evt.put(Minos_coll);
+    
+    
+   
+    //std::cout<<"run= "<<run<<" event= "<<event<<" ts= "<<ts<<" tsval= "<<tsval<<std::endl;
+    
  return;
 }
 
@@ -259,8 +273,19 @@ std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS >
 void MergeData::MergeBeam(std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll)
 {
   std::cout<<"in mergebeam"<<std::endl;
+  edm::Timestamp  timestamp=fdaq->GetTimeStamp();
   time_t spilltime = fdaq->GetTimeStamp();//time info. from DAQ480 software
+  std::cout<<"doing event# "<<fdaq->GetEvent()<<std::endl;
+  unsigned long long int tsval= timestamp.value();
   std::cout<<"spilltime="<<spilltime<<std::endl;
+  std::cout<<"tsval=    "<<tsval<<std::endl;
+  // const unsigned long int mask32= 0xFFFFFFFFUL;
+//   unsigned long int lup=(ul64>>32) & mask32;
+//   TTimeStamp tts(lup,llo);
+//   std::cout<<"tts"<<tts<<std::endl;
+  
+  
+  
   std::cout<<"1***"<<std::endl;
   // std::cout<<"DAQ480(in MergeBeam()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
