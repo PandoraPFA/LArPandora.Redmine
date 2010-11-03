@@ -1,0 +1,17 @@
+<!--                                                                                  -->
+<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
+<!--  $Author:  $                                                                     -->
+<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
+<!--                                                                                  -->
+<!--  Include edm::Wrapper lines for objects that we would like to put into the event -->
+<!--  Include the non-wrapper lines for all objects on the edm::Wrapper lines and     -->
+<!--  for all objects that are data members of those objects.                         -->
+
+
+<lcgdict>
+ <class name="merge::ScanInfo "/>
+ <class name="std::vector<merge::ScanInfo> "/>
+ <class name="edm::Wrapper< std::vector<merge::ScanInfo>  >"/>
+
+
+</lcgdict>
