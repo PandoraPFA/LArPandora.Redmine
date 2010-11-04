@@ -43,7 +43,7 @@ int no=0;
 int no_events_daq=0,no_events_daq_pot=0,no_e_pot_and_time_matched=0,no_e_pot_and_z_matched=0,no_e_pot_matched=0, e_w_predicted_tracks_outside_minos=0;
 int no_distance_cut=0,no_degree_cut=0,no_all_cuts=0;
  int no_matched_tracks=0;
- std::vector<raw::MINOS > minos_tracks;
+ std::vector<merge::MINOS > minos_tracks;
 //-------------------------------------------------
 MergeData::MergeData(edm::ParameterSet const& pset) : 
   
@@ -55,8 +55,8 @@ MergeData::MergeData(edm::ParameterSet const& pset) :
   foundminosinfo(false)
 {
 produces< std::vector<raw::BeamInfo> > ();
-produces< std::vector<raw::Paddles> > ();
-produces< std::vector<raw::MINOS> > ();
+produces< std::vector<merge::Paddles> > ();
+produces< std::vector<merge::MINOS> > ();
   }
   
   void MergeData::beginJob(edm::EventSetup const&)
@@ -272,16 +272,16 @@ std::cout<<"in produce"<<std::endl;
 	evt.put(Beam_coll);
 	std::cout<<"put beam"<<std::endl;}
 
-std::auto_ptr<std::vector<raw::Paddles> > Paddles_coll(new std::vector<raw::Paddles> );
-raw::Paddles paddles;
+std::auto_ptr<std::vector<merge::Paddles> > Paddles_coll(new std::vector<merge::Paddles> );
+merge::Paddles paddles;
 MergePMT(paddles);
 if(foundpaddleinfo==true){
 std::cout<<"saving paddles"<<std::endl;
 Paddles_coll->push_back(paddles);
 evt.put(Paddles_coll);}
 
-std::auto_ptr<std::vector<raw::MINOS > > Minos_coll(new std::vector<raw::MINOS > );
-raw::MINOS minos;
+std::auto_ptr<std::vector<merge::MINOS > > Minos_coll(new std::vector<merge::MINOS > );
+merge::MINOS minos;
 MergeMINOS(minos);
 Minos_coll->push_back(minos);
 evt.put(Minos_coll);
@@ -402,7 +402,7 @@ void MergeData::MergeBeam(raw::BeamInfo& beam)
 }
 
 //-------------------------------------------------
-void MergeData::MergePMT(raw::Paddles& paddles)
+void MergeData::MergePMT(merge::Paddles& paddles)
 
 {
 std::cout<<"in mergePMT"<<std::endl;
@@ -532,7 +532,7 @@ std::cout<<"in mergePMT"<<std::endl;
 
 
 //-------------------------------------------------
-void MergeData::MergeMINOS(raw::MINOS& minos)
+void MergeData::MergeMINOS(merge::MINOS& minos)
 
 {
   std::cout<<"in mergeMinos"<<std::endl;
@@ -1125,12 +1125,12 @@ v_z_start_a.clear();
 		      
 		      
 		      // FOR NEWEST MINOS FILE***:
-		      //raw::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtx,trkErange,sgate53,trkqp,trkVtx, trkdcos,month,trkmom, charge, trkstp,trkeqp,trkVtxe,0);
+		      //merge::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtx,trkErange,sgate53,trkqp,trkVtx, trkdcos,month,trkmom, charge, trkstp,trkeqp,trkVtxe,0);
 		      
 		       //for OLD MINOS FILE: ***:
-		     // raw::MINOS 
+		     // merge::MINOS 
 		     
-		     //  raw::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtxX,vtxY,vtxZ,trkErange,sgate53,trkqp,trkVtxX,trkVtxY,trkVtxZ, trkdcosx,trkdcosy,trkdcosz,month,0);
+		     //  merge::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtxX,vtxY,vtxZ,trkErange,sgate53,trkqp,trkVtxX,trkVtxY,trkVtxZ, trkdcosx,trkdcosy,trkdcosz,month,0);
 // 		      
 		      minos.SetRun(run);
 		      minos.SetSubRun(subRun);

@@ -20,6 +20,8 @@
 
 // nutools includes
 #include "T962_MergeData/ScanInfo.h"
+#include "T962_MergeData/Paddles.h"
+#include "T962_MergeData/MINOS.h"
 
 //
 // Only include objects that we would like to be able to put into the event.
@@ -27,4 +29,5 @@
 //
 
 template class edm::Wrapper< std::vector<merge::ScanInfo>  >;
-
+template class edm::Wrapper< std::vector<merge::MINOS>     >;
+template class edm::Wrapper< std::vector<merge::Paddles>   >;

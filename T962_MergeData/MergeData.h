@@ -11,7 +11,11 @@
 #define MERGEDATA_H
 
 #include "FWCore/Framework/interface/EDProducer.h"
-#include "RawData/raw.h"
+//#include "RawData/raw.h"
+#include "RawData/BeamInfo.h"
+#include "RawData/DAQHeader.h"
+#include "T962_MergeData/MINOS.h"
+#include "T962_MergeData/Paddles.h"
 
 
 #include <vector>
@@ -168,13 +172,13 @@ namespace merge {
 //     void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
 
    void MergeBeam(raw::BeamInfo& beam);                 ///method to merge beam data
-    void MergePMT(raw::Paddles& paddles);                 ///method to merge pmt data
-    void MergeMINOS(raw::MINOS& minos);                 ///method to merge MINOS data
+    void MergePMT(merge::Paddles& paddles);                 ///method to merge pmt data
+    void MergeMINOS(merge::MINOS& minos);                 ///method to merge MINOS data
     
     
 	edm::Ptr<raw::DAQHeader> fdaq;
     raw::BeamInfo  fBeamInfo;
-    raw::Paddles   fPaddles;
+    merge::Paddles   fPaddles;
     
 	 
     ///<parameters to set

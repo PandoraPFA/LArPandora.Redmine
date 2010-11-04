@@ -12,6 +12,10 @@
  <class name="merge::ScanInfo "/>
  <class name="std::vector<merge::ScanInfo> "/>
  <class name="edm::Wrapper< std::vector<merge::ScanInfo>  >"/>
-
-
+ <class name="merge::MINOS    "/>
+ <class name="merge::Paddles  "/>
+ <class name="std::vector<merge::MINOS>    "/>
+ <class name="std::vector<merge::Paddles>  "/>
+ <class name="edm::Wrapper< std::vector<merge::MINOS>     >"/>
+ <class name="edm::Wrapper< std::vector<merge::Paddles>   >"/>
 </lcgdict>
