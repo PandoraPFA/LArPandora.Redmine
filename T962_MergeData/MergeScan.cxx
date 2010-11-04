@@ -40,8 +40,8 @@ namespace merge{
 //-------------------------------------------------
 MergeScan::MergeScan(edm::ParameterSet const& pset) : 
   
-  daq_modulelabel(pset.getParameter< std::string >("daq")),
-  scanners(pset.getParameter< std::vector<std::string> >("scanners")),  
+  daq_modulelabel     (pset.getParameter< std::string >("daq")),
+  scanners            (pset.getParameter< std::vector<std::string> >("scanners")),  
   foundscaninfo(false)
 {
 produces< std::vector<merge::ScanInfo> >();
@@ -95,7 +95,10 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
     ins3.str(k);
         ins3>>run>>event>>isnotneutrino>>ismaybeneutrino>>isneutrino>>trackind>>trackcol>>vertindtime>>vertcoltime>>vertindwire>>vertcolwire>>numshower;
         
-    if((daq->GetRun()==run)&&(daq->GetEvent()==event ) ){ foundscaninfo=true;}    
+    if((daq->GetRun()==run)&&(daq->GetEvent()==event ) )
+    foundscaninfo=true; 
+    else
+    foundscaninfo=false;
         
     if(foundscaninfo)
     {  
@@ -112,13 +115,12 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
       scan.SetVertColWire(vertcolwire);
       scan.SetNumShower(numshower);
       scan.SetScanner(scanner);
-
       break;
     }
   }
   scanfile.close();
   
-  
+  if(foundscaninfo)
   Scan_coll->push_back(scan);
   }
   evt.put(Scan_coll);

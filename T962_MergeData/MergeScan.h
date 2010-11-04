@@ -35,9 +35,7 @@ namespace merge {
     void produce(edm::Event& evt, edm::EventSetup const&);
     void beginJob(edm::EventSetup const&);
 
-
   private:
-
 
   protected: 
 
