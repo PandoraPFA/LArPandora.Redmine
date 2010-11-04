@@ -19,7 +19,17 @@ namespace merge {
     
   public:
     ScanInfo();
-    ScanInfo(int isneutrino, int isnotneutrino, int maybeneutrino, int trackind, int trackcol, int vertindtime, int vertcoltime, int vertindwire, int vertcolwire, int vnumshower, int scanner);
+    ScanInfo(int isneutrino, 
+	     int isnotneutrino, 
+	     int maybeneutrino, 
+	     int trackind, 
+	     int trackcol, 
+	     int vertindtime, 
+	     int vertcoltime, 
+	     int vertindwire, 
+	     int vertcolwire, 
+	     int vnumshower, 
+	     int scanner);
     ~ScanInfo();
     
     
@@ -49,7 +59,17 @@ namespace merge {
 
     
   private:
-    int isneutrino, isnotneutrino, ismaybeneutrino, trackind, trackcol, vertindtime, vertcoltime, vertindwire, vertcolwire, numshower, scanner;
+    int isneutrino;
+    int isnotneutrino;
+    int ismaybeneutrino;
+    int trackind;
+    int trackcol;
+    int vertindtime;
+    int vertcoltime;
+    int vertindwire;
+    int vertcolwire;
+    int numshower;
+    int scanner;
           
   };
   
