@@ -163,11 +163,15 @@ namespace merge {
    
     
    
-    void MergeBeam( std::auto_ptr<std::vector <raw::BeamInfo> >Beam_coll);                 ///method to merge beam data
-    void MergePMT(std::auto_ptr<std::vector <raw::Paddles> >Paddles_coll);                 ///method to merge pmt data
-    void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
+   //  void MergeBeam( std::auto_ptr<std::vector <raw::BeamInfo> >Beam_coll);                 ///method to merge beam data
+//     void MergePMT(std::auto_ptr<std::vector <raw::Paddles> >Paddles_coll);                 ///method to merge pmt data
+//     void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
 
-   
+   void MergeBeam(raw::BeamInfo& beam);                 ///method to merge beam data
+    void MergePMT(raw::Paddles& paddles);                 ///method to merge pmt data
+    void MergeMINOS(raw::MINOS& minos);                 ///method to merge MINOS data
+    
+    
 	edm::Ptr<raw::DAQHeader> fdaq;
     raw::BeamInfo  fBeamInfo;
     raw::Paddles   fPaddles;
