@@ -98,7 +98,9 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
     if((daq->GetRun()==run)&&(daq->GetEvent()==event ) ){ foundscaninfo=true;}    
         
     if(foundscaninfo)
-    {      
+    {  
+      scan.SetRun(run);
+      scan.SetEvent(event);
       scan.SetIsNeutrino(isneutrino);
       scan.SetIsnotNeutrino(isnotneutrino);
       scan.SetIsMaybeNeutrino(ismaybeneutrino);

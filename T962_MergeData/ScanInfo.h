@@ -19,7 +19,7 @@ namespace merge {
     
   public:
     ScanInfo();
-    ScanInfo(int isneutrino, 
+    ScanInfo(int run, int event, int isneutrino, 
 	     int isnotneutrino, 
 	     int maybeneutrino, 
 	     int trackind, 
@@ -32,7 +32,8 @@ namespace merge {
 	     int scanner);
     ~ScanInfo();
     
-    
+    int Get_Run() const;
+    int Get_Event() const;
     int Get_IsNeutrino() const;
     int Get_IsnotNeutrino() const;
     int Get_IsMaybeNeutrino() const;
@@ -45,6 +46,8 @@ namespace merge {
     int Get_NumShower() const;
     int Get_Scanner() const;
 
+    void SetRun(int val);
+    void SetEvent(int val);
     void SetIsNeutrino(int val);
     void SetIsnotNeutrino(int val);
     void SetIsMaybeNeutrino(int val);
@@ -59,6 +62,8 @@ namespace merge {
 
     
   private:
+    int run;
+    int event;
     int isneutrino;
     int isnotneutrino;
     int ismaybeneutrino;
