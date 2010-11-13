@@ -75,7 +75,7 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
   for(int scanner=0;scanner<scanners.size();scanner++)
   {
   char scanfilename[100];
- sprintf(scanfilename,"/argoneut/app/users/spitz7/larsoft_new/scan_%s.00%d.txt",scanners[scanner].c_str(),daq->GetRun());
+ sprintf(scanfilename,"/argoneut/app/users/spitz7/larsoft11/scan_%s.00%d.txt",scanners[scanner].c_str(),daq->GetRun());
 
  std::ifstream scanfile(scanfilename);
 
@@ -84,7 +84,7 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
     return;
   }
 
-  int isneutrino,isnotneutrino,ismaybeneutrino,trackind,trackcol,vertindtime,vertcoltime,vertindwire,vertcolwire,numshower;
+  int isneutrino,isnotneutrino,ismaybeneutrino,track,vertindtime,vertcoltime,vertindwire,vertcolwire,numshower;
   std::string first,k;
   int event,run;
 
@@ -93,7 +93,7 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
     std::istringstream ins3;
     ins3.clear();
     ins3.str(k);
-        ins3>>run>>event>>isnotneutrino>>ismaybeneutrino>>isneutrino>>trackind>>trackcol>>vertindtime>>vertcoltime>>vertindwire>>vertcolwire>>numshower;
+        ins3>>run>>event>>isnotneutrino>>ismaybeneutrino>>isneutrino>>track>>vertindtime>>vertcoltime>>vertindwire>>vertcolwire>>numshower;
         
     if((daq->GetRun()==run)&&(daq->GetEvent()==event ) )
     foundscaninfo=true; 
@@ -107,8 +107,7 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
       scan.SetIsNeutrino(isneutrino);
       scan.SetIsnotNeutrino(isnotneutrino);
       scan.SetIsMaybeNeutrino(ismaybeneutrino);
-      scan.SetTrackInd(trackind);
-      scan.SetTrackCol(trackcol);      
+      scan.SetTrack(track);     
       scan.SetVertIndTime(vertindtime);
       scan.SetVertColTime(vertcoltime);
       scan.SetVertIndWire(vertindwire);

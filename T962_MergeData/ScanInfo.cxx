@@ -22,8 +22,7 @@ namespace merge{
     isneutrino=-1;
     isnotneutrino=-1;
     ismaybeneutrino=-1;
-    trackind=-1;
-    trackcol=-1;
+    track=-1;
     vertindtime=-1;
     vertcoltime=-1;
     vertindwire=-1;
@@ -37,8 +36,7 @@ namespace merge{
   ScanInfo::ScanInfo(int vrun, int vevent, int visneutrino,
 		     int visnotneutrino,
 		     int vismaybeneutrino, 
-		     int vtrackind, 
-		     int vtrackcol, 
+		     int vtrack, 
 		     int vvertindtime,
 		     int vvertcoltime,
 		     int vvertindwire,
@@ -51,8 +49,7 @@ namespace merge{
     isneutrino=visneutrino;
     isnotneutrino=visnotneutrino;
     ismaybeneutrino=vismaybeneutrino;
-    trackind=vtrackind;
-    trackcol=vtrackcol;
+    track=vtrack;
     vertindtime=vvertindtime;
     vertcoltime=vvertcoltime;
     vertindwire=vvertindwire;
@@ -76,11 +73,8 @@ namespace merge{
   int ScanInfo::Get_IsMaybeNeutrino() const
   {return ismaybeneutrino;}
   
-  int ScanInfo::Get_TrackInd() const
-  {return trackind;}
-  
-  int ScanInfo::Get_TrackCol() const
-  {return trackcol;}
+  int ScanInfo::Get_Track() const
+  {return track;}
   
   int ScanInfo::Get_VertIndTime() const
   {return vertindtime;}
@@ -114,11 +108,8 @@ namespace merge{
 
   void ScanInfo::SetIsMaybeNeutrino(int val) 
   {ismaybeneutrino=val;}
-    void ScanInfo::SetTrackInd(int val) 
-  {trackind=val;}
-  
-  void ScanInfo::SetTrackCol(int val) 
-  {trackcol=val;}
+    void ScanInfo::SetTrack(int val) 
+  {track=val;}
   
   void ScanInfo::SetVertIndTime(int val) 
   {vertindtime=val;}
@@ -143,7 +134,7 @@ namespace merge{
   std::ostream& operator<<( std::ostream& os, const merge::ScanInfo& o ){//output operator
   
   
-    os<<o.Get_Run()<<"\t"<<o.Get_Event()<<"\t"<<o.Get_IsnotNeutrino()<<"\t"<<o.Get_IsMaybeNeutrino()<<"\t"<<o.Get_IsNeutrino()<<"\t"<<o.Get_TrackInd()<<"\t"<<o.Get_TrackCol()<<"\t"<<o.Get_VertIndTime()<<"\t"<<o.Get_VertColTime()<<o.Get_VertIndWire()<<"\t"<<o.Get_VertColWire()<<"\t"<<o.Get_NumShower()<<"\t"<<o.Get_Scanner();
+    os<<o.Get_Run()<<"\t"<<o.Get_Event()<<"\t"<<o.Get_IsnotNeutrino()<<"\t"<<o.Get_IsMaybeNeutrino()<<"\t"<<o.Get_IsNeutrino()<<o.Get_Track()<<"\t"<<o.Get_VertColTime()<<o.Get_VertIndWire()<<"\t"<<o.Get_VertColWire()<<"\t"<<o.Get_NumShower()<<"\t"<<o.Get_Scanner();
     
     return os;
   }

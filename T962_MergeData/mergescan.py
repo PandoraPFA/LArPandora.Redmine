@@ -15,7 +15,7 @@ process = mergescan.Process("MergeScan")
 
 # Maximum number of events to do.
 process.maxEvents = mergescan.untracked.PSet(
-    input = mergescan.untracked.int32(3) # See if this works to run fewer than are in input file.
+    input = mergescan.untracked.int32(100) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.
@@ -42,14 +42,14 @@ process.Geometry = mergescan.Service(
 
 # Service to get my MC events, which were run up through DetSim.
 process.source = mergescan.Source("PoolSource",
-                                fileNames = mergescan.untracked.vstring("/argoneut/app/users/soderber/larsoft_svn/Kinga_Events/testARTevents.root")
+                                fileNames = mergescan.untracked.vstring("/argoneut/data/rootfiles_ART/R650_D20090928_T112738.root")
                                 )
 
 
 process.merge = mergescan.EDProducer(
     "MergeScan",
     daq   = mergescan.string("source"),
-    scanners = mergescan.vstring("spitz7","patch")
+    scanners = mergescan.vstring("spitz7")
     )    
 
 

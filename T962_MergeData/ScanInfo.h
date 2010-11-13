@@ -22,8 +22,7 @@ namespace merge {
     ScanInfo(int run, int event, int isneutrino, 
 	     int isnotneutrino, 
 	     int maybeneutrino, 
-	     int trackind, 
-	     int trackcol, 
+	     int track, 
 	     int vertindtime, 
 	     int vertcoltime, 
 	     int vertindwire, 
@@ -37,8 +36,7 @@ namespace merge {
     int Get_IsNeutrino() const;
     int Get_IsnotNeutrino() const;
     int Get_IsMaybeNeutrino() const;
-    int Get_TrackInd() const;
-    int Get_TrackCol() const;
+    int Get_Track() const;
     int Get_VertIndTime() const;
     int Get_VertColTime() const;
     int Get_VertIndWire() const;
@@ -51,8 +49,7 @@ namespace merge {
     void SetIsNeutrino(int val);
     void SetIsnotNeutrino(int val);
     void SetIsMaybeNeutrino(int val);
-    void SetTrackInd(int val);
-    void SetTrackCol(int val);
+    void SetTrack(int val);
     void SetVertIndTime(int val);
     void SetVertColTime(int val);
     void SetVertIndWire(int val);
@@ -67,8 +64,7 @@ namespace merge {
     int isneutrino;
     int isnotneutrino;
     int ismaybeneutrino;
-    int trackind;
-    int trackcol;
+    int track;
     int vertindtime;
     int vertcoltime;
     int vertindwire;
