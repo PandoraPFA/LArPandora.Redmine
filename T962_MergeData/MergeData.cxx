@@ -347,7 +347,7 @@ void MergeData::MergeBeam(raw::BeamInfo& beam)
   
   
  
-  sprintf(beamfilename,"matched_%02d_%02d_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+  sprintf(beamfilename,"matched_%02d_%02d_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
   
   std::ifstream beamfile(beamfilename);
   
@@ -548,7 +548,8 @@ void MergeData::MergeMINOS(merge::MINOS& minos)
   
   char matchedfilename[20];
 
-  sprintf(matchedfilename,"matched_%02d_%d_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+  sprintf(matchedfilename,"matched_%02d_%d_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+  // sprintf(matchedfilename,"matched_%02d_%d_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
  
   std::ifstream matchedfile(matchedfilename);
   std::string line;
@@ -632,12 +633,12 @@ void MergeData::MergeMINOS(merge::MINOS& minos)
 
 
   ///////////////////////////////////////////////////////////////////////////////////
-  //std::string path ="/argoneut/data/users/soderber/MINOS/";
+  std::string path ="/argoneut/app/users/spitz7/larsoft11/MINOS/";
     
-    std::string path= "/argoneut/app/users/kpartyka/larsoft/MINOS/";//gotta replace New_MINOS with MINOS later. I am testing new file 09.15.2010
+    //std::string path= "/argoneut/app/users/kpartyka/larsoft/MINOS/";//gotta replace New_MINOS with MINOS later. I am testing new file 09.15.2010
   // int no_files=0;
    
-  //TFile *f = new TFile("/argoneut/data/users/soderber/MINOS/RunN00017288.root");
+  //TFile *f = new //TFile("/argoneut/data/users/soderber/MINOS/RunN00017288.root");
    
  
   int no_argoneut_events=0;
@@ -678,22 +679,31 @@ void MergeData::MergeMINOS(merge::MINOS& minos)
   float tr101d;
 
   float trkmom;
-  int charge;
-  float trkstpU;
-  float trkstpV;
+  float charge;
+  float trkstpU[100000];
+  float trkstpV[100000];
   int ntrkstp;
-  float trkstpX;
-  float trkstpY;
-  float trkstpZ;
+  float trkstpX[100000];
+  float trkstpY[100000];
+  float trkstpZ[100000];
   float trkeqp;
-  float trkVtxeX;
-  float trkVtxeY;
+  double trkVtxeX;
+  double trkVtxeY;
+  
+  //new: 12/14/2010: 
+  
+  int goodspill;
+  float dtnear;
+  double nearns;
+  float nearsec;
+  double offset;
+  double utc1;
   
   std::vector<float> vtx;
     std::vector<float> trkVtx;
     std::vector<float> trkdcos;
      std::vector<float> trkstp;
-     std::vector<float> trkVtxe;
+     std::vector<double> trkVtxe;
   //***************************************
 
  
@@ -774,8 +784,8 @@ v_z_start_a.clear();
 	  int no_files=0;
 	  DIR *pDIR;
 	  struct dirent *entry;
-	 
-	   if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/MINOS") )
+	 if( pDIR=opendir("/argoneut/app/users/spitz7/larsoft11/MINOS") )
+	  // if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/MINOS") )
 	  //if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/New_MINOS") )//checking the new file from rashid 09.15.2010
 	    {
 	       
@@ -826,17 +836,21 @@ v_z_start_a.clear();
 		  minitree->SetBranchAddress("tor101",&tor101);
 		  minitree->SetBranchAddress("tortgt",&tortgt);
 
-		  // minitree->SetBranchAddress("charge",&charge);
-//  		  minitree->SetBranchAddress("trkmom",&trkmom);
-// 		  minitree->SetBranchAddress("trkstpU",&trkstpU);
-// 		  minitree->SetBranchAddress("trkstpV",&trkstpV);
-// 		  minitree->SetBranchAddress("ntrkstp",&ntrkstp);
-// 		  minitree->SetBranchAddress("trkstpX",&trkstpX);
-// 		  minitree->SetBranchAddress("trkstpY",&trkstpY);
-// 		  minitree->SetBranchAddress("trkstpZ",&trkstpZ);
-// 		  minitree->SetBranchAddress("trkeqp",&trkeqp);
-// 		  minitree->SetBranchAddress("trkVtxeX",&trkVtxeX);
-// 		  minitree->SetBranchAddress("trkVtxeY",&trkVtxeY);
+		  minitree->SetBranchAddress("charge",&charge); 		  minitree->SetBranchAddress("trkmom",&trkmom);		  minitree->SetBranchAddress("trkstpU",&trkstpU);
+    	  minitree->SetBranchAddress("trkstpV",&trkstpV);
+		  minitree->SetBranchAddress("ntrkstp",&ntrkstp); 		  minitree->SetBranchAddress("trkstpX",&trkstpX);
+    	  minitree->SetBranchAddress("trkstpY",&trkstpY);
+     	  minitree->SetBranchAddress("trkstpZ",&trkstpZ);
+		  minitree->SetBranchAddress("trkeqp",&trkeqp);
+	      minitree->SetBranchAddress("trkVtxeX",&trkVtxeX);
+		  minitree->SetBranchAddress("trkVtxeY",&trkVtxeY);
+		  
+		  minitree->SetBranchAddress("dtnear",&dtnear);
+		  minitree->SetBranchAddress("goodspill",&goodspill);
+		  minitree->SetBranchAddress("nearns",&nearns);
+		  minitree->SetBranchAddress("nearsec",&nearsec);
+		  minitree->SetBranchAddress("offset",&offset);
+		  minitree->SetBranchAddress("utc1",&utc1);
 		  
 
 	 std::cout<<"after minitrees"<<std::endl;	
@@ -846,8 +860,10 @@ v_z_start_a.clear();
 
 		  //------------------------------------------
 		  Long64_t nentries = minitree->GetEntries();
+		  //std::cout<<"nentries= "<<nentries<<std::endl;
 		  Long64_t nbytes = 0;
 		  for(Long64_t i=0;i<nentries;i++){
+		  //std::cout<<"i= "<<i<<std::endl;
 		    nbytes+=minitree->GetEntry(i);
 		    //----------------------------------------------
 		    //for print out of minos data:
@@ -1099,28 +1115,28 @@ v_z_start_a.clear();
 		      // if using maddalena's file is not necessary ---->uncomment this:
 		      foundminosinfo=true;
 		      
-		      vtx.push_back(vtxX);
-		      vtx.push_back(vtxY);
-		      vtx.push_back(vtxZ);
-		      
-		      trkVtx.push_back(trkVtxX);
-		      trkVtx.push_back(trkVtxY);
-		      trkVtx.push_back(trkVtxZ);
-		      
-		      trkdcos.push_back(trkdcosx);
-		      trkdcos.push_back(trkdcosy);
-		      trkdcos.push_back(trkdcosz);
-		      
-		      trkstp.push_back(trkstpU);
-		      trkstp.push_back(trkstpV);
-		      trkstp.push_back(ntrkstp);
-		      
-		      trkstp.push_back(trkstpX);
-		      trkstp.push_back(trkstpY);
-		      trkstp.push_back(trkstpZ);
-		      
-		      trkVtxe.push_back(trkVtxeX);
-		      trkVtxe.push_back(trkVtxeY);
+		      // vtx.push_back(vtxX);
+// 		      vtx.push_back(vtxY);
+// 		      vtx.push_back(vtxZ);
+// 		      
+// 		      trkVtx.push_back(trkVtxX);
+// 		      trkVtx.push_back(trkVtxY);
+// 		      trkVtx.push_back(trkVtxZ);
+// 		      
+// 		      trkdcos.push_back(trkdcosx);
+// 		      trkdcos.push_back(trkdcosy);
+// 		      trkdcos.push_back(trkdcosz);
+// 		      
+// 		      trkstp.push_back(trkstpU);
+// 		      trkstp.push_back(trkstpV);
+// 		      trkstp.push_back(ntrkstp);
+// 		      
+// 		      trkstp.push_back(trkstpX);
+// 		      trkstp.push_back(trkstpY);
+// 		      trkstp.push_back(trkstpZ);
+// 		      
+// 		      trkVtxe.push_back(trkVtxeX);
+// 		      trkVtxe.push_back(trkVtxeY);
 		      
 		      
 		      
@@ -1143,19 +1159,38 @@ v_z_start_a.clear();
 		      minos.SetCrateT0(crateT0);
 		      minos.SetTmframe(tmframe);
 		      minos.SetYear(year);
-		      minos.SetVtxX(vtxX);
-		      minos.SetVtxY(vtxY);
-		      minos.SetVtxZ(vtxZ);
+		      minos.SetVtx(vtxX,vtxY,vtxZ);
+		      // minos.SetVtxX(vtxX);
+// 		      minos.SetVtxY(vtxY);
+// 		      minos.SetVtxZ(vtxZ);
 		      minos.SetTrkErange(trkErange);
 		      minos.SetSgate53(sgate53);
 		      minos.SetTrkqp(trkqp);
-		      minos.SetTrkVtxX(trkVtxX);
-		      minos.SetTrkVtxY(trkVtxY);
-		      minos.SetTrkVtxZ(trkVtxZ);
-		      minos.SetTrkdcosx(trkdcosx);
-		      minos.SetTrkdcosy(trkdcosy);
-		      minos.SetTrkdcosz(trkdcosz);
+		      minos.SetTrkVtx(trkVtxX,trkVtxY,trkVtxZ);
+		     //  minos.SetTrkVtxX(trkVtxX);
+// 		      minos.SetTrkVtxY(trkVtxY);
+// 		      minos.SetTrkVtxZ(trkVtxZ);	
+              minos.SetTrkdcos(trkdcosx,trkdcosy,trkdcosz);
+		      // minos.SetTrkdcosx(trkdcosx);
+// 		      minos.SetTrkdcosy(trkdcosy);
+// 		      minos.SetTrkdcosz(trkdcosz);
 		      minos.SetMonth(month);
+		      minos.SetTrkmom(trkmom);
+		      minos.SetCharge(charge);
+		      minos.SetTrkStpX(trkstpX);
+		      minos.SetTrkStpY(trkstpY);
+		      minos.SetTrkStpZ(trkstpZ);
+		      minos.SetTrkStpU(trkstpU); 
+		      minos.SetTrkStpV(trkstpV);
+		      //minos.SetTrkStp(trkstpU,trkstpV,trkstpX,trkstpY,trkstpZ);
+		      minos.SetTrkeqp(trkeqp);
+		      minos.SetTrkVtxe(trkVtxeX,trkVtxeY);
+		      minos.SetGoodspill(goodspill);
+ 		      minos.SetDtnear_nearsec(dtnear,nearsec);
+ 		      minos.SetNearns_offset(nearns,offset);
+// 		      minos.SetNearsec(nearsec);
+// 		      minos.SetOffset(offset);
+		      minos.SetUtc1(utc1);
 		      minos.SetMatched(0);
 		      
 		      

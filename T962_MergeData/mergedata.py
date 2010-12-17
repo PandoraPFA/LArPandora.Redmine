@@ -25,7 +25,7 @@ process.maxEvents = mergedata.untracked.PSet(
 # Load the service that manages root files for histograms.
 process.TFileService = mergedata.Service(
     "TFileService",
-    fileName = mergedata.string("mergedata_hist.root"),
+    fileName = mergedata.string("mergedata_12.15.10hist.root"),
     closeFileFast = mergedata.untracked.bool(False)
 )
 
@@ -42,7 +42,9 @@ process.Geometry = mergedata.Service(
 
 # Service to get my MC events, which were run up through DetSim.
 process.source = mergedata.Source("PoolSource",
-                                fileNames = mergedata.untracked.vstring("/argoneut/app/users/soderber/larsoft_svn/Kinga_Events/testARTevents.root")
+                                fileNames = 
+                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R609_D20090915_T153438.root")
+                                #mergedata.untracked.vstring("/argoneut/app/users/soderber/larsoft_svn/Kinga_Events/testARTevents.root")
                                # skipEvents=mergedata.untracked.uint32(4)
                                 )
 
@@ -58,7 +60,7 @@ process.merge = mergedata.EDProducer(
 # Write the events to the output file.
 process.output = mergedata.OutputModule(
     "PoolOutputModule",
-    fileName = mergedata.untracked.string('mergedata_gen.root'),
+    fileName = mergedata.untracked.string('mergedata_12.15.10gen.root'),
 )
 
 ####### End of the section that defines and configures modules.#########
