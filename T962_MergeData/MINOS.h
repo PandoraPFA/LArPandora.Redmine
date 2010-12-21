@@ -21,8 +21,8 @@ namespace merge{
 
   private:
   //*** for NEWEST MINOS FILE:***
-   int frun;
-    int fsubRun;
+   std::vector<int> frun_subrun;
+   // int fsubRun;
     int fsnarl;
     double futc;
     double fday;
@@ -127,11 +127,11 @@ namespace merge{
   public:
   // FOR NEWEST MINOS FILE: ***
   
-      MINOS(int run, int subRun, int snarl, double utc, double day, float trkIndex, 
+      MINOS(std::vector<int> run_subrun, int snarl, double utc, double day, float trkIndex, 
      float trkE, float shwE,float crateT0, float tmframe, double year, std::vector<float> fvtx,
      float trkErange,float sgate53, float trkqp, std::vector<float> trkVtx, 
      std::vector<float> trkdcos, double month,float trkmom, 
-     float charge, float trkstpX[100000], float trkstpY[100000],float trkstpZ[100000],float trkstpU[100000],float trkstpV[100000], float trkeqp,
+     float charge, float trkstpX[100000], float trkstpY[100000],float trkstpZ[100000],float trkstpU[100000],float trkstpV[100000], int ntrkstp,float trkeqp,
      std::vector<double> ftrkVtxe,int goodspill,std::vector<float> dtnear_fnearsec,std::vector<double> nearns_foffset,double utc1, int matched);
      
      
@@ -208,10 +208,10 @@ namespace merge{
      //new file:
      void SetMatched(int matched)
     {fmatched=matched;}
-	void SetRun(int run)
-    {frun=run;}
-	void SetSubRun(int subrun)
-    {fsubRun=subrun;}
+	void SetRun_subrun(std::vector<int> &run_subrun)
+    {frun_subrun=run_subrun;}
+	// void SetSubRun(int subrun)
+//     {fsubRun=subrun;}
     void SetSnarl(int snarl)
     {fsnarl=snarl;}
 	void SetUtc(double utc)
@@ -230,10 +230,9 @@ namespace merge{
     {ftmframe=tmframe;}
     void SetYear(double year)
     {fyear=year;}
-    void SetVtx(float vtxX,float vtxY,float vtxZ)
-    {fvtx[0]=vtxX;
-    fvtx[1]=vtxY;
-    fvtx[2]=vtxZ;
+    void SetVtx(std::vector<float> &vtx)
+    {fvtx=vtx;
+     
     }
     
     void SetTrkErange(float trkErange)
@@ -242,15 +241,13 @@ namespace merge{
     {fsgate53=sgate53;}
     void SetTrkqp(float trkqp)
     {ftrkqp=trkqp;}
-    void SetTrkVtx(float TrkVtxX,float TrkVtxY,float TrkVtxZ)
-    {ftrkVtx[0]=TrkVtxX;
-    ftrkVtx[1]=TrkVtxY;
-    ftrkVtx[2]=TrkVtxZ;}
+    void SetTrkVtx(std::vector<float> &TrkVtx)
+    {ftrkVtx=TrkVtx;
+   }
     
-     void SetTrkdcos(float trkdcosx,float trkdcosy,float trkdcosz)
-    {ftrkdcos[0]=trkdcosx;
-    ftrkdcos[1]=trkdcosy;
-    ftrkdcos[2]=trkdcosz;
+     void SetTrkdcos(std::vector<float> & trkdcos)
+    {ftrkdcos=trkdcos;
+    
     }
     
     void SetTrkmom(float trkmom)
@@ -269,28 +266,26 @@ namespace merge{
     {ftrkstpU[100000]=trkstpU[100000];}
     void SetTrkStpV(float trkstpV[100000])
     {ftrkstpV[100000]=trkstpV[100000];}
-    
+    void SetNtrkstp(int ntrkstp)
+    {fntrkstp=ntrkstp;}
     
     
     void SetTrkeqp(float trkeqp)
     {ftrkeqp=trkeqp;}
-    void SetTrkVtxe(double trkVtxeX, double trkVtxeY)
+    void SetTrkVtxe(std::vector<double> & trkVtxe)
     {
-    ftrkVtxe[0]=trkVtxeX;
-    ftrkVtxe[1]=trkVtxeY;
+    ftrkVtxe=trkVtxe;
+    
     }
     void SetGoodspill( int goodspill)
     {fgoodspill=goodspill;}
-    void SetDtnear_nearsec(float dtnear,float nearsec)
-    {fdtnear_fnearsec[0]=dtnear;
-    fdtnear_fnearsec[1]=nearsec;}
-    void SetNearns_offset(double nearns,double offset)
-    {fnearns_foffset[0]=nearns;
-    fnearns_foffset[1]=offset;}
-    //void SetNearsec(float nearsec)
-    //{fnearsec=nearsec;}
-   // void SetOffset(double offset)
-    //{foffset=offset;}
+    void SetDtnear_nearsec(std::vector<float> &dtnear_nearsec)
+    {fdtnear_fnearsec=dtnear_nearsec;
+    }
+    void SetNearns_offset(std::vector<double> &nearns_offset)
+    {fnearns_foffset=nearns_offset;
+    }
+    
     void SetUtc1(double utc1)
     {futc1=utc1;}
     void SetMonth(double month)

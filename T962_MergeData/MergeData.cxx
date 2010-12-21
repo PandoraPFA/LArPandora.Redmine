@@ -43,6 +43,8 @@ int no=0;
 int no_events_daq=0,no_events_daq_pot=0,no_e_pot_and_time_matched=0,no_e_pot_and_z_matched=0,no_e_pot_matched=0, e_w_predicted_tracks_outside_minos=0;
 int no_distance_cut=0,no_degree_cut=0,no_all_cuts=0;
  int no_matched_tracks=0;
+ int no_unmatched_events=0;
+ int dircos_exist=0;
  std::vector<merge::MINOS > minos_tracks;
 //-------------------------------------------------
 MergeData::MergeData(edm::ParameterSet const& pset) : 
@@ -64,7 +66,11 @@ produces< std::vector<merge::MINOS> > ();
   std::cout<<"in beginJob"<<std::endl;
   // get access to the TFile service
     edm::Service<edm::TFileService> tfs;
-    
+  ftime_matching_cand=tfs->make<TH1F>("ftime_matching_cand","No of minos spills fullfilling time matching condition for each argoneut event", 20,0 ,20);
+  
+  futc1_tms_diff = tfs->make<TH1F>("futc1_tms_diff","fabs(utc1+500-(tms))", 2000,0 ,2000);
+  
+  
   fdiff_x = tfs->make<TH1F>("fdiff_x","Difference between predicted (from Argoneut) and Minos x coordinate value of track", 6500,-250 ,400);
   fdiff_y = tfs->make<TH1F>("fdiff_y","Difference between predicted (from Argoneut) and Minos y coordinate value of track", 8000,-400 ,400);
  fdiff_z = tfs->make<TH1F>("fdiff_z"," Minos z coordinate value of tracks (that are candidates for matching)", 8000,-400 ,400);
@@ -615,10 +621,10 @@ void MergeData::MergeMINOS(merge::MINOS& minos)
   std::cout<<"WILL BE READING: "<<dircosfilename<<std::endl;
   
   dircosfile.open(dircosfilename, std::ios::in);
-  
+  if(dircosfile.is_open()){ dircos_exist=1;}
   if(!dircosfile.is_open()){
     std::cerr << "Merge:  Could not open file named " << dircosfilename << std::endl;
-    return;
+    //return; //we want to match now whether we did 3-d reco or not
   }
   //...........................
   
@@ -698,12 +704,14 @@ void MergeData::MergeMINOS(merge::MINOS& minos)
   float nearsec;
   double offset;
   double utc1;
-  
+  std::vector<int> run_subrun;
   std::vector<float> vtx;
     std::vector<float> trkVtx;
     std::vector<float> trkdcos;
      std::vector<float> trkstp;
      std::vector<double> trkVtxe;
+     std::vector<float> dtnear_nearsec;
+     std::vector<double> nearns_offset;
   //***************************************
 
  
@@ -759,7 +767,7 @@ v_z_start_a.clear();
   double y_offset=20.28; //previously  19;
   int in_matching=0,pot_matched=0,pot_and_z_matched=0,pot_and_time_matched=0;
   double const pi=4.0*atan(1.0);
-   
+  int multiple_match=0; 
    
   //std::cout <<" utc = " <<std::setprecision(10)<< utc<<std::endl; 
   while(getline(matchedfile,k))
@@ -867,7 +875,7 @@ v_z_start_a.clear();
 		    nbytes+=minitree->GetEntry(i);
 		    //----------------------------------------------
 		    //for print out of minos data:
-		     
+		     //std::cout<< " utc= "<<std::setprecision(13)<<utc<<std::endl;
 		    //std::cout<< " utc= "<<std::setprecision(13)<<utc<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
 		     
 
@@ -884,10 +892,30 @@ v_z_start_a.clear();
 		    //  if(fabs(utc-spilltime)<1000000 && fabs(trtgtd_m-trtgtd)<0.000001 && fabs(tor101_m-tor101)<0.00001 && fabs(tortgt_m-tortgt)<0.00001){
 		    // if(fabs(utc-(tms/1000))<60 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001){
 		     
+		     //*************************************************************
+		     //Matching condition based on time info alone:
+		     
+		     if(fabs(utc1+500-(tms))<1001){
+		     std::cout <<"MATCHED by TIME for run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex <<std::endl;
+		     
+		     if(trkIndex==0){multiple_match++;}
+		     futc1_tms_diff->Fill(fabs(utc1+500-(tms)));
+		     
+		     
+		    //  }
+// 		      else {std::cout<<"NO MATCHING BY TIME !!! for event "<<event<<std::endl;
+// 		      no_unmatched_events++;}
+		      //*************************************************************
+		     
+		     
+		     
+		     
+		     
+		     
 		    if( fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001){pot_matched=1; }
 		    if( fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 && fabs(trkVtxZ*100)<10){pot_and_z_matched=1;}
 		    if( fabs(utc-(tms/1000))<60 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 ){pot_and_time_matched=1;}
-		    if(fabs(utc-(tms/1000))<2 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 && fabs(trkVtxZ*100)<10){
+		    // if(fabs(utc-(tms/1000))<2 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 && fabs(trkVtxZ*100)<10){
 
 		    
 
@@ -958,10 +986,13 @@ v_z_start_a.clear();
 		      // We now open argoneut 3-d reconstruction file....it is put inside minos tracks because we are only interested in argoneut's events that CAN be matched with minos ...
 
 		  
-		     
+		//get info from our 3-d reconstruction file if it exists:
+		
+if(dircos_exist==1){
 
 		   while(getline(dircosfile,l))
 		     {
+		     
 		       Run=0;
 		       Event=0;
 		       Cosx=0;
@@ -1104,10 +1135,10 @@ v_z_start_a.clear();
 		     
 		    //std::cout<<"No of events reconstructed by Maddalena= "<<no_argoneut_events<<std::endl;
 		       
-		       
+		      
 		      dircosfile.close();
 		       
-		       
+		       }//if dircos_exist
 		       
 		       
 		      //-------------------end of maddalena file-----------------------------------
@@ -1115,65 +1146,49 @@ v_z_start_a.clear();
 		      // if using maddalena's file is not necessary ---->uncomment this:
 		      foundminosinfo=true;
 		      
-		      // vtx.push_back(vtxX);
-// 		      vtx.push_back(vtxY);
-// 		      vtx.push_back(vtxZ);
+		      run_subrun.push_back(run);
+		      run_subrun.push_back(subRun);
+		      
+		       vtx.push_back(vtxX);
+	      vtx.push_back(vtxY);
+	      vtx.push_back(vtxZ);
 // 		      
-// 		      trkVtx.push_back(trkVtxX);
-// 		      trkVtx.push_back(trkVtxY);
-// 		      trkVtx.push_back(trkVtxZ);
+		      trkVtx.push_back(trkVtxX);
+		      trkVtx.push_back(trkVtxY);
+		      trkVtx.push_back(trkVtxZ);
 // 		      
-// 		      trkdcos.push_back(trkdcosx);
-// 		      trkdcos.push_back(trkdcosy);
-// 		      trkdcos.push_back(trkdcosz);
-// 		      
-// 		      trkstp.push_back(trkstpU);
-// 		      trkstp.push_back(trkstpV);
-// 		      trkstp.push_back(ntrkstp);
-// 		      
-// 		      trkstp.push_back(trkstpX);
-// 		      trkstp.push_back(trkstpY);
-// 		      trkstp.push_back(trkstpZ);
-// 		      
-// 		      trkVtxe.push_back(trkVtxeX);
-// 		      trkVtxe.push_back(trkVtxeY);
+		      trkdcos.push_back(trkdcosx);
+		      trkdcos.push_back(trkdcosy);
+		      trkdcos.push_back(trkdcosz);
+	      
+		      trkVtxe.push_back(trkVtxeX);
+		      trkVtxe.push_back(trkVtxeY);
+		      
+		      dtnear_nearsec.push_back(dtnear);
+		      dtnear_nearsec.push_back(nearsec);
+		      
+		      nearns_offset.push_back(nearns);
+		      nearns_offset.push_back(offset);
 		      
 		      
-		      
-		      // FOR NEWEST MINOS FILE***:
-		      //merge::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtx,trkErange,sgate53,trkqp,trkVtx, trkdcos,month,trkmom, charge, trkstp,trkeqp,trkVtxe,0);
-		      
-		       //for OLD MINOS FILE: ***:
-		     // merge::MINOS 
-		     
-		     //  merge::MINOS my_minos(run,subRun,snarl,utc,day,trkIndex,trkE,shwE,crateT0,tmframe,year,vtxX,vtxY,vtxZ,trkErange,sgate53,trkqp,trkVtxX,trkVtxY,trkVtxZ, trkdcosx,trkdcosy,trkdcosz,month,0);
-// 		      
-		      minos.SetRun(run);
-		      minos.SetSubRun(subRun);
+		    
+		      minos.SetRun_subrun(run_subrun);
+		     // minos.SetSubRun(subRun);
 		      minos.SetSnarl(snarl);
 		      minos.SetUtc(utc);
 		      minos.SetDay(day);
-		      minos.SetTrkIndex(trkIndex);
+			  minos.SetTrkIndex(trkIndex);
 		      minos.SetTrkE(trkE);
 		      minos.SetShwE(shwE);
 		      minos.SetCrateT0(crateT0);
 		      minos.SetTmframe(tmframe);
 		      minos.SetYear(year);
-		      minos.SetVtx(vtxX,vtxY,vtxZ);
-		      // minos.SetVtxX(vtxX);
-// 		      minos.SetVtxY(vtxY);
-// 		      minos.SetVtxZ(vtxZ);
+		      minos.SetVtx(vtx);
 		      minos.SetTrkErange(trkErange);
 		      minos.SetSgate53(sgate53);
 		      minos.SetTrkqp(trkqp);
-		      minos.SetTrkVtx(trkVtxX,trkVtxY,trkVtxZ);
-		     //  minos.SetTrkVtxX(trkVtxX);
-// 		      minos.SetTrkVtxY(trkVtxY);
-// 		      minos.SetTrkVtxZ(trkVtxZ);	
-              minos.SetTrkdcos(trkdcosx,trkdcosy,trkdcosz);
-		      // minos.SetTrkdcosx(trkdcosx);
-// 		      minos.SetTrkdcosy(trkdcosy);
-// 		      minos.SetTrkdcosz(trkdcosz);
+		      minos.SetTrkVtx(trkVtx);
+		      minos.SetTrkdcos(trkdcos);
 		      minos.SetMonth(month);
 		      minos.SetTrkmom(trkmom);
 		      minos.SetCharge(charge);
@@ -1182,18 +1197,16 @@ v_z_start_a.clear();
 		      minos.SetTrkStpZ(trkstpZ);
 		      minos.SetTrkStpU(trkstpU); 
 		      minos.SetTrkStpV(trkstpV);
-		      //minos.SetTrkStp(trkstpU,trkstpV,trkstpX,trkstpY,trkstpZ);
+		      minos.SetNtrkstp(ntrkstp);
 		      minos.SetTrkeqp(trkeqp);
-		      minos.SetTrkVtxe(trkVtxeX,trkVtxeY);
+		      minos.SetTrkVtxe(trkVtxe);
 		      minos.SetGoodspill(goodspill);
- 		      minos.SetDtnear_nearsec(dtnear,nearsec);
- 		      minos.SetNearns_offset(nearns,offset);
-// 		      minos.SetNearsec(nearsec);
-// 		      minos.SetOffset(offset);
-		      minos.SetUtc1(utc1);
+ 		      minos.SetDtnear_nearsec(dtnear_nearsec);
+ 		      minos.SetNearns_offset(nearns_offset);
+              minos.SetUtc1(utc1);
 		      minos.SetMatched(0);
 		      
-		      
+		     
 		      
    // MINOS(int run, int subRun, int snarl, double utc, double day, float trkIndex, float trkE, float shwE,
 // 	
@@ -1228,8 +1241,8 @@ v_z_start_a.clear();
 		}//while
 	      closedir(pDIR);
 	      // std::cout<<no_files<<std::endl;
-	       
-	       
+	     
+	      if(in_matching==0){no_unmatched_events++;} 
 	       
 	      //Take diff between argoneut x coordinate and the one predicted from argoneuut (same for y)
 	       	std::vector<double> all_cosx,degree_diff_x;
@@ -1622,9 +1635,9 @@ if(minos_trkqp[index]!=0){
 	   
 	   
 }//match between DAQ and matched file
-       
-}//while in matched file
    
+}//while in matched file
+  
   matchedfile.close();
    
   minos_trk_x.clear();
@@ -1648,7 +1661,8 @@ if(minos_trkqp[index]!=0){
   if(pot_and_z_matched==1)no_e_pot_and_z_matched++;
   if(pot_and_time_matched==1)no_e_pot_and_time_matched++;
    
-   
+   ftime_matching_cand->Fill(multiple_match);
+   multiple_match=0; 
    
    
   //std::cout<<"No of completely matched events(with Maddalena's file)= "<< no_matched_tracks<<std::endl;
@@ -1662,6 +1676,8 @@ if(minos_trkqp[index]!=0){
   std::cout<<"No of events left after requiring distance and degree cuts is " <<no_all_cuts <<std::endl;
   std::cout<<"No of events that were calculated as having tracks that are outside of Minos' reach = "<< e_w_predicted_tracks_outside_minos<<std::endl;
    
+   std::cout<<"**************"<<std::endl;
+   std::cout<<"NO OF EVENTS UNMATCHED BASED ON TIME CONDITION (utc1) IS: "<<no_unmatched_events<<std::endl;
    
        
    

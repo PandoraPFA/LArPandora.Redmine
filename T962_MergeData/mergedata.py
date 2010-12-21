@@ -15,7 +15,7 @@ process = mergedata.Process("MergeData")
 
 # Maximum number of events to do.
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(2) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(8119) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.
@@ -25,7 +25,7 @@ process.maxEvents = mergedata.untracked.PSet(
 # Load the service that manages root files for histograms.
 process.TFileService = mergedata.Service(
     "TFileService",
-    fileName = mergedata.string("mergedata_12.15.10hist.root"),
+    fileName = mergedata.string("mergedata_12.21.10_r728hist.root"),
     closeFileFast = mergedata.untracked.bool(False)
 )
 
@@ -43,9 +43,9 @@ process.Geometry = mergedata.Service(
 # Service to get my MC events, which were run up through DetSim.
 process.source = mergedata.Source("PoolSource",
                                 fileNames = 
-                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R609_D20090915_T153438.root")
+                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R728_D20091201_T162032.root"),
                                 #mergedata.untracked.vstring("/argoneut/app/users/soderber/larsoft_svn/Kinga_Events/testARTevents.root")
-                               # skipEvents=mergedata.untracked.uint32(4)
+                                skipEvents=mergedata.untracked.uint32(29997)
                                 )
 
 
@@ -60,7 +60,7 @@ process.merge = mergedata.EDProducer(
 # Write the events to the output file.
 process.output = mergedata.OutputModule(
     "PoolOutputModule",
-    fileName = mergedata.untracked.string('mergedata_12.15.10gen.root'),
+    fileName = mergedata.untracked.string('mergedata_12.21.10.r728gen.root'),
 )
 
 ####### End of the section that defines and configures modules.#########

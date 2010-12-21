@@ -43,6 +43,8 @@ namespace merge {
    
 
   private:
+  TH1F* ftime_matching_cand;
+  TH1F* futc1_tms_diff;
     TH1F* fdiff_x;
     TH1F* fdiff_y;
     TH1F* fdiff_z;
