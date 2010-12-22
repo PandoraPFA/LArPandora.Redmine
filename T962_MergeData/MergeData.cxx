@@ -46,6 +46,7 @@ int no_distance_cut=0,no_degree_cut=0,no_all_cuts=0;
  int no_unmatched_events=0;
  int dircos_exist=0;
  std::vector<merge::MINOS > minos_tracks;
+ std::vector<merge::MINOS > Minos_coll_check;
 //-------------------------------------------------
 MergeData::MergeData(edm::ParameterSet const& pset) : 
   
@@ -287,10 +288,29 @@ Paddles_coll->push_back(paddles);
 evt.put(Paddles_coll);}
 
 std::auto_ptr<std::vector<merge::MINOS > > Minos_coll(new std::vector<merge::MINOS > );
-merge::MINOS minos;
-MergeMINOS(minos);
-Minos_coll->push_back(minos);
-evt.put(Minos_coll);
+//merge::MINOS minos;
+//MergeMINOS(minos);
+std::vector<merge::MINOS> vec_minos;
+MergeMINOS(vec_minos);
+if(foundminosinfo==true){
+std::cout<<"saving minos"<<std::endl;
+//Minos_coll->push_back(minos);
+std::cout<<"No of MINOS objects saved is "<<vec_minos.size()<<std::endl;
+for(int i=0;i<vec_minos.size();i++)
+{
+Minos_coll->push_back(vec_minos[i]);
+std::cout<<"The saved trackindex= "<<vec_minos[i].getTrkIndex()<<std::endl;
+
+}
+
+
+
+//std::cout<<"The saved trackindex= "<<minos.getTrkIndex()<<std::endl;
+//below is just for checking the number of minos objects saved
+//Minos_coll_check.push_back(minos);
+//std::cout<<"No of MINOS objects saved is ***"<<Minos_coll_check.size()<<std::endl;
+
+evt.put(Minos_coll);}
     
     
     
@@ -304,7 +324,9 @@ evt.put(Minos_coll);
     else {std::cout<<"foundminosinfo==false"<<std::endl;}
     
     
-    
+    foundbeaminfo=false;
+    foundpaddleinfo=false;
+    foundminosinfo=false;
    
     
   // if(foundbeaminfo)  {  
@@ -538,11 +560,13 @@ std::cout<<"in mergePMT"<<std::endl;
 
 
 //-------------------------------------------------
-void MergeData::MergeMINOS(merge::MINOS& minos)
+//void MergeData::MergeMINOS(merge::MINOS& minos)
+void MergeData::MergeMINOS(std::vector<merge::MINOS> & vec_minos)
 
 {
+merge::MINOS minos;
   std::cout<<"in mergeMinos"<<std::endl;
-  
+  std::cout<<"foundminosinfo="<<foundminosinfo<<std::endl;
  // time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
   
   time_t spilltime=fdaq->GetTimeStamp();
@@ -1144,6 +1168,8 @@ if(dircos_exist==1){
 		      //-------------------end of maddalena file-----------------------------------
 		      //.........................................................................
 		      // if using maddalena's file is not necessary ---->uncomment this:
+		      if(foundminosinfo==false){std::cout<<"foundminosinfo is false NOW***  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$-----------"<<std::endl;}
+		      else{std::cout<<"WEIRD, it's true-------------------"<<std::endl;}
 		      foundminosinfo=true;
 		      
 		      run_subrun.push_back(run);
@@ -1206,7 +1232,7 @@ if(dircos_exist==1){
               minos.SetUtc1(utc1);
 		      minos.SetMatched(0);
 		      
-		     
+		    vec_minos.push_back(minos); 
 		      
    // MINOS(int run, int subRun, int snarl, double utc, double day, float trkIndex, float trkE, float shwE,
 // 	

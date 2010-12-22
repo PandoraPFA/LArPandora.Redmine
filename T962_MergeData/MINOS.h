@@ -297,6 +297,9 @@ namespace merge{
    return fmatched;
 
     }
+    float getTrkIndex(){
+    return ftrkIndex;}
+    
     
   };
 

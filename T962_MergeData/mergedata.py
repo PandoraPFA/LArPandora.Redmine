@@ -14,8 +14,9 @@ import FWCore.ParameterSet.python.Config as mergedata
 process = mergedata.Process("MergeData")
 
 # Maximum number of events to do.
+#put 8119
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(8119) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(2) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.
@@ -25,7 +26,7 @@ process.maxEvents = mergedata.untracked.PSet(
 # Load the service that manages root files for histograms.
 process.TFileService = mergedata.Service(
     "TFileService",
-    fileName = mergedata.string("mergedata_12.21.10_r728hist.root"),
+    fileName = mergedata.string("mergedata_12.21.10_hist.root"),
     closeFileFast = mergedata.untracked.bool(False)
 )
 
@@ -60,7 +61,7 @@ process.merge = mergedata.EDProducer(
 # Write the events to the output file.
 process.output = mergedata.OutputModule(
     "PoolOutputModule",
-    fileName = mergedata.untracked.string('mergedata_12.21.10.r728gen.root'),
+    fileName = mergedata.untracked.string('mergedata_12.21.10gen.root'),
 )
 
 ####### End of the section that defines and configures modules.#########

@@ -175,8 +175,8 @@ namespace merge {
 
    void MergeBeam(raw::BeamInfo& beam);                 ///method to merge beam data
     void MergePMT(merge::Paddles& paddles);                 ///method to merge pmt data
-    void MergeMINOS(merge::MINOS& minos);                 ///method to merge MINOS data
-    
+    //void MergeMINOS(merge::MINOS& minos);                 ///method to merge MINOS data
+     void MergeMINOS(std::vector<merge::MINOS> & vec_minos); 
     
 	edm::Ptr<raw::DAQHeader> fdaq;
     raw::BeamInfo  fBeamInfo;
