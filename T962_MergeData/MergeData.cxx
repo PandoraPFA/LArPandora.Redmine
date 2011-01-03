@@ -922,8 +922,8 @@ v_z_start_a.clear();
 		     if(fabs(utc1+500-(tms))<1001){
 		     std::cout <<"MATCHED by TIME for run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex <<std::endl;
 		     
-		     if(trkIndex==0){multiple_match++;}
-		     futc1_tms_diff->Fill(fabs(utc1+500-(tms)));
+		     if(trkIndex==0){multiple_match++;
+		     futc1_tms_diff->Fill(fabs(utc1+500-(tms)));}
 		     
 		     
 		    //  }
@@ -1268,7 +1268,8 @@ if(dircos_exist==1){
 	      closedir(pDIR);
 	      // std::cout<<no_files<<std::endl;
 	     
-	      if(in_matching==0){no_unmatched_events++;} 
+	      if(in_matching==0){no_unmatched_events++;
+	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;} 
 	       
 	      //Take diff between argoneut x coordinate and the one predicted from argoneuut (same for y)
 	       	std::vector<double> all_cosx,degree_diff_x;
@@ -1293,14 +1294,14 @@ if(dircos_exist==1){
 
 
 		for(unsigned int i=0;i<minos_trk_x.size();i++){
-		  std::cout<<"CHECKING MINOS TRACK #"<<i<<std::endl;
+		 // std::cout<<"CHECKING MINOS TRACK #"<<i<<std::endl;
 		  d_z=D-v_z_start_a[t]+minos_trk_z[i];
-		  std::cout<<"d_z= "<<d_z<<" for trkvtxZ= "<<minos_trk_z[i]<<" (i.e minos_trk_z["<<i<<"],)"<<"  v_z_start_a["<<i<<" = "<<v_z_start_a[t]<<std::endl;
+		  //std::cout<<"d_z= "<<d_z<<" for trkvtxZ= "<<minos_trk_z[i]<<" (i.e minos_trk_z["<<i<<"],)"<<"  v_z_start_a["<<i<<" = "<<v_z_start_a[t]<<std::endl;
 		  vector_length= d_z/v_Cosz[t];
 		  
 		  x_predicted=vector_length*v_Cosx[t]+v_x_start_a[t];
 		  y_predicted=vector_length*v_Cosy[t]+v_y_start_a[t];
-		  std::cout<<"x_predicted= "<<vector_length*v_Cosx[t]+v_x_start_a[t]<<" ,	y_predicted= "<<vector_length*v_Cosy[t]+v_y_start_a[t]<<std::endl;
+		 // std::cout<<"x_predicted= "<<vector_length*v_Cosx[t]+v_x_start_a[t]<<" ,	y_predicted= "<<vector_length*v_Cosy[t]+v_y_start_a[t]<<std::endl;
 		  
 		  
 		  //.......................................................................
@@ -1339,7 +1340,7 @@ if(dircos_exist==1){
 		   
 		  distance.push_back(sqrt(all_diff_x[i]*all_diff_x[i] + all_diff_y[i]*all_diff_y[i]));
 		  distance_minos_coord.push_back(sqrt(all_diff_x_minos_coord[i]*all_diff_x_minos_coord[i] + all_diff_y_minos_coord[i]*all_diff_y_minos_coord[i]));
-		  std::cout<<"distance_minos_coord["<<i<<"]= "<<sqrt(all_diff_x_minos_coord[i]*all_diff_x_minos_coord[i] + all_diff_y_minos_coord[i]*all_diff_y_minos_coord[i])<<std::endl;
+		  //std::cout<<"distance_minos_coord["<<i<<"]= "<<sqrt(all_diff_x_minos_coord[i]*all_diff_x_minos_coord[i] + all_diff_y_minos_coord[i]*all_diff_y_minos_coord[i])<<std::endl;
 		  //lets test how many of them would fall within 11 cm circle, (i am doing it b/c i want to see if maybe I should not be just taking min # of the distance between argoneut and minos track BUT consider all the ones that fall within the specified distance (11cm)
 		   
 		  if(sqrt(all_diff_x_minos_coord[i]*all_diff_x_minos_coord[i] + all_diff_y_minos_coord[i]*all_diff_y_minos_coord[i])<11) no_tracks_less_than_11_apart++;
@@ -1423,7 +1424,7 @@ if(dircos_exist==1){
 
 		if(min_dist<11)
 		  {
-		    std::cout<<"for r<11, q/p= "<<minos_trkqp[index]<<std::endl;
+		   // std::cout<<"for r<11, q/p= "<<minos_trkqp[index]<<std::endl;
 
 		     
 		    f_distance_less_than_11->Fill(min_dist);
