@@ -15,7 +15,7 @@ process = mergescan.Process("MergeScan")
 
 # Maximum number of events to do.
 process.maxEvents = mergescan.untracked.PSet(
-    input = mergescan.untracked.int32(100) # See if this works to run fewer than are in input file.
+    input = mergescan.untracked.int32(30659) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.

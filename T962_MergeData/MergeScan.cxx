@@ -75,7 +75,7 @@ void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
   for(int scanner=0;scanner<scanners.size();scanner++)
   {
   char scanfilename[100];
- sprintf(scanfilename,"/argoneut/app/users/spitz7/larsoft11/scan_%s.00%d.txt",scanners[scanner].c_str(),daq->GetRun());
+ sprintf(scanfilename,"/argoneut/data/simplescan_data/simplescan_text/scan_%s.00%d.txt",scanners[scanner].c_str(),daq->GetRun());
 
  std::ifstream scanfile(scanfilename);
 
