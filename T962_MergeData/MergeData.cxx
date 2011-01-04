@@ -341,6 +341,7 @@ evt.put(Minos_coll);}
   
    
     //std::cout<<"run= "<<run<<" event= "<<event<<" ts= "<<ts<<" tsval= "<<tsval<<std::endl;
+    vec_minos.clear();
     
  return;
 }
