@@ -4,6 +4,7 @@
 //
 //   soderber@fnal.gov
 //   kinga.partyka@yale.edu
+//   joshua.spitz@yale.edu
 //
 ////////////////////////////////////////////////////////////////////////
 #include "FWCore/Framework/interface/Event.h"
@@ -20,6 +21,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <iomanip>
 #include <algorithm>
 #include <functional>
@@ -67,9 +69,15 @@ produces< std::vector<merge::MINOS> > ();
   std::cout<<"in beginJob"<<std::endl;
   // get access to the TFile service
     edm::Service<edm::TFileService> tfs;
+    
+  //ftimeofnomatch =tfs->make<TH1F>("ftimeofnomatch","ArgoNeuT Spill Time w/ no match", 10000,0 ,);
+    
+  fproblemevent=tfs->make<TH1F>("fproblemevent","Event number with no match", 40000,0 ,40000);  
+    
   ftime_matching_cand=tfs->make<TH1F>("ftime_matching_cand","No of minos spills fullfilling time matching condition for each argoneut event", 20,0 ,20);
   
   futc1_tms_diff = tfs->make<TH1F>("futc1_tms_diff","fabs(utc1+500-(tms))", 2000,0 ,2000);
+  
   
   
   fdiff_x = tfs->make<TH1F>("fdiff_x","Difference between predicted (from Argoneut) and Minos x coordinate value of track", 6500,-250 ,400);
@@ -341,8 +349,10 @@ evt.put(Minos_coll);}
   
    
     //std::cout<<"run= "<<run<<" event= "<<event<<" ts= "<<ts<<" tsval= "<<tsval<<std::endl;
+
     vec_minos.clear();
     
+
  return;
 }
 
@@ -664,7 +674,7 @@ merge::MINOS minos;
 
 
   ///////////////////////////////////////////////////////////////////////////////////
-  std::string path ="/argoneut/app/users/spitz7/larsoft11/MINOS/";
+  std::string path ="/argoneut/app/users/spitz7/larsoft_7/MINOS/";
     
     //std::string path= "/argoneut/app/users/kpartyka/larsoft/MINOS/";//gotta replace New_MINOS with MINOS later. I am testing new file 09.15.2010
   // int no_files=0;
@@ -817,7 +827,7 @@ v_z_start_a.clear();
 	  int no_files=0;
 	  DIR *pDIR;
 	  struct dirent *entry;
-	 if( pDIR=opendir("/argoneut/app/users/spitz7/larsoft11/MINOS") )
+	 if( pDIR=opendir("/argoneut/app/users/spitz7/larsoft_7/MINOS/") )
 	  // if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/MINOS") )
 	  //if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/New_MINOS") )//checking the new file from rashid 09.15.2010
 	    {
@@ -831,8 +841,27 @@ v_z_start_a.clear();
 		    std::cout <<"file is "<< entry->d_name << "\n";
 		    no_files ++;}
 		  else continue;
-		   
-		  std::string fileName = entry->d_name;
+		  
+		  std::string filetime(entry->d_name);
+          //gymnastics to get the time from the filename. there is certainly as easier way 
+		  std::string firsttime = filetime.substr(18);
+		  std::string firsttime2 = firsttime.substr(0,13);
+		  std::istringstream buffer(firsttime2);
+		  long int firsttime3;
+		  buffer >> firsttime3;
+		  
+
+		  
+// 		  std::cout<<"TMMSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS "<<std::setprecision(13)<<tms<<"  "<<firsttime3<<std::endl; 
+		  //don't consider runs that started in the future. add 100 seconds to be safe
+		  if(firsttime3-100000 > tms)
+  		  continue;
+		  
+//only consider runs that started within one day (86400 seconds)
+          if(abs((long int)tms-firsttime3)>86400000)
+  		  continue;
+		  
+	   	  std::string fileName = entry->d_name;
 		  std::string file=path+fileName;
 		   
 		  TFile *f = new TFile(file.c_str());
@@ -898,6 +927,8 @@ v_z_start_a.clear();
 		  for(Long64_t i=0;i<nentries;i++){
 		  //std::cout<<"i= "<<i<<std::endl;
 		    nbytes+=minitree->GetEntry(i);
+		    
+		   // std::cout<<"UTC1111111111111111111111111111111 "<<std::setprecision(13)<<utc1<<std::endl;
 		    //----------------------------------------------
 		    //for print out of minos data:
 		     //std::cout<< " utc= "<<std::setprecision(13)<<utc<<std::endl;
@@ -1253,7 +1284,7 @@ if(dircos_exist==1){
  		      std::cout<<"length of minos_tracks="<<minos_tracks.size()<<std::endl;
 		      //...................................................................
 		       
-		       
+		       break;
 		      //  std::cout<<"exited while"<<std::endl;
 		    }//found a match
 		    //	std::cout<<"after matched"<<std::endl;
@@ -1270,7 +1301,11 @@ if(dircos_exist==1){
 	      // std::cout<<no_files<<std::endl;
 	     
 	      if(in_matching==0){no_unmatched_events++;
-	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;} 
+	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;
+	      
+	      fproblemevent->Fill(event);
+	      
+	      } 
 	       
 	      //Take diff between argoneut x coordinate and the one predicted from argoneuut (same for y)
 	       	std::vector<double> all_cosx,degree_diff_x;
@@ -1690,6 +1725,7 @@ if(minos_trkqp[index]!=0){
   if(pot_and_time_matched==1)no_e_pot_and_time_matched++;
    
    ftime_matching_cand->Fill(multiple_match);
+      
    multiple_match=0; 
    
    
