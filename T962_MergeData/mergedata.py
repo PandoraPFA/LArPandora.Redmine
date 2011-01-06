@@ -14,9 +14,10 @@ import FWCore.ParameterSet.python.Config as mergedata
 process = mergedata.Process("MergeData")
 
 # Maximum number of events to do.
-#put 8119
+#put 8119 for R728
+#put 30476 for R729
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(8118) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(1) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.
@@ -26,7 +27,7 @@ process.maxEvents = mergedata.untracked.PSet(
 # Load the service that manages root files for histograms.
 process.TFileService = mergedata.Service(
     "TFileService",
-    fileName = mergedata.string("mergedata_1.3.11_RUN728_ALL2_hist.root"),
+    fileName = mergedata.string("mergedata_blah_hist.root"),
     closeFileFast = mergedata.untracked.bool(False)
 )
 
@@ -44,9 +45,11 @@ process.Geometry = mergedata.Service(
 # Service to get my MC events, which were run up through DetSim.
 process.source = mergedata.Source("PoolSource",
                                 fileNames = 
-                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R728_D20091201_T162032.root"),
+                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R729_D20091203_T095413.root")
                                 #mergedata.untracked.vstring("/argoneut/app/users/soderber/larsoft_svn/Kinga_Events/testARTevents.root")
-                                skipEvents=mergedata.untracked.uint32(29997)
+                                #skipEvents=mergedata.untracked.uint32(29997) for run 728
+                                #remember you need a comma if you use skipevents
+                                #skipEvents=mergedata.untracked.uint32(30475)
                                 )
 
 
@@ -61,7 +64,7 @@ process.merge = mergedata.EDProducer(
 # Write the events to the output file.
 process.output = mergedata.OutputModule(
     "PoolOutputModule",
-    fileName = mergedata.untracked.string('mergedata_1.3.11_RUN728_ALL2_gen.root'),
+    fileName = mergedata.untracked.string('mergedata_blah_gen.root'),
 )
 
 ####### End of the section that defines and configures modules.#########

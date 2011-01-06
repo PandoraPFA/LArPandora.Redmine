@@ -42,7 +42,7 @@ namespace merge{
 
 
 int no=0;
-int no_events_daq=0,no_events_daq_pot=0,no_e_pot_and_time_matched=0,no_e_pot_and_z_matched=0,no_e_pot_matched=0, e_w_predicted_tracks_outside_minos=0;
+int no_events_daq=0,no_events_utc1=0,no_e_pot_and_time_matched=0,no_e_pot_time_z_matched=0,no_e_pot_and_z_matched=0,no_e_pot_matched=0, e_w_predicted_tracks_outside_minos=0;
 int no_distance_cut=0,no_degree_cut=0,no_all_cuts=0;
  int no_matched_tracks=0;
  int no_unmatched_events=0;
@@ -800,7 +800,7 @@ v_z_start_a.clear();
   //........................................................................
   double x_offset=116.9; // previously 118;
   double y_offset=20.28; //previously  19;
-  int in_matching=0,pot_matched=0,pot_and_z_matched=0,pot_and_time_matched=0;
+  int in_matching=0,pot_matched=0,pot_and_z_matched=0,pot_and_time_matched=0,pot_time_z_matched=0;
   double const pi=4.0*atan(1.0);
   int multiple_match=0; 
    
@@ -971,7 +971,7 @@ v_z_start_a.clear();
 		    if( fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001){pot_matched=1; }
 		    if( fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 && fabs(trkVtxZ*100)<10){pot_and_z_matched=1;}
 		    if( fabs(utc-(tms/1000))<60 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 ){pot_and_time_matched=1;}
-		    // if(fabs(utc-(tms/1000))<2 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 && fabs(trkVtxZ*100)<10){
+		    if(fabs(utc-(tms/1000))<2 && fabs(trtgtd_m-trtgtd)<0.001 && fabs(tor101_m-tor101)<0.001 && fabs(tortgt_m-tortgt)<0.001 && fabs(trkVtxZ*100)<10){pot_time_z_matched=1;}
 
 		    
 
@@ -1719,10 +1719,11 @@ if(minos_trkqp[index]!=0){
   v_Cosy.clear();
   v_Cosz.clear();
    
-  if(in_matching==1)no_events_daq_pot++;
+  if(in_matching==1)no_events_utc1++;
   if(pot_matched==1)no_e_pot_matched++;
   if(pot_and_z_matched==1)no_e_pot_and_z_matched++;
   if(pot_and_time_matched==1)no_e_pot_and_time_matched++;
+  if(pot_time_z_matched==1) no_e_pot_time_z_matched++;
    
    ftime_matching_cand->Fill(multiple_match);
       
@@ -1730,7 +1731,7 @@ if(minos_trkqp[index]!=0){
    
    
   //std::cout<<"No of completely matched events(with Maddalena's file)= "<< no_matched_tracks<<std::endl;
-  std::cout<<"Total no of events from DAQ and matched with our matched  file is: "<< no_events_daq<<" out of these " <<	no_events_daq_pot<< " events we match by requring same POTs, time cut of 60s and z cut of 10cm. Out of these "<<no<<" is matched also with Argoneut's tracks that we have in dircos file."<<std::endl; 
+  std::cout<<"Total no of events from DAQ and matched with our matched  file is: "<< no_events_daq<<" out of these " <<	no_e_pot_time_z_matched<< " events we match by requring same POTs, time cut of 60s and z cut of 10cm. Out of these "<<no<<" is matched also with Argoneut's tracks that we have in dircos file."<<std::endl; 
    
   std::cout<<"No of events matched just by same POTs: "<<no_e_pot_matched  <<std::endl;
   std::cout<<"No of events matched by same POTs and Z cut: "<<no_e_pot_and_z_matched  <<std::endl;
@@ -1741,6 +1742,7 @@ if(minos_trkqp[index]!=0){
   std::cout<<"No of events that were calculated as having tracks that are outside of Minos' reach = "<< e_w_predicted_tracks_outside_minos<<std::endl;
    
    std::cout<<"**************"<<std::endl;
+   std::cout<<"NO OF EVENTS MATCHED BASED ON TIME CONDITION (utc1) IS:"<<no_events_utc1<<std::endl; 
    std::cout<<"NO OF EVENTS UNMATCHED BASED ON TIME CONDITION (utc1) IS: "<<no_unmatched_events<<std::endl;
    
        
