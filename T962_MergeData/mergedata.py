@@ -17,7 +17,7 @@ process = mergedata.Process("MergeData")
 #put 8119 for R728
 #put 30476 for R729
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(1) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(30476) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.

@@ -47,6 +47,8 @@ int no_distance_cut=0,no_degree_cut=0,no_all_cuts=0;
  int no_matched_tracks=0;
  int no_unmatched_events=0;
  int dircos_exist=0;
+  int matchedi=0;
+   long int firsttime4=0;
  std::vector<merge::MINOS > minos_tracks;
  std::vector<merge::MINOS > Minos_coll_check;
 //-------------------------------------------------
@@ -245,7 +247,7 @@ MergeData::~MergeData()
 
 void MergeData::produce(edm::Event& evt, edm::EventSetup const&)
 {
-std::cout<<"in produce"<<std::endl;
+
 
 
 
@@ -263,7 +265,7 @@ std::cout<<"in produce"<<std::endl;
     edm::EventNumber_t event = evt.id().event();
     edm::Timestamp ts = evt.time();
     unsigned long long int tsval = ts.value();
-    std::cout<<"tsval= "<<std::setprecision(15)<<tsval<<std::endl;
+   //  std::cout<<"tsval= "<<std::setprecision(15)<<tsval<<std::endl;
    
     std::cout<<"run: "<<run<<" event: "<<event<<std::endl;
     //std::cout<<"ts: "<<ts<<std::endl;
@@ -281,11 +283,12 @@ std::cout<<"in produce"<<std::endl;
 	raw::BeamInfo beam;
 	MergeBeam(beam);
 	if(foundbeaminfo==true){
-	std::cout<<"saving beam"<<std::endl;
+	// std::cout<<"saving beam"<<std::endl;
 	Beam_coll->push_back(beam);
-	std::cout<<"push beam"<<std::endl;
+	// std::cout<<"push beam"<<std::endl;
 	evt.put(Beam_coll);
-	std::cout<<"put beam"<<std::endl;}
+	// std::cout<<"put beam"<<std::endl;
+	}
 
 std::auto_ptr<std::vector<merge::Paddles> > Paddles_coll(new std::vector<merge::Paddles> );
 merge::Paddles paddles;
@@ -301,7 +304,6 @@ std::auto_ptr<std::vector<merge::MINOS > > Minos_coll(new std::vector<merge::MIN
 std::vector<merge::MINOS> vec_minos;
 MergeMINOS(vec_minos);
 if(foundminosinfo==true){
-std::cout<<"saving minos"<<std::endl;
 //Minos_coll->push_back(minos);
 std::cout<<"No of MINOS objects saved is "<<vec_minos.size()<<std::endl;
 for(int i=0;i<vec_minos.size();i++)
@@ -322,14 +324,14 @@ evt.put(Minos_coll);}
     
     
     
-    if(foundbeaminfo==true)std::cout<<"foundbeaminfo==true"<<std::endl;
-    else {std::cout<<"foundbeaminfo==false"<<std::endl;}
-    
-    if(foundpaddleinfo==true)std::cout<<"foundpaddleinfo==true"<<std::endl;
-    else {std::cout<<"foundpaddleinfo==false"<<std::endl;}
-    
-    if(foundminosinfo==true)std::cout<<"foundminosinfo==true"<<std::endl;
-    else {std::cout<<"foundminosinfo==false"<<std::endl;}
+//     if(foundbeaminfo==true)std::cout<<"foundbeaminfo==true"<<std::endl;
+//     else {std::cout<<"foundbeaminfo==false"<<std::endl;}
+//     
+//     if(foundpaddleinfo==true)std::cout<<"foundpaddleinfo==true"<<std::endl;
+//     else {std::cout<<"foundpaddleinfo==false"<<std::endl;}
+//     
+//     if(foundminosinfo==true)std::cout<<"foundminosinfo==true"<<std::endl;
+//     else {std::cout<<"foundminosinfo==false"<<std::endl;}
     
     
     foundbeaminfo=false;
@@ -360,14 +362,14 @@ evt.put(Minos_coll);}
 
 void MergeData::MergeBeam(raw::BeamInfo& beam)
 {
-  std::cout<<"in mergebeam"<<std::endl;
+ //  std::cout<<"in mergebeam"<<std::endl;
   edm::Timestamp  timestamp=fdaq->GetTimeStamp();
   time_t spilltime = fdaq->GetTimeStamp();//time info. from DAQ480 software
   spilltime = spilltime >> 32;
-  std::cout<<"doing event# "<<fdaq->GetEvent()<<std::endl;
+  // std::cout<<"doing event# "<<fdaq->GetEvent()<<std::endl;
   unsigned long long int tsval= timestamp.value();
-  std::cout<<"spilltime="<<spilltime<<std::endl;
-  std::cout<<"tsval=    "<<tsval<<std::endl;
+  // std::cout<<"spilltime="<<spilltime<<std::endl;
+  // std::cout<<"tsval=    "<<tsval<<std::endl;
  
   
   
@@ -375,7 +377,7 @@ void MergeData::MergeBeam(raw::BeamInfo& beam)
  
   // std::cout<<"DAQ480(in MergeBeam()) tells us that the spilltime to match is: "<<spilltime<<std::endl;
   tm *timeinfo = localtime(&spilltime);
-  std::cout<<"timeinfo="<<timeinfo<<std::endl;
+  // std::cout<<"timeinfo="<<timeinfo<<std::endl;
  
   // std::cout << "Run " << fDAQHeader[fDAQHeader.size()-1]->GetRun() << " Event = " << fDAQHeader[fDAQHeader.size()-1]->GetEvent() 
   //<< " time = " << fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp() << " pretty = " << ctime(&spilltime) << std::endl;
@@ -426,9 +428,9 @@ void MergeData::MergeBeam(raw::BeamInfo& beam)
       
       //  fBeamInfo.SetDATE(date);
       //       fBeamInfo.SetTIME(time);
-       std::cout<<"-------------------------------"<<std::endl;
-       std::cout<<beam<<std::endl;
-       std::cout<<"-------------------------------"<<std::endl;
+//        std::cout<<"-------------------------------"<<std::endl;
+//        std::cout<<beam<<std::endl;
+//        std::cout<<"-------------------------------"<<std::endl;
       // std::cout<<"size of beam_coll ="<<Beam_coll->size()<<std::endl;
       break;
     }
@@ -444,7 +446,7 @@ void MergeData::MergeBeam(raw::BeamInfo& beam)
 void MergeData::MergePMT(merge::Paddles& paddles)
 
 {
-std::cout<<"in mergePMT"<<std::endl;
+// std::cout<<"in mergePMT"<<std::endl;
   //time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time 
   time_t spilltime= fdaq->GetTimeStamp();
   spilltime = spilltime >> 32;
@@ -463,7 +465,7 @@ std::cout<<"in mergePMT"<<std::endl;
   std::string line;
   
   if(!pmtfile.is_open()){
-    std::cerr << "Merge:  Could not open file named " << pmtfilename << std::endl;
+    // std::cerr << "Merge:  Could not open file named " << pmtfilename << std::endl;
     return;
   }
   
@@ -576,8 +578,8 @@ void MergeData::MergeMINOS(std::vector<merge::MINOS> & vec_minos)
 
 {
 merge::MINOS minos;
-  std::cout<<"in mergeMinos"<<std::endl;
-  std::cout<<"foundminosinfo="<<foundminosinfo<<std::endl;
+//   std::cout<<"in mergeMinos"<<std::endl;
+//   std::cout<<"foundminosinfo="<<foundminosinfo<<std::endl;
  // time_t spilltime = fDAQHeader[fDAQHeader.size()-1]->GetTimeStamp();//time info. from DAQ480 software
   
   time_t spilltime=fdaq->GetTimeStamp();
@@ -653,12 +655,12 @@ merge::MINOS minos;
   //   std::cout<<"WILL BE READING: "<<dircosfilename<<std::endl;
   
   char dircosfilename[38]="dircos_bis_mR728-9_sel.txt";
-  std::cout<<"WILL BE READING: "<<dircosfilename<<std::endl;
+ //  std::cout<<"WILL BE READING: "<<dircosfilename<<std::endl;
   
   dircosfile.open(dircosfilename, std::ios::in);
   if(dircosfile.is_open()){ dircos_exist=1;}
   if(!dircosfile.is_open()){
-    std::cerr << "Merge:  Could not open file named " << dircosfilename << std::endl;
+   //  std::cerr << "Merge:  Could not open file named " << dircosfilename << std::endl;
     //return; //we want to match now whether we did 3-d reco or not
   }
   //...........................
@@ -674,7 +676,7 @@ merge::MINOS minos;
 
 
   ///////////////////////////////////////////////////////////////////////////////////
-  std::string path ="/argoneut/app/users/spitz7/larsoft_7/MINOS/";
+  std::string path ="/argoneut/app/users/spitz7/larsoft_8/MINOS2/";
     
     //std::string path= "/argoneut/app/users/kpartyka/larsoft/MINOS/";//gotta replace New_MINOS with MINOS later. I am testing new file 09.15.2010
   // int no_files=0;
@@ -803,7 +805,9 @@ v_z_start_a.clear();
   int in_matching=0,pot_matched=0,pot_and_z_matched=0,pot_and_time_matched=0,pot_time_z_matched=0;
   double const pi=4.0*atan(1.0);
   int multiple_match=0; 
-   
+ 
+
+
   //std::cout <<" utc = " <<std::setprecision(10)<< utc<<std::endl; 
   while(getline(matchedfile,k))
     {
@@ -812,6 +816,9 @@ v_z_start_a.clear();
       ins3.clear();
       ins3.str(k);
       ins3>>first>>run_>>event>>tms>> tor101_m >> tortgt_m >> trtgtd_m;
+      
+      
+      
       //  std::cout<<std::setprecision(9)<<first<<"  "<<run<<"  "<<event<<"  "<<tms<<" "<<tor101<<"  "<< tortgt <<"  "<< trtgtd <<std::endl;
        
       //  std::cout <<"run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex << " Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
@@ -827,18 +834,18 @@ v_z_start_a.clear();
 	  int no_files=0;
 	  DIR *pDIR;
 	  struct dirent *entry;
-	 if( pDIR=opendir("/argoneut/app/users/spitz7/larsoft_7/MINOS/") )
+	 if( pDIR=opendir("/argoneut/app/users/spitz7/larsoft_8/MINOS2/") )
 	  // if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/MINOS") )
 	  //if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/New_MINOS") )//checking the new file from rashid 09.15.2010
 	    {
-	       
+
 	       
 	      while(entry = readdir(pDIR))
 		{
 		  int utc_same_as_t=0;
 		   
 		  if( strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 ){
-		    std::cout <<"file is "<< entry->d_name << "\n";
+		    // std::cout <<"file is "<< entry->d_name << "\n";
 		    no_files ++;}
 		  else continue;
 		  
@@ -847,20 +854,37 @@ v_z_start_a.clear();
 		  std::string firsttime = filetime.substr(18);
 		  std::string firsttime2 = firsttime.substr(0,13);
 		  std::istringstream buffer(firsttime2);
-		  long int firsttime3;
-		  buffer >> firsttime3;
-		  
+		  long int firsttimestart;		  
+		  buffer >> firsttimestart;
 
-		  
-// 		  std::cout<<"TMMSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS "<<std::setprecision(13)<<tms<<"  "<<firsttime3<<std::endl; 
+          firsttime = filetime.substr(32);
+		  firsttime2 = firsttime.substr(0,13);
+		  std::istringstream buffer2(firsttime2);
+		  long int firsttimeend;		  
+		  buffer2 >> firsttimeend;
+
+//           std::cout<<" firsttimes "<<firsttimestart<<" "<<firsttimeend<<std::endl;
+// 		  
+//  		  std::cout<<"TMMSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS "<<std::setprecision(13)<<tms<<"  "<<firsttimestart<<std::endl; 
 		  //don't consider runs that started in the future. add 100 seconds to be safe
-		  if(firsttime3-100000 > tms)
+// 		  if(firsttime3-100000 > tms)
+//   		  continue;
+// 		  
+// //only consider runs that started within one day (86400 seconds)
+//           if(abs((long int)tms-firsttime3)>86400000)
+//   		  continue;
+  		  
+  		  if(!(firsttimestart<tms&&tms<firsttimeend))
   		  continue;
-		  
-//only consider runs that started within one day (86400 seconds)
-          if(abs((long int)tms-firsttime3)>86400000)
-  		  continue;
-		  
+  		  
+  		  if(firsttimestart!=firsttime4)
+		  {
+		  matchedi=0;
+		  std::cout<<"here "<<firsttimestart<<" "<<std::setprecision(13)<<firsttime4<<std::endl;
+		  firsttime4=firsttimestart;
+		  }
+  		  
+		  std::cout <<"***********FILE BEING SCANNED IS*********** "<< entry->d_name << "\n";
 	   	  std::string fileName = entry->d_name;
 		  std::string file=path+fileName;
 		   
@@ -915,7 +939,7 @@ v_z_start_a.clear();
 		  minitree->SetBranchAddress("utc1",&utc1);
 		  
 
-	 std::cout<<"after minitrees"<<std::endl;	
+	 // std::cout<<"after minitrees"<<std::endl;	
 		  //...................................................
 
 	
@@ -924,11 +948,18 @@ v_z_start_a.clear();
 		  Long64_t nentries = minitree->GetEntries();
 		  //std::cout<<"nentries= "<<nentries<<std::endl;
 		  Long64_t nbytes = 0;
-		  for(Long64_t i=0;i<nentries;i++){
+		  
+		  
+		  
+		  for(int i=matchedi;i<nentries;i++){
+ //testing purposes only:
+ if(i==matchedi)
+ std::cout<<"MATCHEDI**************             "<<matchedi<<std::endl;
+		  
 		  //std::cout<<"i= "<<i<<std::endl;
 		    nbytes+=minitree->GetEntry(i);
-		    
-		   // std::cout<<"UTC1111111111111111111111111111111 "<<std::setprecision(13)<<utc1<<std::endl;
+		    // if(i==0||i==nentries-1)
+// 		    std::cout<<"UTC1111111111111111111111111111111 "<<std::setprecision(13)<<utc1<<std::endl;
 		    //----------------------------------------------
 		    //for print out of minos data:
 		     //std::cout<< " utc= "<<std::setprecision(13)<<utc<<std::endl;
@@ -952,6 +983,10 @@ v_z_start_a.clear();
 		     //Matching condition based on time info alone:
 		     
 		     if(fabs(utc1+500-(tms))<1001){
+		     
+		     matchedi=i;
+		     
+		     
 		     std::cout <<"MATCHED by TIME for run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex <<std::endl;
 		     
 		     if(trkIndex==0){multiple_match++;
@@ -1731,17 +1766,17 @@ if(minos_trkqp[index]!=0){
    
    
   //std::cout<<"No of completely matched events(with Maddalena's file)= "<< no_matched_tracks<<std::endl;
-  std::cout<<"Total no of events from DAQ and matched with our matched  file is: "<< no_events_daq<<" out of these " <<	no_e_pot_time_z_matched<< " events we match by requring same POTs, time cut of 60s and z cut of 10cm. Out of these "<<no<<" is matched also with Argoneut's tracks that we have in dircos file."<<std::endl; 
-   
-  std::cout<<"No of events matched just by same POTs: "<<no_e_pot_matched  <<std::endl;
-  std::cout<<"No of events matched by same POTs and Z cut: "<<no_e_pot_and_z_matched  <<std::endl;
-  std::cout<<"No of events matched by same POTs and time cut: "<<no_e_pot_and_time_matched <<std::endl;
-  std::cout<<"No of tracks left after requiring them to be within 11 cm radius of each other on x-y plane is "<<no_distance_cut <<" (compare this with "<<no_matched_tracks<<" )"<<std::endl;
-  std::cout<<"No of events left after requiring to be within 7 degrees in y and 16 degrees in x is " <<no_degree_cut <<std::endl;
-  std::cout<<"No of events left after requiring distance and degree cuts is " <<no_all_cuts <<std::endl;
-  std::cout<<"No of events that were calculated as having tracks that are outside of Minos' reach = "<< e_w_predicted_tracks_outside_minos<<std::endl;
-   
-   std::cout<<"**************"<<std::endl;
+//   std::cout<<"Total no of events from DAQ and matched with our matched  file is: "<< no_events_daq<<" out of these " <<	no_e_pot_time_z_matched<< " events we match by requring same POTs, time cut of 60s and z cut of 10cm. Out of these "<<no<<" is matched also with Argoneut's tracks that we have in dircos file."<<std::endl; 
+//    
+//   std::cout<<"No of events matched just by same POTs: "<<no_e_pot_matched  <<std::endl;
+//   std::cout<<"No of events matched by same POTs and Z cut: "<<no_e_pot_and_z_matched  <<std::endl;
+//   std::cout<<"No of events matched by same POTs and time cut: "<<no_e_pot_and_time_matched <<std::endl;
+//   std::cout<<"No of tracks left after requiring them to be within 11 cm radius of each other on x-y plane is "<<no_distance_cut <<" (compare this with "<<no_matched_tracks<<" )"<<std::endl;
+//   std::cout<<"No of events left after requiring to be within 7 degrees in y and 16 degrees in x is " <<no_degree_cut <<std::endl;
+//   std::cout<<"No of events left after requiring distance and degree cuts is " <<no_all_cuts <<std::endl;
+//   std::cout<<"No of events that were calculated as having tracks that are outside of Minos' reach = "<< e_w_predicted_tracks_outside_minos<<std::endl;
+//    
+//    std::cout<<"**************"<<std::endl;
    std::cout<<"NO OF EVENTS MATCHED BASED ON TIME CONDITION (utc1) IS:"<<no_events_utc1<<std::endl; 
    std::cout<<"NO OF EVENTS UNMATCHED BASED ON TIME CONDITION (utc1) IS: "<<no_unmatched_events<<std::endl;
    
