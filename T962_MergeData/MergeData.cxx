@@ -805,7 +805,7 @@ v_z_start_a.clear();
   int in_matching=0,pot_matched=0,pot_and_z_matched=0,pot_and_time_matched=0,pot_time_z_matched=0;
   double const pi=4.0*atan(1.0);
   int multiple_match=0; 
- 
+  int flag=0;
 
 
   //std::cout <<" utc = " <<std::setprecision(10)<< utc<<std::endl; 
@@ -1033,7 +1033,7 @@ v_z_start_a.clear();
 		      time_diff_spilltime.push_back(utc-spilltime);
 		      minos_trk_index.push_back(trkIndex);
 		       
-		      std::cout<<"************************************YAY*****************"<<std::endl;
+		     // std::cout<<"************************************YAY*****************"<<std::endl;
 
 		
 
@@ -1045,8 +1045,8 @@ v_z_start_a.clear();
 		      std::cout<< " Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
 
 
-		      std::cout<<"utc-spilltime= "<<std::setprecision(10)<<(utc-spilltime)<<" s"<<" , "<<(utc-spilltime)/3600<<" h"<<std::endl;
-		      std::cout<<"utc-tms= "<<std::setprecision(10)<<(utc-(tms/1000))<<" s"<<" , "<<(utc-(tms/1000))/3600<<" h"<<std::endl;
+// 		      std::cout<<"utc-spilltime= "<<std::setprecision(10)<<(utc-spilltime)<<" s"<<" , "<<(utc-spilltime)/3600<<" h"<<std::endl;
+// 		      std::cout<<"utc-tms= "<<std::setprecision(10)<<(utc-(tms/1000))<<" s"<<" , "<<(utc-(tms/1000))/3600<<" h"<<std::endl;
 		      //std::cout<<"trtgtd (matched)= "<<std::setprecision(13)<<trtgtd<<"   "<<" trkTimeT0= "<<std::setprecision(13)<<trkTimeT0<<" trkVtxT= "<<std::setprecision(13)<<trkVtxT<<" trkChi2=  "<<trkChi2<<std::endl;
 		      utc_same_as_t=1;
 		      //--------------------------------
@@ -1236,7 +1236,7 @@ if(dircos_exist==1){
 		      //.........................................................................
 		      // if using maddalena's file is not necessary ---->uncomment this:
 		      if(foundminosinfo==false){std::cout<<"foundminosinfo is false NOW***  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$-----------"<<std::endl;}
-		      else{std::cout<<"WEIRD, it's true-------------------"<<std::endl;}
+		      
 		      foundminosinfo=true;
 		      
 		      run_subrun.push_back(run);
@@ -1318,10 +1318,14 @@ if(dircos_exist==1){
 		       minos_tracks.push_back(minos);
  		      std::cout<<"length of minos_tracks="<<minos_tracks.size()<<std::endl;
 		      //...................................................................
-		       
-		       break;
+            flag=1;
+
 		      //  std::cout<<"exited while"<<std::endl;
-		    }//found a match
+		    }
+		    else if(flag==1)
+		    break;
+		    
+		    //found a match
 		    //	std::cout<<"after matched"<<std::endl;
 		  }//loop over Minos root file
 		  // std::cout<<"finished looping minosfile"<<std::endl;
