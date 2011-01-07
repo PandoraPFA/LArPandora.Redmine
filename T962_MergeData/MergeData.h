@@ -44,6 +44,7 @@ namespace merge {
 
   private:
     TH1F* fproblemevent;
+    TH2F* fproblemevent2d;
   TH1F* ftime_matching_cand;
   TH1F* futc1_tms_diff;
     TH1F* fdiff_x;

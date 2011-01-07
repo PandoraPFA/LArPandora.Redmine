@@ -74,8 +74,7 @@ produces< std::vector<merge::MINOS> > ();
     
   //ftimeofnomatch =tfs->make<TH1F>("ftimeofnomatch","ArgoNeuT Spill Time w/ no match", 10000,0 ,);
     
-  fproblemevent=tfs->make<TH1F>("fproblemevent","Event number with no match", 40000,0 ,40000);  
-    
+  fproblemevent=tfs->make<TH1F>("fproblemevent","Event number with no match", 40000,0 ,40000);  fproblemevent2d=tfs->make<TH2F>("fproblemevent2d","POT vs. Event number with no match", 40000,0 ,40000,500,-1,45); 
   ftime_matching_cand=tfs->make<TH1F>("ftime_matching_cand","No of minos spills fullfilling time matching condition for each argoneut event", 20,0 ,20);
   
   futc1_tms_diff = tfs->make<TH1F>("futc1_tms_diff","fabs(utc1+500-(tms))", 2000,0 ,2000);
@@ -388,7 +387,7 @@ void MergeData::MergeBeam(raw::BeamInfo& beam)
   
   
  
-  sprintf(beamfilename,"matched_%02d_%02d_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+  sprintf(beamfilename,"/argoneut/data/rundata/matched/matched_%02d_%i_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
   
   std::ifstream beamfile(beamfilename);
   
@@ -591,7 +590,7 @@ merge::MINOS minos;
   
   char matchedfilename[20];
 
-  sprintf(matchedfilename,"matched_%02d_%d_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+  sprintf(matchedfilename,"/argoneut/data/rundata/matched/matched_%02d_%i_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
   // sprintf(matchedfilename,"matched_%02d_%d_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
  
   std::ifstream matchedfile(matchedfilename);
@@ -952,9 +951,10 @@ v_z_start_a.clear();
 		  
 		  
 		  for(int i=matchedi;i<nentries;i++){
- //testing purposes only:
- if(i==matchedi)
- std::cout<<"MATCHEDI**************             "<<matchedi<<std::endl;
+
+           //testing purposes only:
+           if(i==matchedi)
+           std::cout<<"MATCHEDI**************             "<<matchedi<<std::endl;
 		  
 		  //std::cout<<"i= "<<i<<std::endl;
 		    nbytes+=minitree->GetEntry(i);
@@ -1235,7 +1235,7 @@ if(dircos_exist==1){
 		      //-------------------end of maddalena file-----------------------------------
 		      //.........................................................................
 		      // if using maddalena's file is not necessary ---->uncomment this:
-		      if(foundminosinfo==false){std::cout<<"foundminosinfo is false NOW***  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$-----------"<<std::endl;}
+		      // if(foundminosinfo==false){std::cout<<"foundminosinfo is false NOW***  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$-----------"<<std::endl;}
 		      
 		      foundminosinfo=true;
 		      
@@ -1343,6 +1343,7 @@ if(dircos_exist==1){
 	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;
 	      
 	      fproblemevent->Fill(event);
+	      fproblemevent2d->Fill(event,tor101);
 	      
 	      } 
 	       
@@ -1781,7 +1782,7 @@ if(minos_trkqp[index]!=0){
 //   std::cout<<"No of events that were calculated as having tracks that are outside of Minos' reach = "<< e_w_predicted_tracks_outside_minos<<std::endl;
 //    
 //    std::cout<<"**************"<<std::endl;
-   std::cout<<"NO OF EVENTS MATCHED BASED ON TIME CONDITION (utc1) IS:"<<no_events_utc1<<std::endl; 
+   std::cout<<"NO OF EVENTS MATCHED BASED ON TIME CONDITION (utc1) IS: "<<no_events_utc1<<std::endl; 
    std::cout<<"NO OF EVENTS UNMATCHED BASED ON TIME CONDITION (utc1) IS: "<<no_unmatched_events<<std::endl;
    
        
