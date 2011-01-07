@@ -74,7 +74,9 @@ produces< std::vector<merge::MINOS> > ();
     
   //ftimeofnomatch =tfs->make<TH1F>("ftimeofnomatch","ArgoNeuT Spill Time w/ no match", 10000,0 ,);
     
-  fproblemevent=tfs->make<TH1F>("fproblemevent","Event number with no match", 40000,0 ,40000);  fproblemevent2d=tfs->make<TH2F>("fproblemevent2d","POT vs. Event number with no match", 40000,0 ,40000,500,-1,45); 
+fproblemevent2d=tfs->make<TH2F>("fproblemevent2d","POT vs. Event number with no match", 40000,0 ,40000,500,-1,45); 
+  
+   fPOTdiff_matched=tfs->make<TH1F>("fPOTdiff_matched","POT difference of match", 80000,-40,40);
   ftime_matching_cand=tfs->make<TH1F>("ftime_matching_cand","No of minos spills fullfilling time matching condition for each argoneut event", 20,0 ,20);
   
   futc1_tms_diff = tfs->make<TH1F>("futc1_tms_diff","fabs(utc1+500-(tms))", 2000,0 ,2000);
@@ -1037,7 +1039,10 @@ v_z_start_a.clear();
 
 		
 
-
+                 if(flag==0){
+               fPOTdiff_matched->Fill(tor101_m-tor101);
+              std::cout<<"POTDIFF: "<<tor101_m-tor101<<std::endl;
+              }
 		       
 		      std::cout<<"spilltime= "<<std::setprecision(13)<<spilltime<< " utc= "<<std::setprecision(13)<<utc<<" trtgtd_m= "<<std::setprecision(13)<<trtgtd_m<<"   "<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tor101_m= "<<std::setprecision(13)<<tor101_m<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt_m= "<<std::setprecision(13)<<tortgt_m<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Run = "<<fdaq->GetRun()  <<" Event = "<< fdaq->GetEvent() <<"tms="<<tms<<std::endl;
 		       
@@ -1342,7 +1347,7 @@ if(dircos_exist==1){
 	      if(in_matching==0){no_unmatched_events++;
 	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;
 	      
-	      fproblemevent->Fill(event);
+
 	      fproblemevent2d->Fill(event,tor101);
 	      
 	      } 
