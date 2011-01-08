@@ -1348,8 +1348,8 @@ if(dircos_exist==1){
 	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;
 	      
 
-	      fproblemevent2d->Fill(event,tor101);
-	      
+	      fproblemevent2d->Fill(event,tor101_m);
+	      std::cout<<"TOR101_m********************************************* "<<tor101_m<<std::endl;
 	      } 
 	       
 	      //Take diff between argoneut x coordinate and the one predicted from argoneuut (same for y)
