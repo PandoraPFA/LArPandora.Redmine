@@ -45,8 +45,8 @@ namespace merge {
   private:
     TH2F* fproblemevent2d;
      TH1F* fPOTdiff_matched;
-  TH1F* ftime_matching_cand;
-  TH1F* futc1_tms_diff;
+    TH2F* fMINOSrun_event;
+    TH1F* futc1_tms_diff;
     TH1F* fdiff_x;
     TH1F* fdiff_y;
     TH1F* fdiff_z;
@@ -71,7 +71,6 @@ namespace merge {
     TH1F *fdiff_y_minos_coord;
     TH1F *fdegree_diff_x;
     TH1F *fdegree_diff_y;
-    TH1F *ftime_diff_spilltime_all_cuts;
     TH1F *f_distance_all_cuts;
     TH1F *fdegree_diff_x_all_cuts;
     TH1F *fdegree_diff_y_all_cuts;

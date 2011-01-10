@@ -77,7 +77,9 @@ produces< std::vector<merge::MINOS> > ();
 fproblemevent2d=tfs->make<TH2F>("fproblemevent2d","POT vs. Event number with no match", 40000,0 ,40000,500,-1,45); 
   
    fPOTdiff_matched=tfs->make<TH1F>("fPOTdiff_matched","POT difference of match", 80000,-40,40);
-  ftime_matching_cand=tfs->make<TH1F>("ftime_matching_cand","No of minos spills fullfilling time matching condition for each argoneut event", 20,0 ,20);
+  
+  
+   fMINOSrun_event=tfs->make<TH2F>("MINOSrun_event","MINOS run # vs, event #", 4000,0 ,40000,5000,15000 ,20000);
   
   futc1_tms_diff = tfs->make<TH1F>("futc1_tms_diff","fabs(utc1+500-(tms))", 2000,0 ,2000);
   
@@ -199,7 +201,7 @@ fdiff_y_combined_minos_coord = tfs->make<TH1F>("fdiff_y_combined_minos_coord","D
 fdegree_diff_y = tfs->make<TH1F>("fdegree_diff_y","Difference between Minos and Argoneut value of acos(cos(theta)) track chosen by the shortest distance", 20000,-100 ,100  );
 fdegree_diff_x = tfs->make<TH1F>("fdegree_diff_x","Difference between Minos and Argoneut value of acos(cos(theta)) track chosen by the shortest distance", 20000,-100 ,100  );
 
-ftime_diff_spilltime_all_cuts= tfs->make<TH1F>("ftime_diff_spilltime_all_cuts","utc (Minos)-spilltime ", 40000,-20000 ,20000);
+// ftime_diff_spilltime_all_cuts= tfs->make<TH1F>("ftime_diff_spilltime_all_cuts","utc (Minos)-spilltime ", 40000,-20000 ,20000);
  f_distance_all_cuts=tfs->make<TH1F>(" f_distance_all_cuts","distance in the x-y plane between us and minos' best track  ", 3000,0 ,300);
 fdegree_diff_x_all_cuts= tfs->make<TH1F>("fdegree_diff_x_all_cuts","Difference between Minos and Argoneut value of acos(cos(theta)) track chosen by the shortest distance", 20000,-100 ,100  );
 fdegree_diff_y_all_cuts= tfs->make<TH1F>("fdegree_diff_y_all_cuts","Difference between Minos and Argoneut value of acos(cos(theta)) track chosen by the shortest distance", 20000,-100 ,100  );
@@ -881,7 +883,6 @@ v_z_start_a.clear();
   		  if(firsttimestart!=firsttime4)
 		  {
 		  matchedi=0;
-		  std::cout<<"here "<<firsttimestart<<" "<<std::setprecision(13)<<firsttime4<<std::endl;
 		  firsttime4=firsttimestart;
 		  }
   		  
@@ -940,13 +941,14 @@ v_z_start_a.clear();
 		  minitree->SetBranchAddress("utc1",&utc1);
 		  
 
-	 // std::cout<<"after minitrees"<<std::endl;	
+	  	
 		  //...................................................
-
+  
 	
 
 		  //------------------------------------------
 		  Long64_t nentries = minitree->GetEntries();
+
 		  //std::cout<<"nentries= "<<nentries<<std::endl;
 		  Long64_t nbytes = 0;
 		  
@@ -955,11 +957,19 @@ v_z_start_a.clear();
 		  for(int i=matchedi;i<nentries;i++){
 
            //testing purposes only:
-           if(i==matchedi)
-           std::cout<<"MATCHEDI**************             "<<matchedi<<std::endl;
+//=            if(i==matchedi)
+//            std::cout<<"MATCHEDI**************             "<<matchedi<<std::endl;
 		  
 		  //std::cout<<"i= "<<i<<std::endl;
 		    nbytes+=minitree->GetEntry(i);
+		    
+		    if(i==matchedi)
+		    {
+		    fMINOSrun_event->Fill(event,run);
+            std::cout<<event<<" "<<run<<std::endl;
+		    }
+		    
+		    
 		    // if(i==0||i==nentries-1)
 // 		    std::cout<<"UTC1111111111111111111111111111111 "<<std::setprecision(13)<<utc1<<std::endl;
 		    //----------------------------------------------
@@ -1041,7 +1051,7 @@ v_z_start_a.clear();
 
                  if(flag==0){
                fPOTdiff_matched->Fill(tor101_m-tor101);
-              std::cout<<"POTDIFF: "<<tor101_m-tor101<<std::endl;
+              std::cout<<"POTDIFF: "<<tor101_m-tor101<<std::endl;              
               }
 		       
 		      std::cout<<"spilltime= "<<std::setprecision(13)<<spilltime<< " utc= "<<std::setprecision(13)<<utc<<" trtgtd_m= "<<std::setprecision(13)<<trtgtd_m<<"   "<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tor101_m= "<<std::setprecision(13)<<tor101_m<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt_m= "<<std::setprecision(13)<<tortgt_m<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Run = "<<fdaq->GetRun()  <<" Event = "<< fdaq->GetEvent() <<"tms="<<tms<<std::endl;
@@ -1330,7 +1340,7 @@ if(dircos_exist==1){
 		    else if(flag==1)
 		    break;
 		    
-		    //found a match
+
 		    //	std::cout<<"after matched"<<std::endl;
 		  }//loop over Minos root file
 		  // std::cout<<"finished looping minosfile"<<std::endl;
@@ -1345,7 +1355,7 @@ if(dircos_exist==1){
 	      // std::cout<<no_files<<std::endl;
 	     
 	      if(in_matching==0){no_unmatched_events++;
-	      std::cout<<"PROBLEM with event "<<event<<" NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;
+	      std::cout<<"PROBLEM with event "<<event<<": NO MATCH IN TIME WITH MINOS (utc1)"<<std::endl;
 	      
 
 	      fproblemevent2d->Fill(event,tor101_m);
@@ -1623,7 +1633,7 @@ if(minos_trkqp[index]!=0){
 		  {
 		    no_all_cuts++;
 		    //std::cout<<"Events that pass all the cuts are: "<<events[index]<<" ";
-		    ftime_diff_spilltime_all_cuts->Fill(time_diff_spilltime[index]);
+
 		    f_distance_all_cuts->Fill(min_dist);
 		    fdegree_diff_x_all_cuts->Fill((degree_diff_x[index]*180)/pi);
 		    fdegree_diff_y_all_cuts->Fill((degree_diff_y[index]*180)/pi);
@@ -1770,7 +1780,7 @@ if(minos_trkqp[index]!=0){
   if(pot_and_time_matched==1)no_e_pot_and_time_matched++;
   if(pot_time_z_matched==1) no_e_pot_time_z_matched++;
    
-   ftime_matching_cand->Fill(multiple_match);
+  //  ftime_matching_cand->Fill(multiple_match);
       
    multiple_match=0; 
    
