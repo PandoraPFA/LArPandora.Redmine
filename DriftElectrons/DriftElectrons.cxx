@@ -44,7 +44,6 @@ namespace dfe{
     fRecombk         (pset.getParameter< double >("Recombk")),
     fLongDiff        (pset.getParameter< double >("LongDiff")),
     fTranDiff        (pset.getParameter< double >("TranDiff")),
-    fDriftVel        (pset.getParameter< double >("DriftVel")),
     fClusterSize     (pset.getParameter< double >("ClusterSize")),
     fLArG4ModuleLabel(pset.getParameter< std::string >("LArG4ModuleLabel"))
   {
@@ -90,9 +89,9 @@ namespace dfe{
     
     //get a collection of electrons
     std::auto_ptr<std::vector<sim::Electrons> > ecol(new std::vector<sim::Electrons>);
-
+    edm::Service<util::LArProperties> larp;
     edm::Service<geo::Geometry> geom;
-  
+    
     double xyz[3] = {0.};
     double xyz1[3] = {0.};
     int planes = geom->Nplanes();
@@ -145,8 +144,9 @@ namespace dfe{
       
 //       std::cout << XDrift << " " << xyz[0] << " " << voxel->VoxelID().X() << std::endl;
       if(XDrift < 0.) continue; 
+      
       // Drift time (nano-sec)
-      double TDrift = XDrift/fDriftVel;
+      double TDrift = XDrift/larp->DriftVelocity(larp->Efield(),larp->Temperature());
       // Longitudinal & transverse diffusion sigma (cm)
       double LDiffSig = TMath::Sqrt(fLongDiff*TDrift);
       double TDiffSig = TMath::Sqrt(fTranDiff*TDrift);
@@ -158,7 +158,7 @@ namespace dfe{
       for(int k = 0; k<nClus; ++k){
 	double XDiff = fRandom.Gaus(0.,LDiffSig);
 	// Correct drift time for longitudinal diffusion
-	double TDiff = TDrift + XDiff/fDriftVel;
+	double TDiff = TDrift + XDiff/larp->DriftVelocity(larp->Efield(),larp->Temperature());
 	// Smear the Y,Z position by the transverse diffusion
 	double YDiff = fRandom.Gaus(voxel->VoxelID().Y(),TDiffSig);
 	double ZDiff = fRandom.Gaus(voxel->VoxelID().Z(),TDiffSig);
@@ -184,7 +184,7 @@ namespace dfe{
 	///make a collection of electrons for each plane
 	for(int p = 0; p < planes; ++p){
 	  xyz1[0] = xyz[0] + pitch[p];
-	  double pitchT = fabs(pitch[p])/fDriftVel;
+	  double pitchT = fabs(pitch[p])/larp->DriftVelocity(larp->Efield(),larp->Temperature());
 	  unsigned int channel = geom->NearestChannel(xyz1);
 	  fChannels->Fill(channel);
 	  ecol->push_back(sim::Electrons(channel, TDiff+pitchT, nElDiff, voxel));

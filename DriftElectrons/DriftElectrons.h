@@ -9,6 +9,8 @@
 #ifndef DRIFTELECTRONS_H
 #define DRIFTELECTRONS_H
 
+#include "Utilities/LArProperties.h"
+
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "TRandom3.h"
 #include <vector>
@@ -40,7 +42,6 @@ namespace dfe {
     double fRecombA;               ///< factor for calculating recombination
     double fRecombk;               ///< factor for calculating recombination
     double fGeV2Elect;             ///< Conversion from GeV energy loss to electrons
-    double fDriftVel;              ///< Electron drift velocity (cm/ns)
     double fLongDiff;              ///< Longitudinal diffusion coefficient (cm^2/ns)
     double fTranDiff;              ///< Transverse diffusion coefficient (cm^2/ns)
     double fClusterSize;           ///< Max number of electrons to diffuse as a single cluster
