@@ -45,7 +45,8 @@ process.Geometry = drifte.Service(
 process.LArProperties = genie.Service(
     "LArProperties",
     Efield       = simwire.double(0.5),   #kV/cm
-    Temperature  = simwire.double(87.)     #kelvin
+    Temperature  = simwire.double(87.),     #kelvin
+    Electronlifetime   = genie.double(1000000000.)     #microseconds
 )
 
 # Define the service for passing voxel parameters

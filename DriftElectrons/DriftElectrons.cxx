@@ -117,6 +117,9 @@ namespace dfe{
 
     fNumVoxels->Fill(vxlistHandle->size());
 
+
+    double electronlifetime=larp->ElectronLifetime();
+    double driftvelocity=larp->DriftVelocity(larp->Efield(),larp->Temperature());
     // There's probably only one LArVoxelList per event, but FMWK
     // always reads a vector of pointers.  For each LArVoxelList:
     for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
@@ -138,15 +141,16 @@ namespace dfe{
       edm::Service<sim::LArVoxelCalculator> lvc;
       double recomb = fRecombA/(1. + Energy*(1e3/lvc->VoxelSizeX())*fRecombk);
 
-      double nElectrons = fGeV2Elect * Energy * recomb;
+      
       // X drift distance
       double XDrift = voxel->VoxelID().X() - xyz[0];
-      
-//       std::cout << XDrift << " " << xyz[0] << " " << voxel->VoxelID().X() << std::endl;
+
       if(XDrift < 0.) continue; 
       
       // Drift time (nano-sec)
-      double TDrift = XDrift/larp->DriftVelocity(larp->Efield(),larp->Temperature());
+      double TDrift = XDrift/driftvelocity;
+      double lifetimecorrection = TMath::Exp(-(TDrift/1000.)/electronlifetime);
+      double nElectrons = fGeV2Elect * Energy * recomb * lifetimecorrection;
       // Longitudinal & transverse diffusion sigma (cm)
       double LDiffSig = TMath::Sqrt(fLongDiff*TDrift);
       double TDiffSig = TMath::Sqrt(fTranDiff*TDrift);
@@ -158,7 +162,7 @@ namespace dfe{
       for(int k = 0; k<nClus; ++k){
 	double XDiff = fRandom.Gaus(0.,LDiffSig);
 	// Correct drift time for longitudinal diffusion
-	double TDiff = TDrift + XDiff/larp->DriftVelocity(larp->Efield(),larp->Temperature());
+	double TDiff = TDrift + XDiff/driftvelocity;
 	// Smear the Y,Z position by the transverse diffusion
 	double YDiff = fRandom.Gaus(voxel->VoxelID().Y(),TDiffSig);
 	double ZDiff = fRandom.Gaus(voxel->VoxelID().Z(),TDiffSig);
@@ -184,7 +188,7 @@ namespace dfe{
 	///make a collection of electrons for each plane
 	for(int p = 0; p < planes; ++p){
 	  xyz1[0] = xyz[0] + pitch[p];
-	  double pitchT = fabs(pitch[p])/larp->DriftVelocity(larp->Efield(),larp->Temperature());
+	  double pitchT = fabs(pitch[p])/driftvelocity;
 	  unsigned int channel = geom->NearestChannel(xyz1);
 	  fChannels->Fill(channel);
 	  ecol->push_back(sim::Electrons(channel, TDiff+pitchT, nElDiff, voxel));
