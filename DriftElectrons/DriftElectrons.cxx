@@ -119,7 +119,7 @@ namespace dfe{
 
 
     double electronlifetime=larp->ElectronLifetime();
-    double driftvelocity=larp->DriftVelocity(larp->Efield(),larp->Temperature());
+    double driftvelocity=larp->DriftVelocity(larp->Efield(),larp->Temperature())/1000.;
     // There's probably only one LArVoxelList per event, but FMWK
     // always reads a vector of pointers.  For each LArVoxelList:
     for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
