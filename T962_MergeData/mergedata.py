@@ -63,7 +63,7 @@ process.merge = mergedata.EDProducer(
 # Write the events to the output file.
 process.output = mergedata.OutputModule(
     "PoolOutputModule",
-    fileName = mergedata.untracked.string('mergedata_blah_gen.root'),
+    fileName = mergedata.untracked.string('mergedata_gen.root'),
 )
 
 ####### End of the section that defines and configures modules.#########
