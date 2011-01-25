@@ -27,7 +27,7 @@ process.maxEvents = mergedata.untracked.PSet(
 # Load the service that manages root files for histograms.
 process.TFileService = mergedata.Service(
     "TFileService",
-    fileName = mergedata.string("mergedata_blah_hist.root"),
+    fileName = mergedata.string("mergedata_hist.root"),
     closeFileFast = mergedata.untracked.bool(False)
 )
 
