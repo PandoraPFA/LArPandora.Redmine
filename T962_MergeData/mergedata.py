@@ -17,7 +17,7 @@ process = mergedata.Process("MergeData")
 #put 8119 for R728
 #put 30476 for R729
 process.maxEvents = mergedata.untracked.PSet(
-    input = mergedata.untracked.int32(30476) # See if this works to run fewer than are in input file.
+    input = mergedata.untracked.int32(16424) # See if this works to run fewer than are in input file.
 )
 
 # Load the standard message logger configuration.
@@ -45,11 +45,10 @@ process.Geometry = mergedata.Service(
 # Service to get my MC events, which were run up through DetSim.
 process.source = mergedata.Source("PoolSource",
                                 fileNames = 
-                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R729_D20091203_T095413.root")
+                                mergedata.untracked.vstring("/argoneut/data/rootfiles_ART/R609_D20090915_T153438.root")
                                 #mergedata.untracked.vstring("/argoneut/app/users/soderber/larsoft_svn/Kinga_Events/testARTevents.root")
                                 #skipEvents=mergedata.untracked.uint32(29997) for run 728
                                 #remember you need a comma if you use skipevents
-                                #skipEvents=mergedata.untracked.uint32(30475)
                                 )
 
 

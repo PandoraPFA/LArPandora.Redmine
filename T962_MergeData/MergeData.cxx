@@ -79,7 +79,7 @@ fproblemevent2d=tfs->make<TH2F>("fproblemevent2d","POT vs. Event number with no 
    fPOTdiff_matched=tfs->make<TH1F>("fPOTdiff_matched","POT difference of match", 80000,-40,40);
   
   
-   fMINOSrun_event=tfs->make<TH2F>("MINOSrun_event","MINOS run # vs, event #", 4000,0 ,40000,5000,15000 ,20000);
+   fMINOSrun_event=tfs->make<TH2F>("MINOSrun_event","MINOS run # vs ArgoNeuT event # for match", 4000,0 ,40000,5000,15000 ,20000);
   
   futc1_tms_diff = tfs->make<TH1F>("futc1_tms_diff","fabs(utc1+500-(tms))", 2000,0 ,2000);
   
@@ -679,7 +679,7 @@ merge::MINOS minos;
 
 
   ///////////////////////////////////////////////////////////////////////////////////
-  std::string path ="/argoneut/app/users/spitz7/larsoft_8/MINOS2/";
+  std::string path ="/argoneut/app/users/rmehdi/fhc/";
     
     //std::string path= "/argoneut/app/users/kpartyka/larsoft/MINOS/";//gotta replace New_MINOS with MINOS later. I am testing new file 09.15.2010
   // int no_files=0;
@@ -703,9 +703,6 @@ merge::MINOS minos;
   //float crateT0;
   double tmframe;
   double year;
-  float vtxX;
-  float vtxY;
-  float vtxZ;
   float trkErange;
   double sgate53;
   float trkqp;     
@@ -837,7 +834,7 @@ v_z_start_a.clear();
 	  int no_files=0;
 	  DIR *pDIR;
 	  struct dirent *entry;
-	 if( pDIR=opendir("/argoneut/app/users/spitz7/larsoft_8/MINOS2/") )
+	 if( pDIR=opendir("/argoneut/app/users/rmehdi/fhc/") )
 	  // if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/MINOS") )
 	  //if( pDIR=opendir("/argoneut/app/users/kpartyka/larsoft/New_MINOS") )//checking the new file from rashid 09.15.2010
 	    {
@@ -853,15 +850,15 @@ v_z_start_a.clear();
 		  else continue;
 		  
 		  std::string filetime(entry->d_name);
-          //gymnastics to get the time from the filename. there is certainly as easier way 
+          //gymnastics to get the time from the filename. there is certainly an easier way 
 		  std::string firsttime = filetime.substr(18);
-		  std::string firsttime2 = firsttime.substr(0,13);
+		  std::string firsttime2 = firsttime.substr(0,10);
 		  std::istringstream buffer(firsttime2);
 		  long int firsttimestart;		  
 		  buffer >> firsttimestart;
-
-          firsttime = filetime.substr(32);
-		  firsttime2 = firsttime.substr(0,13);
+          firsttime = filetime.substr(29);
+		  firsttime2 = firsttime.substr(0,10);
+		  
 		  std::istringstream buffer2(firsttime2);
 		  long int firsttimeend;		  
 		  buffer2 >> firsttimeend;
@@ -876,8 +873,8 @@ v_z_start_a.clear();
 // //only consider runs that started within one day (86400 seconds)
 //           if(abs((long int)tms-firsttime3)>86400000)
 //   		  continue;
-  		  
-  		  if(!(firsttimestart<tms&&tms<firsttimeend))
+  		  //std::cout<<tms/1000.<<" "<<firsttimestart<<" "<<firsttimeend<<std::endl;
+  		  if(!(firsttimestart<tms/1000.&&tms/1000.<firsttimeend))
   		  continue;
   		  
   		  if(firsttimestart!=firsttime4)
@@ -892,53 +889,62 @@ v_z_start_a.clear();
 		   
 		  TFile *f = new TFile(file.c_str());
 		  TTree *minitree = (TTree*)f->Get("minitree");
-		  minitree->SetBranchAddress("run",&run);
+		  minitree->SetBranchAddress("run",&run);  
 		  minitree->SetBranchAddress("subRun",&subRun);
 		  minitree->SetBranchAddress("snarl",&snarl);
 		  minitree->SetBranchAddress("utc",&utc);
 		  minitree->SetBranchAddress("day",&day);
 		  minitree->SetBranchAddress("trkIndex",&trkIndex);
+		  minitree->SetBranchAddress("trkChi2",&trkChi2);
+		  minitree->SetBranchAddress("utc1",&utc1);
+		  minitree->SetBranchAddress("nearns",&nearns);
+		  minitree->SetBranchAddress("nearsec",&nearsec);		  
 		  minitree->SetBranchAddress("trkE",&trkE);
 		  minitree->SetBranchAddress("shwE",&shwE);
 		  minitree->SetBranchAddress("crateT0",&crateT0);
 		  minitree->SetBranchAddress("tmframe",&tmframe);
-		  minitree->SetBranchAddress("year",&year);
-		  minitree->SetBranchAddress("vtxX",&vtxX);
-		  minitree->SetBranchAddress("vtxY",&vtxY);
-		  minitree->SetBranchAddress("vtxZ",&vtxZ);
+		  minitree->SetBranchAddress("year",&year);		  
+		  minitree->SetBranchAddress("offset",&offset);
+	 	  minitree->SetBranchAddress("dtnear",&dtnear);		
 		  minitree->SetBranchAddress("trkErange",&trkErange);
 		  minitree->SetBranchAddress("sgate53",&sgate53);
 		  minitree->SetBranchAddress("trkqp",&trkqp);
+		  minitree->SetBranchAddress("trkeqp",&trkeqp);
 		  minitree->SetBranchAddress("trkVtxX",&trkVtxX);
 		  minitree->SetBranchAddress("trkVtxY",&trkVtxY);
 		  minitree->SetBranchAddress("trkVtxZ",&trkVtxZ);
+	      minitree->SetBranchAddress("trkVtxeX",&trkVtxeX);
+		  minitree->SetBranchAddress("trkVtxeY",&trkVtxeY);
+		  minitree->SetBranchAddress("charge",&charge); 		  minitree->SetBranchAddress("trkmom",&trkmom);	
+		  minitree->SetBranchAddress("trkVtxT",&trkVtxT);	
+		  minitree->SetBranchAddress("trkTimeT0",&trkTimeT0);  
 		  minitree->SetBranchAddress("trkdcosx",&trkdcosx);
 		  minitree->SetBranchAddress("trkdcosy",&trkdcosy);
 		  minitree->SetBranchAddress("trkdcosz",&trkdcosz);
 		  minitree->SetBranchAddress("month",&month);
-		  minitree->SetBranchAddress("trkChi2",&trkChi2);
-		  minitree->SetBranchAddress("trkTimeT0",&trkTimeT0);
-		  minitree->SetBranchAddress("trkVtxT",&trkVtxT);
-		  minitree->SetBranchAddress("tr101d",&tr101d);
 		  minitree->SetBranchAddress("trtgtd",&trtgtd);
-		  minitree->SetBranchAddress("tor101",&tor101);
 		  minitree->SetBranchAddress("tortgt",&tortgt);
-
-		  minitree->SetBranchAddress("charge",&charge); 		  minitree->SetBranchAddress("trkmom",&trkmom);		  minitree->SetBranchAddress("trkstpU",&trkstpU);
-    	  minitree->SetBranchAddress("trkstpV",&trkstpV);
-		  minitree->SetBranchAddress("ntrkstp",&ntrkstp); 		  minitree->SetBranchAddress("trkstpX",&trkstpX);
+		  minitree->SetBranchAddress("tor101",&tor101);
+		  minitree->SetBranchAddress("tr101d",&tr101d);
+		  minitree->SetBranchAddress("goodspill",&goodspill);
+		  minitree->SetBranchAddress("ntrkstp",&ntrkstp); 
+		  minitree->SetBranchAddress("trkstpX",&trkstpX);
     	  minitree->SetBranchAddress("trkstpY",&trkstpY);
      	  minitree->SetBranchAddress("trkstpZ",&trkstpZ);
-		  minitree->SetBranchAddress("trkeqp",&trkeqp);
-	      minitree->SetBranchAddress("trkVtxeX",&trkVtxeX);
-		  minitree->SetBranchAddress("trkVtxeY",&trkVtxeY);
+		  minitree->SetBranchAddress("trkstpU",&trkstpU);
+    	  minitree->SetBranchAddress("trkstpV",&trkstpV);
+    	  
+		 
+
 		  
-		  minitree->SetBranchAddress("dtnear",&dtnear);
-		  minitree->SetBranchAddress("goodspill",&goodspill);
-		  minitree->SetBranchAddress("nearns",&nearns);
-		  minitree->SetBranchAddress("nearsec",&nearsec);
-		  minitree->SetBranchAddress("offset",&offset);
-		  minitree->SetBranchAddress("utc1",&utc1);
+	
+	    
+		  
+		  
+		  
+		  
+		  
+		
 		  
 
 	  	
@@ -966,7 +972,7 @@ v_z_start_a.clear();
 		    if(i==matchedi)
 		    {
 		    fMINOSrun_event->Fill(event,run);
-            std::cout<<event<<" "<<run<<std::endl;
+            std::cout<<"ArgoNeuT event: "<<event<<" MINOS run: "<<run<<std::endl;
 		    }
 		    
 		    
@@ -999,7 +1005,7 @@ v_z_start_a.clear();
 		     matchedi=i;
 		     
 		     
-		     std::cout <<"MATCHED by TIME for run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex <<std::endl;
+		   //   std::cout<<"MATCHED by TIME for run= "<<run_<< "event = " << event <<" tms= "<<std::setprecision(13)<<tms/1000<< " utc = " <<std::setprecision(10)<< utc << " trkIndex = " << trkIndex <<std::endl;
 		     
 		     if(trkIndex==0){multiple_match++;
 		     futc1_tms_diff->Fill(fabs(utc1+500-(tms)));}
@@ -1054,10 +1060,10 @@ v_z_start_a.clear();
               std::cout<<"POTDIFF: "<<tor101_m-tor101<<std::endl;              
               }
 		       
-		      std::cout<<"spilltime= "<<std::setprecision(13)<<spilltime<< " utc= "<<std::setprecision(13)<<utc<<" trtgtd_m= "<<std::setprecision(13)<<trtgtd_m<<"   "<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tor101_m= "<<std::setprecision(13)<<tor101_m<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt_m= "<<std::setprecision(13)<<tortgt_m<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Run = "<<fdaq->GetRun()  <<" Event = "<< fdaq->GetEvent() <<"tms="<<tms<<std::endl;
-		       
-		       
-		      std::cout<< " Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
+		    //   std::cout<<"spilltime= "<<std::setprecision(13)<<spilltime<< " utc= "<<std::setprecision(13)<<utc<<" trtgtd_m= "<<std::setprecision(13)<<trtgtd_m<<"   "<<" trtgtd= "<<std::setprecision(13)<<trtgtd<<" tor101_m= "<<std::setprecision(13)<<tor101_m<<" tor101=  "<<std::setprecision(13)<<tor101<<" tortgt_m= "<<std::setprecision(13)<<tortgt_m<<" tortgt=  "<<std::setprecision(13)<<tortgt<<" tr101d= "<<tr101d<<" trkIndex = " << trkIndex <<" Run = "<<fdaq->GetRun()  <<" Event = "<< fdaq->GetEvent() <<"tms="<<tms<<std::endl;
+// 		       
+// 		       
+// 		      std::cout<< " Vertex(X,Y,Z) = (" 	      << trkVtxX << "," << trkVtxY << "," << trkVtxZ << ") " << " cos(x,y,z) = (" << trkdcosx   << "," << trkdcosy << "," << trkdcosz << ")" << std::endl;
 
 
 // 		      std::cout<<"utc-spilltime= "<<std::setprecision(10)<<(utc-spilltime)<<" s"<<" , "<<(utc-spilltime)/3600<<" h"<<std::endl;
@@ -1257,9 +1263,6 @@ if(dircos_exist==1){
 		      run_subrun.push_back(run);
 		      run_subrun.push_back(subRun);
 		      
-		       vtx.push_back(vtxX);
-	      vtx.push_back(vtxY);
-	      vtx.push_back(vtxZ);
 // 		      
 		      trkVtx.push_back(trkVtxX);
 		      trkVtx.push_back(trkVtxY);
