@@ -23,7 +23,7 @@
 #include "FWCore/Framework/interface/TFileDirectory.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "VertexActivity.h"
+#include "T962/VertexActivity/VertexActivity.h"
 extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>

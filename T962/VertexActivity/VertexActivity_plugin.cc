@@ -10,7 +10,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h" 
 #include "FWCore/ServiceRegistry/interface/ServiceMaker.h" 
 #include "FWCore/MessageLogger/interface/MessageLogger.h" 
-#include "VertexActivity/VertexActivity.h"
+#include "T962/VertexActivity/VertexActivity.h"
 
 namespace vertex{
 
