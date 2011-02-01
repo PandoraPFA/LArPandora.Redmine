@@ -5,17 +5,15 @@
 //    joshua.spitz@yale.edu
 //
 ////////////////////////////////////////////////////////////////////////
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Common/interface/Ptr.h"
-#include "DataFormats/Common/interface/PtrVector.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Services/interface/TFileService.h"
-#include "FWCore/Framework/interface/TFileDirectory.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "art/Framework/Core/Event.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "art/Persistency/Common/Handle.h"
+#include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/PtrVector.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "art/Framework/Services/Optional/TFileService.h"
+#include "art/Framework/Core/TFileDirectory.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -38,20 +36,20 @@
 namespace merge{
 
 //-------------------------------------------------
-MergeScan::MergeScan(edm::ParameterSet const& pset) : 
+MergeScan::MergeScan(fhicl::ParameterSet const& pset) : 
   
-  daq_modulelabel     (pset.getParameter< std::string >("daq")),
-  scanners            (pset.getParameter< std::vector<std::string> >("scanners")),  
+  daq_modulelabel     (pset.get< std::string >("daq")),
+  scanners            (pset.get< std::vector<std::string> >("scanners")),  
   foundscaninfo(false)
 {
 produces< std::vector<merge::ScanInfo> >();
 }
   
-void MergeScan::beginJob(edm::EventSetup const&)
+void MergeScan::beginJob()
 {
 
   // get access to the TFile service
-    edm::Service<edm::TFileService> tfs;
+    art::ServiceHandle<art::TFileService> tfs;
 }
 
 //-------------------------------------------------
@@ -62,12 +60,12 @@ MergeScan::~MergeScan()
 
 //-------------------------------------------------
 
-void MergeScan::produce(edm::Event& evt, edm::EventSetup const&)
+void MergeScan::produce(art::Event& evt)
 {
   std::auto_ptr<std::vector<merge::ScanInfo> > Scan_coll(new std::vector<merge::ScanInfo> );
-  edm::Handle< std::vector<raw::DAQHeader> > daqHandle;
+  art::Handle< std::vector<raw::DAQHeader> > daqHandle;
   evt.getByLabel(daq_modulelabel,daqHandle);
-  edm::Ptr<raw::DAQHeader> daq = edm::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
+  art::Ptr<raw::DAQHeader> daq = art::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
   merge::ScanInfo scan;
 
   time_t spilltime = daq->GetTimeStamp();//time info. from DAQ480 software

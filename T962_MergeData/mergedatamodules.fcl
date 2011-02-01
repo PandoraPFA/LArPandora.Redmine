@@ -1,0 +1,16 @@
+BEGIN_PROLOG
+
+argoneut_mergescan:
+{
+ module_type: "MergeScan"
+ daq:         "daq"
+ scanners:    ["spitz7"]
+}
+
+argoneut_mergedata:
+{
+ module_type: "MergeData"
+ daq:         "daq"
+}
+
+END_PROLOG

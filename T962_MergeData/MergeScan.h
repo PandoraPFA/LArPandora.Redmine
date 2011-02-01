@@ -9,7 +9,7 @@
 #ifndef MERGESCAN_H
 #define MERGESCAN_H
 
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "RawData/raw.h"
 #include "T962_MergeData/ScanInfo.h"
 
@@ -22,18 +22,16 @@
 class TH1F;
 class TH2F;
 
-
-
 namespace merge {
 
-  class MergeScan : public edm::EDProducer {
+  class MergeScan : public art::EDProducer {
 
   public:
           
-    explicit MergeScan(edm::ParameterSet const& pset); 
+    explicit MergeScan(fhicl::ParameterSet const& pset); 
     virtual ~MergeScan();
-    void produce(edm::Event& evt, edm::EventSetup const&);
-    void beginJob(edm::EventSetup const&);
+    void produce(art::Event& evt);
+    void beginJob();
 
   private:
 

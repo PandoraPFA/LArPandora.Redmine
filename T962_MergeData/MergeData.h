@@ -10,10 +10,11 @@
 #ifndef MERGEDATA_H
 #define MERGEDATA_H
 
-#include "FWCore/Framework/interface/EDProducer.h"
-//#include "RawData/raw.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/DAQHeader.h"
+#include "art/Framework/Core/EDProducer.h"
+#include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/PtrVector.h"
+
+#include "RawData/raw.h"
 #include "T962_MergeData/MINOS.h"
 #include "T962_MergeData/Paddles.h"
 
@@ -31,20 +32,20 @@ class TH2F;
 
 namespace merge {
 
-  class MergeData : public edm::EDProducer {
+  class MergeData : public art::EDProducer {
 
   public:
           
-    explicit MergeData(edm::ParameterSet const& pset); 
+    explicit MergeData(fhicl::ParameterSet const& pset); 
     virtual ~MergeData();
-    void produce(edm::Event& evt, edm::EventSetup const&);
-    void beginJob(edm::EventSetup const&);
+    void produce(art::Event& evt);
+    void beginJob();
  
    
 
   private:
     TH2F* fproblemevent2d;
-     TH1F* fPOTdiff_matched;
+    TH1F* fPOTdiff_matched;
     TH2F* fMINOSrun_event;
     TH1F* futc1_tms_diff;
     TH1F* fdiff_x;
@@ -170,23 +171,23 @@ namespace merge {
    
     
    
-   //  void MergeBeam( std::auto_ptr<std::vector <raw::BeamInfo> >Beam_coll);                 ///method to merge beam data
-//     void MergePMT(std::auto_ptr<std::vector <raw::Paddles> >Paddles_coll);                 ///method to merge pmt data
-//     void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
+    //  void MergeBeam( std::auto_ptr<std::vector <raw::BeamInfo> >Beam_coll);                 ///method to merge beam data
+    //     void MergePMT(std::auto_ptr<std::vector <raw::Paddles> >Paddles_coll);                 ///method to merge pmt data
+    //     void MergeMINOS(std::auto_ptr<std::vector<raw::MINOS> >Minos_coll);                 ///method to merge MINOS data
 
-   void MergeBeam(raw::BeamInfo& beam);                 ///method to merge beam data
+    void MergeBeam(raw::BeamInfo& beam);                 ///method to merge beam data
     void MergePMT(merge::Paddles& paddles);                 ///method to merge pmt data
     //void MergeMINOS(merge::MINOS& minos);                 ///method to merge MINOS data
-     void MergeMINOS(std::vector<merge::MINOS> & vec_minos); 
+    void MergeMINOS(std::vector<merge::MINOS> & vec_minos); 
     
-	edm::Ptr<raw::DAQHeader> fdaq;
+    art::Ptr<raw::DAQHeader> fdaq;
     raw::BeamInfo  fBeamInfo;
     merge::Paddles   fPaddles;
     
 	 
     ///<parameters to set
-   std::string  fdaq_modulelabel;               ///< folder for input 
-   std::string file;	
+    std::string  fdaq_modulelabel;               ///< folder for input 
+    std::string file;	
    
     bool foundbeaminfo;
     bool foundpaddleinfo;
