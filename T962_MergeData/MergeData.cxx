@@ -63,7 +63,13 @@ namespace merge{
     produces< std::vector<merge::Paddles> > ();
     produces< std::vector<merge::MINOS> > ();
   }
+
+  //-------------------------------------------------
+  MergeData::~MergeData()
+  {
+  }
   
+  //-------------------------------------------------
   void MergeData::beginJob()
   {
     std::cout<<"in beginJob"<<std::endl;
@@ -236,12 +242,6 @@ namespace merge{
     f_p_for_negative_cut11= tfs->make<TH1F>("f_p_for_negative_cut11", "Momentum distribution for mu-", 500, 0, 50);
 
 
-  }
-
-  //-------------------------------------------------
-  MergeData::~MergeData()
-  {
- 
   }
 
   //-------------------------------------------------

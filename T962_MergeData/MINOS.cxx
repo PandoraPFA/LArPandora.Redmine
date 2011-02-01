@@ -65,7 +65,8 @@ merge::MINOS::MINOS(std::vector<int> run_subrun,
   fgoodspill(goodspill),
   fdtnear_fnearsec(dtnear_nearsec), 
   fnearns_foffset(nearns_offset),
-  futc1(utc1),fmatched(matched)
+  futc1(utc1),
+  fmatched(matched)
 {
   // just in case these data members ever come back
 //   for(int i = 0; i < 100000; ++i){
