@@ -9,6 +9,7 @@
 
 
 <lcgdict>
+ <class name="std::vector< std::vector<int> >" />
  <class name="merge::ScanInfo "/>
  <class name="merge::MINOS    "/>
  <class name="merge::Paddles  "/>

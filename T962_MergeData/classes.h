@@ -28,10 +28,12 @@
 // Do not include the objects they contain internally.
 //
 
+template class std::vector< std::vector<int> >;
 template class std::vector<merge::ScanInfo>;
 template class std::vector<merge::MINOS>;
 template class std::vector<merge::Paddles>;
 
+template class art::Wrapper< std::vector< std::vector<int> > >;
 template class art::Wrapper< std::vector<merge::ScanInfo>  >;
 template class art::Wrapper< std::vector<merge::MINOS>     >;
 template class art::Wrapper< std::vector<merge::Paddles>   >;

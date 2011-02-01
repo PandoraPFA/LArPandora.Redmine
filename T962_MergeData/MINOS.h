@@ -48,12 +48,12 @@ namespace merge{
     int fmatched;
     float ftrkmom;
     float fcharge;
-    float ftrkstpU[100000];
-    float ftrkstpV[100000];
+    std::vector<float> ftrkstpU;
+    std::vector<float> ftrkstpV;
     int fntrkstp;
-    float ftrkstpX[100000];
-    float ftrkstpY[100000];
-    float ftrkstpZ[100000];
+    std::vector<float> ftrkstpX;
+    std::vector<float> ftrkstpY;
+    std::vector<float> ftrkstpZ;
     float ftrkeqp;
     // ftrkVtxeX;
     //float ftrkVtxeY;
@@ -127,25 +127,47 @@ namespace merge{
   public:
   // FOR NEWEST MINOS FILE: ***
   
-      MINOS(std::vector<int> run_subrun, int snarl, double utc, double day, float trkIndex, 
-     float trkE, float shwE,float crateT0, float tmframe, double year, std::vector<float> fvtx,
-     float trkErange,float sgate53, float trkqp, std::vector<float> trkVtx, 
-     std::vector<float> trkdcos, double month,float trkmom, 
-     float charge, float trkstpX[100000], float trkstpY[100000],float trkstpZ[100000],float trkstpU[100000],float trkstpV[100000], int ntrkstp,float trkeqp,
-     std::vector<double> ftrkVtxe,int goodspill,std::vector<float> dtnear_fnearsec,std::vector<double> nearns_foffset,double utc1, int matched);
+      MINOS(std::vector<int> run_subrun, 
+		    int snarl, 
+		    double utc, 
+		    double day, 
+		    float trkIndex,
+		    float trkE, 
+		    float shwE,
+		    float crateT0, 
+		    float tmframe, 
+		    double year, 
+		    std::vector<float> vtx, 
+		    float trkErange,
+		    float sgate53, 
+		    float trkqp, 
+		    std::vector<float> trkVtx, 
+		    std::vector<float> trkdcos, 
+		    double month, 
+		    float trkmom,
+		    float charge, 
+		    float trkstpX[100000], 
+		    float trkstpY[100000],
+		    float trkstpZ[100000],
+		    float trkstpU[100000], 
+		    float trkstpV[100000], 
+		    int ntrkstp,
+		    float trkeqp,
+		    std::vector<double> trkVtxe,
+		    int goodspill,
+		    std::vector<float> dtnear_nearsec,
+		    std::vector<double> nearns_offset, 
+		    double utc1,int matched);
      
      
      
     // int goodspill,float dtnear,double nearns, float nearsec, double offset, 
      
-   //FOR OLD MINOS FILE: ***
+      //FOR OLD MINOS FILE: ***
    
-   // MINOS(int run, int subRun, int snarl, double utc, double day, float trkIndex, float trkE, float shwE,
-// 	
-//           double crateT0, double tmframe, double year, float vtxX, float vtxY, float vtxZ, float trkErange,
-// 	
+      // MINOS(int run, int subRun, int snarl, double utc, double day, float trkIndex, float trkE, float shwE,
+      //           double crateT0, double tmframe, double year, float vtxX, float vtxY, float vtxZ, float trkErange,
 //           double sgate53, float trkqp, float trkVtxX, float trkVtxY, float trkVtxZ, float trkdcosx,
-// 	
 //           float trkdcosy, float trkdcosz, double month, int matched);
    
    
@@ -257,15 +279,15 @@ namespace merge{
     {fcharge=charge;
     }
     void SetTrkStpX(float trkstpX[100000])
-    {ftrkstpX[100000]=trkstpX[100000];}
+    {ftrkstpX.clear(); for(int i = 0; i < 100000; ++i) ftrkstpX.push_back(trkstpX[i]);}
     void SetTrkStpY(float trkstpY[100000])
-    {ftrkstpY[100000]=trkstpY[100000];}
+    {ftrkstpY.clear(); for(int i = 0; i < 100000; ++i) ftrkstpY.push_back(trkstpY[i]);}
     void SetTrkStpZ(float trkstpZ[100000])
-    {ftrkstpZ[100000]=trkstpZ[100000];}
+    {ftrkstpZ.clear(); for(int i = 0; i < 100000; ++i) ftrkstpZ.push_back(trkstpZ[i]);}
     void SetTrkStpU(float trkstpU[100000])
-    {ftrkstpU[100000]=trkstpU[100000];}
+    {ftrkstpU.clear(); for(int i = 0; i < 100000; ++i) ftrkstpU.push_back(trkstpU[i]);}
     void SetTrkStpV(float trkstpV[100000])
-    {ftrkstpV[100000]=trkstpV[100000];}
+    {ftrkstpV.clear(); for(int i = 0; i < 100000; ++i) ftrkstpV.push_back(trkstpV[i]);}
     void SetNtrkstp(int ntrkstp)
     {fntrkstp=ntrkstp;}
     

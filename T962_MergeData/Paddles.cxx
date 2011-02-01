@@ -15,10 +15,10 @@ merge::Paddles::Paddles()
 {
   time=0;
   for(int i=0;i<4;++i){
-    
+    tdc.resize(4);
     for (int j=0;j<4;++j){
       
-      tdc[i][j]=0;
+      tdc[i].push_back(0);
     }
   }
   

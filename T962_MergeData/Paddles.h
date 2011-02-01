@@ -8,6 +8,7 @@
 #ifndef T962_MERGEDATA_PADDLES_H
 #define T962_MERGEDATA_PADDLES_H
 
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <time.h>
@@ -31,7 +32,7 @@ namespace merge{
     
   private:
     time_t time;
-    int tdc[4][4];
+    std::vector< std::vector<int> > tdc;
 
   };
 
