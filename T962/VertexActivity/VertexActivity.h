@@ -10,7 +10,7 @@
 
 #include "Utilities/LArProperties.h"
 
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "TMath.h"
 #include <vector>
 #include <string>
@@ -19,15 +19,15 @@
 
 namespace vertex {
    
- class VertexActivity :  public edm::EDProducer {
+ class VertexActivity :  public art::EDProducer {
     
   public:
     
-    explicit VertexActivity(edm::ParameterSet const& pset); 
-    ~VertexActivity();        
+    explicit VertexActivity(fhicl::ParameterSet const& pset); 
+    virtual ~VertexActivity();        
 
-    void produce(edm::Event& evt, edm::EventSetup const&);
-    void beginJob(edm::EventSetup const&);
+    void produce(art::Event& evt);
+    void beginJob();
     
   private:
 

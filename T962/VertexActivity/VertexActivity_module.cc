@@ -7,13 +7,12 @@
 //  
 ////////////////////////////////////////////////////////////////////////
 // Framework includes
-#include "FWCore/Framework/interface/MakerMacros.h" 
-#include "FWCore/ServiceRegistry/interface/ServiceMaker.h" 
-#include "FWCore/MessageLogger/interface/MessageLogger.h" 
+#include "art/Framework/Core/ModuleMacros.h" 
+
 #include "T962/VertexActivity/VertexActivity.h"
 
 namespace vertex{
 
-  DEFINE_FWK_MODULE(VertexActivity);
+  DEFINE_ART_MODULE(VertexActivity);
 
 } // end of vertex namespace
