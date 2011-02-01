@@ -9,17 +9,15 @@
 #include <iostream>
 
 // Framework includes
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Common/interface/Ptr.h"
-#include "DataFormats/Common/interface/PtrVector.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Services/interface/TFileService.h"
-#include "FWCore/Framework/interface/TFileDirectory.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "art/Framework/Core/Event.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "art/Persistency/Common/Handle.h"
+#include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/PtrVector.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "art/Framework/Services/Optional/TFileService.h"
+#include "art/Framework/Core/TFileDirectory.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "DriftElectrons/DriftElectrons.h"
 #include "Geometry/geo.h"
@@ -39,13 +37,13 @@ namespace dfe{
   }
 
   //-----------------------------------------------------
-  DriftElectrons::DriftElectrons(edm::ParameterSet const& pset) :
-    fRecombA         (pset.getParameter< double >("RecombA")),
-    fRecombk         (pset.getParameter< double >("Recombk")),
-    fLongDiff        (pset.getParameter< double >("LongDiff")),
-    fTranDiff        (pset.getParameter< double >("TranDiff")),
-    fClusterSize     (pset.getParameter< double >("ClusterSize")),
-    fLArG4ModuleLabel(pset.getParameter< std::string >("LArG4ModuleLabel"))
+  DriftElectrons::DriftElectrons(fhicl::ParameterSet const& pset) :
+    fRecombA         (pset.get< double >("RecombA")),
+    fRecombk         (pset.get< double >("Recombk")),
+    fLongDiff        (pset.get< double >("LongDiff")),
+    fTranDiff        (pset.get< double >("TranDiff")),
+    fClusterSize     (pset.get< double >("ClusterSize")),
+    fLArG4ModuleLabel(pset.get< std::string >("LArG4ModuleLabel"))
   {
     produces< std::vector<sim::Electrons> >();
 
@@ -68,12 +66,12 @@ namespace dfe{
   }
 
   //-----------------------------------------------------
-  void DriftElectrons::beginJob(edm::EventSetup const&)
+  void DriftElectrons::beginJob()
   {
     // get access to the TFile service
-    edm::Service<edm::TFileService> tfs;
+    art::ServiceHandle<art::TFileService> tfs;
 
-    edm::Service<geo::Geometry> geo;
+    art::ServiceHandle<geo::Geometry> geo;
 
     fChannels    = tfs->make<TH1D>("channels",  ";channel;# electrons",  geo->Nchannels(), 0, geo->Nchannels());
     fDiffuseX    = tfs->make<TH1D>("diffusex",  ";x diffusion (cm);",    200, -5., 5.  );
@@ -84,13 +82,13 @@ namespace dfe{
   }
 
   //-----------------------------------------------------
-  void DriftElectrons::produce(edm::Event& evt, edm::EventSetup const&)
+  void DriftElectrons::produce(art::Event& evt)
   {
     
     //get a collection of electrons
     std::auto_ptr<std::vector<sim::Electrons> > ecol(new std::vector<sim::Electrons>);
-    edm::Service<util::LArProperties> larp;
-    edm::Service<geo::Geometry> geom;
+    art::ServiceHandle<util::LArProperties> larp;
+    art::ServiceHandle<geo::Geometry> geom;
     
     double xyz[3] = {0.};
     double xyz1[3] = {0.};
@@ -112,7 +110,7 @@ namespace dfe{
 //     std::cout << "In Drift: X =" << xyz[0] << std::endl;
   
     // Read in the LArVoxelList object(s).
-    edm::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
+    art::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
     evt.getByLabel(fLArG4ModuleLabel,vxlistHandle);
 
     fNumVoxels->Fill(vxlistHandle->size());
@@ -125,7 +123,7 @@ namespace dfe{
     for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
 
       // Get the reference to the LArVoxelID in the LArVoxelList.
-      edm::Ptr<sim::LArVoxelData> voxel(vxlistHandle, i);
+      art::Ptr<sim::LArVoxelData> voxel(vxlistHandle, i);
       
       // Get the energy calculated by the LArVoxelList method.
       double Energy = voxel->Energy();
@@ -138,7 +136,7 @@ namespace dfe{
       // A = 0.800 +/- 0.003
       // k = (0.097+/-0.001) g/(MeVcm^2)
 
-      edm::Service<sim::LArVoxelCalculator> lvc;
+      art::ServiceHandle<sim::LArVoxelCalculator> lvc;
       double recomb = fRecombA/(1. + Energy*(1e3/lvc->VoxelSizeX())*fRecombk);
 
       

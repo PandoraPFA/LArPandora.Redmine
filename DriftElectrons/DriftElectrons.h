@@ -11,7 +11,7 @@
 
 #include "Utilities/LArProperties.h"
 
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "TRandom3.h"
 #include <vector>
 #include <string>
@@ -26,14 +26,14 @@ namespace sim {
 namespace dfe {
   
   ///class describing the drift of electrons in LAr
-  class DriftElectrons : public edm::EDProducer {
+  class DriftElectrons : public art::EDProducer {
     
   public:
     
-    explicit DriftElectrons(edm::ParameterSet const& pset);
+    explicit DriftElectrons(fhicl::ParameterSet const& pset);
     virtual ~DriftElectrons();
-    void produce(edm::Event& evt, edm::EventSetup const&);
-    void beginJob(edm::EventSetup const&);
+    void produce(art::Event& evt);
+    void beginJob();
     
   private:
         
