@@ -300,11 +300,11 @@ void vertex::VertexActivity::produce(art::Event& evt)
 	  // 	  if(larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2)+pow(TMath::Abs(drifttick-hit[i]->CrossingTime()),2)) < fActivityRadius) 
 	  // 	  {
 	  
-	  if(TMath::Abs((int)(wire2-wire))<=fActivityRadius&&TMath::Abs(drifttick-hit[i]->CrossingTime())*.0743<=fActivityRadius)
+	  if(TMath::Abs((int)(wire2-wire))<=fActivityRadius&&TMath::Abs(drifttick-hit[i]->PeakTime())*.0743<=fActivityRadius)
 	    {
-	      std::cout<<"drifttick "<<drifttick<<" hit crossing time "<<hit[i]->CrossingTime()<<std::endl;
+	      std::cout<<"drifttick "<<drifttick<<" hit crossing time "<<hit[i]->PeakTime()<<std::endl;
 	  
-	      hitamplitude=hit[i]->MIPs();
+	      hitamplitude=hit[i]->Charge();
 	      //elifetime_factor=TMath::Exp((-hit[i]->CrossingTime()*.198)/electronlifetime); 
 	      elifetime_factor=1.;
 	      //elifetime_factor=1;
@@ -312,17 +312,17 @@ void vertex::VertexActivity::produce(art::Event& evt)
 	  
 
 	      if(p==0)	  {energyofhits_ind+=(6241.5*fCalibration_factor*fWorkfunction_factor/fRecombination_factor)*(1/elifetime_factor)*hitamplitude*.000001*3.2;
-		hit_ind.push_back(hit[i]->MIPs());
+		hit_ind.push_back(hit[i]->Charge());
 	      }
 	      if(p==1){energyofhits_col+=(6241.5*fCalibration_factor*fWorkfunction_factor/fRecombination_factor)*(1/elifetime_factor)*hitamplitude*.000001;
-		hit_col.push_back(hit[i]->MIPs());
+		hit_col.push_back(hit[i]->Charge());
 	      }
 	      if(p==0)
 	   
-		std::cout<<p<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<hit[i]->CrossingTime()<<" "<<hitamplitude*3.2<<" "<<energyofhits_ind<<std::endl;
+		std::cout<<p<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<hit[i]->PeakTime()<<" "<<hitamplitude*3.2<<" "<<energyofhits_ind<<std::endl;
   	   
 	      if(p==1)
-		std::cout<<p<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<hit[i]->CrossingTime()<<" "<<hitamplitude<<" "<<energyofhits_col<<std::endl;
+		std::cout<<p<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<hit[i]->PeakTime()<<" "<<hitamplitude<<" "<<energyofhits_col<<std::endl;
   	   
 	    }
 	  
