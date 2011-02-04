@@ -72,11 +72,11 @@ namespace t962{
          float ftr101d;
          int fgoodspill;
          int fntrkstp;
-         float ftrkstpX[];
-         float ftrkstpY[];
-         float ftrkstpZ[];
-         float ftrkstpU[];
-         float ftrkstpV[];
+         std::vector<float> ftrkstpX;
+         std::vector<float> ftrkstpY;
+         std::vector<float> ftrkstpZ;
+         std::vector<float> ftrkstpU;
+         std::vector<float> ftrkstpV;
 
       } fminosdata;
 

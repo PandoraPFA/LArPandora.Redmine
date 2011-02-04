@@ -1,6 +1,7 @@
 #include "job/mergedatabeam.fcl"
+#include "job/mergedataminos.fcl"
 
-process_name: MergeDataBeam
+process_name: MergeData
 
 services:
 {
@@ -20,18 +21,19 @@ outputs:
  out1:
  {
     module_type: RootOutput
-    fileName:    "mergedata_beam.root"
+    fileName:    "mergedata.root"
  }      
 }
 
 physics:
 {
   producers:{}
-  mergebeam: [beam]
+  merge: [beam, minos]
   stream1: [out1]
-  trigger_paths: [mergebeam]
+  trigger_paths: [merge]
   end_paths: [stream1]
 }
 
 physics.producers.beam:  @local::argoneut_mergedatabeam
+physics.producers.minos: @local::argoneut_mergedataminos
 

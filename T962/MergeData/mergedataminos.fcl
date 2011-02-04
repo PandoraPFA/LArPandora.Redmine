@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+argoneut_mergedataminos:
+{
+ module_type: "MergeDataMINOS"
+ daq:         "source"
+ beam:        "beam"
+}
+
+END_PROLOG
+
