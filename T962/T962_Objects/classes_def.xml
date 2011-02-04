@@ -1,0 +1,20 @@
+<!--                                                                                  -->
+<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
+<!--  $Author:  $                                                                     -->
+<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
+<!--                                                                                  -->
+<!--  Include art::Wrapper lines for objects that we would like to put into the event -->
+<!--  Include the non-wrapper lines for all objects on the art::Wrapper lines and     -->
+<!--  for all objects that are data members of those objects.                         -->
+
+
+<lcgdict>
+ <class name="t962::MINOS    "/>
+ <class name="t962::Paddles  "/>
+ 
+ <class name="std::vector<t962::MINOS>    "/>
+ <class name="std::vector<t962::Paddles>  "/>
+
+ <class name="art::Wrapper< std::vector<t962::MINOS>     >"/>
+ <class name="art::Wrapper< std::vector<t962::Paddles>   >"/>
+</lcgdict>
