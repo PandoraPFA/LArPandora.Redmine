@@ -1,0 +1,14 @@
+BEGIN_PROLOG
+
+argoneut_matchtracks:
+{
+ module_type: "MatchTracks"
+ lartracks:   "tracks"
+ minostracks: "minos"
+ dcosx:       1.0
+ dcosy:       1.0
+ dcosz:       1.0 
+}
+
+END_PROLOG
+

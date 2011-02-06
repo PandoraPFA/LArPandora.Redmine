@@ -1,0 +1,41 @@
+#include "job/matchtracksmodule.fcl"
+#include "job/trackfindermodules.fcl"
+
+process_name: MatchTracks
+
+services:
+{
+  TFileService: {fileName: "matchtracks_hist.root"}
+  Timing:       {}
+}
+
+source:
+{
+ module_type: RootInput
+ dirName:     "."
+ fileNames:    ["mergedata.root"]
+ maxEvents: -1
+}
+
+outputs:
+{
+ out1:
+ {
+    module_type: RootOutput
+    fileName:    "matchtracks.root"
+ }      
+}
+
+physics:
+{
+  producers:{}
+  analyzers:{}
+  recopath: [track3d]
+  anapath: [match]
+  stream1: [out1]
+  triggerPaths: [recopath]
+  end_paths: [anapath], stream1
+}
+
+physics.producers.match:  @local::argoneut_track
+physics.analyzers.match:  @local::argoneut_matchtracks
