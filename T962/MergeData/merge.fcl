@@ -5,7 +5,8 @@ process_name: MergeData
 
 services:
 {
-  Timing: {}
+  TFileService: {fileName: "mergedata_hist.root"}
+  Timing:       {}
 }
 
 source:

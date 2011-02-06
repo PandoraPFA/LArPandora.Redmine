@@ -55,9 +55,9 @@ namespace merge{
       //get access to the TFile service
       art::ServiceHandle<art::TFileService> tfs;
 
-      fproblemevent2d=tfs->make<TH2D>("fproblemevent2d","POT vs. Event number with no match", 40000,0 ,40000,500,-1,45); 
-      fPOTdiff_matched=tfs->make<TH1D>("fPOTdiff_matched","POT difference of match", 8000,-40,40);
-      fMINOSrun_event=tfs->make<TH2D>("MINOSrun_event","MINOS run # vs ArgoNeuT event # for match", 4000,0 ,40000,5000,15000 ,20000);
+      fproblemevent2d=tfs->make<TH2D>("fproblemevent2d","POT vs. Event number with no match", 400,0 ,40000,500,-1,45); 
+      fPOTdiff_matched=tfs->make<TH1D>("fPOTdiff_matched","POT difference of match", 800,-40,40);
+      fMINOSrun_event=tfs->make<TH2D>("MINOSrun_event","MINOS run # vs ArgoNeuT event # for match", 400,0 ,40000,500,15000 ,20000);
       futc1_tms_diff = tfs->make<TH1D>("futc1_tms_diff","fabs(utc1+500-(tms))", 200,0 ,2000);
 
    }
@@ -77,11 +77,10 @@ namespace merge{
       std::vector<t962::MINOS> vec_minos;
 
       if(MergeMINOS(vec_minos)){
-         std::cout << "No of MINOS objects savid is " << vec_minos.size() << std::endl;
+         //std::cout << "No of MINOS objects saved is " << vec_minos.size() << std::endl;
          for(int i=0;i<vec_minos.size();i++)
          {
             MINOS_coll->push_back(vec_minos[i]);
-            std::cout<<"The saved trackindex= "<<vec_minos[i].trkIndex()<<std::endl;
          }
          evt.put(MINOS_coll);
       }
@@ -102,8 +101,6 @@ namespace merge{
       int flag=0;
 	    
       double tms = (double)fbeam->get_t_ms();//millisecond timing information from BeamInfo object
-      std::cout << "tms = " << tms << std::endl;
-      
 
       //loop through MINOS root files	  
       std::string path = "/argoneut/app/users/rmehdi/fhc/";
@@ -183,12 +180,13 @@ namespace merge{
 		  		    
                //*************************************************************
                //Matching condition based on time info alone:
-			
-               std::cout << "minos.futc1 = " << minos.fminosdata.futc1 << " tms = " << tms << std::endl;
                double diff = fabs(minos.fminosdata.futc1 + 500 - tms);
-               std::cout << "diff = " << diff << std::endl;
+          
                if(diff<1001){
                   if(minos.fminosdata.ftrkIndex==0){
+                     // std::cout << "minos.futc1 = " << std::setprecision(12) << minos.fminosdata.futc1 
+                     //           << " tms = " << std::setprecision(12) << tms << std::endl;
+                     // std::cout << "diff = " << diff << std::endl;
                      fPOTdiff_matched->Fill(fbeam->get_tor101() - minos.fminosdata.ftor101);
                      fMINOSrun_event->Fill(fdaq->GetEvent(),minos.fminosdata.frun);
                      futc1_tms_diff->Fill(diff);
