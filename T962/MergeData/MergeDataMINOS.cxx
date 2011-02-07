@@ -124,51 +124,58 @@ namespace merge{
  
             TFile *f = new TFile(file.c_str());
             TTree *minitree = (TTree*)f->Get("minitree");
-            minitree->SetBranchAddress("run",&minos.fminosdata.frun);  
-            minitree->SetBranchAddress("subRun",&minos.fminosdata.fsubRun);
-            minitree->SetBranchAddress("snarl",&minos.fminosdata.fsnarl);
-            minitree->SetBranchAddress("utc",&minos.fminosdata.futc);
-            minitree->SetBranchAddress("day",&minos.fminosdata.fday);
-            minitree->SetBranchAddress("trkIndex",&minos.fminosdata.ftrkIndex);
-            minitree->SetBranchAddress("trkChi2",&minos.fminosdata.ftrkChi2);
-            minitree->SetBranchAddress("utc1",&minos.fminosdata.futc1);
-            minitree->SetBranchAddress("nearns",&minos.fminosdata.fnearns);
-            minitree->SetBranchAddress("nearsec",&minos.fminosdata.fnearsec);		  
-            minitree->SetBranchAddress("trkE",&minos.fminosdata.ftrkE);
-            minitree->SetBranchAddress("shwE",&minos.fminosdata.fshwE);
-            minitree->SetBranchAddress("crateT0",&minos.fminosdata.fcrateT0);
-            minitree->SetBranchAddress("tmframe",&minos.fminosdata.ftmframe);
-            minitree->SetBranchAddress("year",&minos.fminosdata.fyear);		  
-            minitree->SetBranchAddress("offset",&minos.fminosdata.foffset);
-            minitree->SetBranchAddress("dtnear",&minos.fminosdata.fdtnear);		
-            minitree->SetBranchAddress("trkErange",&minos.fminosdata.ftrkErange);
-            minitree->SetBranchAddress("sgate53",&minos.fminosdata.fsgate53);
-            minitree->SetBranchAddress("trkqp",&minos.fminosdata.ftrkqp);
-            minitree->SetBranchAddress("trkeqp",&minos.fminosdata.ftrkeqp);
-            minitree->SetBranchAddress("trkVtxX",&minos.fminosdata.ftrkVtxX);
-            minitree->SetBranchAddress("trkVtxY",&minos.fminosdata.ftrkVtxY);
-            minitree->SetBranchAddress("trkVtxZ",&minos.fminosdata.ftrkVtxZ);
-            minitree->SetBranchAddress("trkVtxeX",&minos.fminosdata.ftrkVtxeX);
-            minitree->SetBranchAddress("trkVtxeY",&minos.fminosdata.ftrkVtxeY);
-            minitree->SetBranchAddress("charge",&minos.fminosdata.fcharge); 		  
-            minitree->SetBranchAddress("trkmom",&minos.fminosdata.ftrkmom);	
-            minitree->SetBranchAddress("trkVtxT",&minos.fminosdata.ftrkVtxT);	
-            minitree->SetBranchAddress("trkTimeT0",&minos.fminosdata.ftrkTimeT0);  
-            minitree->SetBranchAddress("trkdcosx",&minos.fminosdata.ftrkdcosx);
-            minitree->SetBranchAddress("trkdcosy",&minos.fminosdata.ftrkdcosy);
-            minitree->SetBranchAddress("trkdcosz",&minos.fminosdata.ftrkdcosz);
-            minitree->SetBranchAddress("month",&minos.fminosdata.fmonth);
-            minitree->SetBranchAddress("trtgtd",&minos.fminosdata.ftrtgtd);
-            minitree->SetBranchAddress("tortgt",&minos.fminosdata.ftortgt);
-            minitree->SetBranchAddress("tor101",&minos.fminosdata.ftor101);
-            minitree->SetBranchAddress("tr101d",&minos.fminosdata.ftr101d);
-            minitree->SetBranchAddress("goodspill",&minos.fminosdata.fgoodspill);
-            minitree->SetBranchAddress("ntrkstp",&minos.fminosdata.fntrkstp); 
-            //minitree->SetBranchAddress("trkstpX",&minos.fminosdata.ftrkstpX);
-            //minitree->SetBranchAddress("trkstpY",&minos.fminosdata.ftrkstpY);
-            //minitree->SetBranchAddress("trkstpZ",&minos.fminosdata.ftrkstpZ);
-            //minitree->SetBranchAddress("trkstpU",&minos.fminosdata.ftrkstpU);
-            //minitree->SetBranchAddress("trkstpV",&minos.fminosdata.ftrkstpV);
+            minitree->SetBranchAddress("run",&minos.frun);  
+            minitree->SetBranchAddress("subRun",&minos.fsubRun);
+            minitree->SetBranchAddress("snarl",&minos.fsnarl);
+            minitree->SetBranchAddress("utc",&minos.futc);
+            minitree->SetBranchAddress("day",&minos.fday);
+            minitree->SetBranchAddress("trkIndex",&minos.ftrkIndex);
+            minitree->SetBranchAddress("trkChi2",&minos.ftrkChi2);
+            minitree->SetBranchAddress("utc1",&minos.futc1);
+            minitree->SetBranchAddress("nearns",&minos.fnearns);
+            minitree->SetBranchAddress("nearsec",&minos.fnearsec);		  
+            minitree->SetBranchAddress("trkE",&minos.ftrkE);
+            minitree->SetBranchAddress("shwE",&minos.fshwE);
+            minitree->SetBranchAddress("crateT0",&minos.fcrateT0);
+            minitree->SetBranchAddress("tmframe",&minos.ftmframe);
+            minitree->SetBranchAddress("year",&minos.fyear);		  
+            minitree->SetBranchAddress("offset",&minos.foffset);
+            minitree->SetBranchAddress("dtnear",&minos.fdtnear);		
+            minitree->SetBranchAddress("trkErange",&minos.ftrkErange);
+            minitree->SetBranchAddress("sgate53",&minos.fsgate53);
+            minitree->SetBranchAddress("trkqp",&minos.ftrkqp);
+            minitree->SetBranchAddress("trkeqp",&minos.ftrkeqp);
+            minitree->SetBranchAddress("trkVtxX",&minos.ftrkVtxX);
+            minitree->SetBranchAddress("trkVtxY",&minos.ftrkVtxY);
+            minitree->SetBranchAddress("trkVtxZ",&minos.ftrkVtxZ);
+            minitree->SetBranchAddress("trkVtxeX",&minos.ftrkVtxeX);
+            minitree->SetBranchAddress("trkVtxeY",&minos.ftrkVtxeY);
+            minitree->SetBranchAddress("charge",&minos.fcharge); 		  
+            minitree->SetBranchAddress("trkmom",&minos.ftrkmom);	
+            minitree->SetBranchAddress("trkVtxT",&minos.ftrkVtxT);	
+            minitree->SetBranchAddress("trkTimeT0",&minos.ftrkTimeT0);  
+            minitree->SetBranchAddress("trkdcosx",&minos.ftrkdcosx);
+            minitree->SetBranchAddress("trkdcosy",&minos.ftrkdcosy);
+            minitree->SetBranchAddress("trkdcosz",&minos.ftrkdcosz);
+            minitree->SetBranchAddress("month",&minos.fmonth);
+            minitree->SetBranchAddress("trtgtd",&minos.ftrtgtd);
+            minitree->SetBranchAddress("tortgt",&minos.ftortgt);
+            minitree->SetBranchAddress("tor101",&minos.ftor101);
+            minitree->SetBranchAddress("tr101d",&minos.ftr101d);
+            minitree->SetBranchAddress("goodspill",&minos.fgoodspill);
+            minitree->SetBranchAddress("trkContained",&minos.ftrkcontained);
+            minitree->SetBranchAddress("goodbeam",&minos.fgoodbeam);
+            minitree->SetBranchAddress("ntrkstp",&minos.fntrkstp);
+            float trkstpX[1000];//don't like to hard-code the array size, but will suffice for now
+            float trkstpY[1000];
+            float trkstpZ[1000];
+            float trkstpU[1000];
+            float trkstpV[1000];
+            minitree->SetBranchAddress("trkstpX",trkstpX);
+            minitree->SetBranchAddress("trkstpY",trkstpY);
+            minitree->SetBranchAddress("trkstpZ",trkstpZ);
+            minitree->SetBranchAddress("trkstpU",trkstpU);
+            minitree->SetBranchAddress("trkstpV",trkstpV);
 		 
             //------------------------------------------
             Long64_t nentries = minitree->GetEntries();
@@ -177,18 +184,31 @@ namespace merge{
             for(int i=0;i<nentries;i++){
 
                nbytes+=minitree->GetEntry(i);
+               //create correctly-sized vectors from arrays.
+               std::vector<float> ftrkstpX(trkstpX,trkstpX+minos.fntrkstp);
+               std::vector<float> ftrkstpY(trkstpY,trkstpY+minos.fntrkstp);
+               std::vector<float> ftrkstpZ(trkstpZ,trkstpZ+minos.fntrkstp);
+               std::vector<float> ftrkstpU(trkstpU,trkstpU+minos.fntrkstp);
+               std::vector<float> ftrkstpV(trkstpV,trkstpV+minos.fntrkstp);
+               
+               //store in working MINOS object
+               minos.ftrkstpX = ftrkstpX;
+               minos.ftrkstpY = ftrkstpY;
+               minos.ftrkstpZ = ftrkstpZ;
+               minos.ftrkstpU = ftrkstpU;
+               minos.ftrkstpV = ftrkstpV;
 		  		    
                //*************************************************************
                //Matching condition based on time info alone:
-               double diff = fabs(minos.fminosdata.futc1 + 500 - tms);
+               double diff = fabs(minos.futc1 + 500 - tms);
           
                if(diff<1001){
-                  if(minos.fminosdata.ftrkIndex==0){
-                     // std::cout << "minos.futc1 = " << std::setprecision(12) << minos.fminosdata.futc1 
+                  if(minos.ftrkIndex==0){
+                     // std::cout << "minos.futc1 = " << std::setprecision(12) << minos.futc1 
                      //           << " tms = " << std::setprecision(12) << tms << std::endl;
                      // std::cout << "diff = " << diff << std::endl;
-                     fPOTdiff_matched->Fill(fbeam->get_tor101() - minos.fminosdata.ftor101);
-                     fMINOSrun_event->Fill(fdaq->GetEvent(),minos.fminosdata.frun);
+                     fPOTdiff_matched->Fill(fbeam->get_tor101() - minos.ftor101);
+                     fMINOSrun_event->Fill(fdaq->GetEvent(),minos.frun);
                      futc1_tms_diff->Fill(diff);
                   }
                   vec_minos.push_back(minos); 		  

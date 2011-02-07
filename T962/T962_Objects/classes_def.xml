@@ -10,7 +10,6 @@
 
 <lcgdict>
  <class name="t962::MINOS    "/>
- <class name="t962::MINOS::MinosData  "/>
  <class name="t962::Paddles  "/>
  
  <class name="std::vector<t962::MINOS>    "/>

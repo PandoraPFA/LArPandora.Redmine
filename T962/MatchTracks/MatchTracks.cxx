@@ -84,9 +84,9 @@ namespace match{
                double larStart[3];
                double larEnd[3];
                lartrack->Direction(larStart,larEnd);
-               fDiffDirCosX->Fill(larStart[0]-minostrack->fminosdata.ftrkdcosx);
-               fDiffDirCosY->Fill(larStart[1]-minostrack->fminosdata.ftrkdcosy);
-               fDiffDirCosZ->Fill(larStart[2]-minostrack->fminosdata.ftrkdcosz);
+               fDiffDirCosX->Fill(larStart[0]-minostrack->ftrkdcosx);
+               fDiffDirCosY->Fill(larStart[1]-minostrack->ftrkdcosy);
+               fDiffDirCosZ->Fill(larStart[2]-minostrack->ftrkdcosz);
             }
          }
       }
@@ -100,9 +100,9 @@ namespace match{
       double lardirectionStart[3];
       double lardirectionEnd[3];
       lar_track->Direction(lardirectionStart,lardirectionEnd);
-      if( fabs(lardirectionStart[0]-minos_track->fminosdata.ftrkdcosx) > fdcosx) return false;
-      if( fabs(lardirectionStart[1]-minos_track->fminosdata.ftrkdcosy) > fdcosx) return false;
-      if( fabs(lardirectionStart[2]-minos_track->fminosdata.ftrkdcosz) > fdcosx) return false;
+      if( fabs(lardirectionStart[0]-minos_track->ftrkdcosx) > fdcosx) return false;
+      if( fabs(lardirectionStart[1]-minos_track->ftrkdcosy) > fdcosx) return false;
+      if( fabs(lardirectionStart[2]-minos_track->ftrkdcosz) > fdcosx) return false;
      
       return true;  
   
