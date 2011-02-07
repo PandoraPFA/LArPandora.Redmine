@@ -33,9 +33,9 @@ physics:
   recopath: [track3d]
   anapath: [match]
   stream1: [out1]
-  triggerPaths: [recopath]
-  end_paths: [anapath], stream1
+  trigger_paths: [recopath]
+  end_paths: [anapath, stream1]
 }
 
-physics.producers.match:  @local::argoneut_track
-physics.analyzers.match:  @local::argoneut_matchtracks
+physics.producers.track3d:  @local::argoneut_track
+physics.analyzers.match:    @local::argoneut_matchtracks

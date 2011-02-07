@@ -66,11 +66,17 @@ namespace match{
    //-------------------------------------------------
    void MatchTracks::analyze(const art::Event& evt)
    {
+
+      std::cout << "In MatchTracks::analyze..." << std::endl;
+
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
       evt.getByLabel(fLarTracks_label,LarTrackHandle);
 
       art::Handle< std::vector<t962::MINOS> > MinosTrackHandle;
       evt.getByLabel(fMinosTracks_label,MinosTrackHandle);
+
+      std::cout << "#T962 Tracks = " << LarTrackHandle->size() 
+                << " #MINOS Tracks = " << MinosTrackHandle->size() << std::endl;
 
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
@@ -101,8 +107,8 @@ namespace match{
       double lardirectionEnd[3];
       lar_track->Direction(lardirectionStart,lardirectionEnd);
       if( fabs(lardirectionStart[0]-minos_track->ftrkdcosx) > fdcosx) return false;
-      if( fabs(lardirectionStart[1]-minos_track->ftrkdcosy) > fdcosx) return false;
-      if( fabs(lardirectionStart[2]-minos_track->ftrkdcosz) > fdcosx) return false;
+      if( fabs(lardirectionStart[1]-minos_track->ftrkdcosy) > fdcosy) return false;
+      if( fabs(lardirectionStart[2]-minos_track->ftrkdcosz) > fdcosz) return false;
      
       return true;  
   
