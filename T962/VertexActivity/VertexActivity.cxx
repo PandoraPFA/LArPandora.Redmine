@@ -20,6 +20,8 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "art/Persistency/Common/OrphanHandle.h"
+
 
 #include "T962/VertexActivity/VertexActivity.h"
 extern "C" {
@@ -38,9 +40,10 @@ extern "C" {
 #include "Simulation/sim.h"
 #include "Simulation/SimListUtils.h"
 #include "Simulation/LArVoxelCalculator.h"
+#include "Simulation/LArVoxelData.h"
 #include "RawData/RawDigit.h"
 #include "Filters/ChannelFilter.h"
-#include "T962_MergeData/ScanInfo.h"
+// #include "T962_MergeData/ScanInfo.h"
 #include "RecoBase/recobase.h"
 #include "Geometry/geo.h"
 
@@ -49,7 +52,6 @@ vertex::VertexActivity::VertexActivity(fhicl::ParameterSet const& pset) :
   fDBScanModuleLabel            (pset.get< std::string >("DBScanModuleLabel")),
   fLArG4ModuleLabel             (pset.get< std::string >("LArG4ModuleLabel")),
   fVertexModuleLabel            (pset.get<std::string > ("VertexModuleLabel")),
-  fGenieGenModuleLabel          (pset.get< std::string >("GenieGenModuleLabel")),
   fScanModuleLabel              (pset.get< std::string > ("ScanModuleLabel")),
   fCathodetimelocation          (pset.get< double >("Cathodetimelocation")),
   fDelta_Cathodetimelocation    (pset.get< double >("Delta_Cathodetimelocation")),
@@ -377,7 +379,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
   for(int i=0;i<size3;i++)
     findcol->Fill(hit_ind[i],hit_col[i]);
 
-}
+ }
 
 
 
