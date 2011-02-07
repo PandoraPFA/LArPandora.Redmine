@@ -51,7 +51,7 @@ extern "C" {
 vertex::VertexActivity::VertexActivity(fhicl::ParameterSet const& pset) :
   fDBScanModuleLabel            (pset.get< std::string >("DBScanModuleLabel")),
   fLArG4ModuleLabel             (pset.get< std::string >("LArG4ModuleLabel")),
-  fVertexModuleLabel            (pset.get<std::string > ("VertexModuleLabel")),
+  fGenieGenModuleLabel             (pset.get< std::string >("GenieGenModuleLabel")),
   fScanModuleLabel              (pset.get< std::string > ("ScanModuleLabel")),
   fCathodetimelocation          (pset.get< double >("Cathodetimelocation")),
   fDelta_Cathodetimelocation    (pset.get< double >("Delta_Cathodetimelocation")),
@@ -102,25 +102,25 @@ void vertex::VertexActivity::produce(art::Event& evt)
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
   evt.getByLabel(fDBScanModuleLabel,clusterListHandle);
     
-  art::Handle< std::vector<recob::Vertex> > vertexListHandle;
-  evt.getByLabel(fVertexModuleLabel,vertexListHandle);
+//   art::Handle< std::vector<recob::Vertex> > vertexListHandle;
+//   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
   
-  // std::cout << "Vertex  list size = " << vertexListHandle->size() << " AND cluster hit size:" <<  clusterListHandle->size()<< std::endl;
+//    std::cout << "Vertex  list size = " << vertexListHandle->size() << " AND cluster hit size:" <<  clusterListHandle->size()<< std::endl;
 
   art::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
   evt.getByLabel(fLArG4ModuleLabel,vxlistHandle);
 
-  // std::cout<<"vxlistHandle->size() "<<vxlistHandle->size()<<std::endl;
+   std::cout<<"vxlistHandle->size() "<<vxlistHandle->size()<<std::endl;
 
   art::PtrVector<simb::MCTruth> mclist;
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
     {
       art::Ptr<simb::MCTruth> mctparticle(mctruthListHandle,ii);
       mclist.push_back(mctparticle);
-    }
+    } 
    
   //  neutrinos  
   //      for( unsigned int i = 0; i < mclist.size(); ++i ){
@@ -135,8 +135,8 @@ void vertex::VertexActivity::produce(art::Event& evt)
   //     vertex[2] =neut.Nu().Vz();
   // 
   //     }
-   
-   
+//    
+//    
    
   for( unsigned int i = 0; i < mclist.size(); ++i ){
 
@@ -154,13 +154,19 @@ void vertex::VertexActivity::produce(art::Event& evt)
   // There's probably only one LArVoxelList per event, but FMWK
   // always reads a vector of pointers.  For each LArVoxelList:
   double Energy=0.;
+  
+ 
+ 
+ 
+ 
+  
   for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
     // Get the reference to the LArVoxelID in the LArVoxelList.
     art::Ptr<sim::LArVoxelData> voxel(vxlistHandle, i);
       
     int numberParticles = voxel->NumberParticles();
 	      
-    // std::cout<<"numberParticles "<<numberParticles<<std::endl;
+     std::cout<<"numberParticles "<<numberParticles<<std::endl;
     for ( int i = 0; i != numberParticles; ++i )
       {
 	// if(sqrt(pow(TMath::Abs(voxel->VoxelID().X()-vertex[0]),2)+pow(TMath::Abs(voxel->VoxelID().Y()-vertex[1]),2)+pow(TMath::Abs(voxel->VoxelID().Z()-vertex[2]),2))<fActivityRadius)
