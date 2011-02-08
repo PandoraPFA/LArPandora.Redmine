@@ -67,8 +67,6 @@ namespace match{
    void MatchTracks::analyze(const art::Event& evt)
    {
 
-      std::cout << "In MatchTracks::analyze..." << std::endl;
-
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
       evt.getByLabel(fLarTracks_label,LarTrackHandle);
 

@@ -3,7 +3,7 @@ BEGIN_PROLOG
 argoneut_matchtracks:
 {
  module_type: "MatchTracks"
- lartracks:   "tracks"
+ lartracks:   "track3d"
  minostracks: "minos"
  dcosx:       1.0
  dcosy:       1.0
