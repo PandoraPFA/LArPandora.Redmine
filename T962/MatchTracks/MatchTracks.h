@@ -41,9 +41,11 @@ namespace match {
       std::string fLarTracks_label;
       std::string fMinosTracks_label;
    
-      double fdcosx;//tolerance in dircosX matching
-      double fdcosy;//tolerance in dircosY matching
-      double fdcosz;//tolerance in dircosZ matching
+      double fdZ;    //max. z distance between projected T962 track and MINOS track
+      double fdXY;   //max. radial distance between projected T962 track and MINOS track
+      double fdCosx; //tolerance in dircosX matching
+      double fdCosy; //tolerance in dircosY matching
+      double fdCosz; //tolerance in dircosZ matching
       
    protected: 
       

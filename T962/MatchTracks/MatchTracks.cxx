@@ -38,9 +38,11 @@ namespace match{
    MatchTracks::MatchTracks(fhicl::ParameterSet const& pset) : 
       fLarTracks_label(pset.get< std::string >("lartracks")),
       fMinosTracks_label(pset.get< std::string >("minostracks")),
-      fdcosx(pset.get< double >("dcosx")),
-      fdcosy(pset.get< double >("dcosy")),
-      fdcosz(pset.get< double >("dcosz"))
+      fdZ(pset.get< double>("dZ")),
+      fdXY(pset.get< double>("dXY")),
+      fdCosx(pset.get< double >("dCosx")),
+      fdCosy(pset.get< double >("dCosy")),
+      fdCosz(pset.get< double >("dCosz"))
    {
 
    }
@@ -101,12 +103,48 @@ namespace match{
    //-------------------------------------------------
    bool MatchTracks::Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track)
    {
+
+       double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
+                                           //(this minus number is the one we measured with Mitch)
+
+      double x_offset=116.9; // previously 118;
+      double y_offset=20.28; //previously  19;
+
+      std::vector<double> larStart, larEnd;
+      lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
+
+
       double lardirectionStart[3];
       double lardirectionEnd[3];
       lar_track->Direction(lardirectionStart,lardirectionEnd);
-      if( fabs(lardirectionStart[0]-minos_track->ftrkdcosx) > fdcosx) return false;
-      if( fabs(lardirectionStart[1]-minos_track->ftrkdcosy) > fdcosy) return false;
-      if( fabs(lardirectionStart[2]-minos_track->ftrkdcosz) > fdcosz) return false;
+
+
+      double dz = D - larStart[2]+(100.0 * minos_track->ftrkVtxZ);//z-difference between end of T962 track and
+                                                                  //begin of MINOS track...in centimeters
+
+      double l = dz/(lardirectionEnd[2]);//3-d distance between end of T962 track and begin of MINOS track
+
+      double x_pred = l*lardirectionEnd[0]+larEnd[0];//predicted x-pos. of T962 track at z-position equal to
+                                                       //start of MINOS track
+      double y_pred = l*lardirectionEnd[1]+larEnd[1];//predicted y-pos. of T962 track at z-position equal to
+                                                       //start of MINOS track
+
+      double dx = 100.0*minos_track->ftrkVtxX - x_pred;
+      double dy = 100.0*minos_track->ftrkVtxY - y_pred;
+      
+      
+      if(100.0*minos_track->ftrkVtxZ > fdZ) return false;//MINOS track starts too far into the detector 
+      
+      if((x_pred + x_offset)>297.7 
+         || (x_pred+x_offset)<-187.45 
+         || (y_pred+y_offset)>181.71 
+         || (y_pred+y_offset)<-100.29) return false;//predicted coordinates lie outside the MINOS detector boundaries
+
+      if(sqrt(dx*dx + dy*dy) > fdXY) return false;//predicted coordinates too far from XY-pos. at start of MINOS track
+
+      if( fabs(lardirectionStart[0]-minos_track->ftrkdcosx) > fdCosx) return false;
+      if( fabs(lardirectionStart[1]-minos_track->ftrkdcosy) > fdCosy) return false;
+      if( fabs(lardirectionStart[2]-minos_track->ftrkdcosz) > fdCosz) return false;
      
       return true;  
   

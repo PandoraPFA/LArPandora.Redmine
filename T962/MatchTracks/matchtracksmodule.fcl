@@ -5,9 +5,11 @@ argoneut_matchtracks:
  module_type: "MatchTracks"
  lartracks:   "track3d"
  minostracks: "minos"
- dcosx:       1.0
- dcosy:       1.0
- dcosz:       1.0 
+ dZ:          10.0
+ dXY:         11.0
+ dCosx:       1.0
+ dCosy:       1.0
+ dCosz:       1.0 
 }
 
 END_PROLOG
