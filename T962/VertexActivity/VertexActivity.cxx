@@ -154,12 +154,6 @@ void vertex::VertexActivity::produce(art::Event& evt)
   // There's probably only one LArVoxelList per event, but FMWK
   // always reads a vector of pointers.  For each LArVoxelList:
   double Energy=0.;
-  
- 
- 
- 
- 
-  
   for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
     // Get the reference to the LArVoxelID in the LArVoxelList.
     art::Ptr<sim::LArVoxelData> voxel(vxlistHandle, i);
