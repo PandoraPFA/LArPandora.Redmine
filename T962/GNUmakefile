@@ -5,7 +5,7 @@
 #
 include SoftRelTools/arch_spec_root.mk
 
-SUBDIRS     := T962_Objects MergeData VertexActivity MatchTracks
+SUBDIRS     := T962_Objects MergeData VertexActivity MatchTracks MergeScan
 
 LIBLINK    := $(LOADLIBES) -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -l$(PACKAGE)
 
