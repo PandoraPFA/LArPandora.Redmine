@@ -78,8 +78,12 @@ namespace match{
       std::cout << "#T962 Tracks = " << LarTrackHandle->size() 
                 << " #MINOS Tracks = " << MinosTrackHandle->size() << std::endl;
 
+      
+
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
+
+         std::cout << *lartrack << std::endl;
          
          for(unsigned int j=0; j<MinosTrackHandle->size();++j){
             art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
@@ -104,7 +108,7 @@ namespace match{
    bool MatchTracks::Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track)
    {
 
-       double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
+      double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
                                            //(this minus number is the one we measured with Mitch)
 
       double x_offset=116.9; // previously 118;
