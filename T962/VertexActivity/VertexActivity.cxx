@@ -65,7 +65,7 @@ vertex::VertexActivity::VertexActivity(fhicl::ParameterSet const& pset) :
   fDelta_Calibration_factor     (pset.get< double >("Delta_Calibration_factor")),
   fActivityRadius               (pset.get< double >("ActivityRadius"))
 {
-  produces< std::vector<recob::Vertex> >();
+  produces< std::vector<recob::EndPoint2D> >();
 }
 
 //-----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
   evt.getByLabel(fDBScanModuleLabel,clusterListHandle);
     
-//   art::Handle< std::vector<recob::Vertex> > vertexListHandle;
+//   art::Handle< std::vector<recob::EndPoint2D> > vertexListHandle;
 //   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
@@ -204,11 +204,11 @@ void vertex::VertexActivity::produce(art::Event& evt)
   //      vertexcoltime=scanIn[i]->Get_VertColTime();   
   //     }
   //take into account automated vertex finding as well (not yet implemented)  
-  //   art::PtrVector<recob::Vertex> vertIn;
+  //   art::PtrVector<recob::EndPoint2D> vertIn;
   // 
   //   for(unsigned int ii = 0; ii < vertexListHandle->size(); ++ii)
   //     {
-  //       art::Ptr<recob::Vertex> vertex(vertexListHandle, ii);
+  //       art::Ptr<recob::EndPoint2D> vertex(vertexListHandle, ii);
   //       vertIn.push_back(vertex);
   //     }
   //   
