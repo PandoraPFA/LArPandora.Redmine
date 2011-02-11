@@ -75,22 +75,30 @@ namespace match{
       art::Handle< std::vector<t962::MINOS> > MinosTrackHandle;
       evt.getByLabel(fMinosTracks_label,MinosTrackHandle);
 
+      std::cout << std::setfill('*') << std::setw(175) << "*" << std::setfill(' ') << std::endl;
       std::cout << "#T962 Tracks = " << LarTrackHandle->size() 
                 << " #MINOS Tracks = " << MinosTrackHandle->size() << std::endl;
 
-      
+      for(unsigned int i=0; i<LarTrackHandle->size();++i){
+         art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
+         std::cout << " T962 " << *lartrack << std::endl;
+      }
+
+      for(unsigned int j=0; j<MinosTrackHandle->size();++j){
+         art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
+         std::cout << *minostrack << std::endl;
+      }
 
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
-
-         std::cout << *lartrack << std::endl;
          
          for(unsigned int j=0; j<MinosTrackHandle->size();++j){
             art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
 
             bool match = Compare(lartrack,minostrack);
             if(match){
-               std::cout << "Match!" << std::endl;
+               std::cout << "Match! T962 Track #" << lartrack->ID() 
+                         << " and MINOS Track #" << minostrack->ftrkIndex << std::endl;
                double larStart[3];
                double larEnd[3];
                lartrack->Direction(larStart,larEnd);

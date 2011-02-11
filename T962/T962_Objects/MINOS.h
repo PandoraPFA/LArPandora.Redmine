@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 
 namespace t962{
@@ -69,6 +70,8 @@ namespace t962{
       std::vector<float> ftrkstpZ;
       std::vector<float> ftrkstpU;
       std::vector<float> ftrkstpV;
+
+      friend std::ostream& operator << (std::ostream& o, const MINOS& m);
 
    private:    
 
