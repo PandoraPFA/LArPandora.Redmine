@@ -1,0 +1,15 @@
+BEGIN_PROLOG
+
+argoneut_scanfilter:
+{
+ module_type:      "ScanFilter"
+ ScanModuleLabel:  "mergescan"
+ DigitModuleLabel: "source"
+ Neutrino_req:     1        #0=no neutrinos, 1=maybe neutrino, 2=neutrino. 
+                            #2 is most stringent, 0 is least stringent  
+ NumShowers_req:   0        #Maximum number of showers required to pass
+ NumTracks_req:    20        #Maximum number of tracks in any plane required to pass  
+}
+
+
+END_PROLOG
