@@ -30,7 +30,7 @@ namespace filt {
   private: 
  
     std::string fScanModuleLabel;
-    int fNeutrino_req, fNumShowers_req, fNumTracks_req;
+    int fNeutrino_req, fMinShowers_req, fMinTracks_req, fMaxShowers_req, fMaxTracks_req;
   
   protected: 
     

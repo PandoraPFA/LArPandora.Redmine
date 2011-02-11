@@ -40,8 +40,10 @@ namespace filt{
   ScanFilter::ScanFilter(fhicl::ParameterSet const & pset) : 
     fScanModuleLabel(pset.get< std::string > ("ScanModuleLabel")),
     fNeutrino_req   (pset.get< int >("Neutrino_req")),
-    fNumShowers_req (pset.get< int >("NumShowers_req")),
-    fNumTracks_req  (pset.get< int >("NumTracks_req"))
+    fMinShowers_req (pset.get< int >("MinShowers_req")),
+    fMaxShowers_req (pset.get< int >("MaxShowers_req")),
+    fMinTracks_req (pset.get< int >("MinTracks_req")),
+    fMaxTracks_req (pset.get< int >("MaxTracks_req"))
   {   
   }
 
@@ -73,9 +75,11 @@ namespace filt{
     for(unsigned int i = 0; i < scanIn.size(); ++i){
 
     if(    
-    (scanIn[i]->Get_IsNeutrino()||(fNeutrino_req==1 && scanIn[i]->Get_IsMaybeNeutrino()==1)||(fNeutrino_req==0 && scanIn[i]->Get_IsnotNeutrino()==1)) 
-    && scanIn[i]->Get_NumShower()<=fNumShowers_req  
-    && scanIn[i]->Get_Track()<=fNumTracks_req 
+    (scanIn[i]->Get_IsNeutrino()||(fNeutrino_req==1 && scanIn[i]->Get_IsMaybeNeutrino()==1)||(fNeutrino_req==0)) 
+    && scanIn[i]->Get_NumShower()<=fMaxShowers_req
+    && scanIn[i]->Get_NumShower()>=fMinShowers_req
+    && scanIn[i]->Get_Track()<=fMaxTracks_req
+    && scanIn[i]->Get_Track()>=fMinTracks_req
     && scanIn[i]->Get_Run()==run 
     && scanIn[i]->Get_Event()==event)
     failFlag=0;       

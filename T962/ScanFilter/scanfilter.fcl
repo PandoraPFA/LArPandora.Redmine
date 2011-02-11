@@ -1,0 +1,17 @@
+BEGIN_PROLOG
+
+argoneut_scanfilter:
+{
+ module_type:      "ScanFilter"
+ ScanModuleLabel:  "mergescan"
+ DigitModuleLabel: "source"
+ Neutrino_req:     1        #0=all events (including 'no neutrino'), 1='maybe a neutrino' or 'a neutrino', 2='a neutrino'
+ 
+ MinShowers_req:   0         #Minimum number of showers 
+ MaxShowers_req:   0         #Maximum number of showers 
+ MinTracks_req:    2         #Minimum number of tracks 
+ MaxTracks_req:    20        #Maximum number of tracks 
+}
+
+
+END_PROLOG
