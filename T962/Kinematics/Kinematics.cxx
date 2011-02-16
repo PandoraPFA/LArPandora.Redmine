@@ -77,13 +77,7 @@ void kin::Kinematics::beginJob()
 //-----------------------------------------------------------------------------
 void kin::Kinematics::produce(art::Event& evt)
 {
-  double vertexcolwire=-1.;
-  double vertexcoltime=-1.;
-  double efficiency=1.;
 
-  double elifetime_factor=0;
-  double hitamplitude=0.;
-  double vertex [3] = { 0, 0, 0 };
   art::ServiceHandle<geo::Geometry> geom;
   art::ServiceHandle<util::LArProperties> larp;
   double electronlifetime=larp->ElectronLifetime();
@@ -102,13 +96,13 @@ void kin::Kinematics::produce(art::Event& evt)
      }
  
      for(unsigned int i = 0; i < scanIn.size(); ++i){     
-      vertexcolwire=scanIn[i]->Get_VertColWire();
-      vertexcoltime=scanIn[i]->Get_VertColTime();   
+//       vertexcolwire=scanIn[i]->Get_VertColWire();
+//       vertexcoltime=scanIn[i]->Get_VertColTime();   
      }
      
-     std::cout<<"vertex: "<<vertexcolwire<<" "<<vertexcoltime<<std::endl;
-     findcol->Fill(vertexcolwire,vertexcoltime);
-     
+//      std::cout<<"vertex: "<<vertexcolwire<<" "<<vertexcoltime<<std::endl;
+//      findcol->Fill(vertexcolwire,vertexcoltime);
+//      
      
  //minos info
    art::PtrVector<t962::MINOS> minosIn;
