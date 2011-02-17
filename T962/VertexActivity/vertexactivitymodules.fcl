@@ -5,6 +5,7 @@ argoneut_vertexactivity:
  module_type:                 "VertexActivity"
  DBScanModuleLabel:           "dbscan"
  LArG4ModuleLabel:            "largeant"
+ HitsModuleLabel:             "ffthit"
  GenieGenModuleLabel:         "generator"
  ScanModuleLabel:             "merge"
  Cathodetimelocation:          75. 

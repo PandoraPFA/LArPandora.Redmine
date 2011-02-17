@@ -51,7 +51,8 @@ extern "C" {
 vertex::VertexActivity::VertexActivity(fhicl::ParameterSet const& pset) :
   fDBScanModuleLabel            (pset.get< std::string >("DBScanModuleLabel")),
   fLArG4ModuleLabel             (pset.get< std::string >("LArG4ModuleLabel")),
-  fGenieGenModuleLabel             (pset.get< std::string >("GenieGenModuleLabel")),
+  fHitsModuleLabel              (pset.get< std::string >("HitsModuleLabel")),  
+  fGenieGenModuleLabel          (pset.get< std::string >("GenieGenModuleLabel")),
   fScanModuleLabel              (pset.get< std::string > ("ScanModuleLabel")),
   fCathodetimelocation          (pset.get< double >("Cathodetimelocation")),
   fDelta_Cathodetimelocation    (pset.get< double >("Delta_Cathodetimelocation")),
@@ -80,10 +81,10 @@ void vertex::VertexActivity::beginJob()
 {
   // get access to the TFile service
   art::ServiceHandle<art::TFileService> tfs;
-  fIndEfficiency    = tfs->make<TH2F>("Ind Efficiency",  "Ind Efficiency vs E_rec", 100, 0, 100, 100,0,2);
-  fColEfficiency    = tfs->make<TH2F>("Col Efficiency",  "Col Efficiency vs E_rec", 100, 0, 100, 100,0,2);
-  fEfficiency    = tfs->make<TH2F>("Efficiency",  "Efficiency vs E_rec", 100, 0, 100, 100,0,2);
-  findcol    = tfs->make<TH2F>("IndCol_mips",  "IndCol_mips", 1000, 0, 100, 1000,0,100);
+  fIndEfficiency    = tfs->make<TH2F>("Ind Efficiency",  "Ind Efficiency vs E_rec", 100, 0, 300, 100,0,2);
+  fColEfficiency    = tfs->make<TH2F>("Col Efficiency",  "Col Efficiency vs E_rec", 100, 0, 300, 100,0,2);
+  fEfficiency    = tfs->make<TH2F>("Efficiency",  "Efficiency vs E_rec", 100, 0, 300, 100,0,2);
+  findcol    = tfs->make<TH2F>("IndCol_mips",  "IndCol_mips", 1000, 0, 1000, 1000,0,1000);
 }
 
 //-----------------------------------------------------------------------------
@@ -102,7 +103,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
   evt.getByLabel(fDBScanModuleLabel,clusterListHandle);
     
-//   art::Handle< std::vector<recob::EndPoint2D> > vertexListHandle;
+//   art::Handle< std::vector<recob::Vertex> > vertexListHandle;
 //   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
@@ -123,21 +124,21 @@ void vertex::VertexActivity::produce(art::Event& evt)
     } 
    
   //  neutrinos  
-  //      for( unsigned int i = 0; i < mclist.size(); ++i ){
-  // 
-  //      art::Ptr<simb::MCTruth> mc(mclist[i]);
-  // 
-  // 	simb::MCNeutrino neut(mc->GetNeutrino());
-  // 
-  //     std::cout<<"vertex: "<<neut.Nu().Vx()<<" "<<neut.Nu().Vy()<<" "<<neut.Nu().Vz()<<std::endl;
-  //     vertex[0] =neut.Nu().Vx();
-  //     vertex[1] =neut.Nu().Vy();
-  //     vertex[2] =neut.Nu().Vz();
-  // 
-  //     }
+//      for( unsigned int i = 0; i < mclist.size(); ++i ){
+// 
+//      art::Ptr<simb::MCTruth> mc(mclist[i]);
+// 
+// 	simb::MCNeutrino neut(mc->GetNeutrino());
+// 
+//     std::cout<<"vertex: "<<neut.Nu().Vx()<<" "<<neut.Nu().Vy()<<" "<<neut.Nu().Vz()<<std::endl;
+//     vertex[0] =neut.Nu().Vx();
+//     vertex[1] =neut.Nu().Vy();
+//     vertex[2] =neut.Nu().Vz();
+// 
+//     }
 //    
 //    
-   
+   //muons
   for( unsigned int i = 0; i < mclist.size(); ++i ){
 
     art::Ptr<simb::MCTruth> mc(mclist[i]);
@@ -160,7 +161,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
       
     int numberParticles = voxel->NumberParticles();
 	      
-     std::cout<<"numberParticles "<<numberParticles<<std::endl;
+    //  std::cout<<"numberParticles "<<numberParticles<<std::endl;
     for ( int i = 0; i != numberParticles; ++i )
       {
 	// if(sqrt(pow(TMath::Abs(voxel->VoxelID().X()-vertex[0]),2)+pow(TMath::Abs(voxel->VoxelID().Y()-vertex[1]),2)+pow(TMath::Abs(voxel->VoxelID().Z()-vertex[2]),2))<fActivityRadius)
@@ -204,11 +205,11 @@ void vertex::VertexActivity::produce(art::Event& evt)
   //      vertexcoltime=scanIn[i]->Get_VertColTime();   
   //     }
   //take into account automated vertex finding as well (not yet implemented)  
-  //   art::PtrVector<recob::EndPoint2D> vertIn;
+  //   art::PtrVector<recob::Vertex> vertIn;
   // 
   //   for(unsigned int ii = 0; ii < vertexListHandle->size(); ++ii)
   //     {
-  //       art::Ptr<recob::EndPoint2D> vertex(vertexListHandle, ii);
+  //       art::Ptr<recob::Vertex> vertex(vertexListHandle, ii);
   //       vertIn.push_back(vertex);
   //     }
   //   
@@ -222,18 +223,28 @@ void vertex::VertexActivity::produce(art::Event& evt)
   art::PtrVector<recob::Hit> cHits;
   art::PtrVector<recob::Hit> hit;
    
-  art::PtrVector<recob::Cluster> clusIn;
-  for(unsigned int ii = 0; ii < clusterListHandle->size(); ++ii)
-    {
-      art::Ptr<recob::Cluster> cluster(clusterListHandle, ii);
-      clusIn.push_back(cluster);
-    }
+//   art::PtrVector<recob::Cluster> clusIn;
+//   for(unsigned int ii = 0; ii < clusterListHandle->size(); ++ii)
+//     {
+//       art::Ptr<recob::Cluster> cluster(clusterListHandle, ii);
+//       clusIn.push_back(cluster);
+//     }
+//   
+  art::Handle< std::vector<recob::Hit> > hitcol;
+  evt.getByLabel(fHitsModuleLabel,hitcol);
+  
+  
+  ///loop over all hits in the event and look for clusters (for each plane)
+  
+  
+  art::PtrVector<recob::Hit> allhits;
 
-
+  
   int numberwires;
   double numbertimesamples;
 
-  unsigned int channel,channel2,plane,plane2,wire,wire2;
+  unsigned int channel2,plane,plane2,wire,wire2,plane3;
+    unsigned int p(0),w(0), channel(0);;
   
       
 
@@ -253,47 +264,67 @@ void vertex::VertexActivity::produce(art::Event& evt)
   std::vector<float> hit_col;
   hit_ind.clear();
   hit_col.clear();
-  for(int p = 0; p < geom->Nplanes(); p++) 
+  for(int plane = 0; plane < geom->Nplanes(); plane++) 
     {
+     allhits.clear();
+        for(unsigned int i = 0; i< hitcol->size(); ++i){
+  
+	art::Ptr<recob::Hit> hit(hitcol, i);
+  
+  
+	channel=hit->Wire()->RawDigit()->Channel();
+	geom->ChannelToWire(channel,p,w);
     
-      if(p==0)
+	if(p == plane) allhits.push_back(hit);
+   
+      }
+
+    
+    
+      if(plane==0)
 	vertex[0]=.3;//force time coordinate to be closer to induction plane 
       else
 	vertex[0]=-.3;//force time coordinate to be closer to collection plane
      
       channel2 = geom->NearestChannel(vertex);
       geom->ChannelToWire(channel2,plane2,wire2); 
-      std::cout<<"channel2 "<<channel2<<std::endl;
-      art::PtrVector<recob::Hit> vHits;
-      art::PtrVectorItr<recob::Cluster> clusterIter = clusIn.begin();
-      hit.clear();
-      cHits.clear();      
+      // std::cout<<"channel2 "<<channel2<<std::endl;
+  //     art::PtrVector<recob::Hit> vHits;
+//       art::PtrVectorItr<recob::Cluster> clusterIter = clusIn.begin();
+//       hit.clear();
+//       cHits.clear();      
       
       
-      while(clusterIter!= clusIn.end() ) {
-	cHits = (*clusterIter)->Hits(p);
-	if(cHits.size() > 0)
-	  for(int i = 0; i < cHits.size(); i++)
-	    hit.push_back(cHits[i]);
-      
-	clusterIter++;  
-      } 
-      if(hit.size() == 0) 
+//       while(clusterIter!= clusIn.end() ) {
+// 	cHits = (*clusterIter)->Hits(p);
+// 	if(cHits.size() > 0)
+// 	  for(int i = 0; i < cHits.size(); i++)
+// 	    hit.push_back(cHits[i]);
+//       
+// 	clusterIter++;  
+//       } 
+// 
+//    std::cout<<"allhits size "<<allhits.size()<<" "<<hitcol->size()<<std::endl;
+
+      if(allhits.size() == 0) 
         continue;
 
       numberwires=geom->Nwires(0);
-      numbertimesamples=hit[0]->Wire()->fSignal.size();
+      numbertimesamples=allhits[0]->Wire()->fSignal.size();
       
 
 	  
-      for(unsigned int i=0;i < hit.size(); i++)
+      for(unsigned int i=0;i < allhits.size(); i++)
 	{
-	  channel=hit[i]->Wire()->RawDigit()->Channel();
-	  geom->ChannelToWire(channel,plane,wire);   
-
-	  
-	  if(plane!=p)
-	    continue;
+	
+	  // std::cout<<"hit size: "<<hit.size()<<std::endl;
+	
+	   channel=allhits[i]->Wire()->RawDigit()->Channel();
+ 	  geom->ChannelToWire(channel,plane3,wire);   
+// // std::cout<<hit[i]->Charge()<<" "<<hit[i]->PeakTime()<<" "<<hit[i]->Channel()<<std::endl;
+// 	  
+// 	  if(plane!=p)
+// 	    continue;
 
 	  //units are cm:
 	  // if(sqrt(pow(TMath::Abs(vertexcolwire-wire)*.0743,2)+pow(TMath::Abs(vertexcoltime-hit[i]->CrossingTime()),2)) < fActivityRadius) 
@@ -302,33 +333,43 @@ void vertex::VertexActivity::produce(art::Event& evt)
 	  // 	  if(larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2)+pow(TMath::Abs(drifttick-hit[i]->CrossingTime()),2)) < fActivityRadius) 
 	  // 	  {
 	  
-	  if(TMath::Abs((int)(wire2-wire))<=fActivityRadius&&TMath::Abs(drifttick-hit[i]->PeakTime())*.0743<=fActivityRadius)
+	  // std::cout<<i<<" "<<wire<<" "<<wire2<<" "<<fActivityRadius<<" "<<drifttick<<" "<<allhits[i]->PeakTime()<<std::endl;
+	  if(TMath::Abs((int)(wire2-wire))<=fActivityRadius&&TMath::Abs(drifttick-allhits[i]->PeakTime())*.0743<=fActivityRadius)
 	    {
-	      std::cout<<"drifttick "<<drifttick<<" hit crossing time "<<hit[i]->PeakTime()<<std::endl;
+	       //std::cout<<"drifttick "<<drifttick<<" hit crossing time "<<allhits[i]->PeakTime()<<std::endl;
 	  
-	      hitamplitude=hit[i]->Charge();
+	      hitamplitude=allhits[i]->Charge()/20.4;//20.4 is scale factor between charge and energy (empirical, from plot)
 	      //elifetime_factor=TMath::Exp((-hit[i]->CrossingTime()*.198)/electronlifetime); 
 	      elifetime_factor=1.;
 	      //elifetime_factor=1;
 	      //6241.5 electrons/fC
 	  
 
-	      if(p==0)	  {energyofhits_ind+=(6241.5*fCalibration_factor*fWorkfunction_factor/fRecombination_factor)*(1/elifetime_factor)*hitamplitude*.000001*3.2;
-		hit_ind.push_back(hit[i]->Charge());
+	      if(plane==0)	  {energyofhits_ind+=(6241.5*fCalibration_factor*fWorkfunction_factor/fRecombination_factor)*(1/elifetime_factor)*hitamplitude*.000001*2.64;
+		hit_ind.push_back(hitamplitude*2.64);//2.64=col/ind
 	      }
-	      if(p==1){energyofhits_col+=(6241.5*fCalibration_factor*fWorkfunction_factor/fRecombination_factor)*(1/elifetime_factor)*hitamplitude*.000001;
-		hit_col.push_back(hit[i]->Charge());
+	      if(plane==1){energyofhits_col+=((6241.5*fCalibration_factor*fWorkfunction_factor/fRecombination_factor)*(1/elifetime_factor)*hitamplitude*.000001);
+		hit_col.push_back(hitamplitude);
 	      }
-	      if(p==0)
-	   
-		std::cout<<p<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<hit[i]->PeakTime()<<" "<<hitamplitude*3.2<<" "<<energyofhits_ind<<std::endl;
-  	   
-	      if(p==1)
-		std::cout<<p<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<hit[i]->PeakTime()<<" "<<hitamplitude<<" "<<energyofhits_col<<std::endl;
+ 	      if(plane==0)	   
+ 		std::cout<<plane<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<allhits[i]->PeakTime()<<" "<<drifttick<<" "<<hitamplitude*2.64<<" "<<energyofhits_ind<<std::endl;
+//   	   
+	      if(plane==1)
+		std::cout<<plane<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<allhits[i]->PeakTime()<<" "<<drifttick<<" "<<hitamplitude<<" "<<energyofhits_col<<std::endl;
   	   
 	    }
+	    else
+	    {
+	     if(plane==0)
+		std::cout<<"not counted "<<plane<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<allhits[i]->PeakTime()<<" "<<drifttick<<" "<<hitamplitude<<" "<<energyofhits_col<<std::endl;
+	    
+	    
+	     if(plane==1)
+		std::cout<<"not counted "<<plane<<" "<<wire<<" "<<wire2<<" "<<larp->DriftVelocity(larp->Efield(),larp->Temperature())*.198*sqrt(pow(TMath::Abs((int)(wire2-wire))*(1/(larp->DriftVelocity(larp->Efield(),larp->Temperature())*(1/.4)*.198)),2))<<" "<<allhits[i]->PeakTime()<<" "<<drifttick<<" "<<hitamplitude<<" "<<energyofhits_col<<std::endl;
+	    
+	    }
 	  
-	  
+
 	}
 	
 	
@@ -343,12 +384,12 @@ void vertex::VertexActivity::produce(art::Event& evt)
 	
 	
       double finalenergy=((A*reduceden)+(B*averageen))/(A+B);
-      if(p==1)
+      if(plane==1)
 	{
-	  std::cout<<"Energy2 "<<Energy<<" MeV "<<finalenergy<<" "<<std::endl;
-	  fEfficiency->Fill(finalenergy,finalenergy/Energy);
-	  fIndEfficiency->Fill(energyofhits_ind,energyofhits_ind/Energy);
-	  fColEfficiency->Fill(energyofhits_col,energyofhits_col/Energy);
+	  std::cout<<"Energy2 "<<Energy<<" MeV "<<finalenergy<<" "<<energyofhits_ind<<" "<<energyofhits_col<<std::endl;
+	  fEfficiency->Fill(Energy,finalenergy/Energy);
+	  fIndEfficiency->Fill(Energy,energyofhits_ind/Energy);
+	  fColEfficiency->Fill(Energy,energyofhits_col/Energy);
 	}
       //Energy=0.;
     
@@ -359,8 +400,8 @@ void vertex::VertexActivity::produce(art::Event& evt)
       // 
       // 	}
 
-      hit.clear();
-      if(clusterIter!=clusIn.end()) clusterIter++;
+      allhits.clear();
+
 
 
     }
@@ -375,7 +416,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
   if(size==size2)
     size3=size;
     
-  std::cout<<"size3 "<<size3<<" "<<size2<<" "<<size<<std::endl;
+ //  std::cout<<"size3 "<<size3<<" "<<size2<<" "<<size<<std::endl;
   for(int i=0;i<size3;i++)
     findcol->Fill(hit_ind[i],hit_col[i]);
 

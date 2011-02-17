@@ -39,6 +39,7 @@ namespace vertex {
     std::string fLArG4ModuleLabel;
     std::string fVertexModuleLabel;
     std::string fGenieGenModuleLabel;
+    std::string fHitsModuleLabel;
     std::string fScanModuleLabel;
     double fCathodetimelocation, fDelta_Cathodetimelocation;
     double fE_lifetime, fDelta_E_lifetime;

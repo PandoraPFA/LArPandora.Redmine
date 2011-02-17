@@ -30,7 +30,7 @@ services.user.LArVoxelCalculator:  @local::argoneut_larvoxelcalculator
 source:
 {
   module_type: RootInput
-  maxEvents:  10        # Number of events to create
+  maxEvents:  -1        # Number of events to create
 }
 
 outputs:
@@ -56,7 +56,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ caldata, ffthit, dbscan, vertexactivity ] 
+ reco: [ caldata, ffthit, vertexactivity ] 
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -73,6 +73,5 @@ physics:
 # define the list of LArSoft modules to run through the simulate path
 physics.producers.caldata:    @local::argoneut_calwire	
 physics.producers.ffthit:     @local::argoneut_hitfinder	
-physics.producers.dbscan:    @local::argoneut_dbcluster	
 physics.producers.vertexactivity:     @local::argoneut_vertexactivity
 
