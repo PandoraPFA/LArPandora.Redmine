@@ -4,6 +4,7 @@
 ///
 /// \version $Id: T962G4.h,v 1.11 2010/06/04 21:47:27 bjpjones Exp $
 /// \author  joshua.spitz@yale.edu
+/// \echurch@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef T962G4_T962G4ANA_H
@@ -20,11 +21,9 @@ namespace T962G4 {
  
   class T962G4Ana : public art::EDAnalyzer{
   public:
- 
-    /// Standard constructor and destructor for an FMWK module.
+
     explicit T962G4Ana(fhicl::ParameterSet const& pset);
     virtual ~T962G4Ana();
-
     void analyze (const art::Event& evt); 
     void beginJob();
 
