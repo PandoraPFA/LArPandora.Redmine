@@ -4,6 +4,7 @@ argoneut_t962geantana:
 {
  module_type:      "T962G4Ana"
  GeantModuleLabel: "largeant"
+ GenieGenModuleLabel:         "generator"
  Ndaughters:        20
 }
 

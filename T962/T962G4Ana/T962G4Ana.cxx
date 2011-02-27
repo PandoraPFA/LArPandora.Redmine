@@ -42,6 +42,7 @@ namespace T962G4 {
   // Constructor
   T962G4Ana::T962G4Ana(fhicl::ParameterSet const& pset) :
     fG4ModuleLabel(pset.get< std::string >("GeantModuleLabel")),
+    fGenieGenModuleLabel             (pset.get< std::string >("GenieGenModuleLabel")),
     fm_run(0), 
     fm_event(0),
     fm_trackID(-1),
@@ -62,7 +63,17 @@ namespace T962G4 {
     fm_minosenter_x(0.),
     fm_minosenter_y(0.),
     fm_minosenter_z(0.),
-    fm_minosenter_energy(0.)
+    fm_minosenter_energy(0.),
+    fm_init_px(0.),
+    fm_init_py(0.),
+    fm_init_pz(0.),
+    fm_init_x(0.),
+    fm_init_y(0.),
+    fm_init_z(0.),
+    fm_init_energy(0.),
+    fm_offset_x(0.),
+    fm_offset_y(0.),
+    fm_offset_z(0.)
   {
   }
 
@@ -98,11 +109,55 @@ namespace T962G4 {
   ftree->Branch("minosenter_y", &fm_minosenter_y, "minosenter_y/F");
   ftree->Branch("minosenter_z", &fm_minosenter_z, "minosenter_z/F");
   ftree->Branch("minosenter_energy", &fm_minosenter_energy, "minosenter_energy/F");  
+  ftree->Branch("init_px", &fm_init_px, "init_px/F");
+  ftree->Branch("init_py", &fm_init_py, "init_py/F");
+  ftree->Branch("init_pz", &fm_init_pz, "init_pz/F");
+  ftree->Branch("init_x", &fm_init_x, "init_x/F");
+  ftree->Branch("init_y", &fm_init_y, "init_y/F");
+  ftree->Branch("init_z", &fm_init_z, "init_z/F");
+  ftree->Branch("init_energy", &fm_init_energy, "init_energy/F"); 
+  ftree->Branch("neutrino_px", &fm_neutrino_px, "neutrino_px/F");
+  ftree->Branch("neutrino_py", &fm_neutrino_py, "neutrino_py/F");
+  ftree->Branch("neutrino_pz", &fm_neutrino_pz, "neutrino_pz/F");
+  ftree->Branch("neutrino_x", &fm_neutrino_x, "neutrino_x/F");
+  ftree->Branch("neutrino_y", &fm_neutrino_y, "neutrino_y/F");
+  ftree->Branch("neutrino_z", &fm_neutrino_z, "neutrino_z/F");
+  ftree->Branch("neutrino_energy", &fm_neutrino_energy, "neutrino_energy/F");
+  ftree->Branch("neutrino_pdgcode", &fm_neutrino_pdgcode, "neutrino_pdgcode/I");
+  ftree->Branch("offset_x", &fm_offset_x, "offset_x/F");
+  ftree->Branch("offset_y", &fm_offset_y, "offset_y/F");
+  ftree->Branch("offset_z", &fm_offset_z, "offset_z/F");
   }
 
   //-----------------------------------------------------------------------
-  void T962G4Ana::analyze(const art::Event& evt) 
-  {
+void T962G4Ana::analyze(const art::Event& evt) 
+{
+  
+  art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
+  evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
+
+
+  art::PtrVector<simb::MCTruth> mclist;
+  for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
+    {
+      art::Ptr<simb::MCTruth> mctparticle(mctruthListHandle,ii);
+      mclist.push_back(mctparticle);
+    } 
+
+  art::Ptr<simb::MCTruth> mc(mclist[0]);
+// 
+	simb::MCNeutrino neut(mc->GetNeutrino());
+
+
+
+    fm_neutrino_x =neut.Nu().Vx();
+    fm_neutrino_y =neut.Nu().Vy();
+    fm_neutrino_z =neut.Nu().Vz();
+    fm_neutrino_px =neut.Nu().Px();
+    fm_neutrino_py =neut.Nu().Py();
+    fm_neutrino_pz =neut.Nu().Pz();
+    fm_neutrino_energy=neut.Nu().E();
+    fm_neutrino_pdgcode=neut.Nu().PdgCode();
 
     //get the list of particles from this event
     sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
@@ -139,38 +194,39 @@ namespace T962G4 {
     fm_mass=0.;
     fm_energylost=0.;
     fm_deflectionangle=0.;
-    float x_offset=116.9;//cm
-    float y_offset=-20.28;//cm
-    float z_offset=-147.1;//cm
+    fm_offset_x=116.9;//cm
+    fm_offset_y=-20.28;//cm
+    fm_offset_z=-154.22;//cm
     
     int numprimaries=0;
+    int numinminos=0;
+    int primindex=1;
     for(unsigned int i = 0; i < pvec.size(); ++i)
     {
      if(pvec[i]->Process()!="primary")
-     continue;     
+     continue; 
+     numinminos++;
     simb::MCTrajectory trajectory = pvec[i]->Trajectory();
     int numberofpoints= pvec[i]->NumberTrajectoryPoints();    
     	for(int j=1; j<numberofpoints; j++)
     	{
     	TLorentzVector prevposition = trajectory.Position(j-1);
     	TLorentzVector position = trajectory.Position(j);
-    
-    	if(pvec[i]->Process()=="primary"&&prevposition.Z()<154.22&&position.Z()>154.22)
-    	numprimaries++; 
-    	}
-    
+        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<154.22&&position.Z()>154.22&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
+    	numprimaries++;    	
+    	}    
     }
     ofstream myfile;
     myfile.open("MINOSin.txt", std::ios::out | std::ios::app);
     myfile << "________________________________________________________________________________\n";    
-    myfile << "***** HEPEVT Common Event#: "<<fm_event<<", "<<numprimaries<<" particles (max 4000) ***** Double Precision\n";
+    myfile << "***** HEPEVT Common Event#: "<<fm_event<<", "<<numprimaries+numinminos+1<<" particles (max 4000) ***** Double Precision\n";
     myfile << "4-byte integers, 8-byte floating point numbers, 4000-allocated entries.\n";
     myfile << "Indx Stat Par- chil-       (  P_x,       P_y,       P_z,    Energy,       M )\n";
     myfile << "      ID  ents dren    Prod (   X,         Y,         Z,        cT)      [mm]\n";
     myfile << "________________________________________________________________________________\n";
-    
-    
-    
+    myfile <<"   "<<1<<" +10001    "<<0<<"    0    (    "<<fm_neutrino_px<<",  "<<fm_neutrino_py<<",  "<<fm_neutrino_pz<<",  "<<fm_neutrino_energy<<",  "<<fm_mass<<")\n";
+    myfile <<"      +"<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
+      
     for(unsigned int i = 0; i < pvec.size(); ++i){
     
     if(pvec[i]->Process()!="primary")
@@ -180,16 +236,28 @@ namespace T962G4 {
     fm_pdgcode=pvec[i]->PdgCode();       
     fm_mass=pvec[i]->Mass();
     fm_trackID=i;
+    TLorentzVector initposition = trajectory.Position(0);
+    TLorentzVector initmomentum = trajectory.Momentum(0);
+    int numberofpoints= pvec[i]->NumberTrajectoryPoints();   
     
-    int numberofpoints= pvec[i]->NumberTrajectoryPoints();    
+       fm_init_x=initposition.X();
+       fm_init_y=initposition.Y();
+       fm_init_z=initposition.Z();
+       fm_init_px=initmomentum.Px();
+       fm_init_py=initmomentum.Py();
+       fm_init_pz=initmomentum.Pz();
+       fm_init_energy=initmomentum.E(); 
+      
+      primindex++;
+      myfile <<"   "<<primindex<<" +10001    1    0    (    "<<fm_init_px<<",  "<<fm_init_py<<",  "<<fm_init_pz<<",  "<<fm_init_energy<<",  "<<fm_mass<<")\n";
+      myfile <<"      +"<<fm_pdgcode<<"    1    0    (      "<<(fm_init_x+fm_offset_x)*10.<<",       "<<(fm_init_y+fm_offset_y)*10.<<",       "<<(fm_init_z+fm_offset_z)*10.<<",  2.64e+06)\n";
     for(int j=1; j<numberofpoints; j++)
     {
       TLorentzVector prevposition = trajectory.Position(j-1);
       TLorentzVector position = trajectory.Position(j);
       TLorentzVector prevmomentum = trajectory.Momentum(j-1);
-      TLorentzVector momentum = trajectory.Momentum(j);      
-      TLorentzVector initmomentum = trajectory.Momentum(0);
-    
+      TLorentzVector momentum = trajectory.Momentum(j);
+
        if(       (((prevposition.X()<0.&&position.X()>0.)||(prevposition.X()>0.&&position.X()<0.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.Z()>0.&&prevposition.Z()<90.))
        ||       (((prevposition.X()<47.&&position.X()>47.)||(prevposition.X()>47.&&position.X()<47.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.Z()>0.&&prevposition.Z()<90.))
        ||       (((prevposition.Y()<20.2&&position.Y()>20.2)||(prevposition.Y()>20.2&&position.Y()<20.2))&&(prevposition.X()<47.&&prevposition.X()>0.&&prevposition.Z()>0.&&prevposition.Z()<90.))
@@ -206,41 +274,32 @@ namespace T962G4 {
        fm_tpcexit_pz=prevmomentum.Pz();
        fm_tpcexit_energy=prevmomentum.E(); 
        }
-   //  if(prevposition.Z()<154.22&&position.Z()>154.22)
-//           {
-       fm_minosenter_x=prevposition.X()+x_offset;
-       fm_minosenter_y=prevposition.Y()+y_offset;
-       fm_minosenter_z=prevposition.Z()+z_offset;
+    if(prevposition.Z()<154.22&&position.Z()>154.22&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
+           {
+       fm_minosenter_x=prevposition.X();
+       fm_minosenter_y=prevposition.Y();
+       fm_minosenter_z=prevposition.Z();
        fm_minosenter_px=prevmomentum.Px();
        fm_minosenter_py=prevmomentum.Py();
        fm_minosenter_pz=prevmomentum.Pz();
        fm_minosenter_energy=prevmomentum.E();
-       
-       
 
-//     myfile << "   1   +0    0    0    (        0,         0,         0,         0,         0)\n";
-//     myfile << "       +0    0    0    (        0,         0,         0,         0)\n";
-    myfile <<"   1   +1    0    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
-    myfile <<"      +"<<fm_pdgcode<<"    0    0    (      "<<fm_minosenter_x*10.<<",       "<<fm_minosenter_y*10.<<",       "<<fm_minosenter_z*10.<<",  2.64e+06)\n";
-    myfile << "________________________________________________________________________________\n";         
-
+    primindex++;
+    myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
+    myfile <<"      +"<<fm_pdgcode<<"    0    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
     
-       
 //          
-        std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;      
-      
-       
+       //  std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;      
+
        fm_energylost=fm_tpcexit_energy-fm_minosenter_energy;
        fm_deflectionangle= TMath::ACos(((fm_tpcexit_px*fm_minosenter_px)+(fm_tpcexit_py*fm_minosenter_py)+(fm_tpcexit_pz*fm_minosenter_pz))/(sqrt(pow(fm_tpcexit_px,2)+pow(fm_tpcexit_py,2)+pow(fm_tpcexit_pz,2))*sqrt(pow(fm_minosenter_px,2)+pow(fm_minosenter_py,2)+pow(fm_minosenter_pz,2))));
-
-       
-      // std::cout<<"exit-enter "<<(fm_tpcexit_energy-fm_minosenter_energy)*1000.<<" "<<fm_deflectionangle<<std::endl;
-          // }
+//         std::cout<<"exit-enter "<<(fm_tpcexit_energy-fm_minosenter_energy)*1000.<<" "<<fm_deflectionangle<<" "<<fm_minosenter_energy<<std::endl;
+           }
     }
-    ftree->Fill(); 
-
+    ftree->Fill();    
   }
-myfile.close(); 
+  myfile << "________________________________________________________________________________\n";
+  myfile.close(); 
 return;  
 }
 
