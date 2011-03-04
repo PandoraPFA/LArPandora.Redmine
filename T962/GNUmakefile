@@ -7,10 +7,10 @@ include SoftRelTools/arch_spec_root.mk
 
 SUBDIRS     := T962_Objects MergeData VertexActivity MatchTracks MergeScan ScanFilter Kinematics SimKinematics T962G4Ana
 
-LIBLINK    := $(LOADLIBES) -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -l$(PACKAGE)
+LIBLINK    := -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -l$(PACKAGE)
 
 ########################################################################
 include SoftRelTools/standard.mk
 include SoftRelTools/arch_spec_art.mk
 
-override LIBLIBS += -L$(ART_LIB) -lart_Framework_Services_Optional_TFileService_service
+override LIBLIBS += $(LOADLIBES) -L$(ART_LIB) -lart_Framework_Services_Optional_TFileService_service

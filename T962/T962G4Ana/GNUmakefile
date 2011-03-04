@@ -12,7 +12,7 @@ JOBFILES    := $(wildcard *.fcl)
 
 CPPFLAGS     += -I$(G4INSTALL)/include
 
-LIBLINK    := $(LOADLIBES) -L$(CLHEP_BASE)/lib -lCLHEP -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -lGeometry -lSimulationBase -lSimulation -l$(PACKAGE)
+LIBLINK    := -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -l$(PACKAGE)
 
 
 ########################################################################
@@ -20,4 +20,4 @@ include SoftRelTools/standard.mk
 include SoftRelTools/arch_spec_art.mk
 ########################################################################
 
-override LIBLIBS += -L$(ART_LIB) -lart_Framework_Services_Optional_TFileService_service
+override LIBLIBS += $(LOADLIBES) -L$(ART_LIB) -lart_Framework_Services_Optional_TFileService_service -L$(CLHEP_BASE)/lib -lCLHEP -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -lSimulation -lGeometry -lSimulationBase 
