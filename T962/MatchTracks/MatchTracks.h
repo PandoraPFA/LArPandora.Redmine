@@ -10,6 +10,7 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/Handle.h"
 
 #include "RecoBase/Track.h"
 #include "T962/T962_Objects/MINOS.h"
@@ -19,6 +20,7 @@
 
 
 class TH1D;
+class TH2D;
 
 namespace match {
    
@@ -37,6 +39,32 @@ namespace match {
       TH1D* fDiffDirCosX;
       TH1D* fDiffDirCosY;
       TH1D* fDiffDirCosZ;
+      TH1D* fDiffR;
+      TH2D* fDiffXvDiffY;
+
+      TH1D* fT962_DirCosX;
+      TH1D* fT962_DirCosY;
+      TH1D* fT962_DirCosZ;
+      TH2D* fT962_StartZY;
+      TH2D* fT962_EndZY;
+      TH2D* fT962_StartXY;
+      TH2D* fT962_EndXY;
+      TH2D* fT962_StartZX;
+      TH2D* fT962_EndZX;
+      TH1D* fT962_Ntracks;
+
+      TH1D* fMinos_DirCosX;
+      TH1D* fMinos_DirCosY;
+      TH1D* fMinos_DirCosZ;
+      TH2D* fMinos_XY;
+      TH1D* fMinosErange_Pos;
+      TH1D* fMinosErange_Neg;
+      TH1D* fMinosMom_Pos;
+      TH1D* fMinosMom_Neg;
+      
+
+      TH2D* fDiffXvD;
+      TH2D* fDiffYvD;
 
       std::string fLarTracks_label;
       std::string fMinosTracks_label;
@@ -49,8 +77,11 @@ namespace match {
       
    protected: 
       
-      bool Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track); //method to compare track kinematics
-      
+      bool Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track, 
+                   double &xpred, double &ypred, double &rdiff); //method to compare track kinematics
+      int  AngleCompare(art::Ptr<recob::Track> lar_track, art::Handle< std::vector<t962::MINOS> > minoshandle);
+      bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
+
    }; // class MatchTracks
    
 }

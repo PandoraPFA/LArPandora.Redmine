@@ -35,18 +35,20 @@ services.user.HoughLineService: @local::argoneut_houghlineservice
 source:
 {
  module_type: RootInput
- dirName:     "."
+ #dirName:     "."
  fileNames:    ["mergedata.root"]
+ #dirName:      "/argoneut/data/rootfiles_ART_MINOS_handscanned"
+ #fileNames:    ["/argoneut/data/rootfiles_ART_MINOS/R644_D20090925_T150423_MINOS.root"]
  maxEvents: -1
 }
 
 outputs:
 {
- out1:
- {
-    module_type: RootOutput
-    fileName:    "matchtracks.root"
- }      
+ #out1:
+ #{
+ #   module_type: RootOutput
+ #   fileName:    "matchtracks.root"
+ #}      
 }
 
 physics:
@@ -54,16 +56,19 @@ physics:
   producers:{}
   analyzers:{}
   recopath: [caldata, ffthit, dbscan, hough, linemerger, track3d]
+  #recopath: [caldata,ffthit,dbscan,track3d]
   anapath: [match]
-  stream1: [out1]
+  #stream1: [out1]
   trigger_paths: [recopath]
-  end_paths: [anapath, stream1]
+  #end_paths: [anapath, stream1]
+  end_paths: [anapath]
 }
 
 physics.producers.caldata:  @local::argoneut_calwire
 physics.producers.ffthit:   @local::argoneut_hitfinder
-physics.producers.dbscan:  @local::argoneut_dbcluster
-physics.producers.hough:    @local::argoneut_houghlinemod
+physics.producers.dbscan:   @local::argoneut_dbcluster
+physics.producers.hough:    @local::argoneut_houghlinefinder
 physics.producers.linemerger: @local::argoneut_linemerger
 physics.producers.track3d:  @local::argoneut_track
+#physics.producers.track3d:  @local::argoneut_lartrack
 physics.analyzers.match:    @local::argoneut_matchtracks

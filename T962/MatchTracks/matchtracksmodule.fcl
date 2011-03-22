@@ -5,8 +5,8 @@ argoneut_matchtracks:
  module_type: "MatchTracks"
  lartracks:   "track3d"
  minostracks: "minos"
- dZ:          10.0
- dXY:         11.0
+ dZ:          20.0
+ dXY:         50.0
  dCosx:       1.0
  dCosy:       1.0
  dCosz:       1.0 
