@@ -175,7 +175,7 @@ void Kinematics::analyze(const art::Event& evt)
     
     fm_lepphi_true=(TMath::Pi()+TMath::ATan2(-neut.Py(),-neut.Pz()));
 
-    fm_lepphi_reco=(TMath::Pi()+TMath::ATan2(-larStart[1],-larStart[2]));
+    fm_lepphi_reco=(TMath::Pi()+TMath::ATan2(-(larStart[1]*(larStart[0]+larStart[1]+larStart[2])),-larStart[2]*(larStart[0]+larStart[1]+larStart[2])));
     fm_leptheta_reco=TMath::ACos(larStart[2]);
     if(trackStart.size())
     {
