@@ -1,6 +1,6 @@
 BEGIN_PROLOG
 
-argoneut_kinematics:
+argoneut_kinematicsana:
 { 
  module_type:                 "Kinematics"
  DBScanModuleLabel:           "dbscan"
@@ -8,6 +8,7 @@ argoneut_kinematics:
  GenieGenModuleLabel:         "generator"
  ScanModuleLabel:             "mergescan"
  MINOSModuleLabel:            "minos"
+ LArTracksModuleLabel:        "track3d"
 }
 
 
