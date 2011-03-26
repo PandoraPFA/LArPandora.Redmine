@@ -169,11 +169,14 @@ void Kinematics::analyze(const art::Event& evt)
     fm_init_y_true=neut.Vy();
     fm_init_z_true=neut.Vz();
     
-    fm_leptheta_true=TMath::Abs(neut.Pz()/sqrt(pow(neut.Px(),2)+pow(neut.Py(),2)+pow(neut.Pz(),2)));    
+    
+    
+    fm_leptheta_true=TMath::ACos(neut.Pz()/sqrt(pow(neut.Px(),2)+pow(neut.Py(),2)+pow(neut.Pz(),2)));
+    
     fm_lepphi_true=(TMath::Pi()+TMath::ATan2(-neut.Py(),-neut.Pz()));
 
     fm_lepphi_reco=(TMath::Pi()+TMath::ATan2(-larStart[1],-larStart[2]));
-    fm_leptheta_reco=larStart[2];
+    fm_leptheta_reco=TMath::ACos(larStart[2]);
     if(trackStart.size())
     {
     fm_init_x_reco=trackStart[0];
