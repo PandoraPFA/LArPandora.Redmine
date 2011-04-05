@@ -134,14 +134,23 @@ void Kinematics::analyze(const art::Event& evt)
   double larEnd[3];
      //just take the longest 3D track for now    
     //      for(unsigned int i=0; i<LarTrackHandle->size();++i){
+    
+    // std::sort(LarTrackHandle->begin(),LarTrackHandle->end());
+    int size=0;
      if(LarTrackHandle->size()>0)
-     for(unsigned int i=0; i<1;++i){
+     for(unsigned int i=0; i<LarTrackHandle->size();++i){
       art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
+      
        std::cout << " T962 " << *lartrack << std::endl;
        std::cout << "T962 Track #" << lartrack->ID() <<std::endl;
 
+       if(lartrack->SpacePoints().size()>size)
+       {
        lartrack->Direction(larStart,larEnd);
-       lartrack->Extent(trackStart,trackEnd);     
+       lartrack->Extent(trackStart,trackEnd);  
+       }
+       size=lartrack->SpacePoints().size();
+       std::cout<<"size "<<size<<std::endl;
       }
       
    if(LarTrackHandle->size()==0)
@@ -173,9 +182,9 @@ void Kinematics::analyze(const art::Event& evt)
     
     fm_leptheta_true=TMath::ACos(neut.Pz()/sqrt(pow(neut.Px(),2)+pow(neut.Py(),2)+pow(neut.Pz(),2)));
     
-    fm_lepphi_true=(TMath::Pi()+TMath::ATan2(-neut.Py(),-neut.Pz()));
+    fm_lepphi_true=(TMath::Pi()+TMath::ATan2(-neut.Py(),-neut.Px()));
 
-    fm_lepphi_reco=(TMath::Pi()+TMath::ATan2(-(larStart[1]*(larStart[0]+larStart[1]+larStart[2])),-larStart[2]*(larStart[0]+larStart[1]+larStart[2])));
+    fm_lepphi_reco=(TMath::Pi()+TMath::ATan2(-(larStart[1]*(larStart[0]+larStart[1]+larStart[2])),-larStart[0]*(larStart[0]+larStart[1]+larStart[2])));
     fm_leptheta_reco=TMath::ACos(larStart[2]);
     if(trackStart.size())
     {
@@ -240,7 +249,7 @@ void Kinematics::analyze(const art::Event& evt)
         fm_tpcexit_x_true=prevposition.X();
         fm_tpcexit_y_true=prevposition.Y();
         fm_tpcexit_z_true=prevposition.Z();
-       }          
+       }
      }
     }
 
