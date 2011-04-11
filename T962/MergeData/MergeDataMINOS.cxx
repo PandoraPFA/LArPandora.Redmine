@@ -65,13 +65,9 @@ namespace merge{
    //-------------------------------------------------
    void MergeDataMINOS::produce(art::Event& evt)
    {
-      art::Handle< std::vector<raw::DAQHeader> > daqHandle;
-      evt.getByLabel(fdaq_modulelabel,daqHandle);
-      fdaq = art::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
+      evt.getByLabel(fdaq_modulelabel,fdaq);
 
-      art::Handle< std::vector<raw::BeamInfo> > beamHandle;
-      evt.getByLabel(fbeam_modulelabel,beamHandle);
-      fbeam = art::Ptr<raw::BeamInfo>(beamHandle, beamHandle->size()-1);
+      evt.getByLabel(fbeam_modulelabel,fbeam);
 	  
       std::auto_ptr<std::vector<t962::MINOS> > MINOS_coll(new std::vector<t962::MINOS> );
       std::vector<t962::MINOS> vec_minos;

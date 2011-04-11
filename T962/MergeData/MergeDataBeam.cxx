@@ -29,7 +29,7 @@ namespace merge{
   MergeDataBeam::MergeDataBeam(fhicl::ParameterSet const& pset) : 
     fdaq_modulelabel(pset.get< std::string >("daq"))
   {
-    produces< std::vector<raw::BeamInfo> > ();
+    produces<raw::BeamInfo> ();
   }
 
   //-------------------------------------------------
@@ -41,16 +41,13 @@ namespace merge{
   //-------------------------------------------------
   void MergeDataBeam::produce(art::Event& evt)
   {
-    art::Handle< std::vector<raw::DAQHeader> > daqHandle;
-    evt.getByLabel(fdaq_modulelabel,daqHandle);
-    fdaq = art::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
+    evt.getByLabel(fdaq_modulelabel,fdaq);
        
-    std::auto_ptr<std::vector<raw::BeamInfo> > Beam_coll(new std::vector<raw::BeamInfo> );
     raw::BeamInfo beam;
 
     if(MergeBeam(beam)){
-      Beam_coll->push_back(beam);
-      evt.put(Beam_coll);
+      std::auto_ptr<raw::BeamInfo> Beam(new raw::BeamInfo(beam));
+      evt.put(Beam);
     }
   
     return;
@@ -63,10 +60,10 @@ namespace merge{
     spilltime = spilltime >> 32;
     tm *timeinfo = localtime(&spilltime);//use this to get day/month/year;we should worry about users in different time zones at some point
    
-  
     char beamfilename[20];
     sprintf(beamfilename,"/argoneut/data/rundata/matched/matched_%02d_%i_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
     std::ifstream beamfile(beamfilename);
+
     if(!beamfile.is_open()){
        mf::LogDebug ("badfile") << "MergeBeam could not open file named " << beamfilename ;
        return false;
@@ -87,7 +84,9 @@ namespace merge{
        ins.clear();
        ins.str(k);
        ins>>first>>run>>event>>tms>> tor101 >> tortgt >> trtgtd;
-       //  std::cout<<std::setprecision(9)<<first<<"  "<<run<<"  "<<event<<"  "<<tms<<" "<<tor101<<"  "<< tortgt <<"  "<< trtgtd <<std::endl;
+//        std::cout<<std::setprecision(9)<<first<<"  "
+// 		<<run<<"  "<<event<<"  "<<tms<<" "
+// 		<<tor101<<"  "<< tortgt <<"  "<< trtgtd <<std::endl;
    
        if((fdaq->GetRun()==run)&&(fdaq->GetEvent()==event ) ){ 
           foundbeaminfo=true;

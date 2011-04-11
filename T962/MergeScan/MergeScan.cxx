@@ -63,9 +63,8 @@ MergeScan::~MergeScan()
 void MergeScan::produce(art::Event& evt)
 {
   std::auto_ptr<std::vector<t962::ScanInfo> > Scan_coll(new std::vector<t962::ScanInfo> );
-  art::Handle< std::vector<raw::DAQHeader> > daqHandle;
-  evt.getByLabel(daq_modulelabel,daqHandle);
-  art::Ptr<raw::DAQHeader> daq = art::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
+  art::Handle< raw::DAQHeader > daq;
+  evt.getByLabel(daq_modulelabel,daq);
   t962::ScanInfo scan;
 
   time_t spilltime = daq->GetTimeStamp();//time info. from DAQ480 software

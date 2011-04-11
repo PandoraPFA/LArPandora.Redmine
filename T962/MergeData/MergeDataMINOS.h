@@ -50,10 +50,10 @@ namespace merge {
 
       void parse_filename(std::string filename, int & minos_t1, int & minos_t2); //method to grab relevant MINOS info. from filenames
 
-      art::Ptr<raw::DAQHeader> fdaq;
+      art::Handle<raw::DAQHeader> fdaq;
       std::string  fdaq_modulelabel;               // label for input DAQHeader object 
       
-      art::Ptr<raw::BeamInfo> fbeam;
+      art::Handle<raw::BeamInfo> fbeam;
       std::string fbeam_modulelabel;               // label for input BeamInfo object
       
    }; // class MergeDataMINOS

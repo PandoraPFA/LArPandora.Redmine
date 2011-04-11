@@ -32,7 +32,7 @@ namespace merge {
 
     bool MergeBeam(raw::BeamInfo& beam);                 ///method to merge beam data
     
-    art::Ptr<raw::DAQHeader> fdaq;
+    art::Handle<raw::DAQHeader> fdaq;
     std::string  fdaq_modulelabel;               ///< folder for input 
      
     

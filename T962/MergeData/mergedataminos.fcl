@@ -3,7 +3,7 @@ BEGIN_PROLOG
 argoneut_mergedataminos:
 {
  module_type: "MergeDataMINOS"
- daq:         "source"
+ daq:         "daq"
  beam:        "beam"
 }
 
