@@ -37,14 +37,10 @@ namespace dfe{
   }
 
   //-----------------------------------------------------
-  DriftElectrons::DriftElectrons(fhicl::ParameterSet const& pset) :
-    fRecombA         (pset.get< double >("RecombA")),
-    fRecombk         (pset.get< double >("Recombk")),
-    fLongDiff        (pset.get< double >("LongDiff")),
-    fTranDiff        (pset.get< double >("TranDiff")),
-    fClusterSize     (pset.get< double >("ClusterSize")),
-    fLArG4ModuleLabel(pset.get< std::string >("LArG4ModuleLabel"))
+  DriftElectrons::DriftElectrons(fhicl::ParameterSet const& pset)
   {
+    this->reconfigure(pset);
+
     produces< std::vector<sim::Electrons> >();
 
     // Conversion from GeV energy loss to electrons
@@ -63,6 +59,19 @@ namespace dfe{
   //-----------------------------------------------------
   DriftElectrons::~DriftElectrons()
   {
+  }
+
+  //-----------------------------------------------------
+  void DriftElectrons::reconfigure(fhicl::ParameterSet p)
+  {
+    fRecombA          = p.get< double      >("RecombA");    		
+    fRecombk          = p.get< double 	   >("Recombk");    	
+    fLongDiff         = p.get< double 	   >("LongDiff");   	
+    fTranDiff         = p.get< double 	   >("TranDiff");   	
+    fClusterSize      = p.get< double 	   >("ClusterSize");	
+    fLArG4ModuleLabel = p.get< std::string >("LArG4ModuleLabel");
+
+    return;
   }
 
   //-----------------------------------------------------

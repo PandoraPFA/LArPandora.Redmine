@@ -34,7 +34,8 @@ namespace dfe {
     virtual ~DriftElectrons();
     void produce(art::Event& evt);
     void beginJob();
-    
+    void reconfigure(fhicl::ParameterSet p);
+
   private:
         
     TRandom3 fRandom;              ///< random number generator
