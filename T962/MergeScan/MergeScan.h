@@ -35,6 +35,8 @@ namespace t962 {
 
   private:
 
+    art::Handle<raw::DAQHeader> fdaq;
+
   protected: 
 
     ///<parameters to set

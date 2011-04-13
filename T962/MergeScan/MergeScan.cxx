@@ -63,15 +63,17 @@ MergeScan::~MergeScan()
 void MergeScan::produce(art::Event& evt)
 {
   std::auto_ptr<std::vector<t962::ScanInfo> > Scan_coll(new std::vector<t962::ScanInfo> );
-  art::Handle< raw::DAQHeader > daq;
-  evt.getByLabel(daq_modulelabel,daq);
+  //art::Handle< std::vector<raw::DAQHeader> > daqHandle;
+
+  evt.getByLabel(daq_modulelabel,fdaq);
+  //art::Ptr<raw::DAQHeader> daq = art::Ptr<raw::DAQHeader>(daqHandle, daqHandle->size()-1);
   t962::ScanInfo scan;
 
-  time_t spilltime = daq->GetTimeStamp();//time info. from DAQ480 software
+  time_t spilltime = fdaq->GetTimeStamp();//time info. from DAQ480 software
   tm *timeinfo = localtime(&spilltime);
 
   char scanfilename[100];
- sprintf(scanfilename,"/argoneut/data/simplescan_data/simplescan_text/scan_%s.00%d.txt",scanners.c_str(),daq->GetRun());
+ sprintf(scanfilename,"/argoneut/data/simplescan_data/simplescan_text/scan_%s.00%d.txt",scanners.c_str(),fdaq->GetRun());
 
  std::ifstream scanfile(scanfilename);
 
@@ -91,7 +93,7 @@ void MergeScan::produce(art::Event& evt)
     ins3.str(k);
         ins3>>run>>event>>isnotneutrino>>ismaybeneutrino>>isneutrino>>track>>vertindtime>>vertcoltime>>vertindwire>>vertcolwire>>numshower;
         
-    if((daq->GetRun()==run)&&(daq->GetEvent()==event ) )
+    if((fdaq->GetRun()==run)&&(fdaq->GetEvent()==event ) )
     foundscaninfo=true; 
     else
     foundscaninfo=false;

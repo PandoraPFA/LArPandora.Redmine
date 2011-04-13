@@ -1,4 +1,4 @@
-#include "/argoneut/app/users/spitz7/larsoft_ART2/job/mergescanmodule.fcl"
+#include "job/mergescanmodule.fcl"
 
 process_name: MergeScan
 
