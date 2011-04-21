@@ -9,7 +9,7 @@
 #include "job/trackfindermodules.fcl"
 #include "job/kinematicsmodules.fcl"
 #include "job/scanfilter.fcl"
-
+#include "job/matchtracksmodule.fcl"
 
 process_name: Reco
 
@@ -45,7 +45,10 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "standard_reco.root" #default file name, can override from command line with -o or --output
+//    SelectEvents: {SelectEvents: [reco] }
  }
+
+ 
 }
 
 # Define and configure some modules to do work on each event.
@@ -56,33 +59,36 @@ physics:
 
  producers:{}
 
-# filters:{} 
+ filters:{} 
 
- analyzers:{}
+ # analyzers:{}
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ caldata, ffthit, dbscan, hough, linemerger, track3d ] 
- 
+ // reco: [  scanfilt, caldata, ffthit, dbscan, hough, linemerger, track3d  ] 
+ reco: [  caldata, ffthit, dbcluster, hough, linemerger, track3d  ]
+ # reco: [ scanfilt ]
  ana: [kinematicsana]
+// ana: [matchtracks]
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
- trigger_paths: [reco] 
+   trigger_paths: [reco] 
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- end_paths:     [ ana, stream1]  
+ end_paths:     [ stream1, ana ]  
 }
 
 # define the list of LArSoft modules to run through the simulate path
-// physics.producers.scanfilt:    @local::argoneut_scanfilter
+// physics.filters.scanfilt:    @local::argoneut_scanfilter
 physics.producers.caldata:    @local::argoneut_calwire	
 physics.producers.ffthit:     @local::argoneut_hitfinder	
-physics.producers.dbscan:    @local::argoneut_dbcluster	
+physics.producers.dbcluster:    @local::argoneut_dbcluster	
 physics.producers.hough:    @local::argoneut_houghlinefinder
 physics.producers.linemerger: @local::argoneut_linemerger
 physics.producers.track3d:  @local::argoneut_track
-physics.analyzers.kinematicsana:  @local::argoneut_kinematicsana
+//physics.analyzers.matchtracks:  @local::argoneut_matchtracks
+ physics.analyzers.kinematicsana:  @local::argoneut_kinematicsana
