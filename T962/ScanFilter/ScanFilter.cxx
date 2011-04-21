@@ -160,12 +160,7 @@ namespace filt{
     && scanIn[i]->Get_Track()>=fMinTracks_req
     && scanIn[i]->Get_Run()==run 
     && scanIn[i]->Get_Event()==event
-    && time < (1630-(fFidVolume_cut/.0297))
-    && time > (60+(fFidVolume_cut/.0297))
-    && y_vert < (20.2-fFidVolume_cut)
-    && y_vert > (-19.8+fFidVolume_cut)
-    && z_vert < (90.-fFidVolume_cut)
-    && z_vert > (0.+fFidVolume_cut)    
+ 
     )
     
     failFlag=0;       
