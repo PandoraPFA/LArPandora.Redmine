@@ -225,8 +225,10 @@ void T962G4Ana::analyze(const art::Event& evt)
     myfile << "      ID  ents dren    Prod (   X,         Y,         Z,        cT)      [mm]\n";
     myfile << "________________________________________________________________________________\n";
     myfile <<"   "<<1<<" +10001    "<<0<<"    0    (    "<<fm_neutrino_px<<",  "<<fm_neutrino_py<<",  "<<fm_neutrino_pz<<",  "<<fm_neutrino_energy<<",  "<<fm_mass<<")\n";
+    if(fm_neutrino_pdgcode>0)
     myfile <<"      +"<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
-      
+    else
+    myfile <<"      "<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
     for(unsigned int i = 0; i < pvec.size(); ++i){
     
     if(pvec[i]->Process()!="primary")
@@ -249,8 +251,12 @@ void T962G4Ana::analyze(const art::Event& evt)
        fm_init_energy=initmomentum.E(); 
       
       primindex++;
+
       myfile <<"   "<<primindex<<" +10001    1    0    (    "<<fm_init_px<<",  "<<fm_init_py<<",  "<<fm_init_pz<<",  "<<fm_init_energy<<",  "<<fm_mass<<")\n";
+      if(fm_pdgcode>0)
       myfile <<"      +"<<fm_pdgcode<<"    1    0    (      "<<(fm_init_x+fm_offset_x)*10.<<",       "<<(fm_init_y+fm_offset_y)*10.<<",       "<<(fm_init_z+fm_offset_z)*10.<<",  2.64e+06)\n";
+      else
+      myfile <<"      "<<fm_pdgcode<<"    1    0    (      "<<(fm_init_x+fm_offset_x)*10.<<",       "<<(fm_init_y+fm_offset_y)*10.<<",       "<<(fm_init_z+fm_offset_z)*10.<<",  2.64e+06)\n";
     for(int j=1; j<numberofpoints; j++)
     {
       TLorentzVector prevposition = trajectory.Position(j-1);
@@ -286,7 +292,10 @@ void T962G4Ana::analyze(const art::Event& evt)
 
     primindex++;
     myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
-    myfile <<"      +"<<fm_pdgcode<<"    0    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
+    if(fm_pdgcode>0)
+    myfile <<"       +"<<fm_pdgcode<<"    0    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
+    else
+     myfile <<"       "<<fm_pdgcode<<"    0    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
     
 //          
        //  std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;      
