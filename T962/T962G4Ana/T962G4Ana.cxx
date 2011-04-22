@@ -293,9 +293,9 @@ void T962G4Ana::analyze(const art::Event& evt)
     primindex++;
     myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
     if(fm_pdgcode>0)
-    myfile <<"       +"<<fm_pdgcode<<"    0    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
+    myfile <<"       +"<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
     else
-     myfile <<"       "<<fm_pdgcode<<"    0    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
+     myfile <<"      "<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
     
 //          
        //  std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;      
