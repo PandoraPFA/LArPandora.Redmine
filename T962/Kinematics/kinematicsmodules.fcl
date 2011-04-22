@@ -3,7 +3,7 @@ BEGIN_PROLOG
 argoneut_kinematicsana:
 { 
  module_type:                 "Kinematics"
- DBScanModuleLabel:           "dbscan"
+ DBScanModuleLabel:           "dbcluster"
  LArG4ModuleLabel:            "largeant"
  GenieGenModuleLabel:         "generator"
  ScanModuleLabel:             "mergescan"
