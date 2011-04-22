@@ -8,12 +8,14 @@
 #ifndef MATCHTRACKS_H
 #define MATCHTRACKS_H
 
-#include "art/Framework/Core/EDAnalyzer.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Persistency/Common/Ptr.h"
 #include "art/Persistency/Common/Handle.h"
 
 #include "RecoBase/Track.h"
 #include "T962/T962_Objects/MINOS.h"
+#include "T962/T962_Objects/MINOSTrackMatch.h"
+
 
 #include <string>
 #include <vector>
@@ -24,7 +26,7 @@ class TH2D;
 
 namespace match {
    
-   class MatchTracks : public art::EDAnalyzer {
+   class MatchTracks : public art::EDProducer {
       
    public:
       
@@ -32,7 +34,7 @@ namespace match {
       virtual ~MatchTracks();
       
       void beginJob();
-      void analyze(const art::Event& evt);
+      void produce(art::Event& evt);
       
    private:
 

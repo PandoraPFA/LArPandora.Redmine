@@ -45,7 +45,7 @@ namespace match{
       fdCosy(pset.get< double >("dCosy")),
       fdCosz(pset.get< double >("dCosz"))
    {
-
+      produces< std::vector<t962::MINOSTrackMatch> > ();
    }
 
    //-------------------------------------------------
@@ -91,9 +91,10 @@ namespace match{
    }
 
    //-------------------------------------------------
-   void MatchTracks::analyze(const art::Event& evt)
+   void MatchTracks::produce(art::Event& evt)
    {
-
+      t962::MINOSTrackMatch minos;
+      std::vector<t962::MINOSTrackMatch> vec_minos;
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
       evt.getByLabel(fLarTracks_label,LarTrackHandle);
 
@@ -119,8 +120,10 @@ namespace match{
          art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
          std::cout << *minostrack << std::endl;
       }
-
+      int numMatches=0;
       
+      
+
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
          if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
@@ -139,7 +142,7 @@ namespace match{
             double lardirectionStart[3];
             double lardirectionEnd[3];
             lartrack->Direction(lardirectionStart,lardirectionEnd);
-            
+        
             for(int n = 0; n<100;++n){
                //double D=(90*0.5)+(42.4*2.54)-5.588;
                double D = 90.0 + n*1.0;
@@ -155,12 +158,17 @@ namespace match{
                fDiffXvD->Fill((100.0*minostrack->ftrkVtxX - x_pred),D);
                fDiffYvD->Fill((100.0*minostrack->ftrkVtxY - y_pred),D);
             }
-            
+         
             double xdiff,ydiff,rdiff;
             bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff);
             if(match){
-               std::cout << "Match! T962 Track #" << lartrack->ID() 
+            numMatches++;
+               std::cout <<"Run "<<evt.id().run()<<" Event "<<evt.id().event()<< " Match! T962 Track #" << lartrack->ID() 
                          << " and MINOS Track #" << minostrack->ftrkIndex << std::endl;
+                         
+               minos.fMINOStrackid=minostrack->ftrkIndex;
+               minos.fArgoNeuTtrackid=lartrack->ID();
+               vec_minos.push_back(minos);
                fDiffR->Fill(rdiff);
                fDiffXvDiffY->Fill(xdiff,ydiff);
                fDiffDirCosX->Fill(lardirectionStart[0]-minostrack->ftrkdcosx);
@@ -189,12 +197,24 @@ namespace match{
                   fMinosErange_Neg->Fill(1000.0*minostrack->ftrkErange);
                   fMinosMom_Neg->Fill(1000.0*minostrack->ftrkmom);
                }
-               
 
             }
          }
       }
- 
+      
+      
+      std::auto_ptr<std::vector<t962::MINOSTrackMatch> > MINOS_coll(new std::vector<t962::MINOSTrackMatch> );
+
+      
+         //std::cout << "No of MINOS objects saved is " << vec_minos.size() << std::endl;
+         for(int i=0;i<vec_minos.size();i++)
+         {
+            MINOS_coll->push_back(vec_minos[i]);
+         }
+         evt.put(MINOS_coll);
+         vec_minos.clear();
+
+      
       return;
    }
  
