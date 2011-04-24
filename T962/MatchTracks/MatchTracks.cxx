@@ -120,10 +120,31 @@ namespace match{
          art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
          std::cout << *minostrack << std::endl;
       }
-      int numMatches=0;
+      
+      //the following makes sure that only 1 argoneut track is assigned to one minos track and that the match is the strongest (in terms of projected radial difference between the tracks) among the candidate matches      
+      double rdiff2=1000000.;      
+       for(unsigned int i=0; i<LarTrackHandle->size();++i)
+       {
+         art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
+         if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
+         for(unsigned int j=0; j<MinosTrackHandle->size();++j)
+         {
+            art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);            
+            if((100.0*minostrack->ftrkVtxZ)>fdZ) continue;
+            std::vector<double> larStart, larEnd;
+            lartrack->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)            
+            double lardirectionStart[3];
+            double lardirectionEnd[3];
+            lartrack->Direction(lardirectionStart,lardirectionEnd);         
+            double xdiff,ydiff,rdiff;
+            bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff);            
+            if(match && rdiff2>rdiff)
+             rdiff2=rdiff;
+         }           
+        }
       
       
-
+      
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
          if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
@@ -161,8 +182,8 @@ namespace match{
          
             double xdiff,ydiff,rdiff;
             bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff);
-            if(match){
-            numMatches++;
+            
+            if(match && rdiff==rdiff2){
                std::cout <<"Run "<<evt.id().run()<<" Event "<<evt.id().event()<< " Match! T962 Track #" << lartrack->ID() 
                          << " and MINOS Track #" << minostrack->ftrkIndex << std::endl;
                          
