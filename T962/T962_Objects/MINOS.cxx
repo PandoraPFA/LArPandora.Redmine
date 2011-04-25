@@ -13,8 +13,6 @@ namespace t962{
       fmcPx(0.),
       fmcPy(0.),
       fmcPz(0.),
-      fMINOStrackid(-1),
-      fArgoNeuTtrackid(-1),
       ftrkstpX(1,-999.0),
       ftrkstpY(1,-999.0),
       ftrkstpZ(1,-999.0),
