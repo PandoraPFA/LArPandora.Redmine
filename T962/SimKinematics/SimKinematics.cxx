@@ -124,6 +124,11 @@ void simkin::SimKinematics::produce(art::Event& evt)
 {
   double vertex [3] = { 0, 0, 0 };
   art::ServiceHandle<geo::Geometry> geom;
+  
+  std::cout<<"half width geom->DetHalfWidth() "<<geom->DetHalfWidth()<<std::endl;
+  std::cout<<"half height geom->DetHalfHeight() "<<geom->DetHalfHeight()<<std::endl;
+  std::cout<<"length geom->DetLength() "<<geom->DetLength()<<std::endl;
+  
   art::ServiceHandle<util::LArProperties> larp;
   double electronlifetime=larp->ElectronLifetime();
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
@@ -169,9 +174,7 @@ TVector3 pxpypz;
     fm_CCNC=neut.CCNC();
     fm_PDG=neut.Lepton().PdgCode();
     fm_mode=neut.Mode();
-    fm_hitnuc=neut.HitNuc();
-    
-    
+    fm_hitnuc=neut.HitNuc();        
     fm_leppx=neut.Lepton().Px();
     fm_leppy=neut.Lepton().Py();
     fm_leppz=neut.Lepton().Pz();
@@ -179,10 +182,9 @@ TVector3 pxpypz;
     fm_nuE=neut.Nu().E();
     fm_W=neut.W();
     fm_qsqr=neut.QSqr();
-
-    fm_lepphi=(TMath::Pi()+TMath::ATan2(-neut.Lepton().Py(),-neut.Lepton().Pz()));
+    fm_lepphi=(TMath::Pi()+TMath::ATan2(neut.Lepton().Py(),neut.Lepton().Px()));
     
-    fm_leptheta=((neut.Lepton().Pz()==0)?TMath::PiOver2():TMath::ACos(neut.Lepton().Pz()/sqrt(pow(neut.Lepton().Px(),2)+pow(neut.Lepton().Py(),2)+pow(neut.Lepton().Pz(),2))));
+    fm_leptheta=TMath::ACos(neut.Lepton().Pz()/sqrt(pow(neut.Lepton().Px(),2)+pow(neut.Lepton().Py(),2)+pow(neut.Lepton().Pz(),2)));
     
     
     ftree->Fill();     
