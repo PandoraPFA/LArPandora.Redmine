@@ -45,7 +45,7 @@ namespace match{
       fdCosy(pset.get< double >("dCosy")),
       fdCosz(pset.get< double >("dCosz"))
    {
-      produces< std::vector<t962::MINOS> > ();
+      produces< std::vector<t962::MINOSTrackMatch> > ();
    }
 
    //-------------------------------------------------
@@ -93,8 +93,8 @@ namespace match{
    //-------------------------------------------------
    void MatchTracks::produce(art::Event& evt)
    {
-      t962::MINOS minos;
-      std::vector<t962::MINOS> vec_minos;
+      t962::MINOSTrackMatch minos;
+      std::vector<t962::MINOSTrackMatch> vec_minos;
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
       evt.getByLabel(fLarTracks_label,LarTrackHandle);
 
@@ -187,8 +187,8 @@ namespace match{
                std::cout <<"Run "<<evt.id().run()<<" Event "<<evt.id().event()<< " Match! T962 Track #" << lartrack->ID() 
                          << " and MINOS Track #" << minostrack->ftrkIndex << std::endl;
                          
-               minos.SetMINOStrackid(minostrack->ftrkIndex);
-               minos.SetArgoNeuTtrackid(lartrack->ID());          
+               minos.fMINOStrackid=minostrack->ftrkIndex;
+               minos.fArgoNeuTtrackid=lartrack->ID();
                vec_minos.push_back(minos);
                fDiffR->Fill(rdiff);
                fDiffXvDiffY->Fill(xdiff,ydiff);
@@ -224,7 +224,7 @@ namespace match{
       }
       
       
-      std::auto_ptr<std::vector<t962::MINOS> > MINOS_coll(new std::vector<t962::MINOS> );
+      std::auto_ptr<std::vector<t962::MINOSTrackMatch> > MINOS_coll(new std::vector<t962::MINOSTrackMatch> );
 
       
          //std::cout << "No of MINOS objects saved is " << vec_minos.size() << std::endl;
