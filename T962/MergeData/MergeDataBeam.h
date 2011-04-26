@@ -17,6 +17,7 @@
 
 #include <string>
 
+///T962 analysis for merging different types of data
 namespace merge {
 
   class MergeDataBeam : public art::EDProducer {
