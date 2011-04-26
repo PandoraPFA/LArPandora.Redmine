@@ -22,7 +22,7 @@ outputs:
  out1:
  {
     module_type: RootOutput
-    fileName:    "ornella.root"
+    fileName:    "mergedata.root"
  }      
 }
 

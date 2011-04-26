@@ -35,7 +35,7 @@
 
 
 namespace merge{
-
+   static int event=1;
    //-------------------------------------------------
    MergeSimMINOS::MergeSimMINOS(fhicl::ParameterSet const& pset) : 
       fG4ModuleLabel(pset.get< std::string >("GeantModuleLabel"))
@@ -54,9 +54,6 @@ namespace merge{
    {
       //get access to the TFile service
       art::ServiceHandle<art::TFileService> tfs;
-
-      fproblemevent2d=tfs->make<TH2D>("fproblemevent2d","POT vs. Event number with no match", 400,0 ,40000,500,-1,45); 
-
    }
 
    //-------------------------------------------------
@@ -69,6 +66,7 @@ namespace merge{
       std::vector<t962::MINOS> vec_minos;
 
       if(MergeMINOS(vec_minos)){
+ 
          //std::cout << "No of MINOS objects saved is " << vec_minos.size() << std::endl;
          for(int i=0;i<vec_minos.size();i++)
          {
@@ -81,7 +79,6 @@ namespace merge{
       }
 
       vec_minos.clear();
- 
       return;
    }
  
@@ -91,11 +88,9 @@ namespace merge{
       t962::MINOS minos;//new minos object;
   
       int flag=0;
-	    
-//       double tms = (double)fbeam->get_t_ms();//millisecond timing information from BeamInfo object
-
+      
       //loop through MINOS root files	  
-      std::string path = "/argoneut/app/users/rmehdi/mcfhc/";
+      std::string path = "/argoneut/data/outstage/spitz7/rashidmc/";
       DIR *pDIR;
       struct dirent *entry;
       if( (pDIR=opendir(path.c_str())) != NULL )
@@ -105,10 +100,7 @@ namespace merge{
             if( strcmp(entry->d_name, ".")==0 || strcmp(entry->d_name, "..")==00) continue;
 		 
             //grab initial/final timestamp info. from input MINOS file
-            int firsttimestart = 0;
-            int firsttimeend = 0;
 
-		 
             std::string file = (path + entry->d_name);
  
             TFile *f = new TFile(file.c_str());
@@ -166,8 +158,7 @@ namespace merge{
             minitree->SetBranchAddress("trkstpZ",trkstpZ);
             minitree->SetBranchAddress("trkstpU",trkstpU);
             minitree->SetBranchAddress("trkstpV",trkstpV);
-            
-            
+                      
             double fmcPx, fmcPy, fmcPz;
             minitree->SetBranchAddress("mcPx",&fmcPx);
             minitree->SetBranchAddress("mcPy",&fmcPy);
@@ -195,120 +186,28 @@ namespace merge{
                minos.ftrkstpZ = ftrkstpZ;
                minos.ftrkstpU = ftrkstpU;
                minos.ftrkstpV = ftrkstpV;
-		  		    
-               //*************************************************************
-               //Matching condition based on time info alone:
-             // double diff = fabs(minos.futc1 + 500 - tms);
-          
-               //if(diff<1001){
-               
-               //if mcvertices are equal
-               
- //////////////////////////////////////////////////////////////////////////////////////////                                             
-//////////////////////////////////////////////////////////////////////////////////////////  
 
-//        std::cout<<std::setprecision(9)<<first<<"  "
-// 		<<run<<"  "<<event<<"  "<<tms<<" "
-// 		<<tor101<<"  "<< tortgt <<"  "<< trtgtd <<std::endl;
-   
-       //if((fdaq->GetRun()==run)&&(fdaq->GetEvent()==event ) ){
- //       std::cout<<"MINOS "<<minos.fmcPx<<" "<<minos.fmcPy<<" "<<minos.fmcPz<<" "<<std::endl;
-//        std::cout<<index<<" "<<stat<<" "<<par<<" "<<chil<<" "<<dummy<<" "<<px<<" "<<py<<" "<<pz<<std::endl;
-//        
-
-     // get the particles from the event handle
-
-
-    art::PtrVector<sim::Particle> pvec;
-    for(unsigned int i = 0; i < parHandle->size(); ++i){
-      art::Ptr<sim::Particle> p(parHandle, i);      
-      pvec.push_back(p);
-    }    
-
-    float minosenter_px=0.;
-    float minosenter_py=0.;
-    float minosenter_pz=0.;
-    for(unsigned int i = 0; i < pvec.size(); ++i){
-    
-    if(pvec[i]->Process()!="primary")
-    continue;
-    
-    simb::MCTrajectory trajectory = pvec[i]->Trajectory();
-    TLorentzVector initposition = trajectory.Position(0);
-    TLorentzVector initmomentum = trajectory.Momentum(0);
-    int numberofpoints= pvec[i]->NumberTrajectoryPoints();   
-
-    for(int j=1; j<numberofpoints; j++)
-    {
-      TLorentzVector prevposition = trajectory.Position(j-1);
-      TLorentzVector position = trajectory.Position(j);
-      TLorentzVector prevmomentum = trajectory.Momentum(j-1);
-      TLorentzVector momentum = trajectory.Momentum(j);
-
-
-    if(prevposition.Z()<154.22&&position.Z()>154.22&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
-           {
-       minosenter_px=prevmomentum.Px();
-       minosenter_py=prevmomentum.Py();
-       minosenter_pz=prevmomentum.Pz();
-           }
-    }   
-  }
-
- std::cout<<"MINOS "<<fmcPx<<" "<<fmcPy<<" "<<fmcPz<<" "<<std::endl;
- std::cout<<"Event record "<<minosenter_px<<" "<<minosenter_py<<" "<<minosenter_pz<<std::endl;
-
-       if(fmcPx==minosenter_px&&fmcPy==minosenter_py&&fmcPz==minosenter_pz
-       &&minosenter_px&&minosenter_py&&minosenter_pz
-       ){
-  //             std::cout<<"MINOS "<<minos.fmcPx<<" "<<minos.fmcPy<<" "<<minos.fmcPz<<" "<<std::endl;
-//        std::cout<<index<<" "<<stat<<" "<<par<<" "<<chil<<" "<<dummy<<" "<<px<<" "<<py<<" "<<pz<<std::endl;
-
-//           beam.SetTOR101(tor101);
-//           beam.SetTORTGT(tortgt);
-//           beam.SetTRTGTD(trtgtd);
-//           beam.SetT_MS(tms);
+       if(minos.fsnarl==event)
+       { 
           vec_minos.push_back(minos); 		  
           flag=1;          
        }
-        else if(flag==1) break;
-            
-//////////////////////////////////////////////////////////////////////////////////////////                                             
-//////////////////////////////////////////////////////////////////////////////////////////                 
-//                if(1)
-//                {
-//                   if(minos.ftrkIndex==0){
-//                      // std::cout << "minos.futc1 = " << std::setprecision(12) << minos.futc1 
-//                      //           << " tms = " << std::setprecision(12) << tms << std::endl;
-//                      // std::cout << "diff = " << diff << std::endl;
-// //                      fPOTdiff_matched->Fill(fbeam->get_tor101() - minos.ftor101);
-// //                      fMINOSrun_event->Fill(fdaq->GetEvent(),minos.frun);
-// //                      futc1_tms_diff->Fill(diff);
-//                   }
-//                   vec_minos.push_back(minos); 		  
-//                   flag=1;
-//                }
-//                else if(flag==1) break;//already past matching tracks, so stop looping over TTree
+       else if(flag==1) break;
 
             }
-            //loop over Minos root file		  
-
-            minitree->Delete();
+  
+            minitree->Delete(); 
             f->Close();
             f->Delete();
-
-            if(vec_minos.size()==0) fproblemevent2d->Fill(1.,1.);
-            else break;//already found our match, so why keep looping over files in directory?
             
          }//while
          closedir(pDIR);
 		  
-      }// if( pDIR=opendir("...
-	 
+      }
+	  event++;
       if(vec_minos.size() > 0) return true;
       else return false;
-  
-  
+    
    }
 
 

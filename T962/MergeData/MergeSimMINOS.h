@@ -35,12 +35,6 @@ namespace merge {
       void produce(art::Event& evt);
       
    private:
-
-      TH2D* fproblemevent2d;
-      TH1D* fPOTdiff_matched;
-      TH2D* fMINOSrun_event;
-      TH1D* futc1_tms_diff;
-
       
    protected: 
       
