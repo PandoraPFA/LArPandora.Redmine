@@ -37,7 +37,7 @@
 #include <sys/stat.h>
 
 namespace T962G4 {
-
+   static int event=1;
   //-----------------------------------------------------------------------
   // Constructor
   T962G4Ana::T962G4Ana(fhicl::ParameterSet const& pset) :
@@ -196,7 +196,7 @@ void T962G4Ana::analyze(const art::Event& evt)
     fm_deflectionangle=0.;
     fm_offset_x=116.9;//cm
     fm_offset_y=-20.28;//cm
-    fm_offset_z=-154.22;//cm
+    fm_offset_z=-147.108;//cm
     
     int numprimaries=0;
     int numinminos=0;
@@ -212,14 +212,14 @@ void T962G4Ana::analyze(const art::Event& evt)
     	{
     	TLorentzVector prevposition = trajectory.Position(j-1);
     	TLorentzVector position = trajectory.Position(j);
-        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<154.22&&position.Z()>154.22&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
+        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<147.108&&position.Z()>147.108&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
     	numprimaries++;    	
     	}    
     }
     ofstream myfile;
     myfile.open("MINOSin.txt", std::ios::out | std::ios::app);
     myfile << "________________________________________________________________________________\n";    
-    myfile << "***** HEPEVT Common Event#: "<<fm_event<<", "<<numprimaries+numinminos+1<<" particles (max 4000) ***** Double Precision\n";
+    myfile << "***** HEPEVT Common Event#: "<<event<<", "<<numprimaries+numinminos+1<<" particles (max 4000) ***** Double Precision\n";
     myfile << "4-byte integers, 8-byte floating point numbers, 4000-allocated entries.\n";
     myfile << "Indx Stat Par- chil-       (  P_x,       P_y,       P_z,    Energy,       M )\n";
     myfile << "      ID  ents dren    Prod (   X,         Y,         Z,        cT)      [mm]\n";
@@ -280,8 +280,10 @@ void T962G4Ana::analyze(const art::Event& evt)
        fm_tpcexit_pz=prevmomentum.Pz();
        fm_tpcexit_energy=prevmomentum.E(); 
        }
-    if(prevposition.Z()<154.22&&position.Z()>154.22&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
-           {
+    // if(prevposition.Z()<154.22&&position.Z()>154.22&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
+//            {
+       if(prevposition.Z()<147.108&&position.Z()>147.108&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
+        {
        fm_minosenter_x=prevposition.X();
        fm_minosenter_y=prevposition.Y();
        fm_minosenter_z=prevposition.Z();
@@ -309,6 +311,7 @@ void T962G4Ana::analyze(const art::Event& evt)
   }
   myfile << "________________________________________________________________________________\n";
   myfile.close(); 
+  event++;
 return;  
 }
 

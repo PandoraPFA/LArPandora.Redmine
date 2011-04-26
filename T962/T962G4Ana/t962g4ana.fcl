@@ -37,7 +37,7 @@ outputs:
  {
    module_type: RootOutput
 ###default file name, can override from command line with -o or --output
-   fileName:    "test.root" 
+   fileName:    "t962gana.root" 
  }
 }
 
