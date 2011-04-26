@@ -11,7 +11,6 @@
 #include <iomanip>
 #include <vector>
 
-///ArgoNeuT specific analysis
 namespace t962{
 
    class MINOS  {
