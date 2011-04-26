@@ -17,6 +17,8 @@
 #include <TH1F.h>
 #include <TH2F.h>
 class TTree;
+
+///T962 kinematics analysis code
 namespace kin {
    
  class Kinematics :  public art::EDAnalyzer {
