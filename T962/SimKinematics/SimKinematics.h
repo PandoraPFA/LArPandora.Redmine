@@ -17,6 +17,8 @@
 #include <TH1F.h>
 #include <TH2F.h>
 class TTree;
+
+///T962 analysis for simulation kinematics
 namespace simkin {
    
  class SimKinematics :  public art::EDProducer {
