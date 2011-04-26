@@ -16,6 +16,8 @@
 #include "TH2D.h"
 #include "TTree.h"
 class TTree;
+
+///T962 filter for hand scan results
 namespace filt {
 
   class ScanFilter : public art::EDFilter  {
