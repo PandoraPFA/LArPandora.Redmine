@@ -10,9 +10,6 @@ namespace t962{
 
    MINOS::MINOS():
       fmatched(-1),
-      fmcPx(0.),
-      fmcPy(0.),
-      fmcPz(0.),
       ftrkstpX(1,-999.0),
       ftrkstpY(1,-999.0),
       ftrkstpZ(1,-999.0),
