@@ -30,7 +30,7 @@ physics:
 {
   producers:{}
 //merge: [beam, minos]  
-  merge: [minossim]
+  merge: [minos]
   stream1: [out1]
   trigger_paths: [merge]
   end_paths: [stream1]
@@ -38,4 +38,4 @@ physics:
 
 // physics.producers.beam:  @local::argoneut_mergedatabeam
 // physics.producers.minos: @local::argoneut_mergedataminos
-physics.producers.minossim: @local::argoneut_mergesimminos
+physics.producers.minos: @local::argoneut_mergesimminos

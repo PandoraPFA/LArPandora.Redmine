@@ -18,6 +18,7 @@
 #include "TTree.h"
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TSystem.h"
 
 #include <sstream>
 #include <fstream>
@@ -90,15 +91,26 @@ namespace merge{
       int flag=0;
       
       //loop through MINOS root files	  
-      std::string path = "/argoneut/data/outstage/spitz7/rashidmc/";
+      //std::string path = "/argoneut/data/outstage/spitz7/rashidmc/";
+      std::string path(gSystem->Getenv("DIR"));//PWD
+      
+      path=( path + "/");
+      
+
       DIR *pDIR;
       struct dirent *entry;
       if( (pDIR=opendir(path.c_str())) != NULL )
       {
+     
          while((entry = readdir(pDIR)) != NULL)
-         {
+         {;
             if( strcmp(entry->d_name, ".")==0 || strcmp(entry->d_name, "..")==00) continue;
-		 
+            
+
+            std::string filename(entry->d_name);    
+            if(filename.find("fhc.root")==-1)
+            continue;
+
             //grab initial/final timestamp info. from input MINOS file
 
             std::string file = (path + entry->d_name);
@@ -159,13 +171,13 @@ namespace merge{
             minitree->SetBranchAddress("trkstpU",trkstpU);
             minitree->SetBranchAddress("trkstpV",trkstpV);
                       
-            double fmcPx, fmcPy, fmcPz;
-            minitree->SetBranchAddress("mcPx",&fmcPx);
-            minitree->SetBranchAddress("mcPy",&fmcPy);
-            minitree->SetBranchAddress("mcPz",&fmcPz);
-            minos.SetmcPx(fmcPx);
-            minos.SetmcPy(fmcPy);
-		    minos.SetmcPz(fmcPz); 
+ //            double fmcPx, fmcPy, fmcPz;
+//             minitree->SetBranchAddress("mcPx",&fmcPx);
+//             minitree->SetBranchAddress("mcPy",&fmcPy);
+//             minitree->SetBranchAddress("mcPz",&fmcPz);
+//             minos.SetmcPx(fmcPx);
+//             minos.SetmcPy(fmcPy);
+// 		    minos.SetmcPz(fmcPz); 
             //------------------------------------------
             Long64_t nentries = minitree->GetEntries();
             Long64_t nbytes = 0;
