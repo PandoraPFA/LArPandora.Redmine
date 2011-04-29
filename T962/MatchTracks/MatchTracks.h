@@ -42,6 +42,7 @@ namespace match {
       TH1D* fDiffDirCosY;
       TH1D* fDiffDirCosZ;
       TH1D* fDiffR;
+      TH1D* fDiffTotal;
       TH2D* fDiffXvDiffY;
 
       TH1D* fT962_DirCosX;
@@ -81,7 +82,7 @@ namespace match {
    protected: 
       
       bool Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track, 
-                   double &xpred, double &ypred, double &rdiff); //method to compare track kinematics
+                   double &xpred, double &ypred, double &rdiff, double &totaldiff); //method to compare track kinematics
       int  AngleCompare(art::Ptr<recob::Track> lar_track, art::Handle< std::vector<t962::MINOS> > minoshandle);
       bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
 
