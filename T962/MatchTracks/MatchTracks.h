@@ -24,7 +24,6 @@
 class TH1D;
 class TH2D;
 
-///T962 analysis for MINOS matching
 namespace match {
    
    class MatchTracks : public art::EDProducer {
@@ -77,6 +76,7 @@ namespace match {
       double fdCosx; //tolerance in dircosX matching
       double fdCosy; //tolerance in dircosY matching
       double fdCosz; //tolerance in dircosZ matching
+      double fdBoundary; //distance from a boundary to be considered a track that "ends on a boundary"
       
    protected: 
       

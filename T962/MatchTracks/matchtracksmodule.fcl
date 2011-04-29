@@ -10,6 +10,7 @@ argoneut_matchtracks:
  dCosx:       1.0
  dCosy:       1.0
  dCosz:       1.0 
+ dBoundary:   5.0
 }
 
 END_PROLOG
