@@ -9,18 +9,18 @@
 
 
 <lcgdict>
- <class name="t962::MINOS    "/>
- <class name="t962::MINOSTrackMatch    "/>
- <class name="t962::Paddles  "/>
- <class name="t962::ScanInfo  "/>
+ <class name="t962::MINOS"           ClassVersion="10"           />
+ <class name="t962::MINOSTrackMatch" ClassVersion="10"		 />
+ <class name="t962::Paddles"         ClassVersion="10"		 />
+ <class name="t962::ScanInfo"        ClassVersion="10"		 />
  
- <class name="std::vector<t962::MINOS>    "/>
- <class name="std::vector<t962::MINOSTrackMatch>    "/>
- <class name="std::vector<t962::Paddles>  "/>
- <class name="std::vector<t962::ScanInfo>  "/>
+ <class name="std::vector<t962::MINOS>"                          />
+ <class name="std::vector<t962::MINOSTrackMatch>"                />
+ <class name="std::vector<t962::Paddles>"                        />
+ <class name="std::vector<t962::ScanInfo>"                       />
 
- <class name="art::Wrapper< std::vector<t962::MINOS>     >"/>
- <class name="art::Wrapper< std::vector<t962::MINOSTrackMatch>     >"/>
- <class name="art::Wrapper< std::vector<t962::Paddles>   >"/>
- <class name="art::Wrapper< std::vector<t962::ScanInfo>   >"/>
+ <class name="art::Wrapper< std::vector<t962::MINOS>           >"/>
+ <class name="art::Wrapper< std::vector<t962::MINOSTrackMatch> >"/>
+ <class name="art::Wrapper< std::vector<t962::Paddles>         >"/>
+ <class name="art::Wrapper< std::vector<t962::ScanInfo>        >"/>
 </lcgdict>
