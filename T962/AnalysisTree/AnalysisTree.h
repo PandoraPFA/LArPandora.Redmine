@@ -9,6 +9,7 @@
 #define ANALYSISTREE_H
 
 #include "art/Framework/Core/EDAnalyzer.h"
+#include "RecoBase/Track.h"
 
 #include <vector>
 #include <string>
@@ -31,7 +32,11 @@ namespace t962 {
     /// read access to event
     void analyze(const art::Event& evt);
     void beginJob();
-
+  
+  protected:
+  
+  bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
+  
   private:
     
     void ResetVars();
@@ -49,7 +54,8 @@ namespace t962 {
     int nclusv_reco;
     int nclusw_reco;
     int ntracks_reco;
-
+    int nvertextracks_reco;
+    int ntrackendonboundary_reco;
     double trackstart_x_reco;
     double trackstart_y_reco;
     double trackstart_z_reco;
@@ -98,15 +104,16 @@ namespace t962 {
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
     std::string fLArG4ModuleLabel;
-    std::string fClusterModuleLabel;
-    std::string fCalDataModuleLabel;
+    std::string fCalDataModuleLabel; 
     std::string fGenieGenModuleLabel;
+    std::string fClusterModuleLabel;   
     std::string fTrackModuleLabel;
     std::string fVertexModuleLabel;
     std::string fMINOSModuleLabel;
     std::string fTrackMatchModuleLabel;
     std::string fScanModuleLabel;
-
+    double fvertextrackWindow;
+    double fboundaryWindow;
   }; // class AnalysisTree
 
 }

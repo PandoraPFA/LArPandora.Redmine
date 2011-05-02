@@ -3,7 +3,7 @@
 // Create a TTree for analysis
 //
 // \author tjyang@fnal.gov
-// 
+// \author joshua.spitz@yale.edu
 // 
 ////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +51,10 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
-  fScanModuleLabel              (pset.get< std::string > ("ScanModuleLabel"))
+  fScanModuleLabel          (pset.get< std::string > ("ScanModuleLabel")        ),
+  fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
+  fboundaryWindow           (pset.get< double >("boundaryWindow")               )
+  
 {
 }
 
@@ -62,10 +65,7 @@ t962::AnalysisTree::~AnalysisTree()
 
 void t962::AnalysisTree::beginJob()
 {
-
-  // get access to the TFile service
   art::ServiceHandle<art::TFileService> tfs;
-
   fTree = tfs->make<TTree>("anatree","analysis tree");
   fTree->Branch("run",&run,"run/I");
   fTree->Branch("event",&event,"event/I");
@@ -77,6 +77,8 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("nclusv_reco",&nclusv_reco,"nclusv_reco/I");
   fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
   fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
+  fTree->Branch("nvertextracks_reco",&nvertextracks_reco,"nvertextracks_reco/I");
+  fTree->Branch("ntrackendonboundary_reco",&ntrackendonboundary_reco,"ntrackendonboundary_reco/I");
   fTree->Branch("trackstart_dcosx_reco",&trackstart_dcosx_reco, "trackstart_dcosx_reco/D");
   fTree->Branch("trackstart_dcosy_reco",&trackstart_dcosy_reco, "trackstart_dcosy_reco/D");
   fTree->Branch("trackstart_dcosz_reco",&trackstart_dcosz_reco, "trackstart_dcosz_reco/D");
@@ -89,15 +91,15 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
-  fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");
+  fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
   fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minosD");
   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
   fTree->Branch("trk_dcosx_minos",&trk_dcosx_minos,"trk_dcosx_minos/D");
   fTree->Branch("trk_dcosy_minos",&trk_dcosy_minos,"trk_dcosy_minos/D");
   fTree->Branch("trk_dcosz_minos",&trk_dcosz_minos,"trk_dcosz_minos/D");
-  fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/F");
-  fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/F");
-  fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/F");
+  fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/D");
+  fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/D");
+  fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/D");
   fTree->Branch("ntracks_scan", &ntracks_scan , "ntracks_scan/I");
   fTree->Branch("nshowers_scan", &nshowers_scan , "nshowers_scan/I");
   fTree->Branch("neutrino_scan", &neutrino_scan , "neutrino_scan/I");
@@ -115,7 +117,6 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/D");
   fTree->Branch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/D");
   fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
-
 }
 
 void t962::AnalysisTree::analyze(const art::Event& evt)
@@ -153,8 +154,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
   evt.getByLabel(fScanModuleLabel,scanListHandle);
-  
-  
+    
   art::PtrVector<simb::MCTruth> mclist;
   if(evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
@@ -178,8 +178,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     tracklist.push_back(trackHolder);
   }
 
- art::PtrVector<recob::Vertex> vertexlist;
- if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
+  art::PtrVector<recob::Vertex> vertexlist;
+  if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
   for (unsigned int i = 0; i < vertexListHandle->size(); ++i){
     art::Ptr<recob::Vertex> vertexHolder(vertexListHandle,i);
     vertexlist.push_back(vertexHolder);
@@ -238,13 +238,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       break;
     }
   }
-
-  ntracks_reco=tracklist.size();
-
-  //matching information
+  
+  //matching information  
   nmatched_reco = trackmatchlist.size();
-
-  int ANTtrackID;
+  int ANTtrackID=-1;
   for(unsigned int i = 0; i < trackmatchlist.size(); i++)
     {
      for(unsigned int j = 0; j < minoslist.size(); j++)
@@ -253,7 +250,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
      {
       ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
-      std::cout<<"idd "<<minoslist[j]->ftrkIndex<<" "<<trackmatchlist[i]->fMINOStrackid<<std::endl;
      trk_mom_minos = minoslist[j]->ftrkmom;
      trk_charge_minos = minoslist[j]->fcharge;
      trk_dcosx_minos = minoslist[j]->ftrkdcosx;
@@ -264,20 +260,45 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
     
       //track information
-      
+     ntracks_reco=tracklist.size();
      double larStart[3];
      double larEnd[3];
  	 std::vector<double> trackStart;
   	 std::vector<double> trackEnd;
-         
-     for(unsigned int i=0; i<tracklist.size();++i){
+     trackStart.clear();
+     trackEnd.clear();
      
+     //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
+     int n_vertextracks=0;
+     int n_endonboundarytracks=0;
+      for(unsigned int i=0; i<tracklist.size();++i){
+       tracklist[i]->Extent(trackStart,trackEnd);            
+       trackstart_x_reco=trackStart[0];
+       trackstart_y_reco=trackStart[1];
+       trackstart_z_reco=trackStart[2];
+       trackexit_x_reco=trackEnd[0];
+       trackexit_y_reco=trackEnd[1];
+       trackexit_z_reco=trackEnd[2];  
+       if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+       n_vertextracks++;       
+       if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
+      }
+           
+     nvertextracks_reco=n_vertextracks; 
+     ntrackendonboundary_reco=n_endonboundarytracks;
+     
+     //grab information about where track started and ended and the dcos at those points
+     trackStart.clear();
+     trackEnd.clear();
+     memset(larStart, 0, 3);
+     memset(larEnd, 0, 3);
+     for(unsigned int i=0; i<tracklist.size();++i){
+      
       if(ANTtrackID!=tracklist[i]->ID())
       continue;
 
        tracklist[i]->Direction(larStart,larEnd);
        tracklist[i]->Extent(trackStart,trackEnd);  
-       float trackextent=sqrt(pow(trackEnd[0]-trackStart[0],2)+pow(trackEnd[1]-trackStart[1],2)+pow(trackEnd[2]-trackStart[2],2));
                      
        trackstart_dcosx_reco = larStart[0];
        trackstart_dcosy_reco = larStart[1];
@@ -294,13 +315,13 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
        trackexit_z_reco=trackEnd[2];  
       }
 
-    //scan information
-     double time= 0.;
+    //scan information (data only)
+     double time= -99.;
      double y_vert=-99.;
      double z_vert=-99.;
      
      for(unsigned int i=0; i<scanlist.size();++i){ 
-     double time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
+     time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
      int wire_I=scanlist[i]->Get_VertIndWire();    
      int wire_C=scanlist[i]->Get_VertColWire();     
      wire_I=geom->PlaneWireToChannel(0,wire_I);
@@ -316,7 +337,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      nshowers_scan=scanlist[i]->Get_NumShower();         
      }
 
-  if (!isdata){//mc truth information
+    //mc truth information
+   if (!isdata){
     nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
     ccnc_truth = mclist[0]->GetNeutrino().CCNC();
     mode_truth = mclist[0]->GetNeutrino().Mode();
@@ -333,7 +355,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
     }
   }
-   std::cout<<"filling"<<std::endl;
+
   fTree->Fill();
 
 }
@@ -350,6 +372,8 @@ void t962::AnalysisTree::ResetVars(){
   nclusu_reco  = -99999;
   nclusv_reco  = -99999;
   nclusw_reco  = -99999;
+  ntracks_reco = -99999;
+  nvertextracks_reco = -99999;
   trackstart_x_reco = -99999;
   trackstart_y_reco = -99999;
   trackstart_z_reco = -99999;
@@ -389,3 +413,26 @@ void t962::AnalysisTree::ResetVars(){
   lep_dcosy_truth = -99999;
   lep_dcosz_truth = -99999;
 }
+
+bool t962::AnalysisTree::EndsOnBoundary(art::Ptr<recob::Track> lar_track)
+{
+      std::vector<double> larStart, larEnd;
+      lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
+
+ 	if(fabs(larEnd[0])<fboundaryWindow 
+	|| fabs(47.-larEnd[0])<fboundaryWindow 
+	|| fabs(larEnd[1]+19.8)<fboundaryWindow
+	|| fabs(20.2-larEnd[1])<fboundaryWindow 
+	|| fabs(larEnd[2])<fboundaryWindow 
+	|| fabs(90.-larEnd[2])<fboundaryWindow  )   
+	return true;  
+      else return false;
+}
+
+
+
+
+
+
+
+
