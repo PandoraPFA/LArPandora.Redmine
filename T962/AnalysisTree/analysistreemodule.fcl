@@ -13,6 +13,7 @@ argoneut_analysistree:
  VertexModuleLabel:        "vertex2d"
  MINOSModuleLabel:         "minos"
  TrackMatchModuleLabel:    "matchtracks"
+ ScanModuleLabel:          "mergescan"
 }
 
 END_PROLOG

@@ -28,6 +28,7 @@
 #include "T962/AnalysisTree/AnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
 #include "T962/T962_Objects/MINOSTrackMatch.h"
+#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
@@ -49,7 +50,8 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
-  fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   )
+  fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
+  fScanModuleLabel              (pset.get< std::string > ("ScanModuleLabel"))
 {
 }
 
@@ -68,32 +70,51 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("run",&run,"run/I");
   fTree->Branch("event",&event,"event/I");
   fTree->Branch("isdata",&isdata,"isdata/I");
-  fTree->Branch("vtxx",&vtxx,"vtxx/D");
-  fTree->Branch("vtxy",&vtxy,"vtxy/D");
-  fTree->Branch("vtxz",&vtxz,"vtxz/D");
-  fTree->Branch("ntrks",&ntrks,"ntrks/I");
-  fTree->Branch("nclusu",&nclusu,"nclusu/I");
-  fTree->Branch("nclusv",&nclusv,"nclusv/I");
-  fTree->Branch("nclusw",&nclusw,"nclusw/I");
-  fTree->Branch("matched",&matched,"matched/I");
-  fTree->Branch("mtrk_mom",&mtrk_mom,"mtrk_mom/D");
-  fTree->Branch("mtrk_charge",&mtrk_charge,"mtrk_charge/D");
-  fTree->Branch("mtrk_dcosx",&mtrk_dcosx,"mtrk_dcosx/D");
-  fTree->Branch("mtrk_dcosy",&mtrk_dcosy,"mtrk_dcosy/D");
-  fTree->Branch("mtrk_dcosz",&mtrk_dcosz,"mtrk_dcosz/D");
-  fTree->Branch("inu",&inu,"inu/I");
-  fTree->Branch("ccnc",&ccnc,"ccnc/I");
-  fTree->Branch("mode",&mode,"mode/I");
-  fTree->Branch("enu",&enu,"enu/D");
-  fTree->Branch("Q2",&Q2,"Q2/D");
-  fTree->Branch("W",&W,"W/D");
-  fTree->Branch("nuvtxx",&nuvtxx,"nuvtxx/D");
-  fTree->Branch("nuvtxy",&nuvtxy,"nuvtxy/D");
-  fTree->Branch("nuvtxz",&nuvtxz,"nuvtxz/D");
-  fTree->Branch("lep_mom",&lep_mom,"lep_mom/D");
-  fTree->Branch("lep_dcosx",&lep_dcosx,"lep_dcosx/D");
-  fTree->Branch("lep_dcosy",&lep_dcosy,"lep_dcosy/D");
-  fTree->Branch("lep_dcosz",&lep_dcosz,"lep_dcosz/D");
+  fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
+  fTree->Branch("vtxy_reco",&vtxy_reco,"vtxy_reco/D");
+  fTree->Branch("vtxz_reco",&vtxz_reco,"vtxz_reco/D");
+  fTree->Branch("nclusu_reco",&nclusu_reco,"nclusu_reco/I");
+  fTree->Branch("nclusv_reco",&nclusv_reco,"nclusv_reco/I");
+  fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
+  fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
+  fTree->Branch("trackstart_dcosx_reco",&trackstart_dcosx_reco, "trackstart_dcosx_reco/D");
+  fTree->Branch("trackstart_dcosy_reco",&trackstart_dcosy_reco, "trackstart_dcosy_reco/D");
+  fTree->Branch("trackstart_dcosz_reco",&trackstart_dcosz_reco, "trackstart_dcosz_reco/D");
+  fTree->Branch("trackexit_dcosx_reco",&trackexit_dcosx_reco, "trackexit_dcosx_reco/D");
+  fTree->Branch("trackexit_dcosy_reco",&trackexit_dcosy_reco, "trackexit_dcosy_reco/D");
+  fTree->Branch("trackexit_dcosz_reco",&trackexit_dcosz_reco, "trackexit_dcosz_reco/D");
+  fTree->Branch("trackstart_x_reco",&trackstart_x_reco, "trackstart_x_reco/D");
+  fTree->Branch("trackstart_y_reco",&trackstart_y_reco, "trackstart_y_reco/D");
+  fTree->Branch("trackstart_z_reco",&trackstart_z_reco, "trackstart_z_reco/D");
+  fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
+  fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
+  fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
+  fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");
+  fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minosD");
+  fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
+  fTree->Branch("trk_dcosx_minos",&trk_dcosx_minos,"trk_dcosx_minos/D");
+  fTree->Branch("trk_dcosy_minos",&trk_dcosy_minos,"trk_dcosy_minos/D");
+  fTree->Branch("trk_dcosz_minos",&trk_dcosz_minos,"trk_dcosz_minos/D");
+  fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/F");
+  fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/F");
+  fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/F");
+  fTree->Branch("ntracks_scan", &ntracks_scan , "ntracks_scan/I");
+  fTree->Branch("nshowers_scan", &nshowers_scan , "nshowers_scan/I");
+  fTree->Branch("neutrino_scan", &neutrino_scan , "neutrino_scan/I");
+  fTree->Branch("maybeneutrino_scan", &maybeneutrino_scan , "maybeneutrino_scan/I");    
+  fTree->Branch("nuPDG_truth",&nuPDG_truth,"nuPDG_truth/I");
+  fTree->Branch("ccnc_truth",&ccnc_truth,"ccnc_truth/I");
+  fTree->Branch("mode_truth",&mode_truth,"mode_truth/I");
+  fTree->Branch("enu_truth",&enu_truth,"enu_truth/D");
+  fTree->Branch("Q2_truth",&Q2_truth,"Q2_truth/D");
+  fTree->Branch("W_truth",&W_truth,"W_truth/D");
+  fTree->Branch("nuvtxx_truth",&nuvtxx_truth,"nuvtxx_truth/D");
+  fTree->Branch("nuvtxy_truth",&nuvtxy_truth,"nuvtxy_truth/D");
+  fTree->Branch("nuvtxz_truth",&nuvtxz_truth,"nuvtxz_truth/D");
+  fTree->Branch("lep_mom_truth",&lep_mom_truth,"lep_mom_truth/D");
+  fTree->Branch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/D");
+  fTree->Branch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/D");
+  fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
 
 }
 
@@ -109,7 +130,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     isdata = 1;
   }
   else isdata = 0;
-  
+
   art::Handle< std::vector<raw::RawDigit> > rdListHandle;
   evt.getByLabel(fDigitModuleLabel,rdListHandle);
   art::Handle< std::vector<sim::SimChannel> > scListHandle;
@@ -130,8 +151,12 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   evt.getByLabel(fMINOSModuleLabel,minosListHandle);
   art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
   evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
-
+  art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
+  evt.getByLabel(fScanModuleLabel,scanListHandle);
+  
+  
   art::PtrVector<simb::MCTruth> mclist;
+  if(evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
     {
       art::Ptr<simb::MCTruth> mctparticle(mctruthListHandle,ii);
@@ -139,99 +164,176 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
 
   art::PtrVector<recob::Cluster> clusterlist;
+  if(evt.getByLabel(fClusterModuleLabel,clusterListHandle))
   for (unsigned int ii = 0; ii <  clusterListHandle->size(); ++ii)
     {
       art::Ptr<recob::Cluster> clusterHolder(clusterListHandle,ii);
       clusterlist.push_back(clusterHolder);
     }
 
-
   art::PtrVector<recob::Track> tracklist;
+  if(evt.getByLabel(fTrackModuleLabel,trackListHandle))
   for (unsigned int i = 0; i < trackListHandle->size(); ++i){
     art::Ptr<recob::Track> trackHolder(trackListHandle,i);
     tracklist.push_back(trackHolder);
   }
 
-  art::PtrVector<recob::Vertex> vertexlist;
+ art::PtrVector<recob::Vertex> vertexlist;
+ if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
   for (unsigned int i = 0; i < vertexListHandle->size(); ++i){
     art::Ptr<recob::Vertex> vertexHolder(vertexListHandle,i);
     vertexlist.push_back(vertexHolder);
   }
 
   art::PtrVector<t962::MINOS> minoslist;
+  if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
   for (unsigned int i = 0; i < minosListHandle->size(); i++){
     art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
     minoslist.push_back(minosHolder);
   }
 
   art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
+  if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
   for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
     art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
     trackmatchlist.push_back(trackmatchHolder);
   }
-
-
+  
+   art::PtrVector<t962::ScanInfo> scanlist;
+  if(evt.getByLabel(fScanModuleLabel,scanListHandle))
+  for (unsigned int i = 0; i < scanListHandle->size(); i++){
+    art::Ptr<t962::ScanInfo> scanHolder(scanListHandle,i);
+    scanlist.push_back(scanHolder);
+  }
+  
   art::ServiceHandle<geo::Geometry> geom;  
 
   //vertex information
+  if(vertexlist.size())
+  {
   double vtxxyz[3];
   vertexlist[0]->XYZ(vtxxyz);
-  vtxx = vtxxyz[0];
-  vtxy = vtxxyz[1];
-  vtxz = vtxxyz[2];
-
+  vtxx_reco = vtxxyz[0];
+  vtxy_reco = vtxxyz[1];
+  vtxz_reco = vtxxyz[2];
+  }
   //cluster information
-  nclusu = 0;
-  nclusv = 0;
-  nclusw = 0;
+  nclusu_reco = 0;
+  nclusv_reco = 0;
+  nclusw_reco = 0;
+  
   for(unsigned int i=0; i<clusterlist.size();++i){
     
     switch(clusterlist[i]->View()){
     case geo::kU :
-      nclusu ++;
+      nclusu_reco ++;
       break;
     case geo::kV :
-      nclusv ++;
+      nclusv_reco ++;
       break;
     case geo::kW :
-      nclusw ++;
+      nclusw_reco ++;
       break;
     default :
       break;
     }
   }
 
-  //track information
-  ntrks = trackmatchlist.size();
+  ntracks_reco=tracklist.size();
 
   //matching information
-  matched = trackmatchlist.size();
-  if (matched>0){
-    mtrk_mom = minoslist[0]->ftrkmom;
-    mtrk_charge = minoslist[0]->fcharge;
-    mtrk_dcosx = minoslist[0]->ftrkdcosx;
-    mtrk_dcosy = minoslist[0]->ftrkdcosy;
-    mtrk_dcosz = minoslist[0]->ftrkdcosz;
-  }
+  nmatched_reco = trackmatchlist.size();
+
+  int ANTtrackID;
+  for(unsigned int i = 0; i < trackmatchlist.size(); i++)
+    {
+     for(unsigned int j = 0; j < minoslist.size(); j++)
+     {
+ 
+     if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
+     {
+      ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
+      std::cout<<"idd "<<minoslist[j]->ftrkIndex<<" "<<trackmatchlist[i]->fMINOStrackid<<std::endl;
+     trk_mom_minos = minoslist[j]->ftrkmom;
+     trk_charge_minos = minoslist[j]->fcharge;
+     trk_dcosx_minos = minoslist[j]->ftrkdcosx;
+     trk_dcosy_minos = minoslist[j]->ftrkdcosy;
+     trk_dcosz_minos = minoslist[j]->ftrkdcosz;       
+      }      
+     }
+    }
+    
+      //track information
+      
+     double larStart[3];
+     double larEnd[3];
+ 	 std::vector<double> trackStart;
+  	 std::vector<double> trackEnd;
+         
+     for(unsigned int i=0; i<tracklist.size();++i){
+     
+      if(ANTtrackID!=tracklist[i]->ID())
+      continue;
+
+       tracklist[i]->Direction(larStart,larEnd);
+       tracklist[i]->Extent(trackStart,trackEnd);  
+       float trackextent=sqrt(pow(trackEnd[0]-trackStart[0],2)+pow(trackEnd[1]-trackStart[1],2)+pow(trackEnd[2]-trackStart[2],2));
+                     
+       trackstart_dcosx_reco = larStart[0];
+       trackstart_dcosy_reco = larStart[1];
+       trackstart_dcosz_reco = larStart[2];       
+       trackexit_dcosx_reco = larEnd[0];
+       trackexit_dcosy_reco = larEnd[1];
+       trackexit_dcosz_reco = larEnd[2];
+           
+       trackstart_x_reco=trackStart[0];
+       trackstart_y_reco=trackStart[1];
+       trackstart_z_reco=trackStart[2];
+       trackexit_x_reco=trackEnd[0];
+       trackexit_y_reco=trackEnd[1];
+       trackexit_z_reco=trackEnd[2];  
+      }
+
+    //scan information
+     double time= 0.;
+     double y_vert=-99.;
+     double z_vert=-99.;
+     
+     for(unsigned int i=0; i<scanlist.size();++i){ 
+     double time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
+     int wire_I=scanlist[i]->Get_VertIndWire();    
+     int wire_C=scanlist[i]->Get_VertColWire();     
+     wire_I=geom->PlaneWireToChannel(0,wire_I);
+     wire_C=geom->PlaneWireToChannel(1,wire_C);
+     geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
+         
+     vtxx_scan=(time-60)*.031;
+     vtxy_scan=y_vert;
+     vtxz_scan=z_vert;
+     neutrino_scan=scanlist[i]->Get_IsNeutrino();
+     maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
+     ntracks_scan=scanlist[i]->Get_Track();
+     nshowers_scan=scanlist[i]->Get_NumShower();         
+     }
 
   if (!isdata){//mc truth information
-    inu = mclist[0]->GetNeutrino().Nu().PdgCode();
-    ccnc = mclist[0]->GetNeutrino().CCNC();
-    mode = mclist[0]->GetNeutrino().Mode();
-    Q2 = mclist[0]->GetNeutrino().QSqr();
-    W = mclist[0]->GetNeutrino().W();
-    enu = mclist[0]->GetNeutrino().Nu().E();
-    nuvtxx = mclist[0]->GetNeutrino().Nu().Vx();
-    nuvtxy = mclist[0]->GetNeutrino().Nu().Vy();
-    nuvtxz = mclist[0]->GetNeutrino().Nu().Vz();
-    lep_mom = mclist[0]->GetNeutrino().Lepton().P();
+    nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
+    ccnc_truth = mclist[0]->GetNeutrino().CCNC();
+    mode_truth = mclist[0]->GetNeutrino().Mode();
+    Q2_truth = mclist[0]->GetNeutrino().QSqr();
+    W_truth = mclist[0]->GetNeutrino().W();
+    enu_truth = mclist[0]->GetNeutrino().Nu().E();
+    nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx();
+    nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy();
+    nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz();
+    lep_mom_truth = mclist[0]->GetNeutrino().Lepton().P();
     if (mclist[0]->GetNeutrino().Lepton().P()){
-      lep_dcosx = mclist[0]->GetNeutrino().Lepton().Px()/mclist[0]->GetNeutrino().Lepton().P();
-      lep_dcosy = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
-      lep_dcosz = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
+      lep_dcosx_truth = mclist[0]->GetNeutrino().Lepton().Px()/mclist[0]->GetNeutrino().Lepton().P();
+      lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
+      lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
     }
   }
-
+   std::cout<<"filling"<<std::endl;
   fTree->Fill();
 
 }
@@ -242,30 +344,48 @@ void t962::AnalysisTree::ResetVars(){
   run = -99999;
   event = -99999;
   isdata = -99999;
-  vtxx = -99999;
-  vtxy = -99999;
-  vtxz = -99999;
-  ntrks = -99999;
-  nclusu = -99999;
-  nclusv = -99999;
-  nclusw = -99999;
-  matched = -99999;
-  mtrk_mom = -99999;
-  mtrk_charge = -99999;
-  mtrk_dcosx = -99999;
-  mtrk_dcosy = -99999;
-  mtrk_dcosz = -99999;
-  inu = -99999;
-  ccnc = -99999;
-  mode = -99999;
-  enu = -99999;
-  Q2 = -99999;
-  W = -99999;
-  nuvtxx = -99999;
-  nuvtxy = -99999;
-  nuvtxz = -99999;
-  lep_mom = -99999;
-  lep_dcosx = -99999;
-  lep_dcosy = -99999;
-  lep_dcosz = -99999;
+  vtxx_reco = -99999;
+  vtxy_reco  = -99999;
+  vtxz_reco  = -99999;
+  nclusu_reco  = -99999;
+  nclusv_reco  = -99999;
+  nclusw_reco  = -99999;
+  trackstart_x_reco = -99999;
+  trackstart_y_reco = -99999;
+  trackstart_z_reco = -99999;
+  trackexit_x_reco = -99999;
+  trackexit_y_reco = -99999;
+  trackexit_z_reco = -99999;  
+  trackstart_dcosx_reco = -99999;
+  trackstart_dcosy_reco = -99999;
+  trackstart_dcosz_reco = -99999;       
+  trackexit_dcosx_reco = -99999;
+  trackexit_dcosy_reco = -99999;
+  trackexit_dcosz_reco = -99999;
+  nmatched_reco = -99999;
+  trk_mom_minos = -99999;
+  trk_charge_minos = -99999;
+  trk_dcosx_minos = -99999;
+  trk_dcosy_minos = -99999;
+  trk_dcosz_minos = -99999;  
+  vtxx_scan=-99999;
+  vtxy_scan=-99999;
+  vtxz_scan=-99999;
+  neutrino_scan=-99999;
+  maybeneutrino_scan=-99999;
+  ntracks_scan=-99999;
+  nshowers_scan=-99999;         
+  nuPDG_truth = -99999;
+  ccnc_truth = -99999;
+  mode_truth = -99999;
+  enu_truth = -99999;
+  Q2_truth = -99999;
+  W_truth = -99999;
+  nuvtxx_truth = -99999;
+  nuvtxy_truth = -99999;
+  nuvtxz_truth = -99999;
+  lep_mom_truth = -99999;
+  lep_dcosx_truth = -99999;
+  lep_dcosy_truth = -99999;
+  lep_dcosz_truth = -99999;
 }

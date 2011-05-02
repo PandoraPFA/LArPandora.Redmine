@@ -41,35 +41,59 @@ namespace t962 {
     int run;
     int event;
     int isdata;
-    //reconstructed information
-    double vtxx;
-    double vtxy;
-    double vtxz;
-    int ntrks;
-    int nclusu;
-    int nclusv;
-    int nclusw;
+    //reconstructed information    
+    double vtxx_reco;
+    double vtxy_reco;
+    double vtxz_reco;
+    int nclusu_reco;
+    int nclusv_reco;
+    int nclusw_reco;
+    int ntracks_reco;
+
+    double trackstart_x_reco;
+    double trackstart_y_reco;
+    double trackstart_z_reco;
+    double trackexit_x_reco;
+    double trackexit_y_reco;
+    double trackexit_z_reco;
+    double trackstart_dcosx_reco;
+    double trackstart_dcosy_reco;
+    double trackstart_dcosz_reco;       
+    double trackexit_dcosx_reco;
+    double trackexit_dcosy_reco;
+    double trackexit_dcosz_reco;   
+              
     //matching information
-    int matched;        //number of matched tracks
-    double mtrk_mom;
-    double mtrk_charge;
-    double mtrk_dcosx;
-    double mtrk_dcosy;
-    double mtrk_dcosz;
+    int nmatched_reco;        //number of matched tracks
+    double trk_mom_minos;
+    double trk_charge_minos;
+    double trk_dcosx_minos;
+    double trk_dcosy_minos;
+    double trk_dcosz_minos;
+    
+    //scan information
+    double vtxx_scan;
+    double vtxy_scan;
+    double vtxz_scan;
+    double neutrino_scan;
+    double maybeneutrino_scan;
+    double ntracks_scan;
+    double nshowers_scan; 
+    
     //mctruth information
-    int inu;
-    int ccnc;
-    int mode;
-    double enu;
-    double Q2;
-    double W;
-    double nuvtxx;
-    double nuvtxy;
-    double nuvtxz;
-    double lep_mom;
-    double lep_dcosx;
-    double lep_dcosy;
-    double lep_dcosz;
+    int nuPDG_truth;
+    int ccnc_truth;
+    int mode_truth;
+    double enu_truth;
+    double Q2_truth;
+    double W_truth;
+    double nuvtxx_truth;
+    double nuvtxy_truth;
+    double nuvtxz_truth;
+    double lep_mom_truth;
+    double lep_dcosx_truth;
+    double lep_dcosy_truth;
+    double lep_dcosz_truth;
 
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
@@ -81,6 +105,7 @@ namespace t962 {
     std::string fVertexModuleLabel;
     std::string fMINOSModuleLabel;
     std::string fTrackMatchModuleLabel;
+    std::string fScanModuleLabel;
 
   }; // class AnalysisTree
 
