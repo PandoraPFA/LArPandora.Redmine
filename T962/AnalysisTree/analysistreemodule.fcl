@@ -14,7 +14,7 @@ argoneut_analysistree:
  MINOSModuleLabel:         "minos"
  TrackMatchModuleLabel:    "matchtracks"
  ScanModuleLabel:          "mergescan"
- vertextrackWindow:        10.
+ vertextrackWindow:         5.
  boundaryWindow:            5.
 }
 

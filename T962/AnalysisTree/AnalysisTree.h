@@ -53,9 +53,9 @@ namespace t962 {
     int nclusu_reco;
     int nclusv_reco;
     int nclusw_reco;
-    int ntracks_reco;
-    int nvertextracks_reco;
-    int ntrackendonboundary_reco;
+    int ntracks_reco;         //number of reconstructed tracks
+    int nvertextracks_reco;   //number of reconstructed tracks with start position within fvertextrackWindow cm of vertex
+    int ntrackendonboundary_reco; //number of reconstructed tracks with end poistion within fboundaryWindow cm of detector boundary
     double trackstart_x_reco;
     double trackstart_y_reco;
     double trackstart_z_reco;

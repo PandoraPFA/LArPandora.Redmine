@@ -280,7 +280,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
        trackexit_y_reco=trackEnd[1];
        trackexit_z_reco=trackEnd[2];  
        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
-       n_vertextracks++;       
+       n_vertextracks++;  
+       
        if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
       }
            
