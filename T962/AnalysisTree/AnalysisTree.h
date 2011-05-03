@@ -32,7 +32,11 @@ namespace t962 {
     /// read access to event
     void analyze(const art::Event& evt);
     void beginJob();
-  
+    void beginSubRun(const art::SubRun& sr);
+
+    
+    
+    
   protected:
   
   bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
@@ -45,6 +49,7 @@ namespace t962 {
     //run information
     int run;
     int event;
+    double pot;
     int isdata;
     //reconstructed information    
     double vtxx_reco;
@@ -56,6 +61,7 @@ namespace t962 {
     int ntracks_reco;         //number of reconstructed tracks
     int nvertextracks_reco;   //number of reconstructed tracks with start position within fvertextrackWindow cm of vertex
     int ntrackendonboundary_reco; //number of reconstructed tracks with end poistion within fboundaryWindow cm of detector boundary
+    int nvertexclusters_reco; //number of reconstructed clusters with start position within fvertextrackWindow cm of vertex
     double trackstart_x_reco;
     double trackstart_y_reco;
     double trackstart_z_reco;
@@ -81,10 +87,10 @@ namespace t962 {
     double vtxx_scan;
     double vtxy_scan;
     double vtxz_scan;
-    double neutrino_scan;
-    double maybeneutrino_scan;
-    double ntracks_scan;
-    double nshowers_scan; 
+    int neutrino_scan;
+    int maybeneutrino_scan;
+    int ntracks_scan;
+    int nshowers_scan; 
     
     //mctruth information
     int nuPDG_truth;
@@ -112,6 +118,7 @@ namespace t962 {
     std::string fMINOSModuleLabel;
     std::string fTrackMatchModuleLabel;
     std::string fScanModuleLabel;
+    std::string fPOTModuleLabel;
     double fvertextrackWindow;
     double fboundaryWindow;
   }; // class AnalysisTree

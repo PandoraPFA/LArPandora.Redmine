@@ -36,6 +36,7 @@
 #include "RecoBase/recobase.h"
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
+#include "SummaryData/summary.h"
 
  
 //-------------------------------------------------
@@ -52,6 +53,7 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
   fScanModuleLabel          (pset.get< std::string > ("ScanModuleLabel")        ),
+  fPOTModuleLabel           (pset.get< std::string > ("POTModuleLabel")        ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               )
   
@@ -69,6 +71,7 @@ void t962::AnalysisTree::beginJob()
   fTree = tfs->make<TTree>("anatree","analysis tree");
   fTree->Branch("run",&run,"run/I");
   fTree->Branch("event",&event,"event/I");
+  fTree->Branch("pot",&pot,"pot/D");
   fTree->Branch("isdata",&isdata,"isdata/I");
   fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
   fTree->Branch("vtxy_reco",&vtxy_reco,"vtxy_reco/D");
@@ -78,6 +81,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
   fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
   fTree->Branch("nvertextracks_reco",&nvertextracks_reco,"nvertextracks_reco/I");
+  fTree->Branch("nvertexclusters_reco",&nvertexclusters_reco,"nvertexclusters_reco/I");
   fTree->Branch("ntrackendonboundary_reco",&ntrackendonboundary_reco,"ntrackendonboundary_reco/I");
   fTree->Branch("trackstart_dcosx_reco",&trackstart_dcosx_reco, "trackstart_dcosx_reco/D");
   fTree->Branch("trackstart_dcosy_reco",&trackstart_dcosy_reco, "trackstart_dcosy_reco/D");
@@ -119,6 +123,25 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
 }
 
+
+void t962::AnalysisTree::beginSubRun(const art::SubRun& sr)
+{
+
+art::Handle< sumdata::POTSummary > potListHandle;
+sr.getByLabel(fPOTModuleLabel,potListHandle);
+
+if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+pot=potListHandle->totpot;
+else
+pot=0.;
+
+std::cout<<"POT: "<<pot<<std::endl;
+
+}
+
+
+
+
 void t962::AnalysisTree::analyze(const art::Event& evt)
 {
 
@@ -154,7 +177,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
   evt.getByLabel(fScanModuleLabel,scanListHandle);
-    
+
   art::PtrVector<simb::MCTruth> mclist;
   if(evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
@@ -205,7 +228,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     art::Ptr<t962::ScanInfo> scanHolder(scanListHandle,i);
     scanlist.push_back(scanHolder);
   }
-  
   art::ServiceHandle<geo::Geometry> geom;  
 
   //vertex information
@@ -239,6 +261,17 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
   }
   
+//need wire time 2d vertex position for this to work
+//   int n_vertexclusters=0;
+//   for(unsigned int i=0; i<clusterlist.size();++i){
+//   
+//   //need wire time 2d vertex position for this to work
+//   if(sqrt(pow(clusterlist[i]->StartPos()[0]-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(clusterlist[i]->StartPos()[1]-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(clusterlist[i]->StartPos()[2]-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow) 
+//   n_vertexclusters++;   
+//   }
+//   
+//   nvertexclusters_reco=n_vertexclusters;
+
   //matching information  
   nmatched_reco = trackmatchlist.size();
   int ANTtrackID=-1;
@@ -258,7 +291,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       }      
      }
     }
-    
+
       //track information
      ntracks_reco=tracklist.size();
      double larStart[3];
@@ -267,7 +300,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   	 std::vector<double> trackEnd;
      trackStart.clear();
      trackEnd.clear();
-     
      //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
      int n_vertextracks=0;
      int n_endonboundarytracks=0;
@@ -279,12 +311,12 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
        trackexit_x_reco=trackEnd[0];
        trackexit_y_reco=trackEnd[1];
        trackexit_z_reco=trackEnd[2];  
-       if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
-       n_vertextracks++;  
+        if (!isdata){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+       n_vertextracks++; 
+       }
        
        if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
       }
-           
      nvertextracks_reco=n_vertextracks; 
      ntrackendonboundary_reco=n_endonboundarytracks;
      
@@ -324,7 +356,9 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      for(unsigned int i=0; i<scanlist.size();++i){ 
      time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
      int wire_I=scanlist[i]->Get_VertIndWire();    
-     int wire_C=scanlist[i]->Get_VertColWire();     
+     int wire_C=scanlist[i]->Get_VertColWire();   
+     if(wire_I>-1 && wire_C>-1)
+     {
      wire_I=geom->PlaneWireToChannel(0,wire_I);
      wire_C=geom->PlaneWireToChannel(1,wire_C);
      geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
@@ -335,9 +369,9 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      neutrino_scan=scanlist[i]->Get_IsNeutrino();
      maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
      ntracks_scan=scanlist[i]->Get_Track();
-     nshowers_scan=scanlist[i]->Get_NumShower();         
+     nshowers_scan=scanlist[i]->Get_NumShower(); 
      }
-
+     }
     //mc truth information
    if (!isdata){
     nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
@@ -358,7 +392,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   }
 
   fTree->Fill();
-
 }
 
   //---------------------------------------------------------------- 
@@ -375,6 +408,7 @@ void t962::AnalysisTree::ResetVars(){
   nclusw_reco  = -99999;
   ntracks_reco = -99999;
   nvertextracks_reco = -99999;
+  nvertexclusters_reco = -99999;
   trackstart_x_reco = -99999;
   trackstart_y_reco = -99999;
   trackstart_z_reco = -99999;
