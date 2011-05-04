@@ -49,12 +49,14 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")      ),
   fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
+  fEndPoint2DModuleLabel    (pset.get< std::string >("EndPoint2DModuleLabel")   ),
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
-  fScanModuleLabel          (pset.get< std::string > ("ScanModuleLabel")        ),
-  fPOTModuleLabel           (pset.get< std::string > ("POTModuleLabel")        ),
+  fScanModuleLabel          (pset.get< std::string >("ScanModuleLabel")         ),
+  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
+  fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               )
   
 {
@@ -81,7 +83,9 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
   fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
   fTree->Branch("nvertextracks_reco",&nvertextracks_reco,"nvertextracks_reco/I");
-  fTree->Branch("nvertexclusters_reco",&nvertexclusters_reco,"nvertexclusters_reco/I");
+  fTree->Branch("nvertexclustersu_reco",&nvertexclustersu_reco,"nvertexclustersu_reco/I");
+  fTree->Branch("nvertexclustersv_reco",&nvertexclustersv_reco,"nvertexclustersv_reco/I");
+  fTree->Branch("nvertexclustersw_reco",&nvertexclustersw_reco,"nvertexclustersw_reco/I");
   fTree->Branch("ntrackendonboundary_reco",&ntrackendonboundary_reco,"ntrackendonboundary_reco/I");
   fTree->Branch("trackstart_dcosx_reco",&trackstart_dcosx_reco, "trackstart_dcosx_reco/D");
   fTree->Branch("trackstart_dcosy_reco",&trackstart_dcosy_reco, "trackstart_dcosy_reco/D");
@@ -169,6 +173,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   evt.getByLabel(fCalDataModuleLabel,wireListHandle);
   art::Handle< std::vector<recob::Track> > trackListHandle;
   evt.getByLabel(fTrackModuleLabel,trackListHandle);
+  art::Handle< std::vector<recob::EndPoint2D> > endpointListHandle;
+  evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle);
   art::Handle< std::vector<recob::Vertex> > vertexListHandle;
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   art::Handle< std::vector<t962::MINOS> > minosListHandle;
@@ -200,6 +206,13 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     art::Ptr<recob::Track> trackHolder(trackListHandle,i);
     tracklist.push_back(trackHolder);
   }
+
+  art::PtrVector<recob::EndPoint2D> endpointlist;
+  if(evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle))
+    for (unsigned int i = 0; i < endpointListHandle->size(); ++i){
+      art::Ptr<recob::EndPoint2D> endpointHolder(endpointListHandle,i);
+      endpointlist.push_back(endpointHolder);
+    }
 
   art::PtrVector<recob::Vertex> vertexlist;
   if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
@@ -233,28 +246,34 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   //vertex information
   if(vertexlist.size())
   {
-  double vtxxyz[3];
-  vertexlist[0]->XYZ(vtxxyz);
-  vtxx_reco = vtxxyz[0];
-  vtxy_reco = vtxxyz[1];
-  vtxz_reco = vtxxyz[2];
+    double vtxxyz[3];
+    vertexlist[0]->XYZ(vtxxyz);
+    vtxx_reco = vtxxyz[0];
+    vtxy_reco = vtxxyz[1];
+    vtxz_reco = vtxxyz[2];
   }
   //cluster information
   nclusu_reco = 0;
   nclusv_reco = 0;
   nclusw_reco = 0;
-  
+
+  int nplanes = geom->Nplanes();
+  std::vector<int> Cls[nplanes];
+
   for(unsigned int i=0; i<clusterlist.size();++i){
     
     switch(clusterlist[i]->View()){
     case geo::kU :
       nclusu_reco ++;
+      Cls[0].push_back(i);
       break;
     case geo::kV :
       nclusv_reco ++;
+      Cls[1].push_back(i);
       break;
     case geo::kW :
       nclusw_reco ++;
+      Cls[2].push_back(i);
       break;
     default :
       break;
@@ -272,6 +291,44 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 //   
 //   nvertexclusters_reco=n_vertexclusters;
 
+  for (int i = 0; i<nplanes; i++){
+    int n_vertexclusters = 0;
+    if (Cls[i].size()>0){
+      int vtx2d_w = -99999;
+      double vtx2d_t = -99999;
+      bool found2dvtx = false;
+      //find 2d vertex
+      for (unsigned int j = 0; j<endpointlist.size();j++){
+	if (endpointlist[j]->View() == clusterlist[Cls[i][0]]->View()){
+	  vtx2d_w = endpointlist[j]->WireNum();
+	  vtx2d_t = endpointlist[j]->DriftTime();
+	  found2dvtx = true;
+	  break;
+	}
+      }
+      if (found2dvtx){
+	for (unsigned j = 0; j<Cls[i].size(); j++){
+	  double w = clusterlist[Cls[i][j]]->StartPos()[0];
+	  double t = clusterlist[Cls[i][j]]->StartPos()[1];
+	  double dtdw = clusterlist[Cls[i][j]]->dTdW();
+	  double t_vtx = t+dtdw*(vtx2d_w-w);
+	  double dis = TMath::Abs(vtx2d_t-t_vtx);
+	  if (dis<fvertexclusterWindow){
+	    n_vertexclusters++;
+	  }
+	}
+      }
+    }
+    if (i==0){
+      nvertexclustersu_reco = n_vertexclusters;
+    }
+    else if (i==1){
+      nvertexclustersv_reco = n_vertexclusters;
+    }
+    else if (i==2){
+      nvertexclustersw_reco = n_vertexclusters;
+    }
+  }
   //matching information  
   nmatched_reco = trackmatchlist.size();
   int ANTtrackID=-1;
@@ -408,7 +465,9 @@ void t962::AnalysisTree::ResetVars(){
   nclusw_reco  = -99999;
   ntracks_reco = -99999;
   nvertextracks_reco = -99999;
-  nvertexclusters_reco = -99999;
+  nvertexclustersu_reco = -99999;
+  nvertexclustersv_reco = -99999;
+  nvertexclustersw_reco = -99999;
   trackstart_x_reco = -99999;
   trackstart_y_reco = -99999;
   trackstart_z_reco = -99999;

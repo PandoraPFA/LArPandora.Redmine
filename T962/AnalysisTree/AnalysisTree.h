@@ -61,7 +61,9 @@ namespace t962 {
     int ntracks_reco;         //number of reconstructed tracks
     int nvertextracks_reco;   //number of reconstructed tracks with start position within fvertextrackWindow cm of vertex
     int ntrackendonboundary_reco; //number of reconstructed tracks with end poistion within fboundaryWindow cm of detector boundary
-    int nvertexclusters_reco; //number of reconstructed clusters with start position within fvertextrackWindow cm of vertex
+    int nvertexclustersu_reco; //number of reconstructed clusters with start position within fvertexclusterWindow cm of vertex
+    int nvertexclustersv_reco; //number of reconstructed clusters with start position within fvertexclusterWindow cm of vertex
+    int nvertexclustersw_reco; //number of reconstructed clusters with start position within fvertexclusterWindow cm of vertex
     double trackstart_x_reco;
     double trackstart_y_reco;
     double trackstart_z_reco;
@@ -114,15 +116,16 @@ namespace t962 {
     std::string fGenieGenModuleLabel;
     std::string fClusterModuleLabel;   
     std::string fTrackModuleLabel;
+    std::string fEndPoint2DModuleLabel;
     std::string fVertexModuleLabel;
     std::string fMINOSModuleLabel;
     std::string fTrackMatchModuleLabel;
     std::string fScanModuleLabel;
     std::string fPOTModuleLabel;
     double fvertextrackWindow;
+    double fvertexclusterWindow;
     double fboundaryWindow;
   }; // class AnalysisTree
-
 }
 
 #endif 
