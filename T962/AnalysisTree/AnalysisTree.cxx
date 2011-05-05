@@ -100,7 +100,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
   fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
-  fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minosD");
+  fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minos/D");
   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
   fTree->Branch("trk_dcosx_minos",&trk_dcosx_minos,"trk_dcosx_minos/D");
   fTree->Branch("trk_dcosy_minos",&trk_dcosy_minos,"trk_dcosy_minos/D");
