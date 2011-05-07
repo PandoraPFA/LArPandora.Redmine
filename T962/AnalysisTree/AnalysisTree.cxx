@@ -105,6 +105,9 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trk_dcosx_minos",&trk_dcosx_minos,"trk_dcosx_minos/D");
   fTree->Branch("trk_dcosy_minos",&trk_dcosy_minos,"trk_dcosy_minos/D");
   fTree->Branch("trk_dcosz_minos",&trk_dcosz_minos,"trk_dcosz_minos/D");
+  fTree->Branch("trk_vtxx_minos",&trk_vtxx_minos,"trk_vtxx_minos/D");
+  fTree->Branch("trk_vtxy_minos",&trk_vtxy_minos,"trk_vtxy_minos/D");
+  fTree->Branch("trk_vtxz_minos",&trk_vtxz_minos,"trk_vtxz_minos/D");
   fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/D");
   fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/D");
   fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/D");
@@ -138,8 +141,6 @@ if(sr.getByLabel(fPOTModuleLabel,potListHandle))
 pot=potListHandle->totpot;
 else
 pot=0.;
-
-std::cout<<"POT: "<<pot<<std::endl;
 
 }
 
@@ -279,17 +280,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       break;
     }
   }
-  
-//need wire time 2d vertex position for this to work
-//   int n_vertexclusters=0;
-//   for(unsigned int i=0; i<clusterlist.size();++i){
-//   
-//   //need wire time 2d vertex position for this to work
-//   if(sqrt(pow(clusterlist[i]->StartPos()[0]-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(clusterlist[i]->StartPos()[1]-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(clusterlist[i]->StartPos()[2]-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow) 
-//   n_vertexclusters++;   
-//   }
-//   
-//   nvertexclusters_reco=n_vertexclusters;
+
 
   for (int i = 0; i<nplanes; i++){
     int n_vertexclusters = 0;
@@ -339,12 +330,15 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
  
      if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
      {
-      ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
+     ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
      trk_mom_minos = minoslist[j]->ftrkmom;
      trk_charge_minos = minoslist[j]->fcharge;
      trk_dcosx_minos = minoslist[j]->ftrkdcosx;
      trk_dcosy_minos = minoslist[j]->ftrkdcosy;
-     trk_dcosz_minos = minoslist[j]->ftrkdcosz;       
+     trk_dcosz_minos = minoslist[j]->ftrkdcosz;
+     trk_vtxx_minos = minoslist[j]->ftrkVtxX;
+     trk_vtxy_minos = minoslist[j]->ftrkVtxY;
+     trk_vtxz_minos = minoslist[j]->ftrkVtxZ;     
       }      
      }
     }
@@ -486,6 +480,9 @@ void t962::AnalysisTree::ResetVars(){
   trk_dcosx_minos = -99999;
   trk_dcosy_minos = -99999;
   trk_dcosz_minos = -99999;  
+  trk_vtxx_minos = -99999;
+  trk_vtxy_minos = -99999;
+  trk_vtxz_minos = -99999;
   vtxx_scan=-99999;
   vtxy_scan=-99999;
   vtxz_scan=-99999;

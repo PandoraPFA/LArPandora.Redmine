@@ -84,7 +84,9 @@ namespace t962 {
     double trk_dcosx_minos;
     double trk_dcosy_minos;
     double trk_dcosz_minos;
-    
+    double trk_vtxx_minos;
+    double trk_vtxy_minos;
+    double trk_vtxz_minos;
     //scan information
     double vtxx_scan;
     double vtxy_scan;
