@@ -31,8 +31,7 @@ namespace match {
    public:
       
       explicit MatchTracks(fhicl::ParameterSet const& pset); 
-      virtual ~MatchTracks();
-      
+      virtual ~MatchTracks();      
       void beginJob();
       void produce(art::Event& evt);
       
@@ -44,7 +43,6 @@ namespace match {
       TH1D* fDiffR;
       TH1D* fDiffTotal;
       TH2D* fDiffXvDiffY;
-
       TH1D* fT962_DirCosX;
       TH1D* fT962_DirCosY;
       TH1D* fT962_DirCosZ;
@@ -55,7 +53,7 @@ namespace match {
       TH2D* fT962_StartZX;
       TH2D* fT962_EndZX;
       TH1D* fT962_Ntracks;
-
+      TH1D* fMINOS_Ntracks; 
       TH1D* fMinos_DirCosX;
       TH1D* fMinos_DirCosY;
       TH1D* fMinos_DirCosZ;
@@ -64,8 +62,6 @@ namespace match {
       TH1D* fMinosErange_Neg;
       TH1D* fMinosMom_Pos;
       TH1D* fMinosMom_Neg;
-      
-
       TH2D* fDiffXvD;
       TH2D* fDiffYvD;
 
