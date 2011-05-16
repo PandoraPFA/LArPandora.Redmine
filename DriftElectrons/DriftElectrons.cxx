@@ -113,7 +113,7 @@ namespace dfe{
       xyz[0] = xyz1[0];
 //       std::cout << "pitch " << p << " is " << pitch[p] << std::endl;
     }
-    ///reset the xyz array to be at the first induction plane
+    // reset the xyz array to be at the first induction plane
     geom->Plane(0).Wire(0).GetCenter(xyz);
 
 //     std::cout << "In Drift: X =" << xyz[0] << std::endl;
@@ -198,7 +198,8 @@ namespace dfe{
 	  double pitchT = fabs(pitch[p])/driftvelocity;
 	  unsigned int channel = geom->NearestChannel(xyz1);
 	  fChannels->Fill(channel);
-	  ecol->push_back(sim::Electrons(channel, TDiff+pitchT, nElDiff, voxel));
+	  double voxXYZ[3] = {voxel->VoxelID().X(), voxel->VoxelID().Y(), voxel->VoxelID().Z()};
+	  ecol->push_back(sim::Electrons(channel, TDiff+pitchT, nElDiff, voxel, voxXYZ));
 	}//end loop over planes
       }//end loop over clusters
     }//end loop over voxels in list
