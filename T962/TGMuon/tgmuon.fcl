@@ -1,0 +1,10 @@
+BEGIN_PROLOG
+
+#no experiment specific configurations because TGMuon is detector agnostic
+
+standard_tgmuon:
+{
+ module_type:  "TGMuon"
+}
+
+END_PROLOG
