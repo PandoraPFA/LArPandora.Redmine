@@ -20,7 +20,7 @@ services:
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   1000          # Number of events to create
+  maxEvents:   10000          # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }

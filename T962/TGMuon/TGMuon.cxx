@@ -108,10 +108,7 @@ namespace evgen{
   void TGMuon::Sample(simb::MCTruth &mct) 
   {
       //loop through MINOS root files	  
-      std::string path = "/argoneut/data/outstage/spitz7/allminos_neutrinodata/";      
-      path=( path + "/");    
-      DIR *pDIR;
-      struct dirent *entry;
+      std::string file = "/argoneut/data/outstage/spitz7/allminos_neutrinodata/allminos_neutrinodata.root";        
       int snarl=0;
       int run=0;
       int subRun=0;
@@ -120,16 +117,7 @@ namespace evgen{
       double x_offset=116.9; 
       double y_offset=20.28;
       double z_offset=500.; //force particle to be well upstream of ArgoNeuT
-    if( (pDIR=opendir(path.c_str())) != NULL )
-    {     
-     while((entry = readdir(pDIR)) != NULL)
-     {
-            if( strcmp(entry->d_name, ".")==0 || strcmp(entry->d_name, "..")==00) continue;
-
-            std::string filename(entry->d_name);   
-            std::string file = (path + entry->d_name);
-            if(filename.find("allminos_neutrinodata.root")==-1)
-            continue;
+  
             TFile *f = new TFile(file.c_str());
             TTree *minitree = (TTree*)f->Get("minitree");
             minitree->SetBranchAddress("run",&frun);  
@@ -208,11 +196,7 @@ namespace evgen{
        minitree->Delete();
        f->Close();
        f->Delete();
-       
-     if(flag)
-     break;
-     }//while loop            
-    }
+
    return;
   }
 
