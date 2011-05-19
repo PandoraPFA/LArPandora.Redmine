@@ -331,7 +331,12 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
      {
      ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
-     trk_mom_minos = minoslist[j]->ftrkmom;
+     
+     if(minoslist[j]->ftrkcontained)
+     trk_mom_minos = minoslist[j]->ftrkErange;
+     else
+     trk_mom_minos = minoslist[j]->ftrkmom;     
+     
      trk_charge_minos = minoslist[j]->fcharge;
      trk_dcosx_minos = minoslist[j]->ftrkdcosx;
      trk_dcosy_minos = minoslist[j]->ftrkdcosy;
