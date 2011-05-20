@@ -238,8 +238,8 @@ namespace match{
       double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
                                            //(this minus number is the one we measured with Mitch)
 
-      double x_offset=116.9; // previously 118;
-      double y_offset=20.28; //previously  19;
+      double x_offset=114.4; // previously 116.9;
+      double y_offset=20.98; //previously  20.28;
 
       std::vector<double> larStart, larEnd;
       lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
