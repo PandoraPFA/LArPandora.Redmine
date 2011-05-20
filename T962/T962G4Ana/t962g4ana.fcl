@@ -15,15 +15,9 @@ services:
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
-  user: 
-  { 
-    Geometry:           @local::argoneut_geo 	       
-    LArProperties:      @local::argoneut_properties	       
-    LArFFT:             @local::argoneut_larfft  	       
-    LArG4Parameters:    @local::argoneut_largeantparameters
-    LArVoxelCalculator: @local::argoneut_larvoxelcalculator
-  }
+  user:         @local::argoneut_services
 }
+
 
 #Start each new event with an empty event.
 source:
