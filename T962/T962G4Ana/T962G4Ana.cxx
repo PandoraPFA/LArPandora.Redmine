@@ -194,8 +194,8 @@ void T962G4Ana::analyze(const art::Event& evt)
     fm_mass=0.;
     fm_energylost=0.;
     fm_deflectionangle=0.;
-    fm_offset_x=116.9;//cm
-    fm_offset_y=-20.28;//cm
+    fm_offset_x=114.4;//cm
+    fm_offset_y=-20.98;//cm
     fm_offset_z=-147.108;//cm
     
     int numprimaries=0;
