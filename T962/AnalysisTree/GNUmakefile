@@ -17,5 +17,5 @@ LIBLINK    := -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)
 include SoftRelTools/standard.mk
 include SoftRelTools/arch_spec_art.mk
 
-override LIBLIBS += $(LOADLIBES) -L$(ART_LIB) -lart_Framework_Services_Optional_TFileService_service -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -lRecoBase -lFilters -lGeometry -lSimulationBase -lSimulation -lRawData -lT962_Objects
+override LIBLIBS += $(LOADLIBES) -L$(ART_LIB) -lart_Framework_Services_Optional_TFileService_service -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR)  -lSimulationBase -lSimulation -lRecoBase -lFilters -lGeometry -lRawData -lT962_Objects
 
