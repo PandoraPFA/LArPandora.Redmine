@@ -6,6 +6,7 @@
 #
 include SoftRelTools/arch_spec_root.mk
 
+PACKAGE     := AnalysisTree
 LIB_TYPE    := shared
 LIB         := lib$(PACKAGE)
 LIBCXXFILES := $(wildcard *.cxx)
