@@ -1,6 +1,5 @@
 #include "job/services.fcl"
 #include "job/simulationservices.fcl"
-#include "job/genie.fcl"
 #include "job/largeantmodules.fcl"
 #include "job/detsimmodules.fcl"
 #include "job/t962geantmodules.fcl"
@@ -19,13 +18,12 @@ services:
 }
 
 
-#Start each new event with an empty event.
+
+#source is now a root file
 source:
 {
-  module_type: EmptyEvent
-  maxEvents:   100          # Number of events to create
-  firstRun:    1           # Run number to use for this file
-  firstEvent:  1           # number of first event in the file
+  module_type: RootInput
+  maxEvents:  -1      # Number of events to create
 }
 
 outputs:
@@ -47,7 +45,7 @@ physics:
 
  producers:
  {
-   generator: @local::argoneut_genie_hist_neutrino
+//    generator: @local::argoneut_genie_hist_neutrino
    largeant:  @local::argoneut_largeant	       
    daq:       @local::argoneut_simwire 
  }
@@ -59,7 +57,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, largeant, daq ] 
+ simulate: [ largeant, daq ] 
  t962ana: [ t962gana ]
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
