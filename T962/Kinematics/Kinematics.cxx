@@ -238,18 +238,21 @@ void Kinematics::analyze(const art::Event& evt)
       TLorentzVector prevmomentum = trajectory.Momentum(j-1);
       TLorentzVector momentum = trajectory.Momentum(j);
 
-       if(       (((prevposition.X()<0.&&position.X()>0.)||(prevposition.X()>0.&&position.X()<0.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.X()<47.&&position.X()>47.)||(prevposition.X()>47.&&position.X()<47.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.Y()<20.2&&position.Y()>20.2)||(prevposition.Y()>20.2&&position.Y()<20.2))&&(prevposition.X()<47.&&prevposition.X()>0.&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.Y()<-19.8&&position.Y()>-19.8)||(prevposition.Y()>-19.8&&position.Y()<-19.8))&&(prevposition.X()<47.&&prevposition.X()>0.&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.Z()<0.&&position.Z()>0.)||(prevposition.Z()>0.&&position.Z()<0.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.X()>0.&&prevposition.X()<47.))
-       ||       (((prevposition.Z()<90.&&position.Z()>90.)||(prevposition.Z()>90.&&position.Z()<90.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.X()>0.&&prevposition.X()<47.))
+       if(       (((prevposition.X()<0.&&position.X()>=0.)||(prevposition.X()>0.&&position.X()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.X()<47.&&position.X()>=47.)||(prevposition.X()>47.&&position.X()<=47.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.Y()<20.&&position.Y()>=20.)||(prevposition.Y()>20.&&position.Y()<=20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.Y()<-20.&&position.Y()>=-20.)||(prevposition.Y()>-20.&&position.Y()<=-20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.Z()<0.&&position.Z()>=0.)||(prevposition.Z()>0.&&position.Z()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
+       ||       (((prevposition.Z()<90.&&position.Z()>=90.)||(prevposition.Z()>90.&&position.Z()<=90.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
        )
        {    
-        fm_tpcexit_x_true=prevposition.X();
-        fm_tpcexit_y_true=prevposition.Y();
-        fm_tpcexit_z_true=prevposition.Z();
+        fm_tpcexit_x_true=position.X();
+        fm_tpcexit_y_true=position.Y();
+        fm_tpcexit_z_true=position.Z();
        }
+       
+       std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;  
+       
      }
     }
 
