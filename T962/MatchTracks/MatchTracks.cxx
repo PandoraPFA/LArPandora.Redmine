@@ -309,8 +309,8 @@ namespace match{
       lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
  	if(fabs(larEnd[0])<fdBoundary
 	|| fabs(47.-larEnd[0])<fdBoundary 
-	|| fabs(larEnd[1]+19.8)<fdBoundary
-	|| fabs(20.2-larEnd[1])<fdBoundary
+	|| fabs(larEnd[1]+20.)<fdBoundary
+	|| fabs(20.-larEnd[1])<fdBoundary
 	|| fabs(larEnd[2])<fdBoundary
 	|| fabs(90.-larEnd[2])<fdBoundary )   
 	return true;  
