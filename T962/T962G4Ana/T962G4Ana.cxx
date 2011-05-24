@@ -212,7 +212,7 @@ void T962G4Ana::analyze(const art::Event& evt)
     	{
     	TLorentzVector prevposition = trajectory.Position(j-1);
     	TLorentzVector position = trajectory.Position(j);
-        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<147.108&&position.Z()>147.108&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
+        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<152.95&&position.Z()>152.95&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
     	numprimaries++;    	
     	}    
     }
@@ -264,33 +264,33 @@ void T962G4Ana::analyze(const art::Event& evt)
       TLorentzVector prevmomentum = trajectory.Momentum(j-1);
       TLorentzVector momentum = trajectory.Momentum(j);
 
-       if(       (((prevposition.X()<0.&&position.X()>0.)||(prevposition.X()>0.&&position.X()<0.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.X()<47.&&position.X()>47.)||(prevposition.X()>47.&&position.X()<47.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.Y()<20.2&&position.Y()>20.2)||(prevposition.Y()>20.2&&position.Y()<20.2))&&(prevposition.X()<47.&&prevposition.X()>0.&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.Y()<-19.8&&position.Y()>-19.8)||(prevposition.Y()>-19.8&&position.Y()<-19.8))&&(prevposition.X()<47.&&prevposition.X()>0.&&prevposition.Z()>0.&&prevposition.Z()<90.))
-       ||       (((prevposition.Z()<0.&&position.Z()>0.)||(prevposition.Z()>0.&&position.Z()<0.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.X()>0.&&prevposition.X()<47.))
-       ||       (((prevposition.Z()<90.&&position.Z()>90.)||(prevposition.Z()>90.&&position.Z()<90.))&&(prevposition.Y()<20.2&&prevposition.Y()>-19.8&&prevposition.X()>0.&&prevposition.X()<47.))
+       if(       (((prevposition.X()<0.&&position.X()>=0.)||(prevposition.X()>0.&&position.X()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.X()<47.&&position.X()>=47.)||(prevposition.X()>47.&&position.X()<=47.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.Y()<20.&&position.Y()>=20.)||(prevposition.Y()>20.&&position.Y()<=20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.Y()<-20.&&position.Y()>=-20.)||(prevposition.Y()>-20.&&position.Y()<=-20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+       ||       (((prevposition.Z()<0.&&position.Z()>=0.)||(prevposition.Z()>0.&&position.Z()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
+       ||       (((prevposition.Z()<90.&&position.Z()>=90.)||(prevposition.Z()>90.&&position.Z()<=90.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
        )
        {    
-       fm_tpcexit_x=prevposition.X();
-       fm_tpcexit_y=prevposition.Y();
-       fm_tpcexit_z=prevposition.Z();
-       fm_tpcexit_px=prevmomentum.Px();
-       fm_tpcexit_py=prevmomentum.Py();
-       fm_tpcexit_pz=prevmomentum.Pz();
-       fm_tpcexit_energy=prevmomentum.E(); 
+       fm_tpcexit_x=position.X();
+       fm_tpcexit_y=position.Y();
+       fm_tpcexit_z=position.Z();
+       fm_tpcexit_px=momentum.Px();
+       fm_tpcexit_py=momentum.Py();
+       fm_tpcexit_pz=momentum.Pz();
+       fm_tpcexit_energy=momentum.E(); 
        }
     // if(prevposition.Z()<154.22&&position.Z()>154.22&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
 //            {
-       if(prevposition.Z()<147.108&&position.Z()>147.108&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
+       if(prevposition.Z()<152.95&&position.Z()>152.95&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
         {
-       fm_minosenter_x=prevposition.X();
-       fm_minosenter_y=prevposition.Y();
-       fm_minosenter_z=prevposition.Z();
-       fm_minosenter_px=prevmomentum.Px();
-       fm_minosenter_py=prevmomentum.Py();
-       fm_minosenter_pz=prevmomentum.Pz();
-       fm_minosenter_energy=prevmomentum.E();
+       fm_minosenter_x=position.X();
+       fm_minosenter_y=position.Y();
+       fm_minosenter_z=position.Z();
+       fm_minosenter_px=momentum.Px();
+       fm_minosenter_py=momentum.Py();
+       fm_minosenter_pz=momentum.Pz();
+       fm_minosenter_energy=momentum.E();
 
     primindex++;
     myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
