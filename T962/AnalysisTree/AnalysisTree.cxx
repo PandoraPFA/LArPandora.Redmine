@@ -517,8 +517,8 @@ bool t962::AnalysisTree::EndsOnBoundary(art::Ptr<recob::Track> lar_track)
 
  	if(fabs(larEnd[0])<fboundaryWindow 
 	|| fabs(47.-larEnd[0])<fboundaryWindow 
-	|| fabs(larEnd[1]+19.8)<fboundaryWindow
-	|| fabs(20.2-larEnd[1])<fboundaryWindow 
+	|| fabs(larEnd[1]+20.)<fboundaryWindow
+	|| fabs(20.-larEnd[1])<fboundaryWindow 
 	|| fabs(larEnd[2])<fboundaryWindow 
 	|| fabs(90.-larEnd[2])<fboundaryWindow  )   
 	return true;  
