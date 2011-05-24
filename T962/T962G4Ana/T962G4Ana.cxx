@@ -196,7 +196,7 @@ void T962G4Ana::analyze(const art::Event& evt)
     fm_deflectionangle=0.;
     fm_offset_x=114.4;//cm
     fm_offset_y=-20.98;//cm
-    fm_offset_z=-147.108;//cm
+    fm_offset_z=-152.95;//cm
     
     int numprimaries=0;
     int numinminos=0;
@@ -212,7 +212,7 @@ void T962G4Ana::analyze(const art::Event& evt)
     	{
     	TLorentzVector prevposition = trajectory.Position(j-1);
     	TLorentzVector position = trajectory.Position(j);
-        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<152.95&&position.Z()>152.95&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
+        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<152.95&&position.Z()>=152.95&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
     	numprimaries++;    	
     	}    
     }
@@ -282,7 +282,7 @@ void T962G4Ana::analyze(const art::Event& evt)
        }
     // if(prevposition.Z()<154.22&&position.Z()>154.22&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
 //            {
-       if(prevposition.Z()<152.95&&position.Z()>152.95&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
+       if(prevposition.Z()<152.95&&position.Z()>=152.95&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
         {
        fm_minosenter_x=position.X();
        fm_minosenter_y=position.Y();
