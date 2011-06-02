@@ -104,8 +104,8 @@ namespace match{
       evt.getByLabel(fMinosTracks_label,MinosTrackHandle);
 
       std::cout << std::setfill('*') << std::setw(175) << "*" << std::setfill(' ') << std::endl;
-      std::cout << "Run = " << evt.id().run() << " Event = " << evt.id().event() << std::endl;
-      std::cout << "#T962 Tracks = " << LarTrackHandle->size() 
+      std::cout << "Run = " << evt.id().run() << " Event = " << evt.id().event();
+      std::cout << " #T962 Tracks = " << LarTrackHandle->size() 
                 << " #MINOS Tracks = " << MinosTrackHandle->size() << std::endl;
 
       fT962_Ntracks->Fill(LarTrackHandle->size());
@@ -139,9 +139,15 @@ namespace match{
             double lardirectionEnd[3];
             lartrack->Direction(lardirectionStart,lardirectionEnd);         
             double xdiff,ydiff,rdiff,totaldiff;
-            bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff,totaldiff);            
+            
+            bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff,totaldiff);  
+            
+            
             if(match && totaldiff2>totaldiff)
+            {
              totaldiff2=totaldiff;
+             std::cout<<i<<" "<<j<<" "<<totaldiff<<" "<<minostrack->ftrkmom<<std::endl;
+             }
          }           
         }
             
@@ -238,9 +244,8 @@ namespace match{
       double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
                                            //(this minus number is the one we measured with Mitch)
 
-      double x_offset=114.4; // previously 116.9;
-      double y_offset=20.98; //previously  20.28;
-
+      double x_offset=117.4; // previously 116.9;
+      double y_offset=19.3; // previously  20.28;
       std::vector<double> larStart, larEnd;
       lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
       //std::cout << "larStart = (" << larStart[0] << "," << larStart[1] << "," << larStart[2] << ")" << std::endl;
