@@ -146,10 +146,12 @@ void T962G4Ana::analyze(const art::Event& evt)
 
   art::Ptr<simb::MCTruth> mc(mclist[0]);
 // 
+
+//comment out this section for through going muon simulation
+
+if(mc->NeutrinoSet())
+{
 	simb::MCNeutrino neut(mc->GetNeutrino());
-
-
-
     fm_neutrino_x =neut.Nu().Vx();
     fm_neutrino_y =neut.Nu().Vy();
     fm_neutrino_z =neut.Nu().Vz();
@@ -158,6 +160,10 @@ void T962G4Ana::analyze(const art::Event& evt)
     fm_neutrino_pz =neut.Nu().Pz();
     fm_neutrino_energy=neut.Nu().E();
     fm_neutrino_pdgcode=neut.Nu().PdgCode();
+}
+//     
+    
+    
 
     //get the list of particles from this event
     sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
