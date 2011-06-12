@@ -114,9 +114,9 @@ namespace evgen{
       int subRun=0;
       int flag=0;
       double r=0;
-      double x_offset=116.9; 
-      double y_offset=20.28;
-      double z_offset=500.; //force particle to be well upstream of ArgoNeuT
+      double x_offset=117.4; 
+      double y_offset=19.3;
+      double z_offset=150.; //force particle to be well upstream of ArgoNeuT
   
             TFile *f = new TFile(file.c_str());
             TTree *minitree = (TTree*)f->Get("minitree");
@@ -143,7 +143,7 @@ namespace evgen{
             subRun=fsubRun;
             snarl=fsnarl;
             //count POT even if the particle is not passed to Geant
-            totalpot+=ftrtgtd;
+            totalpot+=ftrtgtd*pow(10,12);
           
       for(int i=r-ftrkIndex;i<nentries;i++)
       {
@@ -160,7 +160,7 @@ namespace evgen{
     	 x[1]=100.*ftrkVtxY + y_offset;
     	 x[2]=100.*ftrkVtxZ - z_offset;        
         //don't bother passing the particle to geant if it's way outside the argoneut detector window   
-      	if(100.0*ftrkVtxZ > 20. || fabs(x[0]+23.5)>200 || fabs(x[1])>200)
+      	if(100.0*ftrkVtxZ > 20. || fabs(x[0]+23.5)>100. || fabs(x[1])>100.)
       	continue;
 
       	// Choose momentum
