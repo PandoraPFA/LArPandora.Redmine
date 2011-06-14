@@ -1,0 +1,16 @@
+BEGIN_PROLOG
+
+argoneut_ccqeanalysis:
+{ 
+ module_type:              "CCQEanalysis"
+ GenieGenModuleLabel:      "generator"
+ LArGeantModuleLabel:      "largeant"
+ HitsModuleLabel:          "ffthit"
+ ClusterFinderModuleLabel: "dbcluster"
+
+}
+
+END_PROLOG
+
+
+
