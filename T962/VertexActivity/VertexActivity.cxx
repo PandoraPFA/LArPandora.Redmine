@@ -244,7 +244,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
   double numbertimesamples;
 
   unsigned int channel2,plane,plane2,wire,wire2,plane3;
-    unsigned int p(0),w(0), channel(0);;
+  unsigned int p(0),w(0), t(0),channel(0);
   
       
 
@@ -273,7 +273,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
   
   
 	channel=hit->Wire()->RawDigit()->Channel();
-	geom->ChannelToWire(channel,p,w);
+	geom->ChannelToWire(channel,t,p,w);
     
 	if(p == plane) allhits.push_back(hit);
    
@@ -287,7 +287,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
 	vertex[0]=-.3;//force time coordinate to be closer to collection plane
      
       channel2 = geom->NearestChannel(vertex);
-      geom->ChannelToWire(channel2,plane2,wire2); 
+      geom->ChannelToWire(channel2,t,plane2,wire2); 
       // std::cout<<"channel2 "<<channel2<<std::endl;
   //     art::PtrVector<recob::Hit> vHits;
 //       art::PtrVectorItr<recob::Cluster> clusterIter = clusIn.begin();
@@ -320,7 +320,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
 	  // std::cout<<"hit size: "<<hit.size()<<std::endl;
 	
 	   channel=allhits[i]->Wire()->RawDigit()->Channel();
- 	  geom->ChannelToWire(channel,plane3,wire);   
+	   geom->ChannelToWire(channel,t,plane3,wire);   
 // // std::cout<<hit[i]->Charge()<<" "<<hit[i]->PeakTime()<<" "<<hit[i]->Channel()<<std::endl;
 // 	  
 // 	  if(plane!=p)

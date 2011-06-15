@@ -17,8 +17,8 @@
 #include <string>
 #include <time.h>
 
-
 ///Merge different data streams 
+
 class TH1F;
 class TH2F;
 
