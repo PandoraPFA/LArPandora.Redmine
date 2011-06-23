@@ -1,0 +1,31 @@
+BEGIN_PROLOG
+
+no_mag:
+{
+    UseField:         false
+    ConstantField:    [ 0.0, 0.0, 0.0 ]
+    MagnetizedVolume: "volCryostat"
+}
+
+argoneut_mag:
+{
+    UseField:         false
+    ConstantField:    [ 0.0, 0.0, 0.0 ]
+    MagnetizedVolume: "volCryostat"
+}
+
+microboone_mag:
+{
+    UseField:         false
+    ConstantField:    [ 0.0, 0.0, 0.0 ]
+    MagnetizedVolume: "volCryostat"
+}
+
+lbne_mag:
+{
+    UseField:         true
+    ConstantField:    [ 0.4, 0.0, 0.0 ]
+    MagnetizedVolume: "volCryostat"
+}
+
+END_PROLOG
