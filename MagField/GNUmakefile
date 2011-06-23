@@ -21,7 +21,7 @@ LIBLINK    := -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)
 include SoftRelTools/standard.mk
 include SoftRelTools/arch_spec_art.mk
 
-override LIBLIBS += $(LOADLIBES) -L$(CLHEP_BASE)/lib -lCLHEP -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -lGeometry
+override LIBLIBS += $(LOADLIBES) -L$(CLHEP_BASE)/lib -lCLHEP 
 
 
 

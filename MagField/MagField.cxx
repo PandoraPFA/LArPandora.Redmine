@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "MagField/mag.h"
-//#include "Geometry/geo.h"
 
 #include <vector>
 #include <string>
