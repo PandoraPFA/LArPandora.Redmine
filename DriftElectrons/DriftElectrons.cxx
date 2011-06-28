@@ -26,8 +26,10 @@
 
 #include "TH1.h"
 #include "TMath.h"
-#include "TRandom3.h"
 #include <ctime>
+
+#include "CLHEP/Random/RandFlat.h"
+#include "CLHEP/Random/RandGaussQ.h"
 
 namespace dfe{
 
@@ -41,6 +43,17 @@ namespace dfe{
   {
     this->reconfigure(pset);
 
+    // get the random number seed, use a random default if not specified    
+    // in the configuration file.  maximum allowed seed for RandomNumberGenerator
+    // is 900000000, so time(0) returns the number of seconds since 1970 which is 
+    // too large, so subtract the upper limit from the returned value. As of
+    // June 28, 2011, the resulting number is 0.45 the limit, so we should be
+    // good for about another 41 years before having to revisit this statement.
+    // \todo Is this solution for setting a seed acceptable when submitting jobs to the grid?
+    unsigned int seed = pset.get< unsigned int >("Seed", time(0) - 902000000);
+
+    createEngine(seed);
+
     produces< std::vector<sim::Electrons> >();
 
     // Conversion from GeV energy loss to electrons
@@ -51,9 +64,6 @@ namespace dfe{
     // There's a factor of two in the diffusion equation
     fLongDiff *= 2.;
     fTranDiff *= 2.;
-
-    int RanSeed = time(0);
-    fRandom.SetSeed(RanSeed);
   }
 
   //-----------------------------------------------------
@@ -99,6 +109,10 @@ namespace dfe{
     art::ServiceHandle<util::LArProperties> larp;
     art::ServiceHandle<geo::Geometry> geom;
     
+    art::ServiceHandle<art::RandomNumberGenerator> rng;
+    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::RandGaussQ gauss(engine);
+
     double xyz[3] = {0.};
     double xyz1[3] = {0.};
     int planes = geom->Nplanes();
@@ -167,12 +181,12 @@ namespace dfe{
       
       // Drift nClus electron clusters to the induction plane
       for(int k = 0; k<nClus; ++k){
-	double XDiff = fRandom.Gaus(0.,LDiffSig);
+	double XDiff = gauss.fire(0.,LDiffSig);
 	// Correct drift time for longitudinal diffusion
 	double TDiff = TDrift + XDiff/driftvelocity;
 	// Smear the Y,Z position by the transverse diffusion
-	double YDiff = fRandom.Gaus(voxel->VoxelID().Y(),TDiffSig);
-	double ZDiff = fRandom.Gaus(voxel->VoxelID().Z(),TDiffSig);
+	double YDiff = gauss.fire(voxel->VoxelID().Y(),TDiffSig);
+	double ZDiff = gauss.fire(voxel->VoxelID().Z(),TDiffSig);
 	
 	fDiffuseX->Fill(XDiff);
 	fDiffuseY->Fill(voxel->VoxelID().Y() - YDiff);

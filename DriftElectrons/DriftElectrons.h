@@ -12,7 +12,6 @@
 #include "Utilities/LArProperties.h"
 
 #include "art/Framework/Core/EDProducer.h"
-#include "TRandom3.h"
 #include <vector>
 #include <string>
 
@@ -38,8 +37,6 @@ namespace dfe {
 
   private:
         
-    TRandom3 fRandom;              ///< random number generator
-
     double fRecombA;               ///< factor for calculating recombination
     double fRecombk;               ///< factor for calculating recombination
     double fGeV2Elect;             ///< Conversion from GeV energy loss to electrons
