@@ -44,11 +44,8 @@ namespace dfe{
     this->reconfigure(pset);
 
     // get the random number seed, use a random default if not specified    
-    // in the configuration file.  maximum allowed seed for RandomNumberGenerator
-    // is 900000000. Use the system random number generator to get a pseudo-random
-    // number for the seed value, and take the modulus of the maximum allowed 
-    // seed to ensure we don't ever go over that maximum
-    unsigned int seed = pset.get< unsigned int >("Seed", rand()%900000000);
+    // in the configuration file.  
+    unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
 
     createEngine(seed);
 
