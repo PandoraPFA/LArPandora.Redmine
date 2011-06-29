@@ -3,4 +3,7 @@
 
 #include "MagField/MagField.h"
 
+/// Service describing a magnetic field
+namespace mag {}
+
 #endif // MAG_MAG_H
