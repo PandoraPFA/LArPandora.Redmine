@@ -1,0 +1,18 @@
+////////////////////////////////////////////////////////////////////////
+//
+// MuonAna class
+//
+// msoderbe@syr.edu
+//
+//  
+////////////////////////////////////////////////////////////////////////
+// Framework includes
+#include "art/Framework/Core/ModuleMacros.h" 
+
+#include "T962/MuonAna/MuonAna.h"
+
+namespace muons{
+
+  DEFINE_ART_MODULE(MuonAna);
+
+} // end of vertex namespace
