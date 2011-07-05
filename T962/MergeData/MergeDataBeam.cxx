@@ -61,7 +61,8 @@ namespace merge{
     tm *timeinfo = localtime(&spilltime);//use this to get day/month/year;we should worry about users in different time zones at some point
    
     char beamfilename[20];
-    sprintf(beamfilename,"/argoneut/data/rundata/matched/matched_%02d_%i_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+    //sprintf(beamfilename,"/argoneut/data/rundata/matched/matched_%02d_%i_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+    sprintf(beamfilename,"./matchfiles/matched_%02d_%i_%d",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
     std::ifstream beamfile(beamfilename);
 
     if(!beamfile.is_open()){

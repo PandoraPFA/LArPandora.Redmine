@@ -99,14 +99,15 @@ namespace merge{
       double tms = (double)fbeam->get_t_ms();//millisecond timing information from BeamInfo object
 
       //loop through MINOS root files	  
-      std::string path = "/argoneut/app/users/rmehdi/fhc/";
+      //std::string path = "/argoneut/app/users/rmehdi/fhc/";
+      std::string path = "./matchfiles/";
       DIR *pDIR;
       struct dirent *entry;
       if( (pDIR=opendir(path.c_str())) != NULL )
       {
          while((entry = readdir(pDIR)) != NULL)
          {
-            if( strcmp(entry->d_name, ".")==0 || strcmp(entry->d_name, "..")==00) continue;
+            if( strcmp(entry->d_name, ".")==0 || strcmp(entry->d_name, "..")==00 ) continue;
 		 
             //grab initial/final timestamp info. from input MINOS file
             int firsttimestart = 0;

@@ -29,13 +29,13 @@ outputs:
 physics:
 {
   producers:{}
-//merge: [beam, minos]  
-  merge: [minos]
+merge: [beam, minos]  
+//  merge: [minos]
   stream1: [out1]
   trigger_paths: [merge]
   end_paths: [stream1]
 }
 
-// physics.producers.beam:  @local::argoneut_mergedatabeam
-// physics.producers.minos: @local::argoneut_mergedataminos
-physics.producers.minos: @local::argoneut_mergesimminos
+physics.producers.beam:  @local::argoneut_mergedatabeam
+physics.producers.minos: @local::argoneut_mergedataminos
+//physics.producers.minos: @local::argoneut_mergesimminos
