@@ -7,7 +7,13 @@ argoneut_ccqeanalysis:
  LArGeantModuleLabel:      "largeant"
  HitsModuleLabel:          "ffthit"
  ClusterFinderModuleLabel: "dbcluster"
-
+ HoughModuleLabel:          "hough"
+ LineMModuleLabel:         "linemerger"
+ TrackModuleLabel:         "track3d"
+ EndPoint2DModuleLabel:    "vertex2d"
+ VertexModuleLabel:        "vertex2d"
+// MINOSModuleLabel:         "minos"
+ //TrackMatchModuleLabel:    "matchtracks"
 }
 
 END_PROLOG

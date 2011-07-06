@@ -56,6 +56,13 @@ t962::CCQEanalysis::CCQEanalysis(fhicl::ParameterSet const& pset) :
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
   fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
   fClusterFinderModuleLabel (pset.get< std::string >("ClusterFinderModuleLabel")),
+  fHoughModuleLabel (pset.get< std::string >("HoughModuleLabel")),
+  fLineMModuleLabel       (pset.get< std::string >("LineMModuleLabel")      ),
+  fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
+  fEndPoint2DModuleLabel    (pset.get< std::string >("EndPoint2DModuleLabel")   ),
+  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
+  //fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
+  //fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")  
   frun(0),
   fevent(0),
   fbeam(0),
@@ -140,15 +147,47 @@ void t962::CCQEanalysis::beginJob()
   fTree->Branch("EndPointy",fEndPointy,"EndPointy[no_primaries]/D");
   fTree->Branch("EndPointz",fEndPointz,"EndPointz[no_primaries]/D");
   
+//                  RECO :
+  fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
+  fTree->Branch("vtxy_reco",&vtxy_reco,"vtxy_reco/D");
+  fTree->Branch("vtxz_reco",&vtxz_reco,"vtxz_reco/D");
+  fTree->Branch("nclusu_reco",&nclusu_reco,"nclusu_reco/I");
+  fTree->Branch("nclusv_reco",&nclusv_reco,"nclusv_reco/I");
+  fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
+  fTree->Branch("nhoughu_reco",&nhoughu_reco,"nhoughu_reco/I");
+  fTree->Branch("nhoughv_reco",&nhoughu_reco,"nhoughv_reco/I");
+  fTree->Branch("nhoughw_reco",&nhoughu_reco,"nhoughw_reco/I");
+  fTree->Branch("nlineu_reco",&nclusu_reco,"nlineu_reco/I");
+  fTree->Branch("nlinev_reco",&nclusu_reco,"nlinev_reco/I");
+  fTree->Branch("nlinew_reco",&nclusu_reco,"nlinew_reco/I");
+  fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
+  // fTree->Branch("nvertextracks_reco",&nvertextracks_reco,"nvertextracks_reco/I");
+//   fTree->Branch("nvertexclustersu_reco",&nvertexclustersu_reco,"nvertexclustersu_reco/I");
+//   fTree->Branch("nvertexclustersv_reco",&nvertexclustersv_reco,"nvertexclustersv_reco/I");
+//   fTree->Branch("nvertexclustersw_reco",&nvertexclustersw_reco,"nvertexclustersw_reco/I");
+// 
+//  fTree->Branch("trackstart_dcosx_reco",&trackstart_dcosx_reco, "trackstart_dcosx_reco/D");
+//   fTree->Branch("trackstart_dcosy_reco",&trackstart_dcosy_reco, "trackstart_dcosy_reco/D");
+//   fTree->Branch("trackstart_dcosz_reco",&trackstart_dcosz_reco, "trackstart_dcosz_reco/D");
+//   fTree->Branch("trackexit_dcosx_reco",&trackexit_dcosx_reco, "trackexit_dcosx_reco/D");
+//   fTree->Branch("trackexit_dcosy_reco",&trackexit_dcosy_reco, "trackexit_dcosy_reco/D");
+//   fTree->Branch("trackexit_dcosz_reco",&trackexit_dcosz_reco, "trackexit_dcosz_reco/D");
+//   fTree->Branch("trackstart_x_reco",&trackstart_x_reco, "trackstart_x_reco/D");
+//   fTree->Branch("trackstart_y_reco",&trackstart_y_reco, "trackstart_y_reco/D");
+//   fTree->Branch("trackstart_z_reco",&trackstart_z_reco, "trackstart_z_reco/D");
+//   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
+//   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
+//   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
+//   fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
+//   fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minos/D");
+//   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
+//   fTree->Branch("trk_dcosx_minos",&trk_dcosx_minos,"trk_dcosx_minos/D");
+//   fTree->Branch("trk_dcosy_minos",&trk_dcosy_minos,"trk_dcosy_minos/D");
+//   fTree->Branch("trk_dcosz_minos",&trk_dcosz_minos,"trk_dcosz_minos/D");
+//   fTree->Branch("trk_vtxx_minos",&trk_vtxx_minos,"trk_vtxx_minos/D");
+//   fTree->Branch("trk_vtxy_minos",&trk_vtxy_minos,"trk_vtxy_minos/D");
+//   fTree->Branch("trk_vtxz_minos",&trk_vtxz_minos,"trk_vtxz_minos/D");
 //   
-  
-  
-  // fTree->Branch("theta_truth",&Mu_theta_truth,"Mu_theta_truth/D");
-//   fTree->Branch("phi_truth",&Mu_phi_truth,"Mu_phi_truth/D");
-//   fTree->Branch("charge_truth",&Mu_charge_truth,"Mu_charge_truth/I");
-//   
-  
-  
   
   
   
@@ -214,19 +253,26 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
    art::Handle< std::vector<sim::Particle> > geant_list;
     evt.getByLabel (fLArG4ModuleLabel,geant_list);
     
+  //.................
+  
+   art::Handle< std::vector<recob::Cluster> > linemListHandle;
+  evt.getByLabel(fLineMModuleLabel,linemListHandle);
+  
+   art::Handle< std::vector<recob::Cluster> > houghListHandle;
+  evt.getByLabel(fHoughModuleLabel,houghListHandle);
+  
+  art::Handle< std::vector<recob::Track> > trackListHandle;
+  evt.getByLabel(fTrackModuleLabel,trackListHandle);
+  art::Handle< std::vector<recob::EndPoint2D> > endpointListHandle;
+  evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle);
+  art::Handle< std::vector<recob::Vertex> > vertexListHandle;
+  evt.getByLabel(fVertexModuleLabel,vertexListHandle);
+  //art::Handle< std::vector<t962::MINOS> > minosListHandle;
+  //evt.getByLabel(fMINOSModuleLabel,minosListHandle);
+  //art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
+  //evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   
   
-  
-   //................................................................
-double vertex [3] = { 0, 0, 0 };
-int have_p=0;
-int have_pion=0;
-double E_p, E_pion;
-int event_has_pi0=0;
-int event_has_pi_plus=0;
-
-double MC_Total_Eng=0;
-
    art::PtrVector<simb::MCTruth> mclist;
    for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
     {
@@ -241,6 +287,82 @@ double MC_Total_Eng=0;
       geant_part.push_back(p);
     } 
     
+    
+  art::PtrVector<recob::Cluster> clusterlist;
+  clusterlist.clear();
+  if(evt.getByLabel(fClusterFinderModuleLabel,clusterListHandle))
+  for (unsigned int ii = 0; ii <  clusterListHandle->size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> clusterHolder(linemListHandle,ii);
+      clusterlist.push_back(clusterHolder);
+    }
+    
+    art::PtrVector<recob::Cluster> houghlist;
+  if(evt.getByLabel(fHoughModuleLabel,houghListHandle))
+  for (unsigned int ii = 0; ii <  houghListHandle->size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> houghHolder(houghListHandle,ii);
+      houghlist.push_back(houghHolder);
+    }
+    
+    
+    art::PtrVector<recob::Cluster> linemlist;
+  if(evt.getByLabel(fLineMModuleLabel,linemListHandle))
+  for (unsigned int ii = 0; ii <  linemListHandle->size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> linemHolder(linemListHandle,ii);
+      linemlist.push_back(linemHolder);
+    }
+
+  art::PtrVector<recob::Track> tracklist;
+  if(evt.getByLabel(fTrackModuleLabel,trackListHandle))
+  for (unsigned int i = 0; i < trackListHandle->size(); ++i){
+    art::Ptr<recob::Track> trackHolder(trackListHandle,i);
+    tracklist.push_back(trackHolder);
+  }
+
+  art::PtrVector<recob::EndPoint2D> endpointlist;
+  if(evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle))
+    for (unsigned int i = 0; i < endpointListHandle->size(); ++i){
+      art::Ptr<recob::EndPoint2D> endpointHolder(endpointListHandle,i);
+      endpointlist.push_back(endpointHolder);
+    }
+
+  art::PtrVector<recob::Vertex> vertexlist;
+  if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
+  for (unsigned int i = 0; i < vertexListHandle->size(); ++i){
+    art::Ptr<recob::Vertex> vertexHolder(vertexListHandle,i);
+    vertexlist.push_back(vertexHolder);
+  }
+
+ //  art::PtrVector<t962::MINOS> minoslist;
+//   if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
+//   for (unsigned int i = 0; i < minosListHandle->size(); i++){
+//     art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
+//     minoslist.push_back(minosHolder);
+//   }
+// 
+//   art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
+//   if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
+//   for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
+//     art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
+//     trackmatchlist.push_back(trackmatchHolder);
+//   }
+  
+  
+   //................................................................
+   art::ServiceHandle<geo::Geometry> geom;  
+   
+double vertex [3] = { 0, 0, 0 };
+int have_p=0;
+int have_pion=0;
+double E_p, E_pion;
+int event_has_pi0=0;
+int event_has_pi_plus=0;
+
+double MC_Total_Eng=0;
+
+  
     
     
     
@@ -341,12 +463,12 @@ double MC_Total_Eng=0;
 //     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
 //     fEng.push_back(geant_part[i]->E());
 //     
-    std::cout<<"here1"<<std::endl;
+   
     fprimaries_pdg[i]=geant_part[i]->PdgCode();
-    std::cout<<"here2"<<std::endl;
+    
     fEng[i]=geant_part[i]->E();
     fPx[i]=geant_part[i]->Px();
-    std::cout<<"here3"<<std::endl;
+   
     fPy[i]=geant_part[i]->Py();
     fPz[i]=geant_part[i]->Pz();
     
@@ -471,8 +593,152 @@ double MC_Total_Eng=0;
  
  } //loop thru geant particles
  
- fTree->Fill();
+ 
+ 
+ //.....................................................................
+  
+ //                RECONSTRUCTION INFO:
+ //.....................................................................
 
+ 
+ //vertex information
+  if(vertexlist.size())
+  {
+    double vtxxyz[3];
+    vertexlist[0]->XYZ(vtxxyz);
+    vtxx_reco = vtxxyz[0];
+    vtxy_reco = vtxxyz[1];
+    vtxz_reco = vtxxyz[2];
+  }
+  // DBSCANcluster information
+  nclusu_reco = 0;
+  nclusv_reco = 0;
+  nclusw_reco = 0;
+
+  int nplanes = geom->Nplanes();
+  std::vector<int> Cls[nplanes];
+std::cout<<"*** DBSCAN list size= "<<clusterlist.size()<<std::endl;
+  for(unsigned int i=0; i<clusterlist.size();++i){
+  // std::cout<<"i= "<<i<<std::endl;
+//   if(clusterlist[i]->View()==geo::kU){
+//   std::cout<<" in U?"<<std::endl;
+//   nclusu_reco++;
+//   }
+//   else if( clusterlist[i]->View()==geo::kV){
+//   std::cout<<" in V?"<<std::endl;
+//   nclusv_reco++;
+//   }
+//   else{
+//   
+//   std::cout<<"no idea <<<<<<<<<<<<"<<std::endl;
+//   }
+
+
+   switch(clusterlist[i]->View()){
+    case geo::kU :
+      nclusu_reco ++;
+      Cls[0].push_back(i);
+      std::cout<<"here1"<<std::endl;
+      break;
+    case geo::kV :
+      nclusv_reco ++;
+      Cls[1].push_back(i);
+      std::cout<<"here2"<<std::endl;
+      break;
+    case geo::kW :
+      nclusw_reco ++;
+      Cls[2].push_back(i);
+      std::cout<<"here3"<<std::endl;
+      break;
+    default :
+      break;
+    }
+  }
+std::cout<<"No dbscan in u= "<<nclusu_reco<<std::endl;
+std::cout<<"No dbscan in v= "<<nclusv_reco<<std::endl;
+std::cout<<"No dbscan in w= "<<nclusw_reco<<std::endl;
+
+// HOUGH cluster information
+  nhoughu_reco = 0;
+  nhoughv_reco = 0;
+  nhoughw_reco = 0;
+
+ 
+  std::vector<int> Hough[nplanes];
+
+  for(unsigned int i=0; i<houghlist.size();++i){
+    
+    switch(houghlist[i]->View()){
+    case geo::kU :
+      nhoughu_reco ++;
+      Hough[0].push_back(i);
+      break;
+    case geo::kV :
+      nhoughv_reco ++;
+      Hough[1].push_back(i);
+      break;
+    case geo::kW :
+      nhoughw_reco ++;
+      Hough[2].push_back(i);
+      break;
+    default :
+      break;
+    }
+  }
+
+std::cout<<"No hough in u= "<<nhoughu_reco<<std::endl;
+std::cout<<"No hough in v= "<<nhoughv_reco<<std::endl;
+std::cout<<"No hough in w= "<<nhoughw_reco<<std::endl;
+
+ 
+  // LINE MERGER cluster information
+  nlineu_reco = 0;
+  nlinev_reco = 0;
+  nlinew_reco = 0;
+
+  
+  std::vector<int> Lines[nplanes];
+
+  for(unsigned int i=0; i<linemlist.size();++i){
+    
+    switch(linemlist[i]->View()){
+    case geo::kU :
+      nlineu_reco ++;
+      Lines[0].push_back(i);
+      break;
+    case geo::kV :
+      nlinev_reco ++;
+      Lines[1].push_back(i);
+      break;
+    case geo::kW :
+      nlinew_reco ++;
+      Lines[2].push_back(i);
+      break;
+    default :
+      break;
+    }
+  }
+ 
+ std::cout<<"No line mergers in u= "<<nlineu_reco<<std::endl;
+ std::cout<<"No line mergers in v= "<<nlinev_reco<<std::endl;
+ std::cout<<"No line mergers in w= "<<nlinew_reco<<std::endl;
+ 
+ 
+ 
+ 
+ //track information
+     ntracks_reco=tracklist.size();
+     std::cout<<"No of 3d tracks= "<<ntracks_reco<<std::endl;
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ fTree->Fill();
+clusterlist.clear();
   
  
 No_protons_in_event->Fill(have_p);

@@ -73,11 +73,34 @@ namespace t962 {
   double *fEndPointy;
   double *fEndPointz;
 //     
+ //reconstructed information    
+    double vtxx_reco;
+    double vtxy_reco;
+    double vtxz_reco;
+    int nclusu_reco;
+    int nclusv_reco;
+    int nclusw_reco;
+    int nlineu_reco;
+    int nlinev_reco;
+    int nlinew_reco;
+    int nhoughu_reco;
+     int nhoughv_reco;
+      int nhoughw_reco;
+    int ntracks_reco;
+    
+    //..............................
+    
   std::string fGenieGenModuleLabel;
   std::string fLArG4ModuleLabel;
   std::string fHitsModuleLabel;
   std::string fClusterFinderModuleLabel;
-   
+  std::string fHoughModuleLabel;
+  std::string fLineMModuleLabel;   
+    std::string fTrackModuleLabel;
+    std::string fEndPoint2DModuleLabel;
+    std::string fVertexModuleLabel;
+    std::string fMINOSModuleLabel;
+    std::string fTrackMatchModuleLabel; 
     
     
     TH1F* Mu_theta;
