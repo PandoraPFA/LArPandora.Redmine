@@ -56,6 +56,7 @@ t962::CCQEanalysis::CCQEanalysis(fhicl::ParameterSet const& pset) :
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
   fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
   fClusterFinderModuleLabel (pset.get< std::string >("ClusterFinderModuleLabel")),
+  fDBClusterFinderModuleLabel (pset.get< std::string >("DBClusterFinderModuleLabel")),
   fHoughModuleLabel (pset.get< std::string >("HoughModuleLabel")),
   fLineMModuleLabel       (pset.get< std::string >("LineMModuleLabel")      ),
   fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
@@ -151,16 +152,19 @@ void t962::CCQEanalysis::beginJob()
   fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
   fTree->Branch("vtxy_reco",&vtxy_reco,"vtxy_reco/D");
   fTree->Branch("vtxz_reco",&vtxz_reco,"vtxz_reco/D");
-  fTree->Branch("nclusu_reco",&nclusu_reco,"nclusu_reco/I");
-  fTree->Branch("nclusv_reco",&nclusv_reco,"nclusv_reco/I");
-  fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
+  fTree->Branch("ndbclusu_reco",&ndbclusu_reco,"ndbclusu_reco/I");
+  fTree->Branch("ndbclusv_reco",&ndbclusv_reco,"ndbclusv_reco/I");
+  fTree->Branch("ndbclusw_reco",&ndbclusw_reco,"ndbclusw_reco/I");
   fTree->Branch("nhoughu_reco",&nhoughu_reco,"nhoughu_reco/I");
   fTree->Branch("nhoughv_reco",&nhoughu_reco,"nhoughv_reco/I");
   fTree->Branch("nhoughw_reco",&nhoughu_reco,"nhoughw_reco/I");
-  fTree->Branch("nlineu_reco",&nclusu_reco,"nlineu_reco/I");
-  fTree->Branch("nlinev_reco",&nclusu_reco,"nlinev_reco/I");
-  fTree->Branch("nlinew_reco",&nclusu_reco,"nlinew_reco/I");
+  fTree->Branch("nlineu_reco",&nlineu_reco,"nlineu_reco/I");
+  fTree->Branch("nlinev_reco",&nlinev_reco,"nlinev_reco/I");
+  fTree->Branch("nlinew_reco",&nlinew_reco,"nlinew_reco/I");
   fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
+  fTree->Branch("nclusu_reco",&nclusu_reco,"nclusu_reco/I");
+  fTree->Branch("nclusv_reco",&nclusv_reco,"nclusv_reco/I");
+  fTree->Branch("nclusw_reco",&nclusw_reco,"nclusw_reco/I");
   // fTree->Branch("nvertextracks_reco",&nvertextracks_reco,"nvertextracks_reco/I");
 //   fTree->Branch("nvertexclustersu_reco",&nvertexclustersu_reco,"nvertexclustersu_reco/I");
 //   fTree->Branch("nvertexclustersv_reco",&nvertexclustersv_reco,"nvertexclustersv_reco/I");
@@ -222,7 +226,7 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
 
    frun = evt.run();
    fevent = evt.id().event();
-   fbeam=1; //1 for nu mode, -1 for anti-nu mode
+   fbeam=-1; //1 for nu mode, -1 for anti-nu mode
    
   std::cout << "run    : " << evt.run() << std::endl;
   std::cout << "event  : " << evt.id().event() << std::endl;
@@ -247,8 +251,8 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   evt.getByLabel(fHitsModuleLabel,hitListHandle);
   
-  art::Handle< std::vector<recob::Cluster> > clusterListHandle;
-  evt.getByLabel(fClusterFinderModuleLabel,clusterListHandle);
+  art::Handle< std::vector<recob::Cluster> > dbclusterListHandle;
+  evt.getByLabel(fDBClusterFinderModuleLabel,dbclusterListHandle);
  
    art::Handle< std::vector<sim::Particle> > geant_list;
     evt.getByLabel (fLArG4ModuleLabel,geant_list);
@@ -273,6 +277,57 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   //evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   
   
+  
+  //---------------------------------------------------
+art::Handle< std::vector<recob::Cluster> > clusterListHandle;
+  evt.getByLabel(fClusterFinderModuleLabel,clusterListHandle);
+  
+  art::PtrVector<recob::Cluster> clusters;
+  for (unsigned int ii = 0; ii <  clusterListHandle->size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> clusterHolder(clusterListHandle,ii);
+      clusters.push_back(clusterHolder);
+    }
+    //---------------------------------------------------
+ std::cout<<"-----------------------------------"<<std::endl;
+  
+   nclusu_reco=0;
+   nclusv_reco=0;
+   nclusw_reco=0;
+  
+  
+  std::cout<<"*** DBSCAN list size= "<<clusters.size()<<std::endl;
+  for(unsigned int i=0; i<clusters.size();++i){
+   switch(clusters[i]->View()){
+    case geo::kU :
+      nclusu_reco ++;
+     // Cls[0].push_back(i);
+      std::cout<<"here1"<<std::endl;
+      break;
+    case geo::kV :
+      nclusv_reco ++;
+      //Cls[1].push_back(i);
+      std::cout<<"here2"<<std::endl;
+      break;
+    case geo::kW :
+      nclusw_reco ++;
+      //Cls[2].push_back(i);
+      std::cout<<"here3"<<std::endl;
+      break;
+    default :
+      break;
+    }
+  }
+std::cout<<"No dbscan in u= "<<nclusu_reco<<std::endl;
+std::cout<<"No dbscan in v= "<<nclusv_reco<<std::endl;
+std::cout<<"No dbscan in w= "<<nclusw_reco<<std::endl;
+  
+  
+   std::cout<<"-----------------------------------"<<std::endl;
+   
+   
+   
+  
    art::PtrVector<simb::MCTruth> mclist;
    for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
     {
@@ -288,13 +343,13 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
     } 
     
     
-  art::PtrVector<recob::Cluster> clusterlist;
-  clusterlist.clear();
-  if(evt.getByLabel(fClusterFinderModuleLabel,clusterListHandle))
-  for (unsigned int ii = 0; ii <  clusterListHandle->size(); ++ii)
+  art::PtrVector<recob::Cluster> dbclusterlist;
+  dbclusterlist.clear();
+  if(evt.getByLabel(fDBClusterFinderModuleLabel,dbclusterListHandle))
+  for (unsigned int ii = 0; ii <  dbclusterListHandle->size(); ++ii)
     {
-      art::Ptr<recob::Cluster> clusterHolder(linemListHandle,ii);
-      clusterlist.push_back(clusterHolder);
+      art::Ptr<recob::Cluster> dbclusterHolder(linemListHandle,ii);
+      dbclusterlist.push_back(dbclusterHolder);
     }
     
     art::PtrVector<recob::Cluster> houghlist;
@@ -611,52 +666,52 @@ double MC_Total_Eng=0;
     vtxz_reco = vtxxyz[2];
   }
   // DBSCANcluster information
-  nclusu_reco = 0;
-  nclusv_reco = 0;
-  nclusw_reco = 0;
+  ndbclusu_reco = 0;
+  ndbclusv_reco = 0;
+  ndbclusw_reco = 0;
 
   int nplanes = geom->Nplanes();
   std::vector<int> Cls[nplanes];
-std::cout<<"*** DBSCAN list size= "<<clusterlist.size()<<std::endl;
-  for(unsigned int i=0; i<clusterlist.size();++i){
-  // std::cout<<"i= "<<i<<std::endl;
-//   if(clusterlist[i]->View()==geo::kU){
-//   std::cout<<" in U?"<<std::endl;
-//   nclusu_reco++;
+std::cout<<"*** DBSCAN list size= "<<dbclusterlist.size()<<std::endl;
+  //for(unsigned int i=0; i<dbclusterlist.size();++i)// {
+//   // std::cout<<"i= "<<i<<std::endl;
+// //   if(clusterlist[i]->View()==geo::kU){
+// //   std::cout<<" in U?"<<std::endl;
+// //   nclusu_reco++;
+// //   }
+// //   else if( clusterlist[i]->View()==geo::kV){
+// //   std::cout<<" in V?"<<std::endl;
+// //   nclusv_reco++;
+// //   }
+// //   else{
+// //   
+// //   std::cout<<"no idea <<<<<<<<<<<<"<<std::endl;
+// //   }
+// 
+// 
+//    switch(dbclusterlist[i]->View()){
+//     case geo::kU :
+//       ndbclusu_reco ++;
+//       Cls[0].push_back(i);
+//       std::cout<<"here1"<<std::endl;
+//       break;
+//     case geo::kV :
+//       ndbclusv_reco ++;
+//       Cls[1].push_back(i);
+//       std::cout<<"here2"<<std::endl;
+//       break;
+//     case geo::kW :
+//       ndbclusw_reco ++;
+//       Cls[2].push_back(i);
+//       std::cout<<"here3"<<std::endl;
+//       break;
+//     default :
+//       break;
+//     }
 //   }
-//   else if( clusterlist[i]->View()==geo::kV){
-//   std::cout<<" in V?"<<std::endl;
-//   nclusv_reco++;
-//   }
-//   else{
-//   
-//   std::cout<<"no idea <<<<<<<<<<<<"<<std::endl;
-//   }
-
-
-   switch(clusterlist[i]->View()){
-    case geo::kU :
-      nclusu_reco ++;
-      Cls[0].push_back(i);
-      std::cout<<"here1"<<std::endl;
-      break;
-    case geo::kV :
-      nclusv_reco ++;
-      Cls[1].push_back(i);
-      std::cout<<"here2"<<std::endl;
-      break;
-    case geo::kW :
-      nclusw_reco ++;
-      Cls[2].push_back(i);
-      std::cout<<"here3"<<std::endl;
-      break;
-    default :
-      break;
-    }
-  }
-std::cout<<"No dbscan in u= "<<nclusu_reco<<std::endl;
-std::cout<<"No dbscan in v= "<<nclusv_reco<<std::endl;
-std::cout<<"No dbscan in w= "<<nclusw_reco<<std::endl;
+// std::cout<<"No dbscan in u= "<<ndbclusu_reco<<std::endl;
+// std::cout<<"No dbscan in v= "<<ndbclusv_reco<<std::endl;
+// std::cout<<"No dbscan in w= "<<ndbclusw_reco<<std::endl;
 
 // HOUGH cluster information
   nhoughu_reco = 0;
@@ -738,7 +793,7 @@ std::cout<<"No hough in w= "<<nhoughw_reco<<std::endl;
  
  
  fTree->Fill();
-clusterlist.clear();
+//dbclusterlist.clear();
   
  
 No_protons_in_event->Fill(have_p);

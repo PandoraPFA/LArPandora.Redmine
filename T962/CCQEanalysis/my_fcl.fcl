@@ -50,6 +50,7 @@ physics:
  analyzers:
  {
   ccqeanalysis: @local::argoneut_ccqeanalysis
+  //dbscanana: @local::argoneut_dbclusterana
  }
 
  #define the producer and filter modules for this path, order matters, 

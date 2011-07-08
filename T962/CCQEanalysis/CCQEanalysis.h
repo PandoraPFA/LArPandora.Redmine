@@ -80,6 +80,9 @@ namespace t962 {
     int nclusu_reco;
     int nclusv_reco;
     int nclusw_reco;
+    int ndbclusu_reco;
+    int ndbclusv_reco;
+    int ndbclusw_reco;
     int nlineu_reco;
     int nlinev_reco;
     int nlinew_reco;
@@ -94,6 +97,7 @@ namespace t962 {
   std::string fLArG4ModuleLabel;
   std::string fHitsModuleLabel;
   std::string fClusterFinderModuleLabel;
+  std::string fDBClusterFinderModuleLabel;
   std::string fHoughModuleLabel;
   std::string fLineMModuleLabel;   
     std::string fTrackModuleLabel;
