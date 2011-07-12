@@ -22,6 +22,7 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "muonana_hist.root" }
   user:         @local::argoneut_services
+  RandomNumberGenerator: {}
 }
 
 
