@@ -59,6 +59,14 @@ namespace muons {
         TH2F*  fEndXvsEndY;
         TH2F*  fEndZvsEndX;
         TH2F*  fEndZvsEndY;
+
+        TH1D* fMinosErange_Pos;
+        TH1D* fMinosErange_Neg;
+        TH1D* fMinosMom_Pos;
+        TH1D* fMinosMom_Neg;
+
+        
+        std::string fTrackMatchModuleLabel;
         std::string fMINOSModuleLabel;
         std::string fTracks_label;
         double fdBoundary; //distance from a boundary to be considered a track that "ends on a boundary"

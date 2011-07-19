@@ -11,6 +11,7 @@
 #include "job/matchtracksmodule.fcl"
 #include "job/vertexfindermodules.fcl"
 #include "job/analysistreemodule.fcl"
+#include "job/caloitaliano.fcl"
 
 #include "job/muonanamodules.fcl"
 
@@ -52,8 +53,9 @@ physics:
 
  producers:{}
  analyzers:{}
- recopath: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, spacepts, track3d, matchtracks  ]
- anapath:  [ muon ]
+# recopath: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, spacepts, track3d, matchtracks  ]
+recopath: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, track3d, matchtracks  ]
+ anapath:  [ calo, muon ]
  stream1:  [ out1 ]
  trigger_paths: [recopath] 
  end_paths:     [ anapath ] 
@@ -66,7 +68,9 @@ physics.producers.dbcluster:   @local::argoneut_dbcluster
 physics.producers.hough:       @local::argoneut_houghlinefinder
 physics.producers.linemerger:  @local::argoneut_linemerger
 physics.producers.vertex2d:    @local::argoneut_vertex2d
-physics.producers.spacepts:    @local::argoneut_spacepts
-physics.producers.track3d:     @local::argoneut_kalman
+physics.producers.track3d:     @local::argoneut_spacepts
+#physics.producers.spacepts:    @local::argoneut_spacepts
+#physics.producers.track3d:     @local::argoneut_kalman
 physics.producers.matchtracks: @local::argoneut_matchtracks
+physics.analyzers.calo:        @local::argoneut_calo
 physics.analyzers.muon:        @local::argoneut_muonana

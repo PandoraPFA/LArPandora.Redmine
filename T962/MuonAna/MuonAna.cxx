@@ -37,15 +37,17 @@ extern "C" {
 
 #include "Filters/ChannelFilter.h"
 #include "T962/T962_Objects/MINOS.h"
+#include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "RecoBase/recobase.h"
 #include "Geometry/geo.h"
 
 namespace muons {
 //-----------------------------------------------------------------------------
     MuonAna::MuonAna(fhicl::ParameterSet const& pset) :
-        fMINOSModuleLabel     (pset.get< std::string > ("MINOSModuleLabel")),
-        fTracks_label         (pset.get< std::string >("LArTracksModuleLabel")),
-        fdBoundary            (pset.get< double >("dBoundary"))
+        fMINOSModuleLabel      (pset.get< std::string > ("MINOSModuleLabel")),
+        fTracks_label          (pset.get< std::string >("LArTracksModuleLabel")),
+        fTrackMatchModuleLabel (pset.get< std::string >("TrackMatchModuleLabel")),
+        fdBoundary             (pset.get< double >("dBoundary"))
     {
         
     }
@@ -82,6 +84,12 @@ namespace muons {
         fEndXvsEndY = tfs->make<TH2F>("fEndXvsEndY","End X vs. Y", 220,-5.0,50.0,200,-25.0,25.0);
         fEndZvsEndX = tfs->make<TH2F>("fEndZvsEndX","End Z vs. X", 400,-5.0,95.0,220,-5.0,50.0);
         fEndZvsEndY = tfs->make<TH2F>("fEndZvsEndY","End Z vs. Y", 400,-5.0,95.0,200,-25.0,25.0);
+
+        fMinosErange_Pos = tfs->make<TH1D>("fMinosErange_Pos","MINOS + Charge Tracks: Erange",1000,0.0,10000.0);
+        fMinosErange_Neg = tfs->make<TH1D>("fMinosErange_Neg","MINOS - Charge Tracks: Erange",1000,0.0,10000.0);
+        fMinosMom_Pos = tfs->make<TH1D>("fMinosMom_Pos","MINOS + Charge Tracks: Momentum",1000,0.0,10000.0);
+        fMinosMom_Neg = tfs->make<TH1D>("fMinosMom_Neg","MINOS - Charge Tracks: Momentum",1000,0.0,10000.0);
+
             
         
     }
@@ -96,6 +104,7 @@ namespace muons {
         double trackCosEnd[3]={0.,0.,0.};
         std::vector<double> larStart;
         std::vector<double> larEnd;
+
         
         if(LarTrackHandle->size()>0){
             for(unsigned int i=0; i<LarTrackHandle->size();++i){
@@ -129,14 +138,44 @@ namespace muons {
                     fPhi->Fill(lartrack->Phi());
                     fVertAngle->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2]));
                     fHorizAngle->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2]));
-                    
-                    
                     fStartXvsStartY->Fill(larStart[0],larStart[1]);
                     fStartZvsStartX->Fill(larStart[2],larStart[0]);
                     fStartZvsStartY->Fill(larStart[2],larStart[1]);
                     fEndXvsEndY->Fill(larEnd[0],larEnd[1]);
                     fEndZvsEndX->Fill(larEnd[2],larEnd[0]);
                     fEndZvsEndY->Fill(larEnd[2],larEnd[1]);
+
+                    art::Handle< std::vector<t962::MINOS> > MinosTrackHandle;
+                    evt.getByLabel(fMINOSModuleLabel,MinosTrackHandle);
+
+                    art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
+                    evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
+
+
+                    for(unsigned int j=0; j<MinosTrackHandle->size();++j)
+                    {
+                        art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
+
+                        bool match = false;
+                        for (unsigned int k = 0; k < trackmatchListHandle->size(); k++){
+                            art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,k);
+                            if( (trackmatchHolder->fMINOStrackid == minostrack->ftrkIndex) &&
+                                (trackmatchHolder->fArgoNeuTtrackid == lartrack->ID())){
+                                if(minostrack->fcharge==1){
+                                    fMinosErange_Pos->Fill(1000.0*minostrack->ftrkErange);
+                                    fMinosMom_Pos->Fill(1000.0*minostrack->ftrkmom);
+                                }
+                                if(minostrack->fcharge==-1){
+                                    fMinosErange_Neg->Fill(1000.0*minostrack->ftrkErange);
+                                    fMinosMom_Neg->Fill(1000.0*minostrack->ftrkmom);
+                                }
+                            }//found matching tracks
+                        }//trackmatch loop
+                    }//MINOS loop
+                  
+                    
+                    
+                    
                 }
                 
             }
