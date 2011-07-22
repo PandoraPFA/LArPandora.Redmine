@@ -1,0 +1,12 @@
+BEGIN_PROLOG
+
+argoneut_chargedpion:
+{
+ module_type:        "ChargedPion"
+ GenieModuleLabel:   "generator"
+ GeantModuleLabel:   "largeant"
+}
+
+
+END_PROLOG
+
