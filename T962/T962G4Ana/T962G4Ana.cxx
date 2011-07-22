@@ -162,8 +162,7 @@ if(mc->NeutrinoSet())
     fm_neutrino_pdgcode=neut.Nu().PdgCode();
 }
 //     
-    
-    
+        
 
     //get the list of particles from this event
     sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
@@ -290,13 +289,13 @@ if(mc->NeutrinoSet())
 //            {
        if(prevposition.Z()<152.95&&position.Z()>=152.95&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
         {
-       fm_minosenter_x=prevposition.X();
-       fm_minosenter_y=prevposition.Y();
-       fm_minosenter_z=prevposition.Z();
-       fm_minosenter_px=prevmomentum.Px();
-       fm_minosenter_py=prevmomentum.Py();
-       fm_minosenter_pz=prevmomentum.Pz();
-       fm_minosenter_energy=prevmomentum.E();
+       fm_minosenter_x=position.X();
+       fm_minosenter_y=position.Y();
+       fm_minosenter_z=position.Z();
+       fm_minosenter_px=momentum.Px();
+       fm_minosenter_py=momentum.Py();
+       fm_minosenter_pz=momentum.Pz();
+       fm_minosenter_energy=momentum.E();
 
     primindex++;
     myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
@@ -308,10 +307,10 @@ if(mc->NeutrinoSet())
 //          
         // std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;      
 
-       fm_energylost=fm_tpcexit_energy-fm_minosenter_energy;
+       fm_energylost=fm_init_energy-fm_minosenter_energy;
        fm_deflectionangle= TMath::ACos(((fm_tpcexit_px*fm_minosenter_px)+(fm_tpcexit_py*fm_minosenter_py)+(fm_tpcexit_pz*fm_minosenter_pz))/(sqrt(pow(fm_tpcexit_px,2)+pow(fm_tpcexit_py,2)+pow(fm_tpcexit_pz,2))*sqrt(pow(fm_minosenter_px,2)+pow(fm_minosenter_py,2)+pow(fm_minosenter_pz,2))));
 //         std::cout<<"exit-enter "<<(fm_tpcexit_energy-fm_minosenter_energy)*1000.<<" "<<fm_deflectionangle<<" "<<fm_minosenter_energy<<std::endl;
-           }
+            }
     }
     ftree->Fill();    
   }
