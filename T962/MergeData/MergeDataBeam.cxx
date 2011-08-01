@@ -66,7 +66,7 @@ namespace merge{
     std::ifstream beamfile(beamfilename);
 
     if(!beamfile.is_open()){
-       mf::LogDebug ("badfile") << "MergeBeam could not open file named " << beamfilename ;
+       LOG_DEBUG ("badfile") << "MergeBeam could not open file named " << beamfilename ;
        return false;
     }
   
