@@ -1,0 +1,9 @@
+BEGIN_PROLOG
+
+argoneut_radargonana:
+{ 
+ dBoundary:                   1.5
+}
+
+
+END_PROLOG
