@@ -5,7 +5,7 @@
 #
 include SoftRelTools/arch_spec_root.mk
 
-PACKAGE     := MuonAna
+PACKAGE     := RadArgonAna
 LIB_TYPE    := shared
 LIB         := lib$(PACKAGE)
 LIBCXXFILES := $(wildcard *.cxx)
