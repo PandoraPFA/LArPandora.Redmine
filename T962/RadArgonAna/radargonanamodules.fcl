@@ -2,7 +2,9 @@ BEGIN_PROLOG
 
 argoneut_radargonana:
 { 
- dBoundary:                   1.5
+  module_type:      "RadArgonAna"
+  ClusterModuleLabel: "dbcluster"
+  dBoundary:        1.5
 }
 
 

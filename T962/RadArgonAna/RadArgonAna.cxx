@@ -2,15 +2,42 @@
 //
 // RadArgon class
 //
-// msoderbe@syr.edu
+// patch@fnal.gov
 //
-// Make plots for through-going muons.
+// Make plots for radioactive argon decay.
 ////////////////////////////////////////////////////////////////////////
 
+// Framework includes
+#include "art/Framework/Core/Event.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "art/Persistency/Common/Handle.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "art/Framework/Services/Optional/TFileService.h"
+#include "art/Framework/Core/TFileDirectory.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
+#include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/PtrVector.h"
+#include "cetlib/exception.h"
 
-#include <iostream>
+#include "T962/MuonAna/MuonAna.h"
+extern "C" {
+#include <sys/types.h>
+#include <sys/stat.h>
+}
 
+#include <sstream>
+#include <fstream>
+#include <math.h>
+#include <algorithm>
+#include "TMath.h"
 
+#include "Filters/ChannelFilter.h"
+#include "T962/T962_Objects/MINOS.h"
+#include "T962/T962_Objects/MINOSTrackMatch.h"
+#include "RecoBase/recobase.h"
+#include "Geometry/geo.h"
+
+    
 // Framework includes
 //   HOW MANY OF THESE DO I NEED? 
 //   DO I NEED OTHERS?
@@ -44,12 +71,10 @@ extern "C" {
 namespace radargon {
 //-----------------------------------------------------------------------------
   RadArgonAna::RadArgonAna(fhicl::ParameterSet const& pset) :
-    fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
-    fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
-    fCalDataModuleLabel       (pset.get< std::string >("CalDataModuleLabel")      ),
-    fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
-    fHitSensitivity           (pset.get< std::string >("HitSensitivity")          ),
-    fHits_label               (pset.get< std::string >("HitsModeulLabel")         ),
+
+    //fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
+    //fHitSensitivity           (pset.get< std::string >("HitSensitivity")          ),
+    //fHits_label               (pset.get< std::string >("HitsModuleLabel")         ),
     ftmatch                   (pset.get<      int    >("TMatch")                  ),
     fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")      )
   {
@@ -69,8 +94,8 @@ namespace radargon {
 
     // these are not set up correctly, yet
     // for now, just but place-holders for info we want
-//    fPeakTime = tfs->make<TH1F>("fPeakTime","Peak Time of Hit", 200,-25.0,25.0);
-//    fCharge = tfs->make<TH1F>("fCharge","Charge of Hit", 200,-25.0,25.0);
+    fPeakTime = tfs->make<TH1F>("fPeakTime","Peak Time of Hit", 200,-25.0,25.0);
+    fCharge = tfs->make<TH1F>("fCharge","Charge of Hit", 200,-25.0,25.0);
         
   }
     

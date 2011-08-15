@@ -11,7 +11,6 @@
 #include "job/matchtracksmodule.fcl"
 #include "job/vertexfindermodules.fcl"
 #include "job/analysistreemodule.fcl"
-#include "job/caloitaliano.fcl"
 
 #include "job/radargonanamodules.fcl"
 
@@ -31,6 +30,7 @@ services:
 source:
 {
   module_type: RootInput
+  fileNames: ["/argoneut/data/rootfiles_ART_MINOS/Neutrino/R629_E10483-E12482.root"]
   maxEvents:  -1      # Number of events to create
 }
 
@@ -51,11 +51,22 @@ outputs:
 physics:
 {
 
- producers:{}
- analyzers:{}
+  producers:
+  {
+  #  caldata: { module_type: }
+  #  ffthit: { module_type: }
+  #  dbcluster: { module_type: } 
+  }
+
+  analyzers:
+  {
+    radargon: {module_type: RadArgonAna}
+  }
+
+
 # recopath: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, spacepts, track3d, matchtracks  ]
-recopath: [ caldata, ffthit ]
- anapath:  [ calo, radargon ]
+ recopath: [ caldata , ffthit , dbcluster ]
+ anapath:  [ radargon ]
  stream1:  [ out1 ]
  trigger_paths: [recopath] 
  end_paths:     [ anapath ] 
@@ -72,5 +83,4 @@ physics.producers.track3d:     @local::argoneut_spacepts
 #physics.producers.spacepts:    @local::argoneut_spacepts
 #physics.producers.track3d:     @local::argoneut_kalman
 physics.producers.matchtracks: @local::argoneut_matchtracks
-physics.analyzers.calo:        @local::argoneut_calo
 physics.analyzers.radargon:    @local::argoneut_radargonana
