@@ -45,8 +45,6 @@ extern "C" {
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
 #include "Simulation/SimListUtils.h"
-#include "Simulation/LArVoxelCalculator.h"
-#include "Simulation/LArVoxelData.h"
 #include "RawData/RawDigit.h"
 #include "Filters/ChannelFilter.h"
 #include "T962/T962_Objects/ScanInfo.h"
@@ -139,12 +137,6 @@ TVector3 pxpypz;
     
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
-
-
-  art::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
-  evt.getByLabel(fLArG4ModuleLabel,vxlistHandle);
-
-  // std::cout<<"vxlistHandle->size() "<<vxlistHandle->size()<<std::endl;
 
   art::PtrVector<simb::MCTruth> mclist;
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)

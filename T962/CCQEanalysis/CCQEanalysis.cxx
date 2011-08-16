@@ -40,9 +40,6 @@
 #include "Simulation/SimListUtils.h"
 #include "RecoBase/recobase.h"
 #include "RawData/RawDigit.h"
-#include "Simulation/LArVoxelCalculator.h"
-#include "Simulation/LArVoxelData.h"
-#include "Simulation/LArVoxelID.h"
 #include "RecoBase/recobase.h"
 #include "Geometry/geo.h"
 #include "Utilities/LArProperties.h"
@@ -242,9 +239,6 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
-  
-  art::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
-  evt.getByLabel(fLArG4ModuleLabel,vxlistHandle);
   
   sim::ParticleList _particleList = sim::SimListUtils::GetParticleList(evt, fLArG4ModuleLabel);
   

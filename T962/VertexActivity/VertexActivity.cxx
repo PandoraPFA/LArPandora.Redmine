@@ -39,8 +39,6 @@ extern "C" {
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
 #include "Simulation/SimListUtils.h"
-#include "Simulation/LArVoxelCalculator.h"
-#include "Simulation/LArVoxelData.h"
 #include "RawData/RawDigit.h"
 #include "Filters/ChannelFilter.h"
 // #include "T962_MergeData/ScanInfo.h"
@@ -108,14 +106,9 @@ void vertex::VertexActivity::produce(art::Event& evt)
   
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
+
+  sim::LArVoxelList vxlistHandle = sim::SimListUtils::GetLArVoxelList(evt, fLArG4ModuleLabel);
   
-//    std::cout << "Vertex  list size = " << vertexListHandle->size() << " AND cluster hit size:" <<  clusterListHandle->size()<< std::endl;
-
-  art::Handle< std::vector<sim::LArVoxelData> > vxlistHandle;
-  evt.getByLabel(fLArG4ModuleLabel,vxlistHandle);
-
-   std::cout<<"vxlistHandle->size() "<<vxlistHandle->size()<<std::endl;
-
   art::PtrVector<simb::MCTruth> mclist;
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
     {
@@ -155,35 +148,37 @@ void vertex::VertexActivity::produce(art::Event& evt)
   // There's probably only one LArVoxelList per event, but FMWK
   // always reads a vector of pointers.  For each LArVoxelList:
   double Energy=0.;
-  for(unsigned int i = 0; i < vxlistHandle->size(); ++i){
+  
+  sim::LArVoxelList::const_iterator vxitr;
+  for(vxitr = vxlistHandle.begin(); vxitr != vxlistHandle.end(); vxitr++){
     // Get the reference to the LArVoxelID in the LArVoxelList.
-    art::Ptr<sim::LArVoxelData> voxel(vxlistHandle, i);
+    const sim::LArVoxelData &voxel = (*vxitr).second;
+    
+    int numberParticles = voxel.NumberParticles();
       
-    int numberParticles = voxel->NumberParticles();
-	      
     //  std::cout<<"numberParticles "<<numberParticles<<std::endl;
     for ( int i = 0; i != numberParticles; ++i )
       {
-	// if(sqrt(pow(TMath::Abs(voxel->VoxelID().X()-vertex[0]),2)+pow(TMath::Abs(voxel->VoxelID().Y()-vertex[1]),2)+pow(TMath::Abs(voxel->VoxelID().Z()-vertex[2]),2))<fActivityRadius)
+	// if(sqrt(pow(TMath::Abs(voxel.VoxelID().X()-vertex[0]),2)+pow(TMath::Abs(voxel.VoxelID().Y()-vertex[1]),2)+pow(TMath::Abs(voxel.VoxelID().Z()-vertex[2]),2))<fActivityRadius)
 		
 		
-	if(TMath::Abs(voxel->VoxelID().X()-vertex[0])<=(fActivityRadius*.4)
-	   &&((voxel->VoxelID().Z()-vertex[2])-((sqrt(3)/3)*(voxel->VoxelID().Y()-vertex[1]))+((8*sqrt(3)/3)*fActivityRadius*.1))>=0
-	   &&((voxel->VoxelID().Z()-vertex[2])-((sqrt(3)/3)*(voxel->VoxelID().Y()-vertex[1]))-((8*sqrt(3)/3)*fActivityRadius*.1))<=0
-	   &&((voxel->VoxelID().Z()-vertex[2])+((sqrt(3)/3)*(voxel->VoxelID().Y()-vertex[1]))-((8*sqrt(3)/3)*fActivityRadius*.1))<=0
-	   &&((voxel->VoxelID().Z()-vertex[2])+((sqrt(3)/3)*(voxel->VoxelID().Y()-vertex[1]))+((8*sqrt(3)/3)*fActivityRadius*.1))>=0
+	if(TMath::Abs(voxel.VoxelID().X()-vertex[0])<=(fActivityRadius*.4)
+	   &&((voxel.VoxelID().Z()-vertex[2])-((sqrt(3)/3)*(voxel.VoxelID().Y()-vertex[1]))+((8*sqrt(3)/3)*fActivityRadius*.1))>=0
+	   &&((voxel.VoxelID().Z()-vertex[2])-((sqrt(3)/3)*(voxel.VoxelID().Y()-vertex[1]))-((8*sqrt(3)/3)*fActivityRadius*.1))<=0
+	   &&((voxel.VoxelID().Z()-vertex[2])+((sqrt(3)/3)*(voxel.VoxelID().Y()-vertex[1]))-((8*sqrt(3)/3)*fActivityRadius*.1))<=0
+	   &&((voxel.VoxelID().Z()-vertex[2])+((sqrt(3)/3)*(voxel.VoxelID().Y()-vertex[1]))+((8*sqrt(3)/3)*fActivityRadius*.1))>=0
 	   ){
 	  
-	  // std::cout<<TMath::Abs(voxel->VoxelID().X()-vertex[0])<<" "<<TMath::Abs(voxel->VoxelID().Y()-vertex[1])<<" "<<TMath::Abs(voxel->VoxelID().Z()-vertex[2])<<" "<<voxel->Energy(i)*1000.<<std::endl;
+	  // std::cout<<TMath::Abs(voxel.VoxelID().X()-vertex[0])<<" "<<TMath::Abs(voxel.VoxelID().Y()-vertex[1])<<" "<<TMath::Abs(voxel.VoxelID().Z()-vertex[2])<<" "<<voxel.Energy(i)*1000.<<std::endl;
 	  
-	  Energy+= (voxel->Energy(i)*1000.);
-	  //   if(voxel->Energy(i))
-	  //       std::cout<<(voxel->VoxelID().Z()-vertex[2])*10<<std::endl;
+	  Energy+= (voxel.Energy(i)*1000.);
+	  //   if(voxel.Energy(i))
+	  //       std::cout<<(voxel.VoxelID().Z()-vertex[2])*10<<std::endl;
 	}
       }
         
         
-    //std::cout<<voxel->VoxelID().X()<<" "<<voxel->VoxelID().Y()<<" "<<voxel->VoxelID().Z()<<" "<<Energy<<std::endl;    
+    //std::cout<<voxel.VoxelID().X()<<" "<<voxel.VoxelID().Y()<<" "<<voxel.VoxelID().Z()<<" "<<Energy<<std::endl;    
   }	      
   //std::cout<<"Energy: "<<Energy<<" vxlisthandlesize "<<vxlistHandle->size()<<std::endl;  
 
