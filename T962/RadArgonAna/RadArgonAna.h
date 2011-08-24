@@ -42,8 +42,15 @@ namespace radargon {
     std::string fHitSensitivity;
     std::string fHits_label;
     std::string fClusterModuleLabel;
+    TH2S*  fPlaneHits;
+    TH1S*  fIndPlaneHits;
+    TH1S*  fColPlaneHits;
+    //TH1S*  fChannel;
     TH1F*  fCharge;
+    TH1F*  fSingleHitColCharge;
+    TH1F*  fSingleHitIndCharge;
     TH1F*  fPeakTime;
+    TH1F*  fTimeDifference;
     int         ftmatch;
 
   };  

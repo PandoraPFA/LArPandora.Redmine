@@ -96,7 +96,15 @@ namespace radargon {
     // for now, just but place-holders for info we want
     fPeakTime = tfs->make<TH1F>("fPeakTime","Peak Time of Hit", 200,-25.0,25.0);
     fCharge = tfs->make<TH1F>("fCharge","Charge of Hit", 200,-25.0,25.0);
+    fSingleHitIndCharge = tfs->make<TH1F>("fSingleIndCharge","Charge of Induction Hit", 200,-25.0,25.0);  // these be ???
+    fSingleHitColCharge = tfs->make<TH1F>("fSingleColCharge","Charge of Collection Hit", 200,-25.0,25.0); // what size should
+    fTimeDifference= tfs->make<TH1F>("fTimeDifference","Time Difference between Hits", 250,0,50.0);
+
+    //fChannel = tfs->make<TH1S>("fChannel","Channel Number of Hit",1000,0,999);
         
+    fIndPlaneHits = tfs->make<TH1S>("fIndPlaneHits","Number of Hits in Induction Plane",4,0,3);
+    fColPlaneHits = tfs->make<TH1S>("fColPlaneHits","Number of Hits in Collection Plane",4,0,3);
+    fPlaneHits = tfs->make<TH2S>("fPlaneHits","Number of Hits in Induction and Collection Planes", 21, 0.0, 20.0, 21, 0.0, 20.0);
   }
     
 //-----------------------------------------------------------------------------
@@ -136,10 +144,12 @@ namespace radargon {
     for(unsigned int cluster_itr = 0 ; cluster_itr < ClusterHandle->size() ; cluster_itr++){ 
       art::Ptr<recob::Cluster> cluster(ClusterHandle,cluster_itr);
       art::PtrVector<recob::Hit> hitlist;
+      hitlist = cluster->Hits();
 
-      // require clusters contain only one hit 
-      if( hitlist.size() == 1 ){ 
-        std::cout << " ONE HIT IN CLUSTER #" << cluster_itr << std::endl; 
+      // require clusters contain nHits
+      unsigned int nHits = 3; 
+      if( hitlist.size() <= nHits ){ 
+        std::cout << hitlist.size() <<  " HITS IN CLUSTER #" << cluster_itr << std::endl; 
 
         // sort single-hit clusters by plane, can adjust for larger number of hits with loop
         for(art::PtrVector<recob::Hit>::const_iterator aHit = hitlist.begin(); aHit != hitlist.end();  aHit++){
@@ -147,40 +157,58 @@ namespace radargon {
           channel =  (*aHit)->Channel();
           geom->ChannelToWire(channel,tpc,plane,wire);
 
+          double peaktime=(*aHit)->PeakTime();
+    //      fPeakTime->Fill(peaktime);
+    //      fChannel->Fill(channel);
+
           // fill singles vectors
           switch(plane){
             case 0:
               ind_Singles.push_back((*aHit));
-              //ind_SinglesCount.push_back(cluster_itr);
+    //          fIndPlaneHits->Fill(hitlist.size());
               break;
             case 1:
               col_Singles.push_back((*aHit));
-              //col_SingleCount.push_back(cluster_itr);
+    //          fColPlaneHits->Fill(hitlist.size());
               break;
           } // fill singles vectors
         } // sort by plane
       } // require single hit
     } // scan all clusters
 
+
     // now i have ind/col_Singles which contain hit lists
     //   want to see if any of the hits on the collection plane match
     //   in time and have wires that cross in the induction plane
     unsigned int channel_col,channel_ind,wire_col,wire_ind,plane_col,plane_ind,tpc;
+
+    // here i think there is a problem due to the fact that i'm looping over single hits... 
+    // ... probably not collecting everything correctly
     for(art::PtrVector<recob::Hit>::const_iterator ind_hit = ind_Singles.begin(); ind_hit != ind_Singles.end(); ind_hit++){
+
       channel_ind = (*ind_hit)->Channel();
+
       double time_ind = (*ind_hit)->PeakTime() - presamplings;
       double y_pos, z_pos;
+
+    //  double indHitCharge=(*ind_hit)->Charge();
+    //  std::cout << " Charge of induction hit = " << indHitCharge << std::endl;
+    //  fSingleHitIndCharge->Fill(indHitCharge);
+
       for(art::PtrVector<recob::Hit>::const_iterator col_hit = col_Singles.begin(); col_hit != col_Singles.end(); col_hit++){
+
         channel_col = (*col_hit)->Channel();
         double time_col = (*col_hit)->PeakTime() - presamplings - tIC;
+        double time_diff = fabs(time_col - time_ind);
+        bool TimesMatch = ( time_diff < ( ftmatch * timepitch ) );
 
-        bool TimesMatch = ( fabs(time_col-time_ind) < ftmatch * timepitch );
         if( geom->ChannelsIntersect(channel_ind,channel_col,y_pos,z_pos) && TimesMatch ) {
-          // add to a vector?
           std::cout << "  We have a lone hit! " << std::endl; 
+          fSingleHitColCharge->Fill((*col_hit)->Charge());
+          fTimeDifference->Fill(time_diff);
         }
-      }
 
+      }
     }
   }//analyze
 }//namespace
