@@ -18,7 +18,7 @@
 #include "TSystem.h"
 
 
-#include "LambdaAna/LambdaAna.h"
+#include "T962/LambdaAna/LambdaAna.h"
 #include "MCCheater/BackTracker.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
