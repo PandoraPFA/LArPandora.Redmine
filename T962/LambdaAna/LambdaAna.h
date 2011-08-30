@@ -6,28 +6,22 @@
 ////////////////////////////////////////////////////////////////////////
 #ifndef CCHYP_LAMBDAANA_H
 #define CCHYP_LAMBDAANA_H
-//#include "JobControl/Module.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-//namespace edm { class EventHandle; }
-//namespace cfg { class Config;      }
 class TH1F;
 class TH2F;
 class TGraph;
 class TFile;
 
 namespace cchyp {
-  /// A module to check the results from the Monte Carlo generator
+  /// A module to check the results from the Monte Carlo generator and Reconstruction
   class LambdaAna : public art::EDAnalyzer {
   public:
     explicit LambdaAna(fhicl::ParameterSet const& pset);
     virtual ~LambdaAna();                        
-    //void Update(const cfg::Config& c);
     void analyze(const art::Event&);
     void beginJob(); 
-    // void EndJob(const edm::Event&, const edm::EventSetup &); 
-    // jobc::Result Ana(const edm::EventHandle& evt);
-  
+      
   private:
     
     std::string fGenieModuleLabel;
