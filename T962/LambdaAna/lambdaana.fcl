@@ -1,7 +1,6 @@
 #include "job/services.fcl"
 #include "job/simulationservices.fcl"
 #include "job/lambdaanamodules.fcl"
-#include "job/caloitaliano.fcl"
 
 process_name: LambdaAna
 
@@ -10,12 +9,12 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "lambdaana_hist.root" }
   Timing:       {}
-  user: @local::argoneut_services 
+  user:         @local::argoneut_services 
 }
 
 # services from LArSoft - see definitions for configurations in 
 # job/geometry.fcl
-services.user.Geometry:           @local::argoneut_geo 
+services.user.Geometry: @local::argoneut_geo 
 
 
 #Start each new event with an empty event.
@@ -23,8 +22,8 @@ source:
 {
   module_type: RootInput 
   dirName:     "."
-  fileNames:    ["/argoneut/app/users/saima/Commit/nuance_gen_Anti_2000_0.root"]
-  maxEvents:  100       # Number of events to create
+  fileNames:    ["genie_gen_reco.root"]
+  maxEvents:  10       # Number of events to create
 }
 
 outputs:
@@ -39,6 +38,7 @@ outputs:
 # Define and configure some modules to do work on each event.
 # First modules are defined; they are scheduled later.
 # Modules are grouped by type.
+
 physics:
 {
 
@@ -46,12 +46,15 @@ physics:
 
 # filters:{}
 
- analyzers:{}
+ analyzers:
+{
+lambdaana:  @local::argoneut_lambdaana 
+}
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers belo 
  #simulate: [ generator, largeant ] 
- lambdaana: [hypana]
+ lambdaana: [lambdaana]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -65,6 +68,3 @@ physics:
  end_paths:     [lambdaana, stream1]  
 }
 
-# define the list of LArSoft modules to run through the simulate path
-physics.analyzers.hypana:  @local::argoneut_lambdaana
-#physics.analyzers.hypana:  @local::argoneut_calo 
