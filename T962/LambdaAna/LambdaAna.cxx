@@ -425,42 +425,6 @@ namespace cchyp {
 
       
       }
-
-//_____________________________________________
-
-//       art::PtrVector<recob::Hit> hitlist;
-//       std::vector< art::Ptr<recob::Hit> > reco_hits;
-
-//       art::Handle< std::vector<recob::Cluster> > clusterListHandle;
-//       evt.getByLabel(fLineMergerModuleLabel,clusterListHandle);
-    
-//       art::PtrVector<recob::Cluster> cluIn;
-//       for(unsigned int ii = 0; ii < clusterListHandle->size(); ++ii)
-// 	{
-// 	  art::Ptr<recob::Cluster> cluster(clusterListHandle, ii);
-// 	  //cluIn.push_back(cluster);
-// 	  if (cluster->View() == geo::kW) continue;
-// 	  hitlist = cluster->Hits(); // ptrvector to hits in one cluster
-
-// 	  for(art::PtrVectorItr<recob::Hit> theHit = hitlist.begin(); theHit != hitlist.end();  theHit++) 
-// 	    reco_hits.push_back(*theHit);
-// 	}
-
-
-//     // grab the hits that have been reconstructed
-//     art::Handle< std::vector<recob::Hit> > hitcol;
-//     evt.getByLabel(fHitModuleLabel, hitcol);
-
-//     // make a vector of them - we aren't writing anything out to a file
-//     // so no need for a art::PtrVector here
-//     std::vector< art::Ptr<recob::Hit> > hits;
-//     art::fill_ptr_vector(hits, hitcol);
-
-
-
-
-
-
 //______________________________________________
       TLorentzVector lMuonStart;
       TLorentzVector lProtonStart;
@@ -724,6 +688,7 @@ namespace cchyp {
 
 		std::cout << "muon, proton and pion length = " << MuonLength << " " << ProtonLength << " " << PionLength << std::endl;
 		
+		// theta, phi calculation might not be correct or might not match what we get from root, need to work on this !! 
 		Muon_theta = (TMath::ACos(MuonMom.Z()/MuonMom.Mag()))*(180/TMath::Pi());
  		Proton_theta = (TMath::ACos(ProtonMom.Z()/ProtonMom.Mag()))*(180/TMath::Pi());
 		Pion_theta = (TMath::ACos(PionMom.Z()/PionMom.Mag()))*(180/TMath::Pi());
@@ -865,7 +830,6 @@ namespace cchyp {
 //     // a responsible particle for an EM process
     plist.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
     
-    //art::ServiceHandle<geo::Geometry> geo;
     unsigned int p(0),w(0), t(0),channel(0);
     while( itr != hits.end() ){
       
@@ -874,9 +838,8 @@ namespace cchyp {
 
       //std::cout << "____________ HERE IS THE PLANE _____________" << p << std::endl;
 
-       //std::vector<cheat::TrackIDE> trackides = cheat::BackTracker::HitToTrackID(scs, *itr);
        std::vector<cheat::TrackIDE> eveides   = cheat::BackTracker::HitToEveID(plist, *(scs[(*itr)->Channel()]), *itr);
-       //std::vector<double>          xyz       = cheat::BackTracker::HitToXYZ(scs, *itr);
+
 //        std::cout << "EVE ID VECTOR SIZE = " << eveides.size() << std::endl;
        std::vector<cheat::TrackIDE>::iterator idesitr = eveides.begin();
        while( idesitr != eveides.end() ){
@@ -948,17 +911,11 @@ namespace cchyp {
     // loop over the all the hits from merged lines and figure out which particle contributed to each hit
     std::vector< art::Ptr<recob::Hit> >::iterator reco_itr = reco_hits.begin();
 
-//     // adopt an EmEveIdCalculator to find the eve ID.  
-//     // will return a primary particle if it doesn't find 
-//     // a responsible particle for an EM process
-    //plist.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
 
     while( reco_itr != reco_hits.end() ){
 
       //std::cout << "I AM GOING TO CALCULATE THE RECO_EVE_IDS" << std::endl;
-       //std::vector<cheat::TrackIDE> trackides = cheat::BackTracker::HitToTrackID(scs, *itr);
        std::vector<cheat::TrackIDE> reco_eveides   = cheat::BackTracker::HitToEveID(plist, *(scs[(*reco_itr)->Channel()]), *reco_itr);
-       //std::vector<double>          xyz       = cheat::BackTracker::HitToXYZ(scs, *itr);
 //        std::cout << "EVE ID VECTOR SIZE RECO = " << reco_eveides.size() << std::endl;
        std::vector<cheat::TrackIDE>::iterator reco_idesitr = reco_eveides.begin();
        while( reco_idesitr != reco_eveides.end() ){
@@ -989,9 +946,7 @@ namespace cchyp {
     std::vector< art::Ptr<recob::Hit> > track_reco_hits;
     art::PtrVector<recob::Cluster> Icluster;
     art::PtrVector<recob::Cluster> Ccluster;
-    //art::ServiceHandle<geo::Geometry> geo;
-  
-
+    
    for(unsigned int i = 0; i<trkIn.size(); ++i){
        Icluster = trkIn[i]->Clusters(geo::kU); // induction
        Ccluster = trkIn[i]->Clusters(geo::kV); // collection
@@ -1023,17 +978,11 @@ namespace cchyp {
     // loop over the hits and figure out which particle contributed to each one
     std::vector< art::Ptr<recob::Hit> >::iterator track_reco_itr = track_reco_hits.begin();
 
-//     // adopt an EmEveIdCalculator to find the eve ID.  
-//     // will return a primary particle if it doesn't find 
-//     // a responsible particle for an EM process
-    //plist.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
 
     while( track_reco_itr != track_reco_hits.end() ){
       //std::cout << "I AM GOING TO CALCULATE THE RECO_EVE_IDS" << std::endl;
-       //std::vector<cheat::TrackIDE> trackides = cheat::BackTracker::HitToTrackID(scs, *itr);
-       std::vector<cheat::TrackIDE> track_reco_eveides   = cheat::BackTracker::HitToEveID(plist, *(scs[(*track_reco_itr)->Channel()]), *track_reco_itr);
-       //std::vector<double>          xyz       = cheat::BackTracker::HitToXYZ(scs, *itr);
-//        std::cout << "EVE ID VECTOR SIZE RECO = " << reco_eveides.size() << std::endl;
+        std::vector<cheat::TrackIDE> track_reco_eveides   = cheat::BackTracker::HitToEveID(plist, *(scs[(*track_reco_itr)->Channel()]), *track_reco_itr);
+ //        std::cout << "EVE ID VECTOR SIZE RECO = " << reco_eveides.size() << std::endl;
        std::vector<cheat::TrackIDE>::iterator track_reco_idesitr = track_reco_eveides.begin();
        while( track_reco_idesitr != track_reco_eveides.end() ){
 	 //std::cout << "I AM GOING TO PRINT THE RECO_EVE_IDS" << std::endl;
