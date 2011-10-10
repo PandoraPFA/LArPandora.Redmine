@@ -1,9 +1,9 @@
 #include "job/mergesimminos.fcl"
-process_name: MergeData
+process_name: MergeSimMINOS
 
 services:
 {
-  TFileService: {fileName: "mergedata_hist.root"}
+  TFileService: {fileName: "mergesim_hist.root"}
   Timing:       {}
 }
 
@@ -11,7 +11,7 @@ source:
 {
  module_type: RootInput
  dirName:     "."
- fileNames:    ["argoneutdata.root"]
+ fileNames:    ["mergesim.root"]
  maxEvents: -1
 }
 
@@ -20,20 +20,17 @@ outputs:
  out1:
  {
     module_type: RootOutput
-    fileName:    "mergedata.root"
+    fileName:    "mergesim.root"
  }      
 }
 
 physics:
 {
   producers:{}
-//merge: [beam, minos]  
   merge: [minos]
   stream1: [out1]
   trigger_paths: [merge]
   end_paths: [stream1]
 }
 
-//physics.producers.beam:  @local::argoneut_mergedatabeam
-//physics.producers.minos: @local::argoneut_mergedataminos
 physics.producers.minos: @local::argoneut_mergesimminos
