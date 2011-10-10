@@ -11,7 +11,7 @@ source:
 {
  module_type: RootInput
  dirName:     "."
- fileNames:    ["mergesim.root"]
+ fileNames:    ["t962gana.root"]
  maxEvents: -1
 }
 
