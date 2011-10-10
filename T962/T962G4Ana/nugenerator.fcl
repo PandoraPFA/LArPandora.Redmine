@@ -1,9 +1,5 @@
 #include "job/services.fcl"
-#include "job/simulationservices.fcl"
 #include "job/genie.fcl"
-#include "job/largeantmodules.fcl"
-#include "job/detsimmodules.fcl"
-#include "job/t962geantmodules.fcl"
 
 
 process_name: nugenerator
@@ -24,7 +20,7 @@ services:
 source:
 {
   module_type: EmptyEvent
-  maxEvents:  100      # Number of events to create
+  maxEvents:  10      # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
@@ -35,7 +31,7 @@ outputs:
  {
    module_type: RootOutput
 ###default file name, can override from command line with -o or --output
-   fileName:    "t962gana.root" 
+   fileName:    "generator.root" 
  }
 }
 
