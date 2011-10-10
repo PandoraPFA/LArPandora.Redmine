@@ -7,7 +7,7 @@ process_name: nugenerator
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "genie_hist.root" }
+  TFileService: { fileName: "generator_hist.root" }
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
