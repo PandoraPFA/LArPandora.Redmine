@@ -159,7 +159,26 @@ namespace merge{
             minitree->SetBranchAddress("trkContained",&minos.ftrkcontained);
             minitree->SetBranchAddress("goodbeam",&minos.fgoodbeam);
             minitree->SetBranchAddress("ntrkstp",&minos.fntrkstp);
-
+            // uncomment next 10 lines for MC 
+//            minitree->SetBranchAddress("mcIndex",&minos.fmcIndex);
+//            minitree->SetBranchAddress("mcPDG",&minos.fmcPDG);
+//            minitree->SetBranchAddress("mcPx",&minos.fmcPx);
+//            minitree->SetBranchAddress("mcPy",&minos.fmcPy);
+//            minitree->SetBranchAddress("mcPz",&minos.fmcPz);
+//            minitree->SetBranchAddress("mcEne",&minos.fmcEne);
+//            minitree->SetBranchAddress("mcMass",&minos.fmcMass);
+//            minitree->SetBranchAddress("mcVtxX",&minos.fmcVtxX);
+//            minitree->SetBranchAddress("mcVtxY",&minos.fmcVtxY);
+//            minitree->SetBranchAddress("mcVtxZ",&minos.fmcVtxZ);
+            
+//            double fmcPx, fmcPy, fmcPz;
+//             minitree->SetBranchAddress("mcPx",&fmcPx);
+//             minitree->SetBranchAddress("mcPy",&fmcPy);
+//             minitree->SetBranchAddress("mcPz",&fmcPz);
+//             minos.SetmcPx(fmcPx);
+//             minos.SetmcPy(fmcPy);
+// 		         minos.SetmcPz(fmcPz);
+            
             float trkstpX[1000];//don't like to hard-code the array size, but will suffice for now
             float trkstpY[1000];
             float trkstpZ[1000];
@@ -170,14 +189,7 @@ namespace merge{
             minitree->SetBranchAddress("trkstpZ",trkstpZ);
             minitree->SetBranchAddress("trkstpU",trkstpU);
             minitree->SetBranchAddress("trkstpV",trkstpV);
-                      
- //            double fmcPx, fmcPy, fmcPz;
-//             minitree->SetBranchAddress("mcPx",&fmcPx);
-//             minitree->SetBranchAddress("mcPy",&fmcPy);
-//             minitree->SetBranchAddress("mcPz",&fmcPz);
-//             minos.SetmcPx(fmcPx);
-//             minos.SetmcPy(fmcPy);
-// 		    minos.SetmcPz(fmcPz); 
+
             //------------------------------------------
             Long64_t nentries = minitree->GetEntries();
             Long64_t nbytes = 0;

@@ -72,12 +72,22 @@ namespace t962{
       std::vector<float> ftrkstpU;
       std::vector<float> ftrkstpV;
       
-      //MC only
+      //MC only (try commenting out and remaking all of T962/* if there are problems)
+//      float fmcIndex;
+//      double fmcPDG;
+//      double fmcPx;
+//      double fmcPy;
+//      double fmcPz;
+//      double fmcEne;
+//      double fmcMass;
+//      double fmcVtxX;
+//      double fmcVtxY;
+//      double fmcVtxZ;
+      friend std::ostream& operator << (std::ostream& o, const MINOS& m);
+
 //       void SetmcPx(double mcpx){fmcPx = mcpx;}
 //       void SetmcPy(double mcpy){fmcPy = mcpy;}
 //       void SetmcPz(double mcpz){fmcPz = mcpz;}
-
-      friend std::ostream& operator << (std::ostream& o, const MINOS& m);
 
    private:    
 //    

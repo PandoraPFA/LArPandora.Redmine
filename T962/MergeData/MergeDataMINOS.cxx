@@ -163,6 +163,21 @@ namespace merge{
             minitree->SetBranchAddress("trkContained",&minos.ftrkcontained);
             minitree->SetBranchAddress("goodbeam",&minos.fgoodbeam);
             minitree->SetBranchAddress("ntrkstp",&minos.fntrkstp);
+            
+            // uncomment next 10 lines for MC
+//            minos.fmcIndex=-99999;
+//            minos.fmcPDG=-99999;
+//            minos.fmcPx=-99999;
+//            minos.fmcPy=-99999;
+//            minos.fmcPz=-99999;
+//            minos.fmcEne=-99999;
+//            minos.fmcMass=-99999;
+//            minos.fmcVtxX=-99999;
+//            minos.fmcVtxY=-99999;
+//            minos.fmcVtxZ=-99999;
+            
+            
+            
             float trkstpX[1000];//don't like to hard-code the array size, but will suffice for now
             float trkstpY[1000];
             float trkstpZ[1000];
@@ -198,7 +213,8 @@ namespace merge{
                //*************************************************************
                //Matching condition based on time info alone:
                double diff = fabs(minos.futc1 + 500 - tms);
-          
+               //in situ background measurement +1900
+               //double diff = fabs(minos.futc1 + 500 +1900 - tms);
                if(diff<1001){
                   if(minos.ftrkIndex==0){
                      // std::cout << "minos.futc1 = " << std::setprecision(12) << minos.futc1 

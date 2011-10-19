@@ -107,7 +107,19 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trk_dcosz_minos",&trk_dcosz_minos,"trk_dcosz_minos/D");
   fTree->Branch("trk_vtxx_minos",&trk_vtxx_minos,"trk_vtxx_minos/D");
   fTree->Branch("trk_vtxy_minos",&trk_vtxy_minos,"trk_vtxy_minos/D");
-  fTree->Branch("trk_vtxz_minos",&trk_vtxz_minos,"trk_vtxz_minos/D");
+  fTree->Branch("trk_vtxz_minos",&trk_vtxz_minos,"trk_vtxz_minos/D"); 
+  fTree->Branch("mc_index_minos",&mc_index_minos,"mc_index_minos/F");
+  fTree->Branch("mc_pdg_minos",&mc_pdg_minos,"mc_pdg_minos/D");
+  fTree->Branch("mc_px_minos",&mc_px_minos,"mc_px_minos/D");
+  fTree->Branch("mc_py_minos",&mc_py_minos,"mc_py_minos/D");
+  fTree->Branch("mc_pz_minos",&mc_pz_minos,"mc_pz_minos/D");
+  fTree->Branch("mc_ene_minos",&mc_ene_minos,"mc_ene_minos/D");
+  fTree->Branch("mc_mass_minos",&mc_mass_minos,"mc_mass_minos/D");
+  fTree->Branch("mc_vtxx_minos",&mc_vtxx_minos,"mc_vtxx_minos/D");
+  fTree->Branch("mc_vtxy_minos",&mc_vtxy_minos,"mc_vtxy_minos/D");
+  fTree->Branch("mc_vtxz_minos",&mc_vtxz_minos,"mc_vtxz_minos/D");   
+  fTree->Branch("trkcontained_minos",&trkcontained_minos,"trkcontained_minos/I");  
+  fTree->Branch("test_charge_minos",&test_charge_minos,"test_charge_minos/I"); 
   fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/D");
   fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/D");
   fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/D");
@@ -120,6 +132,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("mode_truth",&mode_truth,"mode_truth/I");
   fTree->Branch("enu_truth",&enu_truth,"enu_truth/D");
   fTree->Branch("Q2_truth",&Q2_truth,"Q2_truth/D");
+  fTree->Branch("hitnuc_truth",&hitnuc_truth,"hitnuc_truth/I");
   fTree->Branch("W_truth",&W_truth,"W_truth/D");
   fTree->Branch("nuvtxx_truth",&nuvtxx_truth,"nuvtxx_truth/D");
   fTree->Branch("nuvtxy_truth",&nuvtxy_truth,"nuvtxy_truth/D");
@@ -323,8 +336,20 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   //matching information  
   nmatched_reco = trackmatchlist.size();
   int ANTtrackID=-1;
+  test_charge_minos=0.;
+  
+  for(unsigned int j = 0; j < minoslist.size(); j++)
+     { 
+     	if (!isdata)
+     	{
+        	if(minoslist[j]->fcharge<0.)
+        	test_charge_minos=-1;
+        }
+     }
+     
   for(unsigned int i = 0; i < trackmatchlist.size(); i++)
     {
+
      for(unsigned int j = 0; j < minoslist.size(); j++)
      {
  
@@ -337,14 +362,27 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      else
      trk_mom_minos = minoslist[j]->ftrkmom;     
      
+     trkcontained_minos = minoslist[j]->ftrkcontained; 
      trk_charge_minos = minoslist[j]->fcharge;
      trk_dcosx_minos = minoslist[j]->ftrkdcosx;
      trk_dcosy_minos = minoslist[j]->ftrkdcosy;
      trk_dcosz_minos = minoslist[j]->ftrkdcosz;
      trk_vtxx_minos = minoslist[j]->ftrkVtxX;
      trk_vtxy_minos = minoslist[j]->ftrkVtxY;
-     trk_vtxz_minos = minoslist[j]->ftrkVtxZ;     
-      }      
+     trk_vtxz_minos = minoslist[j]->ftrkVtxZ;        
+     }  
+      if (!isdata){       
+//      mc_index_minos = minoslist[j]->fmcIndex;
+//      mc_pdg_minos = minoslist[j]->fmcPDG;
+//      mc_px_minos = minoslist[j]->fmcPx;
+//      mc_py_minos = minoslist[j]->fmcPy;
+//      mc_pz_minos = minoslist[j]->fmcPz;
+//      mc_ene_minos = minoslist[j]->fmcEne;
+//      mc_mass_minos = minoslist[j]->fmcMass;
+//      mc_vtxx_minos = minoslist[j]->fmcVtxX;
+//      mc_vtxy_minos = minoslist[j]->fmcVtxY;
+//      mc_vtxz_minos = minoslist[j]->fmcVtxZ;
+      }
      }
     }
 
@@ -435,6 +473,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     mode_truth = mclist[0]->GetNeutrino().Mode();
     Q2_truth = mclist[0]->GetNeutrino().QSqr();
     W_truth = mclist[0]->GetNeutrino().W();
+    hitnuc_truth = mclist[0]->GetNeutrino().HitNuc();
     enu_truth = mclist[0]->GetNeutrino().Nu().E();
     nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx();
     nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy();
@@ -488,6 +527,19 @@ void t962::AnalysisTree::ResetVars(){
   trk_vtxx_minos = -99999;
   trk_vtxy_minos = -99999;
   trk_vtxz_minos = -99999;
+  
+  mc_index_minos=-99999;
+  mc_pdg_minos=-99999;
+  mc_px_minos=-99999;
+  mc_py_minos=-99999;
+  mc_pz_minos=-99999;
+  mc_ene_minos=-99999;
+  mc_mass_minos=-99999;
+  mc_vtxx_minos=-99999;
+  mc_vtxy_minos=-99999;
+  mc_vtxz_minos=-99999;
+  test_charge_minos=-99999;
+  trkcontained_minos=-99999;
   vtxx_scan=-99999;
   vtxy_scan=-99999;
   vtxz_scan=-99999;
@@ -501,6 +553,7 @@ void t962::AnalysisTree::ResetVars(){
   enu_truth = -99999;
   Q2_truth = -99999;
   W_truth = -99999;
+  hitnuc_truth = -99999;
   nuvtxx_truth = -99999;
   nuvtxy_truth = -99999;
   nuvtxz_truth = -99999;
