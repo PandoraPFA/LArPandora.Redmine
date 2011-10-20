@@ -110,6 +110,20 @@ namespace t962 {
     double lep_dcosx_truth;
     double lep_dcosy_truth;
     double lep_dcosz_truth;
+    
+    float mc_index_minos;
+    double mc_pdg_minos;
+    double mc_px_minos;
+    double mc_py_minos;
+    double mc_pz_minos;
+    double mc_ene_minos;
+    double mc_mass_minos;
+    double mc_vtxx_minos;
+    double mc_vtxy_minos;
+    double mc_vtxz_minos;
+    int trkcontained_minos;
+    int test_charge_minos;
+    int hitnuc_truth;
 
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
