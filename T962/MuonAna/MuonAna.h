@@ -115,6 +115,11 @@ namespace muons {
         TH1D* fMinosErange_Neg;
         TH1D* fMinosMom_Pos;
         TH1D* fMinosMom_Neg;
+       
+       TH1F* fMinosTrkChi2_Pos;
+       TH1F* fMinosTrkChi2_Neg;
+       TH2F*  fMinosTrkChi2vNPoints_Pos;
+       TH2F*  fMinosTrkChi2vNPoints_Neg;
 
         
         std::string fTrackMatchModuleLabel;
