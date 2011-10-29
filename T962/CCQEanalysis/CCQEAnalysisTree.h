@@ -79,6 +79,8 @@ namespace t962 {
     
     double *twodvtx_w_reco;
     double *twodvtx_t_reco;
+    double *fStart_pt_w_kingaCl;
+    double *fStart_pt_t_kingaCl;
     
     int nkingaclustersu_reco;
     int nkingaclustersv_reco;
@@ -94,6 +96,12 @@ namespace t962 {
     int ndbscanclustersv_reco;
     int nvertexdbscanclustersu_reco;
     int nvertexdbscanclustersv_reco;
+    
+    int no_kingaclusters;
+    
+    int *kingaclusters_planeNo;
+    double *Start_pt_w_kingaCl;
+    double *Start_pt_t_kingaCl;
     
     
               

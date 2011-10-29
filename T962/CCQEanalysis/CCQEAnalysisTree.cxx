@@ -61,7 +61,9 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
-  fboundaryWindow           (pset.get< double >("boundaryWindow")               )
+  fboundaryWindow           (pset.get< double >("boundaryWindow")               ),
+  no_kingaclusters(200)
+ 
   
 {
 }
@@ -71,6 +73,9 @@ t962::CCQEAnalysisTree::~CCQEAnalysisTree()
 {
 delete twodvtx_w_reco;
 delete twodvtx_t_reco;
+delete Start_pt_w_kingaCl;
+delete Start_pt_t_kingaCl;
+delete kingaclusters_planeNo;
 }
 
 void t962::CCQEAnalysisTree::beginJob()
@@ -82,6 +87,9 @@ void t962::CCQEAnalysisTree::beginJob()
   
   twodvtx_w_reco= new double[2];
   twodvtx_t_reco= new double[2];
+  kingaclusters_planeNo=new int[no_kingaclusters];
+  Start_pt_w_kingaCl=new double[no_kingaclusters];
+ Start_pt_t_kingaCl=new double[no_kingaclusters];
   
   
   fTree->Branch("run",&run,"run/I");
@@ -161,6 +169,14 @@ void t962::CCQEAnalysisTree::beginJob()
   fTree->Branch("ndbscanclustersv_reco",&ndbscanclustersv_reco,"ndbscanclustersv_reco/I");
   fTree->Branch("nvertexdbscanclustersu_reco",&nvertexdbscanclustersu_reco,"nvertexdbscanclustersu_reco/I");
   fTree->Branch("nvertexdbscanclustersv_reco",&nvertexdbscanclustersv_reco,"nvertexdbscanclustersv_reco/I");
+  
+  
+  
+  fTree->Branch("no_kingaclusters",&no_kingaclusters,"no_kingaclusters/I");fTree->Branch("kingaclusters_planeNo",kingaclusters_planeNo,"kingaclusters_planeNo[no_kingaclusters]/I");
+  fTree->Branch("Start_pt_w_kingaCl", Start_pt_w_kingaCl, "Start_pt_w_kingaCl[no_kingaclusters]/D");
+ fTree->Branch("Start_pt_t_kingaCl", Start_pt_t_kingaCl, "Start_pt_t_kingaCl[no_kingaclusters]/D");
+ 
+ 
 }
 
 
@@ -307,6 +323,16 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     int fkingaCl_near_vertex_p1=0;
      if(evt.getByLabel(fKingaModuleLabel,kingaListHandle)){
      art::PtrVector<recob::Cluster> KingaClusIn;  
+     
+     
+     
+     std::cout<<"########################################"<<std::endl;
+     std::cout<<"event= "<<evt.id().event()<<std::endl;
+     std::cout<<" in CCQEAnalysisTree, kingaListHandle->size()= "<<kingaListHandle->size()<<std::endl;
+     std::cout<<"vertex for p0: "<<twodvtx_w_reco[0]<<" , "<<twodvtx_t_reco[0]<<std::endl;
+     std::cout<<"vertex for p1: "<<twodvtx_w_reco[1]<<" , "<<twodvtx_t_reco[1]<<std::endl;
+     
+     
      for(unsigned int ii = 0; ii < kingaListHandle->size(); ++ii)
     {
       art::Ptr<recob::Cluster> cluster(kingaListHandle, ii);
@@ -314,27 +340,42 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       
       
       if(cluster->View()==geo::kU){
+      kingaclusters_planeNo[ii]=0;
+      Start_pt_w_kingaCl[ii]=cluster->StartPos()[0];
+      Start_pt_t_kingaCl[ii]=cluster->StartPos()[1];
       fkingaCl_p0++;
-       if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
+      std::cout<<"p0, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
+       if(fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
       fkingaCl_near_vertex_p0++;
       
         }
       
       }
        else if(cluster->View()==geo::kV){
+      kingaclusters_planeNo[ii]=1;
+      Start_pt_w_kingaCl[ii]=cluster->StartPos()[0];
+      Start_pt_t_kingaCl[ii]=cluster->StartPos()[1];
        fkingaCl_p1++;
-         if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
+       std::cout<<"p1, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
+         if( fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
          fkingaCl_near_vertex_p1++;
       
         }
       }
    }
+    no_kingaclusters=KingaClusIn.size();
    } //if
+   
+  
+    std::cout<<"########################################"<<std::endl;
   nkingaclustersu_reco=fkingaCl_p0;
   nkingaclustersv_reco=fkingaCl_p1;
   nvertexkingaclustersu_reco=fkingaCl_near_vertex_p0;
   nvertexkingaclustersv_reco=fkingaCl_near_vertex_p1;
+  std::cout<<"No of kingaclusters near vertex for p0 is: "<<fkingaCl_near_vertex_p0<<std::endl;
+  std::cout<<"No of kingaclusters near vertex for p1 is: "<<fkingaCl_near_vertex_p1<<std::endl;
   
+  std::cout<<"nkingaclustersu_reco= "<<nkingaclustersu_reco<<std::endl;
   //line merger cluster information
   
     int flinemergerCl_p0=0;
@@ -624,6 +665,7 @@ void t962::CCQEAnalysisTree::ResetVars(){
   ndbscanclustersv_reco=-9999;
   nvertexdbscanclustersu_reco=-9999;
   nvertexdbscanclustersv_reco=-9999;
+  no_kingaclusters=-999;
   
 }
 
