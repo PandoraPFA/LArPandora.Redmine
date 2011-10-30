@@ -44,7 +44,8 @@ namespace t962 {
   private:
     
     void ResetVars();
-
+    double fMCvertex [3];
+    
     TTree* fTree;
     //run information
     int run;
@@ -79,6 +80,8 @@ namespace t962 {
     
     double *twodvtx_w_reco;
     double *twodvtx_t_reco;
+    double *twodvtx_w_truth;
+    double *twodvtx_t_truth;
     double *fStart_pt_w_kingaCl;
     double *fStart_pt_t_kingaCl;
     
@@ -98,10 +101,14 @@ namespace t962 {
     int nvertexdbscanclustersv_reco;
     
     int no_kingaclusters;
+    int no_linemergerclusters;
     
     int *kingaclusters_planeNo;
     double *Start_pt_w_kingaCl;
     double *Start_pt_t_kingaCl;
+    int *linemergerclusters_planeNo;
+    double *Start_pt_w_linemergerCl;
+    double *Start_pt_t_linemergerCl;
     
     
               

@@ -62,7 +62,8 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               ),
-  no_kingaclusters(200)
+  no_kingaclusters(200),
+  no_linemergerclusters(200)
  
   
 {
@@ -73,9 +74,14 @@ t962::CCQEAnalysisTree::~CCQEAnalysisTree()
 {
 delete twodvtx_w_reco;
 delete twodvtx_t_reco;
+delete twodvtx_w_truth;
+delete twodvtx_t_truth;
 delete Start_pt_w_kingaCl;
 delete Start_pt_t_kingaCl;
 delete kingaclusters_planeNo;
+delete linemergerclusters_planeNo;
+delete Start_pt_w_linemergerCl;
+delete Start_pt_t_linemergerCl;
 }
 
 void t962::CCQEAnalysisTree::beginJob()
@@ -87,9 +93,14 @@ void t962::CCQEAnalysisTree::beginJob()
   
   twodvtx_w_reco= new double[2];
   twodvtx_t_reco= new double[2];
+  twodvtx_w_truth= new double[2];
+  twodvtx_t_truth= new double[2];
   kingaclusters_planeNo=new int[no_kingaclusters];
+  linemergerclusters_planeNo=new int[no_linemergerclusters];
   Start_pt_w_kingaCl=new double[no_kingaclusters];
- Start_pt_t_kingaCl=new double[no_kingaclusters];
+  Start_pt_t_kingaCl=new double[no_kingaclusters];
+  Start_pt_w_linemergerCl=new double[no_linemergerclusters];
+  Start_pt_t_linemergerCl=new double[no_linemergerclusters];
   
   
   fTree->Branch("run",&run,"run/I");
@@ -153,6 +164,8 @@ void t962::CCQEAnalysisTree::beginJob()
   //kinga:
   fTree->Branch("twodvtx_w_reco", twodvtx_w_reco, "twodvtx_w_reco[2]/D");
   fTree->Branch("twodvtx_t_reco", twodvtx_t_reco, "twodvtx_t_reco[2]/D");
+  fTree->Branch("twodvtx_w_truth", twodvtx_w_truth, "twodvtx_w_truth[2]/D");
+  fTree->Branch("twodvtx_t_truth", twodvtx_t_truth, "twodvtx_t_truth[2]/D");
   fTree->Branch("nkingaclustersu_reco",&nkingaclustersu_reco,"nkingaclustersu_reco/I");
   fTree->Branch("nkingaclustersv_reco",&nkingaclustersv_reco,"nkingaclustersv_reco/I");
   fTree->Branch("nvertexkingaclustersu_reco",&nvertexkingaclustersu_reco,"nvertexkingaclustersu_reco/I");
@@ -175,6 +188,12 @@ void t962::CCQEAnalysisTree::beginJob()
   fTree->Branch("no_kingaclusters",&no_kingaclusters,"no_kingaclusters/I");fTree->Branch("kingaclusters_planeNo",kingaclusters_planeNo,"kingaclusters_planeNo[no_kingaclusters]/I");
   fTree->Branch("Start_pt_w_kingaCl", Start_pt_w_kingaCl, "Start_pt_w_kingaCl[no_kingaclusters]/D");
  fTree->Branch("Start_pt_t_kingaCl", Start_pt_t_kingaCl, "Start_pt_t_kingaCl[no_kingaclusters]/D");
+ 
+ fTree->Branch("no_linemergerclusters",&no_linemergerclusters,"no_linemergerclusters/I");
+ fTree->Branch("linemergerclusters_planeNo",linemergerclusters_planeNo,"linemergerclusters_planeNo[no_linemergerclusters]/I");
+  fTree->Branch("Start_pt_w_linemergerCl", Start_pt_w_linemergerCl, "Start_pt_w_linemergerCl[no_linemergerclusters]/D");
+  fTree->Branch("Start_pt_t_linemergerCl", Start_pt_t_linemergerCl, "Start_pt_t_linemergerCl[no_linemergerclusters]/D");
+ 
  
  
 }
@@ -293,6 +312,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     scanlist.push_back(scanHolder);
   }
   art::ServiceHandle<geo::Geometry> geom;  
+  art::ServiceHandle<util::LArProperties> larp;
 
   //vertex information
   if(vertexlist.size())
@@ -325,13 +345,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      art::PtrVector<recob::Cluster> KingaClusIn;  
      
      
-     
-     std::cout<<"########################################"<<std::endl;
-     std::cout<<"event= "<<evt.id().event()<<std::endl;
-     std::cout<<" in CCQEAnalysisTree, kingaListHandle->size()= "<<kingaListHandle->size()<<std::endl;
-     std::cout<<"vertex for p0: "<<twodvtx_w_reco[0]<<" , "<<twodvtx_t_reco[0]<<std::endl;
-     std::cout<<"vertex for p1: "<<twodvtx_w_reco[1]<<" , "<<twodvtx_t_reco[1]<<std::endl;
-     
+   
      
      for(unsigned int ii = 0; ii < kingaListHandle->size(); ++ii)
     {
@@ -344,7 +358,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       Start_pt_w_kingaCl[ii]=cluster->StartPos()[0];
       Start_pt_t_kingaCl[ii]=cluster->StartPos()[1];
       fkingaCl_p0++;
-      std::cout<<"p0, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
+      //std::cout<<"p0, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
        if(fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
       fkingaCl_near_vertex_p0++;
       
@@ -356,7 +370,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       Start_pt_w_kingaCl[ii]=cluster->StartPos()[0];
       Start_pt_t_kingaCl[ii]=cluster->StartPos()[1];
        fkingaCl_p1++;
-       std::cout<<"p1, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
+       //std::cout<<"p1, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
          if( fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
          fkingaCl_near_vertex_p1++;
       
@@ -367,15 +381,8 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
    } //if
    
   
-    std::cout<<"########################################"<<std::endl;
-  nkingaclustersu_reco=fkingaCl_p0;
-  nkingaclustersv_reco=fkingaCl_p1;
-  nvertexkingaclustersu_reco=fkingaCl_near_vertex_p0;
-  nvertexkingaclustersv_reco=fkingaCl_near_vertex_p1;
-  std::cout<<"No of kingaclusters near vertex for p0 is: "<<fkingaCl_near_vertex_p0<<std::endl;
-  std::cout<<"No of kingaclusters near vertex for p1 is: "<<fkingaCl_near_vertex_p1<<std::endl;
-  
-  std::cout<<"nkingaclustersu_reco= "<<nkingaclustersu_reco<<std::endl;
+   
+
   //line merger cluster information
   
     int flinemergerCl_p0=0;
@@ -391,6 +398,9 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       
       
       if(cluster->View()==geo::kU){
+      linemergerclusters_planeNo[ii]=0;
+      Start_pt_w_linemergerCl[ii]=cluster->StartPos()[0];
+      Start_pt_t_linemergerCl[ii]=cluster->StartPos()[1];
       flinemergerCl_p0++;
        if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
       flinemergerCl_near_vertex_p0++;
@@ -399,6 +409,9 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       
       }
        else if(cluster->View()==geo::kV){
+       linemergerclusters_planeNo[ii]=1;
+       Start_pt_w_linemergerCl[ii]=cluster->StartPos()[0];
+       Start_pt_t_linemergerCl[ii]=cluster->StartPos()[1];
        flinemergerCl_p1++;
          if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
          flinemergerCl_near_vertex_p1++;
@@ -406,6 +419,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
         }
       }
       }
+       no_linemergerclusters=LineMergerClusIn.size();
       }
   
   nlinemergerclustersu_reco=flinemergerCl_p0;
@@ -590,7 +604,52 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
       lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
     }
+    
+    //get true 2d vertex:
+    
+    
+    for( unsigned int i = 0; i < mclist.size(); ++i ){
+
+    art::Ptr<simb::MCTruth> mc(mclist[i]);
+
+    simb::MCParticle neut(mc->GetParticle(i));
+
+    
+    fMCvertex[0] =neut.Vx();
+    fMCvertex[1] =neut.Vy();
+    fMCvertex[2] =neut.Vz();
+   
+    double presamplings=60.0;
+    double drifttick=(fMCvertex[0]/larp->DriftVelocity(larp->Efield(),larp->Temperature()))*(1./.198)+presamplings;
+    
+    twodvtx_t_truth[0]=drifttick;
+    twodvtx_t_truth[1]=drifttick;
   }
+  // now wire vertex:
+   unsigned int channel2,plane2,wire2,tpc2; 
+  for(size_t tpc = 0; tpc < geom->NTPC(); ++tpc){
+   
+  for(unsigned int plane=0;plane<geom->Nplanes(tpc);plane++){
+  if(plane==0){
+	fMCvertex[0]=.3;//force time coordinate to be closer to induction plane 
+	}
+      else{
+	fMCvertex[0]=-.3;//force time coordinate to be closer to collection plane
+     }
+      channel2 = geom->NearestChannel(fMCvertex);
+      geom->ChannelToWire(channel2,tpc2,plane2,wire2);   
+   
+   
+   twodvtx_w_truth[plane]=wire2;
+   }
+   }
+  
+    
+    
+    
+    
+    
+  }//MC
 
   fTree->Fill();
 }
@@ -666,6 +725,7 @@ void t962::CCQEAnalysisTree::ResetVars(){
   nvertexdbscanclustersu_reco=-9999;
   nvertexdbscanclustersv_reco=-9999;
   no_kingaclusters=-999;
+  no_linemergerclusters=-999;
   
 }
 
