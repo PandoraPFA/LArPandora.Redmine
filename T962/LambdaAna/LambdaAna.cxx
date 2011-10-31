@@ -29,16 +29,15 @@
 
 
 // Framework includes
-#include "art/Framework/Core/Event.h" 
+#include "art/Framework/Principal/Event.h" 
 #include "fhiclcpp/ParameterSet.h" 
-#include "art/Persistency/Common/Handle.h"
-#include "art/Persistency/Common/OrphanHandle.h"
+#include "art/Framework/Principal/Handle.h"
 #include "art/Persistency/Common/Ptr.h" 
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
-#include "art/Framework/Core/TFileDirectory.h" 
+#include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
 
@@ -787,7 +786,7 @@ namespace cchyp {
 	cluIn.push_back(cluster);
 	hitlist = cluster->Hits(); // ptrvector to hits in one cluster
 	
-	for(art::PtrVectorItr<recob::Hit> theHit = hitlist.begin(); theHit != hitlist.end();  theHit++) 
+	for(art::PtrVector<recob::Hit>::const_iterator theHit = hitlist.begin(); theHit != hitlist.end();  theHit++) 
 	  reco_hits.push_back(*theHit);
       }
 
@@ -958,7 +957,7 @@ namespace cchyp {
        while(IclusterIter!= Icluster.end() ){
 	 clusters.push_back(*IclusterIter);
 	 track_hitlist = (*IclusterIter)->Hits();
-	 for(art::PtrVectorItr<recob::Hit> IHit = track_hitlist.begin(); IHit != track_hitlist.end();  IHit++) 
+	 for(art::PtrVector<recob::Hit>::const_iterator IHit = track_hitlist.begin(); IHit != track_hitlist.end();  IHit++) 
 	   track_reco_hits.push_back(*IHit);
 	 IclusterIter++;
        }
@@ -967,7 +966,7 @@ namespace cchyp {
        while(CclusterIter!= Ccluster.end() ){
 	 clusters.push_back(*CclusterIter);
 	 track_hitlist = (*CclusterIter)->Hits();
-	 for(art::PtrVectorItr<recob::Hit> CHit = track_hitlist.begin(); CHit != track_hitlist.end();  CHit++) 
+	 for(art::PtrVector<recob::Hit>::const_iterator CHit = track_hitlist.begin(); CHit != track_hitlist.end();  CHit++) 
 	   track_reco_hits.push_back(*CHit);
 	 CclusterIter++;
        }
@@ -1082,7 +1081,7 @@ namespace cchyp {
 
 	//calculate purity
 	uclu_hits=ucluIn[i]->Hits();
-	for(art::PtrVectorItr<recob::Hit> theHit = uclu_hits.begin(); theHit != uclu_hits.end();  theHit++){
+	for(art::PtrVector<recob::Hit>::const_iterator theHit = uclu_hits.begin(); theHit != uclu_hits.end();  theHit++){
  	  reco_hits_U.push_back(*theHit);
 	}
        
@@ -1192,7 +1191,7 @@ namespace cchyp {
 
 	//calculate purity
 	vclu_hits=vcluIn[i]->Hits();
-	for(art::PtrVectorItr<recob::Hit> theHit = vclu_hits.begin(); theHit != vclu_hits.end();  theHit++){
+	for(art::PtrVector<recob::Hit>::const_iterator theHit = vclu_hits.begin(); theHit != vclu_hits.end();  theHit++){
  	  reco_hits_V.push_back(*theHit);
 	}
        

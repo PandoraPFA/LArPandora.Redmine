@@ -10,6 +10,7 @@
 #define MERGESCAN_H
 
 #include "art/Framework/Core/EDProducer.h"
+#include "art/Framework/Principal/Handle.h"
 #include "RawData/raw.h"
 #include "T962/T962_Objects/ScanInfo.h"
 

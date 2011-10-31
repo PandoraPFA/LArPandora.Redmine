@@ -3,9 +3,9 @@
 //   MergeData_Beam Class
 //
 ////////////////////////////////////////////////////////////////////////
-#include "art/Framework/Core/Event.h"
+#include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "art/Persistency/Common/Handle.h"
+#include "art/Framework/Principal/Handle.h"
 #include "art/Persistency/Common/Ptr.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 

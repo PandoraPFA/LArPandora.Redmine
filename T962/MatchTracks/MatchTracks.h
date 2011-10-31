@@ -10,7 +10,7 @@
 
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/Handle.h"
+#include "art/Framework/Principal/Handle.h"
 
 #include "RecoBase/Track.h"
 #include "T962/T962_Objects/MINOS.h"

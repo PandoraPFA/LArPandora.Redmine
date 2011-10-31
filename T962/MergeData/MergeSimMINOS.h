@@ -8,6 +8,7 @@
 #define MERGESIMMINOS_H
 
 #include "art/Framework/Core/EDProducer.h"
+#include "art/Framework/Principal/Handle.h"
 #include "art/Persistency/Common/Ptr.h"
 
 #include "RawData/DAQHeader.h"
