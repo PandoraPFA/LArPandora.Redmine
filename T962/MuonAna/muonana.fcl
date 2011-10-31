@@ -54,8 +54,8 @@ recopath: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, track3d, ma
  anapath:  [ calo, muon ]
  stream1:  [ out1 ]
  trigger_paths: [recopath] 
- end_paths:     [ anapath ] 
- #end_paths:     [ stream1, anapath]
+ #end_paths:     [ anapath ] 
+ end_paths:     [ stream1, anapath]
 }
 
 
