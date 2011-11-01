@@ -38,7 +38,6 @@ extern "C" {
 
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
-#include "Simulation/SimListUtils.h"
 #include "Simulation/LArVoxelCalculator.h"
 #include "Simulation/LArVoxelData.h"
 #include "RawData/RawDigit.h"

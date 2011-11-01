@@ -25,7 +25,6 @@
 #include "cetlib/exception.h"
 #include "Geometry/geo.h"
 // LArSoft Includes
-#include "Simulation/SimListUtils.h"
 #include "SimulationBase/simbase.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/MCNeutrino.h"

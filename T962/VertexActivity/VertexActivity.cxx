@@ -106,7 +106,8 @@ void vertex::VertexActivity::produce(art::Event& evt)
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
 
-  sim::LArVoxelList vxlistHandle = sim::SimListUtils::GetLArVoxelList(evt, fLArG4ModuleLabel);
+  art::ServiceHandle<sim::SimListUtils> slu;
+  sim::LArVoxelList vxlistHandle = slu->GetLArVoxelList();
   
   art::PtrVector<simb::MCTruth> mclist;
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)

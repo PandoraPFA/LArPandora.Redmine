@@ -33,7 +33,6 @@
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
-#include "Simulation/SimListUtils.h"
 #include "RecoBase/recobase.h"
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
