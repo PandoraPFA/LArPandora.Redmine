@@ -332,7 +332,7 @@ void calo::CaloArgoItaliano::analyze(const art::Event& evt)
             double dQdx_e = dQdx/(calFactor*eCharge);  // in e/cm
             if(evt.isRealData()) dQdx_e *= LifetimeCorrection(frun,time);   // in e/cm
             double dEdx    = BirksCorrection(dQdx_e);         // in MeV/cm
-            //	      std::cout<<"MIPs (ADC) "<<MIPs<<" dQdx (ADC/cm) "<<dQdx<<" corr "<<LifetimeCorrection(frun,time)<<" dQdx_e (e/cm)"<<dQdx_e<<" dEdx (MeV/cm) "<<dEdx<<std::endl;
+            //       std::cout<<"MIPs (ADC) "<<MIPs<<" dQdx (ADC/cm) "<<dQdx<<" corr "<<LifetimeCorrection(frun,time)<<" dQdx_e (e/cm)"<<dQdx_e<<" dEdx (MeV/cm) "<<dEdx<<std::endl;
             fdEdx_Coll->Fill(dEdx);
             fbirk->Fill(dQdx_e,dEdx);
             fdEdx_Coll_vsXZangle->Fill(dEdx,TMath::ATan(trackCosStart[0]/trackCosStart[2]));
@@ -345,6 +345,7 @@ void calo::CaloArgoItaliano::analyze(const art::Event& evt)
             fetimeCOL[npC] = (double)etime;
             fMIPsCOL[npC] =  (double)MIPs;
             fdEdxCOL[npC] = (double)dEdx;
+            npC++;
 	
             // dE/dx vs Range plots
             for(std::vector<recob::SpacePoint>::const_iterator spIter = ((*trkIter)->SpacePoints()).begin(); 
@@ -353,6 +354,7 @@ void calo::CaloArgoItaliano::analyze(const art::Event& evt)
                art::PtrVector<recob::Hit> sphits = (*spIter).Hits(geo::kV);
                if(sphits.size()==0) continue;
                if((*hitIter)->Channel()!=sphits[0]->Channel()) continue;
+               if((*hitIter)->PeakTime()!=sphits[0]->PeakTime()) continue;//protect against multiple hits on the same wire in the cluster.
                const double *xyz = new double[3];
                xyz = (*spIter).XYZ();
                std::vector<double> larStart, larEnd;
@@ -378,7 +380,7 @@ void calo::CaloArgoItaliano::analyze(const art::Event& evt)
                   if(containment == 3) fdEdx_vs_Range_pass_MINOS_Neg->Fill(range,dEdx); 
                }
                      
-               npC++;
+               //npC++;
                
             }
          }// end of loop over the (geo::kV) cluster hits
