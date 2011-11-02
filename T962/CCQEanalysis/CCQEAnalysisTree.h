@@ -110,7 +110,12 @@ namespace t962 {
     double *Start_pt_w_linemergerCl;
     double *Start_pt_t_linemergerCl;
     
-    
+    double *two_trackstart_dcosx_reco;
+    double *two_trackstart_dcosy_reco;
+	double *two_trackstart_dcosz_reco;
+	double *two_trackexit_dcosx_reco;
+	double *two_trackexit_dcosy_reco;
+	double *two_trackexit_dcosz_reco;
               
     //matching information
     int nmatched_reco;        //number of matched tracks

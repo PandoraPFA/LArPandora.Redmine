@@ -4,7 +4,7 @@
 //
 // \author tjyang@fnal.gov
 // \author joshua.spitz@yale.edu
-// \ kinga.partyka@yale.edu
+// \author kinga.partyka@yale.edu
 // 
 ////////////////////////////////////////////////////////////////////////
 
@@ -83,6 +83,12 @@ delete kingaclusters_planeNo;
 delete linemergerclusters_planeNo;
 delete Start_pt_w_linemergerCl;
 delete Start_pt_t_linemergerCl;
+delete two_trackstart_dcosx_reco;
+delete two_trackstart_dcosy_reco;
+delete two_trackstart_dcosz_reco;
+delete two_trackexit_dcosx_reco;
+delete two_trackexit_dcosy_reco;
+delete two_trackexit_dcosz_reco;
 }
 
 void t962::CCQEAnalysisTree::beginJob()
@@ -102,6 +108,12 @@ void t962::CCQEAnalysisTree::beginJob()
   Start_pt_t_kingaCl=new double[no_kingaclusters];
   Start_pt_w_linemergerCl=new double[no_linemergerclusters];
   Start_pt_t_linemergerCl=new double[no_linemergerclusters];
+  two_trackstart_dcosx_reco= new double[2];
+  two_trackstart_dcosy_reco= new double[2];
+  two_trackstart_dcosz_reco= new double[2];
+  two_trackexit_dcosx_reco= new double[2];
+  two_trackexit_dcosy_reco= new double[2];
+  two_trackexit_dcosz_reco= new double[2];
   
   
   fTree->Branch("run",&run,"run/I");
@@ -194,6 +206,13 @@ void t962::CCQEAnalysisTree::beginJob()
  fTree->Branch("linemergerclusters_planeNo",linemergerclusters_planeNo,"linemergerclusters_planeNo[no_linemergerclusters]/I");
   fTree->Branch("Start_pt_w_linemergerCl", Start_pt_w_linemergerCl, "Start_pt_w_linemergerCl[no_linemergerclusters]/D");
   fTree->Branch("Start_pt_t_linemergerCl", Start_pt_t_linemergerCl, "Start_pt_t_linemergerCl[no_linemergerclusters]/D");
+  
+  fTree->Branch("two_trackstart_dcosx_reco",two_trackstart_dcosx_reco, "two_trackstart_dcosx_reco[2]/D");
+  fTree->Branch("two_trackstart_dcosy_reco",two_trackstart_dcosy_reco, "two_trackstart_dcosy_reco[2]/D");
+  fTree->Branch("two_trackstart_dcosz_reco",two_trackstart_dcosz_reco, "two_trackstart_dcosz_reco[2]/D");
+  fTree->Branch("two_trackexit_dcosx_reco",two_trackexit_dcosx_reco, "two_trackexit_dcosx_reco[2]/D");
+  fTree->Branch("two_trackexit_dcosy_reco",two_trackexit_dcosy_reco, "two_trackexit_dcosy_reco[2]/D");
+   fTree->Branch("two_trackexit_dcosz_reco",two_trackexit_dcosz_reco, "two_trackexit_dcosz_reco[2]/D");
  
  
  
@@ -381,7 +400,10 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     no_kingaclusters=KingaClusIn.size();
    } //if
    
-  
+  nkingaclustersu_reco=fkingaCl_p0;
+  nkingaclustersv_reco=fkingaCl_p1;
+  nvertexkingaclustersu_reco=fkingaCl_near_vertex_p0;
+  nvertexkingaclustersv_reco=fkingaCl_near_vertex_p1;
    
 
   //line merger cluster information
@@ -542,6 +564,20 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      memset(larStart, 0, 3);
      memset(larEnd, 0, 3);
      for(unsigned int i=0; i<tracklist.size();++i){
+      
+      //kinga:
+      if(tracklist.size()==2){ // (2 track event)
+      
+       tracklist[i]->Direction(larStart,larEnd);
+      
+       two_trackstart_dcosx_reco[i] = larStart[0];
+       two_trackstart_dcosy_reco[i] = larStart[1];
+       two_trackstart_dcosz_reco[i] = larStart[2];       
+       two_trackexit_dcosx_reco[i] = larEnd[0];
+       two_trackexit_dcosy_reco[i] = larEnd[1];
+       two_trackexit_dcosz_reco[i] = larEnd[2];
+      }
+      
       
       if(ANTtrackID!=tracklist[i]->ID())
       continue;

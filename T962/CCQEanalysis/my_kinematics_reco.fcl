@@ -1,12 +1,9 @@
 #include "job/services.fcl"
- 
-#include "job/geometry.fcl"
-#include "job/larproperties.fcl"
-#include "job/larfft.fcl"
+
 #include "job/caldata.fcl"
 #include "job/fftfinder.fcl"
 #include "job/clustermodules.fcl"
-#include "job/clusterservices.fcl"
+
 #include "job/trackfindermodules.fcl"
 #include "job/kinematicsmodules.fcl"
 #include "job/scanfilter.fcl"
