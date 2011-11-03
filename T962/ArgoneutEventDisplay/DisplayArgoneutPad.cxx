@@ -36,7 +36,7 @@ DisplayArgoneutPad::DisplayArgoneutPad(const char* nm, const char* ti,
                                        double x2, double y2) : 
    DrawingPad(nm, ti, x1, y1, x2, y2)
 {
-  this->Pad()->SetFillColor(kBlack);
+  this->Pad()->SetFillColor(kWhite);
   this->Pad()->Draw();
   this->Pad()->cd();
   fView = new evdb::View3D();

@@ -135,11 +135,9 @@ namespace argoevd{
   {
      art::PtrVector<t962::MINOS> minos;
      this->GetMinos(evt, "minos", minos);
-     std::cout << "Minos3D:  Found " << minos.size() << " Minos tracks." << std::endl;
 
      art::PtrVector<t962::MINOSTrackMatch> minosmatch;
      this->GetMinosTrackMatch(evt, "matchtracks", minosmatch); 
-     std::cout << "Minos3D:  Found " << minosmatch.size() << " Matched Minos tracks." << std::endl;
      
      for(size_t p = 0; p < minos.size(); ++p){
         bool matched = false;
