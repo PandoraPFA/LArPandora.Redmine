@@ -89,11 +89,15 @@ void calo::CaloArgoItaliano::beginJob()
    fdEdx_vs_Range_esc_MINOS_Pos  = tfs->make<TH2F>("dEdx_vs_Range_esc_MINOS_Pos","dEdx vs. Range escaping tracks: MINOS Pos",500,0.0,100.0,200,0.0,40.0);
    fdEdx_vs_Range_pass_MINOS_Pos  = tfs->make<TH2F>("dEdx_vs_Range_pass_MINOS_Pos","dEdx vs. Range passing tracks: MINOS Pos",500,0.0,100.0,200,0.0,40.0);
    fKinetic_En_MINOS_Pos = tfs->make<TH1F>("Kinetic_En_MINOS_Pos","Kinetic Energy Deposited in LAr (MeV): MINOS Pos",100,0.,500.);
+   fKinetic_En_esc_MINOS_Pos = tfs->make<TH1F>("Kinetic_En_esc_MINOS_Pos","Kinetic Energy Deposited in LAr (MeV): esc: MINOS Pos",100,0.,500.);
+   fKinetic_En_pass_MINOS_Pos = tfs->make<TH1F>("Kinetic_En_pass_MINOS_Pos","Kinetic Energy Deposited in LAr (MeV): pass: MINOS Pos",100,0.,500.);
    
    fdEdx_vs_Range_MINOS_Neg = tfs->make<TH2F>("dEdx_vs_Range_MINOS_Neg","dEdx vs. Range : MINOS Neg",500,0.0,100.0,200,0.0,40.0);
    fdEdx_vs_Range_esc_MINOS_Neg  = tfs->make<TH2F>("dEdx_vs_Range_esc_MINOS_Neg","dEdx vs. Range escaping tracks: MINOS Neg",500,0.0,100.0,200,0.0,40.0);
    fdEdx_vs_Range_pass_MINOS_Neg  = tfs->make<TH2F>("dEdx_vs_Range_pass_MINOS_Neg","dEdx vs. Range passing tracks: MINOS Neg",500,0.0,100.0,200,0.0,40.0);
    fKinetic_En_MINOS_Neg = tfs->make<TH1F>("Kinetic_En_MINOS_Neg","Kinetic Energy Deposited in LAr (MeV): MINOS Neg",100,0.,500.);
+   fKinetic_En_esc_MINOS_Neg = tfs->make<TH1F>("Kinetic_En_esc_MINOS_Neg","Kinetic Energy Deposited in LAr (MeV): esc: MINOS Neg",100,0.,500.);
+   fKinetic_En_pass_MINOS_Neg = tfs->make<TH1F>("Kinetic_En_pass_MINOS_Neg","Kinetic Energy Deposited in LAr (MeV): pass: MINOS Neg",100,0.,500.);
 
    fXHit = new double[fnhits3D];
    fYHit = new double[fnhits3D];
@@ -388,8 +392,16 @@ void calo::CaloArgoItaliano::analyze(const art::Event& evt)
          double dEdx_Coll_Mean = dEdx_Coll_Tot/npC;
             
          fKinetic_En->Fill(Kin_En);
-         if(match_positive) fKinetic_En_MINOS_Pos->Fill(Kin_En);
-         if(match_negative) fKinetic_En_MINOS_Neg->Fill(Kin_En);
+         if(match_positive){
+           fKinetic_En_MINOS_Pos->Fill(Kin_En);
+           if(containment == 1) fKinetic_En_esc_MINOS_Pos->Fill(Kin_En);
+           if(containment == 3) fKinetic_En_pass_MINOS_Pos->Fill(Kin_En);
+         }
+         if(match_negative){
+           fKinetic_En_MINOS_Neg->Fill(Kin_En);
+           if(containment == 1) fKinetic_En_esc_MINOS_Neg->Fill(Kin_En);
+           if(containment == 3) fKinetic_En_pass_MINOS_Neg->Fill(Kin_En);
+         }
 
 
 //             if(dEdx_Coll_Mean > 4. ) {

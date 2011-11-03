@@ -55,10 +55,14 @@ namespace calo {
        TH2F *fdEdx_vs_Range_esc_MINOS_Pos;
        TH2F *fdEdx_vs_Range_pass_MINOS_Pos;
        TH1F* fKinetic_En_MINOS_Pos;
+       TH1F* fKinetic_En_esc_MINOS_Pos;
+       TH1F* fKinetic_En_pass_MINOS_Pos;
        TH2F *fdEdx_vs_Range_MINOS_Neg;
        TH2F *fdEdx_vs_Range_esc_MINOS_Neg;
        TH2F *fdEdx_vs_Range_pass_MINOS_Neg;
        TH1F* fKinetic_En_MINOS_Neg;
+       TH1F* fKinetic_En_esc_MINOS_Neg;
+       TH1F* fKinetic_En_pass_MINOS_Neg;
  
         int frun;           //Run 
         int fevent;         //Event
