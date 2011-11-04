@@ -746,8 +746,7 @@ namespace cchyp {
     // for MCCheater
 
     // grab the sim::ParticleList
-		art::ServiceHandle<sim::SimListUtils> slu;
-    sim::ParticleList plist = slu->GetParticleList();
+		sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt,fLArG4ModuleLabel);
 
     // print the list of particles first
     //mf::LogInfo("CheckBackTracking") << plist;

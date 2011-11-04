@@ -240,8 +240,7 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
 
-  art::ServiceHandle<sim::SimListUtils> slu;
-  sim::ParticleList _particleList = slu->GetParticleList();
+  sim::ParticleList _particleList = sim::SimListUtils::GetParticleList(evt, fLArG4ModuleLabel);
   
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   evt.getByLabel(fHitsModuleLabel,hitListHandle);

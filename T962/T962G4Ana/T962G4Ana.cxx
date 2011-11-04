@@ -165,8 +165,7 @@ if(mc->NeutrinoSet())
         
 
     //get the list of particles from this event
- art::ServiceHandle<sim::SimListUtils> slu;
-    sim::ParticleList plist = slu->GetParticleList();
+ sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
     art::ServiceHandle<geo::Geometry> geom;
 
     // get the particles from the event handle
