@@ -1,0 +1,4 @@
+<constant name="kInch"	value="2.54" />
+<constant name="kPi"	value="3.1415926535897" />
+<constant name="kSqRt3" value="1.73205081" />
+

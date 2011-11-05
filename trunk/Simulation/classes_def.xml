@@ -1,0 +1,42 @@
+<!--                                                                                  -->
+<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
+<!--  $Author:  $                                                                     -->
+<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
+<!--                                                                                  -->
+<!--  Include art::Wrapper lines for objects that we would like to put into the event -->
+<!--  Include the non-wrapper lines for all objects on the art::Wrapper lines and     -->
+<!--  for all objects that are data members of those objects.                         -->
+
+
+<lcgdict>
+ <class name="sim::LArVoxelID"               ClassVersion="11"              />
+ <class name="sim::LArVoxelData"             ClassVersion="11"              />
+ <class name="sim::Particle"                 ClassVersion="14"              />
+ <class name="sim::PMTHit"                   ClassVersion="10"              />
+ <class name="sim::PMTPhoton"                ClassVersion="10"              />
+ <class name="sim::SimChannel"               ClassVersion="12"              />
+ <class name="sim::PhotonLibraryParameters"  ClassVersion="10"              />
+ <class name="std::pair<int,double>"                                        />     
+ <class name="std::vector<int>"                                             />
+ <class name="std::vector< std::pair<int,double> >"                         />
+ <class name="util::VectorMap<int,double,std::less<int> >"                  />
+ <class name="util::VectorMap<int,double,std::less<int> >::value_compare">
+  <field name="comp" transient="true"                                       />
+ </class>
+ <class name="sim::IDE"                                                     />
+ <class name="std::vector<sim::IDE>"                                        />
+ <class name="std::pair<unsigned short, std::vector<sim::IDE> >"            />
+ <class name="std::map<unsigned short, std::vector<sim::IDE> >"             />
+ <class name="art::Ptr<simb::MCTruth>"                       		    />
+ <class name="std::vector<sim::Particle    >"		     		    />
+ <class name="std::vector<sim::PMTHit      >"		     		    />
+ <class name="std::vector<sim::PMTPhoton   >" 		     		    />
+ <class name="std::vector<sim::PhotonLibraryParameters   >"  		    />
+ <class name="std::vector<sim::SimChannel  >"                		    />
+ <class name="art::Wrapper< std::vector<int>               >"		    />
+ <class name="art::Wrapper< std::vector<sim::Particle>     >"		    />
+ <class name="art::Wrapper< std::vector<sim::PMTHit>       >"		    />
+ <class name="art::Wrapper< std::vector<sim::PMTPhoton>    >"		    />
+ <class name="art::Wrapper< std::vector<sim::SimChannel>   >"		    />
+ <class name="art::Wrapper< std::vector<sim::PhotonLibraryParameters>   >"  />
+</lcgdict>

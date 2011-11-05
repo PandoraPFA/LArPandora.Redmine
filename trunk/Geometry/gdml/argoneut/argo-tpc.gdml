@@ -1,0 +1,88 @@
+<solids>
+ <box name="TPCWidthFace"
+  lunit="cm"
+  z="kTPCWidth+2*kTPCWallThickness"
+  x="kTPCDepth"
+  y="kTPCWallThickness"/>
+ <box name="TPCLengthFace"
+  lunit="cm"
+  z="kTPCWallThickness"
+  x="kTPCDepth"
+  y="kTPCLength"/>
+ <box name="TPCBottomFace"
+  lunit="cm"
+  z="kTPCWidth+2*kTPCWirePlaneOuterWidth"
+  x="kTPCWallThickness"
+  y="kTPCLength+2*kTPCWirePlaneOuterWidth"/>
+ <box name="TPC"
+  lunit="cm"
+  x="kTPCDepth+3*kTPCWirePlaneThickness+kTPCWallThickness"
+  y="kTPCWirePlaneOuterWidth*2+kTPCLength"
+  z="kTPCWirePlaneOuterWidth*2+kTPCWidth"/>
+ <box name="TPCActive"
+  lunit="cm"
+  x="kTPCDepth"
+  y="kTPCLength"
+  z="kTPCWidth"/>
+</solids>
+<structure>
+ <volume name="volTPCWidthFace">
+  <materialref ref="G10"/>
+  <solidref ref="TPCWidthFace"/>
+ </volume>
+ <volume name="volTPCLengthFace">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLengthFace"/>
+ </volume>
+ <volume name="volTPCBottomFace">
+  <materialref ref="G10"/>
+  <solidref ref="TPCBottomFace"/>
+ </volume>
+ <volume name="volTPCActive">
+  <materialref ref="LAr"/>
+  <solidref ref="TPCActive"/>
+ </volume>
+ <volume name="volTPC">
+  <materialref ref="LAr"/>
+  <solidref ref="TPC"/>
+  <physvol>
+   <volumeref ref="volTPCActive"/>
+   <position name="posTPCActive" unit="cm" x="1.5*kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="0.0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWidthFace"/>
+   <position name="posTPCFrontFace" unit="cm" x="1.5*kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="0.5*kTPCLength+0.5*kTPCWallThickness" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWidthFace"/>
+   <position name="posTPCBackFace" unit="cm"  x="1.5*kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="-(0.5*kTPCLength+0.5*kTPCWallThickness)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLengthFace"/>
+   <position name="posTPCLeftFace" unit="cm" x="1.5*kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="0" z="0.5*kTPCWidth+0.5*kTPCWallThickness"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLengthFace"/>
+   <position name="posTPCRightFace" unit="cm" x="1.5*kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="0" z="-(0.5*kTPCWidth+0.5*kTPCWallThickness)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCBottomFace"/>
+   <position name="posTPCBottomFace" unit="cm" x="0.5*kTPCDepth+1.5*kTPCWirePlaneThickness" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlane"/>
+   <position name="posTPCPlane1" unit="cm" x="-0.5*kTPCDepth+kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="0" z="0"/>
+   <rotationref ref="rPlus90AboutXPlus90AboutZ"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlaneInduction"/>
+   <position name="posTPCPlane2" unit="cm" x="-0.5*kTPCDepth-0.5*kTPCWallThickness" y="0" z="0"/>
+   <rotationref ref="rPlus90AboutXPlus90AboutZ"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlaneCollection"/>
+   <position name="posTPCPlane3" unit="cm" x="-0.5*kTPCDepth-kTPCWirePlaneThickness-0.5*kTPCWallThickness" y="0" z="0"/>
+   <rotationref ref="rPlus90AboutXMinus90AboutZ"/>
+   </physvol>
+ </volume> 
+</structure>

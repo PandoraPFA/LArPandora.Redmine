@@ -1,0 +1,262 @@
+#!/usr/bin/perl
+
+$debug_level      = 0;
+$skip_cvs_command = 0;
+$skip_sys_command = 0;
+
+use Getopt::Long;
+Getopt::Long::config('bundling_override');
+
+my %options;
+GetOptions(\%options, 'rel=s','help','h');
+
+if ((defined $options{'h'}) || (defined $options{'help'})) {
+  print_help();
+}
+
+if (defined $options{'rel'}) {
+  $release = $options{'rel'};
+}
+else {
+  if (defined $ENV{"SRT_BASE_RELEASE"}) {
+    $release = $ENV{"SRT_BASE_RELEASE"};
+  }
+  else {
+    die "No release is defined\n";
+  }
+}
+
+my $cvsRoot= $options{'cvsrepo'};
+if ( !(defined $cvsRoot)) {
+# look in the envirnment for it
+    $cvsRoot = $ENV{'CVSROOT'};
+}
+if ( !(defined $cvsRoot)) {
+# last chance -hardwire to what should be the default.
+    $cvsRoot = 'http://cdcvs.fnal.gov/subversion/larsoftsvn/';
+}
+
+$ENV{'CVSROOT'} = $cvsRoot;
+
+if (! (defined $ENV{'SRT_DIST'})) {
+  print "SRT_DIST variable is not defined! Source srt/srt.[c]sh first.\n";
+  print "Release $release not updated.\n";
+  exit(0);
+}
+
+$SRT_DIST = $ENV{"SRT_DIST"};
+$release_dir = "$SRT_DIST/releases/$release";
+
+if (! (-e "$release_dir")) {
+  chdir("$SRT_DIST/releases");
+  do_sys_command("newrel -p -e $release");
+  print "Installing new release '$release'\n";
+}
+else {
+  print "Updating release '$release'\n";
+}
+
+update_setup();
+make_package_list();
+for ($i=0; $i<$npackage; ++$i) {
+  $package = @package_list[$i];
+  $version = @version_list[$i];
+  update_package(); 
+}
+if( (-e "$SRT_DIST/releases/$release/addpkg_svn")) {
+    do_sys_command("rm $SRT_DIST/releases/$release/addpkg_svn");
+}
+
+
+#.......................................................................
+
+sub print_help {
+  print "**********************************************************************\n";
+  print "*                                                                    *\n";
+  print "*     Script to update a release that has already been imported.     *\n";
+  print "*        Only packages which use HEAD version will be updated.        *\n";
+  print "*                                                                    *\n";
+  print "*    Recognized arguments:                                           *\n";
+  print "*       -h or --help: print this message                             *\n";
+  print "*       -rel <release>: specify release to be updated                *\n";
+  print "*                                                                    *\n";
+  print "**********************************************************************\n";
+  exit(0);
+}
+
+#.......................................................................
+
+sub do_sys_command {
+#
+# Perform system command, but only if flag is set.
+#
+  if ($skip_sys_command>0 || $debug_level>1) {
+    print "% $_[0]\n";
+  }
+  if ($skip_sys_command==0) {
+    system($_[0]);
+  }
+}
+
+#.......................................................................
+
+sub do_cvs_command {
+#
+# Perform cvs system command, but only if flag is set.
+#
+  if ($skip_cvs_command>0 || $debug_level>1) {
+    print "% $_[0]\n";
+  }
+  if ($skip_cvs_command==0) {
+    system($_[0]);
+  }
+}
+
+#.......................................................................
+
+sub update_setup {
+#
+# Update the setup package
+#
+  chdir("$SRT_DIST");
+  if (! (-e "setup")) {
+    print "setup directory not found. Will try to add setup package.";
+    do_sys_command("svn checkout http://cdcvs.fnal.gov/subversion/larsoftsvn/trunk/setup");
+
+    if (! (-e "setup")) {
+      die "Couldn't add setup package to $SRT_DIST";
+    }
+  }
+  chdir("setup");
+  do_sys_command("svn update");
+
+  chdir("$SRT_DIST/releases");
+  if (! (-e "$release_dir")) {
+    die "No release $release found: $release_dir!";
+  }
+  chdir("$SRT_DIST/releases/$release");
+
+  #check out the addpkg_svn executable
+  if(! (-e "$SRT_DIST/releases/$release/bin/$SRT_SUBDIR/addpkg_svn")) {
+      do_sys_command("svn checkout http://cdcvs.fnal.gov/subversion/larsoftsvn/trunk/SRT_LAR");
+      do_sys_command("cp SRT_LAR/scripts/addpkg_svn .");
+      chdir("$SRT_DIST/releases/$release/include");
+      do_sys_command("ln -sf ../SRT_LAR SRT_LAR");
+  }
+}
+
+#.......................................................................
+
+sub update_package() {
+#
+# CVS update a package in the release. If it does not exist, use
+# addpkg to add it to the release
+#
+  $addpkg_cmd    = "./addpkg_svn -h $package";
+  $cvsupdate_cmd = "svn update";
+  #
+  # Handle SoftRelTools separately since it comes from a different
+  # repository
+  #
+  if ($package eq "SoftRelTools") {
+      print "handling SoftRelTools\n";
+    $addpkg_cmd    = 
+      "addpkg -d :pserver:anonymous\@srtcvs.fnal.gov:/srtcvs -h $package";
+    $cvsupdate_cmd = "cvs update -d";
+  }
+
+  #
+  # Handle tagged package versions
+  #
+  if ($version ne "HEAD") {
+    $addpkg_cmd = "./addpkg_svn $package $version";
+  }
+
+  #
+  # Handle the nutools packages
+  #
+  $nutools_cvsroot=":pserver:anonymous\@cdcvs.fnal.gov:/cvs/projects/nusoftart";
+  if ($package eq "EventDisplayBase" ) {
+      $addpkg_cmd = "addpkg -hd $nutools_cvsroot $package";
+      $cvsupdate_cmd = "cvs update -d";
+      if ($version ne "HEAD") {
+	  $addpkg_cmd = "addpkg -d $nutools_cvsroot $package $version";
+      }
+  }      
+  if ($package eq "EventGeneratorBase" ) {
+      $addpkg_cmd = "addpkg -hd $nutools_cvsroot  $package";
+      $cvsupdate_cmd = "cvs update -d";
+      if ($version ne "HEAD") {
+	  $addpkg_cmd = "addpkg -d $nutools_cvsroot $package $version";
+      }
+  }      
+  if ($package eq "G4Base" ) {
+      $addpkg_cmd = "addpkg -hd $nutools_cvsroot  $package";
+      $cvsupdate_cmd = "cvs update -d";
+      if ($version ne "HEAD") {
+	  $addpkg_cmd = "addpkg -d $nutools_cvsroot $package $version";
+      }
+  }      
+  if ($package eq "MagneticField" ) {
+      $addpkg_cmd = "addpkg -hd $nutools_cvsroot  $package";
+      $cvsupdate_cmd = "cvs update -d";
+      if ($version ne "HEAD") {
+	  $addpkg_cmd = "addpkg -d $nutools_cvsroot $package $version";
+      }
+  }      
+  if ($package eq "SimulationBase" ) {
+      $addpkg_cmd = "addpkg -hd $nutools_cvsroot  $package";
+      $cvsupdate_cmd = "cvs update -d";
+      if ($version ne "HEAD") {
+	  $addpkg_cmd = "addpkg -d $nutools_cvsroot $package $version";
+      }
+  }      
+      
+      
+  chdir("$release_dir");
+  print "Updating package $package\n";
+  if (!(-e "$package")) {
+    do_sys_command($addpkg_cmd);
+  }
+  chdir("$package");
+  do_sys_command($cvsupdate_cmd);
+}
+
+#.......................................................................
+
+sub make_package_list {
+#
+# Fill the package and tag arrays with contents of respective 
+# setup/packages-<release> file
+#
+  $n = 0;
+  open(PKG_FILE,"$SRT_DIST/setup/packages-$release");
+  PKG : while (<PKG_FILE>) {
+    $line = $_;
+    if ( index($line,"#") == -1 ) {
+      @f  = split(/:/,$line);
+      print @f[0];
+      print "\n";
+      $nf = @f;
+      if ($nf == 2) {
+        $version = @f[1];
+      }
+      else {
+        $version = "HEAD";
+      }
+      @f[0]    =~ s/\s+?$//; # Removes trailing white space
+      $version =~ s/\s+?$//; # Removes trailing white space
+      $version =~ s/^\s+//;  # Removes leading white space
+      $package_list[$n] = @f[0];
+      $version_list[$n] = $version;
+      ++$n; 
+    }
+  }
+  $npackage = $n;
+  if ($debug_level>1) {
+    for ($i=0; $i<$n; ++$i) {
+      print "Package $package_list[$i]:$version_list[$i] is in list\n";
+    }
+  }
+}
+########################################################################

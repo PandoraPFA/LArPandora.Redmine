@@ -1,0 +1,403 @@
+<solids>
+ <tube name="TPCSheet" 
+   rmin="0.5*kTPCInnerDiameter"
+   rmax="0.5*kTPCOuterDiameter"
+   z="kTPCSheetHeight"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCStrip" 
+   rmin="0.5*kTPCOuterDiameter"
+   rmax="0.5*kTPCStripOuterDiameter"
+   z="kTPCStripWidth"
+   startphi="kPi-kTPCStripLength/kTPCStripOuterDiameter"
+   deltaphi="2*kTPCStripLength/kTPCStripOuterDiameter"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCHalfStrip"
+   rmin="0.5*kTPCOuterDiameter"
+   rmax="0.5*kTPCStripOuterDiameter"
+   z="0.5*kTPCStripWidth"
+   startphi="kPi-kTPCStripLength/kTPCStripOuterDiameter"
+   deltaphi="2*kTPCStripLength/kTPCStripOuterDiameter"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCSR"
+   rmin="0.5*kTPCOuterDiameter"
+   rmax="0.5*kTPCSRDiameter"
+   z="kTPCRingThickness"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+ <torus name="TPCBottomRing"
+   rmax="0.5*kTPCBottomRingThickness"
+   rtor="0.5*kTPCOuterDiameter"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPC"
+   rmin="0.5*kTPCInnerDiameter"
+   rmax="0.5*kTPCOuterDiameter"
+   z="kTPCSheetHeight+3*kTPCWireRingThickness"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCLRInnerPart"
+   rmin="0.5*kTPCOuterDiameter"
+   rmax="0.5*(0.5*kTPCOuterDiameter+0.5*kTPCLRDiameter)"
+   z="kTPCRingThickness"
+   startphi="-kTPCLREHStartPhi"
+   deltaphi="2*kTPCLREHStartPhi"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCLROuterPart"
+   rmin="0.5*kTPCOuterDiameter"
+   rmax="0.5*kTPCLRDiameter"
+   z="kTPCRingThickness"
+   startphi="kTPCLREHStartPhi"
+   deltaphi="kTPCLREHDeltaPhi"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCLREH"
+   rmin="0.5*kTPCLREHDiameter"
+   rmax="0.5*kTPCLREHDiameter+kTPCLREHToAppSideEdgeLength"
+   z="kTPCRingThickness"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+ <box name="TPCLRBoxBetweenEHs"
+   x="kTPCLRInnerDiameterToAppEdgeLength"
+   y="kTPCLRDistanceBetweenEHEdges"
+   z="kTPCRingThickness"
+   lunit="cm"/>
+ <box name="TPCLRBoxBesideEHs"
+   x="kTPCLRInnerDiameterToAppEdgeLength"
+   y="kTPCLREHToAppSideEdgeLength"
+   z="kTPCRingThickness"
+   lunit="cm"/>
+ <box name="TPCLRBoxTangentToEHs"
+   x="kTPCLREHToAppFarEdgeLength"
+   y="2*(kTPCLREHToAppSideEdgeLength+kTPCLREHDiameter)+kTPCLRDistanceBetweenEHEdges"
+   z="kTPCRingThickness"
+   lunit="cm"/>
+</solids>
+<structure>
+ <volume name="volTPCHalfStrip">
+  <materialref ref="G10" />
+  <solidref ref="TPCHalfStrip" />
+ </volume>
+ <volume name="volTPCStrip">
+  <materialref ref="G10" />
+  <solidref ref="TPCStrip" />
+ </volume>
+ <volume name="volTPCSheet">
+  <materialref ref="G10" />
+  <solidref ref="TPCSheet" />
+ </volume>
+ <volume name="volTPCSR">
+  <materialref ref="G10" />
+  <solidref ref="TPCSR"/>
+ </volume>
+ <volume name="volTPCBottomRing">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni" />
+  <solidref ref="TPCBottomRing"/>
+ </volume>
+ <volume name="volTPCLRInnerPart">
+  <materialref ref="G10" />
+  <solidref ref="TPCLRInnerPart"/>
+ </volume>
+ <volume name="volTPCLROuterPart">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLROuterPart"/>
+ </volume>
+ <volume name="volTPCLREH">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLREH"/>
+ </volume>
+ <volume name="volTPCLRBoxBesideEHs">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLRBoxBesideEHs"/>
+ </volume>
+ <volume name="volTPCLRBoxTangentToEHs">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLRBoxTangentToEHs"/>
+ </volume>
+ <volume name="volTPCLRBoxBetweenEHs">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLRBoxBetweenEHs"/>
+ </volume>
+ <volume name="volTPC">
+  <materialref ref="LAr" />
+  <solidref ref="TPC" />
+  <physvol>
+   <volumeref ref="volTPCSheet"/>
+   <position name="posTPCSheet" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCBottomRing"/>
+   <position name="posTPCBottomRing" unit="cm" x="0" y="0" z="-0.5*kTPCSheetHeight-0.5*kTPCBottomRingThickness"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCHalfStrip"/>
+   <position name="posTPCHS1" unit="cm" x="0" y="0" z="-9.890625*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS1" unit="cm" x="0" y="0" z="-9.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS2" unit="cm" x="0" y="0" z="-9.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS3" unit="cm" x="0" y="0" z="-8.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR1" unit="cm" x="0" y="0" z="-8.25*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS4" unit="cm" x="0" y="0" z="-8.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS5" unit="cm" x="0" y="0" z="-7.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS6" unit="cm" x="0" y="0" z="-7.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS7" unit="cm" x="0" y="0" z="-6.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS8" unit="cm" x="0" y="0" z="-6.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS9" unit="cm" x="0" y="0" z="-5.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR2" unit="cm" x="0" y="0" z="-5.25*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS10" unit="cm" x="0" y="0" z="-5.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS11" unit="cm" x="0" y="0" z="-4.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS12" unit="cm" x="0" y="0" z="-4.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS13" unit="cm" x="0" y="0" z="-3.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS14" unit="cm" x="0" y="0" z="-3.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS15" unit="cm" x="0" y="0" z="-2.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR3" unit="cm" x="0" y="0" z="-2.25*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS16" unit="cm" x="0" y="0" z="-2.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS17" unit="cm" x="0" y="0" z="-1.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS18" unit="cm" x="0" y="0" z="-1.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS19" unit="cm" x="0" y="0" z="-0.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS20" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS21" unit="cm" x="0" y="0" z="0.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRInnerPart"/>
+   <position name="posTPCLRInnerPart" unit="cm" x="0" y="0" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLROuterPart"/>
+   <position name="posTPCLROuterPart" unit="cm" x="0" y="0" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxBetweenEHs"/>
+   <position name="posTPCLRBoxBetweenEHs" unit="cm" x="0.5*(kTPCLREHDiameter+2*kTPCLREHToAppFarEdgeLength-kTPCLRInnerDiameterToAppEdgeLength)+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLREH"/>
+   <position name="posTPCLREH1" unit="cm" x="0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0.5*kTPCLRDistanceBetweenEHEdges+0.5*kTPCLREHDiameter" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLREH"/>
+   <position name="posTPCLREH2" unit="cm" x="0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="-0.5*kTPCLRDistanceBetweenEHEdges-0.5*kTPCLREHDiameter" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxBesideEHs"/>
+   <position name="posTPCLRBoxBesideEHs1" unit="cm" x="0.5*(kTPCLREHDiameter+2*kTPCLREHToAppFarEdgeLength-kTPCLRInnerDiameterToAppEdgeLength)+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0.5*kTPCLRDistanceBetweenEHEdges+kTPCLREHDiameter+0.5*kTPCLREHToAppSideEdgeLength" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxBesideEHs"/>
+   <position name="posTPCLRBoxBesideEHs2" unit="cm" x="0.5*(kTPCLREHDiameter+2*kTPCLREHToAppFarEdgeLength-kTPCLRInnerDiameterToAppEdgeLength)+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="-0.5*kTPCLRDistanceBetweenEHEdges-kTPCLREHDiameter-0.5*kTPCLREHToAppSideEdgeLength" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxTangentToEHs"/>
+   <position name="posTPCLRBoxTangentToEHs" unit="cm" x="0.5*kTPCLREHDiameter+0.5*kTPCLREHToAppFarEdgeLength+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0" z="0.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS22" unit="cm" x="0" y="0" z="1.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS23" unit="cm" x="0" y="0" z="1.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS24" unit="cm" x="0" y="0" z="2.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS25" unit="cm" x="0" y="0" z="2.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS26" unit="cm" x="0" y="0" z="3.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS27" unit="cm" x="0" y="0" z="3.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR4" unit="cm" x="0" y="0" z="3.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS28" unit="cm" x="0" y="0" z="4.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS29" unit="cm" x="0" y="0" z="4.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS30" unit="cm" x="0" y="0" z="5.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS31" unit="cm" x="0" y="0" z="5.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS32" unit="cm" x="0" y="0" z="6.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS33" unit="cm" x="0" y="0" z="6.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR5" unit="cm" x="0" y="0" z="6.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS34" unit="cm" x="0" y="0" z="7.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS35" unit="cm" x="0" y="0" z="7.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS36" unit="cm" x="0" y="0" z="8.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS37" unit="cm" x="0" y="0" z="8.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS38" unit="cm" x="0" y="0" z="9.0*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS39" unit="cm" x="0" y="0" z="9.5*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRInnerPart"/>
+   <position name="posTPCLRInnerPart" unit="cm" x="0" y="0" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLROuterPart"/>
+   <position name="posTPCLROuterPart" unit="cm" x="0" y="0" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxBetweenEHs"/>
+   <position name="posTPCLRBoxBetweenEHs" unit="cm" x="0.5*(kTPCLREHDiameter+2*kTPCLREHToAppFarEdgeLength-kTPCLRInnerDiameterToAppEdgeLength)+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLREH"/>
+   <position name="posTPCLREH1" unit="cm" x="0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0.5*kTPCLRDistanceBetweenEHEdges+0.5*kTPCLREHDiameter" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLREH"/>
+   <position name="posTPCLREH2" unit="cm" x="0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="-0.5*kTPCLRDistanceBetweenEHEdges-0.5*kTPCLREHDiameter" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxBesideEHs"/>
+   <position name="posTPCLRBoxBesideEHs1" unit="cm" x="0.5*(kTPCLREHDiameter+2*kTPCLREHToAppFarEdgeLength-kTPCLRInnerDiameterToAppEdgeLength)+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0.5*kTPCLRDistanceBetweenEHEdges+kTPCLREHDiameter+0.5*kTPCLREHToAppSideEdgeLength" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxBesideEHs"/>
+   <position name="posTPCLRBoxBesideEHs2" unit="cm" x="0.5*(kTPCLREHDiameter+2*kTPCLREHToAppFarEdgeLength-kTPCLRInnerDiameterToAppEdgeLength)+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="-0.5*kTPCLRDistanceBetweenEHEdges-kTPCLREHDiameter-0.5*kTPCLREHToAppSideEdgeLength" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCLRBoxTangentToEHs"/>
+   <position name="posTPCLRBoxTangentToEHs" unit="cm" x="0.5*kTPCLREHDiameter+0.5*kTPCLREHToAppFarEdgeLength+0.5*kTPCOuterDiameter+kTPCLRInnerDiameterToAppEdgeLength-kTPCLREHToAppFarEdgeLength-0.5*kTPCLREHDiameter" y="0" z="9.75*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCHalfStrip"/>
+   <position name="posTPCHS2" unit="cm" x="0" y="0" z="9.890625*kInch"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <position name="posTPCWireRingModule1" unit="cm" x="0" y="0" z="0.5*kTPCSheetHeight+0.5*kTPCWireRingThickness"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <rotationref ref="r60"/>
+   <position name="posTPCWireRingModule2" unit="cm" x="0" y="0" z="0.5*kTPCSheetHeight+1.5*kTPCWireRingThickness"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <rotationref ref="r120"/>
+   <position name="posTPCWireRingModule3" unit="cm" x="0" y="0" z="0.5*kTPCSheetHeight+2.5*kTPCWireRingThickness"/>
+  </physvol>
+ </volume>
+</structure>

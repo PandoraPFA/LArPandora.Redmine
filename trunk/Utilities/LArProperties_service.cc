@@ -1,0 +1,15 @@
+////////////////////////////////////////////////////////////////////////
+//
+//  LArProperties_plugin
+//
+////////////////////////////////////////////////////////////////////////
+// Framework includes
+#include "art/Framework/Services/Registry/ServiceMacros.h"
+
+#include "Utilities/LArProperties.h"
+
+namespace util{
+ 
+  DEFINE_ART_SERVICE(LArProperties);
+
+} // namespace util

@@ -1,0 +1,15 @@
+BEGIN_PROLOG
+
+argoneut_lambdaana:
+{
+ module_type:       "LambdaAna"
+ GenieModuleLabel:  "generator"
+ LArG4ModuleLabel:  "largeant"
+ HitModuleLabel:    "ffthit"
+ DetSimModuleLabel: "daq"
+ LineMergerModuleLabel: "linemerger"
+ TrackModuleLabel:  "track3d"
+ VertexModuleLabel: "vertex"
+}
+
+END_PROLOG

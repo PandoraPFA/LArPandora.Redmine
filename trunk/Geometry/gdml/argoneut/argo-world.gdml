@@ -1,0 +1,34 @@
+
+<solids>
+   <box name="World" lunit="cm" x="kWorldW+47.5+500" y="kWorldH+20+3*0.15*2.54+4+260" z="kWorldL+90+62.49+2.54"/>
+
+   <box name="MND" lunit="cm" x="485.15" y="381" z="2.54"/>
+
+
+</solids>
+<structure>
+<volume name="volMND">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="MND"/>
+ </volume>
+<volume name="volWorld" >
+  <materialref ref="Air"/> <solidref ref="World"/>
+<physvol>
+    <volumeref ref="volDetEnclosure"/>
+<position name="posDetEnclosure" unit="cm" x="0.5*kTPCDepth" y="-12" z="0.5*kTPCWidth"/>
+   </physvol>
+
+<physvol>
+<volumeref ref="volMND"/>
+<position name="posMND" unit="cm" x="-(93.07-0.5*47.5)" y="190.5-173.228" z="151.68"/>
+ </physvol>
+
+
+
+
+ </volume> 
+
+
+
+</structure>
+

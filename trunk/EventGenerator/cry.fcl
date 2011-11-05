@@ -1,0 +1,26 @@
+BEGIN_PROLOG
+
+
+#for now all experiments have the same configuration - should change eventually
+
+standard_cry:
+{
+ module_type:         "CosmicsGen"
+ SampleTime:           60e-6              #integration time in seconds
+ TimeOffset:          -30e-6              #time in seconds beofre a spill to begin the interactions
+ EnergyThreshold:      50e-3              #in GeV, particles only tracked with E > threshold
+ Latitude:            "latitude 41.8 "    #latitude of detector, must have tailing blank space
+ Altitude:            "altitude 0 "       #altitude of detector, must have tailing blank space
+ SubBoxLength:        "subboxLength 75 "  #length of subbox surrounding detector in m, must have trailing blank space
+}
+
+argoneut_cry:   @local::standard_cry
+
+microboone_cry:              @local::standard_cry
+microboone_cry.SubBoxLength: "subboxLength 300 " 
+
+
+lbne_cry:              @local::standard_cry
+lbne_cry.SubBoxLength: "subboxLength 300 "
+
+END_PROLOG

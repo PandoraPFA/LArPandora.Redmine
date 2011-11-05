@@ -1,0 +1,2313 @@
+<solids>
+  <tube name="TPCWire0"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire1"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 1*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire2"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 2*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire3"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 3*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire4"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 4*kTPCWirePitch*((1/kTan60)+kTan60)"       
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire5"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 5*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire6"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 6*kTPCWirePitch*((1/kTan60)+kTan60)"       
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire7"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 7*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire8"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 8*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire9"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 9*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire10"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 10*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire11"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 11*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire12"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 12*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire13"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 13*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire14"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 14*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire15"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 15*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire16"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 16*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire17"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 17*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire18"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 18*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire19"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 19*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire20"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 20*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire21"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 21*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire22"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 22*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire23"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 23*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire24"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 24*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire25"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 25*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire26"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 26*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire27"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 27*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire28"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 28*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire29"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 29*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire30"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 30*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire31"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 31*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire32"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 32*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire33"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 33*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire34"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 34*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire35"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 35*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire36"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 36*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire37"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 37*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire38"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 38*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire39"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 39*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire40"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 40*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire41"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 41*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire42"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 42*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire43"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 43*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire44"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 44*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire45"
+   rmax="0.5*kTPCWireThickness"
+   z="kFirstInductionWireL + 45*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+
+  <tube name="TPCWireCommon"
+   rmax="0.5*kTPCWireThickness"
+   z="kTPCLength/kSin60"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/> 
+
+  <tube name="TPCWire239"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire238"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 1*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire237"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 2*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire236"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 3*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire235"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 4*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire234"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 5*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire233"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 6*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire232"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 7*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire231"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 8*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire230"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 9*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire229"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 10*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire228"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 11*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire227"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 12*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire226"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 13*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire225"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 14*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire224"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 15*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire223"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 16*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire222"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 17*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire221"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 18*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire220"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 19*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire219"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 20*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire218"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 21*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire217"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 22*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire216"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 23*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire215"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 24*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire214"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 25*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire213"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 26*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire212"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 27*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire211"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 28*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire210"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 29*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire209"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 30*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire208"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 31*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire207"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 32*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire206"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 33*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire205"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 34*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire204"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 35*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire203"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 36*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire202"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 37*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire201"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 38*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire200"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 39*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire199"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 40*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire198"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 41*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire197"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 42*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire196"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 43*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire195"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 44*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire194"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 45*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire193"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 46*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire192"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 47*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire191"
+   rmax="0.5*kTPCWireThickness"
+   z="kLastInductionWireL + 48*kTPCWirePitch*((1/kTan60)+kTan60)"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/>
+
+
+  <box name="TPCWPlaneLengthSide"
+   x="kTPCWirePlaneOuterWidth"
+   y="kTPCWirePlaneThickness"
+   z="kTPCWirePlaneLength"
+   lunit="cm"/>
+  <box name="TPCWPlaneWidthSide"
+   x="kTPCWirePlaneWidth+kTPCWirePlaneOuterWidth*2"
+   y="kTPCWirePlaneThickness"
+   z="kTPCWirePlaneOuterWidth"
+   lunit="cm"/>
+  <box name="TPCPlane"
+   x="kTPCWirePlaneOuterWidth*2+kTPCWidth"
+   y="kTPCWirePlaneThickness"
+   z="kTPCWirePlaneOuterWidth*2+kTPCLength"
+   lunit="cm"/>
+</solids>
+<structure>
+ <volume name="volTPCWire0">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire0"/>
+ </volume>
+ <volume name="volTPCWire1">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire1"/>
+ </volume>
+ <volume name="volTPCWire2">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire2"/>
+ </volume>
+ <volume name="volTPCWire3">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire3"/>
+ </volume>
+ <volume name="volTPCWire4">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire4"/>
+ </volume>
+ <volume name="volTPCWire5">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire5"/>
+ </volume>
+ <volume name="volTPCWire6">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire6"/>
+ </volume>
+ <volume name="volTPCWire7">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire7"/>
+ </volume>
+ <volume name="volTPCWire8">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire8"/>
+ </volume>
+ <volume name="volTPCWire9">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire9"/>
+ </volume>
+ <volume name="volTPCWire10">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire10"/>
+ </volume>
+ <volume name="volTPCWire11">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire11"/>
+ </volume>
+ <volume name="volTPCWire12">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire12"/>
+ </volume>
+ <volume name="volTPCWire13">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire13"/>
+ </volume>
+ <volume name="volTPCWire14">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire14"/>
+ </volume>
+ <volume name="volTPCWire15">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire15"/>
+ </volume>
+ <volume name="volTPCWire16">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire16"/>
+ </volume>
+ <volume name="volTPCWire17">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire17"/>
+ </volume>
+ <volume name="volTPCWire18">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire18"/>
+ </volume>
+ <volume name="volTPCWire19">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire19"/>
+ </volume>
+ <volume name="volTPCWire20">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire20"/>
+ </volume>
+ <volume name="volTPCWire21">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire21"/>
+ </volume>
+ <volume name="volTPCWire22">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire22"/>
+ </volume>
+ <volume name="volTPCWire23">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire23"/>
+ </volume>
+ <volume name="volTPCWire24">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire24"/>
+ </volume>
+ <volume name="volTPCWire25">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire25"/>
+ </volume>
+ <volume name="volTPCWire26">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire26"/>
+ </volume>
+ <volume name="volTPCWire27">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire27"/>
+ </volume>
+ <volume name="volTPCWire28">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire28"/>
+ </volume>
+ <volume name="volTPCWire29">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire29"/>
+ </volume>
+ <volume name="volTPCWire30">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire30"/>
+ </volume>
+ <volume name="volTPCWire31">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire31"/>
+ </volume>
+ <volume name="volTPCWire32">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire32"/>
+ </volume>
+ <volume name="volTPCWire33">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire33"/>
+ </volume>
+ <volume name="volTPCWire34">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire34"/>
+ </volume>
+ <volume name="volTPCWire35">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire35"/>
+ </volume>
+ <volume name="volTPCWire36">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire36"/>
+ </volume>
+ <volume name="volTPCWire37">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire37"/>
+ </volume>
+ <volume name="volTPCWire38">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire38"/>
+ </volume>
+ <volume name="volTPCWire39">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire39"/>
+ </volume>
+ <volume name="volTPCWire40">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire40"/>
+ </volume>
+ <volume name="volTPCWire41">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire41"/>
+ </volume>
+ <volume name="volTPCWire42">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire42"/>
+ </volume>
+ <volume name="volTPCWire43">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire43"/>
+ </volume>
+ <volume name="volTPCWire44">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire44"/>
+ </volume>
+ <volume name="volTPCWire45">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire45"/>
+ </volume>
+
+ <volume name="volTPCWireCommon">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWireCommon"/>
+ </volume>
+
+ <volume name="volTPCWire239">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire239"/>
+ </volume>
+ <volume name="volTPCWire238">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire238"/>
+ </volume>
+ <volume name="volTPCWire237">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire237"/>
+ </volume>
+ <volume name="volTPCWire236">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire236"/>
+ </volume>
+ <volume name="volTPCWire235">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire235"/>
+ </volume>
+ <volume name="volTPCWire234">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire234"/>
+ </volume>
+ <volume name="volTPCWire233">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire233"/>
+ </volume>
+ <volume name="volTPCWire232">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire232"/>
+ </volume>
+ <volume name="volTPCWire231">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire231"/>
+ </volume>
+ <volume name="volTPCWire230">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire230"/>
+ </volume>
+ <volume name="volTPCWire229">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire229"/>
+ </volume>
+ <volume name="volTPCWire228">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire228"/>
+ </volume>
+ <volume name="volTPCWire227">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire227"/>
+ </volume>
+ <volume name="volTPCWire226">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire226"/>
+ </volume>
+ <volume name="volTPCWire225">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire225"/>
+ </volume>
+ <volume name="volTPCWire224">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire224"/>
+ </volume>
+ <volume name="volTPCWire223">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire223"/>
+ </volume>
+ <volume name="volTPCWire222">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire222"/>
+ </volume>
+ <volume name="volTPCWire221">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire221"/>
+ </volume>
+ <volume name="volTPCWire220">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire220"/>
+ </volume>
+ <volume name="volTPCWire219">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire219"/>
+ </volume>
+ <volume name="volTPCWire218">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire218"/>
+ </volume>
+ <volume name="volTPCWire217">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire217"/>
+ </volume>
+ <volume name="volTPCWire216">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire216"/>
+ </volume>
+ <volume name="volTPCWire215">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire215"/>
+ </volume>
+ <volume name="volTPCWire214">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire214"/>
+ </volume>
+ <volume name="volTPCWire213">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire213"/>
+ </volume>
+ <volume name="volTPCWire212">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire212"/>
+ </volume>
+ <volume name="volTPCWire211">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire211"/>
+ </volume>
+ <volume name="volTPCWire210">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire210"/>
+ </volume>
+ <volume name="volTPCWire209">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire209"/>
+ </volume>
+ <volume name="volTPCWire208">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire208"/>
+ </volume>
+ <volume name="volTPCWire207">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire207"/>
+ </volume>
+ <volume name="volTPCWire206">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire206"/>
+ </volume>
+ <volume name="volTPCWire205">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire205"/>
+ </volume>
+ <volume name="volTPCWire204">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire204"/>
+ </volume>
+ <volume name="volTPCWire203">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire203"/>
+ </volume>
+ <volume name="volTPCWire202">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire202"/>
+ </volume>
+ <volume name="volTPCWire201">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire201"/>
+ </volume>
+ <volume name="volTPCWire200">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire200"/>
+ </volume>
+ <volume name="volTPCWire199">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire199"/>
+ </volume>
+ <volume name="volTPCWire198">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire198"/>
+ </volume>
+ <volume name="volTPCWire197">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire197"/>
+ </volume>
+ <volume name="volTPCWire196">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire196"/>
+ </volume>
+ <volume name="volTPCWire195">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire195"/>
+ </volume>
+ <volume name="volTPCWire194">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire194"/>
+ </volume>
+ <volume name="volTPCWire193">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire193"/>
+ </volume>
+ <volume name="volTPCWire192">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire192"/>
+ </volume>
+ <volume name="volTPCWire191">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire191"/>
+ </volume>
+
+ <volume name="volTPCWPlaneLengthSide">
+  <materialref ref="G10"/>
+  <solidref ref="TPCWPlaneLengthSide"/>
+ </volume>
+ <volume name="volTPCWPlaneWidthSide">
+  <materialref ref="G10"/>
+  <solidref ref="TPCWPlaneWidthSide"/>
+ </volume>
+ <volume name="volTPCPlaneInduction">
+  <materialref ref="LAr"/>
+  <solidref ref="TPCPlane"/>
+  <physvol>
+   <volumeref ref="volTPCWire0"/>
+   <position name="posTPCWire0_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*kFirstInductionWireL" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*kFirstInductionWireL" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire1"/>
+   <position name="posTPCWire1_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+1*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+1*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire2"/>
+   <position name="posTPCWire2_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+2*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+2*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire3"/>
+   <position name="posTPCWire3_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+3*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+3*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire4"/>
+   <position name="posTPCWire4_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+4*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+4*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire5"/>
+   <position name="posTPCWire5_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+5*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+5*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire6"/>
+   <position name="posTPCWire6_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+6*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+6*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire7"/>
+   <position name="posTPCWire7_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+7*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+7*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire8"/>
+   <position name="posTPCWire8_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+8*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+8*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire9"/>
+   <position name="posTPCWire9_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+9*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                          z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+9*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire10"/>
+   <position name="posTPCWire10_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+10*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+10*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire11"/>
+   <position name="posTPCWire11_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+11*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+11*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire12"/>
+   <position name="posTPCWire12_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+12*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+12*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire13"/>
+   <position name="posTPCWire13_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+13*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+13*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire14"/>
+   <position name="posTPCWire14_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+14*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+14*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire15"/>
+   <position name="posTPCWire15_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+15*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+15*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire16"/>
+   <position name="posTPCWire16_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+16*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+16*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire17"/>
+   <position name="posTPCWire17_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+17*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+17*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire18"/>
+   <position name="posTPCWire18_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+18*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+18*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire19"/>
+   <position name="posTPCWire19_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+19*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+19*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire20"/>
+   <position name="posTPCWire20_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+20*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+20*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire21"/>
+   <position name="posTPCWire21_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+21*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+21*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire22"/>
+   <position name="posTPCWire22_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+22*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+22*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire23"/>
+   <position name="posTPCWire23_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+23*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+23*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire24"/>
+   <position name="posTPCWire24_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+24*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+24*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire25"/>
+   <position name="posTPCWire25_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+25*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+25*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire26"/>
+   <position name="posTPCWire26_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+26*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+26*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire27"/>
+   <position name="posTPCWire27_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+27*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+27*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire28"/>
+   <position name="posTPCWire28_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+28*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+28*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire29"/>
+   <position name="posTPCWire29_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+29*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+29*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire30"/>
+   <position name="posTPCWire30_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+30*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+30*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire31"/>
+   <position name="posTPCWire31_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+31*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+31*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire32"/>
+   <position name="posTPCWire32_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+32*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+32*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire33"/>
+   <position name="posTPCWire33_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+33*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+33*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire34"/>
+   <position name="posTPCWire34_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+34*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+34*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire35"/>
+   <position name="posTPCWire35_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+35*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+35*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire36"/>
+   <position name="posTPCWire36_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+36*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+36*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire37"/>
+   <position name="posTPCWire37_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+37*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+37*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire38"/>
+   <position name="posTPCWire38_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+38*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+38*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire39"/>
+   <position name="posTPCWire39_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+39*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+39*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire40"/>
+   <position name="posTPCWire40_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+40*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+40*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire41"/>
+   <position name="posTPCWire41_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+41*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+41*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire42"/>
+   <position name="posTPCWire42_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+42*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+42*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire43"/>
+   <position name="posTPCWire43_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+43*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+43*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire44"/>
+   <position name="posTPCWire44_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+44*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+44*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire45"/>
+   <position name="posTPCWire45_ind" unit="cm" x="-0.5*kTPCWidth+ 0.5*kCos60*(kFirstInductionWireL+45*kTPCWirePitch*((1/kTan60)+kTan60))" 
+                                           z="0.5*kTPCWirePlaneLength- 0.5*kSin60*(kFirstInductionWireL+45*kTPCWirePitch*((1/kTan60)+kTan60))" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire46_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 46*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire47_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 47*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire48_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 48*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire49_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 49*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire50_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 50*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire51_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 51*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire52_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 52*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire53_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 53*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire54_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 54*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire55_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 55*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire56_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 56*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire57_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 57*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire58_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 58*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire59_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 59*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire60_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 60*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire61_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 61*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire62_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 62*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire63_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 63*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire64_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 64*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire65_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 65*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire66_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 66*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire67_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 67*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire68_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 68*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire69_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 69*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire70_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 70*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire71_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 71*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire72_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 72*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire73_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 73*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire74_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 74*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+  
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire75_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 75*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire76_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 76*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire77_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 77*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire78_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 78*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire79_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 79*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire80_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 80*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire81_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 81*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire82_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 82*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire83_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 83*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire84_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 84*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire85_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 85*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire86_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 86*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire87_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 87*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire88_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 88*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire89_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 89*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire90_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 90*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire91_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 91*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire92_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 92*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire93_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 93*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire94_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 94*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire95_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 95*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire96_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 96*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire97_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 97*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire98_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 98*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire99_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 99*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire100_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 100*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire101_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 101*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire102_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 102*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire103_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 103*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire104_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 104*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire105_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 105*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire106_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 106*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire107_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 107*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire108_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 108*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire109_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 109*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire110_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 110*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire111_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 111*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire112_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 112*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire113_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 113*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire114_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 114*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire115_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 115*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire116_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 116*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire117_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 117*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire118_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 118*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire119_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 119*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire120_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 120*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire121_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 121*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire122_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 122*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire123_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 123*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire124_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 124*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire125_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 125*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire126_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 126*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire127_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 127*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire128_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 128*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire129_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 129*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire130_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 130*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire131_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 131*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire132_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 132*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire133_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 133*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire134_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 134*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire135_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 135*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire136_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 136*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire137_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 137*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire138_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 138*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire139_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 139*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire140_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 140*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire141_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 141*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire142_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 142*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire143_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 143*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire144_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 144*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire145_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 145*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire146_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 146*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire147_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 147*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire148_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 148*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire149_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 149*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire150_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 150*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire151_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 151*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire152_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 152*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire153_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 153*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire154_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 154*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire155_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 155*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire156_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 156*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire157_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 157*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire158_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 158*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire159_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 159*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire160_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 160*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire161_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 161*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire162_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 162*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire163_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 163*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire164_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 164*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire165_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 165*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire166_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 166*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire167_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 167*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire168_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 168*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire169_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 169*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire170_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 170*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire171_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 171*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire172_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 172*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire173_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 173*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire174_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 174*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire175_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 175*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire176_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 176*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire177_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 177*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire178_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 178*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire179_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 179*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire180_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 180*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire181_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 181*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire182_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 182*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire183_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 183*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire184_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 184*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire185_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 185*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire186_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 186*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire187_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 187*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire188_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 188*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire189_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 189*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWireCommon"/>
+   <position name="posTPCWire190_ind" unit="cm" x="-0.5*kTPCWidth + kFirstInductionWireL*kCos60 + 190*kTPCWireXPitch - (kTPCLength/kSin60)*kCos60*0.5" z="0" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+
+  <physvol>
+   <volumeref ref="volTPCWire191"/>
+   <position name="posTPCWire191_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 48*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 48*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+ <physvol>
+   <volumeref ref="volTPCWire192"/>
+   <position name="posTPCWire192_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 47*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 47*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+
+  <physvol>
+   <volumeref ref="volTPCWire193"/>
+   <position name="posTPCWire193_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 46*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 46*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire194"/>
+   <position name="posTPCWire194_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 45*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 45*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire195"/>
+   <position name="posTPCWire195_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 44*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 44*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire196"/>
+   <position name="posTPCWire196_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 43*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 43*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire197"/>
+   <position name="posTPCWire197_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 42*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 42*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire198"/>
+   <position name="posTPCWire198_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 41*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 41*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire199"/>
+   <position name="posTPCWire199_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 40*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 40*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire200"/>
+   <position name="posTPCWire200_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 39*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 39*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire201"/>
+   <position name="posTPCWire201_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 38*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 38*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire202"/>
+   <position name="posTPCWire202_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 37*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 37*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire203"/>
+   <position name="posTPCWire203_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 36*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 36*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire204"/>
+   <position name="posTPCWire204_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 35*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 35*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire205"/>
+   <position name="posTPCWire205_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 34*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 34*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire206"/>
+   <position name="posTPCWire206_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 33*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 33*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire207"/>
+   <position name="posTPCWire207_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 32*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 32*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire208"/>
+   <position name="posTPCWire208_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 31*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 31*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire209"/>
+   <position name="posTPCWire209_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 30*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 30*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire210"/>
+   <position name="posTPCWire210_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 29*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 29*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire211"/>
+   <position name="posTPCWire211_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 28*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 28*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire212"/>
+   <position name="posTPCWire212_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 27*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 27*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire213"/>
+   <position name="posTPCWire213_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 26*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 26*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire214"/>
+   <position name="posTPCWire214_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 25*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 25*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire215"/>
+   <position name="posTPCWire215_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 24*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 24*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire216"/>
+   <position name="posTPCWire216_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 23*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 23*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire217"/>
+   <position name="posTPCWire217_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 22*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 22*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire218"/>
+   <position name="posTPCWire218_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 21*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 21*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire219"/>
+   <position name="posTPCWire219_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 20*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 20*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire220"/>
+   <position name="posTPCWire220_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 19*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 19*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire221"/>
+   <position name="posTPCWire221_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 18*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 18*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire222"/>
+   <position name="posTPCWire222_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 17*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 17*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire223"/>
+   <position name="posTPCWire223_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 16*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 16*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire224"/>
+   <position name="posTPCWire224_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 15*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 15*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire225"/>
+   <position name="posTPCWire225_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 14*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 14*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire226"/>
+   <position name="posTPCWire226_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 13*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 13*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire227"/>
+   <position name="posTPCWire227_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 12*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 12*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire228"/>
+   <position name="posTPCWire228_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 11*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 11*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire229"/>
+   <position name="posTPCWire229_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 10*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 10*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire230"/>
+   <position name="posTPCWire230_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 9*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 9*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire231"/>
+   <position name="posTPCWire231_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 8*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 8*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire232"/>
+   <position name="posTPCWire232_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 7*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 7*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire233"/>
+   <position name="posTPCWire233_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 6*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 6*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire234"/>
+   <position name="posTPCWire234_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 5*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 5*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire235"/>
+   <position name="posTPCWire235_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 4*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 4*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire236"/>
+   <position name="posTPCWire236_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 3*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 3*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire237"/>
+   <position name="posTPCWire237_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 2*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 2*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire238"/>
+   <position name="posTPCWire238_ind" unit="cm" x="0.5*kTPCWidth   -  (kLastInductionWireL + 1*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kCos60" 
+                                            z="-0.5*kTPCLength +  (kLastInductionWireL + 1*kTPCWirePitch*((1/kTan60)+kTan60))*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire239"/>
+   <position name="posTPCWire239_ind" unit="cm" x="0.5*kTPCWidth   - kLastInductionWireL*0.5*kCos60" 
+                                            z="-0.5*kTPCLength + kLastInductionWireL*0.5*kSin60" y="kWireOffset"/>
+   <rotationref ref="rMinus30AboutY"/> 
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWPlaneLengthSide"/>
+   <position name="posTPCWPlaneLeftLengthSide_ind" unit="cm" x="-0.5*(kTPCWirePlaneWidth+kTPCWirePlaneOuterWidth)" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWPlaneLengthSide"/>
+   <position name="posTPCWPlaneRightLengthSide_ind" unit="cm" x="0.5*(kTPCWirePlaneWidth+kTPCWirePlaneOuterWidth)" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWPlaneWidthSide"/>
+   <position name="posTPCWPlaneTopWidthSide_ind" unit="cm" x="0" y="0" z="0.5*(kTPCWirePlaneLength+kTPCWirePlaneOuterWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWPlaneWidthSide"/>
+   <position name="posTPCWPlaneBottomWidthSide_ind" unit="cm" x="0" y="0" z="-0.5*(kTPCWirePlaneLength+kTPCWirePlaneOuterWidth)"/>
+  </physvol>
+ </volume>
+</structure>

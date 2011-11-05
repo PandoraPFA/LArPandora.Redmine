@@ -1,0 +1,18 @@
+////////////////////////////////////////////////////////////////////////
+//
+// RadArgonAna class
+//
+// patch@fnal.gov
+//
+//  
+////////////////////////////////////////////////////////////////////////
+// Framework includes
+#include "art/Framework/Core/ModuleMacros.h" 
+
+#include "T962/RadArgonAna/RadArgonAna.h"
+
+namespace radargon{
+
+  DEFINE_ART_MODULE(RadArgonAna);
+
+} // end of namespace

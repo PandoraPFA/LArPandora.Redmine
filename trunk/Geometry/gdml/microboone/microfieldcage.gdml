@@ -1,0 +1,378 @@
+<define>
+ <constant name="kFieldCageTPCClearance"    	value="5*kInch" />
+
+ <constant name="kFieldCageTubeRadius"  	value="0.5*kInch" />
+ <constant name="kFieldCageTubeThickness" 	value="0.25*kInch" />
+ <constant name="kFieldCageBeamDepth"           value="10"/>
+ <constant name="kFieldCageBeamWidth"           value="2"/>
+ <constant name="kFieldCageCrossDepth"          value="1"/>
+ <constant name="kFieldCageCrossWidth"          value="4"/>
+
+ <constant name="kFieldCageLoopHeight"       	value="kTPCWidth+2*(kFieldCageTPCClearance+2*kFieldCageTubeRadius)" />
+ <constant name="kFieldCageLoopLength"       	value="kTPCLength+2*(kFieldCageTPCClearance+2*kFieldCageTubeRadius)" />
+ <constant name="kFieldCageLoopWidth"   	value="kTPCDepth+2*(kFieldCageTPCClearance+2*kFieldCageTubeRadius)" />
+
+ <constant name="kFieldCageCornerRadius"	value="0.5*kFieldCageTPCClearance" />
+ <constant name="kFieldCageCornerY"       	value="(0.5*kFieldCageLoopHeight)-kFieldCageCornerRadius-kFieldCageTubeRadius" />
+ <constant name="kFieldCageCornerZ"       	value="(0.5*kFieldCageLoopLength)-kFieldCageCornerRadius-kFieldCageTubeRadius" />
+
+ <constant name="kFieldCageHeight"       	value="kFieldCageLoopHeight+kFieldCageBeamDepth+kFieldCageCrossDepth)" />
+ <constant name="kFieldCageLength"       	value="kFieldCageLoopLength+kFieldCageBeamDepth+kFieldCageCrossDepth)" />
+ <constant name="kFieldCageWidth"      		value="kFieldCageLoopWidth+kFieldCageBeamDepth+kFieldCageCrossDepth)" />
+
+ <constant name="kFieldCageBeamYInt"            value="0.5*(kTPCWidth)"/>
+ <constant name="kFieldCageBeamZPos"            value="0.5*(kFieldCageLength-kFieldCageBeamDepth)"/>
+ <constant name="kFieldCageBeamYPos"            value="0.5*(kFieldCageHeight-kFieldCageBeamDepth"/>
+ <constant name="kFieldCageBeamZInt"            value="0.5*(kTPCLength)"/>
+
+ <constant name="kFieldCageCrossZPos"           value="0.5*(kFieldCageLength+kFieldCageCrossDepth)+kFieldCageBeamDepth"/>
+
+</define>
+<solids>
+<box name="FieldCage"
+  x="kFieldCageWidth"
+  y="kFieldCageHeight"
+  z="kFieldCageLength"
+  lunit="cm"/>
+<box name="FieldCageLoop"
+  x="2*kFieldCageTubeRadius"
+  y="kFieldCageLoopHeight"
+  z="kFieldCageLoopLength"
+  lunit="cm"/>
+<tube name="FieldCageTubeZ"
+  rmin="kFieldCageTubeRadius-kFieldCageTubeThickness"
+  rmax="kFieldCageTubeRadius"  
+  z="kFieldCageLoopLength-2*(kFieldCageCornerRadius+kFieldCageTubeRadius)" 
+  deltaphi="2*kPi" 
+  aunit="rad" 
+  lunit="cm"/> 
+<tube name="FieldCageTubeY" 
+  rmin="kFieldCageTubeRadius-kFieldCageTubeThickness"
+  rmax="kFieldCageTubeRadius"  
+  z="kFieldCageLoopHeight-2*(kFieldCageCornerRadius+kFieldCageTubeRadius)"  
+  deltaphi="2*kPi" 
+  aunit="rad" 
+  lunit="cm"/> 
+<torus name="FieldCageCorner"
+  rmin="kFieldCageTubeRadius-kFieldCageTubeThickness"
+  rmax="kFieldCageTubeRadius"  
+  rtor="kFieldCageCornerRadius"
+  deltaphi="0.5*kPi"
+  aunit="rad"
+  lunit="cm"/>
+
+<box name="FieldCageBarFlat"
+  x="kFieldCageWidth"
+  y="kFieldCageBeamWidth"
+  z="kFieldCageBeamDepth"
+  lunit="cm"/>
+<box name="FieldCageBarAngle"
+  x="348"
+  y="kFieldCageCrossWidth"
+  z="kFieldCageCrossDepth"
+  lunit="cm"/>
+<box name="FieldCageCrossBox"
+  x="40"
+  y="30"
+  z="kFieldCageCrossDepth"
+  lunit="cm"/>
+<box name="FieldCageCross"
+  x="kFieldCageWidth"
+  y="kFieldCageHeight"
+  z="kFieldCageCrossDepth"
+  lunit="cm"/>
+</solids> 
+</solids> 
+<structure> 
+ <volume name="volFieldCageTubeTop"> 
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
+  <solidref ref="FieldCageTubeZ"/> 
+ </volume> 
+ <volume name="volFieldCageTubeBot"> 
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
+  <solidref ref="FieldCageTubeZ"/> 
+ </volume> 
+ <volume name="volFieldCageTubeFront"> 
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
+  <solidref ref="FieldCageTubeY"/> 
+ </volume> 
+ <volume name="volFieldCageTubeBack"> 
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
+  <solidref ref="FieldCageTubeY"/> 
+ </volume> 
+ <volume name="volFieldCageCorner"> 
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
+  <solidref ref="FieldCageCorner"/> 
+ </volume> 
+
+ <volume name="volFieldCageLoop">
+  <materialref ref="LAr"/> 
+  <solidref ref="FieldCageLoop"/> 
+  <physvol>
+   <volumeref ref="volFieldCageTubeTop"/>
+   <position name="posFieldCageTubeTop" unit="cm" x="0" y="0.5*(kFieldCageHeight-2*kFieldCageTubeRadius)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageTubeBot"/>
+   <position name="posFieldCageTubeBot" unit="cm" x="0" y="-0.5*(kFieldCageHeight-2*kFieldCageTubeRadius)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageTubeFront"/>
+   <position name="posFieldCageTubeFront" unit="cm" x="0" y="0" z="0.5*(kFieldCageLength-2*kFieldCageTubeRadius)"/>
+   <rotation name="rFieldCageVert" aunit="rad" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageTubeBack"/>
+   <position name="posFieldCageTubeBack" unit="cm" x="0" y="0" z="-0.5*(kFieldCageLength-2*kFieldCageTubeRadius)"/>
+   <rotation name="rFieldCageVert" aunit="rad" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCorner"/>
+   <position name="posFieldCageCornerBackTop" unit="cm" x="0" y="kFieldCageCornerY" z="-kFieldCageCornerZ"/>
+   <rotation name="rFieldCageCorner" aunit="rad" x="90" y="-90" z="-90"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCorner"/>
+   <position name="posFieldCageCornerBackBot" unit="cm" x="0" y="-kFieldCageCornerY" z="-kFieldCageCornerZ"/>
+   <rotationref ref="rMinus90AboutYPlus90AboutZ"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCorner"/>
+   <position name="posFieldCageCornerFrontTop" unit="cm" x="0" y="kFieldCageCornerY" z="kFieldCageCornerZ"/>
+   <rotationref ref="rPlus90AboutY"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCorner"/>
+   <position name="posFieldCageCornerFrontBot" unit="cm" x="0" y="-kFieldCageCornerY" z="kFieldCageCornerZ"/>
+   <rotationref ref="rMinus90AboutYPlus180AboutZ"/>
+  </physvol>
+ </volume> 
+
+ <volume name="volFieldCageBarFlat">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageBarFlat"/> 
+ </volume>  
+
+ <volume name="volFieldCageBarAngle1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageBarAngle"/> 
+ </volume>  
+ <volume name="volFieldCageBarAngle2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageBarAngle"/>
+ </volume>
+ <volume name="volFieldCageCrossBox">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageCrossBox"/>
+ </volume>
+
+ <volume name="volFieldCageCross">
+  <materialref ref="LAr"/> 
+  <solidref ref="FieldCageCross"/>
+  <physvol> 
+   <volumeref ref="volFieldCageBarAngle1"/>
+   <position name="posFieldCageBarAngle1" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rMinus45AboutZ" unit="deg" x="0" y="0" z="-45"/>
+  </physvol> 
+  <physvol>
+   <volumeref ref="volFieldCageBarAngle2"/>
+   <position name="posFieldCageBarAngle2" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rPlus45AboutZ" unit="deg" x="0" y="0" z="45"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCrossBox"/>
+   <position name="posFCECrossBox" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  </volume>
+
+ <volume name="volFieldCage">
+  <materialref ref="LAr"/> 
+  <solidref ref="FieldCage"/> 
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus6" unit="cm" x="20+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus6" unit="cm" x="-20+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus12" unit="cm" x="44+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus12" unit="cm" x="-44+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus18" unit="cm" x="68+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus18" unit="cm" x="-68+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus24" unit="cm" x="92+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus24" unit="cm" x="-92+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus30" unit="cm" x="116+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus30" unit="cm" x="-116+2" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCross"/>
+   <position name="posFieldCageCross1" unit="cm" x="0" y="0" z="kFieldCageCrossZPos"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBar1" unit="cm" x="0" y="-kFieldCageBeamYPos" z="kFieldCageBeamZPos"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBar2" unit="cm" x="0" y="0" z="kFieldCageBeamZPos"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBar3" unit="cm" x="0" y="kFieldCageBeamYPos" z="kFieldCageBeamZPos"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageCross"/>
+   <position name="posFieldCageCross2" unit="cm" x="0" y="0" z="-kFieldCageCrossZPos"/>
+   <rotation name="rFieldCageCross2" unit="cm" x="0" y="180" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBar4" unit="cm" x="0" y="-kFieldCageBeamYPos" z="-kFieldCageBeamZPos"/>
+   <rotation name="rFieldCageBar4" unit="cm" x="0" y="180" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBar5" unit="cm" x="0" y="0" z="-kFieldCageBeamZPos"/>
+   <rotation name="rFieldCageBar5" unit="cm" x="0" y="180" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBar6" unit="cm" x="0" y="kFieldCageBeamYPos" z="-kFieldCageBeamZPos"/>
+   <rotation name="rFieldCageBar6" unit="cm" x="0" y="180" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop7" unit="cm" x="0" y="kFieldCageBeamYPos" z="(-5/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop7" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot7" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(-5/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot7" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop8" unit="cm" x="0" y="kFieldCageBeamYPos" z="(-4/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop8" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot8" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(-4/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot8" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop9" unit="cm" x="0" y="kFieldCageBeamYPos" z="(-3/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop9" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot9" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(-3/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot9" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop10" unit="cm" x="0" y="kFieldCageBeamYPos" z="(-2/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop10" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot10" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(-2/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot10" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop11" unit="cm" x="0" y="kFieldCageBeamYPos" z="(-1/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop11" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot11" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(-1/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot11" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop12" unit="cm" x="0" y="kFieldCageBeamYPos" z="(0/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop12" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot12" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(0/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot12" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop13" unit="cm" x="0" y="kFieldCageBeamYPos" z="(1/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop13" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot13" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(1/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot13" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop14" unit="cm" x="0" y="kFieldCageBeamYPos" z="(2/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop14" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot14" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(2/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot14" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop15" unit="cm" x="0" y="kFieldCageBeamYPos" z="(3/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop15" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot15" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(3/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot15" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop16" unit="cm" x="0" y="kFieldCageBeamYPos" z="(4/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop16" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot16" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(4/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot16" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarTop17" unit="cm" x="0" y="kFieldCageBeamYPos" z="(5/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarTop17" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageBarFlat"/>
+   <position name="posFieldCageBarBot17" unit="cm" x="0" y="-kFieldCageBeamYPos" z="(5/5)kFieldCageBeamZInt"/>
+   <rotation name="rFieldCageBarBot17" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+ </volume>
+</structure> 

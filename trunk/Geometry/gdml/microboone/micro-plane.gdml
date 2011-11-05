@@ -1,0 +1,48 @@
+<solids>
+<tube name="TPCWire0" 
+  rmax="0.5*kTPCWireThickness" 
+  z="kTPCWireXPitch*(0+1)/kCos30" 
+  deltaphi="2*kPi" 
+  aunit="rad" 
+  lunit="cm"/> 
+<tube name="TPCWireCommon"
+  rmax="0.5*kTPCWireThickness" 
+  z="kTPCWidth/kCos60" 
+  deltaphi="2*kPi" 
+  aunit="rad" 
+  lunit="cm"/> 
+<box name="TPCPlane" 
+  x="kTPCWirePlaneThickness" 
+  y="kTPCWidth" 
+  z="kTPCLength" 
+  lunit="cm"/> 
+</solids>
+<structure>
+  <volume name="volTPCWire0"> 
+    <materialref ref="Titanium"/>
+    <solidref ref="TPCWire0"/> 
+  </volume> 
+  <volume name="volTPCWireCommon"> 
+    <materialref ref="Titanium"/>
+    <solidref ref="TPCWireCommon"/> 
+  </volume> 
+  <volume name="volTPCPlane"> 
+    <materialref ref="LAr"/>
+    <solidref ref="TPCPlane"/> 
+    <physvol>
+     <volumeref ref="volTPCWire0"/> 
+     <position name="posTPCWire0" unit="cm" y="-0.5*kTPCWidth+0.5*(0+1)*kTPCWireXPitch*kCos60/kCos30" z="-0.5*kTPCLength+0.5*kTPCWireXPitch*(0+1)" x="0"/> 
+     <rotationref ref="rPlus150AboutX"/>
+    </physvol> 
+    <physvol>
+     <volumeref ref="volTPCWireCommon"/>
+     <position name="posTPCWire1" unit="cm" y="-0.5*kTPCWidth+0.5*1*kTPCWireXPitch*kCos60/kCos30" z="-0.5*kTPCWirePlaneLength+kTPCWireXPitch*(0.5*1 + 0+1)" x="0"/> 
+     <rotationref ref="rPlus150AboutX"/>
+    </physvol> 
+    <physvol>
+     <volumeref ref="volTPCWire0"/> 
+     <position name="posTPCWire2" unit="cm" y="0.5*kTPCWidth-0.5*(0+1)*kTPCWireXPitch*kCos60/kCos30" z="0.5*kTPCWirePlaneLength-0.5*kTPCWireXPitch*(0+1)" x="0"/> 
+     <rotationref ref="rPlus150AboutX"/>
+    </physvol> 
+  </volume> 
+</structure> 

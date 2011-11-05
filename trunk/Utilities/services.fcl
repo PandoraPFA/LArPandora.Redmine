@@ -1,0 +1,120 @@
+#include "job/geometry.fcl"
+#include "job/clusterservices.fcl"
+#include "job/larfft.fcl"
+#include "job/larproperties.fcl"
+#include "job/messageservice.fcl"
+#include "job/detectorproperties.fcl"
+#include "job/simulationservices.fcl"
+#include "job/magfield.fcl"
+
+BEGIN_PROLOG
+
+#bo is basically the same as argoneut, so keep the same configurations
+#for it as argoneut except for the geometry
+bo_services:
+{
+ Geometry:           @local::bo_geo          
+ DetectorProperties: @local::argoneut_detproperties
+ LArProperties:      @local::argoneut_properties            
+ LArFFT:             @local::argoneut_larfft         
+ DBScanService:      @local::argoneut_dbscanservice  
+ EndPointService:    @local::argoneut_endpointservice
+ HoughLineService:   @local::argoneut_houghlineservice
+}
+
+bo_simulation_services:
+{
+ SimListUtils:       @local::argoneut_simlistutils
+ LArG4Parameters:    @local::argoneut_largeantparameters
+ LArVoxelCalculator: @local::argoneut_larvoxelcalculator
+ MagneticField:      @local::no_mag
+ Geometry:           @local::bo_geo          
+ DetectorProperties: @local::argoneut_detproperties
+ LArProperties:      @local::argoneut_properties            
+ LArFFT:             @local::argoneut_larfft         
+ DBScanService:      @local::argoneut_dbscanservice  
+ EndPointService:    @local::argoneut_endpointservice
+ HoughLineService:   @local::argoneut_houghlineservice
+}
+
+argoneut_services:
+{
+ Geometry:           @local::argoneut_geo 	       
+ DetectorProperties: @local::argoneut_detproperties
+ LArProperties:      @local::argoneut_properties	       
+ LArFFT:             @local::argoneut_larfft  	       
+ DBScanService:      @local::argoneut_dbscanservice   
+ EndPointService:    @local::argoneut_endpointservice 
+ HoughLineService:   @local::argoneut_houghlineservice
+}
+
+argoneut_simulation_services:
+{
+ SimListUtils:       @local::argoneut_simlistutils
+ LArG4Parameters:    @local::argoneut_largeantparameters
+ LArVoxelCalculator: @local::argoneut_larvoxelcalculator
+ MagneticField:      @local::no_mag
+ Geometry:           @local::argoneut_geo          
+ DetectorProperties: @local::argoneut_detproperties
+ LArProperties:      @local::argoneut_properties            
+ LArFFT:             @local::argoneut_larfft         
+ DBScanService:      @local::argoneut_dbscanservice  
+ EndPointService:    @local::argoneut_endpointservice
+ HoughLineService:   @local::argoneut_houghlineservice
+}
+
+microboone_services:
+{
+ Geometry:           @local::microboone_geo 	       
+ DetectorProperties: @local::microboone_detproperties
+ LArProperties:      @local::microboone_properties	       
+ LArFFT:             @local::microboone_larfft  	       
+ LArG4Parameters:    @local::microboone_largeantparameters
+ LArVoxelCalculator: @local::microboone_larvoxelcalculator
+ DBScanService:      @local::microboone_dbscanservice   
+ EndPointService:    @local::microboone_endpointservice 
+ HoughLineService:   @local::microboone_houghlineservice
+}
+
+microboone_simulation_services:
+{
+ SimListUtils:       @local::microboone_simlistutils
+ LArG4Parameters:    @local::microboone_largeantparameters
+ LArVoxelCalculator: @local::microboone_larvoxelcalculator
+ Geometry:           @local::microboone_geo 	       
+ DetectorProperties: @local::microboone_detproperties
+ LArProperties:      @local::microboone_properties	       
+ LArFFT:             @local::microboone_larfft  	       
+ DBScanService:      @local::microboone_dbscanservice   
+ EndPointService:    @local::microboone_endpointservice 
+ HoughLineService:   @local::microboone_houghlineservice
+ MagneticField:      @local::no_mag 	       
+}
+
+lbne_services:
+{
+ Geometry:           @local::lbne_geo 	       
+ DetectorProperties: @local::lbne_detproperties
+ LArProperties:      @local::lbne_properties	       
+ LArFFT:             @local::lbne_larfft  	       
+ DBScanService:      @local::lbne_dbscanservice   
+ EndPointService:    @local::lbne_endpointservice 
+ HoughLineService:   @local::lbne_houghlineservice
+}
+
+lbne_simulation_services:
+{
+ SimListUtils:       @local::lbne_simlistutils
+ LArFFT:             @local::lbne_larfft  	       
+ LArG4Parameters:    @local::lbne_largeantparameters
+ Geometry:           @local::lbne_geo 	       
+ DetectorProperties: @local::lbne_detproperties
+ LArProperties:      @local::lbne_properties	       
+ LArVoxelCalculator: @local::lbne_larvoxelcalculator
+ DBScanService:      @local::lbne_dbscanservice   
+ EndPointService:    @local::lbne_endpointservice 
+ HoughLineService:   @local::lbne_houghlineservice
+ MagneticField:      @local::no_mag 	       
+}
+
+END_PROLOG

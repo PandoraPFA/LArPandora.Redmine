@@ -1,0 +1,28 @@
+<solids>
+<tube name="TPCWireVert" 
+  rmax="0.5*kTPCWireThickness" 
+  z="kTPCWidth" 
+  deltaphi="2*kPi" 
+  aunit="rad" 
+  lunit="cm"/> 
+<box name="TPCPlaneVert" 
+  x="kTPCWirePlaneThickness" 
+  y="kTPCWidth" 
+  z="kTPCLength" 
+  lunit="cm"/> 
+</solids>
+<structure>
+  <volume name="volTPCWireVert"> 
+    <materialref ref="Titanium"/>
+    <solidref ref="TPCWireVert"/> 
+  </volume> 
+  <volume name="volTPCPlaneVert"> 
+    <materialref ref="LAr"/>
+    <solidref ref="TPCPlaneVert"/> 
+    <physvol>
+     <volumeref ref="volTPCWireVert"/> 
+     <position name="posTPCWireVert0" unit="cm" z="-0.5*kTPCLength+kTPCWirePitch*(0+1)" x="0" y="0"/> 
+     <rotationref ref="rPlus90AboutX"/> 
+    </physvol> 
+  </volume> 
+</structure> 

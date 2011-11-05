@@ -1,0 +1,963 @@
+<solids>
+ <tube name="TPCShieldPlaneWire"
+   rmax="0.5*kTPCWireThickness"
+   z="kTPCWirePlaneLength"
+   deltaphi="2*kPi"
+   aunit="rad"
+   lunit="cm"/> 
+  <box name="TPCShieldPlaneLengthSide"
+   x="kTPCWirePlaneOuterWidth"
+   y="kTPCWirePlaneThickness"
+   z="kTPCWirePlaneLength"
+   lunit="cm"/>
+  <box name="TPCShieldPlaneWidthSide"
+   x="kTPCWirePlaneWidth+kTPCWirePlaneOuterWidth*2"
+   y="kTPCWirePlaneThickness"
+   z="kTPCWirePlaneOuterWidth"
+   lunit="cm"/>
+  <box name="TPCShieldPlane"
+   x="kTPCWirePlaneOuterWidth*2+kTPCWidth"
+   y="kTPCWirePlaneThickness"
+   z="kTPCWirePlaneOuterWidth*2+kTPCLength"
+   lunit="cm"/>
+</solids>
+
+<structure>
+ <volume name="volTPCShieldPlaneWire">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCShieldPlaneWire"/>
+ </volume>
+ <volume name="volTPCShieldPlaneLengthSide">
+  <materialref ref="G10"/>
+  <solidref ref="TPCShieldPlaneLengthSide"/>
+ </volume>
+ <volume name="volTPCShieldPlaneWidthSide">
+  <materialref ref="G10"/>
+  <solidref ref="TPCShieldPlaneWidthSide"/>
+ </volume>
+ <volume name="volTPCShieldPlane">
+  <materialref ref="LAr"/>
+  <solidref ref="TPCShieldPlane"/>
+
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire1" unit="cm" x="-0.5*kTPCWirePlaneWidth+0/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire2" unit="cm" x="-0.5*kTPCWirePlaneWidth+1/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire3" unit="cm" x="-0.5*kTPCWirePlaneWidth+2/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire4" unit="cm" x="-0.5*kTPCWirePlaneWidth+3/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire5" unit="cm" x="-0.5*kTPCWirePlaneWidth+4/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire6" unit="cm" x="-0.5*kTPCWirePlaneWidth+5/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire7" unit="cm" x="-0.5*kTPCWirePlaneWidth+6/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire8" unit="cm" x="-0.5*kTPCWirePlaneWidth+7/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire9" unit="cm" x="-0.5*kTPCWirePlaneWidth+8/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire10" unit="cm" x="-0.5*kTPCWirePlaneWidth+9/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire11" unit="cm" x="-0.5*kTPCWirePlaneWidth+10/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire12" unit="cm" x="-0.5*kTPCWirePlaneWidth+11/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire13" unit="cm" x="-0.5*kTPCWirePlaneWidth+12/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire14" unit="cm" x="-0.5*kTPCWirePlaneWidth+13/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire15" unit="cm" x="-0.5*kTPCWirePlaneWidth+14/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire16" unit="cm" x="-0.5*kTPCWirePlaneWidth+15/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire17" unit="cm" x="-0.5*kTPCWirePlaneWidth+16/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire18" unit="cm" x="-0.5*kTPCWirePlaneWidth+17/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire19" unit="cm" x="-0.5*kTPCWirePlaneWidth+18/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire20" unit="cm" x="-0.5*kTPCWirePlaneWidth+19/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire21" unit="cm" x="-0.5*kTPCWirePlaneWidth+20/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire22" unit="cm" x="-0.5*kTPCWirePlaneWidth+21/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire23" unit="cm" x="-0.5*kTPCWirePlaneWidth+22/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire24" unit="cm" x="-0.5*kTPCWirePlaneWidth+23/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire25" unit="cm" x="-0.5*kTPCWirePlaneWidth+24/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire26" unit="cm" x="-0.5*kTPCWirePlaneWidth+25/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire27" unit="cm" x="-0.5*kTPCWirePlaneWidth+26/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire28" unit="cm" x="-0.5*kTPCWirePlaneWidth+27/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire29" unit="cm" x="-0.5*kTPCWirePlaneWidth+28/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire30" unit="cm" x="-0.5*kTPCWirePlaneWidth+29/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire31" unit="cm" x="-0.5*kTPCWirePlaneWidth+30/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire32" unit="cm" x="-0.5*kTPCWirePlaneWidth+31/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire33" unit="cm" x="-0.5*kTPCWirePlaneWidth+32/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire34" unit="cm" x="-0.5*kTPCWirePlaneWidth+33/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire35" unit="cm" x="-0.5*kTPCWirePlaneWidth+34/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire36" unit="cm" x="-0.5*kTPCWirePlaneWidth+35/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire37" unit="cm" x="-0.5*kTPCWirePlaneWidth+36/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire38" unit="cm" x="-0.5*kTPCWirePlaneWidth+37/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire39" unit="cm" x="-0.5*kTPCWirePlaneWidth+38/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire40" unit="cm" x="-0.5*kTPCWirePlaneWidth+39/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire41" unit="cm" x="-0.5*kTPCWirePlaneWidth+40/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire42" unit="cm" x="-0.5*kTPCWirePlaneWidth+41/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire43" unit="cm" x="-0.5*kTPCWirePlaneWidth+42/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire44" unit="cm" x="-0.5*kTPCWirePlaneWidth+43/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire45" unit="cm" x="-0.5*kTPCWirePlaneWidth+44/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire46" unit="cm" x="-0.5*kTPCWirePlaneWidth+45/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire47" unit="cm" x="-0.5*kTPCWirePlaneWidth+46/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire48" unit="cm" x="-0.5*kTPCWirePlaneWidth+47/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire49" unit="cm" x="-0.5*kTPCWirePlaneWidth+48/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire50" unit="cm" x="-0.5*kTPCWirePlaneWidth+49/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire51" unit="cm" x="-0.5*kTPCWirePlaneWidth+50/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire52" unit="cm" x="-0.5*kTPCWirePlaneWidth+51/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire53" unit="cm" x="-0.5*kTPCWirePlaneWidth+52/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire54" unit="cm" x="-0.5*kTPCWirePlaneWidth+53/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire55" unit="cm" x="-0.5*kTPCWirePlaneWidth+54/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire56" unit="cm" x="-0.5*kTPCWirePlaneWidth+55/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire57" unit="cm" x="-0.5*kTPCWirePlaneWidth+56/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire58" unit="cm" x="-0.5*kTPCWirePlaneWidth+57/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire59" unit="cm" x="-0.5*kTPCWirePlaneWidth+58/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire60" unit="cm" x="-0.5*kTPCWirePlaneWidth+59/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire61" unit="cm" x="-0.5*kTPCWirePlaneWidth+60/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire62" unit="cm" x="-0.5*kTPCWirePlaneWidth+61/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire63" unit="cm" x="-0.5*kTPCWirePlaneWidth+62/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire64" unit="cm" x="-0.5*kTPCWirePlaneWidth+63/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire65" unit="cm" x="-0.5*kTPCWirePlaneWidth+64/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire66" unit="cm" x="-0.5*kTPCWirePlaneWidth+65/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire67" unit="cm" x="-0.5*kTPCWirePlaneWidth+66/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire68" unit="cm" x="-0.5*kTPCWirePlaneWidth+67/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire69" unit="cm" x="-0.5*kTPCWirePlaneWidth+68/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire70" unit="cm" x="-0.5*kTPCWirePlaneWidth+69/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire71" unit="cm" x="-0.5*kTPCWirePlaneWidth+70/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire72" unit="cm" x="-0.5*kTPCWirePlaneWidth+71/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire73" unit="cm" x="-0.5*kTPCWirePlaneWidth+72/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire74" unit="cm" x="-0.5*kTPCWirePlaneWidth+73/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire75" unit="cm" x="-0.5*kTPCWirePlaneWidth+74/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire76" unit="cm" x="-0.5*kTPCWirePlaneWidth+75/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire77" unit="cm" x="-0.5*kTPCWirePlaneWidth+76/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire78" unit="cm" x="-0.5*kTPCWirePlaneWidth+77/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire79" unit="cm" x="-0.5*kTPCWirePlaneWidth+78/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire80" unit="cm" x="-0.5*kTPCWirePlaneWidth+79/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire81" unit="cm" x="-0.5*kTPCWirePlaneWidth+80/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire82" unit="cm" x="-0.5*kTPCWirePlaneWidth+81/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire83" unit="cm" x="-0.5*kTPCWirePlaneWidth+82/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire84" unit="cm" x="-0.5*kTPCWirePlaneWidth+83/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire85" unit="cm" x="-0.5*kTPCWirePlaneWidth+84/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire86" unit="cm" x="-0.5*kTPCWirePlaneWidth+85/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire87" unit="cm" x="-0.5*kTPCWirePlaneWidth+86/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire88" unit="cm" x="-0.5*kTPCWirePlaneWidth+87/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire89" unit="cm" x="-0.5*kTPCWirePlaneWidth+88/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire90" unit="cm" x="-0.5*kTPCWirePlaneWidth+89/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire91" unit="cm" x="-0.5*kTPCWirePlaneWidth+90/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire92" unit="cm" x="-0.5*kTPCWirePlaneWidth+91/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire93" unit="cm" x="-0.5*kTPCWirePlaneWidth+92/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire94" unit="cm" x="-0.5*kTPCWirePlaneWidth+93/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire95" unit="cm" x="-0.5*kTPCWirePlaneWidth+94/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire96" unit="cm" x="-0.5*kTPCWirePlaneWidth+95/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire97" unit="cm" x="-0.5*kTPCWirePlaneWidth+96/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire98" unit="cm" x="-0.5*kTPCWirePlaneWidth+97/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire99" unit="cm" x="-0.5*kTPCWirePlaneWidth+98/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire100" unit="cm" x="-0.5*kTPCWirePlaneWidth+99/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire101" unit="cm" x="-0.5*kTPCWirePlaneWidth+100/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire102" unit="cm" x="-0.5*kTPCWirePlaneWidth+101/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire103" unit="cm" x="-0.5*kTPCWirePlaneWidth+102/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire104" unit="cm" x="-0.5*kTPCWirePlaneWidth+103/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire105" unit="cm" x="-0.5*kTPCWirePlaneWidth+104/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire106" unit="cm" x="-0.5*kTPCWirePlaneWidth+105/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire107" unit="cm" x="-0.5*kTPCWirePlaneWidth+106/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire108" unit="cm" x="-0.5*kTPCWirePlaneWidth+107/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire109" unit="cm" x="-0.5*kTPCWirePlaneWidth+108/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire110" unit="cm" x="-0.5*kTPCWirePlaneWidth+109/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire111" unit="cm" x="-0.5*kTPCWirePlaneWidth+110/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire112" unit="cm" x="-0.5*kTPCWirePlaneWidth+111/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire113" unit="cm" x="-0.5*kTPCWirePlaneWidth+112/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire114" unit="cm" x="-0.5*kTPCWirePlaneWidth+113/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire115" unit="cm" x="-0.5*kTPCWirePlaneWidth+114/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire116" unit="cm" x="-0.5*kTPCWirePlaneWidth+115/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire117" unit="cm" x="-0.5*kTPCWirePlaneWidth+116/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire118" unit="cm" x="-0.5*kTPCWirePlaneWidth+117/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire119" unit="cm" x="-0.5*kTPCWirePlaneWidth+118/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire120" unit="cm" x="-0.5*kTPCWirePlaneWidth+119/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire121" unit="cm" x="-0.5*kTPCWirePlaneWidth+120/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire122" unit="cm" x="-0.5*kTPCWirePlaneWidth+121/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire123" unit="cm" x="-0.5*kTPCWirePlaneWidth+122/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire124" unit="cm" x="-0.5*kTPCWirePlaneWidth+123/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire125" unit="cm" x="-0.5*kTPCWirePlaneWidth+124/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire126" unit="cm" x="-0.5*kTPCWirePlaneWidth+125/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire127" unit="cm" x="-0.5*kTPCWirePlaneWidth+126/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire128" unit="cm" x="-0.5*kTPCWirePlaneWidth+127/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire129" unit="cm" x="-0.5*kTPCWirePlaneWidth+128/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire130" unit="cm" x="-0.5*kTPCWirePlaneWidth+129/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire131" unit="cm" x="-0.5*kTPCWirePlaneWidth+130/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire132" unit="cm" x="-0.5*kTPCWirePlaneWidth+131/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire133" unit="cm" x="-0.5*kTPCWirePlaneWidth+132/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire134" unit="cm" x="-0.5*kTPCWirePlaneWidth+133/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire135" unit="cm" x="-0.5*kTPCWirePlaneWidth+134/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire136" unit="cm" x="-0.5*kTPCWirePlaneWidth+135/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire137" unit="cm" x="-0.5*kTPCWirePlaneWidth+136/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire138" unit="cm" x="-0.5*kTPCWirePlaneWidth+137/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire139" unit="cm" x="-0.5*kTPCWirePlaneWidth+138/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire140" unit="cm" x="-0.5*kTPCWirePlaneWidth+139/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire141" unit="cm" x="-0.5*kTPCWirePlaneWidth+140/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire142" unit="cm" x="-0.5*kTPCWirePlaneWidth+141/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire143" unit="cm" x="-0.5*kTPCWirePlaneWidth+142/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire144" unit="cm" x="-0.5*kTPCWirePlaneWidth+143/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire145" unit="cm" x="-0.5*kTPCWirePlaneWidth+144/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire146" unit="cm" x="-0.5*kTPCWirePlaneWidth+145/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire147" unit="cm" x="-0.5*kTPCWirePlaneWidth+146/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire148" unit="cm" x="-0.5*kTPCWirePlaneWidth+147/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire149" unit="cm" x="-0.5*kTPCWirePlaneWidth+148/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire150" unit="cm" x="-0.5*kTPCWirePlaneWidth+149/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire151" unit="cm" x="-0.5*kTPCWirePlaneWidth+150/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire152" unit="cm" x="-0.5*kTPCWirePlaneWidth+151/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire153" unit="cm" x="-0.5*kTPCWirePlaneWidth+152/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire154" unit="cm" x="-0.5*kTPCWirePlaneWidth+153/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire155" unit="cm" x="-0.5*kTPCWirePlaneWidth+154/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire156" unit="cm" x="-0.5*kTPCWirePlaneWidth+155/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire157" unit="cm" x="-0.5*kTPCWirePlaneWidth+156/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire158" unit="cm" x="-0.5*kTPCWirePlaneWidth+157/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire159" unit="cm" x="-0.5*kTPCWirePlaneWidth+158/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire160" unit="cm" x="-0.5*kTPCWirePlaneWidth+159/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire161" unit="cm" x="-0.5*kTPCWirePlaneWidth+160/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire162" unit="cm" x="-0.5*kTPCWirePlaneWidth+161/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire163" unit="cm" x="-0.5*kTPCWirePlaneWidth+162/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire164" unit="cm" x="-0.5*kTPCWirePlaneWidth+163/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire165" unit="cm" x="-0.5*kTPCWirePlaneWidth+164/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire166" unit="cm" x="-0.5*kTPCWirePlaneWidth+165/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire167" unit="cm" x="-0.5*kTPCWirePlaneWidth+166/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire168" unit="cm" x="-0.5*kTPCWirePlaneWidth+167/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire169" unit="cm" x="-0.5*kTPCWirePlaneWidth+168/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire170" unit="cm" x="-0.5*kTPCWirePlaneWidth+169/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire171" unit="cm" x="-0.5*kTPCWirePlaneWidth+170/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire172" unit="cm" x="-0.5*kTPCWirePlaneWidth+171/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire173" unit="cm" x="-0.5*kTPCWirePlaneWidth+172/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire174" unit="cm" x="-0.5*kTPCWirePlaneWidth+173/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire175" unit="cm" x="-0.5*kTPCWirePlaneWidth+174/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire176" unit="cm" x="-0.5*kTPCWirePlaneWidth+175/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire177" unit="cm" x="-0.5*kTPCWirePlaneWidth+176/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire178" unit="cm" x="-0.5*kTPCWirePlaneWidth+177/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire179" unit="cm" x="-0.5*kTPCWirePlaneWidth+178/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire180" unit="cm" x="-0.5*kTPCWirePlaneWidth+179/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire181" unit="cm" x="-0.5*kTPCWirePlaneWidth+180/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire182" unit="cm" x="-0.5*kTPCWirePlaneWidth+181/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire183" unit="cm" x="-0.5*kTPCWirePlaneWidth+182/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire184" unit="cm" x="-0.5*kTPCWirePlaneWidth+183/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire185" unit="cm" x="-0.5*kTPCWirePlaneWidth+184/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire186" unit="cm" x="-0.5*kTPCWirePlaneWidth+185/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire187" unit="cm" x="-0.5*kTPCWirePlaneWidth+186/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire188" unit="cm" x="-0.5*kTPCWirePlaneWidth+187/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire189" unit="cm" x="-0.5*kTPCWirePlaneWidth+188/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire190" unit="cm" x="-0.5*kTPCWirePlaneWidth+189/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire191" unit="cm" x="-0.5*kTPCWirePlaneWidth+190/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire192" unit="cm" x="-0.5*kTPCWirePlaneWidth+191/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire193" unit="cm" x="-0.5*kTPCWirePlaneWidth+192/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire194" unit="cm" x="-0.5*kTPCWirePlaneWidth+193/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire195" unit="cm" x="-0.5*kTPCWirePlaneWidth+194/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire196" unit="cm" x="-0.5*kTPCWirePlaneWidth+195/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire197" unit="cm" x="-0.5*kTPCWirePlaneWidth+196/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire198" unit="cm" x="-0.5*kTPCWirePlaneWidth+197/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire199" unit="cm" x="-0.5*kTPCWirePlaneWidth+198/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire200" unit="cm" x="-0.5*kTPCWirePlaneWidth+199/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire201" unit="cm" x="-0.5*kTPCWirePlaneWidth+200/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire202" unit="cm" x="-0.5*kTPCWirePlaneWidth+201/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire203" unit="cm" x="-0.5*kTPCWirePlaneWidth+202/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire204" unit="cm" x="-0.5*kTPCWirePlaneWidth+203/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire205" unit="cm" x="-0.5*kTPCWirePlaneWidth+204/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire206" unit="cm" x="-0.5*kTPCWirePlaneWidth+205/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire207" unit="cm" x="-0.5*kTPCWirePlaneWidth+206/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire208" unit="cm" x="-0.5*kTPCWirePlaneWidth+207/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire209" unit="cm" x="-0.5*kTPCWirePlaneWidth+208/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire210" unit="cm" x="-0.5*kTPCWirePlaneWidth+209/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire211" unit="cm" x="-0.5*kTPCWirePlaneWidth+210/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire212" unit="cm" x="-0.5*kTPCWirePlaneWidth+211/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire213" unit="cm" x="-0.5*kTPCWirePlaneWidth+212/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire214" unit="cm" x="-0.5*kTPCWirePlaneWidth+213/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire215" unit="cm" x="-0.5*kTPCWirePlaneWidth+214/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire216" unit="cm" x="-0.5*kTPCWirePlaneWidth+215/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire217" unit="cm" x="-0.5*kTPCWirePlaneWidth+216/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire218" unit="cm" x="-0.5*kTPCWirePlaneWidth+217/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire219" unit="cm" x="-0.5*kTPCWirePlaneWidth+218/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire220" unit="cm" x="-0.5*kTPCWirePlaneWidth+219/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire221" unit="cm" x="-0.5*kTPCWirePlaneWidth+220/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire222" unit="cm" x="-0.5*kTPCWirePlaneWidth+221/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire223" unit="cm" x="-0.5*kTPCWirePlaneWidth+222/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire224" unit="cm" x="-0.5*kTPCWirePlaneWidth+223/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire225" unit="cm" x="-0.5*kTPCWirePlaneWidth+224/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWire"/>
+   <position name="posTPCShieldPlaneWire226" unit="cm" x="-0.5*kTPCWirePlaneWidth+225/225*kTPCWirePlaneWidth" y="kWireOffset" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneLengthSide"/>
+   <position name="posTPCShieldPlaneLengthRightSide" unit="cm" x="0.5*(kTPCWirePlaneWidth+kTPCWirePlaneOuterWidth)" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneLengthSide"/>
+   <position name="posTPCShieldPlaneLengthLeftSide" unit="cm" x="-0.5*(kTPCWirePlaneWidth+kTPCWirePlaneOuterWidth)" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWidthSide"/>
+   <position name="posTPCShieldPlaneWidthBottomSide" unit="cm" x="0" y="0" z="-0.5*(kTPCWirePlaneLength+kTPCWirePlaneOuterWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCShieldPlaneWidthSide"/>
+   <position name="posTPCShieldPlaneWidthTopSide" unit="cm" x="0" y="0" z="0.5*(kTPCWirePlaneLength+kTPCWirePlaneOuterWidth)"/>
+  </physvol>
+ </volume>
+</structure>

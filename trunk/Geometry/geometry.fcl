@@ -1,0 +1,38 @@
+BEGIN_PROLOG
+
+bo_geo:
+{
+ SurfaceY: 2.0e2                      #in cm, vertical distance to the surface
+ Name:            "bo"
+ GDML:            "Geometry/gdml/bo.gdml"
+ ROOT:            "Geometry/gdml/bo.root"
+}
+
+argoneut_geo:
+{
+ SurfaceY: 130.0e2                      #in cm, vertical distance to the surface
+ Name:            "argoneut"
+ GDML:            "Geometry/gdml/argoneut.gdml"
+ ROOT:            "Geometry/gdml/argoneut.root"
+}
+
+microboone_geo:
+{
+ SurfaceY: 2.0e2                          #in cm, vertical distance to the surface
+ Name:            "microboone"
+ GDML:            "Geometry/gdml/microboone.gdml"
+ ROOT:            "Geometry/gdml/microboone.root"
+ DisableWiresInG4: true                                  # Whether to use wirefree geometry in LArG4
+                                                         #  As per Brians request, wire free file is specified by
+                                                         #  [GDMLFileName]_nowires.gdml
+}
+
+lbne_geo:
+{
+ SurfaceY: 243.84e2                  #in cm, vertical distance to the surface
+ Name:            "lbne"
+ GDML:            "Geometry/gdml/lbne.gdml"
+ ROOT:            "Geometry/gdml/lbne.root"
+}
+
+END_PROLOG

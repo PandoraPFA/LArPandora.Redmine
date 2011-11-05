@@ -1,0 +1,10 @@
+BEGIN_PROLOG
+
+standard_hitfinderana:
+{
+ module_type:          "HitFinderAna"
+ HitsModuleLabel:      "ffthit"
+ LArGeantModuleLabel:  "largeant"
+}
+
+END_PROLOG

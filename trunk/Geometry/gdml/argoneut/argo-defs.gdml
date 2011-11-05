@@ -1,0 +1,36 @@
+<constant name="kDetEnclosureWidth"	      value="58.0*kInch+0.125*kInch*2" />
+<constant name="kDetEnclosureHeight"	  value="64.0*kInch+0.125*kInch*2+0.5" />
+<constant name="kDetEnclosureLength"	  value="68.0*kInch+0.125*kInch*2" />
+<constant name="kWorldW"                  value="kDetEnclosureWidth"/>
+<constant name="kWorldH"                  value="kDetEnclosureHeight"/>
+<constant name="kWorldL"                  value="kDetEnclosureLength"/>
+
+<constant name="kTPCWidth"		          value="90" />
+<constant name="kTPCLength"		          value="40" />
+<constant name="kTPCDepth"		          value="47.5" />
+<constant name="kTPCWallThickness"	      value="0.5*kInch" />
+<constant name="kTPCStripThickness"	      value="0.1" />
+<constant name="kTPCStripWidth"		      value="1.0" />
+
+<constant name="kTPCWirePlaneThickness"   value="0.4" />
+<constant name="kTPCWireThickness"	      value="0.015" />
+<constant name="kTPCWirePlaneWidth"       value="kTPCWidth" />
+<constant name="kTPCWirePlaneOuterWidth"  value="5" />
+<constant name="kTPCWirePlaneLength"	  value="kTPCLength" />
+<constant name="kTPCWirePitch"            value="0.4"/>
+<constant name="kCos30"                   value="0.8660254038"/>
+<constant name="kCos60"                   value="0.5"/>
+<constant name="kSin60"                   value="0.8660254038"/>
+<constant name="kTan60"                   value="1.7320508076"/>
+<constant name="kTPCWireXPitch"           value="kTPCWirePitch/kCos30"/>
+
+<constant name="kTubLength"               value="68.0*kInch"/>
+<constant name="kTubHeight"               value="64.0*kInch"/>
+<constant name="kTubWidth"                value="58.0*kInch"/>
+<constant name="kTubWallThick"            value="0.125*kInch"/>
+
+<constant name="kWireOffset"              value="0.2"/>
+<constant name="kFirstInductionWireL"     value="3.65"/>
+<constant name="kLastInductionWireL"      value="1.70"/>
+
+

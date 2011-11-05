@@ -1,0 +1,37 @@
+BEGIN_PROLOG
+
+argoneut_harris:
+{
+ module_type:        "HarrisVertexFinder"
+ DBScanModuleLabel:  "dbscan"
+ TimeBins:           256
+ MaxCorners:         20
+ Gsigma:             1.
+ Window:             5
+ Threshold:          0.1
+ SaveVertexMap:      -1
+}
+
+argoneut_vertexmatch:
+{
+ module_type:       "VertexMatch"
+ HoughModuleLabel:  "hough"
+ VertexModuleLabel: "harris"
+ MaxDistance:       30.
+}
+
+argoneut_primaryvertex:
+{
+ module_type:       "PrimaryVertexFinder"
+ TrackModuleLabel:  "track3d"
+ VertexWindow:       0.5
+}
+
+argoneut_vertex2d:
+{
+ module_type:       "VertexFinder2D"
+ ClusterModuleLabel:  "linemerger"
+}
+
+
+END_PROLOG

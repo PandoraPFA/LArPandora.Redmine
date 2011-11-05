@@ -1,0 +1,25 @@
+BEGIN_PROLOG
+
+argoneut_vertexactivity:
+{ 
+ module_type:                 "VertexActivity"
+ DBScanModuleLabel:           "dbscan"
+ LArG4ModuleLabel:            "largeant"
+ HitsModuleLabel:             "ffthit"
+ GenieGenModuleLabel:         "generator"
+ ScanModuleLabel:             "merge"
+ Cathodetimelocation:          75. 
+ Delta_Cathodetimelocation:    10.
+ E_lifetime:                   750.
+ Delta_E_lifetime:             20.
+ Recombination_factor:         0.640
+ Delta_Recombination_factor:   0.013
+ Workfunction_factor:          23.6
+ Delta_Workfunction_factor:    0.5
+ Calibration_factor:           0.133  
+ Delta_Calibration_factor:     0.
+ ActivityRadius:               25.   
+}
+
+
+END_PROLOG

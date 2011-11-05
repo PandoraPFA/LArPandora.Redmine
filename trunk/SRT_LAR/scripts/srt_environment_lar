@@ -1,0 +1,521 @@
+#!/bin/sh
+
+# srt_environment
+# Sets, modifies and displays environment variables for SoftRelTools
+
+script_defaults () {
+	being_sourced=n
+	do_defaults=n
+	do_super=n
+	shell_style=sh
+	do_query=y
+	output_file=""
+	overrides=""
+	do_usage=n
+	auto_local=n
+	do_unsetup=n
+	do_total_unsetup=n
+}
+
+process_args () {
+	while getopts "?dacsSNqXo-:" opt; do
+		if [ "$opt" = "-" ]; then
+			opt=$OPTARG
+		fi
+		case $opt in 
+			\? | help)
+				do_usage=y
+				;;
+			d | defaults)
+				do_defaults=y
+			    ;;
+			a | auto-local)
+				auto_local=y
+			    ;;
+			S | Super)
+				do_super=y
+				;;
+			N | No-Super)
+				do_super=n
+				;;	
+			c | csh )
+				shell_style=csh
+			    ;;
+			s | sh )
+				shell_style=sh
+			    ;;
+			q | query)
+				do_query=y
+			    ;;
+			u | unsetup)
+				do_unsetup=y
+				;;
+			totally-unsetup)
+				do_total_unsetup=y
+				;;
+			X) 
+				being_sourced=y
+				do_query=n
+				find_output_file_name
+				if [ ! "$SRT_ENV_SET" = "yes" ]; then
+					do_defaults=y
+				fi
+			    ;;
+			*) usage
+			   ;;
+			
+		esac
+	done
+	if [ "$do_usage" = y ]; then
+		usage
+	fi
+	shift `expr $OPTIND - 1`
+	if [ $# -gt "0" ]; then
+		overrides=$*
+	fi
+}
+
+fail () {
+	echo "$1" >&2
+	echo "$prog_name failed." >&2
+	exit 1
+}
+
+process_overrides () {
+	for item in $overrides
+	do
+		eval $item
+	done
+}
+	
+special_echo () {
+	if [ "$being_sourced" = "y" ]; then
+		echo "echo '$1'" >> $output_file
+	else
+		echo "$1"
+	fi
+}
+
+usage () {
+	special_echo "usage: srt_environment"
+	special_echo "usage: srt_setup [options] [VAR1=value1 VAR2=value2 ...]"
+	special_echo 
+	special_echo "srt_setup sets the necessary environment variables for SoftRelTools."
+	special_echo "srt_environment displays the variables."
+	special_echo
+	special_echo "options:"
+	special_echo "    -?, --help: prints this usage message"
+	special_echo "    -d, --defaults: set variables to defaults"
+	special_echo "    -a, --auto-local: automatically set local context"
+	special_echo "    -S, --Super: use super test release"
+	special_echo "    -N, --No-Super: use ordinary test release"
+	special_echo "    -u, --unsetup: unsetup the SoftRelTools environment variables"
+	special_echo "    --totally-unsetup: remove all trace of SoftRelTools"
+	special_echo "    -c, --csh: use cshell syntax (sh syntax used by default)"
+	special_echo "    -s, --sh: use shell syntax"
+	special_echo "    -q, --query: query current settings (default behavior for srt_environment)"
+	special_echo "    -X print out variables to tmp file to be sourced by script"
+	special_echo "n.b. srt_environment does not set variables itself."
+	special_echo "     To actually set variables it must be sourced by the alias srt_setup."
+	if [ "$being_sourced" = "y" ]; then
+		echo "/bin/rm $output_file" >> $output_file
+		echo $output_file
+	fi
+	exit
+}
+
+defaults () {
+	if [ -n "$DEFAULT_SRT_DIST" ]; then
+		SRT_DIST=$DEFAULT_SRT_DIST
+	else
+		SRT_DIST="not-set"
+	fi
+	if [ -n "$DEFAULT_SRT_LOCAL" ]; then
+		SRT_LOCAL=$DEFAULT_SRT_LOCAL
+	else
+		SRT_LOCAL="."
+	fi
+	if [ -n "$DEFAULT_SRT_BASE_RELEASE" ]; then
+		SRT_BASE_RELEASE=$DEFAULT_SRT_BASE_RELEASE
+	else
+		SRT_BASE_RELEASE="current"
+	fi
+	if [ -n "$DEFAULT_SRT_CXX" ]; then
+		SRT_CXX=$DEFAULT_SRT_CXX
+	else
+		SRT_CXX="not-set"
+	fi
+	if [ -n "$DEFAULT_SRT_QUAL" ]; then
+		SRT_QUAL=$DEFAULT_SRT_QUAL
+	else
+		SRT_QUAL="default"
+	fi
+}
+
+find_output_file_name () {
+    output_file="/tmp/srt_env_tmp.$$"
+    if [ -f $output_file ]; then
+       i=0
+       while [ -f $output_file ]; do
+	    i=`expr $i + 1` 
+	    output_file="/tmp/srt_env_tmp.$i.$$"
+       done
+    fi
+}
+
+
+get_automatic_vars () {
+	SRT_ARCH="NONE"
+	uname=`uname`
+	SRT_ARCH=$uname`uname -r | cut -c1-3`
+	if [ $uname = "AIX" ]; then
+		SRT_ARCH=$uname`uname -v | cut -c1`
+	elif [ $uname = "HP-UX" ]; then
+		if [ `uname -r | cut -c3` = 0 ]; then
+    		SRT_ARCH=`uname``uname -r | cut -c4`
+		fi
+	elif [ $uname = "HP-UX" ]; then
+		if [ `uname -r | cut -c3` != 0 ]; then
+    		SRT_ARCH=$uname`uname -r | cut -c3-4`
+		fi
+	elif [ $uname = "OSF1" ]; then
+		SRT_ARCH=$uname`uname -r | cut -c1-2`
+	elif [ $uname = "IRIX" -o $uname = "IRIX64" ]; then
+		SRT_ARCH=IRIX`uname -r| cut -c1-3`
+	elif [ $uname = "Darwin" ]; then
+		SRT_ARCH=`uname`
+	fi
+
+	if [ -n "$DEFAULT_SRT_PROJECT" ]; then
+		SRT_PROJECT=$DEFAULT_SRT_PROJECT
+	else
+		if [ -f "$SRT_DIST/srt/project" ]; then
+			SRT_PROJECT=`cat "$SRT_DIST/srt/project"`
+		else
+			SRT_PROJECT=default
+		fi
+	fi
+
+	if [ -n "$DEFAULT_CVSROOT" ]; then
+		CVSROOT=$DEFAULT_CVSROOT
+	else
+		if [ -f "$SRT_DIST/srt/cvsroot" ]; then
+			CVSROOT=`cat "$SRT_DIST/srt/cvsroot"`
+		fi
+	fi
+}
+
+# add_extra_vars is a stub. It can be overriden by system prefs.
+add_extra_vars () { 
+
+	#set environmental variables necessary for using ART FileInPath functionality
+        #will the SRT_PRIVATE_CONTEXT actually reset after the setup???
+        FW_RB="$SRT_PRIVATE_CONTEXT"
+	FW_B="$SRT_PUBLIC_CONTEXT"
+        FW_SP="$SRT_PRIVATE_CONTEXT/:$SRT_PUBLIC_CONTEXT/:${FW_DATA}/"
+        FHICL_FP="./:$SRT_PRIVATE_CONTEXT/job/:$SRT_PRIVATE_CONTEXT/:$SRT_PUBLIC_CONTEXT/job/:$SRT_PUBLIC_CONTEXT/"
+}
+
+derive_vars () {
+	if [ "$do_super" = "y" ]; then
+		SRT_SUPER=true
+	else
+		SRT_SUPER=false
+	fi
+	SRT_PRIVATE_CONTEXT=$SRT_LOCAL
+	if [ "$SRT_SUPER" = "true" ]; then
+		SRT_PUBLIC_CONTEXT=$SRT_LOCAL/super
+	else
+		SRT_PUBLIC_CONTEXT=$SRT_DIST/releases/$SRT_BASE_RELEASE
+	fi
+	if [ "$SRT_QUAL" = "default" ]; then
+		SRT_SUBDIR="$SRT_ARCH-$SRT_CXX"
+	else
+		SRT_SUBDIR="$SRT_ARCH-$SRT_CXX-$SRT_QUAL"
+	fi
+	SRT_MAKEFLAGS="-r -I$SRT_PRIVATE_CONTEXT/include/SRT_$SRT_PROJECT -I$SRT_PUBLIC_CONTEXT/include/SRT_$SRT_PROJECT -I$SRT_PRIVATE_CONTEXT/include -I$SRT_PUBLIC_CONTEXT/include"
+	if [ "$SRT_SUPER" = "true" ]; then
+		SRT_MAKEFLAGS="$SRT_MAKEFLAGS -I$SRT_DIST/releases/$SRT_BASE_RELEASE/include/SoftRelTools/super_extra"
+	fi
+	SRT_MAKEFILES="SoftRelTools/preamble.mk"
+	if [ ! "$SRT_NO_MAKEFLAGS" = "true" ]; then
+		MAKEFLAGS=$SRT_MAKEFLAGS
+		MAKEFILES=$SRT_MAKEFILES
+	fi
+	if [ "$SRT_ENV_SET" = "yes" ]; then
+		PATH=`srt_int_drop -p "$PATH" $old_SRT_PRIVATE_CONTEXT/bin/$old_SRT_SUBDIR`
+		PATH=`srt_int_drop -p "$PATH" $old_SRT_PUBLIC_CONTEXT/bin/$old_SRT_SUBDIR`
+	fi
+	PATH=$SRT_PUBLIC_CONTEXT/bin/$SRT_SUBDIR:$PATH
+	PATH=$SRT_PRIVATE_CONTEXT/bin/$SRT_SUBDIR:$PATH
+	if [ "$SRT_ENV_SET" = "yes" ]; then
+		LD_LIBRARY_PATH=`srt_int_drop -p "$LD_LIBRARY_PATH" $old_SRT_PRIVATE_CONTEXT/lib/$old_SRT_SUBDIR`
+		LD_LIBRARY_PATH=`srt_int_drop -p "$LD_LIBRARY_PATH" $old_SRT_PUBLIC_CONTEXT/lib/$old_SRT_SUBDIR`
+	fi
+	LD_LIBRARY_PATH=$SRT_PUBLIC_CONTEXT/lib/$SRT_SUBDIR:$LD_LIBRARY_PATH
+	LD_LIBRARY_PATH=$SRT_PRIVATE_CONTEXT/lib/$SRT_SUBDIR:$LD_LIBRARY_PATH
+	if [ "$SRT_ENV_SET" = "yes" ]; then
+		MANPATH=`srt_int_drop -p "$MANPATH" $old_SRT_PRIVATE_CONTEXT/man`
+		MANPATH=`srt_int_drop -p "$MANPATH" $old_SRT_PUBLIC_CONTEXT/man`
+	fi
+	MANPATH=$SRT_PUBLIC_CONTEXT/man:$MANPATH
+	MANPATH=$SRT_PRIVATE_CONTEXT/man:$MANPATH
+	
+	BFARCH=$SRT_SUBDIR
+	BFDIST=$SRT_DIST
+	BFCURRENT=$SRT_BASE_RELEASE
+        add_extra_vars
+}
+
+save_vars () {
+	SRT_SAVE_CVSROOT="$CVSROOT"
+	SRT_SAVE_MAKEFILES="$MAKEFILES"
+	SRT_SAVE_MAKEFLAGS="$MAKEFLAGS"
+}
+
+print_var () {
+	local_style=$3
+	if [ "$local_style" = "sh" ]; then
+		echo "$1=\"$2\"" >> $output_file
+		echo "export $1" >> $output_file
+	elif [ "$local_style" = "csh" ]; then
+		echo "setenv $1 \"$2\"" >> $output_file
+	elif [ "$local_style" = "human" ]; then
+		echo "$1 = \"$2\""
+	fi
+}
+
+print_vars () {
+	local_style=$1
+
+	if [ "$local_style" = "human" ]; then
+		echo "Variables for backward compatibility:"
+	fi
+	print_var BFARCH "$BFARCH" $local_style
+	print_var BFDIST "$BFDIST" $local_style
+	print_var BFCURRENT "$BFCURRENT" $local_style
+
+	if [ "$local_style" = "human" ]; then
+		echo ""
+		echo "Automatic and derived variables:"
+		if [ ! "$SRT_ENV_SET" = "yes" ]; then
+			fail "SRT has not been initialized with srt_setup."
+		fi
+	fi
+	print_var PATH "$PATH" $local_style
+	print_var LD_LIBRARY_PATH "$LD_LIBRARY_PATH" $local_style
+	print_var MANPATH "$MANPATH" $local_style
+	print_var SRT_PRIVATE_CONTEXT "$SRT_PRIVATE_CONTEXT" $local_style
+	print_var SRT_PUBLIC_CONTEXT "$SRT_PUBLIC_CONTEXT" $local_style
+	print_var SRT_MAKEFILES "$MAKEFILES" $local_style
+	print_var SRT_MAKEFLAGS "$MAKEFLAGS" $local_style
+	if [ ! "$SRT_NO_MAKEFLAGS" = "true" ]; then
+		print_var MAKEFILES "$MAKEFILES" $local_style
+		print_var MAKEFLAGS "$MAKEFLAGS" $local_style
+		print_var SRT_SAVE_MAKEFILES "$SRT_SAVE_MAKEFILES" $local_style
+		print_var SRT_SAVE_MAKEFLAGS "$SRT_SAVE_MAKEFLAGS" $local_style
+	fi
+	print_var CVSROOT "$CVSROOT" $local_style
+	print_var SRT_SAVE_CVSROOT "$SRT_SAVE_CVSROOT" $local_style
+	print_var SRT_SUBDIR "$SRT_SUBDIR" $local_style
+	print_var SRT_PROJECT "$SRT_PROJECT" $local_style
+	print_var SRT_ARCH "$SRT_ARCH" $local_style
+	print_var SRT_ENV_SET "$SRT_ENV_SET" $local_style
+
+
+	if [ "$local_style" = "human" ]; then
+		echo ""
+		echo "User settable variables:"
+	fi
+	print_var SRT_LOCAL "$SRT_LOCAL" $local_style
+	print_var SRT_DIST "$SRT_DIST" $local_style
+	print_var SRT_BASE_RELEASE "$SRT_BASE_RELEASE" $local_style
+	print_var SRT_CXX "$SRT_CXX" $local_style
+	print_var SRT_QUAL "$SRT_QUAL" $local_style
+	print_var SRT_SUPER "$SRT_SUPER" $local_style
+
+	print_var FW_RELEASE_BASE "$FW_RB" $local_style
+	print_var FW_SEARCH_PATH "$FW_SP" $local_style
+	print_var FHICL_FILE_PATH "$FHICL_FP" $local_style
+}
+
+unset_var () {
+	local_style=$2
+	if [ "$local_style" = "sh" ]; then
+		echo "unset $1" >> $output_file
+	elif [ "$local_style" = "csh" ]; then
+		echo "unsetenv $1" >> $output_file
+	elif [ "$local_style" = "human" ]; then
+		echo "unset $1"
+	fi
+}
+
+# remove_extra_vars is a stub. It can be overriden by system prefs.
+remove_extra_vars () { :; }
+
+unsetup () {
+	local_style=$1
+	if [ "$SRT_ENV_SET" = "yes" ]; then
+		remove_extra_vars
+
+		unset_var BFARCH $local_style
+		unset_var BFDIST $local_style
+		unset_var BFCURRENT $local_style
+
+		PATH=`srt_int_drop -p "$PATH" $SRT_PRIVATE_CONTEXT/bin/$SRT_SUBDIR`
+		PATH=`srt_int_drop -p "$PATH" $SRT_PUBLIC_CONTEXT/bin/$SRT_SUBDIR`
+		print_var PATH "$PATH" $local_style
+		
+		LD_LIBRARY_PATH=`srt_int_drop -p "$LD_LIBRARY_PATH" $SRT_PRIVATE_CONTEXT/lib/$SRT_SUBDIR`
+		LD_LIBRARY_PATH=`srt_int_drop -p "$LD_LIBRARY_PATH" $SRT_PUBLIC_CONTEXT/lib/$SRT_SUBDIR`
+		print_var LD_LIBRARY_PATH "$LD_LIBRARY_PATH" $local_style
+
+		MANPATH=`srt_int_drop -p "$MANPATH" $SRT_PRIVATE_CONTEXT/man`
+		MANPATH=`srt_int_drop -p "$MANPATH" $SRT_PUBLIC_CONTEXT/man`
+		print_var MANPATH "$MANPATH" $local_style
+		                
+		unset_var SRT_PRIVATE_CONTEXT $local_style
+		unset_var SRT_PUBLIC_CONTEXT $local_style
+		print_var MAKEFILES "$SRT_SAVE_MAKEFILES" $local_style
+		unset_var SRT_MAKEFILES $local_style
+		unset_var SRT_SAVE_MAKEFILES $local_style
+		print_var MAKEFLAGS "$SRT_SAVE_MAKEFLAGS" $local_style
+		unset_var SRT_MAKEFLAGS $local_style
+		unset_var SRT_SAVE_MAKEFLAGS $local_style
+		#only restore CVSROOT if user has not changed it
+		if [ -n "$DEFAULT_CVSROOT" ]; then
+			SRT_CVSROOT=$DEFAULT_CVSROOT
+		else
+			if [ -f "$SRT_DIST/srt/cvsroot" ]; then
+				SRT_CVSROOT=`cat "$SRT_DIST/srt/cvsroot"`
+			fi
+		fi
+		if [ "$CVSROOT" = "$SRT_CVSROOT" ]; then
+			print_var CVSROOT "$SRT_SAVE_CVSROOT" $local_style
+		fi
+		unset_var SRT_SAVE_CVSROOT $local_style
+		unset_var SRT_SUBDIR $local_style
+		unset_var SRT_PROJECT $local_style
+		unset_var SRT_ARCH $local_style
+		unset_var SRT_ENV_SET $local_style
+		
+		unset_var SRT_LOCAL $local_style
+		unset_var SRT_BASE_RELEASE $local_style
+		unset_var SRT_CXX $local_style
+		unset_var SRT_QUAL $local_style
+		unset_var SRT_SUPER $local_style
+	fi
+}
+
+total_unsetup () {
+	local_style=$1
+	unsetup $local_style
+	unset_var DEFAULT_SRT_DIST $local_style
+	unset_var SRT_DIST $local_style
+	unset_var DEFAULT_SRT_LOCAL $local_style
+	unset_var DEFAULT_SRT_BASE_RELEASE $local_style
+	unset_var DEFAULT_SRT_CXX $local_style
+	unset_var DEFAULT_SRT_QUAL $local_style
+	
+	PATH=`srt_int_drop -p "$PATH" $SRT_DIST/releases/boot/bin/generic`
+	print_var PATH "$PATH" $local_style
+
+	if [ "$local_style" = "sh" ]; then
+		echo "unset -f srt_setup" >> $output_file
+	elif [ "$local_style" = "csh" ]; then
+		echo "unalias srt_setup" >> $output_file
+	elif [ "$local_style" = "human" ]; then
+		echo "unset -f srt_setup"
+	fi
+}
+
+actions () {
+	if [ "$being_sourced" = "y" ]; then
+		orig_SRT_DIST=$SRT_DIST
+
+		if [ "$SRT_ENV_SET" = "yes" ]; then
+			old_SRT_PRIVATE_CONTEXT=$SRT_PRIVATE_CONTEXT
+			old_SRT_PUBLIC_CONTEXT=$SRT_PUBLIC_CONTEXT
+			old_SRT_SUBDIR=$SRT_SUBDIR
+		fi
+
+		if [ "$do_unsetup" = "y" ]; then
+			unsetup $shell_style
+		elif [ "$do_total_unsetup" = "y" ]; then
+			total_unsetup $shell_style
+		else # We are doing an ordinary setup
+			if [ ! "$SRT_ENV_SET" = "yes" ]; then
+				save_vars
+			fi
+			get_automatic_vars
+			read_envrc
+			if [ "$do_defaults" = "y" ]; then
+				defaults
+			fi
+			if [ "$auto_local" = "y" ]; then
+				SRT_LOCAL=`srt_int_info --local`
+			fi
+			process_overrides
+			derive_vars
+			SRT_ENV_SET=yes
+			print_vars $shell_style
+
+		fi
+		echo $output_file
+		echo "/bin/rm $output_file" >> $output_file
+	fi
+	
+	if [ "$do_query" = "y" ]; then
+		echo "SRT settings:"
+		print_vars "human"
+	fi
+}
+
+read_envrc () {
+	if [ -f "$SRT_DIST/srt/srt_envrc" ]; then
+		. "$SRT_DIST/srt/srt_envrc"
+	fi
+	if [ -f "$SRT_PUBLIC_CONTEXT/srt_envrc" ]; then
+		. "$SRT_PUBLIC_CONTEXT/srt_envrc"
+	fi
+	if [ -f "$SRT_PRIVATE_CONTEXT/srt_envrc" ]; then
+		. "$SRT_PRIVATE_CONTEXT/srt_envrc"
+	fi
+	if [ -f "$HOME/.srt_envrc" ]; then
+		. "$HOME/.srt_envrc"
+	fi
+}
+
+main () {
+	script_defaults
+
+        case "$*" in
+        *unsetup*)
+		: do not double unsetup actions..
+                ;;
+        *)
+		# do a dry run...
+		project_customization > /dev/null 2>&1
+		process_args $* > /dev/null 2>&1
+		actions > /dev/null 2>&1
+		: > $output_file
+                ;;
+        esac
+
+	# now do it for real
+	project_customization
+	process_args $*
+	actions
+}
+
+project_customization() {
+prog_name=srt_environment
+if [ -f "$SRT_PRIVATE_CONTEXT/SRT_$SRT_PROJECT/special/scripts/$prog_name" ]; then
+	. "$SRT_PRIVATE_CONTEXT/SRT_$SRT_PROJECT/special/scripts/$prog_name"
+elif [ -f "$SRT_PUBLIC_CONTEXT/SRT_$SRT_PROJECT/special/scripts/$prog_name" ]; then
+	. "$SRT_PUBLIC_CONTEXT/SRT_$SRT_PROJECT/special/scripts/$prog_name"
+fi
+}
+
+main $*
+

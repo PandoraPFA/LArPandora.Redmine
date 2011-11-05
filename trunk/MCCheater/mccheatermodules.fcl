@@ -1,0 +1,62 @@
+BEGIN_PROLOG
+
+standard_checkbacktrack:
+{
+ module_type:       "CheckBackTracking"
+ HitModuleLabel:    "ffthit"
+ G4ModuleLabel:     "largeant"
+}
+
+standard_clustercheater:
+{
+ module_type:       "ClusterCheater"
+ HitModuleLabel:    "ffthit"
+ G4ModuleLabel:     "largeant"
+}
+
+standard_showercheater:
+{
+ module_type:         "ShowerCheater"
+ CheatedClusterLabel: "cluster"
+ G4ModuleLabel:       "largeant"
+}
+
+standard_trackcheater:
+{
+ module_type:         "TrackCheater"
+ CheatedClusterLabel: "cluster"
+ G4ModuleLabel:       "largeant"
+}
+
+standard_vertexcheater:
+{
+ module_type:       "VertexCheater"
+ CheatedProngLabel: "prong"
+ G4ModuleLabel:     "largeant"
+}
+
+standard_eventcheater:
+{
+ module_type:        "EventCheater"
+ CheatedVertexLabel: "vertex"
+ G4ModuleLabel:      "largeant"
+}
+
+standard_recocheck:
+{
+ module_type:        "RecoCheckAna"
+ HitModuleLabel:     "ffthit"
+ ClusterModuleLabel: "cluster"
+ ShowerModuleLabel:  "shower"
+ TrackModuleLabel:   "track"
+ VertexModuleLabel:  "vertex"
+ EventModuleLabel:   "event"
+ G4ModuleLabel:      "largeant"
+ CheckClusters:      true
+ CheckShowers:       true
+ CheckTracks:        true
+ CheckVertices:      true
+ CheckEvents:        true
+}
+
+END_PROLOG

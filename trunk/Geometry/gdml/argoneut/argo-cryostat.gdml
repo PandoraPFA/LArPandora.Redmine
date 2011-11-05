@@ -1,0 +1,174 @@
+<define>
+  <position name="TPCalign" unit="cm" x="0.5*kTPCWallThickness-0.5*kTPCWirePlaneThickness" y="-0.2" z="0"/>
+</define>
+
+<solids>
+ <tube name="Cryostat" 
+  rmax="(53.34)"
+  z="162.7"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="OuterSteelTube"
+  rmin="(53.34)-0.635"
+  rmax="(53.34)"
+  z="122.516"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="InnerSteelTube"
+  rmin="38.1-0.476"
+  rmax="38.1"
+  z="101.13"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="ArgonTube"
+  rmax="38.1-0.476"
+  z="101.13"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="Tube_for_subtr"
+  rmax="38.1"
+  z="101.13"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="Inner_ring"
+  rmin="38.1"
+  rmax="45.7"
+  z="7"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="Inner_ring2"
+  rmin="38.1"
+  rmax="45.7"
+  z="6.4"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+
+<sphere name="Argon_solid_L" rmin="0" rmax="62.64" deltaphi="2*(3.1415926535897)" deltatheta="0.6444" aunit="rad"
+lunit="cm"/>
+<sphere name="Inner_endcap" rmin="62.944" rmax="63.42" deltaphi="2*(3.1415926535897)" deltatheta="0.6444" aunit="rad"
+lunit="cm"/>
+<sphere name="Outer_endcap" rmin="80.80" rmax="81.28" deltaphi="2*(3.1415926535897)" deltatheta="0.715" aunit="rad"
+lunit="cm"/>
+<subtraction name="Argon_cap_L">
+   <first ref="Argon_solid_L"/> <second ref="Tube_for_subtr"/>
+  </subtraction>
+<subtraction name="ArgonTubeMinusTPC">
+   <first ref="ArgonTube"/> <second ref="TPC"/>
+   <positionref ref="TPCalign"/>
+  </subtraction>
+</solids>
+<structure>
+ <volume name="volOuterSteelTube">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="OuterSteelTube"/>
+ </volume>
+<volume name="volInnerSteelTube">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="InnerSteelTube"/>
+ </volume>
+ <volume name="volTube_for_subtr">
+  <materialref ref="LAr"/>
+  <solidref ref="Tube_for_subtr"/>
+  </volume>
+<volume name="volArgonTube">
+  <materialref ref="LAr"/>
+  <solidref ref="ArgonTube"/>
+ </volume>
+<volume name="volArgon_solid_L">
+  <materialref ref="LAr"/>
+  <solidref ref="Argon_solid_L"/>
+ </volume>
+<volume name="volArgon_cap_L">
+  <materialref ref="LAr"/>
+  <solidref ref="Argon_cap_L"/>
+ </volume>
+<volume name="volInner_ring">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Inner_ring"/>
+ </volume>
+<volume name="volInner_ring2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Inner_ring2"/>
+ </volume>
+
+<volume name="volInner_endcap">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Inner_endcap"/>
+</volume>
+<volume name="volOuter_endcap">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Outer_endcap"/>
+</volume>
+<volume name="volArgonTubeMinusTPC">
+  <materialref ref="LAr"/>
+  <solidref ref="ArgonTubeMinusTPC"/>
+ </volume>
+<volume name="volCryostat">
+  <materialref ref="Vacuum"/>
+  <solidref ref="Cryostat"/>
+
+
+
+<physvol>
+   <volumeref ref="volArgon_cap_L"/>
+   <position name="posArgon_cap1" x="0.0" y="0" z="0"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volArgon_cap_L"/>
+   <position name="posArgon_cap2" x="0.0" y="0" z="0"/>
+<rotationref ref="rPlus180AboutY"/>
+</physvol>
+<physvol>
+   <volumeref ref="volOuterSteelTube"/>
+   <position name="posOuterSteelTube" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volInnerSteelTube"/>
+   <position name="posInnerSteelTube" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+
+<physvol>
+   <volumeref ref="volArgonTubeMinusTPC"/>
+   <position name="posArgonTubeMinusTPC" x="0" y="0" z="0"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volTPC"/>
+   <position name="posTPC" unit="cm" x="0.5*kTPCWallThickness-0.5*kTPCWirePlaneThickness" y="-0.2" z="0"/>   
+  </physvol>
+<physvol>
+   <volumeref ref="volInner_ring"/>
+   <position name="posInner_ring" unit="cm" x="0" y="0" z="(-101.13/2)+6.35+(0.5*6.985)"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volInner_ring2"/>
+   <position name="posInner_ring2" unit="cm" x="0" y="0" z="(-101.13/2)+(0.5*6.35)"/>
+  </physvol>
+
+<physvol>
+   <volumeref ref="volInner_endcap"/>
+   <position name="posInner_endcap1" unit="cm" x="0" y="0" z="-0.238-0.00576844"/>
+ <rotationref ref="rPlus180AboutY"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volInner_endcap"/>
+   <position name="posInner_endcap2" unit="cm" x="0" y="0" z="0.238+0.00576844"/>
+</physvol>
+<physvol>
+   <volumeref ref="volOuter_endcap"/>
+   <position name="posOuter_endcap1" unit="cm" x="0" y="0" z="0.238+0.00846643199"/>
+</physvol>
+<physvol>
+   <volumeref ref="volOuter_endcap"/>
+   <position name="posOuter_endcap2" unit="cm" x="0" y="0" z="-0.238-0.00846643199"/>
+ <rotationref ref="rPlus180AboutY"/>
+</physvol>
+
+ </volume>
+</structure>

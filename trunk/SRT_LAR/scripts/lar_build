@@ -1,0 +1,167 @@
+#!/usr/bin/perl
+
+#script to build LArSOft in the correct order
+
+$debug_level      = 0;
+$skip_sys_command = 0;
+$minus_j = "";
+
+use Getopt::Long;
+Getopt::Long::config('bundling_override');
+
+my %options;
+GetOptions(\%options, 'rel=s','help','h', 'debug', 't', 'test', 'log=s', 'noclean', 'j=i');
+
+if ((defined $options{'h'}) || (defined $options{'help'})) {
+  print_help();
+}
+
+if(defined $options{'log'} ){
+    $logfile = $options{'log'};
+    open(STDOUT,">$logfile");
+    print "Starting FNAL LArSoft Build at ";
+    print scalar localtime();
+    print "\n";
+}
+
+if( defined $options{'debug'} ){
+  $srtqual = $ENV{"SRT_QUAL"};
+  if( $srtqual!="debug" ){
+   print "SRT not setup with SRT_QUAL=debug, can't build debug\n";
+  }
+}
+
+if (defined $options{'rel'}) {
+  $release = $options{'rel'};
+}
+else {
+  if (defined $ENV{"SRT_BASE_RELEASE"}) {
+    $release = $ENV{"SRT_BASE_RELEASE"};
+  }
+  else {
+    die "No release is defined\n";
+  }
+}
+
+if(defined $options{'j'} ){
+    $minus_j = "-j $options{'j'}";
+    print "Trying to parallelize package builds ($options{'j'})\n";
+}
+
+
+if (! (defined $ENV{'SRT_DIST'})) {
+  print "SRT_DIST variable is not defined! Source srt/srt.[c]sh first.\n";
+  print "Release $release not updated.\n";
+  exit(0);
+}
+
+$SRT_DIST = $ENV{"SRT_DIST"};
+$release_dir = "$SRT_DIST/releases/$release";
+
+#check to see if we are supposed to be building in a test release
+if ((defined $options{'t'}) || (defined $options{'test'})) {
+  if (defined $ENV{"SRT_PRIVATE_CONTEXT"}) {
+    $release_dir = $ENV{"SRT_PRIVATE_CONTEXT"};
+  } 
+}
+
+if (! (-e "$release_dir")) {
+  print "Cannot build non-existant release '$release'\n";
+  exit(0);
+}
+else {
+  print "Building release '$release'\n";
+  chdir("$release_dir");
+}
+
+make_package_list();
+
+foreach my $package(@package_list) {
+  if( -e "$package"){
+    print "building $release_dir/$package \n";
+    defined $options{noclean} or do_sys_command("gmake $package.clean");
+    if(defined $options{'log'}){
+	do_sys_command("gmake $minus_j $package.all 2>&1");
+    }
+    else{
+	do_sys_command("gmake $minus_j $package.all");
+    }
+  }
+}
+
+print "Finished FNAL LArSoft Build at ";
+print scalar localtime();
+print "\n";
+
+#.......................................................................
+
+sub print_help {
+  print "**********************************************************************\n";
+  print "*                                                                    *\n";
+  print "*     Script to update a release that has already been imported.     *\n";
+  print "*        Only ackages which use HEAD version will be updated.        *\n";
+  print "*                                                                    *\n";
+  print "*    Recognized arguments:                                           *\n";
+  print "*       -h or --help: print this message                             *\n";
+  print "*       -rel <release>: specify release to be updated                *\n";
+  print "*       -debug: build with debugging symbols on                      *\n";
+  print "*       -log:        make log files of the build                     *\n";
+  print "*       -noclean: Do not clean each package before building.         *\n";
+  print "*       -t or -test: build test release $SRT_PRIVATE_CONTEXT         *\n";
+  print "*       -j <n>: use gmakes parallel build facility on each package   *\n";
+  print "*               (but there is no parallelism of packages)            *\n";
+  print "*                                                                    *\n";
+  print "**********************************************************************\n";
+  exit(0);
+}
+
+#.......................................................................
+
+sub do_sys_command {
+#
+# Perform system command, but only if flag is set.
+#
+  if ($skip_sys_command>0 || $debug_level>1) {
+    print "% $_[0]\n";
+  }
+  if ($skip_sys_command==0) {
+    system($_[0]);
+  }
+}
+
+sub make_package_list{
+  @package_list =
+    (
+     "SoftRelTools",
+     "SRT_LAR",
+     "Geometry",
+     "SummaryData",
+     "SimulationBase",
+     "RawData",
+     "RecoBase",
+     "Utilities",
+     "Simulation",
+     "MagneticField",
+     "MCCheater",
+     "G4Base",
+     "LArG4",
+     "PhotonPropagation",
+     "DetSim",
+     "EventGeneratorBase",
+     "EventGenerator",
+     "Filters",
+     "CalData",
+     "ClusterFinder",
+     "Genfit",
+     "HitFinder",
+     "ShowerFinder",
+     "TrackFinder",
+     "VertexFinder",
+     "EventFinder",
+     "EventDisplayBase",
+     "EventDisplay",
+     "T962"
+    );
+  $npackage = scalar @package_list;
+}
+

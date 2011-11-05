@@ -1,0 +1,150 @@
+<solids>
+ <box name="DetEnclosure" lunit="cm"
+   x="kDetEnclosureWidth" y="kDetEnclosureHeight" z="kDetEnclosureLength"
+ />
+
+ <box name="TubLongSide"  lunit="cm" x="kTubWallThick" y="kTubHeight"       z="kTubLength" />
+ <box name="TubShortSide" lunit="cm" x="kTubWidth"     y="kTubHeight"       z="kTubWallThick" />
+ <box name="TubBottom"    lunit="cm" x="kTubWidth"     y="2.*kTubWallThick" z="kTubLength" />
+
+<tube name="Outer_ring"
+  rmin="53.34"
+  rmax="61"
+  z="7"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="Outer_ring2"
+  rmin="53.34"
+  rmax="61"
+  z="7"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+
+
+<box name="Bottom"
+ lunit="cm"
+ x="142.24"
+ y="20.32"
+ z="1.27"/>
+
+<xtru name="theX" lunit="cm" >
+<twoDimVertex x="0" y="0" />
+<twoDimVertex x="0" y="30.48" />
+<twoDimVertex x="23.18" y="53.66" />
+<twoDimVertex x="30" y="48" />
+<twoDimVertex x="35" y="44.84" />
+<twoDimVertex x="40" y="42.39" />
+<twoDimVertex x="45" y="40.54" />
+<twoDimVertex x="50" y="39.24" />
+<twoDimVertex x="55" y="38.43" />
+<twoDimVertex x="60.96" y="38.1" />
+<twoDimVertex x="65" y="38.25" />
+<twoDimVertex x="70" y="38.87" />
+<twoDimVertex x="75" y="39.98" />
+<twoDimVertex x="80" y="41.61" />
+<twoDimVertex x="85" y="43.82" />
+<twoDimVertex x="90" y="46.70" />
+<twoDimVertex x="98.74" y="53.66" />
+<twoDimVertex x="121.92" y="30.48" />
+<twoDimVertex x="121.92" y="0" />
+
+<section zOrder="0" zPosition="0" xOffset="0" yOffset="0" scalingFactor="1" />
+
+<section zOrder="1" zPosition="12.7" xOffset="0" yOffset="0" scalingFactor="1" />
+</xtru>
+
+</solids>
+<structure>
+ <volume name="volTubLongSide">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref    ref="TubLongSide"/>
+ </volume>
+ <volume name="volTubShortSide">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref    ref="TubShortSide"/>
+ </volume>
+ <volume name="volTubBottom">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref    ref="TubBottom"/>
+ </volume>
+<volume name="volOuter_ring">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Outer_ring"/>
+ </volume>
+<volume name="volOuter_ring2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Outer_ring2"/>
+ </volume>
+<volume name="voltheX">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="theX"/>
+</volume>
+
+
+ <volume name="volBottom">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Bottom"/>
+ </volume>
+
+ <volume name="volDetEnclosure">
+  <materialref ref="Air"/>
+  <solidref ref="DetEnclosure"/>
+  <physvol>
+   <volumeref ref="volTubLongSide"/>
+   <position  name="posTubLongSide1" unit="cm" x="-0.5*kTubWidth" y="0.4" z="0" />
+  </physvol>  
+  <physvol>
+   <volumeref ref="volTubLongSide"/>
+   <position  name="posTubLongSide2" unit="cm" x="0.5*kTubWidth" y="0.4" z="0" />
+  </physvol>  
+  <physvol>
+   <volumeref ref="volTubShortSide"/>
+   <position  name="posTubShortSide1" unit="cm" x="0" y="0.3175" z="-0.5*kTubLength-0.5*0.3175" />
+  </physvol>  
+  <physvol>
+   <volumeref ref="volTubShortSide"/>
+   <position  name="posTubShortSide2" unit="cm" x="0" y="0.3175" z="0.5*kTubLength+0.5*0.3175" />
+  </physvol>  
+  <physvol>
+   <volumeref ref="volTubBottom"/>
+   <position  name="posTubBottom" unit="cm" x="0" y="-0.5*kTubHeight" z="0" />
+  </physvol> 
+
+
+<physvol>
+   <volumeref ref="volCryostat"/>
+   <position name="posCryostat" unit="cm" x="0" y="12+0.2" z="0"/>
+  
+ 
+
+  </physvol>
+<physvol>
+   <volumeref ref="volOuter_ring"/>
+   <position name="posOuter_ring" unit="cm" x="0" y="12+0.2" z="-(122.516/2)+(6.985/2)+6.985"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volOuter_ring2"/>
+   <position name="posOuter_ring2" unit="cm" x="0" y="12+0.2" z="-(122.516/2)+(6.985/2)"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volBottom"/>
+   <position name="posBottom" unit="cm" x="0" y="-26.865-53.46" z="27.15+(20.32/2)+(12.7*0.5)"/>
+<rotationref ref="rPlus90AboutX"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volBottom"/>
+   <position name="posBottom2" unit="cm" x="0" y="-26.865-53.46" z="-(27.15+(20.32/2)-(12.7*0.5))"/>
+<rotationref ref="rPlus90AboutX"/>
+  </physvol>
+ <physvol>
+   <volumeref ref="voltheX"/>
+   <position name="postheX" unit="cm" x="-60.96" y="-(91.44-(53.66/2))-15.14+0.2-0.00861154-0.0024" z="27.15+(20.32/2)"/>
+  </physvol>
+   <physvol>
+   <volumeref ref="voltheX"/>
+   <position name="postheX2" unit="cm" x="-60.96" y="-(91.44-(53.66/2))-15.14+0.2-0.00861154-0.0024" z="-(27.15+(20.32/2))"/>
+  </physvol>
+</volume>
+</structure>

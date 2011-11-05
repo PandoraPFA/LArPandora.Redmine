@@ -1,0 +1,10 @@
+BEGIN_PROLOG
+
+argoneut_mergesimminos:
+{
+ module_type: "MergeSimMINOS"
+ GeantModuleLabel: "largeant" 
+}
+
+END_PROLOG
+

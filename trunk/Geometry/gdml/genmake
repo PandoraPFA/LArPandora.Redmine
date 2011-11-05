@@ -1,0 +1,4 @@
+#!/usr/bin/perl
+
+`generate_gdml.pl -i microboone-gdml-parameters.xml -o microboone-gdml-fragments.xml`;
+`make_gdml.pl -i microboone-gdml-fragments.xml -o microboone.gdml`;

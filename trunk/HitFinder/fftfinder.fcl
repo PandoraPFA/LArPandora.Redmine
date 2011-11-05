@@ -1,0 +1,22 @@
+BEGIN_PROLOG
+
+standard_hitfinder:
+{
+ module_type:         "FFTHitFinder"
+ CalDataModuleLabel:  "caldata"      #Induction signal height threshold 
+ MinSigInd:            6.0           #Collection signal height threshold 
+ MinSigCol:            11.0          #Initial width for induction fit
+ IndWidth:             6.0           #Iitial width for induction fit
+ ColWidth:             7.8           #Initial width for collection fit
+ IndMinWidth:          4.0           #Induction Hit width threshold
+ ColMinWidth:          6.0           #Collection hit width threshold
+ MaxMultiHit:          3             #maximum hits for multi fit   
+}
+
+argoneut_hitfinder:   @local::standard_hitfinder
+
+microboone_hitfinder: @local::standard_hitfinder
+
+lbne_hitfinder:       @local::standard_hitfinder
+
+END_PROLOG

@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gdml xmlns:gdml="http://cern.ch/2001/Schemas/GDML"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="GDMLSchema/gdml.xsd">
+<define>
+   <rotation name="rHoriEast"      unit="deg" x="-90" y="-90" z="0"/>
+   <rotation name="rVertical"      unit="deg" x="-90" y="0"   z="0"/>
+   <rotation name="rHoriWest"      unit="deg" x="-90" y="90"  z="0"/>
+   <rotation name="rMinus90AboutY" unit="deg" x="0"   y="-90" z="0"/>
+   <rotation name="rMinus90AboutX" unit="deg" x="-90" y="0"   z="0"/>
+   <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
+   <rotation name="rPlus90AboutZ"  unit="deg" x="0"  y="0"   z="90"/>
+   <rotation name="rPlus90AboutXPlus90AboutZ" unit="deg" x="90" y="0" z="90"/>
+   <rotation name="rPlus90AboutXMinus90AboutY" unit="deg" x="90" y="-90" z="0"/>
+   <rotation name="rPlus180AboutX"	unit="deg" x="180" y="0"   z="0"/>
+   <rotation name="r60" unit="deg" x="0" y="0" z="60"/>
+   <rotation name="r120" unit="deg" x="0" y="0" z="120"/>
+</define>
+<materials>
+  <element name="videRef" formula="VACUUM" Z="1">  <atom value="1"/> </element>
+  <element name="bromine" formula="Br" Z="35"> <atom value="79.904"/> </element>
+  <element name="hydrogen" formula="H" Z="1">  <atom value="1.0079"/> </element>
+  <element name="nitrogen" formula="N" Z="7">  <atom value="14.0067"/> </element>
+  <element name="oxygen" formula="O" Z="8">  <atom value="15.999"/> </element>
+  <element name="aluminum" formula="Al" Z="13"> <atom value="26.9815"/>  </element>
+  <element name="silicon" formula="Si" Z="14"> <atom value="28.0855"/>  </element>
+  <element name="carbon" formula="C" Z="6">  <atom value="12.0107"/>  </element>
+  <element name="potassium" formula="K" Z="19"> <atom value="39.0983"/>  </element>
+  <element name="chromium" formula="Cr" Z="24"> <atom value="51.9961"/>  </element>
+  <element name="iron" formula="Fe" Z="26"> <atom value="55.8450"/>  </element>
+  <element name="nickel" formula="Ni" Z="28"> <atom value="58.6934"/>  </element>
+  <element name="calcium" formula="Ca" Z="20"> <atom value="40.078"/>   </element>
+  <element name="magnesium" formula="Mg" Z="12"> <atom value="24.305"/>   </element>
+  <element name="sodium" formula="Na" Z="11"> <atom value="22.99"/>    </element>
+  <element name="titanium" formula="Ti" Z="22"> <atom value="47.867"/>   </element>
+  <element name="argon" formula="Ar" Z="18"> <atom value="39.9480"/>  </element>
+
+  <material name="Vacuum" formula="Vacuum">
+   <D value="1.e-25" unit="g/cm3"/>
+   <fraction n="1.0" ref="videRef"/>
+  </material>
+
+  <material name="ALUMINUM_Al" formula="ALUMINUM_Al">
+   <D value="2.6990" unit="g/cm3"/>
+   <fraction n="1.0000" ref="aluminum"/>
+  </material>
+
+  <material name="SILICON_Si" formula="SILICON_Si">
+   <D value="2.3300" unit="g/cm3"/>
+   <fraction n="1.0000" ref="silicon"/>
+  </material>
+
+  <material name="epoxy_resin" formula="C38H40O6Br4">
+   <D value="1.1250" unit="g/cm3"/>
+   <composite n="38" ref="carbon"/>
+   <composite n="40" ref="hydrogen"/>
+   <composite n="6" ref="oxygen"/>
+   <composite n="4" ref="bromine"/>
+  </material>
+
+  <material name="SiO2" formula="SiO2">
+   <D value="2.2" unit="g/cm3"/>
+   <composite n="1" ref="silicon"/>
+   <composite n="2" ref="oxygen"/>
+  </material>
+
+  <material name="Al2O3" formula="Al2O3">
+   <D value="3.97" unit="g/cm3"/>
+   <composite n="2" ref="aluminum"/>
+   <composite n="3" ref="oxygen"/>
+  </material>
+
+  <material name="Fe2O3" formula="Fe2O3">
+   <D value="5.24" unit="g/cm3"/>
+   <composite n="2" ref="iron"/>
+   <composite n="3" ref="oxygen"/>
+  </material>
+
+  <material name="CaO" formula="CaO">
+   <D value="3.35" unit="g/cm3"/>
+   <composite n="1" ref="calcium"/>
+   <composite n="1" ref="oxygen"/>
+  </material>
+
+  <material name="MgO" formula="MgO">
+   <D value="3.58" unit="g/cm3"/>
+   <composite n="1" ref="magnesium"/>
+   <composite n="1" ref="oxygen"/>
+  </material>
+
+  <material name="Na2O" formula="Na2O">
+   <D value="2.27" unit="g/cm3"/>
+   <composite n="2" ref="sodium"/>
+   <composite n="1" ref="oxygen"/>
+  </material>
+
+  <material name="TiO2" formula="TiO2">
+   <D value="4.23" unit="g/cm3"/>
+   <composite n="1" ref="titanium"/>
+   <composite n="2" ref="oxygen"/>
+  </material>
+
+  <material name="fibrous_glass">
+   <D value="2.74351" unit="g/cm3"/>
+   <fraction n="0.600" ref="SiO2"/>
+   <fraction n="0.118" ref="Al2O3"/>
+   <fraction n="0.001" ref="Fe2O3"/>
+   <fraction n="0.224" ref="CaO"/>
+   <fraction n="0.034" ref="MgO"/>
+   <fraction n="0.010" ref="Na2O"/>
+   <fraction n="0.013" ref="TiO2"/>
+  </material>
+
+  <material name="FR4">
+   <D value="1.98281" unit="g/cm3"/>
+   <fraction n="0.47" ref="epoxy_resin"/>
+   <fraction n="0.53" ref="fibrous_glass"/>
+  </material>
+
+  <material name="STEEL_STAINLESS_Fe7Cr2Ni" formula="STEEL_STAINLESS_Fe7Cr2Ni">
+   <D value="7.9300" unit="g/cm3"/>
+   <fraction n="0.0010" ref="carbon"/>
+   <fraction n="0.1792" ref="chromium"/>
+   <fraction n="0.7298" ref="iron"/>
+   <fraction n="0.0900" ref="nickel"/>
+  </material>
+
+  <material name="LAr" formula="LAr">
+   <D value="1.40" unit="g/cm3"/>
+   <fraction n="1.0000" ref="argon"/>
+  </material>
+
+  <material formula=" " name="Air">
+   <D value="0.001205" unit="g/cc"/>
+   <fraction n="0.781154" ref="nitrogen"/>
+   <fraction n="0.209476" ref="oxygen"/>
+   <fraction n="0.00934" ref="argon"/>
+  </material>
+
+  <material formula=" " name="G10">
+   <D value="1.7" unit="g/cc"/>
+   <fraction n="0.2805" ref="silicon"/>
+   <fraction n="0.3954" ref="oxygen"/>
+   <fraction n="0.2990" ref="carbon"/>
+   <fraction n="0.0251" ref="hydrogen"/>
+  </material>
+
+  <material formula=" " name="Granite">
+   <D value="2.7" unit="g/cc"/>
+   <fraction n="0.438" ref="oxygen"/>
+   <fraction n="0.257" ref="silicon"/>
+   <fraction n="0.222" ref="sodium"/>
+   <fraction n="0.049" ref="aluminum"/>
+   <fraction n="0.019" ref="iron"/>
+   <fraction n="0.015" ref="potassium"/>
+  </material>
+
+  <material formula=" " name="ShotRock">
+   <D value="2.7*0.6" unit="g/cc"/>
+   <fraction n="0.438" ref="oxygen"/>
+   <fraction n="0.257" ref="silicon"/>
+   <fraction n="0.222" ref="sodium"/>
+   <fraction n="0.049" ref="aluminum"/>
+   <fraction n="0.019" ref="iron"/>
+   <fraction n="0.015" ref="potassium"/>
+  </material>
+
+  <material formula=" " name="Dirt">
+   <D value="1.7" unit="g/cc"/>
+   <fraction n="0.438" ref="oxygen"/>
+   <fraction n="0.257" ref="silicon"/>
+   <fraction n="0.222" ref="sodium"/>
+   <fraction n="0.049" ref="aluminum"/>
+   <fraction n="0.019" ref="iron"/>
+   <fraction n="0.015" ref="potassium"/>
+  </material>
+
+  <material formula=" " name="Concrete">
+   <D value="2.3" unit="g/cc"/>
+   <fraction n="0.530" ref="oxygen"/>
+   <fraction n="0.335" ref="silicon"/>
+   <fraction n="0.060" ref="calcium"/>
+   <fraction n="0.015" ref="sodium"/>
+   <fraction n="0.020" ref="iron"/>
+   <fraction n="0.040" ref="aluminum"/>
+  </material>
+
+  <material formula="H2O" name="Water">
+   <D value="1.0" unit="g/cc"/>
+   <fraction n="0.1119" ref="hydrogen"/>
+   <fraction n="0.8881" ref="oxygen"/>
+  </material>
+
+  <material formula="Ti" name="Titanium">
+   <D value="4.506" unit="g/cc"/>
+   <fraction n="1." ref="titanium"/>
+  </material>
+
+  <material name="TPB" formula="TPB">
+   <D value="1.40" unit="g/cm3"/>
+   <fraction n="1.0000" ref="argon"/>
+  </material>
+
+  <material name="Glass">
+   <D value="2.74351" unit="g/cm3"/>
+   <fraction n="0.600" ref="SiO2"/>
+   <fraction n="0.118" ref="Al2O3"/>
+   <fraction n="0.001" ref="Fe2O3"/>
+   <fraction n="0.224" ref="CaO"/>
+   <fraction n="0.034" ref="MgO"/>
+   <fraction n="0.010" ref="Na2O"/>
+   <fraction n="0.013" ref="TiO2"/>
+  </material>
+
+  <material name="Acrylic">
+   <D value="1.19" unit="g/cm3"/>
+   <fraction n="0.600" ref="carbon"/>
+   <fraction n="0.320" ref="oxygen"/>
+   <fraction n="0.080" ref="hydrogen"/>
+  </material>
+
+</materials>
+<solids>
+ <tube name="TPCRing"
+   rmin="0.5*(12.94*(2.54))-0.01"
+   rmax="0.5*(12.94*(2.54))"
+   z="(0.15*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCWire"
+   rmax="0.5*(0.04*(2.54))"
+   z="(9.0625*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCExtraWire"
+   rmax="0.5*(0.04*(2.54))"
+   z="(9.0625*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+  <tube name="TPCPlane"
+   rmax="0.5*(12.94*(2.54))"
+   z="(0.15*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+
+ <tube name="TPCSheet" 
+   rmin="0.5*(9.75*(2.54))"
+   rmax="0.5*(10.00*(2.54))"
+   z="(20.00*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCStrip" 
+   rmin="0.5*(10.00*(2.54))"
+   rmax="0.5*(10.25*(2.54))"
+   z="(0.4375*(2.54))"
+   startphi="(3.1415926535897)-(31.300*(2.54))/(10.25*(2.54))"
+   deltaphi="2*(31.300*(2.54))/(10.25*(2.54))"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCHalfStrip"
+   rmin="0.5*(10.00*(2.54))"
+   rmax="0.5*(10.25*(2.54))"
+   z="0.5*(0.4375*(2.54))"
+   startphi="(3.1415926535897)-(31.300*(2.54))/(10.25*(2.54))"
+   deltaphi="2*(31.300*(2.54))/(10.25*(2.54))"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCSR"
+   rmin="0.5*(10.00*(2.54))"
+   rmax="0.5*(11.10*(2.54))"
+   z="(0.0625*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <torus name="TPCBottomRing"
+   rmax="0.5*(1.00*(2.54))"
+   rtor="0.5*(10.00*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPC"
+   rmin="0.5*(0.75*(2.54))"
+   rmax="0.5*(13.00*(2.54))"
+   z="(20.00*(2.54))+2*(1.00*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCLRInnerPart"
+   rmin="0.5*(10.00*(2.54))"
+   rmax="0.5*(0.5*(10.00*(2.54))+0.5*(12.20*(2.54)))"
+   z="(0.0625*(2.54))"
+   startphi="-((0.2268)+(0.1505))"
+   deltaphi="2*((0.2268)+(0.1505))"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCLROuterPart"
+   rmin="0.5*(10.00*(2.54))"
+   rmax="0.5*(12.20*(2.54))"
+   z="(0.0625*(2.54))"
+   startphi="((0.2268)+(0.1505))"
+   deltaphi="(2*(3.1415926535897)-2*((0.2268)+(0.1505)))"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="TPCLREH"
+   rmin="0.5*(2.00*(2.54))"
+   rmax="0.5*(2.00*(2.54))+(0.50*(2.54))"
+   z="(0.0625*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <box name="TPCLRBoxBetweenEHs"
+   x="(3.5*(2.54))"
+   y="(1.00*(2.54))"
+   z="(0.0625*(2.54))"
+   lunit="cm"/>
+ <box name="TPCLRBoxBesideEHs"
+   x="(3.5*(2.54))"
+   y="(0.50*(2.54))"
+   z="(0.0625*(2.54))"
+   lunit="cm"/>
+ <box name="TPCLRBoxTangentToEHs"
+   x="(1.00*(2.54))"
+   y="2*((0.50*(2.54))+(2.00*(2.54)))+(1.00*(2.54))"
+   z="(0.0625*(2.54))"
+   lunit="cm"/>
+
+ <tube name="BoOuterShell" 
+   rmin="0.5*(75.907*(2.54))/(3.1415926535897)-(0.075*(2.54))"
+   rmax="0.5*(75.907*(2.54))/(3.1415926535897)"  
+   z="(38.00*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad" 
+   lunit="cm"/>
+ <tube name="BoOuterShellBottom"
+   rmax="0.5*(75.907*(2.54))/(3.1415926535897)"
+   z="(0.075*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="BoInnerShell"
+   rmin="0.5*(69.115*(2.54))/(3.1415926535897)-(0.048*(2.54))"
+   rmax="0.5*(69.115*(2.54))/(3.1415926535897)"
+   z="(36.296875*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="BoInnerShellBottom"
+   rmax="0.5*(69.115*(2.54))/(3.1415926535897)"
+   z="(0.048*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="BoTopLid"
+   rmax="0.5*(26.00*(2.54))"
+   z="(5.029*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+ <tube name="Cryostat"
+   rmax="0.5*(26.00*(2.54))"
+   z="(38.00*(2.54))+(5.029*(2.54))"
+   deltaphi="2*(3.1415926535897)"
+   aunit="rad"
+   lunit="cm"/>
+
+ <box name="DetEnclosure" lunit="cm"
+   x="(10*(26.00*(2.54)))" y="(10*(38.00*(2.54)))" z="(10*(26.00*(2.54)))"
+ />
+
+   <box name="World" lunit="cm"
+     x="(100.0*(10*(26.00*(2.54))))" y="(100.0*(10*(38.00*(2.54))))" z="(100.0*(10*(26.00*(2.54))))"
+   />
+</solids>
+<structure>
+ <volume name="volTPCWire">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCWire"/>
+ </volume>
+ <volume name="volTPCExtraWire">
+  <materialref ref="Titanium"/>
+  <solidref ref="TPCExtraWire"/>
+ </volume>
+ <volume name="volTPCRing">
+  <materialref ref="G10"/>
+  <solidref ref="TPCRing"/>
+ </volume>
+ <volume name="volTPCPlane">
+  <materialref ref="LAr"/>
+  <solidref ref="TPCPlane"/>
+  <physvol>
+   <volumeref ref="volTPCRing"/>
+   <position name="posTPCwireRing" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCExtraWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCExtraWire1" unit="cm" x="-0.5*(9.0625*(2.54))+0*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire2" unit="cm" x="-0.5*(9.0625*(2.54))+1*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire3" unit="cm" x="-0.5*(9.0625*(2.54))+2*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire4" unit="cm" x="-0.5*(9.0625*(2.54))+3*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire5" unit="cm" x="-0.5*(9.0625*(2.54))+4*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire6" unit="cm" x="-0.5*(9.0625*(2.54))+5*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire7" unit="cm" x="-0.5*(9.0625*(2.54))+6*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire8" unit="cm" x="-0.5*(9.0625*(2.54))+7*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire9" unit="cm" x="-0.5*(9.0625*(2.54))+8*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire10" unit="cm" x="-0.5*(9.0625*(2.54))+9*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire11" unit="cm" x="-0.5*(9.0625*(2.54))+10*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire12" unit="cm" x="-0.5*(9.0625*(2.54))+11*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire13" unit="cm" x="-0.5*(9.0625*(2.54))+12*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire14" unit="cm" x="-0.5*(9.0625*(2.54))+13*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire15" unit="cm" x="-0.5*(9.0625*(2.54))+14*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire16" unit="cm" x="-0.5*(9.0625*(2.54))+15*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire17" unit="cm" x="-0.5*(9.0625*(2.54))+16*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire18" unit="cm" x="-0.5*(9.0625*(2.54))+17*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire19" unit="cm" x="-0.5*(9.0625*(2.54))+18*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire20" unit="cm" x="-0.5*(9.0625*(2.54))+19*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire21" unit="cm" x="-0.5*(9.0625*(2.54))+20*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire22" unit="cm" x="-0.5*(9.0625*(2.54))+21*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire23" unit="cm" x="-0.5*(9.0625*(2.54))+22*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire24" unit="cm" x="-0.5*(9.0625*(2.54))+23*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire25" unit="cm" x="-0.5*(9.0625*(2.54))+24*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire26" unit="cm" x="-0.5*(9.0625*(2.54))+25*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire27" unit="cm" x="-0.5*(9.0625*(2.54))+26*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire28" unit="cm" x="-0.5*(9.0625*(2.54))+27*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire29" unit="cm" x="-0.5*(9.0625*(2.54))+28*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire30" unit="cm" x="-0.5*(9.0625*(2.54))+29*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire31" unit="cm" x="-0.5*(9.0625*(2.54))+30*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire32" unit="cm" x="-0.5*(9.0625*(2.54))+31*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire33" unit="cm" x="-0.5*(9.0625*(2.54))+32*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire34" unit="cm" x="-0.5*(9.0625*(2.54))+33*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire35" unit="cm" x="-0.5*(9.0625*(2.54))+34*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire36" unit="cm" x="-0.5*(9.0625*(2.54))+35*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire37" unit="cm" x="-0.5*(9.0625*(2.54))+36*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire38" unit="cm" x="-0.5*(9.0625*(2.54))+37*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire39" unit="cm" x="-0.5*(9.0625*(2.54))+38*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire40" unit="cm" x="-0.5*(9.0625*(2.54))+39*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire41" unit="cm" x="-0.5*(9.0625*(2.54))+40*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire42" unit="cm" x="-0.5*(9.0625*(2.54))+41*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire43" unit="cm" x="-0.5*(9.0625*(2.54))+42*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire44" unit="cm" x="-0.5*(9.0625*(2.54))+43*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire45" unit="cm" x="-0.5*(9.0625*(2.54))+44*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire46" unit="cm" x="-0.5*(9.0625*(2.54))+45*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire47" unit="cm" x="-0.5*(9.0625*(2.54))+46*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire48" unit="cm" x="-0.5*(9.0625*(2.54))+47*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCWire49" unit="cm" x="-0.5*(9.0625*(2.54))+48*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCExtraWire"/>
+   <rotationref ref="rPlus90AboutX"/>
+   <position name="posTPCExtraWire50" unit="cm" x="-0.5*(9.0625*(2.54))+49*(9.0625*(2.54))/49" y="0" z="0"/>
+  </physvol>
+ </volume>
+
+ <volume name="volTPCHalfStrip">
+  <materialref ref="G10" />
+  <solidref ref="TPCHalfStrip" />
+ </volume>
+ <volume name="volTPCStrip">
+  <materialref ref="G10" />
+  <solidref ref="TPCStrip" />
+ </volume>
+ <volume name="volTPCSheet">
+  <materialref ref="G10" />
+  <solidref ref="TPCSheet" />
+ </volume>
+ <volume name="volTPCSR">
+  <materialref ref="G10" />
+  <solidref ref="TPCSR"/>
+ </volume>
+ <volume name="volTPCBottomRing">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni" />
+  <solidref ref="TPCBottomRing"/>
+ </volume>
+ <volume name="volTPCLRInnerPart">
+  <materialref ref="G10" />
+  <solidref ref="TPCLRInnerPart"/>
+ </volume>
+ <volume name="volTPCLROuterPart">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLROuterPart"/>
+ </volume>
+ <volume name="volTPCLREH">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLREH"/>
+ </volume>
+ <volume name="volTPCLRBoxBesideEHs">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLRBoxBesideEHs"/>
+ </volume>
+ <volume name="volTPCLRBoxTangentToEHs">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLRBoxTangentToEHs"/>
+ </volume>
+ <volume name="volTPCLRBoxBetweenEHs">
+  <materialref ref="G10"/>
+  <solidref ref="TPCLRBoxBetweenEHs"/>
+ </volume>
+ <volume name="volTPC">
+  <materialref ref="LAr" />
+  <solidref ref="TPC" />
+  <physvol>
+   <volumeref ref="volTPCSheet"/>
+   <position name="posTPCSheet" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCBottomRing"/>
+   <position name="posTPCBottomRing" unit="cm" x="0" y="0" z="-0.5*(20.00*(2.54))-0.5*(1.00*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCHalfStrip"/>
+   <position name="posTPCHS1" unit="cm" x="0" y="0" z="-9.890625*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS1" unit="cm" x="0" y="0" z="-9.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS2" unit="cm" x="0" y="0" z="-9.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS3" unit="cm" x="0" y="0" z="-8.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR1" unit="cm" x="0" y="0" z="-8.25*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS4" unit="cm" x="0" y="0" z="-8.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS5" unit="cm" x="0" y="0" z="-7.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS6" unit="cm" x="0" y="0" z="-7.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS7" unit="cm" x="0" y="0" z="-6.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS8" unit="cm" x="0" y="0" z="-6.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS9" unit="cm" x="0" y="0" z="-5.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR2" unit="cm" x="0" y="0" z="-5.25*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS10" unit="cm" x="0" y="0" z="-5.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS11" unit="cm" x="0" y="0" z="-4.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS12" unit="cm" x="0" y="0" z="-4.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS13" unit="cm" x="0" y="0" z="-3.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS14" unit="cm" x="0" y="0" z="-3.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS15" unit="cm" x="0" y="0" z="-2.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR3" unit="cm" x="0" y="0" z="-2.25*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS16" unit="cm" x="0" y="0" z="-2.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS17" unit="cm" x="0" y="0" z="-1.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS18" unit="cm" x="0" y="0" z="-1.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS19" unit="cm" x="0" y="0" z="-0.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS20" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS21" unit="cm" x="0" y="0" z="0.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS22" unit="cm" x="0" y="0" z="1.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS23" unit="cm" x="0" y="0" z="1.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS24" unit="cm" x="0" y="0" z="2.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS25" unit="cm" x="0" y="0" z="2.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS26" unit="cm" x="0" y="0" z="3.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS27" unit="cm" x="0" y="0" z="3.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR4" unit="cm" x="0" y="0" z="3.75*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS28" unit="cm" x="0" y="0" z="4.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS29" unit="cm" x="0" y="0" z="4.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS30" unit="cm" x="0" y="0" z="5.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS31" unit="cm" x="0" y="0" z="5.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS32" unit="cm" x="0" y="0" z="6.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS33" unit="cm" x="0" y="0" z="6.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCSR"/>
+   <position name="posTPCSR5" unit="cm" x="0" y="0" z="6.75*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS34" unit="cm" x="0" y="0" z="7.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS35" unit="cm" x="0" y="0" z="7.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS36" unit="cm" x="0" y="0" z="8.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS37" unit="cm" x="0" y="0" z="8.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS38" unit="cm" x="0" y="0" z="9.0*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCStrip"/>
+   <position name="posTPCS39" unit="cm" x="0" y="0" z="9.5*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCHalfStrip"/>
+   <position name="posTPCHS2" unit="cm" x="0" y="0" z="9.890625*(2.54)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <position name="posTPCWireRingModule1" unit="cm" x="0" y="0" z="0.5*(20.00*(2.54))+0.5*(0.15*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <rotationref ref="r60"/>
+   <position name="posTPCWireRingModule2" unit="cm" x="0" y="0" z="0.5*(20.00*(2.54))+1.5*(0.15*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <rotationref ref="r120"/>
+   <position name="posTPCWireRingModule3" unit="cm" x="0" y="0" z="0.5*(20.00*(2.54))+2.5*(0.15*(2.54))"/>
+  </physvol>
+ </volume>
+
+ <volume name="volBoInnerShellBottom">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="BoInnerShellBottom"/>
+ </volume>
+ <volume name="volBoInnerShell">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="BoInnerShell"/>
+ </volume>
+ <volume name="volBoOuterShellBottom">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="BoOuterShellBottom"/>
+ </volume>
+ <volume name="volBoOuterShell">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="BoOuterShell"/>
+ </volume>
+ <volume name="volBoTopLid">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="BoTopLid"/>
+ </volume>
+ <volume name="volCryostat">
+  <materialref ref="LAr"/>
+  <solidref ref="Cryostat"/>
+  <physvol>
+   <volumeref ref="volBoOuterShell"/>
+   <position name="posBoOuterShellInitial" unit="cm" x="0" y="0" z="-0.5*(5.029*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volBoOuterShellBottom"/>
+   <position name="posBoOuterShellBottom" unit="cm" x="0" y="0" z="-0.5*(38.00*(2.54))+0.5*(0.075*(2.54))-0.5*(5.029*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volBoInnerShell"/>
+   <position name="posBoInnerShellInitial" unit="cm" x="0" y="0" z="0.5*(38.00*(2.54))-0.5*(36.296875*(2.54))-0.5*(5.029*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volBoInnerShellBottom"/>
+   <position name="posBoInnerShellBottom" unit="cm" x="0" y="0" z="0.5*(38.00*(2.54))-(36.296875*(2.54))+0.5*(0.048*(2.54))-0.5*(5.029*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volBoTopLid"/>
+   <position name="posBoTopLid" unit="cm" x="0" y="0" z="0.5*(38.00*(2.54))"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPC"/>
+   <rotationref ref="rPlus90AboutZ"/>
+   <position name="posTPC" unit="cm" x="-(2.78*(2.54))" y="0" z="-0.5*(20.00*(2.54))-(17.3*(2.54))+0.5*(38.00*(2.54))+0.5*(5.029*(2.54))"/>
+  </physvol>
+ </volume>
+
+ <volume name="volDetEnclosure">
+  <materialref ref="Air"/>
+  <solidref ref="DetEnclosure"/>
+  <physvol>
+   <volumeref ref="volCryostat"/>
+   <rotationref ref="rPlus90AboutXPlus90AboutZ"/>
+   <position name="posCryostat" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+ </volume>
+
+ <volume name="volWorld" >
+  <materialref ref="Vacuum"/> <solidref ref="World"/>
+   <physvol>
+    <volumeref ref="volDetEnclosure"/>
+    <position name="posDetEnclosure" unit="cm" x="0" y="-0.5*(38.00*(2.54))+(17.3*(2.54))+(20.00*(2.54))-0.5*(5.029*(2.54))" z="0"/>
+    <rotationref ref="rPlus90AboutY"/>
+   </physvol>
+ </volume> 
+</structure>
+
+<setup name="Default" version="1.0">
+  <world ref="volWorld" />
+</setup>
+
+</gdml>

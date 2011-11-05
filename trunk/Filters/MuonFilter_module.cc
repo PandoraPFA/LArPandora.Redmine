@@ -1,0 +1,21 @@
+////////////////////////////////////////////////////////////////////////
+//
+// MuonFilter
+// 
+// 
+//
+// pagebri3@msu.edu
+//
+////////////////////////////////////////////////////////////////////////
+
+/// Framework includes
+#include "art/Framework/Core/ModuleMacros.h" 
+ 
+// LArSoft includes
+#include "MuonFilter.h"
+
+namespace filter {
+
+  DEFINE_ART_MODULE(MuonFilter);
+
+} //namespace filt

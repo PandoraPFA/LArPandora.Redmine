@@ -1,0 +1,29 @@
+BEGIN_PROLOG
+
+
+standard_shower:
+{
+ module_type:        "ShowerReco"
+ ClusterModuleLabel: "showeranglecluster"
+ VertexClusterModuleLabel: "linemerger" 
+ #MCGeneratorLabel:	   "generator"
+ #LarGeantlabel:    "largeant"
+ #UseMCVertex:	0
+}
+
+
+
+
+
+argoneut_shower:     @local::standard_shower
+
+
+
+microboone_shower:   @local::standard_shower 
+microboone_shower.UseMCVertex:    1     # whether to use the vertex obtained from MC - if exists.
+
+
+
+
+
+END_PROLOG

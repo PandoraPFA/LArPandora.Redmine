@@ -1,0 +1,17 @@
+////////////////////////////////////////////////////////////////////////
+//
+// EventFilter class
+//
+////////////////////////////////////////////////////////////////////////
+
+/// Framework includes
+#include "art/Framework/Core/ModuleMacros.h" 
+ 
+// LArSoft includes
+#include "EventFilter.h"
+
+namespace filter {
+
+   DEFINE_ART_MODULE(EventFilter);
+
+} //namespace filt

@@ -1,0 +1,106 @@
+BEGIN_PROLOG
+
+argoneut_track:
+{
+ module_type:        "Track3Dreco"
+ ClusterModuleLabel: "linemerger"
+ TMatch:             35
+ Chi2DOFmax:         10.0
+}
+
+argoneut_kalman:
+{
+ module_type:         "Track3DKalman"
+ SpacePtsModuleLabel: "spacepts"
+ GenieGenModuleLabel: "generator"     # comment out for real data.
+ G4ModuleLabel:       "largeant"
+ PosErr3:             [0.02,0.02,0.02]   #  position resolution, cm.
+ MomErr3:             [0.10,0.10,0.2]   #  momentum resolution, GeV/c.
+ MomStart3:           [0.10,0.10,1.5]   #  GeV/c. Will *not* be Unit norm'd.
+ GenfPRINT:           true
+}
+
+argoneut_lartracker:
+{
+ module_type:        "LArTracker"
+ ClusterModuleLabel: "dbcluster"      #label for input cluster collection
+ TMatch:             0.05             #tolerance for time matching...in centimeters
+}
+
+argoneut_spacepts:
+{
+ module_type:           "SpacePts"
+ TicksOffset:           75.0
+ ClusterModuleLabel:    "linemerger"
+ EndPoint2DModuleLabel: "vertex2d"
+ TMatch:                50.0
+ vertexclusterWindow:   100.
+}
+
+argoneut_spacepoint:
+{
+  module_type:        "SpacePointAna"
+  HitModuleLabel:     "ffthit"
+  ClusterModuleLabel: "dbcluster"
+  G4ModuleLabel:      "largeant"
+  UseClusterHits:     true
+  MaxDT:              50.
+  MaxS:               10.
+}
+
+microboone_track:
+{
+ module_type:        "Track3Dreco"
+ ClusterModuleLabel: "linemerger"
+ TMatch:             35
+ Chi2DOFmax:         10.0
+}
+
+microboone_spacepts:
+{
+ module_type:              "SpacePts"
+ TicksOffset:              0.0
+ ClusterModuleLabel:       "dbcluster"
+ EndPoint2DModuleLabel:    "vertex2d"
+ TMatch:                   11.0
+ vertexclusterWindow:      10000000.
+}
+
+
+microboone_2stg_kalman:
+{
+ module_type:         "Track3DKalmanSPS2stg"
+ ClusterModuleLabel:  "dbscan"
+ GenieGenModuleLabel: "generator"     # comment out for real data.
+ G4ModuleLabel:       "largeant"
+ PosErr3:             [0.05,0.05,0.05]   #  position resolution, cm.
+ MomErr3:             [0.10,0.10,0.20]   #  momentum resolution, GeV/c.
+ MomStart3:           [0.10,0.10,1.0]    #  Will be Unit norm'd.
+ TailPtsFrac:         0.9    # fraction of upstream SpacePoints to ignore in 1st stage fit.
+ GenfPRINT:           true
+}
+
+microboone_kalman:
+{
+ module_type:         "Track3DKalmanSPS"
+ ClusterModuleLabel:  "dbscan"
+ GenieGenModuleLabel: "generator"     # comment out for real data.
+ G4ModuleLabel:       "largeant"
+ PosErr3:             [0.05,0.05,0.05]   #  position resolution, cm.
+ MomErr3:             [0.10,0.10,0.20]   #  momentum resolution, GeV/c.
+ MomStart3:           [0.10,0.10,1.0]    #  Will be Unit norm'd.
+ GenfPRINT:           true
+}
+
+microboone_spacepoint:
+{
+  module_type:        "SpacePointAna"
+  HitModuleLabel:     "ffthit"
+  ClusterModuleLabel: "dbcluster"
+  G4ModuleLabel:      "largeant"
+  UseClusterHits:     true
+  MaxDT:              50.
+  MaxS:               10.
+}
+
+END_PROLOG

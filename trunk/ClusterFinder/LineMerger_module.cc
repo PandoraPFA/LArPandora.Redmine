@@ -1,0 +1,16 @@
+////////////////////////////////////////////////////////////////////////
+//
+// LineMerger class
+//
+////////////////////////////////////////////////////////////////////////
+// Framework includes
+#include "art/Framework/Core/ModuleMacros.h" 
+
+#include "ClusterFinder/LineMerger.h"
+
+namespace cluster{
+
+  DEFINE_ART_MODULE(LineMerger);
+  
+} // end namespace 
+

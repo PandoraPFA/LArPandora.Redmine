@@ -1,0 +1,59 @@
+BEGIN_PROLOG
+
+argoneut_scanfilter:
+{
+ module_type:      "ScanFilter"
+ ScanModuleLabel:  "merge"
+ DigitModuleLabel: "source"
+ Neutrino_req:     1        #0=no neutrinos, 1=maybe neutrino, 2=neutrino. 
+                            #2 is most stringent, 0 is least stringent  
+ NumShowers_req:   0        #Maximum number of showers required to pass
+ NumTracks_req:    2        #Maximum number of tracks in any plane required to pass  
+}
+
+argoneut_emptyfilter:
+{
+ module_type:      "EmptyFilter"
+ HitsModuleLabel:  "ffthit"
+ MinHits:          30
+ MinIonization:    750.0
+}
+
+argoneut_muonfilter:
+{
+ module_type:        "MuonFilter"
+ ClusterModuleLabel: "dbcluster"
+ LineModuleLabel:    "linemerger"
+ Tolerance:          75.0         
+ Delay:              14.0
+ DCenter:            26.5
+ Cuts:               [22.0, 16.0, 42.5]
+ IonFactor:          1.92
+ MaxIon:             1000.0
+ DeltaWire:          51
+}
+
+adcfilter:
+{
+ module_type:      "ADCFilter"
+ DigitModuleLabel: "daq"
+ MinADC:           30
+}
+
+evtfilter:
+{
+ module_type:      "EventFilter"
+ BadEvents:        [ 5 ]
+ BadRuns:          [ 2 ]
+}
+
+argoneut_finalstateparticlefilter:
+{
+ module_type:      "FinalStateParticleFilter"
+ GenieModuleLabel: "generator"
+ PDG:              [3122, -13]   #pdg codes of final state particles in an event that you want to pick 
+}
+
+
+
+END_PROLOG

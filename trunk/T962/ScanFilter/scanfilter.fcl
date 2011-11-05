@@ -1,0 +1,19 @@
+BEGIN_PROLOG
+
+argoneut_scanfilter:
+{
+ module_type:      "ScanFilter"
+ ScanModuleLabel:  "mergescan"
+ DigitModuleLabel: "source"
+ Neutrino_req:     1        #0=all events (including 'no neutrino'), 1='maybe a neutrino' or 'a neutrino', 2='a neutrino'
+ 
+ MinShowers_req:   -1         #Minimum number of showers 
+ MaxShowers_req:   20         #Maximum number of showers 
+ MinTracks_req:    1          #Minimum number of tracks 
+ MaxTracks_req:    3        #Maximum number of tracks 
+ FidVolume_cut:    -1.        #Minimum distance (in cm) from edge of TPC for vertex to be considered inside the fiducial volume 
+ CreateTTree:      0.        #0 if no TTree is to be created, 1 otherwise
+}
+
+
+END_PROLOG

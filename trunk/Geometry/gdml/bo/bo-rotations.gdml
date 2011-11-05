@@ -1,0 +1,14 @@
+<define>
+   <rotation name="rHoriEast"      unit="deg" x="-90" y="-90" z="0"/>
+   <rotation name="rVertical"      unit="deg" x="-90" y="0"   z="0"/>
+   <rotation name="rHoriWest"      unit="deg" x="-90" y="90"  z="0"/>
+   <rotation name="rMinus90AboutY" unit="deg" x="0"   y="-90" z="0"/>
+   <rotation name="rMinus90AboutX" unit="deg" x="-90" y="0"   z="0"/>
+   <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
+   <rotation name="rPlus90AboutZ"  unit="deg" x="0"  y="0"   z="90"/>
+   <rotation name="rPlus90AboutXPlus90AboutZ" unit="deg" x="90" y="0" z="90"/>
+   <rotation name="rPlus90AboutXMinus90AboutY" unit="deg" x="90" y="-90" z="0"/>
+   <rotation name="rPlus180AboutX"	unit="deg" x="180" y="0"   z="0"/>
+   <rotation name="r60" unit="deg" x="0" y="0" z="60"/>
+   <rotation name="r120" unit="deg" x="0" y="0" z="120"/>
+</define>

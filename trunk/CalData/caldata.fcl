@@ -1,0 +1,35 @@
+BEGIN_PROLOG
+
+
+argoneut_calwire:
+{
+ module_type:        "CalWireT962"
+ DigitModuleLabel:   "daq"
+ ResponseFile:       "ArgoResponse1.5.root"
+ ExponentialEndBins: 300
+ PostsampleBins:     300
+}
+
+microboone_calwire:
+{
+ module_type:        "CalWireMicroBooNE"
+ DigitModuleLabel:   "daq"
+ ResponseFile:       "MicroResponse0.3.root"
+ ExponentialEndBins: 0
+ PostsampleBins:     400
+}
+
+lbne_calwire: @local::microboone_calwire
+
+standard_calwireana: 
+{
+ module_type:        "CalWireAna"
+ CalWireModuleLabel: "caldata"
+ DetSimModuleLabel:  "daq"
+}
+
+argoneut_calwireana:   @local::standard_calwireana
+microboone_calwireana: @local::standard_calwireana
+lbne_calwireana: @local::standard_calwireana
+
+END_PROLOG
