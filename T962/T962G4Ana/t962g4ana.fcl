@@ -1,5 +1,5 @@
 #include "job/services.fcl"
-#include "job/simulationservices.fcl"
+
 #include "job/largeantmodules.fcl"
 #include "job/detsimmodules.fcl"
 #include "job/t962geantmodules.fcl"
@@ -14,7 +14,7 @@ services:
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::argoneut_services
+  user:         @local::argoneut_simulation_services
 }
 
 
