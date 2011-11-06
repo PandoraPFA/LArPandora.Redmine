@@ -9,7 +9,7 @@ argoneut_analysistree:
  CalDataModuleLabel:       "caldata"
  GenieGenModuleLabel:      "generator"
  ClusterModuleLabel:       "linemerger"
- TrackModuleLabel:         "spacepts"
+ TrackModuleLabel:         "track3d"
  EndPoint2DModuleLabel:    "vertex2d"
  VertexModuleLabel:        "vertex2d"
  MINOSModuleLabel:         "minos"
