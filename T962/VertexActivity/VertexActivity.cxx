@@ -280,7 +280,7 @@ void vertex::VertexActivity::produce(art::Event& evt)
       else
 	vertex[0]=-.3;//force time coordinate to be closer to collection plane
      
-      channel2 = geom->NearestChannel(vertex);
+      channel2 = geom->NearestChannel(vertex,plane);
       geom->ChannelToWire(channel2,t,plane2,wire2); 
       // std::cout<<"channel2 "<<channel2<<std::endl;
   //     art::PtrVector<recob::Hit> vHits;
