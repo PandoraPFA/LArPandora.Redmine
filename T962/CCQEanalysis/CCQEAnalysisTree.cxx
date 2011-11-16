@@ -64,7 +64,8 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               ),
   no_kingaclusters(200),
-  no_linemergerclusters(200)
+  no_linemergerclusters(200),
+  ntracks_reco(100)
  
   
 {
@@ -89,6 +90,9 @@ delete two_trackstart_dcosz_reco;
 delete two_trackexit_dcosx_reco;
 delete two_trackexit_dcosy_reco;
 delete two_trackexit_dcosz_reco;
+delete all_trackstart_x_reco;
+delete all_trackstart_y_reco;
+delete all_trackstart_z_reco;
 }
 
 void t962::CCQEAnalysisTree::beginJob()
@@ -97,7 +101,9 @@ void t962::CCQEAnalysisTree::beginJob()
   art::ServiceHandle<art::TFileService> tfs;
   fTree = tfs->make<TTree>("anatree","analysis tree");
   
-  
+  all_trackstart_x_reco=new double[ntracks_reco];
+  all_trackstart_y_reco=new double[ntracks_reco];
+  all_trackstart_z_reco=new double[ntracks_reco];
   twodvtx_w_reco= new double[2];
   twodvtx_t_reco= new double[2];
   twodvtx_w_truth= new double[2];
@@ -198,7 +204,8 @@ void t962::CCQEAnalysisTree::beginJob()
   
   
   
-  fTree->Branch("no_kingaclusters",&no_kingaclusters,"no_kingaclusters/I");fTree->Branch("kingaclusters_planeNo",kingaclusters_planeNo,"kingaclusters_planeNo[no_kingaclusters]/I");
+  fTree->Branch("no_kingaclusters",&no_kingaclusters,"no_kingaclusters/I");
+  fTree->Branch("kingaclusters_planeNo",kingaclusters_planeNo,"kingaclusters_planeNo[no_kingaclusters]/I");
   fTree->Branch("Start_pt_w_kingaCl", Start_pt_w_kingaCl, "Start_pt_w_kingaCl[no_kingaclusters]/D");
  fTree->Branch("Start_pt_t_kingaCl", Start_pt_t_kingaCl, "Start_pt_t_kingaCl[no_kingaclusters]/D");
  
@@ -214,6 +221,9 @@ void t962::CCQEAnalysisTree::beginJob()
   fTree->Branch("two_trackexit_dcosy_reco",two_trackexit_dcosy_reco, "two_trackexit_dcosy_reco[2]/D");
    fTree->Branch("two_trackexit_dcosz_reco",two_trackexit_dcosz_reco, "two_trackexit_dcosz_reco[2]/D");
  
+ fTree->Branch("all_trackstart_x_reco", all_trackstart_x_reco, "all_trackstart_x_reco[ntracks_reco]/D");
+  fTree->Branch("all_trackstart_y_reco", all_trackstart_y_reco, "all_trackstart_y_reco[ntracks_reco]/D");
+  fTree->Branch("all_trackstart_z_reco", all_trackstart_z_reco, "all_trackstart_z_reco[ntracks_reco]/D");
  
  
 }
@@ -542,7 +552,13 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      int n_vertextracks=0;
      int n_endonboundarytracks=0;
       for(unsigned int i=0; i<tracklist.size();++i){
-       tracklist[i]->Extent(trackStart,trackEnd);            
+       tracklist[i]->Extent(trackStart,trackEnd); 
+       
+       
+       all_trackstart_x_reco[i]=trackStart[0];
+       all_trackstart_y_reco[i]=trackStart[1];
+       all_trackstart_z_reco[i]=trackStart[2];
+       
        trackstart_x_reco=trackStart[0];
        trackstart_y_reco=trackStart[1];
        trackstart_z_reco=trackStart[2];
@@ -550,6 +566,10 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
        trackexit_y_reco=trackEnd[1];
        trackexit_z_reco=trackEnd[2];  
         if (!isdata){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+       n_vertextracks++; 
+       }
+       //kinga:
+       if (isdata){        if(sqrt(pow(trackstart_x_reco-vtxx_reco,2)+pow(trackstart_y_reco-vtxy_reco,2)+pow(trackstart_z_reco-vtxz_reco,2))<fvertextrackWindow)
        n_vertextracks++; 
        }
        
@@ -763,6 +783,7 @@ void t962::CCQEAnalysisTree::ResetVars(){
   nvertexdbscanclustersv_reco=-9999;
   no_kingaclusters=-999;
   no_linemergerclusters=-999;
+   ntracks_reco=-999;
   
 }
 

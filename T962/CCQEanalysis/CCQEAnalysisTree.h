@@ -116,6 +116,9 @@ namespace t962 {
 	double *two_trackexit_dcosx_reco;
 	double *two_trackexit_dcosy_reco;
 	double *two_trackexit_dcosz_reco;
+	double *all_trackstart_x_reco;
+    double *all_trackstart_y_reco;
+    double *all_trackstart_z_reco;
               
     //matching information
     int nmatched_reco;        //number of matched tracks
