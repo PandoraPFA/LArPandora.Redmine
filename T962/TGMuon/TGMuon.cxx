@@ -65,7 +65,7 @@ namespace evgen{
   }
 
   //____________________________________________________________________________
-  void TGMuon::reconfigure(fhicl::ParameterSet p)
+  void TGMuon::reconfigure(fhicl::ParameterSet const& pset)
   {
     return;
   }
