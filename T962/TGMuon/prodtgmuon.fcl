@@ -1,5 +1,4 @@
 #include "job/services.fcl"
-#include "job/simulationservices.fcl"
 #include "job/tgmuon.fcl"
 #include "job/largeantmodules.fcl"
 #include "job/detsimmodules.fcl"
@@ -12,7 +11,7 @@ services:
   TFileService: { fileName: "tgmuon_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user: @local::argoneut_services
+  user: @local::argoneut_simulation_services
 }
 
 
