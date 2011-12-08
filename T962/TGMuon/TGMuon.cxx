@@ -136,7 +136,10 @@ namespace evgen{
             minitree->SetBranchAddress("trkqp",&ftrkqp);            
             Long64_t nentries = minitree->GetEntries();
             Long64_t nbytes = 0;           
-            
+      
+      int flag2=0;
+      while(flag2==0)    
+      {      
             r=(int)fRand->Uniform(1,nentries-1);
             nbytes==minitree->GetEntry(r);
             run=frun;
@@ -190,9 +193,10 @@ namespace evgen{
 
       	simb::MCParticle part(trackid, pdg, primary);
       	part.AddTrajectoryPoint(pos, pvec);       
-      	mct.Add(part);      
+      	mct.Add(part);
+	flag2=1;      
       }//for loop
-      
+      }//while flag2 loop
        minitree->Delete();
        f->Close();
        f->Delete();
