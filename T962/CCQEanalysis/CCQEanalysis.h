@@ -58,6 +58,8 @@ namespace t962 {
     //reconstructed information 
     
     int fno_primaries;
+    int no_hits;
+     double fMCvertex [3];
   //std::vector<int> fprimaries_pdg;
   //std::vector<double> fEng;
   
@@ -72,6 +74,17 @@ namespace t962 {
   double *fEndPointx;
   double *fEndPointy;
   double *fEndPointz;
+  
+  int *hit_plane;
+  int *hit_wire;
+  int *hit_channel;
+  double *hit_peakT;
+  double *hit_charge;
+   double *twodvtx_w_reco;
+    double *twodvtx_t_reco;
+    double *twodvtx_w_truth;
+    double *twodvtx_t_truth;
+    int *fNumberDaughters;
 //     
  //reconstructed information    
     double vtxx_reco;

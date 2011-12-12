@@ -64,7 +64,8 @@ t962::CCQEanalysis::CCQEanalysis(fhicl::ParameterSet const& pset) :
   frun(0),
   fevent(0),
   fbeam(0),
-  fno_primaries(100)
+  fno_primaries(100),
+  no_hits(5000)
 {
 
 
@@ -85,6 +86,17 @@ delete fPx;
  delete fEndPointx;
  delete fEndPointy;
  delete fEndPointz;
+ delete hit_plane;
+ delete hit_wire;
+ delete hit_channel;
+ delete hit_peakT;
+ delete hit_charge;
+ delete twodvtx_w_reco;
+delete twodvtx_t_reco;
+ delete twodvtx_w_truth;
+delete twodvtx_t_truth;
+delete fNumberDaughters;
+
  
 }
 
@@ -107,6 +119,19 @@ void t962::CCQEanalysis::beginJob()
   fEndPointx= new double[fno_primaries];
   fEndPointy= new double[fno_primaries];
   fEndPointz= new double[fno_primaries];
+  
+  hit_plane= new int[no_hits];
+   hit_wire= new int[no_hits];
+    hit_channel= new int[no_hits];
+   hit_peakT= new double[no_hits];
+   hit_charge= new double[no_hits];
+  twodvtx_w_reco= new double[2];
+  twodvtx_t_reco= new double[2];
+  twodvtx_w_truth= new double[2];
+  twodvtx_t_truth= new double[2];
+  fNumberDaughters= new int[fno_primaries];
+  
+  
   
    fTree->Branch("beam",&fbeam,"beam/I");
    fTree->Branch("run",&frun,"run/I");
@@ -144,6 +169,20 @@ void t962::CCQEanalysis::beginJob()
   fTree->Branch("EndPointx",fEndPointx,"EndPointx[no_primaries]/D");
   fTree->Branch("EndPointy",fEndPointy,"EndPointy[no_primaries]/D");
   fTree->Branch("EndPointz",fEndPointz,"EndPointz[no_primaries]/D");
+  
+  fTree->Branch("no_hits",&no_hits,"no_hits/I");
+  fTree->Branch("hit_plane",hit_plane,"hit_plane[no_hits]/I");
+  fTree->Branch("hit_wire",hit_wire,"hit_wire[no_hits]/I");
+  fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/I");
+   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
+   fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
+//   
+  fTree->Branch("twodvtx_w_reco", twodvtx_w_reco, "twodvtx_w_reco[2]/D");
+  fTree->Branch("twodvtx_t_reco", twodvtx_t_reco, "twodvtx_t_reco[2]/D");
+  fTree->Branch("twodvtx_w_truth", twodvtx_w_truth, "twodvtx_w_truth[2]/D");
+  fTree->Branch("twodvtx_t_truth", twodvtx_t_truth, "twodvtx_t_truth[2]/D");
+  
+  fTree->Branch("NumberDaughters",fNumberDaughters,"NumberDaughters[no_primaries]/I");
   
 //                  RECO :
   fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
@@ -244,6 +283,8 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   evt.getByLabel(fHitsModuleLabel,hitListHandle);
+  std::vector< art::Ptr<recob::Hit> > hits;
+  art::fill_ptr_vector(hits, hitListHandle);
   
   art::Handle< std::vector<recob::Cluster> > dbclusterListHandle;
   evt.getByLabel(fDBClusterFinderModuleLabel,dbclusterListHandle);
@@ -270,7 +311,7 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   //art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
   //evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   
-  
+
   
   //---------------------------------------------------
 art::Handle< std::vector<recob::Cluster> > clusterListHandle;
@@ -399,6 +440,17 @@ std::cout<<"No dbscan in w= "<<nclusw_reco<<std::endl;
 //   }
   
   
+     // 2d vertex information
+  bool found2dvtx = false;
+  
+  for (unsigned int j = 0; j<endpointlist.size();j++){
+ std::cout<<"j="<<j<<" W_VERTEX_RECO= "<<endpointlist[j]->WireNum()<<" T_VERTEX_RECO= "<<endpointlist[j]->DriftTime()<<std::endl;
+          twodvtx_w_reco[j]=endpointlist[j]->WireNum();
+          twodvtx_t_reco[j]=endpointlist[j]->DriftTime();
+          found2dvtx=true;
+    }
+  
+  
    //................................................................
    art::ServiceHandle<geo::Geometry> geom;  
    
@@ -425,7 +477,8 @@ double MC_Total_Eng=0;
  int ccnc=-999;
  
  
- for( unsigned int i = 0; i < mclist.size(); ++i ){
+ for( unsigned int i = 0; i < 1; ++i ){
+ //for( unsigned int i = 0; i < mclist.size(); ++i ){
     art::Ptr<simb::MCTruth> mc(mclist[i]);
     simb::MCParticle neut(mc->GetParticle(i));
     
@@ -469,6 +522,75 @@ double MC_Total_Eng=0;
  }
  
  
+ 
+ 
+ //.........................................................
+ 
+   //get true 2d vertex:
+     art::ServiceHandle<util::LArProperties> larp;
+    
+    for( unsigned int i = 0; i < 1; ++i ){
+    //for( unsigned int i = 0; i < mclist.size(); ++i ){
+
+    art::Ptr<simb::MCTruth> mc(mclist[i]);
+
+    simb::MCParticle neut(mc->GetParticle(i));
+
+    
+    fMCvertex[0] =neut.Vx();
+    fMCvertex[1] =neut.Vy();
+    fMCvertex[2] =neut.Vz();
+   
+    double presamplings=60.0;
+    double drifttick=(fMCvertex[0]/larp->DriftVelocity(larp->Efield(),larp->Temperature()))*(1./.198)+presamplings;
+    
+    twodvtx_t_truth[0]=drifttick;
+    twodvtx_t_truth[1]=drifttick;
+  }
+  // now wire vertex:
+   unsigned int channel2,plane2,wire2,tpc2; 
+  for(size_t tpc = 0; tpc < geom->NTPC(); ++tpc){
+   
+  for(unsigned int plane=0;plane<geom->Nplanes(tpc);plane++){
+  if(plane==0){
+	fMCvertex[0]=.3;//force time coordinate to be closer to induction plane 
+	}
+      else{
+	fMCvertex[0]=-.3;//force time coordinate to be closer to collection plane
+     }
+     
+  
+  try{
+  channel2 = geom->NearestChannel(fMCvertex,plane);
+  }
+  catch(cet::exception &e){
+  mf::LogWarning("KingaClusterexc")<<e;
+  std::cout<<std::endl;
+   std::cout<<std::endl;
+    std::cout<<std::endl;
+     std::cout<<"exception *****************************"<<std::endl;
+     std::cout<<std::endl;
+   std::cout<<std::endl;
+    std::cout<<std::endl;
+    
+  std::cout<<"fMCvertex[2]= "<<fMCvertex[2]<<" plane="<<plane<<std::endl;
+  if(plane==0 && fMCvertex[2]<5) channel2=0;
+  else if(plane==0 && fMCvertex[2]>geom->DetLength()-5) channel2=(geom->Nchannels())/2 -1;
+  else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
+  else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
+
+  
+  }
+      geom->ChannelToWire(channel2,tpc2,plane2,wire2);   
+   
+   
+   twodvtx_w_truth[plane]=wire2;
+   }
+   }
+  
+    
+    
+    
  
   //..........................................................
   //          START	
@@ -528,6 +650,9 @@ double MC_Total_Eng=0;
    fEndPointy[i]=geant_part[i]->EndPoint()[1];
    fEndPointz[i]=geant_part[i]->EndPoint()[2];
    
+   fNumberDaughters[i]=geant_part[i]->NumberDaughters();
+   
+   std::cout<<"geant_part[i]->EndPoint()[0]= "<<geant_part[i]->EndPoint()[0]<<std::endl;
   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" process= "<<geant_part[i]->Process()<<std::endl;
      
      
@@ -780,12 +905,44 @@ std::cout<<"No hough in w= "<<nhoughw_reco<<std::endl;
      std::cout<<"No of 3d tracks= "<<ntracks_reco<<std::endl;
  
  
+//////////////////////////////////////////////////////////////////////////
+/////////        HIT info:       ////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+  std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
+   unsigned int p(0),w(0),t(0), channel(0);
+   int hit_no;
+   
+   
+   std::cout<<"hits.size()= "<<hits.size()<<std::endl;
+   
+   no_hits=hits.size();
+   
+  while( itr != hits.end() ){
+ // std::cout<<"working on hit# "<<itr-hits.begin()<<std::endl;
+  hit_no=(int)(itr-hits.begin());
+  //std::cout<<"hit_no= "<<hit_no<<std::endl;
+  //std::cout<<"channel= "<<(*itr)->Channel()<<" ";
+  channel=(*itr)->Channel();
+  
+   geom->ChannelToWire(channel,t,p,w);
+   hit_channel[hit_no]= channel;
+  hit_plane[hit_no]=p;
+   hit_wire[hit_no]=w;
+   hit_peakT[hit_no]=(*itr)->PeakTime();
+   hit_charge[hit_no]=(*itr)->Charge();
+   
+   //std::cout<<"p= "<<p<<" ,w= "<<w<<" ,time= "<<(*itr)->PeakTime()<<" Charge= "<<(*itr)->Charge()<<std::endl;
+   
+  //  if((*itr)->View()==geo::kU){
+//     std::cout<<"plane 0"<<std::endl;}
+//     else if((*itr)->View()==geo::kV){
+//     std::cout<<"plane 1"<<std::endl;}
+  itr++;
+  }
  
  
- 
- 
- 
- 
+ ////////////////////////////////////////////////////////////////////////
  fTree->Fill();
 //dbclusterlist.clear();
   
