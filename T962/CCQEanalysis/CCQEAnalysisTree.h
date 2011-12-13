@@ -174,6 +174,40 @@ namespace t962 {
     double fvertextrackWindow;
     double fvertexclusterWindow;
     double fboundaryWindow;
+    
+     int fno_primaries;
+    int *fprimaries_pdg;
+  double *fEng;
+  double *fPx;
+  double *fPy;
+  double *fPz;
+  double *fStartPointx;
+  double *fStartPointy;
+  double *fStartPointz;
+  double *fEndPointx;
+  double *fEndPointy;
+  double *fEndPointz;
+  int *fNumberDaughters;
+  //from genie:
+ int fgenie_no_primaries;
+  double *fgenie_primaries_pdg;
+  double *fgenie_Eng;
+   double *fgenie_Px;
+    double *fgenie_Py;
+     double *fgenie_Pz;
+      double *fgenie_P;
+       int *fgenie_status_code;
+       double *fgenie_mass;
+       int *fgenie_trackID;
+       int *fgenie_ND;
+       int *fgenie_mother;
+       
+       int no_hits;
+       int *hit_plane;
+  int *hit_wire;
+  int *hit_channel;
+  double *hit_peakT;
+  double *hit_charge;
   }; // class CCQEAnalysisTree
 }
 

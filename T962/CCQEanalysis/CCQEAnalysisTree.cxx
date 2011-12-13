@@ -65,7 +65,10 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   fboundaryWindow           (pset.get< double >("boundaryWindow")               ),
   no_kingaclusters(200),
   no_linemergerclusters(200),
-  ntracks_reco(100)
+  ntracks_reco(100),
+  fno_primaries(200),
+  fgenie_no_primaries(200),
+  no_hits(5000)
  
   
 {
@@ -93,6 +96,37 @@ delete two_trackexit_dcosz_reco;
 delete all_trackstart_x_reco;
 delete all_trackstart_y_reco;
 delete all_trackstart_z_reco;
+
+delete fprimaries_pdg;
+delete fEng;
+delete fPx;
+ delete fPy;
+ delete fPz;
+ delete fStartPointx;
+ delete fStartPointy;
+ delete fStartPointz;
+ delete fEndPointx;
+ delete fEndPointy;
+ delete fEndPointz;
+ delete fNumberDaughters;
+ 
+ delete fgenie_primaries_pdg;
+delete fgenie_Eng;
+delete fgenie_Px;
+ delete fgenie_Py;
+ delete fgenie_Pz;
+ delete fgenie_P;
+ delete fgenie_status_code;
+ delete fgenie_mass;
+ delete fgenie_trackID;
+ delete fgenie_ND;
+ delete fgenie_mother;
+ 
+ delete hit_plane;
+ delete hit_wire;
+ delete hit_channel;
+ delete hit_peakT;
+ delete hit_charge;
 }
 
 void t962::CCQEAnalysisTree::beginJob()
@@ -120,6 +154,46 @@ void t962::CCQEAnalysisTree::beginJob()
   two_trackexit_dcosx_reco= new double[2];
   two_trackexit_dcosy_reco= new double[2];
   two_trackexit_dcosz_reco= new double[2];
+  
+   fprimaries_pdg= new int[fno_primaries];
+  fEng= new double[fno_primaries];
+  fPx= new double[fno_primaries];
+  fPy= new double[fno_primaries];
+  fPz= new double[fno_primaries];
+  fStartPointx= new double[fno_primaries];
+  fStartPointy= new double[fno_primaries];
+  fStartPointz= new double[fno_primaries];
+  fEndPointx= new double[fno_primaries];
+  fEndPointy= new double[fno_primaries];
+  fEndPointz= new double[fno_primaries];
+  fNumberDaughters= new int[fno_primaries];
+ 
+ 
+fgenie_primaries_pdg= new double[fgenie_no_primaries];
+ fgenie_Eng= new double[fgenie_no_primaries];
+ fgenie_Px= new double[fgenie_no_primaries];
+  fgenie_Py= new double[fgenie_no_primaries];
+ fgenie_Pz= new double[fgenie_no_primaries];
+ fgenie_P= new double[fgenie_no_primaries];
+fgenie_status_code= new int[fgenie_no_primaries];
+fgenie_mass= new double[fgenie_no_primaries];
+fgenie_trackID= new int[fgenie_no_primaries];
+fgenie_ND= new int[fgenie_no_primaries];
+ fgenie_mother= new int[fgenie_no_primaries];
+ 
+ hit_plane= new int[no_hits];
+   hit_wire= new int[no_hits];
+    hit_channel= new int[no_hits];
+   hit_peakT= new double[no_hits];
+   hit_charge= new double[no_hits];
+   
+    
+  fTree->Branch("no_hits",&no_hits,"no_hits/I");
+  fTree->Branch("hit_plane",hit_plane,"hit_plane[no_hits]/I");
+  fTree->Branch("hit_wire",hit_wire,"hit_wire[no_hits]/I");
+  fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/I");
+   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
+   fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
   
   
   fTree->Branch("run",&run,"run/I");
@@ -224,6 +298,43 @@ void t962::CCQEAnalysisTree::beginJob()
  fTree->Branch("all_trackstart_x_reco", all_trackstart_x_reco, "all_trackstart_x_reco[ntracks_reco]/D");
   fTree->Branch("all_trackstart_y_reco", all_trackstart_y_reco, "all_trackstart_y_reco[ntracks_reco]/D");
   fTree->Branch("all_trackstart_z_reco", all_trackstart_z_reco, "all_trackstart_z_reco[ntracks_reco]/D");
+  
+    //......................................................
+// from geant4:
+
+  fTree->Branch("no_primaries",&fno_primaries,"no_primaries/I");
+  fTree->Branch("primaries_pdg",fprimaries_pdg,"primaries_pdg[no_primaries]/I");
+  fTree->Branch("Eng",fEng,"Eng[no_primaries]/D");
+  fTree->Branch("Px",fPx,"Px[no_primaries]/D");
+  fTree->Branch("Py",fPy,"Py[no_primaries]/D");
+  fTree->Branch("Pz",fPz,"Pz[no_primaries]/D");
+  fTree->Branch("StartPointx",fStartPointx,"StartPointx[no_primaries]/D");
+  fTree->Branch("StartPointy",fStartPointy,"StartPointy[no_primaries]/D");
+  fTree->Branch("StartPointz",fStartPointz,"StartPointz[no_primaries]/D");
+  fTree->Branch("EndPointx",fEndPointx,"EndPointx[no_primaries]/D");
+  fTree->Branch("EndPointy",fEndPointy,"EndPointy[no_primaries]/D");
+  fTree->Branch("EndPointz",fEndPointz,"EndPointz[no_primaries]/D");
+  fTree->Branch("NumberDaughters",fNumberDaughters,"NumberDaughters[no_primaries]/I");
+  
+  fTree->Branch("ccnc_truth",&ccnc_truth,"ccnc_truth/I");
+  fTree->Branch("mode_truth",&mode_truth,"mode_truth/I");
+  
+  
+ //..................................
+ // now from genie:
+  fTree->Branch("genie_no_primaries",&fgenie_no_primaries,"genie_no_primaries/I");
+  fTree->Branch("genie_primaries_pdg",fgenie_primaries_pdg,"genie_primaries_pdg[genie_no_primaries]/D");
+  fTree->Branch("genie_Eng",fgenie_Eng,"genie_Eng[genie_no_primaries]/D");
+  fTree->Branch("genie_Px",fgenie_Px,"genie_Px[genie_no_primaries]/D");
+  fTree->Branch("genie_Py",fgenie_Py,"genie_Py[genie_no_primaries]/D");
+  fTree->Branch("genie_Pz",fgenie_Pz,"genie_Pz[genie_no_primaries]/D");
+  fTree->Branch("genie_P",fgenie_P,"genie_P[genie_no_primaries]/D");
+  fTree->Branch("genie_status_code",fgenie_status_code,"genie_status_code[genie_no_primaries]/D");
+  fTree->Branch("genie_mass",fgenie_mass,"genie_mass[genie_no_primaries]/D");
+  fTree->Branch("genie_trackID",fgenie_trackID,"genie_trackID[genie_no_primaries]/I");
+  fTree->Branch("genie_ND",fgenie_ND,"genie_ND[genie_no_primaries]/I");
+  fTree->Branch("genie_mother",fgenie_mother,"genie_mother[genie_no_primaries]/I");
+  
  
  
 }
@@ -264,6 +375,9 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
   evt.getByLabel(fDigitModuleLabel,scListHandle);
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   evt.getByLabel(fHitsModuleLabel,hitListHandle);
+  std::vector< art::Ptr<recob::Hit> > hits;
+  art::fill_ptr_vector(hits, hitListHandle);
+  
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
@@ -559,12 +673,13 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
        all_trackstart_y_reco[i]=trackStart[1];
        all_trackstart_z_reco[i]=trackStart[2];
        
-       trackstart_x_reco=trackStart[0];
-       trackstart_y_reco=trackStart[1];
-       trackstart_z_reco=trackStart[2];
-       trackexit_x_reco=trackEnd[0];
-       trackexit_y_reco=trackEnd[1];
-       trackexit_z_reco=trackEnd[2];  
+       //the below shouldn't be here!!!!!!!!!!!!!!!!!!!!!!!!!!
+       // trackstart_x_reco=trackStart[0];
+//        trackstart_y_reco=trackStart[1];
+//        trackstart_z_reco=trackStart[2];
+//        trackexit_x_reco=trackEnd[0];
+//        trackexit_y_reco=trackEnd[1];
+//        trackexit_z_reco=trackEnd[2];  
         if (!isdata){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
        n_vertextracks++; 
        }
@@ -681,6 +796,35 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     
     twodvtx_t_truth[0]=drifttick;
     twodvtx_t_truth[1]=drifttick;
+    
+    
+    
+    //.....
+     fgenie_no_primaries=mc->NParticles();
+  
+     for(int j = 0; j < mc->NParticles(); ++j){
+    simb::MCParticle part(mc->GetParticle(j));
+    
+    std::cout<<"pdg= "<<part.PdgCode()<<" ,Process="<<part.Process()<<" StatusCode= "<<part.StatusCode()<<" mass= "<<part.Mass()<<" p= "<<part.P()<<" E= "<<part.E()<<" trackID= "<<part.TrackId()<<" ND= "<<part.NumberDaughters()<<" Mother= "<<part.Mother()<<std::endl;
+    
+    
+    
+  fgenie_primaries_pdg[j]=part.PdgCode();
+fgenie_Eng[j]=part.E();
+fgenie_Px[j]=part.Px();
+ fgenie_Py[j]=part.Py();
+fgenie_Pz[j]=part.Pz();
+fgenie_P[j]=part.Px();
+ fgenie_status_code[j]=part.StatusCode();
+ fgenie_mass[j]=part.Mass();
+ fgenie_trackID[j]=part.TrackId();
+ fgenie_ND[j]=part.NumberDaughters();
+fgenie_mother[j]=part.Mother();
+    
+    
+    
+    }
+    
   }
   // now wire vertex:
    unsigned int channel2,plane2,wire2,tpc2; 
@@ -693,7 +837,24 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       else{
 	fMCvertex[0]=-.3;//force time coordinate to be closer to collection plane
      }
+  
+   try{
   channel2 = geom->NearestChannel(fMCvertex,plane);
+   
+  }
+  catch(cet::exception &e){
+  mf::LogWarning("ccqeanalysistreeexcp")<<e;
+  
+    
+  //std::cout<<"fMCvertex[2]= "<<fMCvertex[2]<<" plane="<<plane<<" DetLength= "<<geom->DetLength()<<" geom->Nchannels()= "<<geom->Nchannels()<<std::endl;
+  
+  if(plane==0 && fMCvertex[2]<5) channel2=0;
+  else if(plane==0 && fMCvertex[2]>geom->DetLength()-5) channel2=(geom->Nchannels())/2 -1;
+  else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
+  else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
+
+  
+  }
       geom->ChannelToWire(channel2,tpc2,plane2,wire2);   
    
    
@@ -707,7 +868,127 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     
     
   }//MC
+  
+  
+  
+  
+  
+  
+  
+   //--------------------------------------------------------------//
+ //        NOW I WILL GET INFO FROM GEANT4 TO FIND OUT HOW MANY 
+ //        PARTICLES WE CAN REALLY SEE IN OUR DETECTOR
+ //        this is needed if you want to confirm that kingaclusters 
+ ///       can correctly count tracks:
+ //--------------------------------------------------------------//
+ 
+ 
+ 
+ 
+ art::Handle< std::vector<sim::Particle> > geant_list;
+    evt.getByLabel (fLArG4ModuleLabel,geant_list);
+ 
+  art::PtrVector<sim::Particle> geant_part;
+   for (unsigned int ii = 0; ii <  geant_list->size(); ++ii)
+    {
+      art::Ptr<sim::Particle> p(geant_list,ii);
+      geant_part.push_back(p);
+    } 
+ std::string pri ("primary");
+ int primary=0;
+ //determine the number of primary particles from geant:
+  
+  for( unsigned int i = 0; i < geant_part.size(); ++i ){
+   
+    if(geant_part[i]->Process()==pri){
+    primary++;
+    }
+   
+   }
+  
+  fno_primaries=primary;
+  
+ std::cout<<"Geant4 list: "<<std::endl;
+ 
+ for( unsigned int i = 0; i < geant_part.size(); ++i ){
+   
+   if(geant_part[i]->Process()==pri){
+   
+   std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
+   
+    // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
+//     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
+//     fEng.push_back(geant_part[i]->E());
+//     
+   
+    fprimaries_pdg[i]=geant_part[i]->PdgCode();
+    
+    fEng[i]=geant_part[i]->E();
+    fPx[i]=geant_part[i]->Px();
+   
+    fPy[i]=geant_part[i]->Py();
+    fPz[i]=geant_part[i]->Pz();
+    
+   fStartPointx[i]=geant_part[i]->Vx();
+   fStartPointy[i]=geant_part[i]->Vy();
+   fStartPointz[i]=geant_part[i]->Vz();
+   fEndPointx[i]=geant_part[i]->EndPoint()[0];
+   fEndPointy[i]=geant_part[i]->EndPoint()[1];
+   fEndPointz[i]=geant_part[i]->EndPoint()[2];
+   
+   fNumberDaughters[i]=geant_part[i]->NumberDaughters();
+   
+   
+  std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
+     
+     }
+     
+     }
+ 
+ 
 
+
+//////////////////////////////////////////////////////////////////////////
+/////////        HIT info:       ////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+  std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
+   unsigned int p(0),w(0),t(0), channel(0);
+   int hit_no;
+   
+   
+   std::cout<<"hits.size()= "<<hits.size()<<std::endl;
+   
+   no_hits=hits.size();
+   
+  while( itr != hits.end() ){
+ // std::cout<<"working on hit# "<<itr-hits.begin()<<std::endl;
+  hit_no=(int)(itr-hits.begin());
+  //std::cout<<"hit_no= "<<hit_no<<std::endl;
+  //std::cout<<"channel= "<<(*itr)->Channel()<<" ";
+  channel=(*itr)->Channel();
+  
+   geom->ChannelToWire(channel,t,p,w);
+   hit_channel[hit_no]= channel;
+  hit_plane[hit_no]=p;
+   hit_wire[hit_no]=w;
+   hit_peakT[hit_no]=(*itr)->PeakTime();
+   hit_charge[hit_no]=(*itr)->Charge();
+   
+   //std::cout<<"p= "<<p<<" ,w= "<<w<<" ,time= "<<(*itr)->PeakTime()<<" Charge= "<<(*itr)->Charge()<<std::endl;
+   
+  //  if((*itr)->View()==geo::kU){
+//     std::cout<<"plane 0"<<std::endl;}
+//     else if((*itr)->View()==geo::kV){
+//     std::cout<<"plane 1"<<std::endl;}
+  itr++;
+  }
+ 
+ 
+ ////////////////////////////////////////////////////////////////////////
+ 
+ 
+ 
   fTree->Fill();
 }
 
