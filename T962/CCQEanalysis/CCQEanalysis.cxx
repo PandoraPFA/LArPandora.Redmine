@@ -477,8 +477,8 @@ double MC_Total_Eng=0;
  int ccnc=-999;
  
  
- for( unsigned int i = 0; i < 1; ++i ){
- //for( unsigned int i = 0; i < mclist.size(); ++i ){
+ 
+  for( unsigned int i = 0; i < mclist.size(); ++i ){
     art::Ptr<simb::MCTruth> mc(mclist[i]);
     simb::MCParticle neut(mc->GetParticle(i));
     
@@ -529,8 +529,8 @@ double MC_Total_Eng=0;
    //get true 2d vertex:
      art::ServiceHandle<util::LArProperties> larp;
     
-    for( unsigned int i = 0; i < 1; ++i ){
-    //for( unsigned int i = 0; i < mclist.size(); ++i ){
+    
+    for( unsigned int i = 0; i < mclist.size(); ++i ){
 
     art::Ptr<simb::MCTruth> mc(mclist[i]);
 
