@@ -66,8 +66,8 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   no_kingaclusters(200),
   no_linemergerclusters(200),
   ntracks_reco(100),
-  fno_primaries(200),
-  fgenie_no_primaries(200),
+  no_primaries(200),
+  genie_no_primaries(200),
   no_hits(5000)
  
   
@@ -96,32 +96,29 @@ delete two_trackexit_dcosz_reco;
 delete all_trackstart_x_reco;
 delete all_trackstart_y_reco;
 delete all_trackstart_z_reco;
-
-delete fprimaries_pdg;
-delete fEng;
-delete fPx;
- delete fPy;
- delete fPz;
- delete fStartPointx;
- delete fStartPointy;
- delete fStartPointz;
- delete fEndPointx;
- delete fEndPointy;
- delete fEndPointz;
- delete fNumberDaughters;
- 
- delete fgenie_primaries_pdg;
-delete fgenie_Eng;
-delete fgenie_Px;
- delete fgenie_Py;
- delete fgenie_Pz;
- delete fgenie_P;
- delete fgenie_status_code;
- delete fgenie_mass;
- delete fgenie_trackID;
- delete fgenie_ND;
- delete fgenie_mother;
- 
+delete primaries_pdg;
+delete Eng;
+delete Px;
+ delete Py;
+ delete Pz;
+ delete StartPointx;
+ delete StartPointy;
+ delete StartPointz;
+ delete EndPointx;
+ delete EndPointy;
+ delete EndPointz;
+ delete NumberDaughters;
+ delete genie_primaries_pdg;
+delete genie_Eng;
+delete genie_Px;
+ delete genie_Py;
+ delete genie_Pz;
+ delete genie_P;
+ delete genie_status_code;
+ delete genie_mass;
+ delete genie_trackID;
+ delete genie_ND;
+ delete genie_mother;
  delete hit_plane;
  delete hit_wire;
  delete hit_channel;
@@ -155,31 +152,31 @@ void t962::CCQEAnalysisTree::beginJob()
   two_trackexit_dcosy_reco= new double[2];
   two_trackexit_dcosz_reco= new double[2];
   
-   fprimaries_pdg= new int[fno_primaries];
-  fEng= new double[fno_primaries];
-  fPx= new double[fno_primaries];
-  fPy= new double[fno_primaries];
-  fPz= new double[fno_primaries];
-  fStartPointx= new double[fno_primaries];
-  fStartPointy= new double[fno_primaries];
-  fStartPointz= new double[fno_primaries];
-  fEndPointx= new double[fno_primaries];
-  fEndPointy= new double[fno_primaries];
-  fEndPointz= new double[fno_primaries];
-  fNumberDaughters= new int[fno_primaries];
+   primaries_pdg= new int[no_primaries];
+  Eng= new double[no_primaries];
+  Px= new double[no_primaries];
+  Py= new double[no_primaries];
+  Pz= new double[no_primaries];
+  StartPointx= new double[no_primaries];
+  StartPointy= new double[no_primaries];
+  StartPointz= new double[no_primaries];
+  EndPointx= new double[no_primaries];
+  EndPointy= new double[no_primaries];
+  EndPointz= new double[no_primaries];
+  NumberDaughters= new int[no_primaries];
  
  
-fgenie_primaries_pdg= new double[fgenie_no_primaries];
- fgenie_Eng= new double[fgenie_no_primaries];
- fgenie_Px= new double[fgenie_no_primaries];
-  fgenie_Py= new double[fgenie_no_primaries];
- fgenie_Pz= new double[fgenie_no_primaries];
- fgenie_P= new double[fgenie_no_primaries];
-fgenie_status_code= new int[fgenie_no_primaries];
-fgenie_mass= new double[fgenie_no_primaries];
-fgenie_trackID= new int[fgenie_no_primaries];
-fgenie_ND= new int[fgenie_no_primaries];
- fgenie_mother= new int[fgenie_no_primaries];
+genie_primaries_pdg= new double[genie_no_primaries];
+ genie_Eng= new double[genie_no_primaries];
+ genie_Px= new double[genie_no_primaries];
+  genie_Py= new double[genie_no_primaries];
+ genie_Pz= new double[genie_no_primaries];
+ genie_P= new double[genie_no_primaries];
+genie_status_code= new int[genie_no_primaries];
+genie_mass= new double[genie_no_primaries];
+genie_trackID= new int[genie_no_primaries];
+genie_ND= new int[genie_no_primaries];
+ genie_mother= new int[genie_no_primaries];
  
  hit_plane= new int[no_hits];
    hit_wire= new int[no_hits];
@@ -302,19 +299,19 @@ fgenie_ND= new int[fgenie_no_primaries];
     //......................................................
 // from geant4:
 
-  fTree->Branch("no_primaries",&fno_primaries,"no_primaries/I");
-  fTree->Branch("primaries_pdg",fprimaries_pdg,"primaries_pdg[no_primaries]/I");
-  fTree->Branch("Eng",fEng,"Eng[no_primaries]/D");
-  fTree->Branch("Px",fPx,"Px[no_primaries]/D");
-  fTree->Branch("Py",fPy,"Py[no_primaries]/D");
-  fTree->Branch("Pz",fPz,"Pz[no_primaries]/D");
-  fTree->Branch("StartPointx",fStartPointx,"StartPointx[no_primaries]/D");
-  fTree->Branch("StartPointy",fStartPointy,"StartPointy[no_primaries]/D");
-  fTree->Branch("StartPointz",fStartPointz,"StartPointz[no_primaries]/D");
-  fTree->Branch("EndPointx",fEndPointx,"EndPointx[no_primaries]/D");
-  fTree->Branch("EndPointy",fEndPointy,"EndPointy[no_primaries]/D");
-  fTree->Branch("EndPointz",fEndPointz,"EndPointz[no_primaries]/D");
-  fTree->Branch("NumberDaughters",fNumberDaughters,"NumberDaughters[no_primaries]/I");
+  fTree->Branch("no_primaries",&no_primaries,"no_primaries/I");
+  fTree->Branch("primaries_pdg",primaries_pdg,"primaries_pdg[no_primaries]/I");
+  fTree->Branch("Eng",Eng,"Eng[no_primaries]/D");
+  fTree->Branch("Px",Px,"Px[no_primaries]/D");
+  fTree->Branch("Py",Py,"Py[no_primaries]/D");
+  fTree->Branch("Pz",Pz,"Pz[no_primaries]/D");
+  fTree->Branch("StartPointx",StartPointx,"StartPointx[no_primaries]/D");
+  fTree->Branch("StartPointy",StartPointy,"StartPointy[no_primaries]/D");
+  fTree->Branch("StartPointz",StartPointz,"StartPointz[no_primaries]/D");
+  fTree->Branch("EndPointx",EndPointx,"EndPointx[no_primaries]/D");
+  fTree->Branch("EndPointy",EndPointy,"EndPointy[no_primaries]/D");
+  fTree->Branch("EndPointz",EndPointz,"EndPointz[no_primaries]/D");
+  fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[no_primaries]/I");
   
   fTree->Branch("ccnc_truth",&ccnc_truth,"ccnc_truth/I");
   fTree->Branch("mode_truth",&mode_truth,"mode_truth/I");
@@ -322,18 +319,18 @@ fgenie_ND= new int[fgenie_no_primaries];
   
  //..................................
  // now from genie:
-  fTree->Branch("genie_no_primaries",&fgenie_no_primaries,"genie_no_primaries/I");
-  fTree->Branch("genie_primaries_pdg",fgenie_primaries_pdg,"genie_primaries_pdg[genie_no_primaries]/D");
-  fTree->Branch("genie_Eng",fgenie_Eng,"genie_Eng[genie_no_primaries]/D");
-  fTree->Branch("genie_Px",fgenie_Px,"genie_Px[genie_no_primaries]/D");
-  fTree->Branch("genie_Py",fgenie_Py,"genie_Py[genie_no_primaries]/D");
-  fTree->Branch("genie_Pz",fgenie_Pz,"genie_Pz[genie_no_primaries]/D");
-  fTree->Branch("genie_P",fgenie_P,"genie_P[genie_no_primaries]/D");
-  fTree->Branch("genie_status_code",fgenie_status_code,"genie_status_code[genie_no_primaries]/D");
-  fTree->Branch("genie_mass",fgenie_mass,"genie_mass[genie_no_primaries]/D");
-  fTree->Branch("genie_trackID",fgenie_trackID,"genie_trackID[genie_no_primaries]/I");
-  fTree->Branch("genie_ND",fgenie_ND,"genie_ND[genie_no_primaries]/I");
-  fTree->Branch("genie_mother",fgenie_mother,"genie_mother[genie_no_primaries]/I");
+  fTree->Branch("genie_no_primaries",&genie_no_primaries,"genie_no_primaries/I");
+  fTree->Branch("genie_primaries_pdg",genie_primaries_pdg,"genie_primaries_pdg[genie_no_primaries]/D");
+  fTree->Branch("genie_Eng",genie_Eng,"genie_Eng[genie_no_primaries]/D");
+  fTree->Branch("genie_Px",genie_Px,"genie_Px[genie_no_primaries]/D");
+  fTree->Branch("genie_Py",genie_Py,"genie_Py[genie_no_primaries]/D");
+  fTree->Branch("genie_Pz",genie_Pz,"genie_Pz[genie_no_primaries]/D");
+  fTree->Branch("genie_P",genie_P,"genie_P[genie_no_primaries]/D");
+  fTree->Branch("genie_status_code",genie_status_code,"genie_status_code[genie_no_primaries]/D");
+  fTree->Branch("genie_mass",genie_mass,"genie_mass[genie_no_primaries]/D");
+  fTree->Branch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
+  fTree->Branch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
+  fTree->Branch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
   
  
  
@@ -800,7 +797,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     
     
     //.....
-     fgenie_no_primaries=mc->NParticles();
+     genie_no_primaries=mc->NParticles();
   
      for(int j = 0; j < mc->NParticles(); ++j){
     simb::MCParticle part(mc->GetParticle(j));
@@ -809,17 +806,17 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     
     
     
-  fgenie_primaries_pdg[j]=part.PdgCode();
-fgenie_Eng[j]=part.E();
-fgenie_Px[j]=part.Px();
- fgenie_Py[j]=part.Py();
-fgenie_Pz[j]=part.Pz();
-fgenie_P[j]=part.Px();
- fgenie_status_code[j]=part.StatusCode();
- fgenie_mass[j]=part.Mass();
- fgenie_trackID[j]=part.TrackId();
- fgenie_ND[j]=part.NumberDaughters();
-fgenie_mother[j]=part.Mother();
+  genie_primaries_pdg[j]=part.PdgCode();
+genie_Eng[j]=part.E();
+genie_Px[j]=part.Px();
+ genie_Py[j]=part.Py();
+genie_Pz[j]=part.Pz();
+genie_P[j]=part.Px();
+ genie_status_code[j]=part.StatusCode();
+ genie_mass[j]=part.Mass();
+ genie_trackID[j]=part.TrackId();
+ genie_ND[j]=part.NumberDaughters();
+genie_mother[j]=part.Mother();
     
     
     
@@ -883,10 +880,10 @@ fgenie_mother[j]=part.Mother();
  //--------------------------------------------------------------//
  
  
- 
+  if (!isdata){ 
  
  art::Handle< std::vector<sim::Particle> > geant_list;
-    evt.getByLabel (fLArG4ModuleLabel,geant_list);
+   if(evt.getByLabel (fLArG4ModuleLabel,geant_list));
  
   art::PtrVector<sim::Particle> geant_part;
    for (unsigned int ii = 0; ii <  geant_list->size(); ++ii)
@@ -906,7 +903,7 @@ fgenie_mother[j]=part.Mother();
    
    }
   
-  fno_primaries=primary;
+  no_primaries=primary;
   
  std::cout<<"Geant4 list: "<<std::endl;
  
@@ -921,22 +918,22 @@ fgenie_mother[j]=part.Mother();
 //     fEng.push_back(geant_part[i]->E());
 //     
    
-    fprimaries_pdg[i]=geant_part[i]->PdgCode();
+    primaries_pdg[i]=geant_part[i]->PdgCode();
     
-    fEng[i]=geant_part[i]->E();
-    fPx[i]=geant_part[i]->Px();
+    Eng[i]=geant_part[i]->E();
+    Px[i]=geant_part[i]->Px();
    
-    fPy[i]=geant_part[i]->Py();
-    fPz[i]=geant_part[i]->Pz();
+    Py[i]=geant_part[i]->Py();
+    Pz[i]=geant_part[i]->Pz();
     
-   fStartPointx[i]=geant_part[i]->Vx();
-   fStartPointy[i]=geant_part[i]->Vy();
-   fStartPointz[i]=geant_part[i]->Vz();
-   fEndPointx[i]=geant_part[i]->EndPoint()[0];
-   fEndPointy[i]=geant_part[i]->EndPoint()[1];
-   fEndPointz[i]=geant_part[i]->EndPoint()[2];
+   StartPointx[i]=geant_part[i]->Vx();
+   StartPointy[i]=geant_part[i]->Vy();
+   StartPointz[i]=geant_part[i]->Vz();
+   EndPointx[i]=geant_part[i]->EndPoint()[0];
+   EndPointy[i]=geant_part[i]->EndPoint()[1];
+   EndPointz[i]=geant_part[i]->EndPoint()[2];
    
-   fNumberDaughters[i]=geant_part[i]->NumberDaughters();
+   NumberDaughters[i]=geant_part[i]->NumberDaughters();
    
    
   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
@@ -946,7 +943,7 @@ fgenie_mother[j]=part.Mother();
      }
  
  
-
+} //if MC
 
 //////////////////////////////////////////////////////////////////////////
 /////////        HIT info:       ////////////////////////////////////////
@@ -1065,6 +1062,9 @@ void t962::CCQEAnalysisTree::ResetVars(){
   no_kingaclusters=-999;
   no_linemergerclusters=-999;
    ntracks_reco=-999;
+   no_primaries=-999;
+   genie_no_primaries=-999;
+   no_hits=-999;
   
 }
 

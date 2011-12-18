@@ -499,7 +499,7 @@ double MC_Total_Eng=0;
      for(int j = 0; j < mc->NParticles(); ++j){
     simb::MCParticle part(mc->GetParticle(j));
     
-    std::cout<<"pdg= "<<part.PdgCode()<<" ,Process="<<part.Process()<<" StatusCode= "<<part.StatusCode()<<" mass= "<<part.Mass()<<" p= "<<part.P()<<" E= "<<part.E()<<" trackID= "<<part.TrackId()<<" ND= "<<part.NumberDaughters()<<" Mother= "<<part.Mother()<<std::endl;
+    std::cout<<"pdg= "<<part.PdgCode()<<" ,Process="<<part.Process()<<" StatusCode= "<<part.StatusCode()<<" mass= "<<part.Mass()<<" p= "<<part.P()<<" E= "<<part.E()<<" trackID= "<<part.TrackId()<<" ND= "<<part.NumberDaughters()<<" Mother= "<<part.Mother()<<" px="<<part.Px()<<" py="<<part.Py()<<" pz="<<part.Pz()<<std::endl;
     
    
     if(part.PdgCode()==2212 && part.StatusCode()==1){
@@ -652,9 +652,7 @@ double MC_Total_Eng=0;
    
    fNumberDaughters[i]=geant_part[i]->NumberDaughters();
    
-   std::cout<<"geant_part[i]->EndPoint()[0]= "<<geant_part[i]->EndPoint()[0]<<std::endl;
-  std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" process= "<<geant_part[i]->Process()<<std::endl;
-     
+  
      
 
  momentum=sqrt(pow(geant_part[i]->Px(),2)+pow(geant_part[i]->Py(),2.)+pow(geant_part[i]->Pz(),2.));
@@ -671,6 +669,11 @@ double MC_Total_Eng=0;
     std::cout<<"track_length= "<<track_length<<std::endl;
 
  
+  std::cout<<"geant_part[i]->EndPoint()[0]= "<<geant_part[i]->EndPoint()[0]<<std::endl;
+  std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" process= "<<geant_part[i]->Process()<<" p="<<geant_part[i]->P()<<" px="<<geant_part[i]->Px()<<" py="<<geant_part[i]->Py()<<" pz="<<geant_part[i]->Pz()<<" track_length="<<track_length<<std::endl;
+     
+     
+     
  // count particles, exclude neutrons
      if(geant_part[i]->PdgCode()!= 2112 && geant_part[i]->Process()==pri && momentum> 0 && geant_part[i]->PdgCode()<10000){
   
