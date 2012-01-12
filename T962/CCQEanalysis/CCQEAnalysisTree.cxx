@@ -63,12 +63,12 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               ),
-  no_kingaclusters(200),
-  no_linemergerclusters(200),
-  ntracks_reco(100),
-  no_primaries(200),
-  genie_no_primaries(200),
-  no_hits(5000)
+  no_kingaclusters(400),
+  no_linemergerclusters(400),
+  ntracks_reco(400),
+  no_primaries(400),
+  genie_no_primaries(400),
+  no_hits(20000)
  
   
 {
