@@ -1,0 +1,24 @@
+BEGIN_PROLOG
+
+argoneut_analysistree:
+{ 
+ module_type:              "AnalysisTree"
+ DigitModuleLabel:         "daq"
+ HitsModuleLabel:          "ffthit"
+ LArGeantModuleLabel:      "largeant"
+ CalDataModuleLabel:       "caldata"
+ GenieGenModuleLabel:      "generator"
+ ClusterModuleLabel:       "linemerger"
+ TrackModuleLabel:         "track3d"
+ EndPoint2DModuleLabel:    "vertex2d"
+ VertexModuleLabel:        "vertex2d"
+ MINOSModuleLabel:         "minos"
+ TrackMatchModuleLabel:    "matchtracks"
+ ScanModuleLabel:          "mergescan"
+ POTModuleLabel:           "generator"
+ vertextrackWindow:         5.
+ vertexclusterWindow:       100.
+ boundaryWindow:            3.
+}
+
+END_PROLOG
