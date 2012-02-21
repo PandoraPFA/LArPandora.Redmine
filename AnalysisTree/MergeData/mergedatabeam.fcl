@@ -1,0 +1,10 @@
+BEGIN_PROLOG
+
+argoneut_mergedatabeam:
+{
+ module_type: "MergeDataBeam"
+ daq:         "daq"
+}
+
+END_PROLOG
+

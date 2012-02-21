@@ -1,0 +1,26 @@
+BEGIN_PROLOG
+
+argoneut_ccqeanalysistree:
+{ 
+ module_type:              "CCQEAnalysisTree"
+ DigitModuleLabel:         "daq"
+ HitsModuleLabel:          "ffthit"
+ LArGeantModuleLabel:      "largeant"
+ CalDataModuleLabel:       "caldata"
+ GenieGenModuleLabel:      "generator"
+ KingaModuleLabel:        "kingacluster" 
+ LineMergerModuleLabel:   "linemerger"
+ DbscanModuleLabel:       "dbcluster"
+ TrackModuleLabel:         "spacepts"
+ EndPoint2DModuleLabel:    "vertex2d"
+ VertexModuleLabel:        "vertex2d"
+ MINOSModuleLabel:         "minos"
+ TrackMatchModuleLabel:    "matchtracks"
+ ScanModuleLabel:          "mergescan"
+ POTModuleLabel:           "generator"
+ vertextrackWindow:         5.
+ vertexclusterWindow:       100.
+ boundaryWindow:            3.
+}
+
+END_PROLOG

@@ -1,0 +1,36 @@
+#include "job/mergesimminos.fcl"
+process_name: MergeSimMINOS
+
+services:
+{
+  TFileService: {fileName: "mergesim_hist.root"}
+  Timing:       {}
+}
+
+source:
+{
+ module_type: RootInput
+ dirName:     "."
+ fileNames:    ["t962gana.root"]
+ maxEvents: -1
+}
+
+outputs:
+{
+ out1:
+ {
+    module_type: RootOutput
+    fileName:    "mergesim.root"
+ }      
+}
+
+physics:
+{
+  producers:{}
+  merge: [minos]
+  stream1: [out1]
+  trigger_paths: [merge]
+  end_paths: [stream1]
+}
+
+physics.producers.minos: @local::argoneut_mergesimminos
