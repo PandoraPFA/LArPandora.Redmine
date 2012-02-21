@@ -1,0 +1,16 @@
+BEGIN_PROLOG
+
+argoneut_ccrecoefftree:
+{ 
+ module_type:              "CCRecoEffTree"
+ LArGeantModuleLabel:      "largeant"
+ GenieGenModuleLabel:      "generator"
+ TrackModuleLabel:         "track3d"
+ VertexModuleLabel:        "vertex2d"
+ MINOSModuleLabel:         "minos"
+ TrackMatchModuleLabel:    "matchtracks"
+ POTModuleLabel:           "generator"
+ boundaryWindow:            3.
+}
+
+END_PROLOG
