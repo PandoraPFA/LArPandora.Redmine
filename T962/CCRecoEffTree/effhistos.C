@@ -174,8 +174,7 @@ void effhistos::Loop()
 	   && muon_reco == 1){ 
 
 	  histeff1D->Fill(lep_mom_truth);
-	  histeff00->Fill(lep_mom_truth);
-	  
+	  histeff00->Fill(lep_mom_truth);	  
 	  histeffT1D->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 	  histeffT00->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 	  if(lep_mom_truth>1)
@@ -191,7 +190,6 @@ void effhistos::Loop()
 	   
 	    histeff11->Fill(lep_mom_truth);
 	    histeff2D->Fill(lep_mom_truth);
-	    
 	    histeffT11->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 	    histeffT2D->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 	    if(lep_mom_truth>1)
@@ -200,7 +198,6 @@ void effhistos::Loop()
 	    if(muon_exits == 1){
 	      histeff22->Fill(lep_mom_truth);
 	      histeff3D->Fill(lep_mom_truth);
-	      
 	      histeffT22->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 	      histeffT3D->Fill((180./3.14159)*TMath::ACos(dcosztruth));  
 	      if(lep_mom_truth>1)
@@ -210,7 +207,6 @@ void effhistos::Loop()
 		
 		histeff33->Fill(lep_mom_truth);
 		histeff4D->Fill(lep_mom_truth);
-		
 		histeffT33->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 		histeffT4D->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 		if(lep_mom_truth>1)
@@ -219,7 +215,6 @@ void effhistos::Loop()
 		if(test_charge_minos==-1){ 
 		  histeffXX->Fill(lep_mom_truth);
 		  histeffXD->Fill(lep_mom_truth);
-
 		  histeffTXX->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 		  histeffTXD->Fill((180./3.14159)*TMath::ACos(dcosztruth));		  
 		  if(lep_mom_truth>1)
@@ -227,7 +222,6 @@ void effhistos::Loop()
 
 		  if(nmatched_reco == 1 && trk_charge_minos<0 && trk_mom_minos>0){
 		    histeff44->Fill(lep_mom_truth);
-		    
 		    histeffT44->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 		    if(lep_mom_truth>1)
 		      f++; // number of cc nu-mu events with a reco muon starting in FV + reco vertex in FV + muon exits the TPC + minos tracks>0 + atleast 1 -vely charged MINOS track + matched with correct sign
@@ -235,11 +229,9 @@ void effhistos::Loop()
 		    double lardirectionEnd1[3]={ trackexit_dcosx_reco,  trackexit_dcosy_reco,  trackexit_dcosz_reco};
 		    double larEnd1[3]= {  trackexit_x_reco,  trackexit_y_reco,  trackexit_z_reco};
 		    double minosdirectionStart1[3]={  trk_dcosx_minos,  trk_dcosy_minos,  trk_dcosz_minos };
-		    
 		    double minosStart1[3]={ trk_vtxx_minos,  trk_vtxy_minos,  trk_vtxz_minos };
 		    double xdiff1,ydiff1,rdiff1,totaldiff1,thetadiff1;
-		    
-		    
+		    		    
 		    project(lardirectionEnd1, larEnd1, minosdirectionStart1,minosStart1,xdiff1,ydiff1,rdiff1,totaldiff1,thetadiff1);
 		    
 		    if(rdiff1>RDIFF_CUT||thetadiff1>THETADIFF_CUT){
@@ -249,11 +241,11 @@ void effhistos::Loop()
 		    
 		    histeff55->Fill(lep_mom_truth);
 		    histeff66->Fill(lep_mom_truth);
-
 		    histeffT55->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 		    histeffT66->Fill((180./3.14159)*TMath::ACos(dcosztruth));
 		    if(lep_mom_truth>1)
-		      g++; // number of cc nu-mu events with a reco muon starting in FV + reco vertex in FV + muon exits the TPC + minos tracks>0 + atleast 1 -vely charged MINOS track + matched with correct sign + pass rdiff|rtheta cut
+		      g++; // number of cc nu-mu events with a reco muon starting in FV + reco vertex in FV + muon exits the TPC + minos tracks>0 
+		           //+ atleast 1 -vely charged MINOS track + matched with correct sign + pass rdiff|rtheta cut
 		  }
 		}
 	      }
@@ -297,11 +289,9 @@ void effhistos::Loop()
 	  double lardirectionEnd[3]={ trackexit_dcosx_reco,  trackexit_dcosy_reco,  trackexit_dcosz_reco};
 	  double larEnd[3]= {  trackexit_x_reco,  trackexit_y_reco,  trackexit_z_reco};
 	  double minosdirectionStart[3]={  trk_dcosx_minos,  trk_dcosy_minos,  trk_dcosz_minos };
-	    
 	  double minosStart[3]={ trk_vtxx_minos,  trk_vtxy_minos,  trk_vtxz_minos };
 	  double xdiff,ydiff,rdiff,totaldiff,thetadiff;
-	    
-	  
+	    	  
 	  project(lardirectionEnd, larEnd, minosdirectionStart,minosStart,xdiff,ydiff,rdiff,totaldiff,thetadiff);
 	  
 	  if(rdiff>RDIFF_CUT||thetadiff>THETADIFF_CUT)
@@ -487,7 +477,6 @@ void effhistos::Loop()
 
 }
 
-
 void project(double lardirectionEnd[3], double larEnd[3], double minosdirectionStart[3], double minosStart[3], double &xpred, double &ypred, double &rdiff, double &totaldiff, double &thetadiff)
 {
   double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
@@ -502,7 +491,6 @@ void project(double lardirectionEnd[3], double larEnd[3], double minosdirectionS
   
   double dx = 100.0*minosStart[0]- x_offset - x_pred;
   double dy = 100.0*minosStart[1] + y_offset - y_pred;
-  
   
   xpred = dx;
   ypred = dy;
