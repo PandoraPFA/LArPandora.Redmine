@@ -1,0 +1,9 @@
+BEGIN_PROLOG
+
+argoneut_matchfilter:
+{
+ module_type:            "MatchFilter"
+  TrackMatchModuleLabel: "matchtracks"
+}
+
+END_PROLOG
