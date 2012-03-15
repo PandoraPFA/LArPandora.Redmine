@@ -829,11 +829,11 @@ namespace cchyp {
 //     // a responsible particle for an EM process
     plist.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
     
-    unsigned int p(0),w(0), t(0),channel(0);
+    unsigned int p(0),w(0), t(0),channel(0), cs(0);
     while( itr != hits.end() ){
       
       channel=(*itr)->Wire()->RawDigit()->Channel();
-      geo->ChannelToWire(channel,t,p,w);
+      geo->ChannelToWire(channel,cs,t,p,w);
 
       //std::cout << "____________ HERE IS THE PLANE _____________" << p << std::endl;
 

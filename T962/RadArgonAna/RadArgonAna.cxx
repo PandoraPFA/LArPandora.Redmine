@@ -153,9 +153,9 @@ namespace radargon {
 
         // sort single-hit clusters by plane, can adjust for larger number of hits with loop
         for(art::PtrVector<recob::Hit>::const_iterator aHit = hitlist.begin(); aHit != hitlist.end();  aHit++){
-          unsigned int channel, plane, tpc, wire;
+          unsigned int channel, plane, tpc, wire, cs;
           channel =  (*aHit)->Channel();
-          geom->ChannelToWire(channel,tpc,plane,wire);
+          geom->ChannelToWire(channel,cs,tpc,plane,wire);
 
           double peaktime=(*aHit)->PeakTime();
     //      fPeakTime->Fill(peaktime);

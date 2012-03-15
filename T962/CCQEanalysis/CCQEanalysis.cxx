@@ -548,7 +548,7 @@ double MC_Total_Eng=0;
     twodvtx_t_truth[1]=drifttick;
   }
   // now wire vertex:
-   unsigned int channel2,plane2,wire2,tpc2; 
+    unsigned int channel2,plane2,wire2,tpc2,cs; 
   for(size_t tpc = 0; tpc < geom->NTPC(); ++tpc){
    
   for(unsigned int plane=0;plane<geom->Nplanes(tpc);plane++){
@@ -581,7 +581,7 @@ double MC_Total_Eng=0;
 
   
   }
-      geom->ChannelToWire(channel2,tpc2,plane2,wire2);   
+  geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
    
    
    twodvtx_w_truth[plane]=wire2;
@@ -913,7 +913,7 @@ std::cout<<"No hough in w= "<<nhoughw_reco<<std::endl;
 
 /////////////////////////////////////////////////////////////////////////
   std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
-   unsigned int p(0),w(0),t(0), channel(0);
+  unsigned int p(0),w(0),t(0), channel(0);
    int hit_no;
    
    
@@ -928,7 +928,7 @@ std::cout<<"No hough in w= "<<nhoughw_reco<<std::endl;
   //std::cout<<"channel= "<<(*itr)->Channel()<<" ";
   channel=(*itr)->Channel();
   
-   geom->ChannelToWire(channel,t,p,w);
+  geom->ChannelToWire(channel,cs,t,p,w);
    hit_channel[hit_no]= channel;
   hit_plane[hit_no]=p;
    hit_wire[hit_no]=w;
