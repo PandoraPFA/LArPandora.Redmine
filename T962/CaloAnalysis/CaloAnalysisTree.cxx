@@ -1,0 +1,592 @@
+////////////////////////////////////////////////////////////////////////
+//
+// Create a TTree for analysis
+//
+//
+// \author kinga.partyka@yale.edu
+// 
+////////////////////////////////////////////////////////////////////////
+
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <functional>
+
+#include "TTree.h"
+
+#include "art/Framework/Principal/Event.h" 
+#include "art/Framework/Principal/SubRun.h" 
+#include "fhiclcpp/ParameterSet.h" 
+#include "art/Framework/Principal/Handle.h" 
+#include "art/Persistency/Common/Ptr.h" 
+#include "art/Persistency/Common/PtrVector.h" 
+#include "art/Framework/Services/Registry/ServiceHandle.h" 
+#include "art/Framework/Services/Optional/TFileService.h" 
+#include "art/Framework/Services/Optional/TFileDirectory.h" 
+#include "messagefacility/MessageLogger/MessageLogger.h" 
+
+
+#include "T962/CaloAnalysis/CaloAnalysisTree.h"
+#include "T962/T962_Objects/MINOS.h"
+#include "T962/T962_Objects/MINOSTrackMatch.h"
+#include "T962/T962_Objects/ScanInfo.h"
+#include "Geometry/geo.h"
+#include "SimulationBase/simbase.h"
+#include "Simulation/sim.h"
+#include "Simulation/SimListUtils.h"
+#include "RecoBase/recobase.h"
+#include "RawData/RawDigit.h"
+#include "Utilities/LArProperties.h"
+#include "SummaryData/summary.h"
+#include "Utilities/DetectorProperties.h"
+
+ 
+//-------------------------------------------------
+t962::CaloAnalysisTree::CaloAnalysisTree(fhicl::ParameterSet const& pset) : 
+  
+  fDigitModuleLabel         (pset.get< std::string >("DigitModuleLabel")        ),
+  fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
+  fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
+  fCalDataModuleLabel       (pset.get< std::string >("CalDataModuleLabel")      ),
+  fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
+  fEndPoint2DModuleLabel    (pset.get< std::string >("EndPoint2DModuleLabel")   ),
+  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
+  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
+  fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
+  fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
+  fboundaryWindow           (pset.get< double >("boundaryWindow")               ),
+  ntracks_reco(400),
+  no_geant_particles(400)
+ 
+  
+ 
+  
+{
+}
+
+//-------------------------------------------------
+t962::CaloAnalysisTree::~CaloAnalysisTree()
+{
+delete twodvtx_w_reco;
+delete twodvtx_t_reco;
+delete twodvtx_w_truth;
+delete twodvtx_t_truth;
+delete primaries_pdg;
+delete Eng;
+delete Px;
+ delete Py;
+ delete Pz;
+ delete StartPointx;
+ delete StartPointy;
+ delete StartPointz;
+ delete EndPointx;
+ delete EndPointy;
+ delete EndPointz;
+ delete NumberDaughters;
+
+ 
+}
+
+void t962::CaloAnalysisTree::beginJob()
+{
+
+  art::ServiceHandle<art::TFileService> tfs;
+  fTree = tfs->make<TTree>("anatree","analysis tree");
+  
+  twodvtx_w_reco= new double[2];
+  twodvtx_t_reco= new double[2];
+  twodvtx_w_truth= new double[2];
+  twodvtx_t_truth= new double[2];
+  
+   primaries_pdg= new int[no_geant_particles];
+  Eng= new double[no_geant_particles];
+  Px= new double[no_geant_particles];
+  Py= new double[no_geant_particles];
+  Pz= new double[no_geant_particles];
+  StartPointx= new double[no_geant_particles];
+  StartPointy= new double[no_geant_particles];
+  StartPointz= new double[no_geant_particles];
+  EndPointx= new double[no_geant_particles];
+  EndPointy= new double[no_geant_particles];
+  EndPointz= new double[no_geant_particles];
+  NumberDaughters= new int[no_geant_particles];
+ 
+
+  fTree->Branch("trk_length_truth",&trk_length_truth,"trk_length_truth/D");
+  
+  fTree->Branch("run",&run,"run/I");
+  fTree->Branch("event",&event,"event/I");
+  fTree->Branch("pot",&pot,"pot/D");
+  fTree->Branch("isdata",&isdata,"isdata/I");
+  fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
+  fTree->Branch("vtxy_reco",&vtxy_reco,"vtxy_reco/D");
+  fTree->Branch("vtxz_reco",&vtxz_reco,"vtxz_reco/D");
+  
+  fTree->Branch("twodvtx_w_reco", twodvtx_w_reco, "twodvtx_w_reco[2]/D");
+  fTree->Branch("twodvtx_t_reco", twodvtx_t_reco, "twodvtx_t_reco[2]/D");
+  fTree->Branch("twodvtx_w_truth", twodvtx_w_truth, "twodvtx_w_truth[2]/D");
+  fTree->Branch("twodvtx_t_truth", twodvtx_t_truth, "twodvtx_t_truth[2]/D");
+  
+  fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
+  fTree->Branch("trackstart_dcosx_reco",&trackstart_dcosx_reco, "trackstart_dcosx_reco/D");
+  fTree->Branch("trackstart_dcosy_reco",&trackstart_dcosy_reco, "trackstart_dcosy_reco/D");
+  fTree->Branch("trackstart_dcosz_reco",&trackstart_dcosz_reco, "trackstart_dcosz_reco/D");
+  fTree->Branch("trackexit_dcosx_reco",&trackexit_dcosx_reco, "trackexit_dcosx_reco/D");
+  fTree->Branch("trackexit_dcosy_reco",&trackexit_dcosy_reco, "trackexit_dcosy_reco/D");
+  fTree->Branch("trackexit_dcosz_reco",&trackexit_dcosz_reco, "trackexit_dcosz_reco/D");
+  fTree->Branch("trackstart_x_reco",&trackstart_x_reco, "trackstart_x_reco/D");
+  fTree->Branch("trackstart_y_reco",&trackstart_y_reco, "trackstart_y_reco/D");
+  fTree->Branch("trackstart_z_reco",&trackstart_z_reco, "trackstart_z_reco/D");
+  fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
+  fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
+  fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
+  
+fTree->Branch("TrkPitchC", &fTrkPitchC, "TrkPitchC/F");
+fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
+    //......................................................
+// from geant4:
+
+  fTree->Branch("no_geant_particles",&no_geant_particles,"no_geant_particles/I");
+  fTree->Branch("primaries_pdg",primaries_pdg,"primaries_pdg[no_geant_particles]/I");
+  fTree->Branch("Eng",Eng,"Eng[no_geant_particles]/D");
+  fTree->Branch("Px",Px,"Px[no_geant_particles]/D");
+  fTree->Branch("Py",Py,"Py[no_geant_particles]/D");
+  fTree->Branch("Pz",Pz,"Pz[no_geant_particles]/D");
+  fTree->Branch("StartPointx",StartPointx,"StartPointx[no_geant_particles]/D");
+  fTree->Branch("StartPointy",StartPointy,"StartPointy[no_geant_particles]/D");
+  fTree->Branch("StartPointz",StartPointz,"StartPointz[no_geant_particles]/D");
+  fTree->Branch("EndPointx",EndPointx,"EndPointx[no_geant_particles]/D");
+  fTree->Branch("EndPointy",EndPointy,"EndPointy[no_geant_particles]/D");
+  fTree->Branch("EndPointz",EndPointz,"EndPointz[no_geant_particles]/D");
+  fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[no_geant_particles]/I");
+  
+  
+  
+ //..................................
+
+}
+
+
+void t962::CaloAnalysisTree::beginSubRun(const art::SubRun& sr)
+{
+
+art::Handle< sumdata::POTSummary > potListHandle;
+sr.getByLabel(fPOTModuleLabel,potListHandle);
+
+if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+pot=potListHandle->totpot;
+else
+pot=0.;
+
+}
+
+
+
+
+void t962::CaloAnalysisTree::analyze(const art::Event& evt)
+{
+std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
+  ResetVars();
+
+  run = evt.run();
+  event = evt.id().event();
+
+  if (evt.isRealData()){
+    isdata = 1;
+  }
+  else isdata = 0;
+
+  
+  
+ 
+ 
+  art::Handle< std::vector<recob::Track> > trackListHandle;
+  evt.getByLabel(fTrackModuleLabel,trackListHandle);
+  art::Handle< std::vector<recob::EndPoint2D> > endpointListHandle;
+  evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle);
+  art::Handle< std::vector<recob::Vertex> > vertexListHandle;
+  evt.getByLabel(fVertexModuleLabel,vertexListHandle);
+ 
+
+ 
+
+
+  art::PtrVector<recob::Track> tracklist;
+  if(evt.getByLabel(fTrackModuleLabel,trackListHandle))
+  for (unsigned int i = 0; i < trackListHandle->size(); ++i){
+    art::Ptr<recob::Track> trackHolder(trackListHandle,i);
+    tracklist.push_back(trackHolder);
+  }
+
+  art::PtrVector<recob::EndPoint2D> endpointlist;
+  if(evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle))
+    for (unsigned int i = 0; i < endpointListHandle->size(); ++i){
+      art::Ptr<recob::EndPoint2D> endpointHolder(endpointListHandle,i);
+      endpointlist.push_back(endpointHolder);
+    }
+
+  art::PtrVector<recob::Vertex> vertexlist;
+  if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
+  for (unsigned int i = 0; i < vertexListHandle->size(); ++i){
+    art::Ptr<recob::Vertex> vertexHolder(vertexListHandle,i);
+    vertexlist.push_back(vertexHolder);
+  }
+
+ 
+ 
+  
+ 
+  art::ServiceHandle<geo::Geometry> geom;  
+  art::ServiceHandle<util::LArProperties> larp;
+   art::ServiceHandle<util::DetectorProperties> detprop;
+  
+ //--------------------------------------------------------------------
+ //      FIGURE OUT THE TRACK LENGTH- SAME AS IN CALORIMETRY 
+ //--------------------------------------------------------------------   
+ fnhitsCOL = 0;
+   double Trk_Length=0;
+    int npC = 0;
+    // Electronic calibration factor to convert from ADC to electrons
+  double fElectronsToADC = detprop->ElectronsToADC();
+  
+  for(art::PtrVector<recob::Track>::const_iterator trkIter = tracklist.begin(); trkIter != tracklist.end();  trkIter++){ 
+  
+   art::PtrVector<recob::Cluster> kVclusterlist = (*trkIter)->Clusters(geo::kV);
+   
+   // loop over all (geo::KV) clusters of the track
+    for(art::PtrVector<recob::Cluster>::const_iterator clIter = kVclusterlist.begin(); 
+	clIter != kVclusterlist.end();  
+	clIter++) { 
+
+       if((*clIter)->View() == geo::kV) fTrkPitchC = (*trkIter)->ProjectedLength(geo::kV);
+// 
+//       // Some variables for the hit
+//       float time;         //hit time at maximum
+//       float stime;        //hit start time 
+//       float etime;        //hit end time 
+      art::PtrVector<recob::Hit> hitlist;
+      hitlist = (*clIter)->Hits(geo::kV);
+      
+     //  fnhitsCOL = npC + hitlist.size();
+//       
+//       double dEdx_Coll_Tot = 0.;
+//       double dEdx_Coll_Tot_5cm = 0.;
+
+      double Kin_En = 0.;
+      double *xyz_previous = new double[3]; 
+ 
+       std::cout<<" TrkPitchC="<<fTrkPitchC<<" nhitsCOL="<<fnhitsCOL<<std::endl;
+
+      int nsp =0;
+      //Loop over clusters
+      for(std::vector<recob::SpacePoint>::const_iterator spIter = ((*trkIter)->SpacePoints()).begin(); 
+	  spIter < ((*trkIter)->SpacePoints()).end();  
+	  ++spIter) { 
+	art::PtrVector<recob::Hit> sphits = (*spIter).Hits(geo::kV);
+	art::PtrVector<recob::Hit> sphitsI = (*spIter).Hits(geo::kU);
+
+	if(sphits.size()==0 ) continue;
+
+	 //std::cout<<" from SPP: nsp, Coll. channel, wire, time, charge, Ind. channel, time, charge "<<nsp<<" "<<sphits[0]->Channel()<<" "<<sphits[0]->PeakTime()<<" "<<sphits[0]->Charge(true)<<" "<<sphitsI[0]->Channel()<<" "<<sphitsI[0]->PeakTime()<<" "<<sphitsI[0]->Charge(true)<<std::endl;
+	nsp++;
+      }
+
+      //loop over Collection hits
+      for(art::PtrVector<recob::Hit>::const_iterator hitIter = hitlist.begin(); hitIter != hitlist.end();  hitIter++){
+	//recover the Hit
+	// time = (*hitIter)->PeakTime() ;
+// 	stime = (*hitIter)->StartTime() ;
+// 	etime = (*hitIter)->EndTime();            
+// 	art::Ptr<recob::Wire> theWire = (*hitIter)->Wire();
+// 	channel = theWire->RawDigit()->Channel();
+// 	geom->ChannelToWire(channel,cstat,tpc,plane,wire);
+	      
+	double MIPs   = (*hitIter)->Charge(true);   // in ADC
+	double dQdx   = MIPs/fTrkPitchC;           // in ADC/cm
+// 	fdQdx_Coll->Fill(dQdx);
+
+        double dQdx_e = dQdx/fElectronsToADC;  // Conversion from ADC/cm to e/cm
+ 
+	//dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
+
+	double dEdx = larp->BirksCorrection(dQdx_e);   // Correction for charge quenching (Recombination) dEdx in MeV/cm
+// 
+// 	fdEdx_Coll->Fill(dEdx);
+// 	fbirk->Fill(dQdx_e,dEdx);
+	//fdEdx_Coll_vsXZangle->Fill(dEdx,TMath::ATan(trackCosStart[0]/trackCosStart[2]));
+	      
+	//dEdx_Coll_Tot = dEdx_Coll_Tot + dEdx;
+	Kin_En = Kin_En + dEdx * fTrkPitchC;
+
+        
+	//std::cout<<" Collection: npC, wire, time, ADC, dQdx (e/cm), dEdx (MeV/cm)"<<npC<<" "<<wire<<" "<<time<<" "<<MIPs<<" "<<dQdx_e<<" "<<dEdx<<std::endl;
+  // 
+//  	fwireCOL[npC] = (int)wire;       
+// 	ftimeCOL[npC] = (double)time;
+// 	fstimeCOL[npC] = (double)stime;
+// 	fetimeCOL[npC] = (double)etime;
+// 	fMIPsCOL[npC] =  (double)MIPs;
+// 	fdEdxCOL[npC] = (double)dEdx;
+
+	npC++;
+
+	
+	// dE/dx vs Residual Range plot
+	for(std::vector<recob::SpacePoint>::const_iterator spIter = ((*trkIter)->SpacePoints()).begin(); 
+	    spIter < ((*trkIter)->SpacePoints()).end();  
+	    ++spIter) { 
+	  art::PtrVector<recob::Hit> sphits = (*spIter).Hits(geo::kV);
+	  art::PtrVector<recob::Hit> sphitsI = (*spIter).Hits(geo::kU);
+
+	  if(sphits.size()==0) continue;
+
+	  if((*hitIter)->Channel()!=sphits[0]->Channel()) continue;
+	  if((*hitIter)->PeakTime()!=sphits[0]->PeakTime()) continue;//protect against multiple hits on the same wire in the cluster.
+
+	  const double *xyz = new double[3];
+	  xyz = (*spIter).XYZ();
+	  std::vector<double> larStart, larEnd;
+	  (*trkIter)->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
+
+	  double res_range = sqrt((larEnd[0]-xyz[0])*(larEnd[0]-xyz[0]) +
+				  (larEnd[1]-xyz[1])*(larEnd[1]-xyz[1]) +
+				  (larEnd[2]-xyz[2])*(larEnd[2]-xyz[2]));
+
+	  // Track Length from I - last points
+// 	  Trk_Length = sqrt((larStart[0]-larEnd[0])*(larStart[0]-larEnd[0]) +
+// 	  		       (larStart[1]-larEnd[1])*(larStart[1]-larEnd[1]) +
+// 	  		       (larStart[2]-larEnd[2])*(larStart[2]-larEnd[2]));
+
+	  if(spIter == ((*trkIter)->SpacePoints()).begin()) Trk_Length = Trk_Length  + sqrt((larStart[0]-xyz[0])*(larStart[0]-xyz[0]) +
+											    (larStart[1]-xyz[1])*(larStart[1]-xyz[1]) +
+											    (larStart[2]-xyz[2])*(larStart[2]-xyz[2]));
+	  else Trk_Length = Trk_Length  + sqrt((xyz_previous[0]-xyz[0])*(xyz_previous[0]-xyz[0]) +
+					       (xyz_previous[1]-xyz[1])*(xyz_previous[1]-xyz[1]) +
+					       (xyz_previous[2]-xyz[2])*(xyz_previous[2]-xyz[2]));
+
+	 //  channel = theWire->RawDigit()->Channel();
+// 	  geom->ChannelToWire(channel,cstat,tpc,plane,wire);
+
+	  // std::cout<<" Space Points: Coll. wire, time, charge, Ind. channel, time, charge "<<wire<<" "<<time<<" "<<MIPs<<" "<<sphitsI[0]->Channel()<<" "<<sphitsI[0]->PeakTime()<<" "<<sphitsI[0]->Charge(true)<<std::endl;
+	  xyz_previous[0] = xyz[0];
+	  xyz_previous[1] = xyz[1];
+	  xyz_previous[2] = xyz[2];
+
+           
+	  /// First and last hits not included in dE/dx vs. residual range plots (because the actual extension of the track within the wire pitch is unknown)
+	
+	        
+	  // npC++;
+               
+	}
+      }// end of loop over the (geo::kV) cluster hits
+      
+      
+      //fKinetic_En->Fill(Kin_En);
+
+      
+
+      std::cout<<"|-*                    Track Length="<<Trk_Length<<" cm"<<std::endl;
+     // std::cout<<"  |-* Collection View Calorimetric Reco"<<std::endl;
+      //std::cout<<"    |-* Hits="<<fnhitsCOL<<std::endl;
+      //std::cout<<"    |-* <dE/dx>="<<dEdx_Coll_Mean<<" MeV/cm"<<std::endl;
+      std::cout<<"    |-* Kinetic Energy deposited in LAr="<<Kin_En<<" MeV"<<std::endl;
+     
+ 
+    }
+ }
+ //--------------------------------------------------------------------
+  //vertex information
+  if(vertexlist.size())
+  {
+    double vtxxyz[3];
+    vertexlist[0]->XYZ(vtxxyz);
+    vtxx_reco = vtxxyz[0];
+    vtxy_reco = vtxxyz[1];
+    vtxz_reco = vtxxyz[2];
+  }
+  
+  
+  // 2d vertex information
+  bool found2dvtx = false;
+  
+  for (unsigned int j = 0; j<endpointlist.size();j++){
+ std::cout<<"j="<<j<<" W_VERTEX_RECO= "<<endpointlist[j]->WireNum()<<" T_VERTEX_RECO= "<<endpointlist[j]->DriftTime()<<std::endl;
+          twodvtx_w_reco[j]=endpointlist[j]->WireNum();
+          twodvtx_t_reco[j]=endpointlist[j]->DriftTime();
+          found2dvtx=true;
+    }
+  
+  //track information
+     ntracks_reco=tracklist.size();
+     double larStart[3];
+     double larEnd[3];
+ 	 std::vector<double> trackStart;
+  	 std::vector<double> trackEnd;
+     trackStart.clear();
+     trackEnd.clear();
+    
+   
+     //grab information about where track started and ended and the dcos at those points
+     trackStart.clear();
+     trackEnd.clear();
+     memset(larStart, 0, 3);
+     memset(larEnd, 0, 3);
+     for(unsigned int i=0; i<tracklist.size();++i){
+     
+    
+
+       tracklist[i]->Direction(larStart,larEnd);
+       tracklist[i]->Extent(trackStart,trackEnd);  
+                     
+       trackstart_dcosx_reco = larStart[0];
+       trackstart_dcosy_reco = larStart[1];
+       trackstart_dcosz_reco = larStart[2];       
+       trackexit_dcosx_reco = larEnd[0];
+       trackexit_dcosy_reco = larEnd[1];
+       trackexit_dcosz_reco = larEnd[2];
+           
+       trackstart_x_reco=trackStart[0];
+       trackstart_y_reco=trackStart[1];
+       trackstart_z_reco=trackStart[2];
+       trackexit_x_reco=trackEnd[0];
+       trackexit_y_reco=trackEnd[1];
+       trackexit_z_reco=trackEnd[2];  
+      }
+
+   
+     
+  
+  
+   //--------------------------------------------------------------//
+ //        NOW I WILL GET INFO FROM GEANT4
+ //       
+ //--------------------------------------------------------------//
+ 
+ 
+  if (!isdata){ 
+ 
+ art::Handle< std::vector<sim::Particle> > geant_list;
+   if(evt.getByLabel (fLArG4ModuleLabel,geant_list));
+ 
+  art::PtrVector<sim::Particle> geant_part;
+   for (unsigned int ii = 0; ii <  geant_list->size(); ++ii)
+    {
+      art::Ptr<sim::Particle> p(geant_list,ii);
+      geant_part.push_back(p);
+    } 
+    std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
+ std::string pri ("primary");
+ int primary=0;
+ //determine the number of primary particles from geant:
+  
+  for( unsigned int i = 0; i < geant_part.size(); ++i ){
+   
+    if(geant_part[i]->Process()==pri){
+    primary++;
+    
+    //-----------------------------------------------
+    //  CALCULATE TRUE LENGTH OF A TRACK:
+    trk_length_truth=0;
+    std::cout<<"NumberTrajectoryPoints= "<<geant_part[i]->NumberTrajectoryPoints()<<std::endl;
+    for(unsigned int pt=0; pt<geant_part[i]->NumberTrajectoryPoints()-1; pt++){
+    
+    trk_length_truth+=sqrt((geant_part[i]->Position(pt+1).X()-geant_part[i]->Position(pt).X())*(geant_part[i]->Position(pt+1).X()-geant_part[i]->Position(pt).X()) + (geant_part[i]->Position(pt+1).Y()-geant_part[i]->Position(pt).Y())*(geant_part[i]->Position(pt+1).Y()-geant_part[i]->Position(pt).Y()) + (geant_part[i]->Position(pt+1).Z()-geant_part[i]->Position(pt).Z())*(geant_part[i]->Position(pt+1).Z()-geant_part[i]->Position(pt).Z()) );
+    
+    }
+    
+     //-----------------------------------------------
+    }
+   
+   }
+  std::cout<<std::endl;
+  std::cout<<"*** trk_length_truth = "<<trk_length_truth<<std::endl;
+  std::cout<<std::endl;
+  
+  no_geant_particles=primary;
+  
+ std::cout<<"Geant4 list: "<<std::endl;
+ 
+ for( unsigned int i = 0; i < geant_part.size(); ++i ){
+   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
+   
+   if(geant_part[i]->Process()==pri){
+   
+   //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
+   
+    // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
+//     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
+//     fEng.push_back(geant_part[i]->E());
+//     
+   
+    primaries_pdg[i]=geant_part[i]->PdgCode();
+    
+    Eng[i]=geant_part[i]->E();
+    Px[i]=geant_part[i]->Px();
+   
+    Py[i]=geant_part[i]->Py();
+    Pz[i]=geant_part[i]->Pz();
+    
+   StartPointx[i]=geant_part[i]->Vx();
+   StartPointy[i]=geant_part[i]->Vy();
+   StartPointz[i]=geant_part[i]->Vz();
+   EndPointx[i]=geant_part[i]->EndPoint()[0];
+   EndPointy[i]=geant_part[i]->EndPoint()[1];
+   EndPointz[i]=geant_part[i]->EndPoint()[2];
+   
+   NumberDaughters[i]=geant_part[i]->NumberDaughters();
+   
+   
+   std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
+   
+ // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
+     
+     }
+     
+     }
+ 
+ 
+} //if MC
+
+
+ 
+ 
+  fTree->Fill();
+}
+
+  //---------------------------------------------------------------- 
+void t962::CaloAnalysisTree::ResetVars(){
+
+  run = -99999;
+  event = -99999;
+  isdata = -99999;
+  vtxx_reco = -99999;
+  vtxy_reco  = -99999;
+  vtxz_reco  = -99999;
+  trackstart_x_reco = -99999;
+  trackstart_y_reco = -99999;
+  trackstart_z_reco = -99999;
+  trackexit_x_reco = -99999;
+  trackexit_y_reco = -99999;
+  trackexit_z_reco = -99999;  
+  trackstart_dcosx_reco = -99999;
+  trackstart_dcosy_reco = -99999;
+  trackstart_dcosz_reco = -99999;       
+  trackexit_dcosx_reco = -99999;
+  trackexit_dcosy_reco = -99999;
+  trackexit_dcosz_reco = -99999;
+  ntracks_reco=-999;
+  no_geant_particles=-999;
+  
+  
+  
+}
+
+
+
+
+
+
+
+
+
