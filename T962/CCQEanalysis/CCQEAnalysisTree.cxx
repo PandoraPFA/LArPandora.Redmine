@@ -410,7 +410,6 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     }
 
 
-
   art::PtrVector<recob::Track> tracklist;
   if(evt.getByLabel(fTrackModuleLabel,trackListHandle))
   for (unsigned int i = 0; i < trackListHandle->size(); ++i){
@@ -485,8 +484,6 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      if(evt.getByLabel(fKingaModuleLabel,kingaListHandle)){
      art::PtrVector<recob::Cluster> KingaClusIn;  
      
-     
-   
      
      for(unsigned int ii = 0; ii < kingaListHandle->size(); ++ii)
     {
@@ -571,7 +568,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
   nvertexlinemergerclustersu_reco=flinemergerCl_near_vertex_p0;
   nvertexlinemergerclustersv_reco=flinemergerCl_near_vertex_p1;
   
-  
+ 
   //dbscan cluster information
   
     int fdbscanCl_p0=0;
@@ -619,18 +616,21 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
   
   for(unsigned int j = 0; j < minoslist.size(); j++)
      { 
+    
      	if (!isdata)
      	{
         	if(minoslist[j]->fcharge<0.)
         	test_charge_minos=-1;
         }
+       
      }
      
   for(unsigned int i = 0; i < trackmatchlist.size(); i++)
     {
+   
      for(unsigned int j = 0; j < minoslist.size(); j++)
      {
- 
+
      if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
      {
      ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
@@ -647,8 +647,10 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      trk_vtxx_minos = minoslist[j]->ftrkVtxX;
      trk_vtxy_minos = minoslist[j]->ftrkVtxY;
      trk_vtxz_minos = minoslist[j]->ftrkVtxZ;     
-      }      
+      }    
+      
      }
+    
     }
 
       //track information
@@ -664,7 +666,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      int n_endonboundarytracks=0;
       for(unsigned int i=0; i<tracklist.size();++i){
        tracklist[i]->Extent(trackStart,trackEnd); 
-       
+      
        
        all_trackstart_x_reco[i]=trackStart[0];
        all_trackstart_y_reco[i]=trackStart[1];
@@ -677,9 +679,15 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
 //        trackexit_x_reco=trackEnd[0];
 //        trackexit_y_reco=trackEnd[1];
 //        trackexit_z_reco=trackEnd[2];  
-        if (!isdata){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+
+
+
+        if (!isdata && mclist[0]->NeutrinoSet()!=0){   
+       
+if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
        n_vertextracks++; 
        }
+      
        //kinga:
        if (isdata){        if(sqrt(pow(trackstart_x_reco-vtxx_reco,2)+pow(trackstart_y_reco-vtxy_reco,2)+pow(trackstart_z_reco-vtxz_reco,2))<fvertextrackWindow)
        n_vertextracks++; 
@@ -687,6 +695,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
        
        if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
       }
+     
      nvertextracks_reco=n_vertextracks; 
      ntrackendonboundary_reco=n_endonboundarytracks;
      
@@ -696,7 +705,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      memset(larStart, 0, 3);
      memset(larEnd, 0, 3);
      for(unsigned int i=0; i<tracklist.size();++i){
-      
+     
       //kinga:
       if(tracklist.size()==2){ // (2 track event)
       
@@ -757,7 +766,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      }
      }
     //mc truth information
-   if (!isdata){
+   if (!isdata && mclist[0]->NeutrinoSet()!=0){
     nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
     ccnc_truth = mclist[0]->GetNeutrino().CCNC();
     mode_truth = mclist[0]->GetNeutrino().Mode();
@@ -773,7 +782,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
       lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
       lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
     }
-    
+   
     //get true 2d vertex:
     
     
@@ -891,6 +900,7 @@ genie_mother[j]=part.Mother();
       art::Ptr<sim::Particle> p(geant_list,ii);
       geant_part.push_back(p);
     } 
+    std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
  std::string pri ("primary");
  int primary=0;
  //determine the number of primary particles from geant:
@@ -908,10 +918,11 @@ genie_mother[j]=part.Mother();
  std::cout<<"Geant4 list: "<<std::endl;
  
  for( unsigned int i = 0; i < geant_part.size(); ++i ){
+   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
    
    if(geant_part[i]->Process()==pri){
    
-   std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
+   //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
    
     // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
 //     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
@@ -936,7 +947,9 @@ genie_mother[j]=part.Mother();
    NumberDaughters[i]=geant_part[i]->NumberDaughters();
    
    
-  std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
+   std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
+   
+ // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
      
      }
      
