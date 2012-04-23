@@ -1,7 +1,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // Create a TTree for analysis
-//
+// This module is meant to analyze single protons. It compares how well our 
+// reco is doing with reconstruction of track length as compared to MC truth. 
+// It also evaluates reconstructed kinetic energy among other things.
 //
 // \author kinga.partyka@yale.edu
 // 
@@ -12,7 +14,6 @@
 #include <algorithm>
 #include <functional>
 
-#include "TTree.h"
 
 #include "art/Framework/Principal/Event.h" 
 #include "art/Framework/Principal/SubRun.h" 
@@ -40,7 +41,15 @@
 #include "SummaryData/summary.h"
 #include "Utilities/DetectorProperties.h"
 
- 
+// ROOT includes
+#include <TROOT.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TBranch.h>
+#include <TH1F.h>
+#include <TH2F.h>
+#include <TMath.h>
+
 //-------------------------------------------------
 t962::CaloAnalysisTree::CaloAnalysisTree(fhicl::ParameterSet const& pset) : 
   
@@ -71,7 +80,7 @@ delete twodvtx_w_reco;
 delete twodvtx_t_reco;
 delete twodvtx_w_truth;
 delete twodvtx_t_truth;
-delete primaries_pdg;
+delete pdg;
 delete Eng;
 delete Px;
  delete Py;
@@ -83,6 +92,10 @@ delete Px;
  delete EndPointy;
  delete EndPointz;
  delete NumberDaughters;
+ delete trk_length_truth;
+ delete trk_length_straight_line_truth;
+ delete trk_length_reco;
+ delete process_primary;
 
  
 }
@@ -92,13 +105,15 @@ void t962::CaloAnalysisTree::beginJob()
 
   art::ServiceHandle<art::TFileService> tfs;
   fTree = tfs->make<TTree>("anatree","analysis tree");
-  
+  //make quick plots --------------------------------------------------
+  diff_length_reco_truth = tfs->make<TH1F>("diff_length_reco_truth","trk_length_reco-trk_length_truth [cm]",200,-10.,10.);
+  //-------------------------------------------------------------------
   twodvtx_w_reco= new double[2];
   twodvtx_t_reco= new double[2];
   twodvtx_w_truth= new double[2];
   twodvtx_t_truth= new double[2];
   
-   primaries_pdg= new int[no_geant_particles];
+  pdg= new int[no_geant_particles];
   Eng= new double[no_geant_particles];
   Px= new double[no_geant_particles];
   Py= new double[no_geant_particles];
@@ -110,9 +125,12 @@ void t962::CaloAnalysisTree::beginJob()
   EndPointy= new double[no_geant_particles];
   EndPointz= new double[no_geant_particles];
   NumberDaughters= new int[no_geant_particles];
+  process_primary= new int[no_geant_particles];
  
-
-  fTree->Branch("trk_length_truth",&trk_length_truth,"trk_length_truth/D");
+ trk_length_truth = new double[no_geant_particles];
+ trk_length_straight_line_truth = new double[no_geant_particles];
+ trk_length_reco = new double[no_geant_particles];
+ 
   
   fTree->Branch("run",&run,"run/I");
   fTree->Branch("event",&event,"event/I");
@@ -147,7 +165,7 @@ fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
 // from geant4:
 
   fTree->Branch("no_geant_particles",&no_geant_particles,"no_geant_particles/I");
-  fTree->Branch("primaries_pdg",primaries_pdg,"primaries_pdg[no_geant_particles]/I");
+  fTree->Branch("pdg",pdg,"pdg[no_geant_particles]/I");
   fTree->Branch("Eng",Eng,"Eng[no_geant_particles]/D");
   fTree->Branch("Px",Px,"Px[no_geant_particles]/D");
   fTree->Branch("Py",Py,"Py[no_geant_particles]/D");
@@ -160,7 +178,10 @@ fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
   fTree->Branch("EndPointz",EndPointz,"EndPointz[no_geant_particles]/D");
   fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[no_geant_particles]/I");
   
-  
+  fTree->Branch("process_primary",process_primary,"process_primary[no_geant_particles]/I");
+ fTree->Branch("trk_length_truth",trk_length_truth,"trk_length_truth[no_geant_particles]/D");
+  fTree->Branch("trk_length_straight_line_truth",trk_length_straight_line_truth,"trk_length_straight_line_truth[no_geant_particles]/D");
+  fTree->Branch("trk_length_reco",trk_length_reco,"trk_length_reco[no_geant_particles]/D");
   
  //..................................
 
@@ -243,13 +264,13 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
  //--------------------------------------------------------------------
  //      FIGURE OUT THE TRACK LENGTH- SAME AS IN CALORIMETRY 
  //--------------------------------------------------------------------   
- fnhitsCOL = 0;
+   fnhitsCOL = 0;
    double Trk_Length=0;
-    int npC = 0;
+   int npC = 0;
     // Electronic calibration factor to convert from ADC to electrons
-  double fElectronsToADC = detprop->ElectronsToADC();
+   double fElectronsToADC = detprop->ElectronsToADC();
   
-  for(art::PtrVector<recob::Track>::const_iterator trkIter = tracklist.begin(); trkIter != tracklist.end();  trkIter++){ 
+   for(art::PtrVector<recob::Track>::const_iterator trkIter = tracklist.begin(); trkIter != tracklist.end();  trkIter++){ 
   
    art::PtrVector<recob::Cluster> kVclusterlist = (*trkIter)->Clusters(geo::kV);
    
@@ -394,7 +415,9 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
      
  
     }
- }
+    trk_length_reco[trkIter-tracklist.begin()]=Trk_Length;
+    std::cout<<"trkIter-tracklist.begin()="<<trkIter-tracklist.begin()<<std::endl;
+ }//track list
  //--------------------------------------------------------------------
   //vertex information
   if(vertexlist.size())
@@ -408,13 +431,13 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
   
   
   // 2d vertex information
-  bool found2dvtx = false;
+ 
   
   for (unsigned int j = 0; j<endpointlist.size();j++){
  std::cout<<"j="<<j<<" W_VERTEX_RECO= "<<endpointlist[j]->WireNum()<<" T_VERTEX_RECO= "<<endpointlist[j]->DriftTime()<<std::endl;
           twodvtx_w_reco[j]=endpointlist[j]->WireNum();
           twodvtx_t_reco[j]=endpointlist[j]->DriftTime();
-          found2dvtx=true;
+          
     }
   
   //track information
@@ -484,42 +507,19 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
    
     if(geant_part[i]->Process()==pri){
     primary++;
-    
-    //-----------------------------------------------
-    //  CALCULATE TRUE LENGTH OF A TRACK:
-    trk_length_truth=0;
-    std::cout<<"NumberTrajectoryPoints= "<<geant_part[i]->NumberTrajectoryPoints()<<std::endl;
-    for(unsigned int pt=0; pt<geant_part[i]->NumberTrajectoryPoints()-1; pt++){
-    
-    trk_length_truth+=sqrt((geant_part[i]->Position(pt+1).X()-geant_part[i]->Position(pt).X())*(geant_part[i]->Position(pt+1).X()-geant_part[i]->Position(pt).X()) + (geant_part[i]->Position(pt+1).Y()-geant_part[i]->Position(pt).Y())*(geant_part[i]->Position(pt+1).Y()-geant_part[i]->Position(pt).Y()) + (geant_part[i]->Position(pt+1).Z()-geant_part[i]->Position(pt).Z())*(geant_part[i]->Position(pt+1).Z()-geant_part[i]->Position(pt).Z()) );
-    
-    }
-    
-     //-----------------------------------------------
+   
     }
    
    }
-  std::cout<<std::endl;
-  std::cout<<"*** trk_length_truth = "<<trk_length_truth<<std::endl;
-  std::cout<<std::endl;
+  
   
   no_geant_particles=primary;
   
  std::cout<<"Geant4 list: "<<std::endl;
  
  for( unsigned int i = 0; i < geant_part.size(); ++i ){
-   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
-   
-   if(geant_part[i]->Process()==pri){
-   
-   //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
-   
-    // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
-//     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
-//     fEng.push_back(geant_part[i]->E());
-//     
-   
-    primaries_pdg[i]=geant_part[i]->PdgCode();
+ 
+  pdg[i]=geant_part[i]->PdgCode();
     
     Eng[i]=geant_part[i]->E();
     Px[i]=geant_part[i]->Px();
@@ -536,16 +536,45 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
    
    NumberDaughters[i]=geant_part[i]->NumberDaughters();
    
-   
-   std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
+     if(geant_part[i]->Process()==pri){
+       process_primary[i]=1;
+     } //if primary
+    else { process_primary[i]=0;} 
+    
+    //-----------------------------------------------
+    //  CALCULATE TRUE LENGTH OF A TRACK:
+    double length=0.;
+    //std::cout<<"NumberTrajectoryPoints= "<<geant_part[i]->NumberTrajectoryPoints()<<std::endl;
+    for(unsigned int pt=0; pt<geant_part[i]->NumberTrajectoryPoints()-1; pt++){
+    
+    length+=sqrt((geant_part[i]->Position(pt+1).X()-geant_part[i]->Position(pt).X())*(geant_part[i]->Position(pt+1).X()-geant_part[i]->Position(pt).X()) + (geant_part[i]->Position(pt+1).Y()-geant_part[i]->Position(pt).Y())*(geant_part[i]->Position(pt+1).Y()-geant_part[i]->Position(pt).Y()) + (geant_part[i]->Position(pt+1).Z()-geant_part[i]->Position(pt).Z())*(geant_part[i]->Position(pt+1).Z()-geant_part[i]->Position(pt).Z()) );
+    
+    }
+    trk_length_truth[i]=length;
+     //-----------------------------------------------
+     //  CALCULATE TRUE LENGTH OF A TRACK ASSUMING STRAIGHT LINE:
+   trk_length_straight_line_truth[i]=sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]));
    
  // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
      
-     }
      
-     }
+   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<" trk_length_truth= "<<trk_length_truth[i]<<std::endl;
+   
+   
+   
+   
+    
+    } //geant particles
+    
+      for(int k=0; k<tracklist.size();k++){
+      std::cout<<std::endl;
+      std::cout<<"*** trk_length_truth = "<<trk_length_truth[k]<<" (assuming straight line track in truth= "<<trk_length_straight_line_truth[k]<<std::endl;
+      std::cout<<"trk_length_reco = "<<trk_length_reco[k]<<std::endl;
+      std::cout<<std::endl;
+      }
  
- 
+ if(trk_length_truth!=0 && trk_length_truth!=0)
+ diff_length_reco_truth->Fill(trk_length_truth-trk_length_truth);
 } //if MC
 
 
@@ -577,6 +606,7 @@ void t962::CaloAnalysisTree::ResetVars(){
   trackexit_dcosz_reco = -99999;
   ntracks_reco=-999;
   no_geant_particles=-999;
+  
   
   
   

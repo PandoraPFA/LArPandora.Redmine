@@ -1,7 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
+// 
 //
-// 
-// 
 // kinga.partyka@yale.edu
 // 
 ////////////////////////////////////////////////////////////////////////
@@ -14,7 +13,7 @@
 #include <vector>
 #include <string>
 
-class TH1D;
+class TH1F;
 class TH2D;
 class TTree;
 
@@ -48,7 +47,10 @@ namespace t962 {
     
     TTree* fTree;
     //run information
-    double trk_length_truth;
+    TH1F *diff_length_reco_truth;
+    double *trk_length_truth;
+    double *trk_length_straight_line_truth;
+    double *trk_length_reco;
     int run;
     int event;
     double pot;
@@ -101,7 +103,8 @@ namespace t962 {
     double *twodvtx_w_truth;
     double *twodvtx_t_truth;
     
-    int *primaries_pdg;
+    int *pdg;
+    int *process_primary;
   double *Eng;
   double *Px;
   double *Py;
