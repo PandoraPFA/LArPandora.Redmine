@@ -96,6 +96,7 @@ delete Px;
  delete trk_length_straight_line_truth;
  delete trk_length_reco;
  delete process_primary;
+ delete Kin_Eng_reco;
 
  
 }
@@ -107,6 +108,17 @@ void t962::CaloAnalysisTree::beginJob()
   fTree = tfs->make<TTree>("anatree","analysis tree");
   //make quick plots --------------------------------------------------
   diff_length_reco_truth = tfs->make<TH1F>("diff_length_reco_truth","trk_length_reco-trk_length_truth [cm]",200,-10.,10.);
+  diff_KE_reco_truth = tfs->make<TH1F>("diff_KE_reco_truth","trk_KE_reco-trk_KE_truth [MeV]",100,-50.,50.);
+  diff_length_truth1_vs_truth2 = tfs->make<TH1F>("diff_length_truth1_vs_truth2","trk_length_straight_line_truth-trk_length_truth [cm]",200,-10.,10.);
+   
+   diff_length_reco_truth_1geant = tfs->make<TH1F>("diff_length_reco_truth_1geant","trk_length_reco-trk_length_truth [cm] for 1 geant particle events",200,-10.,10.);
+  diff_KE_reco_truth_1geant = tfs->make<TH1F>("diff_KE_reco_truth_1geant","trk_KE_reco-trk_KE_truth [MeV] for 1 geant particle events",100,-50.,50.);
+  diff_length_truth1_vs_truth2_1geant = tfs->make<TH1F>("diff_length_truth1_vs_truth2_1geant","trk_length_straight_line_truth-trk_length_truth [cm] for 1 geant particle events",200,-10.,10.);
+   
+   
+   
+   
+   
   //-------------------------------------------------------------------
   twodvtx_w_reco= new double[2];
   twodvtx_t_reco= new double[2];
@@ -127,11 +139,13 @@ void t962::CaloAnalysisTree::beginJob()
   NumberDaughters= new int[no_geant_particles];
   process_primary= new int[no_geant_particles];
  
- trk_length_truth = new double[no_geant_particles];
- trk_length_straight_line_truth = new double[no_geant_particles];
- trk_length_reco = new double[no_geant_particles];
+  trk_length_truth = new double[no_geant_particles];
+  trk_length_straight_line_truth = new double[no_geant_particles];
+  trk_length_reco = new double[ntracks_reco];
+  Kin_Eng_reco = new double[ntracks_reco];
  
   
+ 
   fTree->Branch("run",&run,"run/I");
   fTree->Branch("event",&event,"event/I");
   fTree->Branch("pot",&pot,"pot/D");
@@ -161,6 +175,9 @@ void t962::CaloAnalysisTree::beginJob()
   
 fTree->Branch("TrkPitchC", &fTrkPitchC, "TrkPitchC/F");
 fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
+
+
+
     //......................................................
 // from geant4:
 
@@ -181,7 +198,9 @@ fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
   fTree->Branch("process_primary",process_primary,"process_primary[no_geant_particles]/I");
  fTree->Branch("trk_length_truth",trk_length_truth,"trk_length_truth[no_geant_particles]/D");
   fTree->Branch("trk_length_straight_line_truth",trk_length_straight_line_truth,"trk_length_straight_line_truth[no_geant_particles]/D");
-  fTree->Branch("trk_length_reco",trk_length_reco,"trk_length_reco[no_geant_particles]/D");
+  fTree->Branch("trk_length_reco",trk_length_reco,"trk_length_reco[ntracks_reco]/D");
+  fTree->Branch("Kin_Eng_reco",Kin_Eng_reco,"Kin_Eng_reco[ntracks_reco]/D");
+  fTree->Branch("Kin_Eng_truth",&Kin_Eng_truth,"Kin_Eng_truth/D");
   
  //..................................
 
@@ -206,7 +225,7 @@ pot=0.;
 
 void t962::CaloAnalysisTree::analyze(const art::Event& evt)
 {
-std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
+std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
   ResetVars();
 
   run = evt.run();
@@ -267,6 +286,9 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
    fnhitsCOL = 0;
    double Trk_Length=0;
    int npC = 0;
+   float time;
+   double Kin_En = 0.;
+   
     // Electronic calibration factor to convert from ADC to electrons
    double fElectronsToADC = detprop->ElectronsToADC();
   
@@ -293,7 +315,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
 //       double dEdx_Coll_Tot = 0.;
 //       double dEdx_Coll_Tot_5cm = 0.;
 
-      double Kin_En = 0.;
+       Kin_En = 0.;
       double *xyz_previous = new double[3]; 
  
        std::cout<<" TrkPitchC="<<fTrkPitchC<<" nhitsCOL="<<fnhitsCOL<<std::endl;
@@ -315,7 +337,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
       //loop over Collection hits
       for(art::PtrVector<recob::Hit>::const_iterator hitIter = hitlist.begin(); hitIter != hitlist.end();  hitIter++){
 	//recover the Hit
-	// time = (*hitIter)->PeakTime() ;
+	time = (*hitIter)->PeakTime() ;
 // 	stime = (*hitIter)->StartTime() ;
 // 	etime = (*hitIter)->EndTime();            
 // 	art::Ptr<recob::Wire> theWire = (*hitIter)->Wire();
@@ -328,7 +350,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
 
         double dQdx_e = dQdx/fElectronsToADC;  // Conversion from ADC/cm to e/cm
  
-	//dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
+	dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
 
 	double dEdx = larp->BirksCorrection(dQdx_e);   // Correction for charge quenching (Recombination) dEdx in MeV/cm
 // 
@@ -416,7 +438,8 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
  
     }
     trk_length_reco[trkIter-tracklist.begin()]=Trk_Length;
-    std::cout<<"trkIter-tracklist.begin()="<<trkIter-tracklist.begin()<<std::endl;
+    Kin_Eng_reco[trkIter-tracklist.begin()]=Kin_En;
+    
  }//track list
  //--------------------------------------------------------------------
   //vertex information
@@ -485,6 +508,10 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
  //        NOW I WILL GET INFO FROM GEANT4
  //       
  //--------------------------------------------------------------//
+ double KE=0;
+ double mass_proton=0.938;
+ double mass_neutron=0.939;
+ double KE_sum=0;
  
  
   if (!isdata){ 
@@ -538,9 +565,26 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
    
      if(geant_part[i]->Process()==pri){
        process_primary[i]=1;
+       
+       if(geant_part.size()==1) KE_sum=geant_part[i]->E()-mass_proton;
      } //if primary
-    else { process_primary[i]=0;} 
+    else { 
+    process_primary[i]=0;
     
+    if(geant_part[i]->PdgCode()==2212) KE=geant_part[i]->E()-mass_proton;
+    if(geant_part[i]->PdgCode()==2112) KE=geant_part[i]->E()-mass_neutron;
+    if(geant_part[i]->PdgCode()==22) KE=geant_part[i]->E();
+    
+    KE_sum+=KE;
+    
+    } 
+    
+    
+
+     
+     
+     std::cout<<"KE_sum= "<<KE_sum*1000<<" MeV"<<std::endl;
+     
     //-----------------------------------------------
     //  CALCULATE TRUE LENGTH OF A TRACK:
     double length=0.;
@@ -566,15 +610,33 @@ std::cout<<" IN *** MY *** CaloAnalysisTree ***"<<std::endl;
     
     } //geant particles
     
+    Kin_Eng_truth=KE_sum*1000; //KE in MeV
+    
+    
       for(int k=0; k<tracklist.size();k++){
       std::cout<<std::endl;
-      std::cout<<"*** trk_length_truth = "<<trk_length_truth[k]<<" (assuming straight line track in truth= "<<trk_length_straight_line_truth[k]<<std::endl;
+      std::cout<<"________________________________"<<std::endl;
+      std::cout<<"trk_length_truth = "<<trk_length_truth[k]<<" (assuming straight line track in truth= "<<trk_length_straight_line_truth[k]<<std::endl;
       std::cout<<"trk_length_reco = "<<trk_length_reco[k]<<std::endl;
       std::cout<<std::endl;
+       std::cout<<"Kin_Eng_truth= "<<Kin_Eng_truth<<" Kin_Eng_reco= "<<Kin_Eng_reco[k]<< "MeV"<<std::endl;
+       std::cout<<"________________________________"<<std::endl;
+       
+       
+       if(tracklist.size()==1 && trk_length_reco[k]!=0 && trk_length_truth[k]!=0){
+        diff_length_reco_truth->Fill(trk_length_reco[k]-trk_length_truth[k]);
+        diff_length_truth1_vs_truth2->Fill(trk_length_straight_line_truth[k]-trk_length_truth[k]);
+        diff_KE_reco_truth->Fill(Kin_Eng_truth-Kin_Eng_reco[k]);
+        
+        if(geant_part.size()==1){
+         diff_length_reco_truth_1geant->Fill(trk_length_reco[k]-trk_length_truth[k]);
+        diff_length_truth1_vs_truth2_1geant->Fill(trk_length_straight_line_truth[k]-trk_length_truth[k]);
+        diff_KE_reco_truth_1geant->Fill(Kin_Eng_truth-Kin_Eng_reco[k]);
+        }
+        }
       }
+
  
- if(trk_length_truth!=0 && trk_length_truth!=0)
- diff_length_reco_truth->Fill(trk_length_truth-trk_length_truth);
 } //if MC
 
 
@@ -606,13 +668,34 @@ void t962::CaloAnalysisTree::ResetVars(){
   trackexit_dcosz_reco = -99999;
   ntracks_reco=-999;
   no_geant_particles=-999;
+  Kin_Eng_truth=-999;
   
-  
-  
-  
+
 }
 
+//------------------------------------------------------------------------//
+double t962::CaloAnalysisTree::LifetimeCorrection(float time){
 
+   float t = time;
+
+   art::ServiceHandle<util::LArProperties> LArProp;
+   art::ServiceHandle<util::DetectorProperties> detprop;
+
+   double timetick = detprop->SamplingRate()*1.e-3;    //time sample in microsec
+   double presamplings = detprop->TriggerOffset();
+
+   t -= presamplings;
+   time = t * timetick;  //  (in microsec)
+
+   double tau = LArProp->ElectronLifetime();
+
+   double correction = exp(time/tau);
+   return correction;
+}
+
+//--------------------------------------------------  
+  
+  
 
 
 

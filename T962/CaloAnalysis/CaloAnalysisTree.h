@@ -41,16 +41,24 @@ namespace t962 {
  
   
   private:
-    
+    double LifetimeCorrection(float time);
     void ResetVars();
     double fMCvertex [3];
     
     TTree* fTree;
     //run information
     TH1F *diff_length_reco_truth;
+    TH1F *diff_KE_reco_truth;
+    TH1F *diff_length_truth1_vs_truth2;
+    TH1F *diff_length_reco_truth_1geant;
+    TH1F *diff_KE_reco_truth_1geant;
+    TH1F *diff_length_truth1_vs_truth2_1geant;
+    
     double *trk_length_truth;
     double *trk_length_straight_line_truth;
     double *trk_length_reco;
+    double *Kin_Eng_reco;
+    double Kin_Eng_truth;
     int run;
     int event;
     double pot;
