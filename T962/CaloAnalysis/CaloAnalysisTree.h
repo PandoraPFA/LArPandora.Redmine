@@ -114,6 +114,7 @@ namespace t962 {
     int *pdg;
     int *process_primary;
   double *Eng;
+  double *Eng_at_endtrack;
   double *Px;
   double *Py;
   double *Pz;

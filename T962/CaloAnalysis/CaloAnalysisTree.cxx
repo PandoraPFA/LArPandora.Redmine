@@ -40,6 +40,7 @@
 #include "Utilities/LArProperties.h"
 #include "SummaryData/summary.h"
 #include "Utilities/DetectorProperties.h"
+#include "MCCheater/BackTracker.h"
 
 // ROOT includes
 #include <TROOT.h>
@@ -82,6 +83,7 @@ delete twodvtx_w_truth;
 delete twodvtx_t_truth;
 delete pdg;
 delete Eng;
+delete Eng_at_endtrack;
 delete Px;
  delete Py;
  delete Pz;
@@ -127,6 +129,7 @@ void t962::CaloAnalysisTree::beginJob()
   
   pdg= new int[no_geant_particles];
   Eng= new double[no_geant_particles];
+  Eng_at_endtrack= new double[no_geant_particles];
   Px= new double[no_geant_particles];
   Py= new double[no_geant_particles];
   Pz= new double[no_geant_particles];
@@ -184,6 +187,7 @@ fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
   fTree->Branch("no_geant_particles",&no_geant_particles,"no_geant_particles/I");
   fTree->Branch("pdg",pdg,"pdg[no_geant_particles]/I");
   fTree->Branch("Eng",Eng,"Eng[no_geant_particles]/D");
+  fTree->Branch("Eng_at_endtrack",Eng_at_endtrack,"Eng_at_endtrack[no_geant_particles]/D");
   fTree->Branch("Px",Px,"Px[no_geant_particles]/D");
   fTree->Branch("Py",Py,"Py[no_geant_particles]/D");
   fTree->Branch("Pz",Pz,"Pz[no_geant_particles]/D");
@@ -516,6 +520,53 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
  
   if (!isdata){ 
  
+ 
+  ////////////////////////////////////////////////////////////////////////
+ 
+ //     GET DEPOSITED KINETIC ENERGY
+ 
+ ///////////////////////////
+double tot_energy=0.;
+sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt,fLArG4ModuleLabel);
+art::ServiceHandle<geo::Geometry> geom;
+
+    unsigned int cstat;    //hit cryostat number 
+    unsigned int tpc;    //hit tpc number 
+    unsigned int wire;   //hit wire number 
+    unsigned int plane;  //hit plane number
+
+   std::vector<const sim::SimChannel*> sccol;
+   evt.getView(fLArG4ModuleLabel, sccol);
+
+// loop over all sim::SimChannels in the event and make sure there are no
+   // sim::IDEs with trackID values that are not in the sim::ParticleList
+    for(size_t sc = 0; sc < sccol.size(); ++sc){
+       //check whether the channel is collection - to make sure you sum only one wire plane basically.
+       geom->ChannelToWire(sccol[sc]->Channel(),cstat,tpc,plane,wire);
+       if(geom->Plane(plane).SignalType()!= geo::kCollection)
+           continue;
+
+       const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = sccol[sc]->TDCIDEMap();
+       std::map<unsigned short, std::vector<sim::IDE> >::const_iterator mapitr;
+       for(mapitr = tdcidemap.begin(); mapitr != tdcidemap.end(); mapitr++){
+         const std::vector<sim::IDE> idevec = (*mapitr).second;
+       for(size_t iv = 0; iv < idevec.size(); ++iv){
+         if(plist.find( idevec[iv].trackID ) != plist.end()  //found the right track ID?
+            && idevec[iv].trackID != sim::NoParticleId)  {
+           // here you can put an if whether  idevec[iv].trackID== mother particle TrackID
+            tot_energy+=idevec[iv].energy;
+        }
+
+           //  std::cout << "found track @? " << idevec[iv].trackID << " "<< idevec[iv].numElectrons << " sc: " << sc << std::endl;
+         }
+       }
+     }
+
+std::cout<<"tot_energy= "<<tot_energy<<std::endl;
+Kin_Eng_truth=tot_energy;
+////////////////////////////////////////
+ 
+ 
  art::Handle< std::vector<sim::Particle> > geant_list;
    if(evt.getByLabel (fLArG4ModuleLabel,geant_list));
  
@@ -527,20 +578,8 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
     } 
     std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
  std::string pri ("primary");
- int primary=0;
- //determine the number of primary particles from geant:
-  
-  for( unsigned int i = 0; i < geant_part.size(); ++i ){
-   
-    if(geant_part[i]->Process()==pri){
-    primary++;
-   
-    }
-   
-   }
-  
-  
-  no_geant_particles=primary;
+
+  no_geant_particles=geant_part.size();
   
  std::cout<<"Geant4 list: "<<std::endl;
  
@@ -549,6 +588,12 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
   pdg[i]=geant_part[i]->PdgCode();
     
     Eng[i]=geant_part[i]->E();
+    
+    //energy at the last point of its trajectory:
+    //for(unsigned int pt=0; pt<geant_part[i]->NumberTrajectoryPoints()-1; pt++){
+    Eng_at_endtrack[i]=geant_part[i]->E(geant_part[i]->NumberTrajectoryPoints()-1);
+    
+    //}
     Px[i]=geant_part[i]->Px();
    
     Py[i]=geant_part[i]->Py();
@@ -602,7 +647,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
  // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
      
      
-   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<" trk_length_truth= "<<trk_length_truth[i]<<std::endl;
+   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" E last= "<<geant_part[i]->E(geant_part[i]->NumberTrajectoryPoints()-1)<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<" trk_length_truth= "<<trk_length_truth[i]<<" mother= "<<geant_part[i]->Mother()<<" trackID=" <<geant_part[i]->TrackId()<<std::endl;
    
    
    
@@ -610,7 +655,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
     
     } //geant particles
     
-    Kin_Eng_truth=KE_sum*1000; //KE in MeV
+    //Kin_Eng_truth=KE_sum*1000; //KE in MeV
     
     
       for(int k=0; k<tracklist.size();k++){
@@ -619,7 +664,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
       std::cout<<"trk_length_truth = "<<trk_length_truth[k]<<" (assuming straight line track in truth= "<<trk_length_straight_line_truth[k]<<std::endl;
       std::cout<<"trk_length_reco = "<<trk_length_reco[k]<<std::endl;
       std::cout<<std::endl;
-       std::cout<<"Kin_Eng_truth= "<<Kin_Eng_truth<<" Kin_Eng_reco= "<<Kin_Eng_reco[k]<< "MeV"<<std::endl;
+       std::cout<<"Kin_Eng (from summing geant p)= "<<KE_sum*1000<<" Kin_Eng_reco= "<<Kin_Eng_reco[k]<< "MeV"<<std::endl;
        std::cout<<"________________________________"<<std::endl;
        
        
@@ -636,6 +681,57 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
         }
       }
 
+ 
+//-------------------------------------------------------------------------
+//   FIGURE OUT WHAT PARTICLE IS IN EACH HIT, WANT TO FIND OUT PDG CODE OF
+//    SINGLE HITS AROUND PROTON TRACK
+//-------------------------------------------------------------------------
+
+std::vector<const sim::SimChannel*> scs(geom->Nchannels(),0);
+  for(size_t i = 0; i < sccol.size(); ++i) scs[sccol[i]->Channel()] = sccol[i];
+  
+  
+  sim::ParticleList _particleList = sim::SimListUtils::GetParticleList(evt, fLArG4ModuleLabel);
+   _particleList.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
+ 
+  art::Handle< std::vector<recob::Hit> > hitListHandle;
+  evt.getByLabel(fHitsModuleLabel,hitListHandle);
+  std::vector< art::Ptr<recob::Hit> > hits;
+  art::fill_ptr_vector(hits, hitListHandle);
+
+  std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
+  while(itr != hits.end()) {
+  
+    std::vector<cheat::TrackIDE> trackides = cheat::BackTracker::HitToTrackID(*(scs[(*itr)->Channel()]), *itr);
+    std::vector<cheat::TrackIDE> eveides   = cheat::BackTracker::HitToEveID(_particleList, *(scs[(*itr)->Channel()]), *itr);
+		
+    std::vector<cheat::TrackIDE>::iterator idesitr = trackides.begin();
+		
+   
+    while( idesitr != trackides.end() ){
+    
+     
+
+      const sim::Particle* particle = _particleList.at( (*idesitr).trackID);
+		  
+      int pdg = particle->PdgCode();
+      
+      geom->ChannelToWire((*itr)->Channel(),cstat,tpc,plane,wire);
+      
+      std::cout<<"plane= "<<plane<<" w= "<<wire<<" time= "<<(*itr)->PeakTime()<< " pdg= "<<pdg<<std::endl;
+     
+      //std::cout<<"pdg= "<<pdg<<std::endl;
+   
+      idesitr++;
+	     
+    } //trackIDs  
+	  
+    itr++;
+  }
+ 
+ 
+//-------------------------------------------------------------------------
+ //-------------------------------------------------------------------------
  
 } //if MC
 
