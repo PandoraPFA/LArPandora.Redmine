@@ -13,7 +13,7 @@
 // lar includes
 #include "T962/TGMuon/TGMuon.h"
 
-namespace evgen{
+namespace t962{
 
   DEFINE_ART_MODULE(TGMuon);
 

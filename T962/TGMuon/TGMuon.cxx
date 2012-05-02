@@ -44,7 +44,7 @@
 #include "TDatabasePDG.h"
 #include "TRandom3.h"
 
-namespace evgen{
+namespace t962{
 
   //____________________________________________________________________________
   TGMuon::TGMuon(fhicl::ParameterSet const& pset)

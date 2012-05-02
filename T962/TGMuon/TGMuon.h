@@ -12,7 +12,7 @@
 
 namespace simb { class MCTruth; }
 
-namespace evgen {
+namespace t962 {
 
   /// module to produce single or multiple specified particles in the detector
   class TGMuon : public art::EDProducer {
