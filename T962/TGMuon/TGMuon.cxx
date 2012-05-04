@@ -181,8 +181,7 @@ namespace t962{
       	else
      	pdg=13;
       
-      	static TDatabasePDG  pdgt;
-      	TParticlePDG* pdgp = pdgt.GetParticle(pdg);
+      	TParticlePDG* pdgp = TDatabasePDG::Instance()->GetParticle(pdg);
       	if (pdgp) m = pdgp->Mass();
 
       	TLorentzVector pos(x[0], x[1], x[2], 0.0);

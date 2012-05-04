@@ -9,6 +9,7 @@
 #include <string>
 #include "art/Framework/Core/EDProducer.h"
 #include "TRandom3.h"
+#include "TDatabasePDG.h"
 
 namespace simb { class MCTruth; }
 
@@ -48,6 +49,7 @@ namespace t962 {
     float ftrkmom;
     float ftrkqp;
     float totalpot;
+
   };
 };
 ////////////////////////////////////////////////////////////////////////
