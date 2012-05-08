@@ -18,6 +18,7 @@ class TH1D;
 class TH2D;
 class TTree;
 
+
 ///Track finding and building 
 namespace t962 {
 
@@ -39,7 +40,7 @@ namespace t962 {
     
   protected:
   
-  bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
+    bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
   
   private:
     

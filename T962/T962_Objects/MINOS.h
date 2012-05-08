@@ -72,28 +72,28 @@ namespace t962{
       std::vector<float> ftrkstpU;
       std::vector<float> ftrkstpV;
       
-      //MC only (try commenting out and remaking all of T962/* if there are problems)
-//      float fmcIndex;
-//      double fmcPDG;
-//      double fmcPx;
-//      double fmcPy;
-//      double fmcPz;
-//      double fmcEne;
-//      double fmcMass;
-//      double fmcVtxX;
-//      double fmcVtxY;
-//      double fmcVtxZ;
+      //MC only (try commenting out and remaking all of T962/* if there are problems) .
+      float fmcIndex;
+      double fmcPDG;
+      double fmcPx;
+      double fmcPy;
+      double fmcPz;
+      double fmcEne;
+      double fmcMass;
+      double fmcVtxX;
+      double fmcVtxY;
+      double fmcVtxZ;
       friend std::ostream& operator << (std::ostream& o, const MINOS& m);
 
-//       void SetmcPx(double mcpx){fmcPx = mcpx;}
-//       void SetmcPy(double mcpy){fmcPy = mcpy;}
-//       void SetmcPz(double mcpz){fmcPz = mcpz;}
+       void SetmcPx(double mcpx){fmcPx = mcpx;}
+       void SetmcPy(double mcpy){fmcPy = mcpy;}
+       void SetmcPz(double mcpz){fmcPz = mcpz;}
 
    private:    
-//    
-//       double fmcPx;
-//       double fmcPy;
-//       double fmcPz;
+    
+       //double fmcPx;
+       //double fmcPy;
+       //double fmcPz;
       int fmatched; //our variable to store whether MINOS track is matched to ArgoNeuT track
  
    };   

@@ -164,6 +164,7 @@ namespace merge{
             minitree->SetBranchAddress("ntrkstp",&minos.fntrkstp);
             
             // uncomment next 10 lines for MC
+	    // Never to be used for MC!
 //            minos.fmcIndex=-99999;
 //            minos.fmcPDG=-99999;
 //            minos.fmcPx=-99999;

@@ -18,6 +18,7 @@
 #include "art/Framework/Principal/SubRun.h" 
 #include "fhiclcpp/ParameterSet.h" 
 #include "art/Framework/Principal/Handle.h" 
+#include "art/Framework/Principal/View.h" 
 #include "art/Persistency/Common/Ptr.h" 
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
@@ -191,8 +192,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle);
   art::Handle< std::vector<recob::Vertex> > vertexListHandle;
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
-  art::Handle< std::vector<t962::MINOS> > minosListHandle;
-  evt.getByLabel(fMINOSModuleLabel,minosListHandle);
+  //art::Handle< std::vector<t962::MINOS> > minosListHandle;
+  //evt.getByLabel(fMINOSModuleLabel,minosListHandle);
+  art::View< t962::MINOS > minosListHandle;
+  evt.getView(fMINOSModuleLabel,minosListHandle);
   art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
   evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
@@ -235,11 +238,14 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     vertexlist.push_back(vertexHolder);
   }
 
-  art::PtrVector<t962::MINOS> minoslist;
-  if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
-  for (unsigned int i = 0; i < minosListHandle->size(); i++){
-    art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
-    minoslist.push_back(minosHolder);
+  //art::PtrVector<t962::MINOS> minoslist;
+  std::vector<t962::MINOS*> minoslist;
+  //if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
+  //  for (unsigned int i = 0; i < minosListHandle->size(); i++){
+  for (unsigned int i = 0; i < minosListHandle.vals().size(); i++){
+    //    art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
+    // minoslist.push_back(minosHolder);
+    minoslist.push_back((t962::MINOS*)(minosListHandle.vals()[i]));
   }
 
   art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
@@ -372,16 +378,16 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      trk_vtxz_minos = minoslist[j]->ftrkVtxZ;        
      }  
       if (!isdata){       
-//      mc_index_minos = minoslist[j]->fmcIndex;
-//      mc_pdg_minos = minoslist[j]->fmcPDG;
-//      mc_px_minos = minoslist[j]->fmcPx;
-//      mc_py_minos = minoslist[j]->fmcPy;
-//      mc_pz_minos = minoslist[j]->fmcPz;
-//      mc_ene_minos = minoslist[j]->fmcEne;
-//      mc_mass_minos = minoslist[j]->fmcMass;
-//      mc_vtxx_minos = minoslist[j]->fmcVtxX;
-//      mc_vtxy_minos = minoslist[j]->fmcVtxY;
-//      mc_vtxz_minos = minoslist[j]->fmcVtxZ;
+      mc_index_minos = minoslist[j]->fmcIndex;
+      mc_pdg_minos = minoslist[j]->fmcPDG;
+      mc_px_minos = minoslist[j]->fmcPx;
+      mc_py_minos = minoslist[j]->fmcPy;
+      mc_pz_minos = minoslist[j]->fmcPz;
+      mc_ene_minos = minoslist[j]->fmcEne;
+      mc_mass_minos = minoslist[j]->fmcMass;
+      mc_vtxx_minos = minoslist[j]->fmcVtxX;
+      mc_vtxy_minos = minoslist[j]->fmcVtxY;
+      mc_vtxz_minos = minoslist[j]->fmcVtxZ;
       }
      }
     }
