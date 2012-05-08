@@ -98,7 +98,7 @@ namespace argoevd{
             this->GetArgoProngs(evt, which, prong);
 
             for(size_t p = 0; p < prong.size(); ++p)
-               this->SpacePoint(prong[p], prong[p]->ID(), view);
+	      this->DrawProng3D(*(prong[p]), prong[p]->ID(), view);
          }
       }
   
@@ -140,7 +140,7 @@ namespace argoevd{
             this->GetArgoProngs(evt, which, shower);
 
             for(size_t p = 0; p < shower.size(); ++p)
-               this->SpacePoint(shower[p], shower[p]->ID(), view);
+	      this->DrawProng3D(*(shower[p]), shower[p]->ID(), view);
          }
       }
     
