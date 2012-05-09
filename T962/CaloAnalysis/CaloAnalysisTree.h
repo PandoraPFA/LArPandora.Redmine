@@ -59,6 +59,7 @@ namespace t962 {
     double *trk_length_reco;
     double *Kin_Eng_reco;
     double Kin_Eng_truth;
+    double KE_sum_;
     int run;
     int event;
     double pot;

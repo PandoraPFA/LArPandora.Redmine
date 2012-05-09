@@ -205,6 +205,7 @@ fTree->Branch("nhitsCOL",&fnhitsCOL,"nhitsCOL/I");
   fTree->Branch("trk_length_reco",trk_length_reco,"trk_length_reco[ntracks_reco]/D");
   fTree->Branch("Kin_Eng_reco",Kin_Eng_reco,"Kin_Eng_reco[ntracks_reco]/D");
   fTree->Branch("Kin_Eng_truth",&Kin_Eng_truth,"Kin_Eng_truth/D");
+  fTree->Branch("KE_sum_",&KE_sum_,"KE_sum_/D");
   
  //..................................
 
@@ -629,6 +630,7 @@ Kin_Eng_truth=tot_energy;
      
      
      std::cout<<"KE_sum= "<<KE_sum*1000<<" MeV"<<std::endl;
+     KE_sum_=KE_sum*1000;
      
     //-----------------------------------------------
     //  CALCULATE TRUE LENGTH OF A TRACK:
@@ -765,6 +767,7 @@ void t962::CaloAnalysisTree::ResetVars(){
   ntracks_reco=-999;
   no_geant_particles=-999;
   Kin_Eng_truth=-999;
+  KE_sum_=-999;
   
 
 }
