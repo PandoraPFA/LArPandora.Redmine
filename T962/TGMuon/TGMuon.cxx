@@ -65,10 +65,6 @@ namespace t962{
   }
 
   //____________________________________________________________________________
-  void TGMuon::reconfigure(fhicl::ParameterSet const& pset)
-  {
-    return;
-  }
 
   //____________________________________________________________________________
   void TGMuon::beginRun(art::Run& run)

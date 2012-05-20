@@ -26,7 +26,7 @@ namespace t962 {
     void produce(art::Event& evt);
     void beginRun(art::Run& run);
     void endSubRun(art::SubRun& sr);
-    void reconfigure(fhicl::ParameterSet const& pset);
+    void reconfigure(fhicl::ParameterSet const& pset) {};
 
   private:
 
