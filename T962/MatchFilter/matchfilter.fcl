@@ -1,6 +1,6 @@
 #include "job/services.fcl"
 #include "job/caldata.fcl"
-#include "job/fftfinder.fcl"
+#include "job/hitfindermodules.fcl"
 #include "job/clustermodules.fcl"
 #include "job/vertexfindermodules.fcl"
 #include "job/trackfindermodules.fcl"
@@ -30,6 +30,7 @@ services.user.LArProperties:    @local::argoneut_properties
 services.user.LArFFT:           @local::argoneut_larfft
 services.user.DBScanService:    @local::argoneut_dbscanservice
 services.user.HoughLineService: @local::argoneut_houghlineservice
+services.user.DatabaseUtil:     @local::argoneut_database
 
 source:
 {
@@ -74,4 +75,3 @@ physics.producers.track3d:      @local::argoneut_kalman
 physics.producers.matchtracks:  @local::argoneut_matchtracks
 physics.analyzers.analysistree: @local::argoneut_analysistree
 physics.filters.matchfilter:    @local::argoneut_matchfilter
-services.user.DatabaseUtil: @local::argoneut_database
