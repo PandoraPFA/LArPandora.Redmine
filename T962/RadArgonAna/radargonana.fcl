@@ -6,7 +6,6 @@
 #include "job/caldata.fcl"
 #include "job/hitfindermodules.fcl"
 #include "job/clustermodules.fcl"
-#include "job/clusterservices.fcl"
 #include "job/trackfindermodules.fcl"
 #include "job/matchtracksmodule.fcl"
 #include "job/vertexfindermodules.fcl"
