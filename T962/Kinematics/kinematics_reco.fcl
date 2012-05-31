@@ -1,7 +1,7 @@
 #include "job/services.fcl"
  
 #include "job/caldata.fcl"
-#include "job/fftfinder.fcl"
+#include "job/hitfindermodules.fcl"
 #include "job/clustermodules.fcl"
 #include "job/trackfindermodules.fcl"
 #include "job/kinematicsmodules.fcl"
