@@ -19,6 +19,7 @@ extern "C" {
 #include "T962/ArgoneutEventDisplay/DisplayArgoneutView.h"
 #include "EventDisplay/TWQProjectionView.h"
 #include "EventDisplay/Display3DView.h"
+#include "EventDisplay/Ortho3DView.h"
 
 
 // Framework includes
@@ -40,6 +41,12 @@ static evdb::Canvas* mk_twqprojectionview_canvas(TGMainFrame* mf)
 static evdb::Canvas* mk_display3d_canvas(TGMainFrame* mf)
 {
   return new evd::Display3DView(mf);
+}
+
+// Builder for the Ortho view
+static evdb::Canvas* mk_ortho3d_canvas(TGMainFrame* mf)
+{
+  return new evd::Ortho3DView(mf);
 }
 
 // Builder for the ArgoNeuT 3D view
@@ -83,6 +90,13 @@ namespace argoevd{
 				  700,
 				  700,
 				  mk_display3d_canvas);
+
+    evdb::DisplayWindow::Register("Ortho3D",
+                                  "Ortho3D",
+                                  700,
+                                  700,
+                                  mk_ortho3d_canvas);
+
 
   evdb::DisplayWindow::Register("DisplayArgoneut",
 				  "DisplayArgoneut",
