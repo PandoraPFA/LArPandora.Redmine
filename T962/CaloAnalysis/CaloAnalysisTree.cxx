@@ -37,8 +37,9 @@
 #include "Simulation/SimListUtils.h"
 #include "RecoBase/recobase.h"
 #include "RawData/RawDigit.h"
-#include "Utilities/LArProperties.h"
 #include "SummaryData/summary.h"
+#include "Utilities/LArProperties.h"
+#include "Utilities/AssociationUtil.h"
 #include "Utilities/DetectorProperties.h"
 #include "MCCheater/BackTracker.h"
 
@@ -297,102 +298,92 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
     // Electronic calibration factor to convert from ADC to electrons
    double fElectronsToADC = detprop->ElectronsToADC();
   
-   for(art::PtrVector<recob::Track>::const_iterator trkIter = tracklist.begin(); trkIter != tracklist.end();  trkIter++){ 
-  
-   art::PtrVector<recob::Cluster> kVclusterlist = (*trkIter)->Clusters(geo::kV);
-   
-   // loop over all (geo::KV) clusters of the track
-    for(art::PtrVector<recob::Cluster>::const_iterator clIter = kVclusterlist.begin(); 
-	clIter != kVclusterlist.end();  
-	clIter++) { 
+   size_t trkCtr = 0;
 
-       if((*clIter)->View() == geo::kV) fTrkPitchC = (*trkIter)->ProjectedLength(geo::kV);
-// 
-//       // Some variables for the hit
-//       float time;         //hit time at maximum
-//       float stime;        //hit start time 
-//       float etime;        //hit end time 
-      art::PtrVector<recob::Hit> hitlist;
-      hitlist = (*clIter)->Hits(geo::kV);
+   art::FindManyP<recob::Hit> fmh(trackListHandle, evt, fTrackModuleLabel);
+   art::FindManyP<recob::SpacePoint> fmsp(trackListHandle, evt, fTrackModuleLabel);
+
+   for(art::PtrVector<recob::Track>::const_iterator trkIter = tracklist.begin(); trkIter != tracklist.end();  trkIter++){ 
+     
+     fTrkPitchC = (*trkIter)->ProjectedLength(geo::kV);
+
+     // get the hits for this view
+     std::vector< art::Ptr<recob::Hit> > hits = fmh.at(trkCtr);
+
+     art::PtrVector<recob::Hit> hitlist;
+     for(size_t h = 0; h < hits.size(); ++h) 
+       if(hits[h]->View() == geo::kV) hitlist.push_back(hits[h]);
       
      //  fnhitsCOL = npC + hitlist.size();
 //       
 //       double dEdx_Coll_Tot = 0.;
 //       double dEdx_Coll_Tot_5cm = 0.;
 
-       Kin_En = 0.;
-      double *xyz_previous = new double[3]; 
- 
-       std::cout<<" TrkPitchC="<<fTrkPitchC<<" nhitsCOL="<<fnhitsCOL<<std::endl;
-
-      int nsp =0;
-      //Loop over clusters
-      for(std::vector<recob::SpacePoint>::const_iterator spIter = ((*trkIter)->SpacePoints()).begin(); 
-	  spIter < ((*trkIter)->SpacePoints()).end();  
-	  ++spIter) { 
-	art::PtrVector<recob::Hit> sphits = (*spIter).Hits(geo::kV);
-	art::PtrVector<recob::Hit> sphitsI = (*spIter).Hits(geo::kU);
-
-	if(sphits.size()==0 ) continue;
-
-	 //std::cout<<" from SPP: nsp, Coll. channel, wire, time, charge, Ind. channel, time, charge "<<nsp<<" "<<sphits[0]->Channel()<<" "<<sphits[0]->PeakTime()<<" "<<sphits[0]->Charge(true)<<" "<<sphitsI[0]->Channel()<<" "<<sphitsI[0]->PeakTime()<<" "<<sphitsI[0]->Charge(true)<<std::endl;
-	nsp++;
-      }
-
-      //loop over Collection hits
-      for(art::PtrVector<recob::Hit>::const_iterator hitIter = hitlist.begin(); hitIter != hitlist.end();  hitIter++){
-	//recover the Hit
-	time = (*hitIter)->PeakTime() ;
-// 	stime = (*hitIter)->StartTime() ;
-// 	etime = (*hitIter)->EndTime();            
-// 	art::Ptr<recob::Wire> theWire = (*hitIter)->Wire();
-// 	channel = theWire->RawDigit()->Channel();
-// 	geom->ChannelToWire(channel,cstat,tpc,plane,wire);
-	      
-	double MIPs   = (*hitIter)->Charge(true);   // in ADC
-	double dQdx   = MIPs/fTrkPitchC;           // in ADC/cm
-// 	fdQdx_Coll->Fill(dQdx);
-
-        double dQdx_e = dQdx/fElectronsToADC;  // Conversion from ADC/cm to e/cm
- 
-	dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
-
-	double dEdx = larp->BirksCorrection(dQdx_e);   // Correction for charge quenching (Recombination) dEdx in MeV/cm
-// 
-// 	fdEdx_Coll->Fill(dEdx);
-// 	fbirk->Fill(dQdx_e,dEdx);
-	//fdEdx_Coll_vsXZangle->Fill(dEdx,TMath::ATan(trackCosStart[0]/trackCosStart[2]));
-	      
-	//dEdx_Coll_Tot = dEdx_Coll_Tot + dEdx;
-	Kin_En = Kin_En + dEdx * fTrkPitchC;
-
-        
-	//std::cout<<" Collection: npC, wire, time, ADC, dQdx (e/cm), dEdx (MeV/cm)"<<npC<<" "<<wire<<" "<<time<<" "<<MIPs<<" "<<dQdx_e<<" "<<dEdx<<std::endl;
-  // 
-//  	fwireCOL[npC] = (int)wire;       
-// 	ftimeCOL[npC] = (double)time;
-// 	fstimeCOL[npC] = (double)stime;
-// 	fetimeCOL[npC] = (double)etime;
-// 	fMIPsCOL[npC] =  (double)MIPs;
-// 	fdEdxCOL[npC] = (double)dEdx;
-
-	npC++;
-
-	
-	// dE/dx vs Residual Range plot
-	for(std::vector<recob::SpacePoint>::const_iterator spIter = ((*trkIter)->SpacePoints()).begin(); 
-	    spIter < ((*trkIter)->SpacePoints()).end();  
-	    ++spIter) { 
-	  art::PtrVector<recob::Hit> sphits = (*spIter).Hits(geo::kV);
-	  art::PtrVector<recob::Hit> sphitsI = (*spIter).Hits(geo::kU);
-
-	  if(sphits.size()==0) continue;
-
-	  if((*hitIter)->Channel()!=sphits[0]->Channel()) continue;
-	  if((*hitIter)->PeakTime()!=sphits[0]->PeakTime()) continue;//protect against multiple hits on the same wire in the cluster.
+     Kin_En = 0.;
+     double *xyz_previous = new double[3]; 
+     
+     std::cout<<" TrkPitchC="<<fTrkPitchC<<" nhitsCOL="<<fnhitsCOL<<std::endl;
+  
+     std::vector< art::Ptr<recob::SpacePoint> > sps = fmsp.at(trkCtr);
+     int nsp = sps.size();
+     
+     //loop over Collection hits
+     for(art::PtrVector<recob::Hit>::const_iterator hitIter = hitlist.begin(); hitIter != hitlist.end();  hitIter++){
+       //recover the Hit
+       time = (*hitIter)->PeakTime() ;
+       // 	stime = (*hitIter)->StartTime() ;
+       // 	etime = (*hitIter)->EndTime();            
+       // 	art::Ptr<recob::Wire> theWire = (*hitIter)->Wire();
+       // 	channel = theWire->RawDigit()->Channel();
+       // 	geom->ChannelToWire(channel,cstat,tpc,plane,wire);
+       
+       double MIPs   = (*hitIter)->Charge(true);   // in ADC
+       double dQdx   = MIPs/fTrkPitchC;           // in ADC/cm
+       // 	fdQdx_Coll->Fill(dQdx);
+       
+       double dQdx_e = dQdx/fElectronsToADC;  // Conversion from ADC/cm to e/cm
+       
+       dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
+       
+       double dEdx = larp->BirksCorrection(dQdx_e);   // Correction for charge quenching (Recombination) dEdx in MeV/cm
+       // 
+       // 	fdEdx_Coll->Fill(dEdx);
+       // 	fbirk->Fill(dQdx_e,dEdx);
+       //fdEdx_Coll_vsXZangle->Fill(dEdx,TMath::ATan(trackCosStart[0]/trackCosStart[2]));
+       
+       //dEdx_Coll_Tot = dEdx_Coll_Tot + dEdx;
+       Kin_En = Kin_En + dEdx * fTrkPitchC;
+       
+       
+       //std::cout<<" Collection: npC, wire, time, ADC, dQdx (e/cm), dEdx (MeV/cm)"<<npC<<" "<<wire<<" "<<time<<" "<<MIPs<<" "<<dQdx_e<<" "<<dEdx<<std::endl;
+       // 
+       //  	fwireCOL[npC] = (int)wire;       
+       // 	ftimeCOL[npC] = (double)time;
+       // 	fstimeCOL[npC] = (double)stime;
+       // 	fetimeCOL[npC] = (double)etime;
+       // 	fMIPsCOL[npC] =  (double)MIPs;
+       // 	fdEdxCOL[npC] = (double)dEdx;
+       
+       npC++;
+       
+       art::FindManyP<recob::Hit> fmsph(sps, evt, fTrackModuleLabel);
+       
+       // dE/dx vs Residual Range plot
+       for(size_t s = 0; s < sps.size(); ++s) { 
+	 // space point associations were made in fTrackModuleLabel
+	 std::vector< art::Ptr<recob::Hit> > sphitsAll = fmsph.at(s);
+	 std::vector< art::Ptr<recob::Hit> > sphits;
+	 for(size_t sh = 0; sh < sphitsAll.size(); ++sh)
+	   if(sphitsAll[sh]->View() == geo::kV) sphits.push_back(sphitsAll[sh]); 
+	 
+	 if(sphits.size()==0) continue;
+	 
+	 if((*hitIter)->Channel()!=sphits[0]->Channel()) continue;
+	 //protect against multiple hits on the same wire in the cluster.
+	 if((*hitIter)->PeakTime()!=sphits[0]->PeakTime()) continue;
 
 	  const double *xyz = new double[3];
-	  xyz = (*spIter).XYZ();
+	  xyz = sps[s]->XYZ();
 	  std::vector<double> larStart, larEnd;
 	  (*trkIter)->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
 
@@ -405,16 +396,18 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
 // 	  		       (larStart[1]-larEnd[1])*(larStart[1]-larEnd[1]) +
 // 	  		       (larStart[2]-larEnd[2])*(larStart[2]-larEnd[2]));
 
-	  if(spIter == ((*trkIter)->SpacePoints()).begin()) Trk_Length = Trk_Length  + sqrt((larStart[0]-xyz[0])*(larStart[0]-xyz[0]) +
-											    (larStart[1]-xyz[1])*(larStart[1]-xyz[1]) +
-											    (larStart[2]-xyz[2])*(larStart[2]-xyz[2]));
-	  else Trk_Length = Trk_Length  + sqrt((xyz_previous[0]-xyz[0])*(xyz_previous[0]-xyz[0]) +
-					       (xyz_previous[1]-xyz[1])*(xyz_previous[1]-xyz[1]) +
-					       (xyz_previous[2]-xyz[2])*(xyz_previous[2]-xyz[2]));
+	  if(s == 0) 
+	    Trk_Length = Trk_Length  + sqrt((larStart[0]-xyz[0])*(larStart[0]-xyz[0]) +
+					    (larStart[1]-xyz[1])*(larStart[1]-xyz[1]) +
+					    (larStart[2]-xyz[2])*(larStart[2]-xyz[2]));
+	  else 
+	    Trk_Length = Trk_Length  + sqrt((xyz_previous[0]-xyz[0])*(xyz_previous[0]-xyz[0]) +
+					    (xyz_previous[1]-xyz[1])*(xyz_previous[1]-xyz[1]) +
+					    (xyz_previous[2]-xyz[2])*(xyz_previous[2]-xyz[2]));
 
 	 //  channel = theWire->RawDigit()->Channel();
-// 	  geom->ChannelToWire(channel,cstat,tpc,plane,wire);
-
+	  // 	  geom->ChannelToWire(channel,cstat,tpc,plane,wire);
+	  
 	  // std::cout<<" Space Points: Coll. wire, time, charge, Ind. channel, time, charge "<<wire<<" "<<time<<" "<<MIPs<<" "<<sphitsI[0]->Channel()<<" "<<sphitsI[0]->PeakTime()<<" "<<sphitsI[0]->Charge(true)<<std::endl;
 	  xyz_previous[0] = xyz[0];
 	  xyz_previous[1] = xyz[1];
@@ -426,8 +419,8 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
 	        
 	  // npC++;
                
-	}
-      }// end of loop over the (geo::kV) cluster hits
+       }
+     }// end of loop over the (geo::kV) cluster hits
       
       
       //fKinetic_En->Fill(Kin_En);
@@ -441,11 +434,11 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
       std::cout<<"    |-* Kinetic Energy deposited in LAr="<<Kin_En<<" MeV"<<std::endl;
      
  
-    }
     trk_length_reco[trkIter-tracklist.begin()]=Trk_Length;
     Kin_Eng_reco[trkIter-tracklist.begin()]=Kin_En;
     
- }//track list
+    ++trkCtr;
+   }//track list
  //--------------------------------------------------------------------
   //vertex information
   if(vertexlist.size())
@@ -684,61 +677,55 @@ Kin_Eng_truth=tot_energy;
       }
 
  
-//-------------------------------------------------------------------------
-//   FIGURE OUT WHAT PARTICLE IS IN EACH HIT, WANT TO FIND OUT PDG CODE OF
-//    SINGLE HITS AROUND PROTON TRACK
-//-------------------------------------------------------------------------
-
-std::vector<const sim::SimChannel*> scs(geom->Nchannels(),0);
-  for(size_t i = 0; i < sccol.size(); ++i) scs[sccol[i]->Channel()] = sccol[i];
-  
-  
-  sim::ParticleList _particleList = sim::SimListUtils::GetParticleList(evt, fLArG4ModuleLabel);
-   _particleList.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
+      //-------------------------------------------------------------------------
+      //   FIGURE OUT WHAT PARTICLE IS IN EACH HIT, WANT TO FIND OUT PDG CODE OF
+      //    SINGLE HITS AROUND PROTON TRACK
+      //-------------------------------------------------------------------------
+      art::ServiceHandle<cheat::BackTracker> bt;
+      bt->SetEveIdCalculator(new sim::EmEveIdCalculator);
  
-  art::Handle< std::vector<recob::Hit> > hitListHandle;
-  evt.getByLabel(fHitsModuleLabel,hitListHandle);
-  std::vector< art::Ptr<recob::Hit> > hits;
-  art::fill_ptr_vector(hits, hitListHandle);
-
-  std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
-  while(itr != hits.end()) {
-  
-    std::vector<cheat::TrackIDE> trackides = cheat::BackTracker::HitToTrackID(*(scs[(*itr)->Channel()]), *itr);
-    std::vector<cheat::TrackIDE> eveides   = cheat::BackTracker::HitToEveID(_particleList, *(scs[(*itr)->Channel()]), *itr);
-		
-    std::vector<cheat::TrackIDE>::iterator idesitr = trackides.begin();
-		
-   
-    while( idesitr != trackides.end() ){
-    
-     
-
-      const sim::Particle* particle = _particleList.at( (*idesitr).trackID);
-		  
-      int pdg = particle->PdgCode();
+      art::Handle< std::vector<recob::Hit> > hitListHandle;
+      evt.getByLabel(fHitsModuleLabel,hitListHandle);
+      std::vector< art::Ptr<recob::Hit> > hits;
+      art::fill_ptr_vector(hits, hitListHandle);
       
-      geom->ChannelToWire((*itr)->Channel(),cstat,tpc,plane,wire);
-      
-      std::cout<<"plane= "<<plane<<" w= "<<wire<<" time= "<<(*itr)->PeakTime()<< " pdg= "<<pdg<<std::endl;
-     
-      //std::cout<<"pdg= "<<pdg<<std::endl;
-   
-      idesitr++;
-	     
-    } //trackIDs  
+      std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
+      while(itr != hits.end()) {
+	
+	std::vector<cheat::TrackIDE> trackides = bt->HitToTrackID(*itr);
+	std::vector<cheat::TrackIDE> eveides   = bt->HitToEveID(*itr);
+		
+	std::vector<cheat::TrackIDE>::iterator idesitr = trackides.begin();
+	
+	
+	while( idesitr != trackides.end() ){
 	  
-    itr++;
-  }
- 
- 
-//-------------------------------------------------------------------------
- //-------------------------------------------------------------------------
- 
-} //if MC
+	  
 
+	  const sim::Particle* particle = bt->TrackIDToParticle((*idesitr).trackID);
+		  
+	  int pdg = particle->PdgCode();
+	  
+	  geom->ChannelToWire((*itr)->Channel(),cstat,tpc,plane,wire);
+	  
+	  std::cout<<"plane= "<<plane<<" w= "<<wire<<" time= "
+		   <<(*itr)->PeakTime()<< " pdg= "<<pdg<<std::endl;
+	  
+	  //std::cout<<"pdg= "<<pdg<<std::endl;
+   
+	  idesitr++;
+	  
+	} //trackIDs  
+	
+	itr++;
+      }
+      
+      
+      //-------------------------------------------------------------------------
+      //-------------------------------------------------------------------------
+      
+  } //if MC
 
- 
  
   fTree->Fill();
 }

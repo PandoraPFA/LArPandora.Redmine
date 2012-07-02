@@ -7,40 +7,16 @@
 // Make plots for radioactive argon decay.
 ////////////////////////////////////////////////////////////////////////
 
-// Framework includes
-#include "art/Framework/Principal/Event.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Framework/Services/Optional/TFileDirectory.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
-#include "cetlib/exception.h"
-
-#include "T962/MuonAna/MuonAna.h"
-extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
-}
-
-#include <sstream>
-#include <fstream>
-#include <math.h>
-#include <algorithm>
-#include "TMath.h"
-
 #include "Filters/ChannelFilter.h"
 #include "T962/T962_Objects/MINOS.h"
 #include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "RecoBase/recobase.h"
 #include "Geometry/geo.h"
-
+#include "T962/MuonAna/MuonAna.h"
+#include "T962/RadArgonAna/RadArgonAna.h"
+#include "Utilities/AssociationUtil.h"
     
 // Framework includes
-//   HOW MANY OF THESE DO I NEED? 
-//   DO I NEED OTHERS?
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
@@ -52,7 +28,6 @@ extern "C" {
 #include "art/Persistency/Common/PtrVector.h"
 #include "cetlib/exception.h"
 
-#include "T962/RadArgonAna/RadArgonAna.h"
 extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -63,10 +38,6 @@ extern "C" {
 #include <math.h>
 #include <algorithm>
 #include "TMath.h"
-
-#include "Filters/ChannelFilter.h"
-#include "RecoBase/recobase.h"
-#include "Geometry/geo.h"
 
 namespace radargon {
 //-----------------------------------------------------------------------------
@@ -141,10 +112,12 @@ namespace radargon {
     std::vector<unsigned int>                col_SinglesCount;
 
     // scan all clusters
-    for(unsigned int cluster_itr = 0 ; cluster_itr < ClusterHandle->size() ; cluster_itr++){ 
+
+    art::FindManyP<recob::Hit> fmh(ClusterHandle, evt, fClusterModuleLabel);
+
+    for(size_t cluster_itr = 0 ; cluster_itr < ClusterHandle->size() ; cluster_itr++){ 
       art::Ptr<recob::Cluster> cluster(ClusterHandle,cluster_itr);
-      art::PtrVector<recob::Hit> hitlist;
-      hitlist = cluster->Hits();
+      std::vector< art::Ptr<recob::Hit> > hitlist = fmh.at(cluster_itr);
 
       // require clusters contain nHits
       unsigned int nHits = 3; 

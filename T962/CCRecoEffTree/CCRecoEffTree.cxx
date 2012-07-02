@@ -35,6 +35,7 @@
 #include "RecoBase/recobase.h"
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
+#include "Utilities/AssociationUtil.h"
 #include "SummaryData/summary.h"
 #include "Simulation/SimListUtils.h"
 #include "MCCheater/BackTracker.h"
@@ -144,6 +145,9 @@ pot=0.;
 void t962::CCRecoEffTree::analyze(const art::Event& evt)
 {
 
+  art::ServiceHandle<cheat::BackTracker> bt;
+  bt->SetEveIdCalculator(new sim::EmEveIdCalculator);
+
   ResetVars();
 
   run = evt.run();
@@ -210,18 +214,8 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
       parIn.push_back(particle);
   }
 
-  sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt,fLArG4ModuleLabel);
-  
-  // get the sim::SimChannels as well
-  std::vector<const sim::SimChannel*> sccol;
-  evt.getView(fLArG4ModuleLabel, sccol);
-  
   art::ServiceHandle<geo::Geometry> geom;
-  
-  std::vector<const sim::SimChannel*> scs(geom->Nchannels(),0);
-  for(size_t i = 0; i < sccol.size(); ++i) scs[sccol[i]->Channel()] = sccol[i];
-  
-  
+
   int MuonID = 0;
   unsigned int traj_points_muon = 0;;
   simb::MCTrajectory traj_muon;
@@ -255,45 +249,24 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
   trackStart_muon.clear();
   trackEnd_muon.clear();
   
+  art::FindManyP<recob::Hit> fmh(trackListHandle, evt, fTrackModuleLabel);
+
   for(unsigned int i = 0; i<tracklist.size(); ++i){
     
-    art::PtrVector<recob::Hit> track_hitlist;
     std::vector< art::Ptr<recob::Hit> > track_reco_hits;
-    art::PtrVector<recob::Cluster> Icluster;
-    art::PtrVector<recob::Cluster> Ccluster;
     double muon_hits_reco_track = 0;
-    
-    Icluster = tracklist[i]->Clusters(geo::kU); // induction
-    Ccluster = tracklist[i]->Clusters(geo::kV); // collection
-    
-    art::PtrVector<recob::Cluster> clusters;
-    //clusters.clear();
-    
-    art::PtrVector<recob::Cluster>::const_iterator IclusterIter = Icluster.begin();
-    while(IclusterIter!= Icluster.end() ){
-      clusters.push_back(*IclusterIter);
-      track_hitlist = (*IclusterIter)->Hits();
-      for(art::PtrVector<recob::Hit>::const_iterator IHit = track_hitlist.begin(); IHit != track_hitlist.end();  IHit++) 
-	track_reco_hits.push_back(*IHit);
-      IclusterIter++;
-    }
-    
-    art::PtrVector<recob::Cluster>::const_iterator CclusterIter = Ccluster.begin();
-    while(CclusterIter!= Ccluster.end() ){
-      clusters.push_back(*CclusterIter);
-      track_hitlist = (*CclusterIter)->Hits();
-      for(art::PtrVector<recob::Hit>::const_iterator CHit = track_hitlist.begin(); CHit != track_hitlist.end();  CHit++) 
-	track_reco_hits.push_back(*CHit);
-      CclusterIter++;
-    }
+
+    std::vector< art::Ptr<recob::Hit> > track_hitlist = fmh.at(i);
+        
+    track_reco_hits = track_hitlist;
     
     // loop over the hits and figure out which particle contributed to each one
     std::vector< art::Ptr<recob::Hit> >::iterator track_reco_itr = track_reco_hits.begin();
     
     
     while( track_reco_itr != track_reco_hits.end() ){
-      plist.AdoptEveIdCalculator(new sim::EmEveIdCalculator);
-      std::vector<cheat::TrackIDE> track_reco_eveides   = cheat::BackTracker::HitToEveID(plist, *(scs[(*track_reco_itr)->Channel()]), *track_reco_itr);
+
+      std::vector<cheat::TrackIDE> track_reco_eveides   = bt->HitToEveID(*track_reco_itr);
       std::vector<cheat::TrackIDE>::iterator track_reco_idesitr = track_reco_eveides.begin();
       while( track_reco_idesitr != track_reco_eveides.end() ){
 	if((*track_reco_idesitr).trackID == MuonID)

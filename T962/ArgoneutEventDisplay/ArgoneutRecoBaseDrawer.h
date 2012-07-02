@@ -26,7 +26,7 @@ namespace argoevd {
 
   public:
 
-     void ArgoSpacePoint(const recob::Prong* prong,
+    void ArgoSpacePoint(std::vector<const recob::SpacePoint*> sps,
                          int                 id,
                          evdb::View3D*       view,
                          bool matched=false,
@@ -38,9 +38,12 @@ namespace argoevd {
     
   private:
 
-    int GetArgoProngs(const art::Event&                 evt,
+    int GetArgoTracks(const art::Event&                 evt,
                       const std::string&                which,
-                      std::vector<const recob::Prong*>& prong);
+                      art::PtrVector<recob::Track>&     track);
+    int GetArgoShowers(const art::Event&                evt,
+		       const std::string&               which,
+		       art::PtrVector<recob::Shower>&   shower);
 
 
      int GetMinos(const art::Event&            evt,
