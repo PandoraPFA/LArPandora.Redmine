@@ -16,6 +16,7 @@ argoneut_analysistree:
  TrackMatchModuleLabel:    "matchtracks"
  ScanModuleLabel:          "mergescan"
  POTModuleLabel:           "generator"
+ CalorimetryModuleLabel:   "calo"
  vertextrackWindow:         5.
  vertexclusterWindow:       100.
  boundaryWindow:            3.

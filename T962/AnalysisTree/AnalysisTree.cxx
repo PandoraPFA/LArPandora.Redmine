@@ -35,8 +35,10 @@
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
 #include "RecoBase/recobase.h"
+#include "AnalysisBase/anabase.h"
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
+#include "Utilities/AssociationUtil.h"
 #include "SummaryData/summary.h"
 
  
@@ -56,6 +58,7 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
   fScanModuleLabel          (pset.get< std::string >("ScanModuleLabel")         ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
+  fCalorimetryModuleLabel   (pset.get< std::string >("CalorimetryModuleLabel")  ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               )
@@ -100,6 +103,8 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
+  fTree->Branch("trackke",&trackke);
+  fTree->Branch("trackrange",&trackrange);
   fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
   fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minos/D");
   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
@@ -148,14 +153,14 @@ void t962::AnalysisTree::beginJob()
 void t962::AnalysisTree::beginSubRun(const art::SubRun& sr)
 {
 
-art::Handle< sumdata::POTSummary > potListHandle;
-sr.getByLabel(fPOTModuleLabel,potListHandle);
-
-if(sr.getByLabel(fPOTModuleLabel,potListHandle))
-pot=potListHandle->totpot;
-else
-pot=0.;
-
+  art::Handle< sumdata::POTSummary > potListHandle;
+  sr.getByLabel(fPOTModuleLabel,potListHandle);
+  
+  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+    pot=potListHandle->totpot;
+  else
+    pot=0.;
+  
 }
 
 
@@ -339,141 +344,146 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       nvertexclustersw_reco = n_vertexclusters;
     }
   }
+
   //matching information  
   nmatched_reco = trackmatchlist.size();
   int ANTtrackID=-1;
   test_charge_minos=0.;
   
   for(unsigned int j = 0; j < minoslist.size(); j++)
-     { 
-     	if (!isdata)
+    { 
+      if (!isdata)
      	{
-        	if(minoslist[j]->fcharge<0.)
-        	test_charge_minos=-1;
+	  if(minoslist[j]->fcharge<0.)
+	    test_charge_minos=-1;
         }
-     }
-     
+    }
+  
   for(unsigned int i = 0; i < trackmatchlist.size(); i++)
     {
-
-     for(unsigned int j = 0; j < minoslist.size(); j++)
-     {
- 
-     if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
-     {
-     ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
-     
-     if(minoslist[j]->ftrkcontained)
-     trk_mom_minos = minoslist[j]->ftrkErange;
-     else
-     trk_mom_minos = minoslist[j]->ftrkmom;     
-     
-     trkcontained_minos = minoslist[j]->ftrkcontained; 
-     trk_charge_minos = minoslist[j]->fcharge;
-     trk_dcosx_minos = minoslist[j]->ftrkdcosx;
-     trk_dcosy_minos = minoslist[j]->ftrkdcosy;
-     trk_dcosz_minos = minoslist[j]->ftrkdcosz;
-     trk_vtxx_minos = minoslist[j]->ftrkVtxX;
-     trk_vtxy_minos = minoslist[j]->ftrkVtxY;
-     trk_vtxz_minos = minoslist[j]->ftrkVtxZ;        
-     }  
-      if (!isdata){       
-      mc_index_minos = minoslist[j]->fmcIndex;
-      mc_pdg_minos = minoslist[j]->fmcPDG;
-      mc_px_minos = minoslist[j]->fmcPx;
-      mc_py_minos = minoslist[j]->fmcPy;
-      mc_pz_minos = minoslist[j]->fmcPz;
-      mc_ene_minos = minoslist[j]->fmcEne;
-      mc_mass_minos = minoslist[j]->fmcMass;
-      mc_vtxx_minos = minoslist[j]->fmcVtxX;
-      mc_vtxy_minos = minoslist[j]->fmcVtxY;
-      mc_vtxz_minos = minoslist[j]->fmcVtxZ;
-      }
-     }
+      
+      for(unsigned int j = 0; j < minoslist.size(); j++)
+	{
+	  
+	  if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
+	    {
+	      ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
+	      
+	      if(minoslist[j]->ftrkcontained)
+		trk_mom_minos = minoslist[j]->ftrkErange;
+	      else
+		trk_mom_minos = minoslist[j]->ftrkmom;     
+	      
+	      trkcontained_minos = minoslist[j]->ftrkcontained; 
+	      trk_charge_minos = minoslist[j]->fcharge;
+	      trk_dcosx_minos = minoslist[j]->ftrkdcosx;
+	      trk_dcosy_minos = minoslist[j]->ftrkdcosy;
+	      trk_dcosz_minos = minoslist[j]->ftrkdcosz;
+	      trk_vtxx_minos = minoslist[j]->ftrkVtxX;
+	      trk_vtxy_minos = minoslist[j]->ftrkVtxY;
+	      trk_vtxz_minos = minoslist[j]->ftrkVtxZ;        
+	    }  
+	  if (!isdata){       
+	    mc_index_minos = minoslist[j]->fmcIndex;
+	    mc_pdg_minos = minoslist[j]->fmcPDG;
+	    mc_px_minos = minoslist[j]->fmcPx;
+	    mc_py_minos = minoslist[j]->fmcPy;
+	    mc_pz_minos = minoslist[j]->fmcPz;
+	    mc_ene_minos = minoslist[j]->fmcEne;
+	    mc_mass_minos = minoslist[j]->fmcMass;
+	    mc_vtxx_minos = minoslist[j]->fmcVtxX;
+	    mc_vtxy_minos = minoslist[j]->fmcVtxY;
+	    mc_vtxz_minos = minoslist[j]->fmcVtxZ;
+	  }
+	}
     }
 
-      //track information
-     ntracks_reco=tracklist.size();
-     double larStart[3];
-     double larEnd[3];
- 	 std::vector<double> trackStart;
-  	 std::vector<double> trackEnd;
-     trackStart.clear();
-     trackEnd.clear();
-     //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
-     int n_vertextracks=0;
-     int n_endonboundarytracks=0;
-      for(unsigned int i=0; i<tracklist.size();++i){
-       tracklist[i]->Extent(trackStart,trackEnd);            
-       trackstart_x_reco=trackStart[0];
-       trackstart_y_reco=trackStart[1];
-       trackstart_z_reco=trackStart[2];
-       trackexit_x_reco=trackEnd[0];
-       trackexit_y_reco=trackEnd[1];
-       trackexit_z_reco=trackEnd[2];  
-        if (!isdata){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
-       n_vertextracks++; 
-       }
-       
-       if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
-      }
-     nvertextracks_reco=n_vertextracks; 
-     ntrackendonboundary_reco=n_endonboundarytracks;
-     
-     //grab information about where track started and ended and the dcos at those points
-     trackStart.clear();
-     trackEnd.clear();
-     memset(larStart, 0, 3);
-     memset(larEnd, 0, 3);
-     for(unsigned int i=0; i<tracklist.size();++i){
-      
-      if(ANTtrackID!=tracklist[i]->ID())
+  //track information
+  ntracks_reco=tracklist.size();
+  double larStart[3];
+  double larEnd[3];
+  std::vector<double> trackStart;
+  std::vector<double> trackEnd;
+  trackStart.clear();
+  trackEnd.clear();
+  //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
+  int n_vertextracks=0;
+  int n_endonboundarytracks=0;
+  for(unsigned int i=0; i<tracklist.size();++i){
+    tracklist[i]->Extent(trackStart,trackEnd);            
+    trackstart_x_reco=trackStart[0];
+    trackstart_y_reco=trackStart[1];
+    trackstart_z_reco=trackStart[2];
+    trackexit_x_reco=trackEnd[0];
+    trackexit_y_reco=trackEnd[1];
+    trackexit_z_reco=trackEnd[2];  
+    if (!isdata){
+      if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+	n_vertextracks++; 
+    }
+    if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
+    
+    art::FindOneP<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
+    trackke.push_back(focal.at(i)->KinematicEnergy());
+    trackrange.push_back(focal.at(i)->Range());
+  }
+  nvertextracks_reco=n_vertextracks; 
+  ntrackendonboundary_reco=n_endonboundarytracks;
+  
+  //grab information about where track started and ended and the dcos at those points
+  trackStart.clear();
+  trackEnd.clear();
+  memset(larStart, 0, 3);
+  memset(larEnd, 0, 3);
+  for(unsigned int i=0; i<tracklist.size();++i){
+    
+    if(ANTtrackID!=tracklist[i]->ID())
       continue;
-
-       tracklist[i]->Direction(larStart,larEnd);
-       tracklist[i]->Extent(trackStart,trackEnd);  
-                     
-       trackstart_dcosx_reco = larStart[0];
-       trackstart_dcosy_reco = larStart[1];
-       trackstart_dcosz_reco = larStart[2];       
-       trackexit_dcosx_reco = larEnd[0];
-       trackexit_dcosy_reco = larEnd[1];
-       trackexit_dcosz_reco = larEnd[2];
-           
-       trackstart_x_reco=trackStart[0];
-       trackstart_y_reco=trackStart[1];
-       trackstart_z_reco=trackStart[2];
-       trackexit_x_reco=trackEnd[0];
-       trackexit_y_reco=trackEnd[1];
-       trackexit_z_reco=trackEnd[2];  
+    
+    tracklist[i]->Direction(larStart,larEnd);
+    tracklist[i]->Extent(trackStart,trackEnd);  
+    
+    trackstart_dcosx_reco = larStart[0];
+    trackstart_dcosy_reco = larStart[1];
+    trackstart_dcosz_reco = larStart[2];       
+    trackexit_dcosx_reco = larEnd[0];
+    trackexit_dcosy_reco = larEnd[1];
+    trackexit_dcosz_reco = larEnd[2];
+    
+    trackstart_x_reco=trackStart[0];
+    trackstart_y_reco=trackStart[1];
+    trackstart_z_reco=trackStart[2];
+    trackexit_x_reco=trackEnd[0];
+    trackexit_y_reco=trackEnd[1];
+    trackexit_z_reco=trackEnd[2];  
+  }
+  
+  //scan information (data only)
+  double time= -99.;
+  double y_vert=-99.;
+  double z_vert=-99.;
+  
+  for(unsigned int i=0; i<scanlist.size();++i){ 
+    time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
+    int wire_I=scanlist[i]->Get_VertIndWire();    
+    int wire_C=scanlist[i]->Get_VertColWire();   
+    if(wire_I>-1 && wire_C>-1)
+      {
+	wire_I=geom->PlaneWireToChannel(0,wire_I);
+	wire_C=geom->PlaneWireToChannel(1,wire_C);
+	geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
+	
+	vtxx_scan=(time-60)*.031;
+	vtxy_scan=y_vert;
+	vtxz_scan=z_vert;
+	neutrino_scan=scanlist[i]->Get_IsNeutrino();
+	maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
+	ntracks_scan=scanlist[i]->Get_Track();
+	nshowers_scan=scanlist[i]->Get_NumShower(); 
       }
-
-    //scan information (data only)
-     double time= -99.;
-     double y_vert=-99.;
-     double z_vert=-99.;
-     
-     for(unsigned int i=0; i<scanlist.size();++i){ 
-     time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
-     int wire_I=scanlist[i]->Get_VertIndWire();    
-     int wire_C=scanlist[i]->Get_VertColWire();   
-     if(wire_I>-1 && wire_C>-1)
-     {
-     wire_I=geom->PlaneWireToChannel(0,wire_I);
-     wire_C=geom->PlaneWireToChannel(1,wire_C);
-     geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
-         
-     vtxx_scan=(time-60)*.031;
-     vtxy_scan=y_vert;
-     vtxz_scan=z_vert;
-     neutrino_scan=scanlist[i]->Get_IsNeutrino();
-     maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
-     ntracks_scan=scanlist[i]->Get_Track();
-     nshowers_scan=scanlist[i]->Get_NumShower(); 
-     }
-     }
-    //mc truth information
-   if (!isdata){
+  }
+  //mc truth information
+  if (!isdata){
     nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
     ccnc_truth = mclist[0]->GetNeutrino().CCNC();
     mode_truth = mclist[0]->GetNeutrino().Mode();

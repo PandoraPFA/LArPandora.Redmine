@@ -77,7 +77,9 @@ namespace t962 {
     double trackexit_dcosx_reco;
     double trackexit_dcosy_reco;
     double trackexit_dcosz_reco;   
-              
+    std::vector<double> trackke;
+    std::vector<double> trackrange;
+    
     //matching information
     int nmatched_reco;        //number of matched tracks
     double trk_mom_minos;
@@ -139,6 +141,7 @@ namespace t962 {
     std::string fTrackMatchModuleLabel;
     std::string fScanModuleLabel;
     std::string fPOTModuleLabel;
+    std::string fCalorimetryModuleLabel;
     double fvertextrackWindow;
     double fvertexclusterWindow;
     double fboundaryWindow;
