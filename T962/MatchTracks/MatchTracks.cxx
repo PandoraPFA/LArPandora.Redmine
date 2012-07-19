@@ -97,10 +97,12 @@ namespace match{
       t962::MINOSTrackMatch minos;
       std::vector<t962::MINOSTrackMatch> vec_minos;
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
-      evt.getByLabel(fLarTracks_label,LarTrackHandle);
+      if (!evt.getByLabel(fLarTracks_label,LarTrackHandle))
+	return;
 
       art::Handle< std::vector<t962::MINOS> > MinosTrackHandle;
-      evt.getByLabel(fMinosTracks_label,MinosTrackHandle);
+      if (!evt.getByLabel(fMinosTracks_label,MinosTrackHandle))
+	return;
 
       std::cout << std::setfill('*') << std::setw(175) << "*" << std::setfill(' ') << std::endl;
       std::cout << "Run = " << evt.id().run() << " Event = " << evt.id().event();
@@ -225,7 +227,7 @@ namespace match{
             
       std::auto_ptr<std::vector<t962::MINOSTrackMatch> > MINOS_coll(new std::vector<t962::MINOSTrackMatch> );
 
-         for(int i=0;i<vec_minos.size();i++)
+         for(unsigned int i=0;i<vec_minos.size();i++)
          {
             MINOS_coll->push_back(vec_minos[i]);
          }
