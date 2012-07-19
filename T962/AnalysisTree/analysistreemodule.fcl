@@ -8,6 +8,7 @@ argoneut_analysistree:
  LArGeantModuleLabel:      "largeant"
  CalDataModuleLabel:       "caldata"
  GenieGenModuleLabel:      "generator"
+ G4ModuleLabel:            "largeant"
  ClusterModuleLabel:       "linemerger"
  TrackModuleLabel:         "track3d"
  EndPoint2DModuleLabel:    "vertex2d"
@@ -17,6 +18,7 @@ argoneut_analysistree:
  ScanModuleLabel:          "mergescan"
  POTModuleLabel:           "generator"
  CalorimetryModuleLabel:   "calo"
+ ParticleIDModuleLabel:    "pid"
  vertextrackWindow:         5.
  vertexclusterWindow:       100.
  boundaryWindow:            3.

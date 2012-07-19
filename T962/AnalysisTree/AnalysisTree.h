@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////
-//
+// \version $Id$
 // 
 // \author tjyang@fnal.gov
 //
@@ -77,9 +77,22 @@ namespace t962 {
     double trackexit_dcosx_reco;
     double trackexit_dcosy_reco;
     double trackexit_dcosz_reco;   
+    std::vector<double> trackvtxx;
+    std::vector<double> trackvtxy;
+    std::vector<double> trackvtxz;
+    std::vector<double> trackendx;
+    std::vector<double> trackendy;
+    std::vector<double> trackendz;
     std::vector<double> trackke;
     std::vector<double> trackrange;
-    
+    std::vector<int> trackpid;
+    std::vector<int> trackpidndf;
+    std::vector<double> trackpidchi2;
+    std::vector<double> trackpiddeltachi2;
+    std::vector<double> trackpidchi2pro;
+    std::vector<double> trackpidchi2ka;
+    std::vector<double> trackpidchi2pi;
+    std::vector<double> trackpidchi2mu;
     //matching information
     int nmatched_reco;        //number of matched tracks
     double trk_mom_minos;
@@ -100,6 +113,8 @@ namespace t962 {
     int nshowers_scan; 
     
     //mctruth information
+    int parpdg;
+    double parmom;
     int nuPDG_truth;
     int ccnc_truth;
     int mode_truth;
@@ -133,6 +148,7 @@ namespace t962 {
     std::string fLArG4ModuleLabel;
     std::string fCalDataModuleLabel; 
     std::string fGenieGenModuleLabel;
+    std::string fG4ModuleLabel;
     std::string fClusterModuleLabel;   
     std::string fTrackModuleLabel;
     std::string fEndPoint2DModuleLabel;
@@ -142,6 +158,7 @@ namespace t962 {
     std::string fScanModuleLabel;
     std::string fPOTModuleLabel;
     std::string fCalorimetryModuleLabel;
+    std::string fParticleIDModuleLabel;
     double fvertextrackWindow;
     double fvertexclusterWindow;
     double fboundaryWindow;

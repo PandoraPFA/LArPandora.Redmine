@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
+// \version $Id$
 //
-// Create a TTree for analysis
+// \brief Create a TTree for analysis
 //
 // \author tjyang@fnal.gov
 // \author joshua.spitz@yale.edu
@@ -40,6 +41,7 @@
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "SummaryData/summary.h"
+#include "Simulation/SimListUtils.h"
 
  
 //-------------------------------------------------
@@ -50,6 +52,7 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
   fCalDataModuleLabel       (pset.get< std::string >("CalDataModuleLabel")      ),
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
+  fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")      ),
   fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
   fEndPoint2DModuleLabel    (pset.get< std::string >("EndPoint2DModuleLabel")   ),
@@ -59,6 +62,7 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fScanModuleLabel          (pset.get< std::string >("ScanModuleLabel")         ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::string >("CalorimetryModuleLabel")  ),
+  fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               )
@@ -103,8 +107,22 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
+  fTree->Branch("trackvtxx",&trackvtxx);
+  fTree->Branch("trackvtxy",&trackvtxy);
+  fTree->Branch("trackvtxz",&trackvtxz);
+  fTree->Branch("trackendx",&trackendx);
+  fTree->Branch("trackendy",&trackendy);
+  fTree->Branch("trackendz",&trackendz);
   fTree->Branch("trackke",&trackke);
   fTree->Branch("trackrange",&trackrange);
+  fTree->Branch("trackpid",&trackpid);
+  fTree->Branch("trackpidndf",&trackpidndf);
+  fTree->Branch("trackpidchi2",&trackpidchi2);
+  fTree->Branch("trackpiddeltachi2",&trackpiddeltachi2);
+  fTree->Branch("trackpidchi2pro",&trackpidchi2pro);
+  fTree->Branch("trackpidchi2ka",&trackpidchi2ka);
+  fTree->Branch("trackpidchi2pi",&trackpidchi2pi);
+  fTree->Branch("trackpidchi2mu",&trackpidchi2mu);
   fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
   fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minos/D");
   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
@@ -132,7 +150,9 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("ntracks_scan", &ntracks_scan , "ntracks_scan/I");
   fTree->Branch("nshowers_scan", &nshowers_scan , "nshowers_scan/I");
   fTree->Branch("neutrino_scan", &neutrino_scan , "neutrino_scan/I");
-  fTree->Branch("maybeneutrino_scan", &maybeneutrino_scan , "maybeneutrino_scan/I");    
+  fTree->Branch("maybeneutrino_scan", &maybeneutrino_scan , "maybeneutrino_scan/I"); 
+  fTree->Branch("parpdg", &parpdg, "parpdg/I");
+  fTree->Branch("parmom", &parmom, "parmom/D");
   fTree->Branch("nuPDG_truth",&nuPDG_truth,"nuPDG_truth/I");
   fTree->Branch("ccnc_truth",&ccnc_truth,"ccnc_truth/I");
   fTree->Branch("mode_truth",&mode_truth,"mode_truth/I");
@@ -185,27 +205,58 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   evt.getByLabel(fDigitModuleLabel,scListHandle);
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   evt.getByLabel(fHitsModuleLabel,hitListHandle);
-  art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
-  evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
-  art::Handle< std::vector<recob::Cluster> > clusterListHandle;
-  evt.getByLabel(fClusterModuleLabel,clusterListHandle);
   art::Handle< std::vector<recob::Wire> > wireListHandle;
   evt.getByLabel(fCalDataModuleLabel,wireListHandle);
-  art::Handle< std::vector<recob::Track> > trackListHandle;
-  evt.getByLabel(fTrackModuleLabel,trackListHandle);
-  art::Handle< std::vector<recob::EndPoint2D> > endpointListHandle;
-  evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle);
-  art::Handle< std::vector<recob::Vertex> > vertexListHandle;
-  evt.getByLabel(fVertexModuleLabel,vertexListHandle);
-  //art::Handle< std::vector<t962::MINOS> > minosListHandle;
-  //evt.getByLabel(fMINOSModuleLabel,minosListHandle);
-  art::View< t962::MINOS > minosListHandle;
-  evt.getView(fMINOSModuleLabel,minosListHandle);
-  art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-  evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
-  art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
-  evt.getByLabel(fScanModuleLabel,scanListHandle);
 
+  art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
+  std::vector<art::Ptr<simb::MCTruth> > mclist;
+  if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
+    art::fill_ptr_vector(mclist, mctruthListHandle);
+
+
+  art::Handle< std::vector<recob::Cluster> > clusterListHandle;
+  std::vector<art::Ptr<recob::Cluster> > clusterlist;
+  if (evt.getByLabel(fClusterModuleLabel,clusterListHandle))
+      art::fill_ptr_vector(clusterlist, clusterListHandle);
+
+
+  art::Handle< std::vector<recob::Track> > trackListHandle;
+  std::vector<art::Ptr<recob::Track> > tracklist;
+  if (evt.getByLabel(fTrackModuleLabel,trackListHandle))
+  art::fill_ptr_vector(tracklist, trackListHandle);
+
+  art::Handle< std::vector<recob::EndPoint2D> > endpointListHandle;
+  std::vector<art::Ptr<recob::EndPoint2D> > endpointlist;
+  if (evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle))
+    art::fill_ptr_vector(endpointlist, endpointListHandle);
+
+  art::Handle< std::vector<recob::Vertex> > vertexListHandle;
+  std::vector<art::Ptr<recob::Vertex> > vertexlist;
+  if (evt.getByLabel(fVertexModuleLabel,vertexListHandle))
+  art::fill_ptr_vector(vertexlist, vertexListHandle);
+
+  art::Handle< std::vector<t962::MINOS> > minosListHandle;
+  std::vector<art::Ptr<t962::MINOS> > minoslist;
+  if (evt.getByLabel(fMINOSModuleLabel,minosListHandle))
+    art::fill_ptr_vector(minoslist, minosListHandle);
+
+
+//  art::View< t962::MINOS > minosListHandle;
+//  evt.getView(fMINOSModuleLabel,minosListHandle);
+
+  art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
+  std::vector<art::Ptr<t962::MINOSTrackMatch> > trackmatchlist;
+  if (evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
+    art::fill_ptr_vector(trackmatchlist, trackmatchListHandle);
+
+  art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
+  std::vector<art::Ptr<t962::ScanInfo> > scanlist;
+  if (evt.getByLabel(fScanModuleLabel,scanListHandle))
+    art::fill_ptr_vector(scanlist, scanListHandle);
+
+
+
+  /*
   art::PtrVector<simb::MCTruth> mclist;
   if(evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
   for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
@@ -243,15 +294,16 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     vertexlist.push_back(vertexHolder);
   }
 
-  //art::PtrVector<t962::MINOS> minoslist;
-  std::vector<t962::MINOS*> minoslist;
-  //if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
-  //  for (unsigned int i = 0; i < minosListHandle->size(); i++){
-  for (unsigned int i = 0; i < minosListHandle.vals().size(); i++){
-    //    art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
-    // minoslist.push_back(minosHolder);
-    minoslist.push_back((t962::MINOS*)(minosListHandle.vals()[i]));
-  }
+  art::PtrVector<t962::MINOS> minoslist;
+  //std::vector<const t962::MINOS*> minoslist;
+  if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
+    for (unsigned int i = 0; i < minosListHandle->size(); i++){
+      //for (unsigned int i = 0; i < minosListHandle.vals().size(); i++){
+      art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
+      minoslist.push_back(minosHolder);
+     //minoslist.push_back((t962::MINOS*)(minosListHandle.vals()[i]));
+      //minoslist.push_back(&minosListHandle->at(i));
+    }
 
   art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
   if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
@@ -266,6 +318,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     art::Ptr<t962::ScanInfo> scanHolder(scanListHandle,i);
     scanlist.push_back(scanHolder);
   }
+  */
+
   art::ServiceHandle<geo::Geometry> geom;  
 
   //vertex information
@@ -409,6 +463,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
   int n_vertextracks=0;
   int n_endonboundarytracks=0;
+  art::FindOneP<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
+  art::FindOneP<anab::ParticleID>  fopid(trackListHandle, evt, fParticleIDModuleLabel);
   for(unsigned int i=0; i<tracklist.size();++i){
     tracklist[i]->Extent(trackStart,trackEnd);            
     trackstart_x_reco=trackStart[0];
@@ -417,15 +473,27 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     trackexit_x_reco=trackEnd[0];
     trackexit_y_reco=trackEnd[1];
     trackexit_z_reco=trackEnd[2];  
-    if (!isdata){
+    if (!isdata&&mclist[0]->NeutrinoSet()){
       if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
 	n_vertextracks++; 
     }
     if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
-    
-    art::FindOneP<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
+    trackvtxx.push_back(trackstart_x_reco);
+    trackvtxy.push_back(trackstart_y_reco);
+    trackvtxz.push_back(trackstart_z_reco);
+    trackendx.push_back(trackexit_x_reco);
+    trackendy.push_back(trackexit_y_reco);
+    trackendz.push_back(trackexit_z_reco);
     trackke.push_back(focal.at(i)->KinematicEnergy());
     trackrange.push_back(focal.at(i)->Range());
+    trackpid.push_back(fopid.at(i)->Pdg());
+    trackpidndf.push_back(fopid.at(i)->Ndf());
+    trackpidchi2.push_back(fopid.at(i)->MinChi2());
+    trackpiddeltachi2.push_back(fopid.at(i)->DeltaChi2());
+    trackpidchi2pro.push_back(fopid.at(i)->Chi2Proton());
+    trackpidchi2ka.push_back(fopid.at(i)->Chi2Kaon());
+    trackpidchi2pi.push_back(fopid.at(i)->Chi2Pion());
+    trackpidchi2mu.push_back(fopid.at(i)->Chi2Muon());
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
@@ -484,24 +552,33 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   }
   //mc truth information
   if (!isdata){
-    nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
-    ccnc_truth = mclist[0]->GetNeutrino().CCNC();
-    mode_truth = mclist[0]->GetNeutrino().Mode();
-    Q2_truth = mclist[0]->GetNeutrino().QSqr();
-    W_truth = mclist[0]->GetNeutrino().W();
-    hitnuc_truth = mclist[0]->GetNeutrino().HitNuc();
-    enu_truth = mclist[0]->GetNeutrino().Nu().E();
-    nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx();
-    nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy();
-    nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz();
-    lep_mom_truth = mclist[0]->GetNeutrino().Lepton().P();
-    if (mclist[0]->GetNeutrino().Lepton().P()){
-      lep_dcosx_truth = mclist[0]->GetNeutrino().Lepton().Px()/mclist[0]->GetNeutrino().Lepton().P();
-      lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
-      lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
+    //save single particle information
+    sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
+    for ( sim::ParticleList::const_iterator ipar = plist.begin(); ipar!=plist.end(); ++ipar){
+      sim::Particle *particle = ipar->second;
+      parpdg = particle->PdgCode();
+      parmom = particle->Momentum().P();
+      break;
+    }
+    if (mclist[0]->NeutrinoSet()){
+      nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
+      ccnc_truth = mclist[0]->GetNeutrino().CCNC();
+      mode_truth = mclist[0]->GetNeutrino().Mode();
+      Q2_truth = mclist[0]->GetNeutrino().QSqr();
+      W_truth = mclist[0]->GetNeutrino().W();
+      hitnuc_truth = mclist[0]->GetNeutrino().HitNuc();
+      enu_truth = mclist[0]->GetNeutrino().Nu().E();
+      nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx();
+      nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy();
+      nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz();
+      lep_mom_truth = mclist[0]->GetNeutrino().Lepton().P();
+      if (mclist[0]->GetNeutrino().Lepton().P()){
+	lep_dcosx_truth = mclist[0]->GetNeutrino().Lepton().Px()/mclist[0]->GetNeutrino().Lepton().P();
+	lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
+	lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
+      }
     }
   }
-
   fTree->Fill();
 }
 
@@ -563,6 +640,8 @@ void t962::AnalysisTree::ResetVars(){
   maybeneutrino_scan=-99999;
   ntracks_scan=-99999;
   nshowers_scan=-99999;         
+  parpdg = -99999;
+  parmom = -99999;
   nuPDG_truth = -99999;
   ccnc_truth = -99999;
   mode_truth = -99999;
@@ -577,6 +656,23 @@ void t962::AnalysisTree::ResetVars(){
   lep_dcosx_truth = -99999;
   lep_dcosy_truth = -99999;
   lep_dcosz_truth = -99999;
+  trackvtxx.clear();
+  trackvtxy.clear();
+  trackvtxz.clear();
+  trackendx.clear();
+  trackendy.clear();
+  trackendz.clear();
+  trackke.clear();
+  trackrange.clear();
+  trackpid.clear();
+  trackpidndf.clear();
+  trackpidchi2.clear();
+  trackpiddeltachi2.clear();
+  trackpidchi2pro.clear();
+  trackpidchi2ka.clear();
+  trackpidchi2pi.clear();
+  trackpidchi2mu.clear();
+  
 }
 
 bool t962::AnalysisTree::EndsOnBoundary(art::Ptr<recob::Track> lar_track)
