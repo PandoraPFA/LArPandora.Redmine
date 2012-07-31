@@ -20,6 +20,7 @@ source:
   module_type: RootInput
   fileNames:  [ "data.root" ]
   maxEvents:   -1       # Number of events to create
+  inputCommands:["keep *","drop sim::PMTHits_*_*_*"]
 }
 
 outputs:{}

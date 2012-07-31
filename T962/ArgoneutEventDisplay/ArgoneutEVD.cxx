@@ -20,6 +20,7 @@ extern "C" {
 #include "EventDisplay/TWQProjectionView.h"
 #include "EventDisplay/Display3DView.h"
 #include "EventDisplay/Ortho3DView.h"
+#include "EventDisplay/CalorView.h"
 
 
 // Framework includes
@@ -34,25 +35,31 @@ extern "C" {
 // Builder for the TWQProjectionView canvas
 static evdb::Canvas* mk_twqprojectionview_canvas(TGMainFrame* mf)
 {
-  return new evd::TWQProjectionView(mf);
+   return new evd::TWQProjectionView(mf);
 }
 
 // Builder for the Display3D view
 static evdb::Canvas* mk_display3d_canvas(TGMainFrame* mf)
 {
-  return new evd::Display3DView(mf);
+   return new evd::Display3DView(mf);
 }
 
 // Builder for the Ortho view
 static evdb::Canvas* mk_ortho3d_canvas(TGMainFrame* mf)
 {
-  return new evd::Ortho3DView(mf);
+   return new evd::Ortho3DView(mf);
+}
+
+// Builder for the Calor view
+static evdb::Canvas* mk_calor_canvas(TGMainFrame* mf)
+{
+   return new evd::CalorView(mf);
 }
 
 // Builder for the ArgoNeuT 3D view
 static evdb::Canvas* mk_displayargoneut_canvas(TGMainFrame* mf)
 {
-  return new argoevd::DisplayArgoneutView(mf);
+   return new argoevd::DisplayArgoneutView(mf);
 }
 
 // // Builder for the MCTruth view
@@ -64,45 +71,51 @@ static evdb::Canvas* mk_displayargoneut_canvas(TGMainFrame* mf)
 
 namespace argoevd{
 
-  //----------------------------------------------------
-  ArgoneutEVD::ArgoneutEVD(fhicl::ParameterSet const& pset)
-  {
+   //----------------------------------------------------
+   ArgoneutEVD::ArgoneutEVD(fhicl::ParameterSet const& pset)
+   {
 
-  }
+   }
 
-  //----------------------------------------------------
-  ArgoneutEVD::~ArgoneutEVD()
-  {
-  }
+   //----------------------------------------------------
+   ArgoneutEVD::~ArgoneutEVD()
+   {
+   }
 
-  //----------------------------------------------------
-  void ArgoneutEVD::beginJob()
-  {
-    // Register the list of windows used by the event display
-    evdb::DisplayWindow::Register("Time vs Wire, Charge View",
-				  "Time vs Wire, Charge View",
-				  700,
-				  700,
-				  mk_twqprojectionview_canvas);
+   //----------------------------------------------------
+   void ArgoneutEVD::beginJob()
+   {
+      // Register the list of windows used by the event display
+      evdb::DisplayWindow::Register("Time vs Wire, Charge View",
+                                    "Time vs Wire, Charge View",
+                                    700,
+                                    700,
+                                    mk_twqprojectionview_canvas);
 
-    evdb::DisplayWindow::Register("Display3D",
-				  "Display3D",
-				  700,
-				  700,
-				  mk_display3d_canvas);
+      evdb::DisplayWindow::Register("Display3D",
+                                    "Display3D",
+                                    700,
+                                    700,
+                                    mk_display3d_canvas);
 
-    evdb::DisplayWindow::Register("Ortho3D",
-                                  "Ortho3D",
-                                  700,
-                                  700,
-                                  mk_ortho3d_canvas);
+      evdb::DisplayWindow::Register("Ortho3D",
+                                    "Ortho3D",
+                                    700,
+                                    700,
+                                    mk_ortho3d_canvas);
 
 
-  evdb::DisplayWindow::Register("DisplayArgoneut",
-				  "DisplayArgoneut",
-				  700,
-				  700,
-				  mk_displayargoneut_canvas);
+      evdb::DisplayWindow::Register("DisplayArgoneut",
+                                    "DisplayArgoneut",
+                                    700,
+                                    700,
+                                    mk_displayargoneut_canvas);
+
+      evdb::DisplayWindow::Register("Calorimetry",
+                                    "Calorimetry",
+                                    700,
+                                    700,
+                                    mk_calor_canvas);
     
 //     evdb::ListWindow::Register("MC Particle List",
 // 			       "MC Particle List",
@@ -110,14 +123,14 @@ namespace argoevd{
 // 			       800,
 // 			       mk_mctrue_canvas);
  
-    // Open up the main display window and run
-    evdb::DisplayWindow::OpenWindow(0);
+      // Open up the main display window and run
+      evdb::DisplayWindow::OpenWindow(0);
 
-  }
+   }
 
-  //----------------------------------------------------
-  void ArgoneutEVD::analyze(const art::Event& evt)
-  {
-  }
+   //----------------------------------------------------
+   void ArgoneutEVD::analyze(const art::Event& evt)
+   {
+   }
 
 }//namespace
