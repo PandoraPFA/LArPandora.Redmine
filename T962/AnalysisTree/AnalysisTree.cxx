@@ -505,8 +505,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
   int n_vertextracks=0;
   int n_endonboundarytracks=0;
-  art::FindOneP<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
-  art::FindOneP<anab::ParticleID>  fopid(trackListHandle, evt, fParticleIDModuleLabel);
+  art::FindOne<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
+  art::FindOne<anab::ParticleID>  fopid(trackListHandle, evt, fParticleIDModuleLabel);
   for(unsigned int i=0; i<tracklist.size();++i){
     trackStart.clear();
     trackEnd.clear();
@@ -538,13 +538,17 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     trkenddcosx[i]    = larEnd[0];
     trkenddcosy[i]    = larEnd[1];
     trkenddcosz[i]    = larEnd[2];
-    trkke[i]          = focal.at(i)->KinematicEnergy();
-    trkrange[i]       = focal.at(i)->Range();
-    trkpid[i]         = fopid.at(i)->Pdg();
-    trkpidndf[i]      = fopid.at(i)->Ndf();
-    trkpidchi2[i]     = fopid.at(i)->MinChi2();
-    trkmissinge[i]    = fopid.at(i)->MissingE();
-    trkmissingeavg[i] = fopid.at(i)->MissingEavg();
+    if (focal.at(i).isValid()){
+      trkke[i]          = focal.at(i).ref().KinematicEnergy();
+      trkrange[i]       = focal.at(i).ref().Range();
+    }
+    if (fopid.at(i).isValid()){
+      trkpid[i]         = fopid.at(i).ref().Pdg();
+      trkpidndf[i]      = fopid.at(i).ref().Ndf();
+      trkpidchi2[i]     = fopid.at(i).ref().MinChi2();
+      trkmissinge[i]    = fopid.at(i).ref().MissingE();
+      trkmissingeavg[i] = fopid.at(i).ref().MissingEavg();
+    }
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
