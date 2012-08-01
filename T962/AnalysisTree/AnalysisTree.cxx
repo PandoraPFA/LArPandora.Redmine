@@ -14,6 +14,10 @@
 #include <functional>
 
 #include "TTree.h"
+#include "TFile.h"
+#include "TH1.h"
+#include "TSystem.h"
+#include "TString.h"
 
 #include "art/Framework/Principal/Event.h" 
 #include "art/Framework/Principal/SubRun.h" 
@@ -107,22 +111,41 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
-  fTree->Branch("trackvtxx",&trackvtxx);
-  fTree->Branch("trackvtxy",&trackvtxy);
-  fTree->Branch("trackvtxz",&trackvtxz);
-  fTree->Branch("trackendx",&trackendx);
-  fTree->Branch("trackendy",&trackendy);
-  fTree->Branch("trackendz",&trackendz);
-  fTree->Branch("trackke",&trackke);
-  fTree->Branch("trackrange",&trackrange);
-  fTree->Branch("trackpid",&trackpid);
-  fTree->Branch("trackpidndf",&trackpidndf);
-  fTree->Branch("trackpidchi2",&trackpidchi2);
-  fTree->Branch("trackpiddeltachi2",&trackpiddeltachi2);
-  fTree->Branch("trackpidchi2pro",&trackpidchi2pro);
-  fTree->Branch("trackpidchi2ka",&trackpidchi2ka);
-  fTree->Branch("trackpidchi2pi",&trackpidchi2pi);
-  fTree->Branch("trackpidchi2mu",&trackpidchi2mu);
+//  fTree->Branch("trackvtxx",&trackvtxx);
+//  fTree->Branch("trackvtxy",&trackvtxy);
+//  fTree->Branch("trackvtxz",&trackvtxz);
+//  fTree->Branch("trackendx",&trackendx);
+//  fTree->Branch("trackendy",&trackendy);
+//  fTree->Branch("trackendz",&trackendz);
+//  fTree->Branch("trackke",&trackke);
+//  fTree->Branch("trackrange",&trackrange);
+//  fTree->Branch("trackpid",&trackpid);
+//  fTree->Branch("trackpidndf",&trackpidndf);
+//  fTree->Branch("trackpidchi2",&trackpidchi2);
+//  fTree->Branch("trackpiddeltachi2",&trackpiddeltachi2);
+//  fTree->Branch("trackpidchi2pro",&trackpidchi2pro);
+//  fTree->Branch("trackpidchi2ka",&trackpidchi2ka);
+//  fTree->Branch("trackpidchi2pi",&trackpidchi2pi);
+//  fTree->Branch("trackpidchi2mu",&trackpidchi2mu);
+  fTree->Branch("trkvtxx",trkvtxx,"trkvtxx[ntracks_reco]/D");
+  fTree->Branch("trkvtxy",trkvtxy,"trkvtxy[ntracks_reco]/D");
+  fTree->Branch("trkvtxz",trkvtxz,"trkvtxz[ntracks_reco]/D");
+  fTree->Branch("trkendx",trkendx,"trkendx[ntracks_reco]/D");
+  fTree->Branch("trkendy",trkendy,"trkendy[ntracks_reco]/D");
+  fTree->Branch("trkendz",trkendz,"trkendz[ntracks_reco]/D");
+  fTree->Branch("trkstartdcosx",trkstartdcosx,"trkstartdcosx[ntracks_reco]/D");
+  fTree->Branch("trkstartdcosy",trkstartdcosy,"trkstartdcosy[ntracks_reco]/D");
+  fTree->Branch("trkstartdcosz",trkstartdcosz,"trkstartdcosz[ntracks_reco]/D");
+  fTree->Branch("trkenddcosx",trkenddcosx,"trkenddcosx[ntracks_reco]/D");
+  fTree->Branch("trkenddcosy",trkenddcosy,"trkenddcosy[ntracks_reco]/D");
+  fTree->Branch("trkenddcosz",trkenddcosz,"trkenddcosz[ntracks_reco]/D");
+  fTree->Branch("trkke",trkke,"trkke[ntracks_reco]/D");
+  fTree->Branch("trkrange",trkrange,"trkrange[ntracks_reco]/D");
+  fTree->Branch("trkpid",trkpid,"trkpid[ntracks_reco]/I");
+  fTree->Branch("trkpidndf",trkpidndf,"trkpidndf[ntracks_reco]/I");
+  fTree->Branch("trkpidchi2",trkpidchi2,"trkpidchi2[ntracks_reco]/D");
+  fTree->Branch("trkmissinge",trkmissinge,"trkmissinge[ntracks_reco]/D");
+  fTree->Branch("trkmissingeavg",trkmissingeavg,"trkmissingeavg[ntracks_reco]/D");
   fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
   fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minos/D");
   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
@@ -167,6 +190,27 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/D");
   fTree->Branch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/D");
   fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
+  fTree->Branch("beamwgt",&beamwgt,"beamwgt/D");
+
+  //gSystem->Setenv("FW_SEARCH_PATH","${SRT_PRIVATE_CONTEXT}/T962/CCInclusiveMacro/:${SRT_PUBLIC_CONTEXT}/T962/CCInclusiveMacro/:${FW_SEARCH_PATH}");
+  //gSystem->Exec("echo ${FW_SEARCH_PATH}");
+  //cet::search_path sp("FW_SEARCH_PATH");
+  
+  //std::string fROOTfile;
+//  if( !sp.find_file("numu_numode_final.root", fROOTfile) )
+//    throw cet::exception("AnalysisTree") << "cannot find the root file: \n" 
+//					 << "numu_numode_final.root"
+//					 << "\n bail ungracefully.";
+  TString filename = "numu_numode_final.root";
+  const char *fROOTfile = gSystem->FindFile("${SRT_PRIVATE_CONTEXT}/T962/CCInclusiveMacro/:${SRT_PUBLIC_CONTEXT}/T962/CCInclusiveMacro/",filename);
+
+  if (!fROOTfile) throw cet::exception("AnalysisTree") << "cannot find the root file: \n" 
+						       << filename
+						       << "\n bail ungracefully.";
+
+  TFile *file = TFile::Open(fROOTfile);
+  hBeamWeight_numu_numode = (TH1D*)file->Get("histdiv");
+
 }
 
 
@@ -188,17 +232,17 @@ void t962::AnalysisTree::beginSubRun(const art::SubRun& sr)
 
 void t962::AnalysisTree::analyze(const art::Event& evt)
 {
-
+  
   ResetVars();
-
+  
   run = evt.run();
   event = evt.id().event();
-
+  
   if (evt.isRealData()){
     isdata = 1;
   }
   else isdata = 0;
-
+  
   art::Handle< std::vector<raw::RawDigit> > rdListHandle;
   evt.getByLabel(fDigitModuleLabel,rdListHandle);
   art::Handle< std::vector<sim::SimChannel> > scListHandle;
@@ -321,7 +365,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   */
 
   art::ServiceHandle<geo::Geometry> geom;  
-
+  
   //vertex information
   if(vertexlist.size())
   {
@@ -458,15 +502,19 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   double larEnd[3];
   std::vector<double> trackStart;
   std::vector<double> trackEnd;
-  trackStart.clear();
-  trackEnd.clear();
   //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
   int n_vertextracks=0;
   int n_endonboundarytracks=0;
   art::FindOneP<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
   art::FindOneP<anab::ParticleID>  fopid(trackListHandle, evt, fParticleIDModuleLabel);
   for(unsigned int i=0; i<tracklist.size();++i){
-    tracklist[i]->Extent(trackStart,trackEnd);            
+    trackStart.clear();
+    trackEnd.clear();
+    memset(larStart, 0, 3);
+    memset(larEnd, 0, 3);
+    tracklist[i]->Extent(trackStart,trackEnd); 
+    tracklist[i]->Direction(larStart,larEnd);
+           
     trackstart_x_reco=trackStart[0];
     trackstart_y_reco=trackStart[1];
     trackstart_z_reco=trackStart[2];
@@ -478,22 +526,25 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	n_vertextracks++; 
     }
     if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
-    trackvtxx.push_back(trackstart_x_reco);
-    trackvtxy.push_back(trackstart_y_reco);
-    trackvtxz.push_back(trackstart_z_reco);
-    trackendx.push_back(trackexit_x_reco);
-    trackendy.push_back(trackexit_y_reco);
-    trackendz.push_back(trackexit_z_reco);
-    trackke.push_back(focal.at(i)->KinematicEnergy());
-    trackrange.push_back(focal.at(i)->Range());
-    trackpid.push_back(fopid.at(i)->Pdg());
-    trackpidndf.push_back(fopid.at(i)->Ndf());
-    trackpidchi2.push_back(fopid.at(i)->MinChi2());
-    trackpiddeltachi2.push_back(fopid.at(i)->DeltaChi2());
-    trackpidchi2pro.push_back(fopid.at(i)->Chi2Proton());
-    trackpidchi2ka.push_back(fopid.at(i)->Chi2Kaon());
-    trackpidchi2pi.push_back(fopid.at(i)->Chi2Pion());
-    trackpidchi2mu.push_back(fopid.at(i)->Chi2Muon());
+    trkvtxx[i]        = trackStart[0];
+    trkvtxy[i]        = trackStart[1];
+    trkvtxz[i]        = trackStart[2];
+    trkendx[i]        = trackEnd[0];
+    trkendy[i]        = trackEnd[1];
+    trkendz[i]        = trackEnd[2];
+    trkstartdcosx[i]  = larStart[0];
+    trkstartdcosy[i]  = larStart[1];
+    trkstartdcosz[i]  = larStart[2];
+    trkenddcosx[i]    = larEnd[0];
+    trkenddcosy[i]    = larEnd[1];
+    trkenddcosz[i]    = larEnd[2];
+    trkke[i]          = focal.at(i)->KinematicEnergy();
+    trkrange[i]       = focal.at(i)->Range();
+    trkpid[i]         = fopid.at(i)->Pdg();
+    trkpidndf[i]      = fopid.at(i)->Ndf();
+    trkpidchi2[i]     = fopid.at(i)->MinChi2();
+    trkmissinge[i]    = fopid.at(i)->MissingE();
+    trkmissingeavg[i] = fopid.at(i)->MissingEavg();
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
@@ -560,6 +611,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       parmom = particle->Momentum().P();
       break;
     }
+    //save neutrino interaction information
     if (mclist[0]->NeutrinoSet()){
       nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
       ccnc_truth = mclist[0]->GetNeutrino().CCNC();
@@ -576,6 +628,12 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	lep_dcosx_truth = mclist[0]->GetNeutrino().Lepton().Px()/mclist[0]->GetNeutrino().Lepton().P();
 	lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
 	lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
+      }
+      beamwgt = 1.;
+      if (nuPDG_truth == 14){
+	int bin = hBeamWeight_numu_numode->FindBin(enu_truth);
+	if (bin>=1&&bin<=hBeamWeight_numu_numode->GetNbinsX()) 
+	  beamwgt = hBeamWeight_numu_numode->GetBinContent(bin);
       }
     }
   }
@@ -656,22 +714,44 @@ void t962::AnalysisTree::ResetVars(){
   lep_dcosx_truth = -99999;
   lep_dcosy_truth = -99999;
   lep_dcosz_truth = -99999;
-  trackvtxx.clear();
-  trackvtxy.clear();
-  trackvtxz.clear();
-  trackendx.clear();
-  trackendy.clear();
-  trackendz.clear();
-  trackke.clear();
-  trackrange.clear();
-  trackpid.clear();
-  trackpidndf.clear();
-  trackpidchi2.clear();
-  trackpiddeltachi2.clear();
-  trackpidchi2pro.clear();
-  trackpidchi2ka.clear();
-  trackpidchi2pi.clear();
-  trackpidchi2mu.clear();
+  beamwgt = -99999;
+//  trackvtxx.clear();
+//  trackvtxy.clear();
+//  trackvtxz.clear();
+//  trackendx.clear();
+//  trackendy.clear();
+//  trackendz.clear();
+//  trackke.clear();
+//  trackrange.clear();
+//  trackpid.clear();
+//  trackpidndf.clear();
+//  trackpidchi2.clear();
+//  trackpiddeltachi2.clear();
+//  trackpidchi2pro.clear();
+//  trackpidchi2ka.clear();
+//  trackpidchi2pi.clear();
+//  trackpidchi2mu.clear();
+  for (int i = 0; i < kMaxTrack; i++){
+    trkvtxx[i] = -99999;
+    trkvtxy[i] = -99999;
+    trkvtxz[i] = -99999;
+    trkendx[i] = -99999;
+    trkendy[i] = -99999;
+    trkendz[i] = -99999;
+    trkstartdcosx[i] = -99999;
+    trkstartdcosy[i] = -99999;
+    trkstartdcosz[i] = -99999;
+    trkenddcosx[i] = -99999;
+    trkenddcosy[i] = -99999;
+    trkenddcosz[i] = -99999;
+    trkke[i] = -99999;
+    trkrange[i] = -99999;
+    trkpid[i] = -99999;
+    trkpidndf[i] = -99999;
+    trkpidchi2[i] = -99999;
+    trkmissinge[i] = -99999;
+    trkmissingeavg[i] = -99999;
+  }    
   
 }
 

@@ -18,6 +18,7 @@ class TH1D;
 class TH2D;
 class TTree;
 
+const int kMaxTrack = 1000; //maximum number of tracks
 
 ///Track finding and building 
 namespace t962 {
@@ -77,22 +78,41 @@ namespace t962 {
     double trackexit_dcosx_reco;
     double trackexit_dcosy_reco;
     double trackexit_dcosz_reco;   
-    std::vector<double> trackvtxx;
-    std::vector<double> trackvtxy;
-    std::vector<double> trackvtxz;
-    std::vector<double> trackendx;
-    std::vector<double> trackendy;
-    std::vector<double> trackendz;
-    std::vector<double> trackke;
-    std::vector<double> trackrange;
-    std::vector<int> trackpid;
-    std::vector<int> trackpidndf;
-    std::vector<double> trackpidchi2;
-    std::vector<double> trackpiddeltachi2;
-    std::vector<double> trackpidchi2pro;
-    std::vector<double> trackpidchi2ka;
-    std::vector<double> trackpidchi2pi;
-    std::vector<double> trackpidchi2mu;
+//    std::vector<double> trackvtxx;
+//    std::vector<double> trackvtxy;
+//    std::vector<double> trackvtxz;
+//    std::vector<double> trackendx;
+//    std::vector<double> trackendy;
+//    std::vector<double> trackendz;
+//    std::vector<double> trackke;
+//    std::vector<double> trackrange;
+//    std::vector<int> trackpid;
+//    std::vector<int> trackpidndf;
+//    std::vector<double> trackpidchi2;
+//    std::vector<double> trackpiddeltachi2;
+//    std::vector<double> trackpidchi2pro;
+//    std::vector<double> trackpidchi2ka;
+//    std::vector<double> trackpidchi2pi;
+//    std::vector<double> trackpidchi2mu;
+    double trkvtxx[kMaxTrack];
+    double trkvtxy[kMaxTrack];
+    double trkvtxz[kMaxTrack];
+    double trkendx[kMaxTrack];
+    double trkendy[kMaxTrack];
+    double trkendz[kMaxTrack];
+    double trkstartdcosx[kMaxTrack];
+    double trkstartdcosy[kMaxTrack];
+    double trkstartdcosz[kMaxTrack];
+    double trkenddcosx[kMaxTrack];
+    double trkenddcosy[kMaxTrack];
+    double trkenddcosz[kMaxTrack];
+    double trkke[kMaxTrack];
+    double trkrange[kMaxTrack];
+    int    trkpid[kMaxTrack];
+    int    trkpidndf[kMaxTrack];
+    double trkpidchi2[kMaxTrack];
+    double trkmissinge[kMaxTrack];
+    double trkmissingeavg[kMaxTrack];
     //matching information
     int nmatched_reco;        //number of matched tracks
     double trk_mom_minos;
@@ -128,6 +148,7 @@ namespace t962 {
     double lep_dcosx_truth;
     double lep_dcosy_truth;
     double lep_dcosz_truth;
+    double beamwgt;
     
     float mc_index_minos;
     double mc_pdg_minos;
@@ -162,6 +183,9 @@ namespace t962 {
     double fvertextrackWindow;
     double fvertexclusterWindow;
     double fboundaryWindow;
+
+    TH1D *hBeamWeight_numu_numode;
+
   }; // class AnalysisTree
 }
 
