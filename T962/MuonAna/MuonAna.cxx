@@ -22,6 +22,8 @@
 #include "art/Persistency/Common/Ptr.h"
 #include "art/Persistency/Common/PtrVector.h"
 #include "cetlib/exception.h"
+#include "Utilities/AssociationUtil.h"
+#include "art/Framework/Core/FindMany.h"
 
 #include "T962/MuonAna/MuonAna.h"
 extern "C" {
@@ -37,14 +39,12 @@ extern "C" {
 
 #include "Filters/ChannelFilter.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "RecoBase/recobase.h"
 #include "Geometry/geo.h"
 
 namespace muons {
 //-----------------------------------------------------------------------------
    MuonAna::MuonAna(fhicl::ParameterSet const& pset) :
-      fMINOSModuleLabel      (pset.get< std::string > ("MINOSModuleLabel")),
       fTracks_label          (pset.get< std::string >("LArTracksModuleLabel")),
       fTrackMatchModuleLabel (pset.get< std::string >("TrackMatchModuleLabel")),
       fdBoundary             (pset.get< double >("dBoundary"))
@@ -160,143 +160,120 @@ namespace muons {
       std::vector<double> larStart;
       std::vector<double> larEnd;
         
-      if(LarTrackHandle->size()>0){
-         for(unsigned int i=0; i<LarTrackHandle->size();++i){
+      //find matched MINOS information for each track
+      art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, fTrackMatchModuleLabel);
+      
+      for(unsigned int i=0; i<LarTrackHandle->size();++i){
                 
-            art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
+         art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
               
-                
-            bool startsonboundary = BeginsOnBoundary(lartrack);
-            bool endsonboundary   = EndsOnBoundary(lartrack);
+         bool startsonboundary = BeginsOnBoundary(lartrack);
+         bool endsonboundary   = EndsOnBoundary(lartrack);
 
-            if(startsonboundary && endsonboundary){//throughgoing track...make plots
-               //std::cout << " MuonAna : " << *lartrack << std::endl;
-               lartrack->Extent(larStart,larEnd);
-               lartrack->Direction(trackCosStart,trackCosEnd);
+         if(startsonboundary && endsonboundary){//throughgoing track...make plots
+            lartrack->Extent(larStart,larEnd);
+            lartrack->Direction(trackCosStart,trackCosEnd);
 
-               double tracklength = sqrt((larStart[0]-larEnd[0])*(larStart[0]-larEnd[0]) +
-                                         (larStart[1]-larEnd[1])*(larStart[1]-larEnd[1]) +
-                                         (larStart[2]-larEnd[2])*(larStart[2]-larEnd[2]));
+            double tracklength = sqrt((larStart[0]-larEnd[0])*(larStart[0]-larEnd[0]) +
+                                      (larStart[1]-larEnd[1])*(larStart[1]-larEnd[1]) +
+                                      (larStart[2]-larEnd[2])*(larStart[2]-larEnd[2]));
 
-               fCosX_start->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
-               fCosY_start->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
-               fCosZ_start->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
-               fX_start->Fill(larStart[0]);
-               fY_start->Fill(larStart[1]);
-               fZ_start->Fill(larStart[2]);
-               fX_end->Fill(larEnd[0]);
-               fY_end->Fill(larEnd[1]);
-               fZ_end->Fill(larEnd[2]);
-               fTrackLength->Fill(tracklength);
-               fTheta->Fill(lartrack->Theta());
-               fPhi->Fill(lartrack->Phi());
-               fVertAngle->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2])*180.0/TMath::Pi());
-               fHorizAngle->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2])*180.0/TMath::Pi());
-               fStartXvsStartY->Fill(larStart[0],larStart[1]);
-               fStartZvsStartX->Fill(larStart[2],larStart[0]);
-               fStartZvsStartY->Fill(larStart[2],larStart[1]);
-               fEndXvsEndY->Fill(larEnd[0],larEnd[1]);
-               fEndZvsEndX->Fill(larEnd[2],larEnd[0]);
-               fEndZvsEndY->Fill(larEnd[2],larEnd[1]);
+            fCosX_start->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
+            fCosY_start->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
+            fCosZ_start->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+            fX_start->Fill(larStart[0]);
+            fY_start->Fill(larStart[1]);
+            fZ_start->Fill(larStart[2]);
+            fX_end->Fill(larEnd[0]);
+            fY_end->Fill(larEnd[1]);
+            fZ_end->Fill(larEnd[2]);
+            fTrackLength->Fill(tracklength);
+            fTheta->Fill(lartrack->Theta());
+            fPhi->Fill(lartrack->Phi());
+            fVertAngle->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2])*180.0/TMath::Pi());
+            fHorizAngle->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2])*180.0/TMath::Pi());
+            fStartXvsStartY->Fill(larStart[0],larStart[1]);
+            fStartZvsStartX->Fill(larStart[2],larStart[0]);
+            fStartZvsStartY->Fill(larStart[2],larStart[1]);
+            fEndXvsEndY->Fill(larEnd[0],larEnd[1]);
+            fEndZvsEndX->Fill(larEnd[2],larEnd[0]);
+            fEndZvsEndY->Fill(larEnd[2],larEnd[1]);
 
-               art::Handle< std::vector<t962::MINOS> > MinosTrackHandle;
-               evt.getByLabel(fMINOSModuleLabel,MinosTrackHandle);
+            if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
 
-               art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-               evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
-
-
-               for(unsigned int j=0; j<MinosTrackHandle->size();++j)
-               {
-                  art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
-                  
-                  bool match = false;
-                  for (unsigned int k = 0; k < trackmatchListHandle->size(); k++){
-                     art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,k);
-                     if( (trackmatchHolder->fMINOStrackid == minostrack->ftrkIndex) &&
-                         (trackmatchHolder->fArgoNeuTtrackid == lartrack->ID()) &&
-                         minostrack->ftrkmom>0.0){
-                     
-                        if(minostrack->fcharge==1){
-                           fCosX_start_Pos->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
-                           fCosY_start_Pos->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
-                           fCosZ_start_Pos->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
-                           fX_start_Pos->Fill(larStart[0]);
-                           fY_start_Pos->Fill(larStart[1]);
-                           fZ_start_Pos->Fill(larStart[2]);
-                           fX_end_Pos->Fill(larEnd[0]);
-                           fY_end_Pos->Fill(larEnd[1]);
-                           fZ_end_Pos->Fill(larEnd[2]);
-                           fTrackLength_Pos->Fill(tracklength);
-                           fTheta_Pos->Fill(lartrack->Theta());
-                           fPhi_Pos->Fill(lartrack->Phi());
-                           fVertAngle_Pos->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2])*180.0/TMath::Pi());
-                           fHorizAngle_Pos->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2])*180.0/TMath::Pi());
-                           fStartXvsStartY_Pos->Fill(larStart[0],larStart[1]);
-                           fStartZvsStartX_Pos->Fill(larStart[2],larStart[0]);
-                           fStartZvsStartY_Pos->Fill(larStart[2],larStart[1]);
-                           fEndXvsEndY_Pos->Fill(larEnd[0],larEnd[1]);
-                           fEndZvsEndX_Pos->Fill(larEnd[2],larEnd[0]);
-                           fEndZvsEndY_Pos->Fill(larEnd[2],larEnd[1]);
-                           fMinosX_Pos->Fill(100.0*minostrack->ftrkVtxX);
-                           fMinosY_Pos->Fill(100.0*minostrack->ftrkVtxY);
-                           fMinosZ_Pos->Fill(100.0*minostrack->ftrkVtxZ);
-                           fMinosXY_Pos->Fill(100.0*minostrack->ftrkVtxX,100.0*minostrack->ftrkVtxY);
-                           fMinosTrkChi2_Pos->Fill(minostrack->ftrkChi2); 
-                           fMinosTrkChi2vNPoints_Pos->Fill(minostrack->ftrkChi2,minostrack->fntrkstp);
+            if(fomatch.at(i).ref().fcharge==1){
+               fCosX_start_Pos->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
+               fCosY_start_Pos->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
+               fCosZ_start_Pos->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+               fX_start_Pos->Fill(larStart[0]);
+               fY_start_Pos->Fill(larStart[1]);
+               fZ_start_Pos->Fill(larStart[2]);
+               fX_end_Pos->Fill(larEnd[0]);
+               fY_end_Pos->Fill(larEnd[1]);
+               fZ_end_Pos->Fill(larEnd[2]);
+               fTrackLength_Pos->Fill(tracklength);
+               fTheta_Pos->Fill(lartrack->Theta());
+               fPhi_Pos->Fill(lartrack->Phi());
+               fVertAngle_Pos->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2])*180.0/TMath::Pi());
+               fHorizAngle_Pos->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2])*180.0/TMath::Pi());
+               fStartXvsStartY_Pos->Fill(larStart[0],larStart[1]);
+               fStartZvsStartX_Pos->Fill(larStart[2],larStart[0]);
+               fStartZvsStartY_Pos->Fill(larStart[2],larStart[1]);
+               fEndXvsEndY_Pos->Fill(larEnd[0],larEnd[1]);
+               fEndZvsEndX_Pos->Fill(larEnd[2],larEnd[0]);
+               fEndZvsEndY_Pos->Fill(larEnd[2],larEnd[1]);
+               fMinosX_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxX);
+               fMinosY_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxY);
+               fMinosZ_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxZ);
+               fMinosXY_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxX,100.0*fomatch.at(i).ref().ftrkVtxY);
+               fMinosTrkChi2_Pos->Fill(fomatch.at(i).ref().ftrkChi2); 
+               fMinosTrkChi2vNPoints_Pos->Fill(fomatch.at(i).ref().ftrkChi2,fomatch.at(i).ref().fntrkstp);
                            
                         
-                           if(minostrack->ftrkcontained){
-                              fMinosMom_Pos->Fill(minostrack->ftrkErange);
-                              fMinosErange_Pos->Fill(minostrack->ftrkErange);
-                           }
-                           else fMinosMom_Pos->Fill(minostrack->ftrkmom);
-                        }
-                        if(minostrack->fcharge==-1){
-                           fCosX_start_Neg->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
-                           fCosY_start_Neg->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
-                           fCosZ_start_Neg->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
-                           fX_start_Neg->Fill(larStart[0]);
-                           fY_start_Neg->Fill(larStart[1]);
-                           fZ_start_Neg->Fill(larStart[2]);
-                           fX_end_Neg->Fill(larEnd[0]);
-                           fY_end_Neg->Fill(larEnd[1]);
-                           fZ_end_Neg->Fill(larEnd[2]);
-                           fTrackLength_Neg->Fill(tracklength);
-                           fTheta_Neg->Fill(lartrack->Theta());
-                           fPhi_Neg->Fill(lartrack->Phi());
-                           fVertAngle_Neg->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2])*180.0/TMath::Pi());
-                           fHorizAngle_Neg->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2])*180.0/TMath::Pi());
-                           fStartXvsStartY_Neg->Fill(larStart[0],larStart[1]);
-                           fStartZvsStartX_Neg->Fill(larStart[2],larStart[0]);
-                           fStartZvsStartY_Neg->Fill(larStart[2],larStart[1]);
-                           fEndXvsEndY_Neg->Fill(larEnd[0],larEnd[1]);
-                           fEndZvsEndX_Neg->Fill(larEnd[2],larEnd[0]);
-                           fEndZvsEndY_Neg->Fill(larEnd[2],larEnd[1]);
-                           fMinosX_Neg->Fill(100.0*minostrack->ftrkVtxX);
-                           fMinosY_Neg->Fill(100.0*minostrack->ftrkVtxY);
-                           fMinosZ_Neg->Fill(100.0*minostrack->ftrkVtxZ);
-                           fMinosXY_Neg->Fill(100.0*minostrack->ftrkVtxX,100.0*minostrack->ftrkVtxY);
-                           fMinosTrkChi2_Neg->Fill(minostrack->ftrkChi2); 
-                           fMinosTrkChi2vNPoints_Neg->Fill(minostrack->ftrkChi2,minostrack->fntrkstp);
-                           
-                           if(minostrack->ftrkcontained){
-                              fMinosMom_Neg->Fill(minostrack->ftrkErange);
-                              fMinosErange_Neg->Fill(minostrack->ftrkErange);
-                           }
-                           else fMinosMom_Neg->Fill(minostrack->ftrkmom);
-                        }
-                     }//found matching tracks
-                  }//trackmatch loop
-               }//MINOS loop
-                  
-                    
-                    
-                    
+               if(fomatch.at(i).ref().ftrkcontained){
+                  fMinosMom_Pos->Fill(fomatch.at(i).ref().ftrkErange);
+                  fMinosErange_Pos->Fill(fomatch.at(i).ref().ftrkErange);
+               }
+               else fMinosMom_Pos->Fill(fomatch.at(i).ref().ftrkmom);
             }
+            if(fomatch.at(i).ref().fcharge==-1){
+               fCosX_start_Neg->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
+               fCosY_start_Neg->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
+               fCosZ_start_Neg->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+               fX_start_Neg->Fill(larStart[0]);
+               fY_start_Neg->Fill(larStart[1]);
+               fZ_start_Neg->Fill(larStart[2]);
+               fX_end_Neg->Fill(larEnd[0]);
+               fY_end_Neg->Fill(larEnd[1]);
+               fZ_end_Neg->Fill(larEnd[2]);
+               fTrackLength_Neg->Fill(tracklength);
+               fTheta_Neg->Fill(lartrack->Theta());
+               fPhi_Neg->Fill(lartrack->Phi());
+               fVertAngle_Neg->Fill(TMath::ATan(trackCosStart[1]/trackCosStart[2])*180.0/TMath::Pi());
+               fHorizAngle_Neg->Fill(TMath::ATan(trackCosStart[0]/trackCosStart[2])*180.0/TMath::Pi());
+               fStartXvsStartY_Neg->Fill(larStart[0],larStart[1]);
+               fStartZvsStartX_Neg->Fill(larStart[2],larStart[0]);
+               fStartZvsStartY_Neg->Fill(larStart[2],larStart[1]);
+               fEndXvsEndY_Neg->Fill(larEnd[0],larEnd[1]);
+               fEndZvsEndX_Neg->Fill(larEnd[2],larEnd[0]);
+               fEndZvsEndY_Neg->Fill(larEnd[2],larEnd[1]);
+               fMinosX_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxX);
+               fMinosY_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxY);
+               fMinosZ_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxZ);
+               fMinosXY_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxX,100.0*fomatch.at(i).ref().ftrkVtxY);
+               fMinosTrkChi2_Neg->Fill(fomatch.at(i).ref().ftrkChi2); 
+               fMinosTrkChi2vNPoints_Neg->Fill(fomatch.at(i).ref().ftrkChi2,fomatch.at(i).ref().fntrkstp);
+                           
+               if(fomatch.at(i).ref().ftrkcontained){
+                  fMinosMom_Neg->Fill(fomatch.at(i).ref().ftrkErange);
+                  fMinosErange_Neg->Fill(fomatch.at(i).ref().ftrkErange);
+               }
+               else fMinosMom_Neg->Fill(fomatch.at(i).ref().ftrkmom);
+            }
+         
+         }//through-going 
                 
-         }
-      }
+      }//loop over Tracks
 
    }//analyze
 

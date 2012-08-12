@@ -14,7 +14,6 @@
 
 #include "RecoBase/Track.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
 
 
 #include <string>
@@ -34,6 +33,7 @@ namespace match {
       virtual ~MatchTracks();      
       void beginJob();
       void produce(art::Event& evt);
+      void reconfigure(fhicl::ParameterSet const& pset);
       
    private:
 
@@ -77,9 +77,9 @@ namespace match {
       
    protected: 
       
+      //method to compare track kinematics
       bool Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track, 
-                   double &xpred, double &ypred, double &rdiff, double &totaldiff); //method to compare track kinematics
-      int  AngleCompare(art::Ptr<recob::Track> lar_track, art::Handle< std::vector<t962::MINOS> > minoshandle);
+                   double &xpred, double &ypred, double &rdiff, double &totaldiff, double &totaldiff2); 
       bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
 
    }; // class MatchTracks

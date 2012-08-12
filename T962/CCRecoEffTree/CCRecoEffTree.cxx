@@ -22,12 +22,13 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
 #include "art/Framework/Services/Optional/TFileDirectory.h" 
-#include "messagefacility/MessageLogger/MessageLogger.h" 
+#include "messagefacility/MessageLogger/MessageLogger.h"
+#include "Utilities/AssociationUtil.h" 
+#include "art/Framework/Core/FindMany.h"
 
 
 #include "T962/CCRecoEffTree/CCRecoEffTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
@@ -166,8 +167,6 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   art::Handle< std::vector<t962::MINOS> > minosListHandle;
   evt.getByLabel(fMINOSModuleLabel,minosListHandle);
-  art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-  evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   art::Handle< std::vector<sim::Particle> > larListHandle;
   evt.getByLabel (fLArG4ModuleLabel,larListHandle);  
 
@@ -198,13 +197,6 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
   for (unsigned int i = 0; i < minosListHandle->size(); i++){
     art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
     minoslist.push_back(minosHolder);
-  }
-
-  art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
-  if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
-  for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
-    art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
-    trackmatchlist.push_back(trackmatchHolder);
   }
   
   art::PtrVector<sim::Particle> parIn;
@@ -306,8 +298,11 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
     }
   
   //matching information  
-  nmatched_reco = trackmatchlist.size();
-  int ANTtrackID=-1;
+
+  //find matched MINOS information for each track
+  art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
+
+ 
   test_charge_minos=0.;
 
   nminos_tracks = minoslist.size();
@@ -320,27 +315,26 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
     }
   }
   
-  for(unsigned int i = 0; i < trackmatchlist.size(); i++){
-    for(unsigned int j = 0; j < minoslist.size(); j++){
+ 
+  for(unsigned int i = 0; i < tracklist.size(); i++)
+  {
+     if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
+     
+     if(fomatch.at(i).ref().ftrkcontained)
+        trk_mom_minos = fomatch.at(i).ref().ftrkErange;
+     else
+        trk_mom_minos = fomatch.at(i).ref().ftrkmom;     
+     
+     trk_charge_minos = fomatch.at(i).ref().fcharge;
+     trk_dcosx_minos = fomatch.at(i).ref().ftrkdcosx;
+     trk_dcosy_minos = fomatch.at(i).ref().ftrkdcosy;
+     trk_dcosz_minos = fomatch.at(i).ref().ftrkdcosz;
+     trk_vtxx_minos = fomatch.at(i).ref().ftrkVtxX;
+     trk_vtxy_minos = fomatch.at(i).ref().ftrkVtxY;
+     trk_vtxz_minos = fomatch.at(i).ref().ftrkVtxZ;     
+  }    
       
-      if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid){
-	ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
-	
-	if(minoslist[j]->ftrkcontained)
-	  trk_mom_minos = minoslist[j]->ftrkErange;
-	else
-	  trk_mom_minos = minoslist[j]->ftrkmom;     
-	
-	trk_charge_minos = minoslist[j]->fcharge;
-	trk_dcosx_minos = minoslist[j]->ftrkdcosx;
-	trk_dcosy_minos = minoslist[j]->ftrkdcosy;
-	trk_dcosz_minos = minoslist[j]->ftrkdcosz;
-	trk_vtxx_minos = minoslist[j]->ftrkVtxX;
-	trk_vtxy_minos = minoslist[j]->ftrkVtxY;
-	trk_vtxz_minos = minoslist[j]->ftrkVtxZ;        
-       }      
-    }
-  }
+  
   
   //track information
   double larStart[3];
@@ -367,8 +361,8 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
 
   for(unsigned int i=0; i<tracklist.size();++i){
 
-    if(ANTtrackID!=tracklist[i]->ID())
-      continue;    
+    if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
+    ++nmatched_reco;
     tracklist[i]->Direction(larStart,larEnd);
     tracklist[i]->Extent(trackStart,trackEnd); 
      

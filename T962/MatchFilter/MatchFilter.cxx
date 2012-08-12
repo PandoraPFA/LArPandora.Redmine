@@ -12,17 +12,18 @@
 #include "art/Framework/Principal/Event.h" 
 #include "fhiclcpp/ParameterSet.h" 
 #include "art/Framework/Principal/Handle.h" 
-#include "art/Persistency/Common/Ptr.h" 
-#include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
 #include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
+#include "Utilities/AssociationUtil.h"
+#include "art/Framework/Core/FindMany.h"
 
 
 //Larsoft Includes
 #include "MatchFilter.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
+#include "T962/T962_Objects/classes.h"
+#include "RecoBase/recobase.h"
 
 namespace filt{
 
@@ -40,7 +41,8 @@ namespace filt{
   //-------------------------------------------------
   void MatchFilter::reconfigure(fhicl::ParameterSet const& p)
   {
-    fTrackMatchModuleLabel  =  p.get< std::string >("TrackMatchModuleLabel");
+     fTracks_label           = p.get< std::string >("LArTracksModuleLabel");
+     fTrackMatchModuleLabel  = p.get< std::string >("TrackMatchModuleLabel");
   } 
 
   //-------------------------------------------------
@@ -53,31 +55,22 @@ namespace filt{
   //-------------------------------------------------
   bool MatchFilter::filter(art::Event &evt)
   { 
-    
-  art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-  evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
 
-  art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
-  if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
-  for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
-    art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
-    trackmatchlist.push_back(trackmatchHolder);
-  }
-  
-  int nmatched_reco = -99999;
-  nmatched_reco = trackmatchlist.size();
+     art::Handle< std::vector<recob::Track> > LarTrackHandle;
+     evt.getByLabel(fTracks_label,LarTrackHandle);
 
-  if(nmatched_reco>0){
-    fSelectedEvents->Fill(1); 
-    //std::cout << "event passed the filter " << evt.id().event() << std::endl;
-    return true;
-  }
-  
-  else {
-    //std::cout << "event failed the filter " << evt.id().event() << std::endl;
-    return false;
-  }
+     art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, fTrackMatchModuleLabel);
 
+     if(fomatch.size()>0){
+        fSelectedEvents->Fill(1); 
+        //std::cout << "event passed the filter " << evt.id().event() << std::endl;
+        return true;
+     }
+     else {
+        //std::cout << "event failed the filter " << evt.id().event() << std::endl;
+        return false;
+     }
+     
   } // bool  
 } // namespace
     

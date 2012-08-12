@@ -308,8 +308,6 @@ void t962::CCQEanalysis::analyze(const art::Event& evt)
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   //art::Handle< std::vector<t962::MINOS> > minosListHandle;
   //evt.getByLabel(fMINOSModuleLabel,minosListHandle);
-  //art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-  //evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   
 
   
@@ -432,13 +430,7 @@ std::cout<<"No dbscan in w= "<<nclusw_reco<<std::endl;
 //     minoslist.push_back(minosHolder);
 //   }
 // 
-//   art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
-//   if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
-//   for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
-//     art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
-//     trackmatchlist.push_back(trackmatchHolder);
-//   }
-  
+
   
      // 2d vertex information
   bool found2dvtx = false;

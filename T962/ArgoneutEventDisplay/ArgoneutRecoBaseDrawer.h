@@ -15,7 +15,7 @@ namespace art {
 #include "art/Persistency/Common/PtrVector.h"
 #endif
 
-namespace t962     { class MINOS; class MINOSTrackMatch; }
+namespace t962     { class MINOS; }
 
 namespace argoevd {
   /// Aid in the rendering of ArgoNeuT Reconstruction objects
@@ -50,9 +50,6 @@ namespace argoevd {
                   const std::string&           which,
                   art::PtrVector<t962::MINOS>& minos);
 
-     int GetMinosTrackMatch(const art::Event&            evt,
-                            const std::string&           which,
-                            art::PtrVector<t962::MINOSTrackMatch>& minosmatch);
 
     
         

@@ -16,7 +16,7 @@ namespace evdb{
   class View3D;
 }
 namespace geo      { class Geometry; }
-namespace t962     { class MINOS; class MINOSTrackMatch; } 
+namespace t962     { class MINOS; } 
 
 
 
@@ -41,9 +41,6 @@ namespace argoevd {
                   const std::string&           which,
                   art::PtrVector<t962::MINOS>& minos);
 
-     int GetMinosTrackMatch(const art::Event&            evt,
-                            const std::string&           which,
-                            art::PtrVector<t962::MINOSTrackMatch>& minosmatch);
      
   };
 };

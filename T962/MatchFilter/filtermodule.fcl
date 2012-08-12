@@ -3,7 +3,8 @@ BEGIN_PROLOG
 argoneut_matchfilter:
 {
  module_type:            "MatchFilter"
-  TrackMatchModuleLabel: "matchtracks"
+ LArTracksModuleLabel:   "track3d"
+ TrackMatchModuleLabel:  "match"
 }
 
 END_PROLOG

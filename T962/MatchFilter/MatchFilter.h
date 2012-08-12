@@ -13,6 +13,7 @@
 
 #include "art/Framework/Core/EDFilter.h"
 #include "TH1D.h"
+#include <string>
 
 namespace filt {
 
@@ -31,8 +32,9 @@ namespace filt {
 
   private: 
  
-    std::string fTrackMatchModuleLabel;
-    TH1D* fSelectedEvents;
+     std::string fTracks_label;
+     std::string fTrackMatchModuleLabel;
+     TH1D* fSelectedEvents;
 
   protected: 
 

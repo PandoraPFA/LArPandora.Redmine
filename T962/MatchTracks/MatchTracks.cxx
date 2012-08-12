@@ -12,8 +12,8 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include "Utilities/AssociationUtil.h"
 
-#include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
 
@@ -35,23 +35,30 @@
 namespace match{
 
    //-------------------------------------------------
-   MatchTracks::MatchTracks(fhicl::ParameterSet const& pset) : 
-      fLarTracks_label(pset.get< std::string >("lartracks")),
-      fMinosTracks_label(pset.get< std::string >("minostracks")),
-      fdZ(pset.get< double>("dZ")),
-      fdXY(pset.get< double>("dXY")),
-      fdCosx(pset.get< double >("dCosx")),
-      fdCosy(pset.get< double >("dCosy")),
-      fdCosz(pset.get< double >("dCosz")),
-      fdBoundary(pset.get< double >("dBoundary"))
+   MatchTracks::MatchTracks(fhicl::ParameterSet const& pset) 
    {
-      produces< std::vector<t962::MINOSTrackMatch> > ();
+      this->reconfigure(pset);
+
+      produces< art::Assns<recob::Track, t962::MINOS> >();
    }
 
    //-------------------------------------------------
    MatchTracks::~MatchTracks()
    {
    
+   }
+
+   //-------------------------------------------------
+   void MatchTracks::reconfigure(fhicl::ParameterSet const& pset)
+   {
+      fLarTracks_label = pset.get< std::string >("lartracks");
+      fMinosTracks_label = pset.get< std::string >("minostracks");
+      fdZ = pset.get< double>("dZ");
+      fdXY = pset.get< double>("dXY");
+      fdCosx = pset.get< double >("dCosx");
+      fdCosy = pset.get< double >("dCosy");
+      fdCosz = pset.get< double >("dCosz");
+      fdBoundary = pset.get< double >("dBoundary");
    }
 
    //-------------------------------------------------
@@ -94,80 +101,56 @@ namespace match{
    //-------------------------------------------------
    void MatchTracks::produce(art::Event& evt)
    {
-      t962::MINOSTrackMatch minos;
-      std::vector<t962::MINOSTrackMatch> vec_minos;
+      std::auto_ptr< art::Assns<recob::Track, t962::MINOS> > assn(new art::Assns<recob::Track, t962::MINOS>);
+   
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
-      if (!evt.getByLabel(fLarTracks_label,LarTrackHandle))
-	return;
+      if (!evt.getByLabel(fLarTracks_label,LarTrackHandle)) return;
 
       art::Handle< std::vector<t962::MINOS> > MinosTrackHandle;
-      if (!evt.getByLabel(fMinosTracks_label,MinosTrackHandle))
-	return;
+      if (!evt.getByLabel(fMinosTracks_label,MinosTrackHandle)) return;
 
-      std::cout << std::setfill('*') << std::setw(175) << "*" << std::setfill(' ') << std::endl;
-      std::cout << "Run = " << evt.id().run() << " Event = " << evt.id().event();
-      std::cout << " #T962 Tracks = " << LarTrackHandle->size() 
-                << " #MINOS Tracks = " << MinosTrackHandle->size() << std::endl;
+      mf::LogVerbatim("MatchTracks") << std::setfill('*') << std::setw(175) << "*" << std::setfill(' ') << "\n"
+                                 << " #T962 Tracks = " << LarTrackHandle->size() 
+                                 << " #MINOS Tracks = " << MinosTrackHandle->size() ;
 
       fT962_Ntracks->Fill(LarTrackHandle->size());
       fMINOS_Ntracks->Fill(MinosTrackHandle->size());
-      int matchable = 0;
+      int exiting = 0;
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
-         if(EndsOnBoundary(lartrack)) ++matchable;
-         std::cout << "T962 " << *lartrack << std::endl;
+         if(EndsOnBoundary(lartrack)) ++exiting;
+         mf::LogVerbatim("MatchTracks") << "T962 " << *lartrack ;
       }
-      std::cout << matchable << " Matchable T962 tracks." << std::endl;
+      mf::LogVerbatim("MatchTracks") << exiting << " Exiting T962 tracks." ;
 
       for(unsigned int j=0; j<MinosTrackHandle->size();++j){
          art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
-         std::cout << *minostrack << std::endl;
+         mf::LogVerbatim("MatchTracks") << *minostrack ;
       }
       
-      //the following makes sure that only 1 argoneut track is assigned to one minos track and that the match is the strongest (in terms of projected radial difference and angle between the tracks) among the candidate matches      
-      double totaldiff2=1000000.;      
-       for(unsigned int i=0; i<LarTrackHandle->size();++i)
-       {
+      //the following makes sure that only 1 argoneut track is assigned to one minos track and that the match is the strongest (in terms of projected radial difference and angle between the tracks) among the candidate matches       
+      for(unsigned int i=0; i<LarTrackHandle->size();++i)
+      {
+         double totaldiff2=1000000.;
+         double rdiff_best = -999.0;
+         double xdiff_best = -999.0;
+         double ydiff_best = -999.0;
+         unsigned int matchnumber = 999;
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
          if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
+
+         std::vector<double> larStart, larEnd;
+         lartrack->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)            
+         double lardirectionStart[3];
+         double lardirectionEnd[3];
+         lartrack->Direction(lardirectionStart,lardirectionEnd); 
+         
          for(unsigned int j=0; j<MinosTrackHandle->size();++j)
          {
             art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);            
-            if((100.0*minostrack->ftrkVtxZ)>fdZ) continue;
-            std::vector<double> larStart, larEnd;
-            lartrack->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)            
-            double lardirectionStart[3];
-            double lardirectionEnd[3];
-            lartrack->Direction(lardirectionStart,lardirectionEnd);         
-            double xdiff,ydiff,rdiff,totaldiff;
-            
-            bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff,totaldiff);  
-            
-            
-            if(match && totaldiff2>totaldiff)
-            {
-             totaldiff2=totaldiff;
-             std::cout<<i<<" "<<j<<" "<<totaldiff<<" "<<minostrack->ftrkmom<<std::endl;
-             }
-         }           
-        }
-            
-      for(unsigned int i=0; i<LarTrackHandle->size();++i){
-         art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
-         if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
+            if((100.0*minostrack->ftrkVtxZ)>fdZ) continue;//MINOS track too far into detector
 
-         for(unsigned int j=0; j<MinosTrackHandle->size();++j){
-            art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
-
-            if((100.0*minostrack->ftrkVtxZ)>fdZ) continue;
-
-            std::vector<double> larStart, larEnd;
-            lartrack->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
-            
-            double lardirectionStart[3];
-            double lardirectionEnd[3];
-            lartrack->Direction(lardirectionStart,lardirectionEnd);
-        
+            //some plots to check alignment
             for(int n = 0; n<100;++n){
                //double D=(90*0.5)+(42.4*2.54)-5.588;
                double D = 90.0 + n*1.0;
@@ -183,63 +166,71 @@ namespace match{
                fDiffXvD->Fill((100.0*minostrack->ftrkVtxX - x_pred),D);
                fDiffYvD->Fill((100.0*minostrack->ftrkVtxY - y_pred),D);
             }
-         
-            double xdiff,ydiff,rdiff,totaldiff;
-            bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff,totaldiff);
-            
-            if(match && totaldiff==totaldiff2){
-               std::cout <<"Run "<<evt.id().run()<<" Event "<<evt.id().event()<< " Match! T962 Track #" << lartrack->ID() 
-                         << " and MINOS Track #" << minostrack->ftrkIndex << std::endl;
-                         
-               minos.fMINOStrackid=minostrack->ftrkIndex;
-               minos.fArgoNeuTtrackid=lartrack->ID();
-               vec_minos.push_back(minos);
-               fDiffR->Fill(rdiff);
-               fDiffTotal->Fill(totaldiff);
-               fDiffXvDiffY->Fill(xdiff,ydiff);
-               fDiffDirCosX->Fill(lardirectionStart[0]-minostrack->ftrkdcosx);
-               fDiffDirCosY->Fill(lardirectionStart[1]-minostrack->ftrkdcosy);
-               fDiffDirCosZ->Fill(lardirectionStart[2]-minostrack->ftrkdcosz);
-               fT962_DirCosX->Fill(lardirectionStart[0]);
-               fT962_DirCosY->Fill(lardirectionStart[1]);
-               fT962_DirCosZ->Fill(lardirectionStart[2]);
-               fT962_StartZY->Fill(larStart[2],larStart[1]);
-               fT962_EndZY->Fill(larEnd[2],larEnd[1]);
-               fT962_StartXY->Fill(larStart[0],larStart[1]);
-               fT962_EndXY->Fill(larEnd[0],larEnd[1]);
-               fT962_StartZX->Fill(larStart[2],larStart[0]);
-               fT962_EndZX->Fill(larEnd[2],larEnd[0]);
-               fMinos_DirCosX->Fill(minostrack->ftrkdcosx);
-               fMinos_DirCosY->Fill(minostrack->ftrkdcosy);
-               fMinos_DirCosZ->Fill(minostrack->ftrkdcosz);
-               fMinos_XY->Fill(100.0*minostrack->ftrkVtxX,100.0*minostrack->ftrkVtxY);
-               if(minostrack->fcharge==1){
-                  fMinosErange_Pos->Fill(1000.0*minostrack->ftrkErange);
-                  fMinosMom_Pos->Fill(1000.0*minostrack->ftrkmom);
-               }
-               if(minostrack->fcharge==-1){
-                  fMinosErange_Neg->Fill(1000.0*minostrack->ftrkErange);
-                  fMinosMom_Neg->Fill(1000.0*minostrack->ftrkmom);
-               }
-            }
-         }
-      }
-            
-      std::auto_ptr<std::vector<t962::MINOSTrackMatch> > MINOS_coll(new std::vector<t962::MINOSTrackMatch> );
 
-         for(unsigned int i=0;i<vec_minos.size();i++)
-         {
-            MINOS_coll->push_back(vec_minos[i]);
-         }
-         evt.put(MINOS_coll);
-         vec_minos.clear();
+                  
+            double xdiff,ydiff,rdiff,totaldiff;   
+            bool match = Compare(lartrack,minostrack,xdiff,ydiff,rdiff,totaldiff,totaldiff2);  
+            
+            if(match){
+               matchnumber = j;//keep track of best match found so far
+               rdiff_best = rdiff;
+               xdiff_best = xdiff;
+               ydiff_best = ydiff;
+            }
+
+         }//loop over MINOS tracks
+
          
+         //Check if best match was found, then associate it to Track
+         if(matchnumber!=999){
+            art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,matchnumber);
+            mf::LogVerbatim("MatchTracks") << " Match! T962 Track #" << lartrack->ID() 
+                                       << " and MINOS Track #" << minostrack->ftrkIndex;
+
+            fDiffR->Fill(rdiff_best);
+            fDiffTotal->Fill(totaldiff2);
+            fDiffXvDiffY->Fill(xdiff_best,ydiff_best);
+            fDiffDirCosX->Fill(lardirectionStart[0]-minostrack->ftrkdcosx);
+            fDiffDirCosY->Fill(lardirectionStart[1]-minostrack->ftrkdcosy);
+            fDiffDirCosZ->Fill(lardirectionStart[2]-minostrack->ftrkdcosz);
+            fT962_DirCosX->Fill(lardirectionStart[0]);
+            fT962_DirCosY->Fill(lardirectionStart[1]);
+            fT962_DirCosZ->Fill(lardirectionStart[2]);
+            fT962_StartZY->Fill(larStart[2],larStart[1]);
+            fT962_EndZY->Fill(larEnd[2],larEnd[1]);
+            fT962_StartXY->Fill(larStart[0],larStart[1]);
+            fT962_EndXY->Fill(larEnd[0],larEnd[1]);
+            fT962_StartZX->Fill(larStart[2],larStart[0]);
+            fT962_EndZX->Fill(larEnd[2],larEnd[0]);
+            fMinos_DirCosX->Fill(minostrack->ftrkdcosx);
+            fMinos_DirCosY->Fill(minostrack->ftrkdcosy);
+            fMinos_DirCosZ->Fill(minostrack->ftrkdcosz);
+            fMinos_XY->Fill(100.0*minostrack->ftrkVtxX,100.0*minostrack->ftrkVtxY);
+            if(minostrack->fcharge==1){
+               fMinosErange_Pos->Fill(1000.0*minostrack->ftrkErange);
+               fMinosMom_Pos->Fill(1000.0*minostrack->ftrkmom);
+            }
+            if(minostrack->fcharge==-1){
+               fMinosErange_Neg->Fill(1000.0*minostrack->ftrkErange);
+               fMinosMom_Neg->Fill(1000.0*minostrack->ftrkmom);
+            }
+
+            //make Association between T962 track and matched MINOS track
+            util::CreateAssn(*this, evt, minostrack, lartrack, *assn);
+
+         }//if(matchnumber!=999){
+
+      }//loop over T962 tracks
+                   
+      evt.put(assn);//put Associations into event
+        
       return;
+
    }
  
    //-------------------------------------------------
    bool MatchTracks::Compare(art::Ptr<recob::Track> lar_track, art::Ptr<t962::MINOS> minos_track,
-                             double &xpred, double &ypred, double &rdiff, double &totaldiff)
+                             double &xpred, double &ypred, double &rdiff, double &totaldiff, double &totaldiff2)
    {
 
       double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
@@ -258,17 +249,17 @@ namespace match{
 
 
       // double dz = D - larStart[2]+(100.0 * minos_track->ftrkVtxZ);//z-difference between end of T962 track and
-                                                                  //begin of MINOS track...in centimeters
+      //begin of MINOS track...in centimeters
 
       double dz = D - larEnd[2]+(100.0 * minos_track->ftrkVtxZ);//z-difference between end of T962 track and
-                                                                  //begin of MINOS track...in centimeters
+      //begin of MINOS track...in centimeters
 
       double l = dz/(lardirectionEnd[2]);//3-d distance between end of T962 track and begin of MINOS track
 
       double x_pred = l*lardirectionEnd[0]+larEnd[0];//predicted x-pos. of T962 track at z-position equal to
-                                                       //start of MINOS track
+      //start of MINOS track
       double y_pred = l*lardirectionEnd[1]+larEnd[1];//predicted y-pos. of T962 track at z-position equal to
-                                                       //start of MINOS track
+      //start of MINOS track
 
       double dx = 100.0*minos_track->ftrkVtxX - x_offset - x_pred;
       double dy = 100.0*minos_track->ftrkVtxY + y_offset - y_pred;
@@ -303,8 +294,12 @@ namespace match{
       rdiff = sqrt(dx*dx + dy*dy);
       //totaldiff is a measure of the agreement between the ArgoNeuT projected track and the MINOS track based on radial distance and angle. totaldiff= rdiff/cos(theta)  
       totaldiff=fabs(rdiff/((lardirectionEnd[0]*minos_track->ftrkdcosx)+(lardirectionEnd[1]*minos_track->ftrkdcosy)+(lardirectionEnd[2]*minos_track->ftrkdcosz)));
-      
-      return true;  
+
+      if(totaldiff2>totaldiff){
+         totaldiff2 = totaldiff;//new best match found
+         return true;
+      }
+      else return false;//found match, but not best match
   
    }
 
@@ -313,13 +308,13 @@ namespace match{
    {
       std::vector<double> larStart, larEnd;
       lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
- 	if(fabs(larEnd[0])<fdBoundary
-	|| fabs(47.-larEnd[0])<fdBoundary 
-	|| fabs(larEnd[1]+20.)<fdBoundary
-	|| fabs(20.-larEnd[1])<fdBoundary
-	|| fabs(larEnd[2])<fdBoundary
-	|| fabs(90.-larEnd[2])<fdBoundary )   
-	return true;  
+      if(fabs(larEnd[0])<fdBoundary
+         || fabs(47.-larEnd[0])<fdBoundary 
+         || fabs(larEnd[1]+20.)<fdBoundary
+         || fabs(20.-larEnd[1])<fdBoundary
+         || fabs(larEnd[2])<fdBoundary
+         || fabs(90.-larEnd[2])<fdBoundary )   
+         return true;  
       else return false;
    }
 

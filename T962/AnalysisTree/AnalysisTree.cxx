@@ -30,11 +30,11 @@
 #include "art/Framework/Services/Optional/TFileService.h" 
 #include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
+#include "art/Framework/Core/FindMany.h"
 
 
 #include "T962/AnalysisTree/AnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
@@ -288,10 +288,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 //  art::View< t962::MINOS > minosListHandle;
 //  evt.getView(fMINOSModuleLabel,minosListHandle);
 
-  art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-  std::vector<art::Ptr<t962::MINOSTrackMatch> > trackmatchlist;
-  if (evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
-    art::fill_ptr_vector(trackmatchlist, trackmatchListHandle);
+
 
   art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
   std::vector<art::Ptr<t962::ScanInfo> > scanlist;
@@ -349,12 +346,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       //minoslist.push_back(&minosListHandle->at(i));
     }
 
-  art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
-  if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
-  for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
-    art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
-    trackmatchlist.push_back(trackmatchHolder);
-  }
+ 
   
    art::PtrVector<t962::ScanInfo> scanlist;
   if(evt.getByLabel(fScanModuleLabel,scanListHandle))
@@ -444,8 +436,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   }
 
   //matching information  
-  nmatched_reco = trackmatchlist.size();
-  int ANTtrackID=-1;
+
+  //find matched MINOS information for each track
+  art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
+
   test_charge_minos=0.;
   
   for(unsigned int j = 0; j < minoslist.size(); j++)
@@ -457,43 +451,40 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
         }
     }
   
-  for(unsigned int i = 0; i < trackmatchlist.size(); i++)
+  for(unsigned int i = 0; i < tracklist.size(); i++)
     {
-      
-      for(unsigned int j = 0; j < minoslist.size(); j++)
-	{
+
+       if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
+       ++nmatched_reco;
 	  
-	  if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
-	    {
-	      ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
+
 	      
-	      if(minoslist[j]->ftrkcontained)
-		trk_mom_minos = minoslist[j]->ftrkErange;
-	      else
-		trk_mom_minos = minoslist[j]->ftrkmom;     
-	      
-	      trkcontained_minos = minoslist[j]->ftrkcontained; 
-	      trk_charge_minos = minoslist[j]->fcharge;
-	      trk_dcosx_minos = minoslist[j]->ftrkdcosx;
-	      trk_dcosy_minos = minoslist[j]->ftrkdcosy;
-	      trk_dcosz_minos = minoslist[j]->ftrkdcosz;
-	      trk_vtxx_minos = minoslist[j]->ftrkVtxX;
-	      trk_vtxy_minos = minoslist[j]->ftrkVtxY;
-	      trk_vtxz_minos = minoslist[j]->ftrkVtxZ;        
-	    }  
-	  if (!isdata){       
-	    mc_index_minos = minoslist[j]->fmcIndex;
-	    mc_pdg_minos = minoslist[j]->fmcPDG;
-	    mc_px_minos = minoslist[j]->fmcPx;
-	    mc_py_minos = minoslist[j]->fmcPy;
-	    mc_pz_minos = minoslist[j]->fmcPz;
-	    mc_ene_minos = minoslist[j]->fmcEne;
-	    mc_mass_minos = minoslist[j]->fmcMass;
-	    mc_vtxx_minos = minoslist[j]->fmcVtxX;
-	    mc_vtxy_minos = minoslist[j]->fmcVtxY;
-	    mc_vtxz_minos = minoslist[j]->fmcVtxZ;
-	  }
-	}
+       if(fomatch.at(i).ref().ftrkcontained)
+          trk_mom_minos = fomatch.at(i).ref().ftrkErange;
+       else
+          trk_mom_minos = fomatch.at(i).ref().ftrkmom;     
+       
+       trkcontained_minos = fomatch.at(i).ref().ftrkcontained; 
+       trk_charge_minos = fomatch.at(i).ref().fcharge;
+       trk_dcosx_minos = fomatch.at(i).ref().ftrkdcosx;
+       trk_dcosy_minos = fomatch.at(i).ref().ftrkdcosy;
+       trk_dcosz_minos = fomatch.at(i).ref().ftrkdcosz;
+       trk_vtxx_minos = fomatch.at(i).ref().ftrkVtxX;
+       trk_vtxy_minos = fomatch.at(i).ref().ftrkVtxY;
+       trk_vtxz_minos = fomatch.at(i).ref().ftrkVtxZ;        
+   
+       if (!isdata){       
+          mc_index_minos = fomatch.at(i).ref().fmcIndex;
+          mc_pdg_minos = fomatch.at(i).ref().fmcPDG;
+          mc_px_minos = fomatch.at(i).ref().fmcPx;
+          mc_py_minos = fomatch.at(i).ref().fmcPy;
+          mc_pz_minos = fomatch.at(i).ref().fmcPz;
+          mc_ene_minos = fomatch.at(i).ref().fmcEne;
+          mc_mass_minos = fomatch.at(i).ref().fmcMass;
+          mc_vtxx_minos = fomatch.at(i).ref().fmcVtxX;
+          mc_vtxy_minos = fomatch.at(i).ref().fmcVtxY;
+          mc_vtxz_minos = fomatch.at(i).ref().fmcVtxZ;
+       }
     }
 
   //track information
@@ -560,8 +551,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   memset(larEnd, 0, 3);
   for(unsigned int i=0; i<tracklist.size();++i){
     
-    if(ANTtrackID!=tracklist[i]->ID())
-      continue;
+     if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
     
     tracklist[i]->Direction(larStart,larEnd);
     tracklist[i]->Extent(trackStart,trackEnd);  

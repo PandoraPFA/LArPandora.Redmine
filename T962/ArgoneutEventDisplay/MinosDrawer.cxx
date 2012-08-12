@@ -9,15 +9,18 @@
 #include "EventDisplayBase/View2D.h"
 #include "EventDisplayBase/View3D.h"
 #include "T962/ArgoneutEventDisplay/MinosDrawer.h"
-//#include "EventDisplay/GeometryDrawingOptions.h"
+#include "EventDisplay/RecoDrawingOptions.h"
 
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
+#include "RecoBase/recobase.h"
+
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Persistency/Common/Ptr.h"
 #include "art/Framework/Principal/Handle.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "Utilities/AssociationUtil.h"
+#include "art/Framework/Core/FindMany.h"
 
 namespace {
   // Utility function to make uniform error messages.
@@ -72,32 +75,7 @@ namespace argoevd{
     return minos.size();
   }
 
-    //......................................................................
-   int MinosDrawer::GetMinosTrackMatch(const art::Event&            evt,
-                                       const std::string&           which,
-                                       art::PtrVector<t962::MINOSTrackMatch>& minosmatch) 
-  {
-    minosmatch.clear();
-
-    art::Handle< std::vector<t962::MINOSTrackMatch> > minosmatchhandle;
-    art::PtrVector<t962::MINOSTrackMatch> temp;
-
-    try{
-       evt.getByLabel(which, minosmatchhandle);
-       
-       for(unsigned int i = 0; i < minosmatchhandle->size(); ++i){
-          art::Ptr<t962::MINOSTrackMatch> w(minosmatchhandle, i);
-          temp.push_back(w);
-       }
-       temp.swap(minosmatch);
-    }
-    catch(cet::exception& e){
-       writeErrMsg("GetMinosTrackMatch", e);
-    }
-    
-    return minosmatch.size();
-  }
-
+ 
 
   //......................................................................
    void MinosDrawer::MinosTrack(const art::Ptr<t962::MINOS> minos,
@@ -136,15 +114,29 @@ namespace argoevd{
      art::PtrVector<t962::MINOS> minos;
      this->GetMinos(evt, "minos", minos);
 
-     art::PtrVector<t962::MINOSTrackMatch> minosmatch;
-     this->GetMinosTrackMatch(evt, "matchtracks", minosmatch); 
+     art::ServiceHandle<evd::RecoDrawingOptions> recoOpt;
+     art::Handle< std::vector<recob::Track> > LarTrackHandle;
+     std::string const label = "match";
      
      for(size_t p = 0; p < minos.size(); ++p){
         bool matched = false;
-        for(size_t q= 0; q < minosmatch.size(); ++q)
-        {
-           if(minosmatch[q]->fMINOStrackid == minos[p]->ftrkIndex) matched = true;
-        }  
+       
+        if(recoOpt->fDrawTracks!=0){
+           for (unsigned int imod=0; imod<recoOpt->fTrackLabels.size(); ++imod){
+
+              bool get = evt.getByLabel(recoOpt->fTrackLabels[imod],LarTrackHandle);
+              if(!get) continue;
+
+              //find matched MINOS information 
+              art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, label);
+              for(size_t q= 0; q < fomatch.size(); ++q)
+              {
+                 if(fomatch.at(q).isValid()){//Found matching MINOS track
+                    if(minos[p]->ftrkIndex == fomatch.at(q).ref().ftrkIndex) matched = true;
+                 }
+              }  
+           }
+        }
         this->MinosTrack(minos[p], (int)minos[p]->ftrkIndex, view, matched);
      }
   }
@@ -198,7 +190,6 @@ namespace argoevd{
     c = kGray+2;
     s = 1;
     w = 1;
-    double z = zlo;
   
   }
 

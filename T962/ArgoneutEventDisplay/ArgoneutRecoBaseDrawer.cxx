@@ -24,12 +24,16 @@
 #include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/AssociationUtil.h"
+#include "art/Framework/Core/FindMany.h"
+
+
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
+
 
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/PtrVector.h"
 #include "art/Framework/Principal/Handle.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -109,27 +113,28 @@ namespace argoevd{
             art::PtrVector<recob::Track> track;
             this->GetArgoTracks(evt, which, track);
 
-	    art::FindMany<recob::SpacePoint> fmsp(track, evt, which);
+            art::FindMany<recob::SpacePoint> fmsp(track, evt, which);
 
             art::PtrVector<t962::MINOS> minos;
             this->GetMinos(evt, "minos", minos);
+    
+            art::Handle< std::vector<recob::Track> > LarTrackHandle;
+            evt.getByLabel(drawopt->fTrackLabels[imod],LarTrackHandle);
 
-            art::PtrVector<t962::MINOSTrackMatch> minosmatch;
-            this->GetMinosTrackMatch(evt, "matchtracks", minosmatch); 
-          
+            //find matched MINOS information for each track
+            std::string const label = "match";
+            art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, label);
+
             for(size_t p = 0; p < track.size(); ++p){
                bool matched = false;
                float charge = 0;
-               for(size_t q= 0; q < minosmatch.size(); ++q)
-               {
-                  if(minosmatch[q]->fArgoNeuTtrackid == track[p]->ID()){
-                     matched = true;
-                     for(size_t r = 0; r<minos.size(); ++r){
-                        if(minosmatch[q]->fMINOStrackid == minos[r]->ftrkIndex) charge = minos[r]->fcharge;
-                     }
-                  }
-               }  
-	       std::vector<const recob::SpacePoint*> sps = fmsp.at(p);
+
+               if(fomatch.at(p).isValid()){//Found matching MINOS track
+                  matched = true;
+                  charge = fomatch.at(p).ref().fcharge;
+               }
+
+               std::vector<const recob::SpacePoint*> sps = fmsp.at(p);
                this->ArgoSpacePoint(sps, track[p]->ID(), view, matched,charge);
             }
          }
@@ -226,33 +231,7 @@ namespace argoevd{
     
       return minos.size();
    }
-   //......................................................................
-   int ArgoneutRecoBaseDrawer::GetMinosTrackMatch(const art::Event&            evt,
-                                          const std::string&           which,
-                                          art::PtrVector<t962::MINOSTrackMatch>& minosmatch) 
-   {
-      minosmatch.clear();
-
-      art::Handle< std::vector<t962::MINOSTrackMatch> > minosmatchhandle;
-      art::PtrVector<t962::MINOSTrackMatch> temp;
-
-      try{
-         evt.getByLabel(which, minosmatchhandle);
-       
-         for(unsigned int i = 0; i < minosmatchhandle->size(); ++i){
-            art::Ptr<t962::MINOSTrackMatch> w(minosmatchhandle, i);
-            temp.push_back(w);
-         }
-         temp.swap(minosmatch);
-      }
-      catch(cet::exception& e){
-         writeErrMsg("GetMinosTrackMatch", e);
-      }
-    
-      return minosmatch.size();
-   }
-
-
+  
  
 
 }// namespace

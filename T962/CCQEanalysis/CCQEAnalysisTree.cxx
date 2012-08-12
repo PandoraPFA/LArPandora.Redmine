@@ -25,11 +25,12 @@
 #include "art/Framework/Services/Optional/TFileService.h" 
 #include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
+#include "Utilities/AssociationUtil.h" 
+#include "art/Framework/Core/FindMany.h"
 
 
 #include "T962/CCQEanalysis/CCQEAnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
@@ -389,8 +390,6 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   art::Handle< std::vector<t962::MINOS> > minosListHandle;
   evt.getByLabel(fMINOSModuleLabel,minosListHandle);
-  art::Handle< std::vector<t962::MINOSTrackMatch> > trackmatchListHandle;
-  evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle);
   art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
   evt.getByLabel(fScanModuleLabel,scanListHandle);
   
@@ -437,15 +436,8 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
     minoslist.push_back(minosHolder);
   }
-
-  art::PtrVector<t962::MINOSTrackMatch> trackmatchlist;
-  if(evt.getByLabel(fTrackMatchModuleLabel,trackmatchListHandle))
-  for (unsigned int i = 0; i < trackmatchListHandle->size(); i++){
-    art::Ptr<t962::MINOSTrackMatch> trackmatchHolder(trackmatchListHandle,i);
-    trackmatchlist.push_back(trackmatchHolder);
-  }
   
-   art::PtrVector<t962::ScanInfo> scanlist;
+  art::PtrVector<t962::ScanInfo> scanlist;
   if(evt.getByLabel(fScanModuleLabel,scanListHandle))
   for (unsigned int i = 0; i < scanListHandle->size(); i++){
     art::Ptr<t962::ScanInfo> scanHolder(scanListHandle,i);
@@ -610,8 +602,10 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
   
 
   //matching information  
-  nmatched_reco = trackmatchlist.size();
-  int ANTtrackID=-1;
+
+  //find matched MINOS information for each track
+  art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
+
   test_charge_minos=0.;
   
   for(unsigned int j = 0; j < minoslist.size(); j++)
@@ -625,33 +619,29 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
        
      }
      
-  for(unsigned int i = 0; i < trackmatchlist.size(); i++)
-    {
+ 
    
-     for(unsigned int j = 0; j < minoslist.size(); j++)
+     for(unsigned int i = 0; i < tracklist.size(); i++)
      {
-
-     if(minoslist[j]->ftrkIndex==trackmatchlist[i]->fMINOStrackid)
-     {
-     ANTtrackID=trackmatchlist[i]->fArgoNeuTtrackid;
+        if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
      
-     if(minoslist[j]->ftrkcontained)
-     trk_mom_minos = minoslist[j]->ftrkErange;
+     if(fomatch.at(i).ref().ftrkcontained)
+     trk_mom_minos = fomatch.at(i).ref().ftrkErange;
      else
-     trk_mom_minos = minoslist[j]->ftrkmom;     
+     trk_mom_minos = fomatch.at(i).ref().ftrkmom;     
      
-     trk_charge_minos = minoslist[j]->fcharge;
-     trk_dcosx_minos = minoslist[j]->ftrkdcosx;
-     trk_dcosy_minos = minoslist[j]->ftrkdcosy;
-     trk_dcosz_minos = minoslist[j]->ftrkdcosz;
-     trk_vtxx_minos = minoslist[j]->ftrkVtxX;
-     trk_vtxy_minos = minoslist[j]->ftrkVtxY;
-     trk_vtxz_minos = minoslist[j]->ftrkVtxZ;     
+     trk_charge_minos = fomatch.at(i).ref().fcharge;
+     trk_dcosx_minos = fomatch.at(i).ref().ftrkdcosx;
+     trk_dcosy_minos = fomatch.at(i).ref().ftrkdcosy;
+     trk_dcosz_minos = fomatch.at(i).ref().ftrkdcosz;
+     trk_vtxx_minos = fomatch.at(i).ref().ftrkVtxX;
+     trk_vtxy_minos = fomatch.at(i).ref().ftrkVtxY;
+     trk_vtxz_minos = fomatch.at(i).ref().ftrkVtxZ;     
       }    
       
-     }
+     
     
-    }
+    
 
       //track information
      ntracks_reco=tracklist.size();
@@ -664,6 +654,8 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
      //grab information about whether a track is associated with a vertex and whether a track leaves the detector. these variables are powerful discriminators.
      int n_vertextracks=0;
      int n_endonboundarytracks=0;
+
+
       for(unsigned int i=0; i<tracklist.size();++i){
        tracklist[i]->Extent(trackStart,trackEnd); 
       
@@ -719,9 +711,8 @@ if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(tracksta
        two_trackexit_dcosz_reco[i] = larEnd[2];
       }
       
-      
-      if(ANTtrackID!=tracklist[i]->ID())
-      continue;
+      if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
+      ++nmatched_reco;
 
        tracklist[i]->Direction(larStart,larEnd);
        tracklist[i]->Extent(trackStart,trackEnd);  

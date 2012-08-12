@@ -17,22 +17,24 @@
 //    by putting the string inside another object.
 
 #include "art/Persistency/Common/Wrapper.h"
+#include "art/Persistency/Common/Assns.h"
 
 // nutools includes
 #include "T962/T962_Objects/Paddles.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/MINOSTrackMatch.h"
 #include "T962/T962_Objects/ScanInfo.h"
+#include "RecoBase/recobase.h"
+
 //
 // Only include objects that we would like to be able to put into the event.
 // Do not include the objects they contain internally.
 //
 template class std::vector<t962::MINOS>;
-template class std::vector<t962::MINOSTrackMatch>;
 template class std::vector<t962::Paddles>;
 template class std::vector<t962::ScanInfo>;
+template class art::Assns<recob::Track, t962::MINOS, void>;
 
 template class art::Wrapper< std::vector<t962::MINOS>     >;
-template class art::Wrapper< std::vector<t962::MINOSTrackMatch> >;
 template class art::Wrapper< std::vector<t962::Paddles>   >;
 template class art::Wrapper< std::vector<t962::ScanInfo>   >;
+template class art::Wrapper< art::Assns<recob::Track, t962::MINOS, void> >;
