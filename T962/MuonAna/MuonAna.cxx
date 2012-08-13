@@ -63,9 +63,12 @@ namespace muons {
       // get access to the TFile service  
       art::ServiceHandle<art::TFileService> tfs;
 
-      fCosX_start = tfs->make<TH1F>("fCosX_start","Start Cos X", 180,0.0,180.0);
-      fCosY_start = tfs->make<TH1F>("fCosY_start","Start Cos Y", 180,0.0,180.0);
-      fCosZ_start = tfs->make<TH1F>("fCosZ_start","Start Cos Z", 180,0.0,180.0);
+      fDirX_start = tfs->make<TH1F>("fDirX_start","Start Dir X", 180,0.0,180.0);
+      fDirY_start = tfs->make<TH1F>("fDirY_start","Start Dir Y", 180,0.0,180.0);
+      fDirZ_start = tfs->make<TH1F>("fDirZ_start","Start Dir Z", 180,0.0,180.0);
+      fCosX_start = tfs->make<TH1F>("fCosX_start","Start Cos X", 100,-1.0,1.0);
+      fCosY_start = tfs->make<TH1F>("fCosY_start","Start Cos Y", 100,-1.0,1.0);
+      fCosZ_start = tfs->make<TH1F>("fCosZ_start","Start Cos Z", 100,-1.0,1.0);
       fX_start = tfs->make<TH1F>("fX_start","Start X", 220,-5.0,50.0);
       fY_start = tfs->make<TH1F>("fY_start","Start Y", 200,-25.0,25.0);
       fZ_start = tfs->make<TH1F>("fZ_start","Start Z", 400,-5.0,95.0);
@@ -85,9 +88,12 @@ namespace muons {
       fEndZvsEndY = tfs->make<TH2F>("fEndZvsEndY","End Z vs. Y", 400,-5.0,95.0,200,-25.0,25.0);
 
       //TG Muons matched to Pos./Neg. MINOS tracks
-      fCosX_start_Pos = tfs->make<TH1F>("fCosX_start_Pos","Start Cos X Pos", 180,0.0,180.0);
-      fCosY_start_Pos = tfs->make<TH1F>("fCosY_start_Pos","Start Cos Y Pos", 180,0.0,180.0);
-      fCosZ_start_Pos = tfs->make<TH1F>("fCosZ_start_Pos","Start Cos Z Pos", 180,0.0,180.0);
+      fDirX_start_Pos = tfs->make<TH1F>("fDirX_start_Pos","Start Dir X Pos", 180,0.0,180.0);
+      fDirY_start_Pos = tfs->make<TH1F>("fDirY_start_Pos","Start Dir Y Pos", 180,0.0,180.0);
+      fDirZ_start_Pos = tfs->make<TH1F>("fDirZ_start_Pos","Start Dir Z Pos", 180,0.0,180.0);
+      fCosX_start_Pos = tfs->make<TH1F>("fCosX_start_Pos","Start Cos X Pos", 100,-1.0,1.0);
+      fCosY_start_Pos = tfs->make<TH1F>("fCosY_start_Pos","Start Cos Y Pos", 100,-1.0,1.0);
+      fCosZ_start_Pos = tfs->make<TH1F>("fCosZ_start_Pos","Start Cos Z Pos", 100,-1.0,1.0);
       fX_start_Pos = tfs->make<TH1F>("fX_start_Pos","Start X Pos", 220,-5.0,50.0);
       fY_start_Pos = tfs->make<TH1F>("fY_start_Pos","Start Y Pos", 200,-25.0,25.0);
       fZ_start_Pos = tfs->make<TH1F>("fZ_start_Pos","Start Z Pos", 400,-5.0,95.0);
@@ -109,11 +115,25 @@ namespace muons {
       fMinosY_Pos = tfs->make<TH1F>("fMinosY_Pos","Minos Vtx Y Pos",300,-150.0,150.0);
       fMinosZ_Pos = tfs->make<TH1F>("fMinosZ_Pos","Minos Vtx Z Pos",150,-50.0,100.0);
       fMinosXY_Pos = tfs->make<TH2F>("fMinosXY_Pos","Minos Vtx X vs. Y Pos",600,-300.0,300.0,300,-150.0,150.0);
-   
-
-      fCosX_start_Neg = tfs->make<TH1F>("fCosX_start_Neg","Start Cos X Neg", 180,0.0,180.0);
-      fCosY_start_Neg = tfs->make<TH1F>("fCosY_start_Neg","Start Cos Y Neg", 180,0.0,180.0);
-      fCosZ_start_Neg = tfs->make<TH1F>("fCosZ_start_Neg","Start Cos Z Neg", 180,0.0,180.0);
+      fDirX_MINOS_start_Pos = tfs->make<TH1F>("fDirX_MINOS_start_Pos","MINOS Start Dir X Pos", 180,0.0,180.0);
+      fDirY_MINOS_start_Pos = tfs->make<TH1F>("fDirY_MINOS_start_Pos","MINOS Start Dir Y Pos", 180,0.0,180.0);
+      fDirZ_MINOS_start_Pos = tfs->make<TH1F>("fDirZ_MINOS_start_Pos","MINOS Start Dir Z Pos", 180,0.0,180.0);
+      fCosX_MINOS_start_Pos = tfs->make<TH1F>("fCosX_MINOS_start_Pos","MINOS Start Cos X Pos", 100,-1.0,1.0);
+      fCosY_MINOS_start_Pos = tfs->make<TH1F>("fCosY_MINOS_start_Pos","MINOS Start Cos Y Pos", 100,-1.0,1.0);
+      fCosZ_MINOS_start_Pos = tfs->make<TH1F>("fCosZ_MINOS_start_Pos","MINOS Start Cos Z Pos", 100,-1.0,1.0);
+      fDiffDirX_Pos = tfs->make<TH1F>("fDiffDirX_Pos","Diff Dir X Pos", 360,-180.0,180.0);
+      fDiffDirY_Pos = tfs->make<TH1F>("fDiffDirY_Pos","Diff Dir Y Pos", 360,-180.0,180.0);
+      fDiffDirZ_Pos = tfs->make<TH1F>("fDiffDirZ_Pos","Diff Dir Z Pos", 360,-180.0,180.0);
+      fDiffCosX_Pos = tfs->make<TH1F>("fDiffCosX_Pos","Diff Cos X Pos", 400,-2.0,2.0);
+      fDiffCosY_Pos = tfs->make<TH1F>("fDiffCosY_Pos","Diff Cos Y Pos", 400,-2.0,2.0);
+      fDiffCosZ_Pos = tfs->make<TH1F>("fDiffCosZ_Pos","Diff Cos Z Pos", 400,-2.0,2.0);
+      
+      fDirX_start_Neg = tfs->make<TH1F>("fDirX_start_Neg","Start Dir X Neg", 180,0.0,180.0);
+      fDirY_start_Neg = tfs->make<TH1F>("fDirY_start_Neg","Start Dir Y Neg", 180,0.0,180.0);
+      fDirZ_start_Neg = tfs->make<TH1F>("fDirZ_start_Neg","Start Dir Z Neg", 180,0.0,180.0);
+      fCosX_start_Neg = tfs->make<TH1F>("fCosX_start_Neg","Start Cos X Neg", 100,-1.0,1.0);
+      fCosY_start_Neg = tfs->make<TH1F>("fCosY_start_Neg","Start Cos Y Neg", 100,-1.0,1.0);
+      fCosZ_start_Neg = tfs->make<TH1F>("fCosZ_start_Neg","Start Cos Z Neg", 100,-1.0,1.0);
       fX_start_Neg = tfs->make<TH1F>("fX_start_Neg","Start X Neg", 220,-5.0,50.0);
       fY_start_Neg = tfs->make<TH1F>("fY_start_Neg","Start Y Neg", 200,-25.0,25.0);
       fZ_start_Neg = tfs->make<TH1F>("fZ_start_Neg","Start Z Neg", 400,-5.0,95.0);
@@ -135,6 +155,18 @@ namespace muons {
       fMinosY_Neg = tfs->make<TH1F>("fMinosY_Neg","Minos Vtx Y Neg",300,-150.0,150.0);
       fMinosZ_Neg = tfs->make<TH1F>("fMinosZ_Neg","Minos Vtx Z Neg",150,-50.0,100.0);
       fMinosXY_Neg = tfs->make<TH2F>("fMinosXY_Neg","Minos Vtx X vs. Y Neg",600,-300.0,300.0,300,-150.0,150.0);
+      fDirX_MINOS_start_Neg = tfs->make<TH1F>("fDirX_MINOS_start_Neg","MINOS Start Dir X Neg", 180,0.0,180.0);
+      fDirY_MINOS_start_Neg = tfs->make<TH1F>("fDirY_MINOS_start_Neg","MINOS Start Dir Y Neg", 180,0.0,180.0);
+      fDirZ_MINOS_start_Neg = tfs->make<TH1F>("fDirZ_MINOS_start_Neg","MINOS Start Dir Z Neg", 180,0.0,180.0);
+      fCosX_MINOS_start_Neg = tfs->make<TH1F>("fCosX_MINOS_start_Neg","MINOS Start Cos X Neg", 100,-1.0,1.0);
+      fCosY_MINOS_start_Neg = tfs->make<TH1F>("fCosY_MINOS_start_Neg","MINOS Start Cos Y Neg", 100,-1.0,1.0);
+      fCosZ_MINOS_start_Neg = tfs->make<TH1F>("fCosZ_MINOS_start_Neg","MINOS Start Cos Z Neg", 100,-1.0,1.0);
+      fDiffDirX_Neg = tfs->make<TH1F>("fDiffDirX_Neg","Diff Dir X Neg", 360,-180.0,180.0);
+      fDiffDirY_Neg = tfs->make<TH1F>("fDiffDirY_Neg","Diff Dir Y Neg", 360,-180.0,180.0);
+      fDiffDirZ_Neg = tfs->make<TH1F>("fDiffDirZ_Neg","Diff Dir Z Neg", 360,-180.0,180.0);
+      fDiffCosX_Neg = tfs->make<TH1F>("fDiffCosX_Neg","Diff Cos X Neg", 400,-2.0,2.0);
+      fDiffCosY_Neg = tfs->make<TH1F>("fDiffCosY_Neg","Diff Cos Y Neg", 400,-2.0,2.0);
+      fDiffCosZ_Neg = tfs->make<TH1F>("fDiffCosZ_Neg","Diff Cos Z Neg", 400,-2.0,2.0);
 
       fMinosErange_Pos = tfs->make<TH1D>("fMinosErange_Pos","MINOS + Charge Tracks: Erange",5000,0.0,50.0);
       fMinosErange_Neg = tfs->make<TH1D>("fMinosErange_Neg","MINOS - Charge Tracks: Erange",5000,0.0,50.0);
@@ -178,9 +210,12 @@ namespace muons {
                                       (larStart[1]-larEnd[1])*(larStart[1]-larEnd[1]) +
                                       (larStart[2]-larEnd[2])*(larStart[2]-larEnd[2]));
 
-            fCosX_start->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
-            fCosY_start->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
-            fCosZ_start->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+            fDirX_start->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
+            fDirY_start->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
+            fDirZ_start->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+            fCosX_start->Fill(trackCosStart[0]);
+            fCosY_start->Fill(trackCosStart[1]);
+            fCosZ_start->Fill(trackCosStart[2]);
             fX_start->Fill(larStart[0]);
             fY_start->Fill(larStart[1]);
             fZ_start->Fill(larStart[2]);
@@ -202,9 +237,12 @@ namespace muons {
             if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
 
             if(fomatch.at(i).ref().fcharge==1){
-               fCosX_start_Pos->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
-               fCosY_start_Pos->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
-               fCosZ_start_Pos->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+               fDirX_start_Pos->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
+               fDirY_start_Pos->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
+               fDirZ_start_Pos->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+               fCosX_start_Pos->Fill(trackCosStart[0]);
+               fCosY_start_Pos->Fill(trackCosStart[1]);
+               fCosZ_start_Pos->Fill(trackCosStart[2]);
                fX_start_Pos->Fill(larStart[0]);
                fY_start_Pos->Fill(larStart[1]);
                fZ_start_Pos->Fill(larStart[2]);
@@ -226,6 +264,20 @@ namespace muons {
                fMinosY_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxY);
                fMinosZ_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxZ);
                fMinosXY_Pos->Fill(100.0*fomatch.at(i).ref().ftrkVtxX,100.0*fomatch.at(i).ref().ftrkVtxY);
+               fDirX_MINOS_start_Pos->Fill(TMath::ACos(fomatch.at(i).ref().ftrkdcosx)*180.0/TMath::Pi());
+               fDirY_MINOS_start_Pos->Fill(TMath::ACos(fomatch.at(i).ref().ftrkdcosy)*180.0/TMath::Pi());
+               fDirZ_MINOS_start_Pos->Fill(TMath::ACos(fomatch.at(i).ref().ftrkdcosz)*180.0/TMath::Pi());
+               fCosX_MINOS_start_Pos->Fill(fomatch.at(i).ref().ftrkdcosx);
+               fCosY_MINOS_start_Pos->Fill(fomatch.at(i).ref().ftrkdcosy);
+               fCosZ_MINOS_start_Pos->Fill(fomatch.at(i).ref().ftrkdcosz);
+               fDiffDirX_Pos->Fill((TMath::ACos(trackCosStart[0]) - TMath::ACos(fomatch.at(i).ref().ftrkdcosx))*180.0/TMath::Pi());
+               fDiffDirY_Pos->Fill((TMath::ACos(trackCosStart[1]) - TMath::ACos(fomatch.at(i).ref().ftrkdcosy))*180.0/TMath::Pi());
+               fDiffDirZ_Pos->Fill((TMath::ACos(trackCosStart[2]) - TMath::ACos(fomatch.at(i).ref().ftrkdcosz))*180.0/TMath::Pi());
+               fDiffCosX_Pos->Fill(  trackCosStart[0] - fomatch.at(i).ref().ftrkdcosx);
+               fDiffCosY_Pos->Fill(  trackCosStart[1] - fomatch.at(i).ref().ftrkdcosy);
+               fDiffCosZ_Pos->Fill(  trackCosStart[2] - fomatch.at(i).ref().ftrkdcosz);
+
+
                fMinosTrkChi2_Pos->Fill(fomatch.at(i).ref().ftrkChi2); 
                fMinosTrkChi2vNPoints_Pos->Fill(fomatch.at(i).ref().ftrkChi2,fomatch.at(i).ref().fntrkstp);
                            
@@ -237,9 +289,12 @@ namespace muons {
                else fMinosMom_Pos->Fill(fomatch.at(i).ref().ftrkmom);
             }
             if(fomatch.at(i).ref().fcharge==-1){
-               fCosX_start_Neg->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
-               fCosY_start_Neg->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
-               fCosZ_start_Neg->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+               fDirX_start_Neg->Fill(TMath::ACos(trackCosStart[0])*180.0/TMath::Pi());
+               fDirY_start_Neg->Fill(TMath::ACos(trackCosStart[1])*180.0/TMath::Pi());
+               fDirZ_start_Neg->Fill(TMath::ACos(trackCosStart[2])*180.0/TMath::Pi());
+               fCosX_start_Neg->Fill(trackCosStart[0]);
+               fCosY_start_Neg->Fill(trackCosStart[1]);
+               fCosZ_start_Neg->Fill(trackCosStart[2]);
                fX_start_Neg->Fill(larStart[0]);
                fY_start_Neg->Fill(larStart[1]);
                fZ_start_Neg->Fill(larStart[2]);
@@ -261,6 +316,19 @@ namespace muons {
                fMinosY_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxY);
                fMinosZ_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxZ);
                fMinosXY_Neg->Fill(100.0*fomatch.at(i).ref().ftrkVtxX,100.0*fomatch.at(i).ref().ftrkVtxY);
+               fDirX_MINOS_start_Neg->Fill(TMath::ACos(fomatch.at(i).ref().ftrkdcosx)*180.0/TMath::Pi());
+               fDirY_MINOS_start_Neg->Fill(TMath::ACos(fomatch.at(i).ref().ftrkdcosy)*180.0/TMath::Pi());
+               fDirZ_MINOS_start_Neg->Fill(TMath::ACos(fomatch.at(i).ref().ftrkdcosz)*180.0/TMath::Pi());
+               fCosX_MINOS_start_Neg->Fill(fomatch.at(i).ref().ftrkdcosx);
+               fCosY_MINOS_start_Neg->Fill(fomatch.at(i).ref().ftrkdcosy);
+               fCosZ_MINOS_start_Neg->Fill(fomatch.at(i).ref().ftrkdcosz);
+               fDiffDirX_Neg->Fill((TMath::ACos(trackCosStart[0]) - TMath::ACos(fomatch.at(i).ref().ftrkdcosx))*180.0/TMath::Pi());
+               fDiffDirY_Neg->Fill((TMath::ACos(trackCosStart[1]) - TMath::ACos(fomatch.at(i).ref().ftrkdcosy))*180.0/TMath::Pi());
+               fDiffDirZ_Neg->Fill((TMath::ACos(trackCosStart[2]) - TMath::ACos(fomatch.at(i).ref().ftrkdcosz))*180.0/TMath::Pi());
+               fDiffCosX_Neg->Fill(  trackCosStart[0] - fomatch.at(i).ref().ftrkdcosx);
+               fDiffCosY_Neg->Fill(  trackCosStart[1] - fomatch.at(i).ref().ftrkdcosy);
+               fDiffCosZ_Neg->Fill(  trackCosStart[2] - fomatch.at(i).ref().ftrkdcosz);
+
                fMinosTrkChi2_Neg->Fill(fomatch.at(i).ref().ftrkChi2); 
                fMinosTrkChi2vNPoints_Neg->Fill(fomatch.at(i).ref().ftrkChi2,fomatch.at(i).ref().fntrkstp);
                            

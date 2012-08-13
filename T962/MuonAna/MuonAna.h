@@ -39,6 +39,9 @@ namespace muons {
    private:
        
       //plots for TG Muons
+      TH1F*  fDirX_start;
+      TH1F*  fDirY_start;
+      TH1F*  fDirZ_start;
       TH1F*  fCosX_start;
       TH1F*  fCosY_start;
       TH1F*  fCosZ_start;
@@ -61,6 +64,9 @@ namespace muons {
       TH2F*  fEndZvsEndY;
 
       //plots for TG Muons matched to a pos/neg MINOS track
+      TH1F*  fDirX_start_Pos;
+      TH1F*  fDirY_start_Pos;
+      TH1F*  fDirZ_start_Pos;
       TH1F*  fCosX_start_Pos;
       TH1F*  fCosY_start_Pos;
       TH1F*  fCosZ_start_Pos;
@@ -85,7 +91,22 @@ namespace muons {
       TH1F*  fMinosY_Pos;
       TH1F*  fMinosZ_Pos;
       TH2F*  fMinosXY_Pos;
+      TH1F*  fDirX_MINOS_start_Pos;
+      TH1F*  fDirY_MINOS_start_Pos;
+      TH1F*  fDirZ_MINOS_start_Pos;
+      TH1F*  fCosX_MINOS_start_Pos;
+      TH1F*  fCosY_MINOS_start_Pos;
+      TH1F*  fCosZ_MINOS_start_Pos;
+      TH1F*  fDiffDirX_Pos;
+      TH1F*  fDiffDirY_Pos;
+      TH1F*  fDiffDirZ_Pos;
+      TH1F*  fDiffCosX_Pos;
+      TH1F*  fDiffCosY_Pos;
+      TH1F*  fDiffCosZ_Pos;
 
+      TH1F*  fDirX_start_Neg;
+      TH1F*  fDirY_start_Neg;
+      TH1F*  fDirZ_start_Neg;
       TH1F*  fCosX_start_Neg;
       TH1F*  fCosY_start_Neg;
       TH1F*  fCosZ_start_Neg;
@@ -110,6 +131,18 @@ namespace muons {
       TH1F*  fMinosY_Neg;
       TH1F*  fMinosZ_Neg;
       TH2F*  fMinosXY_Neg;
+      TH1F*  fDirX_MINOS_start_Neg;
+      TH1F*  fDirY_MINOS_start_Neg;
+      TH1F*  fDirZ_MINOS_start_Neg;
+      TH1F*  fCosX_MINOS_start_Neg;
+      TH1F*  fCosY_MINOS_start_Neg;
+      TH1F*  fCosZ_MINOS_start_Neg;
+      TH1F*  fDiffDirX_Neg;
+      TH1F*  fDiffDirY_Neg;
+      TH1F*  fDiffDirZ_Neg;
+      TH1F*  fDiffCosX_Neg;
+      TH1F*  fDiffCosY_Neg;
+      TH1F*  fDiffCosZ_Neg;
 
       TH1D* fMinosErange_Pos;
       TH1D* fMinosErange_Neg;
