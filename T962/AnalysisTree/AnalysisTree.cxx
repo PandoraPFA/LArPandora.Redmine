@@ -18,6 +18,7 @@
 #include "TH1.h"
 #include "TSystem.h"
 #include "TString.h"
+#include "TTimeStamp.h"
 
 #include "art/Framework/Principal/Event.h" 
 #include "art/Framework/Principal/SubRun.h" 
@@ -85,6 +86,7 @@ void t962::AnalysisTree::beginJob()
   fTree = tfs->make<TTree>("anatree","analysis tree");
   fTree->Branch("run",&run,"run/I");
   fTree->Branch("event",&event,"event/I");
+  fTree->Branch("evttime",&evttime,"evttime/D");
   fTree->Branch("pot",&pot,"pot/D");
   fTree->Branch("isdata",&isdata,"isdata/I");
   fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
@@ -111,22 +113,6 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
-//  fTree->Branch("trackvtxx",&trackvtxx);
-//  fTree->Branch("trackvtxy",&trackvtxy);
-//  fTree->Branch("trackvtxz",&trackvtxz);
-//  fTree->Branch("trackendx",&trackendx);
-//  fTree->Branch("trackendy",&trackendy);
-//  fTree->Branch("trackendz",&trackendz);
-//  fTree->Branch("trackke",&trackke);
-//  fTree->Branch("trackrange",&trackrange);
-//  fTree->Branch("trackpid",&trackpid);
-//  fTree->Branch("trackpidndf",&trackpidndf);
-//  fTree->Branch("trackpidchi2",&trackpidchi2);
-//  fTree->Branch("trackpiddeltachi2",&trackpiddeltachi2);
-//  fTree->Branch("trackpidchi2pro",&trackpidchi2pro);
-//  fTree->Branch("trackpidchi2ka",&trackpidchi2ka);
-//  fTree->Branch("trackpidchi2pi",&trackpidchi2pi);
-//  fTree->Branch("trackpidchi2mu",&trackpidchi2mu);
   fTree->Branch("trkvtxx",trkvtxx,"trkvtxx[ntracks_reco]/D");
   fTree->Branch("trkvtxy",trkvtxy,"trkvtxy[ntracks_reco]/D");
   fTree->Branch("trkvtxz",trkvtxz,"trkvtxz[ntracks_reco]/D");
@@ -192,15 +178,6 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
   fTree->Branch("beamwgt",&beamwgt,"beamwgt/D");
 
-  //gSystem->Setenv("FW_SEARCH_PATH","${SRT_PRIVATE_CONTEXT}/T962/CCInclusiveMacro/:${SRT_PUBLIC_CONTEXT}/T962/CCInclusiveMacro/:${FW_SEARCH_PATH}");
-  //gSystem->Exec("echo ${FW_SEARCH_PATH}");
-  //cet::search_path sp("FW_SEARCH_PATH");
-  
-  //std::string fROOTfile;
-//  if( !sp.find_file("numu_numode_final.root", fROOTfile) )
-//    throw cet::exception("AnalysisTree") << "cannot find the root file: \n" 
-//					 << "numu_numode_final.root"
-//					 << "\n bail ungracefully.";
   TString filename = "numu_numode_final.root";
   const char *fROOTfile = gSystem->FindFile("${SRT_PRIVATE_CONTEXT}/T962/CCInclusiveMacro/:${SRT_PUBLIC_CONTEXT}/T962/CCInclusiveMacro/",filename);
 
@@ -238,6 +215,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   run = evt.run();
   event = evt.id().event();
   
+  art::Timestamp ts = evt.time();
+  TTimeStamp tts(ts.timeHigh(), ts.timeLow());
+  evttime = tts.AsDouble();
+
   if (evt.isRealData()){
     isdata = 1;
   }
@@ -284,77 +265,11 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fMINOSModuleLabel,minosListHandle))
     art::fill_ptr_vector(minoslist, minosListHandle);
 
-
-//  art::View< t962::MINOS > minosListHandle;
-//  evt.getView(fMINOSModuleLabel,minosListHandle);
-
-
-
   art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
   std::vector<art::Ptr<t962::ScanInfo> > scanlist;
   if (evt.getByLabel(fScanModuleLabel,scanListHandle))
     art::fill_ptr_vector(scanlist, scanListHandle);
 
-
-
-  /*
-  art::PtrVector<simb::MCTruth> mclist;
-  if(evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
-  for (unsigned int ii = 0; ii <  mctruthListHandle->size(); ++ii)
-    {
-      art::Ptr<simb::MCTruth> mctparticle(mctruthListHandle,ii);
-      mclist.push_back(mctparticle);
-    }
-
-  art::PtrVector<recob::Cluster> clusterlist;
-  if(evt.getByLabel(fClusterModuleLabel,clusterListHandle))
-  for (unsigned int ii = 0; ii <  clusterListHandle->size(); ++ii)
-    {
-      art::Ptr<recob::Cluster> clusterHolder(clusterListHandle,ii);
-      clusterlist.push_back(clusterHolder);
-    }
-
-  art::PtrVector<recob::Track> tracklist;
-  if(evt.getByLabel(fTrackModuleLabel,trackListHandle))
-  for (unsigned int i = 0; i < trackListHandle->size(); ++i){
-    art::Ptr<recob::Track> trackHolder(trackListHandle,i);
-    tracklist.push_back(trackHolder);
-  }
-
-  art::PtrVector<recob::EndPoint2D> endpointlist;
-  if(evt.getByLabel(fEndPoint2DModuleLabel,endpointListHandle))
-    for (unsigned int i = 0; i < endpointListHandle->size(); ++i){
-      art::Ptr<recob::EndPoint2D> endpointHolder(endpointListHandle,i);
-      endpointlist.push_back(endpointHolder);
-    }
-
-  art::PtrVector<recob::Vertex> vertexlist;
-  if(evt.getByLabel(fVertexModuleLabel,vertexListHandle))
-  for (unsigned int i = 0; i < vertexListHandle->size(); ++i){
-    art::Ptr<recob::Vertex> vertexHolder(vertexListHandle,i);
-    vertexlist.push_back(vertexHolder);
-  }
-
-  art::PtrVector<t962::MINOS> minoslist;
-  //std::vector<const t962::MINOS*> minoslist;
-  if(evt.getByLabel(fMINOSModuleLabel,minosListHandle))
-    for (unsigned int i = 0; i < minosListHandle->size(); i++){
-      //for (unsigned int i = 0; i < minosListHandle.vals().size(); i++){
-      art::Ptr<t962::MINOS> minosHolder(minosListHandle,i);
-      minoslist.push_back(minosHolder);
-     //minoslist.push_back((t962::MINOS*)(minosListHandle.vals()[i]));
-      //minoslist.push_back(&minosListHandle->at(i));
-    }
-
- 
-  
-   art::PtrVector<t962::ScanInfo> scanlist;
-  if(evt.getByLabel(fScanModuleLabel,scanListHandle))
-  for (unsigned int i = 0; i < scanListHandle->size(); i++){
-    art::Ptr<t962::ScanInfo> scanHolder(scanListHandle,i);
-    scanlist.push_back(scanHolder);
-  }
-  */
 
   art::ServiceHandle<geo::Geometry> geom;  
   
@@ -454,11 +369,11 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   for(unsigned int i = 0; i < tracklist.size(); i++)
     {
 
-       if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
-       ++nmatched_reco;
-	  
-
-	      
+      if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
+      ++nmatched_reco;
+      
+      
+      
        if(fomatch.at(i).ref().ftrkcontained)
           trk_mom_minos = fomatch.at(i).ref().ftrkErange;
        else
@@ -639,6 +554,7 @@ void t962::AnalysisTree::ResetVars(){
 
   run = -99999;
   event = -99999;
+  evttime = -99999;
   isdata = -99999;
   vtxx_reco = -99999;
   vtxy_reco  = -99999;
@@ -709,22 +625,6 @@ void t962::AnalysisTree::ResetVars(){
   lep_dcosy_truth = -99999;
   lep_dcosz_truth = -99999;
   beamwgt = -99999;
-//  trackvtxx.clear();
-//  trackvtxy.clear();
-//  trackvtxz.clear();
-//  trackendx.clear();
-//  trackendy.clear();
-//  trackendz.clear();
-//  trackke.clear();
-//  trackrange.clear();
-//  trackpid.clear();
-//  trackpidndf.clear();
-//  trackpidchi2.clear();
-//  trackpiddeltachi2.clear();
-//  trackpidchi2pro.clear();
-//  trackpidchi2ka.clear();
-//  trackpidchi2pi.clear();
-//  trackpidchi2mu.clear();
   for (int i = 0; i < kMaxTrack; i++){
     trkvtxx[i] = -99999;
     trkvtxy[i] = -99999;

@@ -51,6 +51,7 @@ namespace t962 {
     //run information
     int run;
     int event;
+    double evttime;
     double pot;
     int isdata;
     //reconstructed information    
@@ -78,22 +79,6 @@ namespace t962 {
     double trackexit_dcosx_reco;
     double trackexit_dcosy_reco;
     double trackexit_dcosz_reco;   
-//    std::vector<double> trackvtxx;
-//    std::vector<double> trackvtxy;
-//    std::vector<double> trackvtxz;
-//    std::vector<double> trackendx;
-//    std::vector<double> trackendy;
-//    std::vector<double> trackendz;
-//    std::vector<double> trackke;
-//    std::vector<double> trackrange;
-//    std::vector<int> trackpid;
-//    std::vector<int> trackpidndf;
-//    std::vector<double> trackpidchi2;
-//    std::vector<double> trackpiddeltachi2;
-//    std::vector<double> trackpidchi2pro;
-//    std::vector<double> trackpidchi2ka;
-//    std::vector<double> trackpidchi2pi;
-//    std::vector<double> trackpidchi2mu;
     double trkvtxx[kMaxTrack];
     double trkvtxy[kMaxTrack];
     double trkvtxz[kMaxTrack];
