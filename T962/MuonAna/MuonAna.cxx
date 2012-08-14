@@ -121,12 +121,12 @@ namespace muons {
       fCosX_MINOS_start_Pos = tfs->make<TH1F>("fCosX_MINOS_start_Pos","MINOS Start Cos X Pos", 100,-1.0,1.0);
       fCosY_MINOS_start_Pos = tfs->make<TH1F>("fCosY_MINOS_start_Pos","MINOS Start Cos Y Pos", 100,-1.0,1.0);
       fCosZ_MINOS_start_Pos = tfs->make<TH1F>("fCosZ_MINOS_start_Pos","MINOS Start Cos Z Pos", 100,-1.0,1.0);
-      fDiffDirX_Pos = tfs->make<TH1F>("fDiffDirX_Pos","Diff Dir X Pos", 360,-180.0,180.0);
-      fDiffDirY_Pos = tfs->make<TH1F>("fDiffDirY_Pos","Diff Dir Y Pos", 360,-180.0,180.0);
-      fDiffDirZ_Pos = tfs->make<TH1F>("fDiffDirZ_Pos","Diff Dir Z Pos", 360,-180.0,180.0);
-      fDiffCosX_Pos = tfs->make<TH1F>("fDiffCosX_Pos","Diff Cos X Pos", 400,-2.0,2.0);
-      fDiffCosY_Pos = tfs->make<TH1F>("fDiffCosY_Pos","Diff Cos Y Pos", 400,-2.0,2.0);
-      fDiffCosZ_Pos = tfs->make<TH1F>("fDiffCosZ_Pos","Diff Cos Z Pos", 400,-2.0,2.0);
+      fDiffDirX_Pos = tfs->make<TH1F>("fDiffDirX_Pos","Diff Dir X Pos", 720,-180.0,180.0);
+      fDiffDirY_Pos = tfs->make<TH1F>("fDiffDirY_Pos","Diff Dir Y Pos", 720,-180.0,180.0);
+      fDiffDirZ_Pos = tfs->make<TH1F>("fDiffDirZ_Pos","Diff Dir Z Pos", 720,-180.0,180.0);
+      fDiffCosX_Pos = tfs->make<TH1F>("fDiffCosX_Pos","Diff Cos X Pos", 800,-2.0,2.0);
+      fDiffCosY_Pos = tfs->make<TH1F>("fDiffCosY_Pos","Diff Cos Y Pos", 800,-2.0,2.0);
+      fDiffCosZ_Pos = tfs->make<TH1F>("fDiffCosZ_Pos","Diff Cos Z Pos", 800,-2.0,2.0);
       
       fDirX_start_Neg = tfs->make<TH1F>("fDirX_start_Neg","Start Dir X Neg", 180,0.0,180.0);
       fDirY_start_Neg = tfs->make<TH1F>("fDirY_start_Neg","Start Dir Y Neg", 180,0.0,180.0);
@@ -161,12 +161,12 @@ namespace muons {
       fCosX_MINOS_start_Neg = tfs->make<TH1F>("fCosX_MINOS_start_Neg","MINOS Start Cos X Neg", 100,-1.0,1.0);
       fCosY_MINOS_start_Neg = tfs->make<TH1F>("fCosY_MINOS_start_Neg","MINOS Start Cos Y Neg", 100,-1.0,1.0);
       fCosZ_MINOS_start_Neg = tfs->make<TH1F>("fCosZ_MINOS_start_Neg","MINOS Start Cos Z Neg", 100,-1.0,1.0);
-      fDiffDirX_Neg = tfs->make<TH1F>("fDiffDirX_Neg","Diff Dir X Neg", 360,-180.0,180.0);
-      fDiffDirY_Neg = tfs->make<TH1F>("fDiffDirY_Neg","Diff Dir Y Neg", 360,-180.0,180.0);
-      fDiffDirZ_Neg = tfs->make<TH1F>("fDiffDirZ_Neg","Diff Dir Z Neg", 360,-180.0,180.0);
-      fDiffCosX_Neg = tfs->make<TH1F>("fDiffCosX_Neg","Diff Cos X Neg", 400,-2.0,2.0);
-      fDiffCosY_Neg = tfs->make<TH1F>("fDiffCosY_Neg","Diff Cos Y Neg", 400,-2.0,2.0);
-      fDiffCosZ_Neg = tfs->make<TH1F>("fDiffCosZ_Neg","Diff Cos Z Neg", 400,-2.0,2.0);
+      fDiffDirX_Neg = tfs->make<TH1F>("fDiffDirX_Neg","Diff Dir X Neg", 720,-180.0,180.0);
+      fDiffDirY_Neg = tfs->make<TH1F>("fDiffDirY_Neg","Diff Dir Y Neg", 720,-180.0,180.0);
+      fDiffDirZ_Neg = tfs->make<TH1F>("fDiffDirZ_Neg","Diff Dir Z Neg", 720,-180.0,180.0);
+      fDiffCosX_Neg = tfs->make<TH1F>("fDiffCosX_Neg","Diff Cos X Neg", 800,-2.0,2.0);
+      fDiffCosY_Neg = tfs->make<TH1F>("fDiffCosY_Neg","Diff Cos Y Neg", 800,-2.0,2.0);
+      fDiffCosZ_Neg = tfs->make<TH1F>("fDiffCosZ_Neg","Diff Cos Z Neg", 800,-2.0,2.0);
 
       fMinosErange_Pos = tfs->make<TH1D>("fMinosErange_Pos","MINOS + Charge Tracks: Erange",5000,0.0,50.0);
       fMinosErange_Neg = tfs->make<TH1D>("fMinosErange_Neg","MINOS - Charge Tracks: Erange",5000,0.0,50.0);
