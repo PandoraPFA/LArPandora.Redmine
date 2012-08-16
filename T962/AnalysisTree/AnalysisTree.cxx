@@ -124,6 +124,12 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trkenddcosx",trkenddcosx,"trkenddcosx[ntracks_reco]/D");
   fTree->Branch("trkenddcosy",trkenddcosy,"trkenddcosy[ntracks_reco]/D");
   fTree->Branch("trkenddcosz",trkenddcosz,"trkenddcosz[ntracks_reco]/D");
+  fTree->Branch("trktruepdgu",trktruepdgu,"trktruepdgu[ntracks_reco]/I");
+  fTree->Branch("trktrueeffu",trktrueeffu,"trktrueeffu[ntracks_reco]/D");
+  fTree->Branch("trktruepuru",trktruepuru,"trktruepuru[ntracks_reco]/D");
+  fTree->Branch("trktruepdgv",trktruepdgv,"trktruepdgv[ntracks_reco]/I");
+  fTree->Branch("trktrueeffv",trktrueeffv,"trktrueeffv[ntracks_reco]/D");
+  fTree->Branch("trktruepurv",trktruepurv,"trktruepurv[ntracks_reco]/D");  
   fTree->Branch("trkke",trkke,"trkke[ntracks_reco]/D");
   fTree->Branch("trkrange",trkrange,"trkrange[ntracks_reco]/D");
   fTree->Branch("trkpid",trkpid,"trkpid[ntracks_reco]/I");
@@ -271,7 +277,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 
 
   art::ServiceHandle<geo::Geometry> geom;  
-  
+  art::ServiceHandle<cheat::BackTracker> bt;
+
   //vertex information
   if(vertexlist.size())
   {
@@ -355,7 +362,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
 
   test_charge_minos=0.;
-  
+  std::cout<<test_charge_minos<<std::endl;
   for(unsigned int j = 0; j < minoslist.size(); j++)
     { 
       if (!isdata)
@@ -466,9 +473,23 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
     int trkid;
     double purity;
-    HitsPurity(hitsU, trkid, purity);
-    std::cout<<trkid<<" "<<purity<<std::endl;
-    
+    double maxe;
+    HitsPurity(hitsU, trkid, purity, maxe);
+    trktruepuru[i] = purity;
+    if (trkid>-1){
+      const sim::Particle *particle = bt->TrackIDToParticle(trkid);
+      //std::cout<<trkid<<" "<<purity<<" "<<maxe<<" "<<particle->PdgCode()<<" "<<particle->E()<<std::endl;
+      trktruepdgu[i] = particle->PdgCode();
+      trktrueeffu[i] = maxe/(particle->E()*1000);
+    }
+    HitsPurity(hitsV, trkid, purity, maxe);
+    trktruepurv[i] = purity;
+    if (trkid>-1){
+      const sim::Particle *particle = bt->TrackIDToParticle(trkid);
+      //std::cout<<trkid<<" "<<purity<<" "<<maxe<<" "<<particle->PdgCode()<<" "<<particle->E()<<std::endl;
+      trktruepdgv[i] = particle->PdgCode();
+      trktrueeffv[i] = maxe/(particle->E()*1000);
+    }
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
@@ -563,7 +584,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   fTree->Fill();
 }
 
-void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity){
+void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity, double& maxe){
 
   trackid = -1;
   purity = -1;
@@ -582,7 +603,7 @@ void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& h
     }
   }
 
-  double maxe = -1;
+  maxe = -1;
   double tote = 0;
   for (std::map<int,double>::iterator ii = trkide.begin(); ii!=trkide.end(); ++ii){
     tote += ii->second;
@@ -693,6 +714,12 @@ void t962::AnalysisTree::ResetVars(){
     trkpidchi2[i] = -99999;
     trkmissinge[i] = -99999;
     trkmissingeavg[i] = -99999;
+    trktruepdgu[i] = -99999;
+    trktrueeffu[i] = -99999;
+    trktruepuru[i] = -99999;
+    trktruepdgv[i] = -99999;
+    trktrueeffv[i] = -99999;
+    trktruepurv[i] = -99999;
   }    
   
 }

@@ -45,7 +45,7 @@ namespace t962 {
   
   private:
     
-    void HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity);
+    void HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity, double& maxe);
     void ResetVars();
 
     TTree* fTree;
@@ -99,6 +99,12 @@ namespace t962 {
     double trkpidchi2[kMaxTrack];
     double trkmissinge[kMaxTrack];
     double trkmissingeavg[kMaxTrack];
+    int    trktruepdgu[kMaxTrack];
+    double trktrueeffu[kMaxTrack];
+    double trktruepuru[kMaxTrack];
+    int    trktruepdgv[kMaxTrack];
+    double trktrueeffv[kMaxTrack];
+    double trktruepurv[kMaxTrack];
     //matching information
     int nmatched_reco;        //number of matched tracks
     double trk_mom_minos;
