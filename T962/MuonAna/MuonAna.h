@@ -10,6 +10,7 @@
 
 #include "art/Persistency/Common/Ptr.h"
 #include "RecoBase/Track.h"
+#include "T962/T962_Objects/MINOS.h"
 
 #include "Utilities/LArProperties.h"
 
@@ -35,6 +36,8 @@ namespace muons {
 
       bool BeginsOnBoundary(art::Ptr<recob::Track> lar_track);
       bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
+      void Compare(art::Ptr<recob::Track> lar_track, t962::MINOS minos_track,   
+                     double &dx, double &dy, double &rdiff);
         
    private:
        
@@ -103,6 +106,9 @@ namespace muons {
       TH1F*  fDiffCosX_Pos;
       TH1F*  fDiffCosY_Pos;
       TH1F*  fDiffCosZ_Pos;
+      TH1F*  fDiffX_Pos;
+      TH1F*  fDiffY_Pos;
+      TH1F*  fDiffR_Pos;
 
       TH1F*  fDirX_start_Neg;
       TH1F*  fDirY_start_Neg;
@@ -143,6 +149,9 @@ namespace muons {
       TH1F*  fDiffCosX_Neg;
       TH1F*  fDiffCosY_Neg;
       TH1F*  fDiffCosZ_Neg;
+      TH1F*  fDiffX_Neg;
+      TH1F*  fDiffY_Neg;
+      TH1F*  fDiffR_Neg;
 
       TH1D* fMinosErange_Pos;
       TH1D* fMinosErange_Neg;
