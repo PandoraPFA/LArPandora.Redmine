@@ -40,14 +40,13 @@
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
-#include "RecoBase/recobase.h"
 #include "AnalysisBase/anabase.h"
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "SummaryData/summary.h"
 #include "Simulation/SimListUtils.h"
-
+#include "MCCheater/BackTracker.h"
  
 //-------------------------------------------------
 t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) : 
@@ -413,6 +412,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   int n_endonboundarytracks=0;
   art::FindOne<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
   art::FindOne<anab::ParticleID>  fopid(trackListHandle, evt, fParticleIDModuleLabel);
+  art::FindManyP<recob::Hit>      fmht(trackListHandle, evt, fTrackModuleLabel);
+
   for(unsigned int i=0; i<tracklist.size();++i){
     trackStart.clear();
     trackEnd.clear();
@@ -455,6 +456,19 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       trkmissinge[i]    = fopid.at(i).ref().MissingE();
       trkmissingeavg[i] = fopid.at(i).ref().MissingEavg();
     }
+    // get the hits in each view
+    std::vector< art::Ptr<recob::Hit> > allHits = fmht.at(i);
+    std::vector< art::Ptr<recob::Hit> > hitsU;
+    std::vector< art::Ptr<recob::Hit> > hitsV;
+    for(size_t ah = 0; ah < allHits.size(); ++ah){
+      if     (allHits[ah]->View() == geo::kU) hitsU.push_back(allHits[ah]);
+      else if(allHits[ah]->View() == geo::kV) hitsV.push_back(allHits[ah]);
+    }
+    int trkid;
+    double purity;
+    HitsPurity(hitsU, trkid, purity);
+    std::cout<<trkid<<" "<<purity<<std::endl;
+    
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
@@ -547,6 +561,40 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
   }
   fTree->Fill();
+}
+
+void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity){
+
+  trackid = -1;
+  purity = -1;
+  
+  art::ServiceHandle<cheat::BackTracker> bt;
+  
+  std::map<int,double> trkide;
+
+  for(size_t h = 0; h < hits.size(); ++h){
+
+    art::Ptr<recob::Hit> hit = hits[h];
+    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hit);
+
+    for(size_t e = 0; e < eveIDs.size(); ++e){
+      trkide[eveIDs[e].trackID] += eveIDs[e].energy;
+    }
+  }
+
+  double maxe = -1;
+  double tote = 0;
+  for (std::map<int,double>::iterator ii = trkide.begin(); ii!=trkide.end(); ++ii){
+    tote += ii->second;
+    if ((ii->second)>maxe){
+      maxe = ii->second;
+      trackid = ii->first;
+    }
+  }
+  
+  if (tote>0){
+    purity = maxe/tote;
+  }
 }
 
   //---------------------------------------------------------------- 

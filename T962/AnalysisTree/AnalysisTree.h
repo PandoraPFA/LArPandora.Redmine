@@ -9,7 +9,7 @@
 #define ANALYSISTREE_H
 
 #include "art/Framework/Core/EDAnalyzer.h"
-#include "RecoBase/Track.h"
+#include "RecoBase/recobase.h"
 
 #include <vector>
 #include <string>
@@ -45,6 +45,7 @@ namespace t962 {
   
   private:
     
+    void HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity);
     void ResetVars();
 
     TTree* fTree;
