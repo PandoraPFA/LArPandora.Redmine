@@ -80,6 +80,8 @@ namespace t962 {
     double trackexit_dcosx_reco;
     double trackexit_dcosy_reco;
     double trackexit_dcosz_reco;   
+    double enu_reco;
+    int    nclupertrack_reco;
     double trkvtxx[kMaxTrack];
     double trkvtxy[kMaxTrack];
     double trkvtxz[kMaxTrack];
@@ -140,6 +142,7 @@ namespace t962 {
     double lep_dcosx_truth;
     double lep_dcosy_truth;
     double lep_dcosz_truth;
+    double mcevts_truth;
     double beamwgt;
     
     float mc_index_minos;
@@ -154,6 +157,8 @@ namespace t962 {
     double mc_vtxz_minos;
     int trkcontained_minos;
     int test_charge_minos;
+    double rdiff_minos;
+    double thetadiff_minos;
     int hitnuc_truth;
 
     std::string fDigitModuleLabel;

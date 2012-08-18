@@ -44,11 +44,36 @@
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
+#include "Utilities/DetectorProperties.h"
 #include "SummaryData/summary.h"
 #include "Simulation/SimListUtils.h"
 #include "MCCheater/BackTracker.h"
  
+const double MPi  = 0.1396;
+const double MPro = 0.938272;
+const double MMu  = 0.1057;
+double LifetimeCorrection(float time){
+
+   double t = time;
+
+   art::ServiceHandle<util::LArProperties> LArProp;
+   art::ServiceHandle<util::DetectorProperties> detprop;
+
+   double timetick = detprop->SamplingRate()*1.e-3;    //time sample in microsec
+   double presamplings = detprop->TriggerOffset();
+
+   t -= presamplings;
+   time = t * timetick;  //  (in microsec)
+
+   double tau = LArProp->ElectronLifetime();
+
+   double correction = exp(time/tau);
+   return correction;
+}
+
+
 //-------------------------------------------------
+
 t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) : 
   
   fDigitModuleLabel         (pset.get< std::string >("DigitModuleLabel")        ),
@@ -112,6 +137,8 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trackexit_x_reco",&trackexit_x_reco, "trackexit_x_reco/D");
   fTree->Branch("trackexit_y_reco",&trackexit_y_reco, "trackexit_y_reco/D");
   fTree->Branch("trackexit_z_reco",&trackexit_z_reco, "trackexit_z_reco/D");    
+  fTree->Branch("enu_reco",&enu_reco,"enu_reco/D");
+  fTree->Branch("nclupertrack_reco",&nclupertrack_reco,"nclupertrack_reco/I");
   fTree->Branch("trkvtxx",trkvtxx,"trkvtxx[ntracks_reco]/D");
   fTree->Branch("trkvtxy",trkvtxy,"trkvtxy[ntracks_reco]/D");
   fTree->Branch("trkvtxz",trkvtxz,"trkvtxz[ntracks_reco]/D");
@@ -124,12 +151,6 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trkenddcosx",trkenddcosx,"trkenddcosx[ntracks_reco]/D");
   fTree->Branch("trkenddcosy",trkenddcosy,"trkenddcosy[ntracks_reco]/D");
   fTree->Branch("trkenddcosz",trkenddcosz,"trkenddcosz[ntracks_reco]/D");
-  fTree->Branch("trktruepdgu",trktruepdgu,"trktruepdgu[ntracks_reco]/I");
-  fTree->Branch("trktrueeffu",trktrueeffu,"trktrueeffu[ntracks_reco]/D");
-  fTree->Branch("trktruepuru",trktruepuru,"trktruepuru[ntracks_reco]/D");
-  fTree->Branch("trktruepdgv",trktruepdgv,"trktruepdgv[ntracks_reco]/I");
-  fTree->Branch("trktrueeffv",trktrueeffv,"trktrueeffv[ntracks_reco]/D");
-  fTree->Branch("trktruepurv",trktruepurv,"trktruepurv[ntracks_reco]/D");  
   fTree->Branch("trkke",trkke,"trkke[ntracks_reco]/D");
   fTree->Branch("trkrange",trkrange,"trkrange[ntracks_reco]/D");
   fTree->Branch("trkpid",trkpid,"trkpid[ntracks_reco]/I");
@@ -137,6 +158,12 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trkpidchi2",trkpidchi2,"trkpidchi2[ntracks_reco]/D");
   fTree->Branch("trkmissinge",trkmissinge,"trkmissinge[ntracks_reco]/D");
   fTree->Branch("trkmissingeavg",trkmissingeavg,"trkmissingeavg[ntracks_reco]/D");
+  fTree->Branch("trktruepdgu",trktruepdgu,"trktruepdgu[ntracks_reco]/I");
+  fTree->Branch("trktrueeffu",trktrueeffu,"trktrueeffu[ntracks_reco]/D");
+  fTree->Branch("trktruepuru",trktruepuru,"trktruepuru[ntracks_reco]/D");
+  fTree->Branch("trktruepdgv",trktruepdgv,"trktruepdgv[ntracks_reco]/I");
+  fTree->Branch("trktrueeffv",trktrueeffv,"trktrueeffv[ntracks_reco]/D");
+  fTree->Branch("trktruepurv",trktruepurv,"trktruepurv[ntracks_reco]/D");  
   fTree->Branch("nmatched_reco",&nmatched_reco,"nmatched_reco/I");  
   fTree->Branch("trk_mom_minos",&trk_mom_minos,"trk_mom_minos/D");
   fTree->Branch("trk_charge_minos",&trk_charge_minos,"trk_charge_minos/D");
@@ -158,6 +185,8 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("mc_vtxz_minos",&mc_vtxz_minos,"mc_vtxz_minos/D");   
   fTree->Branch("trkcontained_minos",&trkcontained_minos,"trkcontained_minos/I");  
   fTree->Branch("test_charge_minos",&test_charge_minos,"test_charge_minos/I"); 
+  fTree->Branch("rdiff_minos",&rdiff_minos,"rdiff_minos/D");
+  fTree->Branch("thetadiff_minos",&thetadiff_minos,"thetadiff_minos/D");
   fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/D");
   fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/D");
   fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/D");
@@ -181,6 +210,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/D");
   fTree->Branch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/D");
   fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
+  fTree->Branch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
   fTree->Branch("beamwgt",&beamwgt,"beamwgt/D");
 
   TString filename = "numu_numode_final.root";
@@ -231,10 +261,15 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   
   art::Handle< std::vector<raw::RawDigit> > rdListHandle;
   evt.getByLabel(fDigitModuleLabel,rdListHandle);
+
   art::Handle< std::vector<sim::SimChannel> > scListHandle;
   evt.getByLabel(fDigitModuleLabel,scListHandle);
+
   art::Handle< std::vector<recob::Hit> > hitListHandle;
-  evt.getByLabel(fHitsModuleLabel,hitListHandle);
+  std::vector<art::Ptr<recob::Hit> > hitlist;
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle))
+    art::fill_ptr_vector(hitlist, hitListHandle);
+
   art::Handle< std::vector<recob::Wire> > wireListHandle;
   evt.getByLabel(fCalDataModuleLabel,wireListHandle);
 
@@ -278,6 +313,13 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 
   art::ServiceHandle<geo::Geometry> geom;  
   art::ServiceHandle<cheat::BackTracker> bt;
+  art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> LArProp;
+
+  // Electronic calibration factor to convert from ADC to electrons
+  double fElectronsToADC = detprop->ElectronsToADC();
+
+
 
   //vertex information
   if(vertexlist.size())
@@ -296,7 +338,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   int nplanes = geom->Nplanes();
   std::vector<int> Cls[nplanes];
 
-  for(unsigned int i=0; i<clusterlist.size();++i){
+  for(size_t i=0; i<clusterlist.size();++i){
     
     switch(clusterlist[i]->View()){
     case geo::kU :
@@ -356,13 +398,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
   }
 
-  //matching information  
-
-  //find matched MINOS information for each track
-  art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
-
+  
   test_charge_minos=0.;
-  std::cout<<test_charge_minos<<std::endl;
   for(unsigned int j = 0; j < minoslist.size(); j++)
     { 
       if (!isdata)
@@ -372,42 +409,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
         }
     }
   
-  for(unsigned int i = 0; i < tracklist.size(); i++)
-    {
-
-      if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
-      ++nmatched_reco;
-      
-      
-      
-       if(fomatch.at(i).ref().ftrkcontained)
-          trk_mom_minos = fomatch.at(i).ref().ftrkErange;
-       else
-          trk_mom_minos = fomatch.at(i).ref().ftrkmom;     
-       
-       trkcontained_minos = fomatch.at(i).ref().ftrkcontained; 
-       trk_charge_minos = fomatch.at(i).ref().fcharge;
-       trk_dcosx_minos = fomatch.at(i).ref().ftrkdcosx;
-       trk_dcosy_minos = fomatch.at(i).ref().ftrkdcosy;
-       trk_dcosz_minos = fomatch.at(i).ref().ftrkdcosz;
-       trk_vtxx_minos = fomatch.at(i).ref().ftrkVtxX;
-       trk_vtxy_minos = fomatch.at(i).ref().ftrkVtxY;
-       trk_vtxz_minos = fomatch.at(i).ref().ftrkVtxZ;        
-   
-       if (!isdata){       
-          mc_index_minos = fomatch.at(i).ref().fmcIndex;
-          mc_pdg_minos = fomatch.at(i).ref().fmcPDG;
-          mc_px_minos = fomatch.at(i).ref().fmcPx;
-          mc_py_minos = fomatch.at(i).ref().fmcPy;
-          mc_pz_minos = fomatch.at(i).ref().fmcPz;
-          mc_ene_minos = fomatch.at(i).ref().fmcEne;
-          mc_mass_minos = fomatch.at(i).ref().fmcMass;
-          mc_vtxx_minos = fomatch.at(i).ref().fmcVtxX;
-          mc_vtxy_minos = fomatch.at(i).ref().fmcVtxY;
-          mc_vtxz_minos = fomatch.at(i).ref().fmcVtxZ;
-       }
-    }
-
   //track information
   ntracks_reco=tracklist.size();
   double larStart[3];
@@ -420,7 +421,15 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   art::FindOne<anab::Calorimetry> focal(trackListHandle, evt, fCalorimetryModuleLabel);
   art::FindOne<anab::ParticleID>  fopid(trackListHandle, evt, fParticleIDModuleLabel);
   art::FindManyP<recob::Hit>      fmht(trackListHandle, evt, fTrackModuleLabel);
-
+  art::FindMany<recob::Track>     fmtk(hitListHandle, evt, fTrackModuleLabel);
+  art::FindMany<recob::Track>     fmtkcl(clusterListHandle, evt, fTrackModuleLabel);
+  
+  nclupertrack_reco = 0;
+  for(size_t i=0; i<clusterlist.size();++i){
+    if (int(fmtkcl.at(i).size())>nclupertrack_reco ){
+      nclupertrack_reco = fmtkcl.at(i).size();
+    }
+  }
   for(unsigned int i=0; i<tracklist.size();++i){
     trackStart.clear();
     trackEnd.clear();
@@ -478,49 +487,30 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     trktruepuru[i] = purity;
     if (trkid>-1){
       const sim::Particle *particle = bt->TrackIDToParticle(trkid);
-      //std::cout<<trkid<<" "<<purity<<" "<<maxe<<" "<<particle->PdgCode()<<" "<<particle->E()<<std::endl;
+      const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
+      double tote = 0;
+      for (size_t iide = 0; iide<vide.size(); ++iide){
+	tote += vide[iide].energy;
+      }
       trktruepdgu[i] = particle->PdgCode();
-      trktrueeffu[i] = maxe/(particle->E()*1000);
+      trktrueeffu[i] = maxe/(tote/2); //I believe tote include both induction and collection energies
     }
     HitsPurity(hitsV, trkid, purity, maxe);
     trktruepurv[i] = purity;
     if (trkid>-1){
       const sim::Particle *particle = bt->TrackIDToParticle(trkid);
-      //std::cout<<trkid<<" "<<purity<<" "<<maxe<<" "<<particle->PdgCode()<<" "<<particle->E()<<std::endl;
+      const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
+      double tote = 0;
+      for (size_t iide = 0; iide<vide.size(); ++iide){
+	tote += vide[iide].energy;
+      }
       trktruepdgv[i] = particle->PdgCode();
-      trktrueeffv[i] = maxe/(particle->E()*1000);
+      trktrueeffv[i] = maxe/(tote/2);
     }
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
-  
-  //grab information about where track started and ended and the dcos at those points
-  trackStart.clear();
-  trackEnd.clear();
-  memset(larStart, 0, 3);
-  memset(larEnd, 0, 3);
-  for(unsigned int i=0; i<tracklist.size();++i){
     
-     if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
-    
-    tracklist[i]->Direction(larStart,larEnd);
-    tracklist[i]->Extent(trackStart,trackEnd);  
-    
-    trackstart_dcosx_reco = larStart[0];
-    trackstart_dcosy_reco = larStart[1];
-    trackstart_dcosz_reco = larStart[2];       
-    trackexit_dcosx_reco = larEnd[0];
-    trackexit_dcosy_reco = larEnd[1];
-    trackexit_dcosz_reco = larEnd[2];
-    
-    trackstart_x_reco=trackStart[0];
-    trackstart_y_reco=trackStart[1];
-    trackstart_z_reco=trackStart[2];
-    trackexit_x_reco=trackEnd[0];
-    trackexit_y_reco=trackEnd[1];
-    trackexit_z_reco=trackEnd[2];  
-  }
-  
   //scan information (data only)
   double time= -99.;
   double y_vert=-99.;
@@ -556,22 +546,42 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       break;
     }
     //save neutrino interaction information
+    mcevts_truth = mclist.size();
     if (mclist[0]->NeutrinoSet()){
-      nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
-      ccnc_truth = mclist[0]->GetNeutrino().CCNC();
-      mode_truth = mclist[0]->GetNeutrino().Mode();
-      Q2_truth = mclist[0]->GetNeutrino().QSqr();
-      W_truth = mclist[0]->GetNeutrino().W();
-      hitnuc_truth = mclist[0]->GetNeutrino().HitNuc();
-      enu_truth = mclist[0]->GetNeutrino().Nu().E();
-      nuvtxx_truth = mclist[0]->GetNeutrino().Nu().Vx();
-      nuvtxy_truth = mclist[0]->GetNeutrino().Nu().Vy();
-      nuvtxz_truth = mclist[0]->GetNeutrino().Nu().Vz();
-      lep_mom_truth = mclist[0]->GetNeutrino().Lepton().P();
-      if (mclist[0]->GetNeutrino().Lepton().P()){
-	lep_dcosx_truth = mclist[0]->GetNeutrino().Lepton().Px()/mclist[0]->GetNeutrino().Lepton().P();
-	lep_dcosy_truth = mclist[0]->GetNeutrino().Lepton().Py()/mclist[0]->GetNeutrino().Lepton().P();
-	lep_dcosz_truth = mclist[0]->GetNeutrino().Lepton().Pz()/mclist[0]->GetNeutrino().Lepton().P();
+      std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+      for (size_t i = 0; i<hitlist.size(); i++){
+	if (hitlist[i]->View() == geo::kV){//collection view
+	  std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+	  for (size_t e = 0; e<eveIDs.size(); e++){
+	    art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+	    mctruthemap[mctruth]+=eveIDs[e].energy;
+	  }
+	}
+      }
+      art::Ptr<simb::MCTruth> mctruth = mclist[0];
+      double maxenergy = -1;
+      for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+	if ((ii->second)>maxenergy){
+	  maxenergy = ii->second;
+	  mctruth = ii->first;
+	}
+      }
+
+      nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
+      ccnc_truth = mctruth->GetNeutrino().CCNC();
+      mode_truth = mctruth->GetNeutrino().Mode();
+      Q2_truth = mctruth->GetNeutrino().QSqr();
+      W_truth = mctruth->GetNeutrino().W();
+      hitnuc_truth = mctruth->GetNeutrino().HitNuc();
+      enu_truth = mctruth->GetNeutrino().Nu().E();
+      nuvtxx_truth = mctruth->GetNeutrino().Nu().Vx();
+      nuvtxy_truth = mctruth->GetNeutrino().Nu().Vy();
+      nuvtxz_truth = mctruth->GetNeutrino().Nu().Vz();
+      lep_mom_truth = mctruth->GetNeutrino().Lepton().P();
+      if (mctruth->GetNeutrino().Lepton().P()){
+	lep_dcosx_truth = mctruth->GetNeutrino().Lepton().Px()/mctruth->GetNeutrino().Lepton().P();
+	lep_dcosy_truth = mctruth->GetNeutrino().Lepton().Py()/mctruth->GetNeutrino().Lepton().P();
+	lep_dcosz_truth = mctruth->GetNeutrino().Lepton().Pz()/mctruth->GetNeutrino().Lepton().P();
       }
       beamwgt = 1.;
       if (nuPDG_truth == 14){
@@ -581,6 +591,153 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       }
     }
   }
+  //minos matching information
+  try{
+  //find matched MINOS information for each track
+    nmatched_reco++;
+    art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
+    
+    //grab information about where track started and ended and the dcos at those points
+    trackStart.clear();
+    trackEnd.clear();
+    memset(larStart, 0, 3);
+    memset(larEnd, 0, 3);
+    int bestmatch = -1;
+    double totaldiffmin = 1e10;
+    for(size_t i=0; i<tracklist.size();++i){
+      
+      if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
+      ++nmatched_reco;
+
+      tracklist[i]->Direction(larStart,larEnd);
+      tracklist[i]->Extent(trackStart,trackEnd);  
+
+      double D=(90*0.5)+(42.4*2.54)-5.588; //distance from the front (upstream) of the TPC to the 1st Minos plane 
+                                           //(this minus number is the one we measured with Mitch)
+      
+      double x_offset=117.4; // previously 116.9;
+      double y_offset=19.3; // previously  20.28;
+
+      double dz = D - trackEnd[2]+(100.0 * fomatch.at(i).ref().ftrkVtxZ);//z-difference between end of T962 track and
+                                                                         //begin of MINOS track...in centimeters
+
+      double l = dz/(larEnd[2]);//3-d distance between end of T962 track and begin of MINOS track
+
+      double x_pred = l*larEnd[0]+trackEnd[0];//predicted x-pos. of T962 track at z-position equal to
+                                              //start of MINOS track
+      double y_pred = l*larEnd[1]+trackEnd[1];//predicted y-pos. of T962 track at z-position equal to
+                                              //start of MINOS track
+
+      double dx = 100.0*fomatch.at(i).ref().ftrkVtxX - x_offset - x_pred;
+      double dy = 100.0*fomatch.at(i).ref().ftrkVtxY + y_offset - y_pred;
+
+      double rdiff = sqrt(dx*dx + dy*dy);
+      double thetadiff = TMath::ACos((larEnd[0]*fomatch.at(i).ref().ftrkdcosx)+(larEnd[1]*fomatch.at(i).ref().ftrkdcosy)+(larEnd[2]*fomatch.at(i).ref().ftrkdcosz));
+      //totaldiff is a measure of the agreement between the ArgoNeuT projected track and the MINOS track based on radial distance and angle. totaldiff= rdiff/cos(theta)  
+      double totaldiff=fabs(rdiff/((larEnd[0]*fomatch.at(i).ref().ftrkdcosx)+(larEnd[1]*fomatch.at(i).ref().ftrkdcosy)+(larEnd[2]*fomatch.at(i).ref().ftrkdcosz)));
+      if (totaldiff<totaldiffmin){
+	totaldiffmin = totaldiff;
+	bestmatch = i;
+	rdiff_minos = rdiff;
+	thetadiff_minos = thetadiff;
+      }
+    }
+
+    if (bestmatch>-1){
+      trackStart.clear();
+      trackEnd.clear();
+      memset(larStart, 0, 3);
+      memset(larEnd, 0, 3);
+      
+      tracklist[bestmatch]->Direction(larStart,larEnd);
+      tracklist[bestmatch]->Extent(trackStart,trackEnd);  
+      
+      trackstart_dcosx_reco = larStart[0];
+      trackstart_dcosy_reco = larStart[1];
+      trackstart_dcosz_reco = larStart[2];       
+      trackexit_dcosx_reco = larEnd[0];
+      trackexit_dcosy_reco = larEnd[1];
+      trackexit_dcosz_reco = larEnd[2];
+      
+      trackstart_x_reco=trackStart[0];
+      trackstart_y_reco=trackStart[1];
+      trackstart_z_reco=trackStart[2];
+      trackexit_x_reco=trackEnd[0];
+      trackexit_y_reco=trackEnd[1];
+      trackexit_z_reco=trackEnd[2];  
+      
+      if(fomatch.at(bestmatch).ref().ftrkcontained)
+	trk_mom_minos = fomatch.at(bestmatch).ref().ftrkErange;
+      else
+	trk_mom_minos = fomatch.at(bestmatch).ref().ftrkmom;     
+      
+      trkcontained_minos = fomatch.at(bestmatch).ref().ftrkcontained; 
+      trk_charge_minos = fomatch.at(bestmatch).ref().fcharge;
+      trk_dcosx_minos = fomatch.at(bestmatch).ref().ftrkdcosx;
+      trk_dcosy_minos = fomatch.at(bestmatch).ref().ftrkdcosy;
+      trk_dcosz_minos = fomatch.at(bestmatch).ref().ftrkdcosz;
+      trk_vtxx_minos = fomatch.at(bestmatch).ref().ftrkVtxX;
+      trk_vtxy_minos = fomatch.at(bestmatch).ref().ftrkVtxY;
+      trk_vtxz_minos = fomatch.at(bestmatch).ref().ftrkVtxZ;        
+      
+      if (!isdata){       
+	mc_index_minos = fomatch.at(bestmatch).ref().fmcIndex;
+	mc_pdg_minos = fomatch.at(bestmatch).ref().fmcPDG;
+	mc_px_minos = fomatch.at(bestmatch).ref().fmcPx;
+	mc_py_minos = fomatch.at(bestmatch).ref().fmcPy;
+	mc_pz_minos = fomatch.at(bestmatch).ref().fmcPz;
+	mc_ene_minos = fomatch.at(bestmatch).ref().fmcEne;
+	mc_mass_minos = fomatch.at(bestmatch).ref().fmcMass;
+	mc_vtxx_minos = fomatch.at(bestmatch).ref().fmcVtxX;
+	mc_vtxy_minos = fomatch.at(bestmatch).ref().fmcVtxY;
+	mc_vtxz_minos = fomatch.at(bestmatch).ref().fmcVtxZ;
+      }
+
+      //Calculate event energy
+      enu_reco = 0;
+      //sum the energy of hits not associated with tracks
+      for(size_t i=0; i<hitlist.size();++i){
+	if (hitlist[i]->View() == geo::kV){//collection view
+	  //std::cout<<i<<" "<<fmtk.at(i).size()<<std::endl;
+	  if (fmtk.at(i).size()==0){//hit not on any tracks
+	    double time   = hitlist[i]->PeakTime();
+	    double MIPs   = hitlist[i]->Charge(true);   // in ADC
+	    double WirePitch = geom->WirePitch(0,1,1);
+	    double dQdx = MIPs/WirePitch;
+	    double dQdx_e = dQdx/fElectronsToADC;  // Conversion from ADC/cm to e/cm
+	    
+	    dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
+	    
+	    double dEdx = LArProp->BirksCorrection(dQdx_e);   // Correction for charge quenching (Recombination) dEdx in MeV/cm
+	    enu_reco += dEdx*WirePitch;
+	  }
+	}
+      }
+      enu_reco /= 1000;
+      enu_reco = enu_reco + MPi; //assuming pion mass
+      
+      //sum track energy except the muon
+      for(size_t i=0; i<tracklist.size();++i){
+	if (int(i)!=bestmatch){ //not the matched track
+	  double mass = MPi;  //default is pion mass
+	  if (trkpid[i] == 2212
+	      &&trkendx[i]>3&&trkendx[i]<44
+	      &&trkendy[i]>-16&&trkendy[i]<16
+	      &&trkendz[i]>6&&trkendz[i]<86) mass = MPro; //proton 
+	  if (trkke[i]>0){
+	    enu_reco += trkke[i]/1000+mass;
+	  }
+	}
+      }
+      
+      //add muon energy
+      enu_reco += sqrt(pow(trk_mom_minos,2)+pow(MMu,2));
+    }//if bestmatch>-1
+  }   
+  catch( cet::exception &e){
+    mf::LogWarning("AnalysisTree") << "caught exception " << e;
+  }
+
   fTree->Fill();
 }
 
@@ -596,9 +753,12 @@ void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& h
   for(size_t h = 0; h < hits.size(); ++h){
 
     art::Ptr<recob::Hit> hit = hits[h];
+    std::vector<sim::IDE> ides;
+    //bt->HitToSimIDEs(hit,ides);
     std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hit);
 
     for(size_t e = 0; e < eveIDs.size(); ++e){
+      //std::cout<<h<<" "<<e<<" "<<eveIDs[e].trackID<<" "<<eveIDs[e].energy<<" "<<eveIDs[e].energyFrac<<std::endl;
       trkide[eveIDs[e].trackID] += eveIDs[e].energy;
     }
   }
@@ -612,6 +772,7 @@ void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& h
       trackid = ii->first;
     }
   }
+  
   
   if (tote>0){
     purity = maxe/tote;
@@ -648,6 +809,8 @@ void t962::AnalysisTree::ResetVars(){
   trackexit_dcosx_reco = -99999;
   trackexit_dcosy_reco = -99999;
   trackexit_dcosz_reco = -99999;
+  enu_reco = -99999;
+  nclupertrack_reco = -99999;
   nmatched_reco = -99999;
   trk_mom_minos = -99999;
   trk_charge_minos = -99999;
@@ -670,6 +833,8 @@ void t962::AnalysisTree::ResetVars(){
   mc_vtxz_minos=-99999;
   test_charge_minos=-99999;
   trkcontained_minos=-99999;
+  rdiff_minos = 99999;
+  thetadiff_minos = 99999;
   vtxx_scan=-99999;
   vtxy_scan=-99999;
   vtxz_scan=-99999;
@@ -693,6 +858,7 @@ void t962::AnalysisTree::ResetVars(){
   lep_dcosx_truth = -99999;
   lep_dcosy_truth = -99999;
   lep_dcosz_truth = -99999;
+  mcevts_truth = -99999;
   beamwgt = -99999;
   for (int i = 0; i < kMaxTrack; i++){
     trkvtxx[i] = -99999;
