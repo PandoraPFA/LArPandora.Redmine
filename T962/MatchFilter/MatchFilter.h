@@ -21,7 +21,7 @@ namespace filt {
     
   public:
     
-    explicit MatchFilter(fhicl::ParameterSet const& ); 
+    explicit MatchFilter(fhicl::ParameterSet const& pset); 
     virtual ~MatchFilter();
          
     

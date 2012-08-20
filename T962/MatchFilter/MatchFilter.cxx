@@ -21,7 +21,7 @@
 
 
 //Larsoft Includes
-#include "MatchFilter.h"
+#include "T962/MatchFilter/MatchFilter.h"
 #include "T962/T962_Objects/classes.h"
 #include "RecoBase/recobase.h"
 
