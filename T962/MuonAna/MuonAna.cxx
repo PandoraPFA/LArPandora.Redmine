@@ -86,6 +86,8 @@ namespace muons {
       fEndXvsEndY = tfs->make<TH2F>("fEndXvsEndY","End X vs. Y", 220,-5.0,50.0,200,-25.0,25.0);
       fEndZvsEndX = tfs->make<TH2F>("fEndZvsEndX","End Z vs. X", 400,-5.0,95.0,220,-5.0,50.0);
       fEndZvsEndY = tfs->make<TH2F>("fEndZvsEndY","End Z vs. Y", 400,-5.0,95.0,200,-25.0,25.0);
+      fChannelVsHitAmplitude = tfs->make<TH2F>("fChannelVsHitAmplitude","Channel vs. Hit Amplitude",480,0.0,480.0,1000,0.0,200.0);
+      //fChannelVsHitAmplitude_Corrected = tfs->make<TH2F>("fChannelVsHitAmplitude_Corrected","Channel vs. Hit Amplitude, Lifetime",480,0.0,480.0,1000,0.0,200.0);
 
       //TG Muons matched to Pos./Neg. MINOS tracks
       fDirX_start_Pos = tfs->make<TH1F>("fDirX_start_Pos","Start Dir X Pos", 180,0.0,180.0);
@@ -130,6 +132,8 @@ namespace muons {
       fDiffX_Pos = tfs->make<TH1F>("fDiffX_Pos","Diff X Pos", 200, -100.0, 100.0);
       fDiffY_Pos = tfs->make<TH1F>("fDiffY_Pos","Diff Y Pos", 200, -100.0, 100.0);
       fDiffR_Pos = tfs->make<TH1F>("fDiffR_Pos","Diff R Pos", 200, 0.0, 200.0);
+      fChannelVsHitAmplitude_Pos = tfs->make<TH2F>("fChannelVsHitAmplitude_Pos","Channel vs. Hit Amplitude Pos",480,0.0,480.0,1000,0.0,200.0);
+      //fChannelVsHitAmplitude_Corrected_Pos = tfs->make<TH2F>("fChannelVsHitAmplitude_Corrected_Pos","Channel vs. Hit Amplitude, Lifetime, Pos",480,0.0,480.0,1000,0.0,200.0);
 
       fDirX_start_Neg = tfs->make<TH1F>("fDirX_start_Neg","Start Dir X Neg", 180,0.0,180.0);
       fDirY_start_Neg = tfs->make<TH1F>("fDirY_start_Neg","Start Dir Y Neg", 180,0.0,180.0);
@@ -173,6 +177,8 @@ namespace muons {
       fDiffX_Neg = tfs->make<TH1F>("fDiffX_Neg","Diff X Neg", 200, -100.0, 100.0);
       fDiffY_Neg = tfs->make<TH1F>("fDiffY_Neg","Diff Y Neg", 200, -100.0, 100.0);
       fDiffR_Neg = tfs->make<TH1F>("fDiffR_Neg","Diff R Neg", 200, 0.0, 200.0);
+      fChannelVsHitAmplitude_Neg = tfs->make<TH2F>("fChannelVsHitAmplitude_Neg","Channel vs. Hit Amplitude Neg",480,0.0,480.0,1000,0.0,200.0);
+      //fChannelVsHitAmplitude_Corrected_Neg = tfs->make<TH2F>("fChannelVsHitAmplitude_Corrected_Neg","Channel vs. Hit Amplitude, Lifetime, Neg",480,0.0,480.0,1000,0.0,200.0);
 
       fMinosErange_Pos = tfs->make<TH1D>("fMinosErange_Pos","MINOS + Charge Tracks: Erange",5000,0.0,50.0);
       fMinosErange_Neg = tfs->make<TH1D>("fMinosErange_Neg","MINOS - Charge Tracks: Erange",5000,0.0,50.0);
@@ -200,6 +206,10 @@ namespace muons {
         
       //find matched MINOS information for each track
       art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, fTrackMatchModuleLabel);
+
+      //find Hit information for each track
+      art::FindManyP<recob::Hit> fhit(LarTrackHandle, evt, fTracks_label);
+
       
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
                 
@@ -239,6 +249,20 @@ namespace muons {
             fEndXvsEndY->Fill(larEnd[0],larEnd[1]);
             fEndZvsEndX->Fill(larEnd[2],larEnd[0]);
             fEndZvsEndY->Fill(larEnd[2],larEnd[1]);
+
+            if(fhit.at(i).size()>0){
+               std::vector< art::Ptr<recob::Hit> > trackhits = fhit.at(i);
+               if(trackhits.size()>100){
+                  for(std::vector< art::Ptr<recob::Hit> >::const_iterator ihit = trackhits.begin();
+                      ihit != trackhits.end(); ++ihit){
+                     const recob::Hit& hit = **ihit;
+                     fChannelVsHitAmplitude->Fill(hit.Channel()+0.1,hit.Charge(true));
+                     //fChannelVsHitAmplitude->Fill(hit.Channel(),hit.Charge(true));
+                  }
+               }
+            }
+
+
 
             if(!fomatch.at(i).isValid()) continue;//No matching MINOS track
 
@@ -288,6 +312,18 @@ namespace muons {
                fDiffX_Pos->Fill(xdiff);
                fDiffY_Pos->Fill(ydiff);
                fDiffR_Pos->Fill(rdiff);
+               
+               if(fhit.at(i).size()>0){
+                  std::vector< art::Ptr<recob::Hit> > trackhits = fhit.at(i);
+                  if(trackhits.size()>100){
+                     for(std::vector< art::Ptr<recob::Hit> >::const_iterator ihit = trackhits.begin();
+                         ihit != trackhits.end(); ++ihit){
+                        const recob::Hit& hit = **ihit;
+                        fChannelVsHitAmplitude_Pos->Fill(hit.Channel()+0.1,hit.Charge(true));
+                        //fChannelVsHitAmplitude_Pos->Fill(hit.Channel(),hit.Charge(true));
+                     }
+                  }
+               }
                
 
 
@@ -344,6 +380,19 @@ namespace muons {
                fDiffX_Neg->Fill(xdiff);
                fDiffY_Neg->Fill(ydiff);
                fDiffR_Neg->Fill(rdiff);
+
+               if(fhit.at(i).size()>0){
+                  std::vector< art::Ptr<recob::Hit> > trackhits = fhit.at(i);
+                  if(trackhits.size()>100){
+                     for(std::vector< art::Ptr<recob::Hit> >::const_iterator ihit = trackhits.begin();
+                         ihit != trackhits.end(); ++ihit){
+                        const recob::Hit& hit = **ihit;
+                        fChannelVsHitAmplitude_Neg->Fill(hit.Channel()+0.1,hit.Charge(true));
+                        //fChannelVsHitAmplitude_Neg->Fill(hit.Channel(),hit.Charge(true));
+                     }
+                  }
+               }
+               
 
                fMinosTrkChi2_Neg->Fill(fomatch.at(i).ref().ftrkChi2); 
                fMinosTrkChi2vNPoints_Neg->Fill(fomatch.at(i).ref().ftrkChi2,fomatch.at(i).ref().fntrkstp);

@@ -66,6 +66,9 @@ namespace muons {
       TH2F*  fEndZvsEndX;
       TH2F*  fEndZvsEndY;
 
+      TH2F*  fChannelVsHitAmplitude;
+      //TH2F*  fChannelVsHitAmplitude_Corrected;
+
       //plots for TG Muons matched to a pos/neg MINOS track
       TH1F*  fDirX_start_Pos;
       TH1F*  fDirY_start_Pos;
@@ -110,6 +113,9 @@ namespace muons {
       TH1F*  fDiffY_Pos;
       TH1F*  fDiffR_Pos;
 
+      TH2F*  fChannelVsHitAmplitude_Pos;
+      //TH2F*  fChannelVsHitAmplitude_Corrected_Pos;
+
       TH1F*  fDirX_start_Neg;
       TH1F*  fDirY_start_Neg;
       TH1F*  fDirZ_start_Neg;
@@ -152,6 +158,9 @@ namespace muons {
       TH1F*  fDiffX_Neg;
       TH1F*  fDiffY_Neg;
       TH1F*  fDiffR_Neg;
+
+      TH2F*  fChannelVsHitAmplitude_Neg;
+      //TH2F*  fChannelVsHitAmplitude_Corrected_Neg;
 
       TH1D* fMinosErange_Pos;
       TH1D* fMinosErange_Neg;
