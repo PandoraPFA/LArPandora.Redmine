@@ -206,6 +206,9 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("nuvtxx_truth",&nuvtxx_truth,"nuvtxx_truth/D");
   fTree->Branch("nuvtxy_truth",&nuvtxy_truth,"nuvtxy_truth/D");
   fTree->Branch("nuvtxz_truth",&nuvtxz_truth,"nuvtxz_truth/D");
+  fTree->Branch("nu_dcosx_truth",&nu_dcosx_truth,"nu_dcosx_truth/D");
+  fTree->Branch("nu_dcosy_truth",&nu_dcosy_truth,"nu_dcosy_truth/D");
+  fTree->Branch("nu_dcosz_truth",&nu_dcosz_truth,"nu_dcosz_truth/D");
   fTree->Branch("lep_mom_truth",&lep_mom_truth,"lep_mom_truth/D");
   fTree->Branch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/D");
   fTree->Branch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/D");
@@ -462,7 +465,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     trkenddcosy[i]    = larEnd[1];
     trkenddcosz[i]    = larEnd[2];
     if (focal.at(i).isValid()){
-      trkke[i]          = focal.at(i).ref().KinematicEnergy();
+      trkke[i]          = focal.at(i).ref().KineticEnergy();
       trkrange[i]       = focal.at(i).ref().Range();
     }
     if (fopid.at(i).isValid()){
@@ -472,45 +475,47 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       trkmissinge[i]    = fopid.at(i).ref().MissingE();
       trkmissingeavg[i] = fopid.at(i).ref().MissingEavg();
     }
-    // get the hits in each view
-    std::vector< art::Ptr<recob::Hit> > allHits = fmht.at(i);
-    std::vector< art::Ptr<recob::Hit> > hitsU;
-    std::vector< art::Ptr<recob::Hit> > hitsV;
-    for(size_t ah = 0; ah < allHits.size(); ++ah){
-      if     (allHits[ah]->View() == geo::kU) hitsU.push_back(allHits[ah]);
-      else if(allHits[ah]->View() == geo::kV) hitsV.push_back(allHits[ah]);
-    }
-    int trkid;
-    double purity;
-    double maxe;
-    HitsPurity(hitsU, trkid, purity, maxe);
-    trktruepuru[i] = purity;
-    if (trkid>-1){
-      const sim::Particle *particle = bt->TrackIDToParticle(trkid);
-      const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
-      double tote = 0;
-      for (size_t iide = 0; iide<vide.size(); ++iide){
-	tote += vide[iide].energy;
+    if (!isdata){
+      // get the hits in each view
+      std::vector< art::Ptr<recob::Hit> > allHits = fmht.at(i);
+      std::vector< art::Ptr<recob::Hit> > hitsU;
+      std::vector< art::Ptr<recob::Hit> > hitsV;
+      for(size_t ah = 0; ah < allHits.size(); ++ah){
+	if     (allHits[ah]->View() == geo::kU) hitsU.push_back(allHits[ah]);
+	else if(allHits[ah]->View() == geo::kV) hitsV.push_back(allHits[ah]);
       }
-      trktruepdgu[i] = particle->PdgCode();
-      trktrueeffu[i] = maxe/(tote/2); //I believe tote include both induction and collection energies
-    }
-    HitsPurity(hitsV, trkid, purity, maxe);
-    trktruepurv[i] = purity;
-    if (trkid>-1){
-      const sim::Particle *particle = bt->TrackIDToParticle(trkid);
-      const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
-      double tote = 0;
-      for (size_t iide = 0; iide<vide.size(); ++iide){
-	tote += vide[iide].energy;
+      int trkid;
+      double purity;
+      double maxe;
+      HitsPurity(hitsU, trkid, purity, maxe);
+      trktruepuru[i] = purity;
+      if (trkid>-1){
+	const sim::Particle *particle = bt->TrackIDToParticle(trkid);
+	const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
+	double tote = 0;
+	for (size_t iide = 0; iide<vide.size(); ++iide){
+	  tote += vide[iide].energy;
+	}
+	trktruepdgu[i] = particle->PdgCode();
+	trktrueeffu[i] = maxe/(tote/2); //I believe tote include both induction and collection energies
       }
-      trktruepdgv[i] = particle->PdgCode();
-      trktrueeffv[i] = maxe/(tote/2);
+      HitsPurity(hitsV, trkid, purity, maxe);
+      trktruepurv[i] = purity;
+      if (trkid>-1){
+	const sim::Particle *particle = bt->TrackIDToParticle(trkid);
+	const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
+	double tote = 0;
+	for (size_t iide = 0; iide<vide.size(); ++iide){
+	  tote += vide[iide].energy;
+	}
+	trktruepdgv[i] = particle->PdgCode();
+	trktrueeffv[i] = maxe/(tote/2);
+      }
     }
   }
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
-    
+  
   //scan information (data only)
   double time= -99.;
   double y_vert=-99.;
@@ -577,6 +582,11 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       nuvtxx_truth = mctruth->GetNeutrino().Nu().Vx();
       nuvtxy_truth = mctruth->GetNeutrino().Nu().Vy();
       nuvtxz_truth = mctruth->GetNeutrino().Nu().Vz();
+      if (mctruth->GetNeutrino().Nu().P()){
+	nu_dcosx_truth = mctruth->GetNeutrino().Nu().Px()/mctruth->GetNeutrino().Nu().P();
+	nu_dcosy_truth = mctruth->GetNeutrino().Nu().Py()/mctruth->GetNeutrino().Nu().P();
+	nu_dcosz_truth = mctruth->GetNeutrino().Nu().Pz()/mctruth->GetNeutrino().Nu().P();
+      }
       lep_mom_truth = mctruth->GetNeutrino().Lepton().P();
       if (mctruth->GetNeutrino().Lepton().P()){
 	lep_dcosx_truth = mctruth->GetNeutrino().Lepton().Px()/mctruth->GetNeutrino().Lepton().P();
@@ -594,7 +604,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   //minos matching information
   try{
   //find matched MINOS information for each track
-    nmatched_reco++;
+    nmatched_reco = 0;
     art::FindOne<t962::MINOS> fomatch(trackListHandle, evt, fTrackMatchModuleLabel);
     
     //grab information about where track started and ended and the dcos at those points
@@ -854,6 +864,9 @@ void t962::AnalysisTree::ResetVars(){
   nuvtxx_truth = -99999;
   nuvtxy_truth = -99999;
   nuvtxz_truth = -99999;
+  nu_dcosx_truth = -99999;
+  nu_dcosy_truth = -99999;
+  nu_dcosz_truth = -99999;
   lep_mom_truth = -99999;
   lep_dcosx_truth = -99999;
   lep_dcosy_truth = -99999;
