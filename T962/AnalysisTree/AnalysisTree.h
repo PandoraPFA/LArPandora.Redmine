@@ -138,11 +138,14 @@ namespace t962 {
     double nuvtxx_truth;
     double nuvtxy_truth;
     double nuvtxz_truth;
+    double nu_dcosx_truth;
+    double nu_dcosy_truth;
+    double nu_dcosz_truth;
     double lep_mom_truth;
     double lep_dcosx_truth;
     double lep_dcosy_truth;
     double lep_dcosz_truth;
-    double mcevts_truth;
+    int    mcevts_truth;
     double beamwgt;
     
     float mc_index_minos;
