@@ -73,6 +73,7 @@ void t962::AnalysisTree::beginJob()
   art::ServiceHandle<art::TFileService> tfs;
   fTree = tfs->make<TTree>("anatree","analysis tree");
   fTree->Branch("run",&run,"run/I");
+  fTree->Branch("subrun",&subrun,"subrun/I");
   fTree->Branch("event",&event,"event/I");
   fTree->Branch("pot",&pot,"pot/D");
   fTree->Branch("isdata",&isdata,"isdata/I");
@@ -167,6 +168,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   ResetVars();
 
   run = evt.run();
+  subrun = evt.subRun();
   event = evt.id().event();
 
   if (evt.isRealData()){
@@ -499,6 +501,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 void t962::AnalysisTree::ResetVars(){
 
   run = -99999;
+  subrun = -99999;
   event = -99999;
   isdata = -99999;
   vtxx_reco = -99999;

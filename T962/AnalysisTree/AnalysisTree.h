@@ -49,6 +49,7 @@ namespace t962 {
     TTree* fTree;
     //run information
     int run;
+    int subrun;
     int event;
     double pot;
     int isdata;
