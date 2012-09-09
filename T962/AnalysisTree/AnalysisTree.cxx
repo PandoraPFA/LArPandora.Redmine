@@ -109,6 +109,7 @@ void t962::AnalysisTree::beginJob()
   art::ServiceHandle<art::TFileService> tfs;
   fTree = tfs->make<TTree>("anatree","analysis tree");
   fTree->Branch("run",&run,"run/I");
+  fTree->Branch("subrun",&subrun,"subrun/I");
   fTree->Branch("event",&event,"event/I");
   fTree->Branch("evttime",&evttime,"evttime/D");
   fTree->Branch("pot",&pot,"pot/D");
@@ -251,6 +252,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   ResetVars();
   
   run = evt.run();
+  subrun = evt.subRun();
   event = evt.id().event();
   
   art::Timestamp ts = evt.time();
@@ -793,6 +795,7 @@ void t962::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& h
 void t962::AnalysisTree::ResetVars(){
 
   run = -99999;
+  subrun = -99999;
   event = -99999;
   evttime = -99999;
   isdata = -99999;
