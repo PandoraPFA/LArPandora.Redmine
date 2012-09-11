@@ -8,6 +8,7 @@
 #include "Geometry/geo.h"
 #include "EventDisplayBase/View2D.h"
 #include "EventDisplayBase/View3D.h"
+#include "T962/ArgoneutEventDisplay/ArgoneutDrawingOptions.h"
 #include "T962/ArgoneutEventDisplay/MinosDrawer.h"
 #include "EventDisplay/RecoDrawingOptions.h"
 
@@ -111,12 +112,13 @@ namespace argoevd{
    void MinosDrawer::Minos3D(const art::Event& evt,
                             evdb::View3D*     view)
   {
+    art::ServiceHandle<argoevd::ArgoneutDrawingOptions> argoopt;
+    
      art::PtrVector<t962::MINOS> minos;
-     this->GetMinos(evt, "minos", minos);
+     this->GetMinos(evt, argoopt->fMINOSLabel, minos);
 
      art::ServiceHandle<evd::RecoDrawingOptions> recoOpt;
      art::Handle< std::vector<recob::Track> > LarTrackHandle;
-     std::string const label = "match";
      
      for(size_t p = 0; p < minos.size(); ++p){
         bool matched = false;
@@ -128,7 +130,7 @@ namespace argoevd{
               if(!get) continue;
 
               //find matched MINOS information 
-              art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, label);
+              art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, argoopt->fMatchLabel);
               for(size_t q= 0; q < fomatch.size(); ++q)
               {
                  if(fomatch.at(q).isValid()){//Found matching MINOS track

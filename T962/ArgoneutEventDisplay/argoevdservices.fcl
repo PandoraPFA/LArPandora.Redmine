@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+argoneut_disp_service:
+{
+
+  MINOSLabel:               "minos" # label of module making the MINOS data
+  MatchLabel:               "matchtracks" # label of module making the Argo/MINOS track associations     
+}
+
+
+END_PROLOG

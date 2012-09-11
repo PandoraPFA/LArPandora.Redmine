@@ -15,6 +15,7 @@
 #include "EventDisplayBase/evdb.h"
 #include "Geometry/geo.h"
 #include "T962/ArgoneutEventDisplay/ArgoneutRecoBaseDrawer.h"
+#include "T962/ArgoneutEventDisplay/ArgoneutDrawingOptions.h"
 #include "EventDisplay/RecoDrawingOptions.h"
 #include "EventDisplay/ColorDrawingOptions.h"
 #include "EventDisplay/RawDrawingOptions.h"
@@ -93,18 +94,8 @@ namespace argoevd{
       art::ServiceHandle<evd::RawDrawingOptions>  rawopt;
       if (rawopt->fDrawRawDataOrCalibWires < 1) return;
       art::ServiceHandle<evd::RecoDrawingOptions> drawopt;
-//       if (drawopt->fDrawProngs!=0) {
 
-//          for (unsigned int imod=0; imod<drawopt->fProngLabels.size(); ++imod) {
-//             std::string const which = drawopt->fProngLabels[imod];
-      
-//             std::vector<const recob::Prong*> prong;
-//             this->GetArgoProngs(evt, which, prong);
-
-//             for(size_t p = 0; p < prong.size(); ++p)
-// 	      this->DrawProng3D(*(prong[p]), prong[p]->ID(), view);
-//          }
-//       }
+      art::ServiceHandle<argoevd::ArgoneutDrawingOptions> argoopt;
   
       if(drawopt->fDrawTracks!=0){
          for (unsigned int imod=0; imod<drawopt->fTrackLabels.size(); ++imod){
@@ -114,18 +105,18 @@ namespace argoevd{
             this->GetArgoTracks(evt, which, track);
 
             art::FindMany<recob::SpacePoint> fmsp(track, evt, which);
-
+            
             art::PtrVector<t962::MINOS> minos;
-            this->GetMinos(evt, "minos", minos);
-    
+            this->GetMinos(evt, argoopt->fMINOSLabel, minos);
+            
             art::Handle< std::vector<recob::Track> > LarTrackHandle;
             evt.getByLabel(drawopt->fTrackLabels[imod],LarTrackHandle);
-
+            
             //find matched MINOS information for each track
-            std::string const label = "match";
-            art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, label);
+            art::FindOne<t962::MINOS> fomatch(LarTrackHandle, evt, argoopt->fMatchLabel);
 
             for(size_t p = 0; p < track.size(); ++p){
+            
                bool matched = false;
                float charge = 0;
 
@@ -139,7 +130,7 @@ namespace argoevd{
             }
          }
       }
-    
+      
       if (drawopt->fDrawShowers!=0) {
          for (unsigned int imod=0; imod<drawopt->fShowerLabels.size(); ++imod){
             std::string const which = drawopt->fShowerLabels[imod];
@@ -151,7 +142,7 @@ namespace argoevd{
 	      this->DrawShower3D(*(shower[p]), shower[p]->ID(), view);
          }
       }
-    
+      
       return;
    }
 
