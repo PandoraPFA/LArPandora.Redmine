@@ -299,8 +299,7 @@ namespace cpion {
       }
    
     //Now look at Geant info
-    Double_t protonX, protonY, protonZ;
-    Double_t length=0;
+    //Double_t length=0;
     tProtons=0;
     tNeutrons=0;
     tTotalEnergy=0;
@@ -312,7 +311,7 @@ namespace cpion {
     tChargedPPerp=0;
 
     //loop over all events and look at number of primary protons, neutrons, pions. Also sum the energy && momenta of all primary particles and all charged primary particles.
-    for(int j=0;j<pvec.size();j++)
+    for(unsigned int j=0;j<pvec.size();j++)
       {
 	if(pvec[j]->Process()!="primary")
 	  {
@@ -320,7 +319,7 @@ namespace cpion {
 	  }
 	if(pvec[j]->Process()=="primary"&&pvec[j]->PdgCode()<100000000)
 	  {
-	    length=(pow ( pow((pvec[j]->Vx()-pvec[j]->EndPoint()[0]),2) + pow((pvec[j]->Vy()-pvec[j]->EndPoint()[1]),2) + pow((pvec[j]->Vz()-pvec[j]->EndPoint()[2]),2), 0.5));
+	 //    length=(pow ( pow((pvec[j]->Vx()-pvec[j]->EndPoint()[0]),2) + pow((pvec[j]->Vy()-pvec[j]->EndPoint()[1]),2) + pow((pvec[j]->Vz()-pvec[j]->EndPoint()[2]),2), 0.5));
 
 	    if(pvec[j]->PdgCode()==2212)
 	      {
@@ -365,7 +364,7 @@ namespace cpion {
 
     //now we loop over all particles in an event again but look for pi+'s
     //probably a better way to do this than looping over all particles twice, if you think of it let me know!
-    for(int i=0; i<pvec.size(); i++)
+    for(unsigned int i=0; i<pvec.size(); i++)
       {
 
 	for(int kk=0;kk<10;kk++)

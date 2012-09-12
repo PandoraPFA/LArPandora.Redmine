@@ -214,7 +214,7 @@ namespace cchyp {
     // get the truth info 
 
     TLorentzVector vertex;
-    double energynu = 0.;
+    //double energynu = 0.;
 
     art::Handle< std::vector<simb::MCTruth> > mclist;
     evt.getByLabel(fGenieModuleLabel,mclist);
@@ -452,9 +452,9 @@ namespace cchyp {
       TVector3 ProtonMom;
       TVector3 PionMom;
 
-      double MuonE = 0.;
-      double ProtonE = 0.;
-      double PionE = 0.;
+      //double MuonE = 0.;
+      //double ProtonE = 0.;
+      //double PionE = 0.;
 
       int MuonID = 0;
       int ProtonID = 0;
@@ -592,7 +592,7 @@ namespace cchyp {
 			mf::LogInfo("LamdaAna") << "number of trajectory points of muon = " 
 						<< traj_points_muon;
 			
-			for(int i = 1; i < traj_points_muon; ++i){
+			for(unsigned int i = 1; i < traj_points_muon; ++i){
 			  double X1 = traj_muon.X(i-1);
 			  double Y1 = traj_muon.Y(i-1);
 			  double Z1 = traj_muon.Z(i-1);
@@ -622,7 +622,7 @@ namespace cchyp {
 			mf::LogInfo("LamdaAna") << "number of trajectory points of proton = " 
 						<< traj_points_proton;
 			
-			for(int i = 1; i < traj_points_proton; ++i){
+			for(unsigned int i = 1; i < traj_points_proton; ++i){
 			  double X1 = traj_proton.X(i-1);
 			  double Y1 = traj_proton.Y(i-1);
 			  double Z1 = traj_proton.Z(i-1);
@@ -646,7 +646,7 @@ namespace cchyp {
 			//find if the pion is exiting
 			std::cout << "number of trajectory points of pion = " << traj_points_pion << std::endl;
 			
-			for(int i = 1; i < traj_points_pion; ++i){
+			for(unsigned int i = 1; i < traj_points_pion; ++i){
 			  double X1 = traj_pion.X(i-1);
 			  double Y1 = traj_pion.Y(i-1);
 			  double Z1 = traj_pion.Z(i-1);
@@ -1043,7 +1043,7 @@ namespace cchyp {
 			double selected_p_charge_V = 0.;
 			double selected_pi_charge_V = 0.;
 			
-			for(int  i = 0; i < ucluIn.size();  i++){
+			for(unsigned int  i = 0; i < ucluIn.size();  i++){
 			  double startwire = ucluIn[i]->StartPos()[0];
 			  double starttime = ucluIn[i]->StartPos()[1];
 			  double endwire = ucluIn[i]->EndPos()[0];
@@ -1154,7 +1154,7 @@ namespace cchyp {
 
 			
 			
-			for(int  i = 0; i < vcluIn.size();  i++){
+			for(unsigned int  i = 0; i < vcluIn.size();  i++){
 			  double startwire = vcluIn[i]->StartPos()[0];
 			  double starttime = vcluIn[i]->StartPos()[1];
 			  double endwire = vcluIn[i]->EndPos()[0];

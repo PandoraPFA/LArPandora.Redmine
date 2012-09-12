@@ -131,13 +131,13 @@ namespace t962{
             minitree->SetBranchAddress("trkmom",&ftrkmom);
             minitree->SetBranchAddress("trkqp",&ftrkqp);            
             Long64_t nentries = minitree->GetEntries();
-            Long64_t nbytes = 0;           
+            //Long64_t nbytes = 0;           
       
       int flag2=0;
       while(flag2==0)    
       {      
             r=(int)fRand->Uniform(1,nentries-1);
-            nbytes==minitree->GetEntry(r);
+            minitree->GetEntry(r);
             run=frun;
             subRun=fsubRun;
             snarl=fsnarl;
@@ -146,7 +146,7 @@ namespace t962{
           
       for(int i=r-ftrkIndex;i<nentries;i++)
       {
-          nbytes==minitree->GetEntry(i);
+          minitree->GetEntry(i);
            
           if(frun==run && fsubRun==subRun && fsnarl==snarl)
           flag=1;           

@@ -69,7 +69,7 @@ namespace t962 {
     double vtxy_reco;
     double vtxz_reco;
    
-    int ntracks_reco;         //number of reconstructed tracks
+  
    
     double trackstart_x_reco;
     double trackstart_y_reco;
@@ -105,6 +105,8 @@ namespace t962 {
     double fvertextrackWindow;
     double fvertexclusterWindow;
     double fboundaryWindow;
+    
+    int ntracks_reco;         //number of reconstructed tracks
     
      int no_geant_particles;
      double *twodvtx_w_reco;

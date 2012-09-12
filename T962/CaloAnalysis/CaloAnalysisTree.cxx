@@ -324,7 +324,7 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
      std::cout<<" TrkPitchC="<<fTrkPitchC<<" nhitsCOL="<<fnhitsCOL<<std::endl;
   
      std::vector< art::Ptr<recob::SpacePoint> > sps = fmsp.at(trkCtr);
-     int nsp = sps.size();
+     //int nsp = sps.size();
      
      //loop over Collection hits
      for(art::PtrVector<recob::Hit>::const_iterator hitIter = hitlist.begin(); hitIter != hitlist.end();  hitIter++){
@@ -386,9 +386,9 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
 	  std::vector<double> larStart, larEnd;
 	  (*trkIter)->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
 
-	  double res_range = sqrt((larEnd[0]-xyz[0])*(larEnd[0]-xyz[0]) +
-				  (larEnd[1]-xyz[1])*(larEnd[1]-xyz[1]) +
-				  (larEnd[2]-xyz[2])*(larEnd[2]-xyz[2]));
+	//   double res_range = sqrt((larEnd[0]-xyz[0])*(larEnd[0]-xyz[0]) +
+// 				  (larEnd[1]-xyz[1])*(larEnd[1]-xyz[1]) +
+// 				  (larEnd[2]-xyz[2])*(larEnd[2]-xyz[2]));
 
 	  // Track Length from I - last points
 // 	  Trk_Length = sqrt((larStart[0]-larEnd[0])*(larStart[0]-larEnd[0]) +
@@ -652,7 +652,7 @@ Kin_Eng_truth=tot_energy;
     //Kin_Eng_truth=KE_sum*1000; //KE in MeV
     
     
-      for(int k=0; k<tracklist.size();k++){
+      for(unsigned int k=0; k<tracklist.size();k++){
       std::cout<<std::endl;
       std::cout<<"________________________________"<<std::endl;
       std::cout<<"trk_length_truth = "<<trk_length_truth[k]<<" (assuming straight line track in truth= "<<trk_length_straight_line_truth[k]<<std::endl;

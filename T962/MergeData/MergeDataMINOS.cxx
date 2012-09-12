@@ -73,7 +73,7 @@ namespace merge{
 
       if(MergeMINOS(vec_minos)){
          //std::cout << "No of MINOS objects saved is " << vec_minos.size() << std::endl;
-         for(int i=0;i<vec_minos.size();i++)
+         for(unsigned int i=0;i<vec_minos.size();i++)
          {
             MINOS_coll->push_back(vec_minos[i]);
          }

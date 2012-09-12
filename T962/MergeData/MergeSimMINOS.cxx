@@ -68,7 +68,7 @@ namespace merge{
       if(MergeMINOS(vec_minos)){
  
          //std::cout << "No of MINOS objects saved is " << vec_minos.size() << std::endl;
-         for(int i=0;i<vec_minos.size();i++)
+         for(unsigned int i=0;i<vec_minos.size();i++)
          {
             MINOS_coll->push_back(vec_minos[i]);
          }
@@ -107,7 +107,7 @@ namespace merge{
             
 
             std::string filename(entry->d_name);    
-            if(filename.find("fhc.root")==-1)
+            if((int)filename.find("fhc.root")==-1)
             continue;
 
             //grab initial/final timestamp info. from input MINOS file
