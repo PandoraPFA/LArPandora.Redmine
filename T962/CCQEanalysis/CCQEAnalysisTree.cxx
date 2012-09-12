@@ -31,7 +31,6 @@
 
 #include "T962/CCQEanalysis/CCQEAnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
@@ -59,7 +58,6 @@ t962::CCQEAnalysisTree::CCQEAnalysisTree(fhicl::ParameterSet const& pset) :
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
-  fScanModuleLabel          (pset.get< std::string >("ScanModuleLabel")         ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
@@ -390,8 +388,7 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   art::Handle< std::vector<t962::MINOS> > minosListHandle;
   evt.getByLabel(fMINOSModuleLabel,minosListHandle);
-  art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
-  evt.getByLabel(fScanModuleLabel,scanListHandle);
+ 
   
   art::Handle< std::vector<recob::Cluster>  > kingaListHandle;
   evt.getByLabel(fKingaModuleLabel,kingaListHandle);
@@ -437,12 +434,6 @@ std::cout<<" IN *** MY *** CCQEANALYSISTREE ***"<<std::endl;
     minoslist.push_back(minosHolder);
   }
   
-  art::PtrVector<t962::ScanInfo> scanlist;
-  if(evt.getByLabel(fScanModuleLabel,scanListHandle))
-  for (unsigned int i = 0; i < scanListHandle->size(); i++){
-    art::Ptr<t962::ScanInfo> scanHolder(scanListHandle,i);
-    scanlist.push_back(scanHolder);
-  }
   art::ServiceHandle<geo::Geometry> geom;  
   art::ServiceHandle<util::LArProperties> larp;
 
@@ -737,25 +728,25 @@ if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(tracksta
      double y_vert=-99.;
      double z_vert=-99.;
      
-     for(unsigned int i=0; i<scanlist.size();++i){ 
-     time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
-     int wire_I=scanlist[i]->Get_VertIndWire();    
-     int wire_C=scanlist[i]->Get_VertColWire();   
-     if(wire_I>-1 && wire_C>-1)
-     {
-     wire_I=geom->PlaneWireToChannel(0,wire_I);
-     wire_C=geom->PlaneWireToChannel(1,wire_C);
-     geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
+    //  for(unsigned int i=0; i<scanlist.size();++i){ 
+//      time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
+//      int wire_I=scanlist[i]->Get_VertIndWire();    
+//      int wire_C=scanlist[i]->Get_VertColWire();   
+//      if(wire_I>-1 && wire_C>-1)
+//      {
+//      wire_I=geom->PlaneWireToChannel(0,wire_I);
+//      wire_C=geom->PlaneWireToChannel(1,wire_C);
+//      geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
          
-     vtxx_scan=(time-60)*.031;
-     vtxy_scan=y_vert;
-     vtxz_scan=z_vert;
-     neutrino_scan=scanlist[i]->Get_IsNeutrino();
-     maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
-     ntracks_scan=scanlist[i]->Get_Track();
-     nshowers_scan=scanlist[i]->Get_NumShower(); 
-     }
-     }
+//      vtxx_scan=(time-60)*.031;
+//      vtxy_scan=y_vert;
+//      vtxz_scan=z_vert;
+//      neutrino_scan=scanlist[i]->Get_IsNeutrino();
+//      maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
+//      ntracks_scan=scanlist[i]->Get_Track();
+//      nshowers_scan=scanlist[i]->Get_NumShower(); 
+//      }
+//      }
     //mc truth information
    if (!isdata && mclist[0]->NeutrinoSet()!=0){
     nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();

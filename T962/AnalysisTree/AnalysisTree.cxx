@@ -36,7 +36,6 @@
 
 #include "T962/AnalysisTree/AnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
@@ -88,7 +87,6 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
-  fScanModuleLabel          (pset.get< std::string >("ScanModuleLabel")         ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::string >("CalorimetryModuleLabel")  ),
   fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
@@ -310,12 +308,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fMINOSModuleLabel,minosListHandle))
     art::fill_ptr_vector(minoslist, minosListHandle);
 
-  art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
-  std::vector<art::Ptr<t962::ScanInfo> > scanlist;
-  if (evt.getByLabel(fScanModuleLabel,scanListHandle))
-    art::fill_ptr_vector(scanlist, scanListHandle);
-
-
   art::ServiceHandle<geo::Geometry> geom;  
   art::ServiceHandle<cheat::BackTracker> bt;
   art::ServiceHandle<util::DetectorProperties> detprop;
@@ -523,25 +515,25 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   double y_vert=-99.;
   double z_vert=-99.;
   
-  for(unsigned int i=0; i<scanlist.size();++i){ 
-    time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
-    int wire_I=scanlist[i]->Get_VertIndWire();    
-    int wire_C=scanlist[i]->Get_VertColWire();   
-    if(wire_I>-1 && wire_C>-1)
-      {
-	wire_I=geom->PlaneWireToChannel(0,wire_I);
-	wire_C=geom->PlaneWireToChannel(1,wire_C);
-	geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
+ //  for(unsigned int i=0; i<scanlist.size();++i){ 
+//     time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
+//     int wire_I=scanlist[i]->Get_VertIndWire();    
+//     int wire_C=scanlist[i]->Get_VertColWire();   
+//     if(wire_I>-1 && wire_C>-1)
+//       {
+// 	wire_I=geom->PlaneWireToChannel(0,wire_I);
+// 	wire_C=geom->PlaneWireToChannel(1,wire_C);
+// 	geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
 	
-	vtxx_scan=(time-60)*.031;
-	vtxy_scan=y_vert;
-	vtxz_scan=z_vert;
-	neutrino_scan=scanlist[i]->Get_IsNeutrino();
-	maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
-	ntracks_scan=scanlist[i]->Get_Track();
-	nshowers_scan=scanlist[i]->Get_NumShower(); 
-      }
-  }
+// 	vtxx_scan=(time-60)*.031;
+// 	vtxy_scan=y_vert;
+// 	vtxz_scan=z_vert;
+// 	neutrino_scan=scanlist[i]->Get_IsNeutrino();
+// 	maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
+// 	ntracks_scan=scanlist[i]->Get_Track();
+// 	nshowers_scan=scanlist[i]->Get_NumShower(); 
+//       }
+//   }
   //mc truth information
   if (!isdata){
     //save single particle information
