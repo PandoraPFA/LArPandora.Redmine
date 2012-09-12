@@ -11,16 +11,13 @@
 <lcgdict>
  <class name="t962::MINOS"           ClassVersion="10"           />
  <class name="t962::Paddles"         ClassVersion="10"		       />
- <class name="t962::ScanInfo"        ClassVersion="10"		       />
  
  <class name="std::vector<t962::MINOS>"                          />
  <class name="std::vector<t962::Paddles>"                        />
- <class name="std::vector<t962::ScanInfo>"                       />
  <class name="art::Assns<recob::Track, t962::MINOS, void>"       />
  
 
  <class name="art::Wrapper< std::vector<t962::MINOS>           >"/>
  <class name="art::Wrapper< std::vector<t962::Paddles>         >"/>
- <class name="art::Wrapper< std::vector<t962::ScanInfo>        >"/>
  <class name="art::Wrapper< art::Assns<recob::Track, t962::MINOS, void> >"/>
 </lcgdict>

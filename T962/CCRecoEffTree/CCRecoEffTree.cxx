@@ -29,7 +29,6 @@
 
 #include "T962/CCRecoEffTree/CCRecoEffTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
