@@ -21,6 +21,7 @@ argoneut_analysistree:
  POTModuleLabel:           "generator"
  CalorimetryModuleLabel:   "calo"
  ParticleIDModuleLabel:    "pid"
+ PaddlesModuleLabel:       "paddles"
  vertextrackWindow:         5.
  vertexclusterWindow:       100.
  boundaryWindow:            3.

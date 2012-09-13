@@ -37,7 +37,8 @@
 
 #include "T962/AnalysisTree/AnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "T962/T962_Objects/ScanInfo.h"
+#include "T962/T962_Objects/Paddles.h"
+//#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
@@ -96,6 +97,7 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::string >("CalorimetryModuleLabel")  ),
   fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
+  fPaddlesModuleLabel       (pset.get< std::string >("PaddlesModuleLabel")      ),
   fvertextrackWindow        (pset.get< double >("vertextrackWindow")            ),
   fvertexclusterWindow      (pset.get< double >("vertexclusterWindow")          ),
   fboundaryWindow           (pset.get< double >("boundaryWindow")               )
@@ -221,6 +223,10 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
   fTree->Branch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
   fTree->Branch("beamwgt",&beamwgt,"beamwgt/D");
+  fTree->Branch("tpx_flux",&tpx_flux,"tpx_flux/D");
+  fTree->Branch("tpy_flux",&tpy_flux,"tpy_flux/D");
+  fTree->Branch("tpz_flux",&tpz_flux,"tpz_flux/D");
+  fTree->Branch("tptype_flux",&tptype_flux,"tptype_flux/I");
 
   //kinga:
 
@@ -303,7 +309,12 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
   fTree->Branch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
   fTree->Branch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
-  
+  //paddles
+  fTree->Branch("pmttime",&pmttime,"pmttime/D");
+  fTree->Branch("pmt1",pmt1,"pmt1[4]/I");
+  fTree->Branch("pmt2",pmt2,"pmt2[4]/I");
+  fTree->Branch("pmt3",pmt3,"pmt3[4]/I");
+  fTree->Branch("pmt4",pmt4,"pmt4[4]/I");
 
   TString filename = "numu_numode_final.root";
   const char *fROOTfile = gSystem->FindFile("${SRT_PRIVATE_CONTEXT}/T962/CCInclusiveMacro/:${SRT_PUBLIC_CONTEXT}/T962/CCInclusiveMacro/",filename);
@@ -371,6 +382,11 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
     art::fill_ptr_vector(mclist, mctruthListHandle);
 
+  art::Handle< std::vector<simb::MCFlux> > mcfluxListHandle;
+  std::vector<art::Ptr<simb::MCFlux> > fluxlist;
+  if (evt.getByLabel(fGenieGenModuleLabel,mcfluxListHandle))
+    art::fill_ptr_vector(fluxlist, mcfluxListHandle);
+
 
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
   std::vector<art::Ptr<recob::Cluster> > clusterlist;
@@ -417,6 +433,20 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 //  if (evt.getByLabel(fScanModuleLabel,scanListHandle))
 //    art::fill_ptr_vector(scanlist, scanListHandle);
 
+  art::Handle< std::vector<t962::Paddles> > paddlesListHandle;
+  std::vector<art::Ptr<t962::Paddles> > paddleslist;
+  if (evt.getByLabel(fPaddlesModuleLabel,paddlesListHandle))
+    art::fill_ptr_vector(paddleslist, paddlesListHandle);
+
+  if (paddleslist.size()>0){
+    pmttime = paddleslist[0]->gettime();
+    for (int i = 0; i<4; ++i){
+      pmt1[i] = paddleslist[0]->gettdc(0,i);
+      pmt2[i] = paddleslist[0]->gettdc(1,i);
+      pmt3[i] = paddleslist[0]->gettdc(2,i);
+      pmt4[i] = paddleslist[0]->gettdc(3,i);
+    }
+  }
 
   art::ServiceHandle<geo::Geometry> geom;  
   art::ServiceHandle<cheat::BackTracker> bt;
@@ -839,12 +869,17 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       }
       art::Ptr<simb::MCTruth> mctruth = mclist[0];
       double maxenergy = -1;
+      int imc = 0;
+      int imc0 = 0;
       for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
 	if ((ii->second)>maxenergy){
 	  maxenergy = ii->second;
 	  mctruth = ii->first;
+	  imc = imc0;
 	}
+	imc0++;
       }
+      art::Ptr<simb::MCFlux> mcflux = fluxlist[imc];
 
       nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
       ccnc_truth = mctruth->GetNeutrino().CCNC();
@@ -867,6 +902,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	lep_dcosy_truth = mctruth->GetNeutrino().Lepton().Py()/mctruth->GetNeutrino().Lepton().P();
 	lep_dcosz_truth = mctruth->GetNeutrino().Lepton().Pz()/mctruth->GetNeutrino().Lepton().P();
       }
+      tpx_flux = mcflux->ftpx;
+      tpy_flux = mcflux->ftpy;
+      tpz_flux = mcflux->ftpz;
+      tptype_flux = mcflux->ftptype;
 
       //Kinga
       double presamplings=60.0;
@@ -1283,6 +1322,10 @@ void t962::AnalysisTree::ResetVars(){
   lep_dcosz_truth = -99999;
   mcevts_truth = -99999;
   beamwgt = -99999;
+  tpx_flux = -99999;
+  tpy_flux = -99999;
+  tpz_flux = -99999;
+  tptype_flux = -99999;
   for (int i = 0; i < kMaxTrack; i++){
     trkvtxx[i] = -99999;
     trkvtxy[i] = -99999;
@@ -1390,7 +1433,14 @@ void t962::AnalysisTree::ResetVars(){
     two_trackexit_dcosy_reco[i] = -99999;
     two_trackexit_dcosz_reco[i] = -99999;
   }
- 
+
+  pmttime = -99999;
+  for (int i = 0; i<4; ++i){
+    pmt1[i] = -99999;
+    pmt2[i] = -99999;
+    pmt3[i] = -99999;
+    pmt4[i] = -99999;
+  }
 }
 
 bool t962::AnalysisTree::EndsOnBoundary(art::Ptr<recob::Track> lar_track)

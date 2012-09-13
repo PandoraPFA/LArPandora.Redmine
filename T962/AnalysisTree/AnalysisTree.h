@@ -156,6 +156,10 @@ namespace t962 {
     double lep_dcosz_truth;
     int    mcevts_truth;
     double beamwgt;
+    double tpx_flux;
+    double tpy_flux;
+    double tpz_flux;
+    int    tptype_flux;
     
     float mc_index_minos;
     double mc_pdg_minos;
@@ -241,6 +245,13 @@ namespace t962 {
     double hit_peakT[kMaxHits];
     double hit_charge[kMaxHits];
 
+    //paddle information
+    double pmttime;
+    int    pmt1[4];
+    int    pmt2[4];
+    int    pmt3[4];
+    int    pmt4[4];
+
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
     std::string fLArG4ModuleLabel;
@@ -260,6 +271,7 @@ namespace t962 {
     std::string fPOTModuleLabel;
     std::string fCalorimetryModuleLabel;
     std::string fParticleIDModuleLabel;
+    std::string fPaddlesModuleLabel;
     double fvertextrackWindow;
     double fvertexclusterWindow;
     double fboundaryWindow;
