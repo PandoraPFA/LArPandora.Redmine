@@ -5,7 +5,7 @@
 #
 include SoftRelTools/arch_spec_root.mk
 
-SUBDIRS     := T962_Objects MergeData MatchTracks T962G4Ana AnalysisTree TGMuon CCQEanalysis MuonAna LambdaAna CCRecoEffTree MatchFilter CaloAnalysis ArgoneutEventDisplay
+SUBDIRS     := T962_Objects MergeData MatchTracks T962G4Ana AnalysisTree TGMuon MuonAna LambdaAna CCRecoEffTree MatchFilter CaloAnalysis ArgoneutEventDisplay
 
 LIBLINK    := -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -l$(PACKAGE)
 
