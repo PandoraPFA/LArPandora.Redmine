@@ -2,8 +2,9 @@
 // \version $Id$
 // 
 // \author tjyang@fnal.gov
+// \author joshua.spitz@yale.edu
+// \author kinga.partyka@yale.edu
 //
-// 
 ////////////////////////////////////////////////////////////////////////
 #ifndef ANALYSISTREE_H
 #define ANALYSISTREE_H
@@ -18,11 +19,13 @@ class TH1D;
 class TH2D;
 class TTree;
 
-const int kMaxTrack = 1000; //maximum number of tracks
+const int kMaxTrack      = 1000;  //maximum number of tracks
+const int kMaxClusters   = 1000;  //maximum number of clusters
+const int kMaxHits       = 20000; //maximum number of hits;
+const int kMaxPrimaries  = 1000;  //maximum number of primary particles
 
 ///Track finding and building 
 namespace t962 {
-
    
   class AnalysisTree : public art::EDAnalyzer {
 
@@ -35,9 +38,6 @@ namespace t962 {
     void analyze(const art::Event& evt);
     void beginJob();
     void beginSubRun(const art::SubRun& sr);
-
-    
-    
     
   protected:
   
@@ -82,7 +82,7 @@ namespace t962 {
     double trackexit_dcosy_reco;
     double trackexit_dcosz_reco;   
     double enu_reco;
-    int    nclupertrack_reco;
+    int    nclupertrack_reco;  //how many times one cluster is used in tracking?
     double trkvtxx[kMaxTrack];
     double trkvtxy[kMaxTrack];
     double trkvtxz[kMaxTrack];
@@ -96,7 +96,9 @@ namespace t962 {
     double trkenddcosy[kMaxTrack];
     double trkenddcosz[kMaxTrack];
     double trkke[kMaxTrack];
+    double Kin_Eng_reco[kMaxTrack];
     double trkrange[kMaxTrack];
+    double trkpitchc[kMaxTrack];
     int    trkpid[kMaxTrack];
     int    trkpidndf[kMaxTrack];
     double trkpidchi2[kMaxTrack];
@@ -118,14 +120,20 @@ namespace t962 {
     double trk_vtxx_minos;
     double trk_vtxy_minos;
     double trk_vtxz_minos;
-    //scan information
-    double vtxx_scan;
-    double vtxy_scan;
-    double vtxz_scan;
-    int neutrino_scan;
-    int maybeneutrino_scan;
-    int ntracks_scan;
-    int nshowers_scan; 
+    int trkcontained_minos;
+    int test_charge_minos;
+    double rdiff_minos;
+    double thetadiff_minos;
+    double muon_Kin_Eng_reco;
+    int no_dead_wires_muon;
+//    //scan information
+//    double vtxx_scan;
+//    double vtxy_scan;
+//    double vtxz_scan;
+//    int neutrino_scan;
+//    int maybeneutrino_scan;
+//    int ntracks_scan;
+//    int nshowers_scan; 
     
     //mctruth information
     int parpdg;
@@ -159,11 +167,79 @@ namespace t962 {
     double mc_vtxx_minos;
     double mc_vtxy_minos;
     double mc_vtxz_minos;
-    int trkcontained_minos;
-    int test_charge_minos;
-    double rdiff_minos;
-    double thetadiff_minos;
     int hitnuc_truth;
+
+    //Kinga
+    double twodvtx_w_reco[2];
+    double twodvtx_t_reco[2];
+    double twodvtx_w_truth[2];
+    double twodvtx_t_truth[2];
+
+    int nkingaclustersu_reco;
+    int nkingaclustersv_reco;
+    int nvertexkingaclustersu_reco;
+    int nvertexkingaclustersv_reco;
+    
+    int nlinemergerclustersu_reco;
+    int nlinemergerclustersv_reco;
+    int nvertexlinemergerclustersu_reco;
+    int nvertexlinemergerclustersv_reco;
+    
+    int ndbscanclustersu_reco;
+    int ndbscanclustersv_reco;
+    int nvertexdbscanclustersu_reco;
+    int nvertexdbscanclustersv_reco;
+    
+    int no_kingaclusters;
+    int no_linemergerclusters;
+
+    int kingaclusters_planeNo[kMaxClusters];
+    double Start_pt_w_kingaCl[kMaxClusters];
+    double Start_pt_t_kingaCl[kMaxClusters];
+    int linemergerclusters_planeNo[kMaxClusters];
+    double Start_pt_w_linemergerCl[kMaxClusters];
+    double Start_pt_t_linemergerCl[kMaxClusters];
+    
+    double two_trackstart_dcosx_reco[2];
+    double two_trackstart_dcosy_reco[2];
+    double two_trackstart_dcosz_reco[2];
+    double two_trackexit_dcosx_reco[2];
+    double two_trackexit_dcosy_reco[2];
+    double two_trackexit_dcosz_reco[2];
+
+    int no_primaries;
+    int primaries_pdg[kMaxPrimaries];
+    double Eng[kMaxPrimaries];
+    double Px[kMaxPrimaries];
+    double Py[kMaxPrimaries];
+    double Pz[kMaxPrimaries];
+    double StartPointx[kMaxPrimaries];
+    double StartPointy[kMaxPrimaries];
+    double StartPointz[kMaxPrimaries];
+    double EndPointx[kMaxPrimaries];
+    double EndPointy[kMaxPrimaries];
+    double EndPointz[kMaxPrimaries];
+    int NumberDaughters[kMaxPrimaries];
+    //from genie:
+    int genie_no_primaries;
+    int genie_primaries_pdg[kMaxPrimaries];
+    double genie_Eng[kMaxPrimaries];
+    double genie_Px[kMaxPrimaries];
+    double genie_Py[kMaxPrimaries];
+    double genie_Pz[kMaxPrimaries];
+    double genie_P[kMaxPrimaries];
+    int genie_status_code[kMaxPrimaries];
+    double genie_mass[kMaxPrimaries];
+    int genie_trackID[kMaxPrimaries];
+    int genie_ND[kMaxPrimaries];
+    int genie_mother[kMaxPrimaries];
+       
+    int no_hits;
+    int hit_plane[kMaxHits];
+    int hit_wire[kMaxHits];
+    int hit_channel[kMaxHits];
+    double hit_peakT[kMaxHits];
+    double hit_charge[kMaxHits];
 
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
@@ -172,12 +248,15 @@ namespace t962 {
     std::string fGenieGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fClusterModuleLabel;   
+    std::string fKingaModuleLabel;
+    std::string fLineMergerModuleLabel;
+    std::string fDbscanModuleLabel;
     std::string fTrackModuleLabel;
     std::string fEndPoint2DModuleLabel;
     std::string fVertexModuleLabel;
     std::string fMINOSModuleLabel;
     std::string fTrackMatchModuleLabel;
-    std::string fScanModuleLabel;
+    //std::string fScanModuleLabel;
     std::string fPOTModuleLabel;
     std::string fCalorimetryModuleLabel;
     std::string fParticleIDModuleLabel;

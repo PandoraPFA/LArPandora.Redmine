@@ -5,7 +5,8 @@
 //
 // \author tjyang@fnal.gov
 // \author joshua.spitz@yale.edu
-// 
+// \author kinga.partyka@yale.edu
+//
 ////////////////////////////////////////////////////////////////////////
 
 #include <sstream>
@@ -36,6 +37,7 @@
 
 #include "T962/AnalysisTree/AnalysisTree.h"
 #include "T962/T962_Objects/MINOS.h"
+#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/geo.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
@@ -82,11 +84,15 @@ t962::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")      ),
+  fKingaModuleLabel         (pset.get< std::string >("KingaModuleLabel")        ),
+  fLineMergerModuleLabel    (pset.get< std::string >("LineMergerModuleLabel")   ),
+  fDbscanModuleLabel        (pset.get< std::string >("DbscanModuleLabel")       ),
   fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")        ),
   fEndPoint2DModuleLabel    (pset.get< std::string >("EndPoint2DModuleLabel")   ),
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fMINOSModuleLabel         (pset.get< std::string >("MINOSModuleLabel")        ),
   fTrackMatchModuleLabel    (pset.get< std::string >("TrackMatchModuleLabel")   ),
+  //fScanModuleLabel          (pset.get< std::string >("ScanModuleLabel")         ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::string >("CalorimetryModuleLabel")  ),
   fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
@@ -152,6 +158,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trkenddcosz",trkenddcosz,"trkenddcosz[ntracks_reco]/D");
   fTree->Branch("trkke",trkke,"trkke[ntracks_reco]/D");
   fTree->Branch("trkrange",trkrange,"trkrange[ntracks_reco]/D");
+  fTree->Branch("trkpitchc",trkpitchc,"trkpitchc[ntracks_reco]/D");
   fTree->Branch("trkpid",trkpid,"trkpid[ntracks_reco]/I");
   fTree->Branch("trkpidndf",trkpidndf,"trkpidndf[ntracks_reco]/I");
   fTree->Branch("trkpidchi2",trkpidchi2,"trkpidchi2[ntracks_reco]/D");
@@ -186,13 +193,13 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("test_charge_minos",&test_charge_minos,"test_charge_minos/I"); 
   fTree->Branch("rdiff_minos",&rdiff_minos,"rdiff_minos/D");
   fTree->Branch("thetadiff_minos",&thetadiff_minos,"thetadiff_minos/D");
-  fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/D");
-  fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/D");
-  fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/D");
-  fTree->Branch("ntracks_scan", &ntracks_scan , "ntracks_scan/I");
-  fTree->Branch("nshowers_scan", &nshowers_scan , "nshowers_scan/I");
-  fTree->Branch("neutrino_scan", &neutrino_scan , "neutrino_scan/I");
-  fTree->Branch("maybeneutrino_scan", &maybeneutrino_scan , "maybeneutrino_scan/I"); 
+//  fTree->Branch("vtxx_scan", &vtxx_scan, "vtxx_scan/D");
+//  fTree->Branch("vtxy_scan", &vtxy_scan, "vtxy_scan/D");
+//  fTree->Branch("vtxz_scan", &vtxz_scan, "vtxz_scan/D");
+//  fTree->Branch("ntracks_scan", &ntracks_scan , "ntracks_scan/I");
+//  fTree->Branch("nshowers_scan", &nshowers_scan , "nshowers_scan/I");
+//  fTree->Branch("neutrino_scan", &neutrino_scan , "neutrino_scan/I");
+//  fTree->Branch("maybeneutrino_scan", &maybeneutrino_scan , "maybeneutrino_scan/I"); 
   fTree->Branch("parpdg", &parpdg, "parpdg/I");
   fTree->Branch("parmom", &parmom, "parmom/D");
   fTree->Branch("nuPDG_truth",&nuPDG_truth,"nuPDG_truth/I");
@@ -215,6 +222,89 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
   fTree->Branch("beamwgt",&beamwgt,"beamwgt/D");
 
+  //kinga:
+
+  fTree->Branch("no_dead_wires_muon",&no_dead_wires_muon,"no_dead_wires_muon/I");  
+  fTree->Branch("no_hits",&no_hits,"no_hits/I");
+  fTree->Branch("hit_plane",hit_plane,"hit_plane[no_hits]/I");
+  fTree->Branch("hit_wire",hit_wire,"hit_wire[no_hits]/I");
+  fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/I");
+  fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
+  fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
+
+  fTree->Branch("twodvtx_w_reco", twodvtx_w_reco, "twodvtx_w_reco[2]/D");
+  fTree->Branch("twodvtx_t_reco", twodvtx_t_reco, "twodvtx_t_reco[2]/D");
+  fTree->Branch("twodvtx_w_truth", twodvtx_w_truth, "twodvtx_w_truth[2]/D");
+  fTree->Branch("twodvtx_t_truth", twodvtx_t_truth, "twodvtx_t_truth[2]/D");
+  fTree->Branch("nkingaclustersu_reco",&nkingaclustersu_reco,"nkingaclustersu_reco/I");
+  fTree->Branch("nkingaclustersv_reco",&nkingaclustersv_reco,"nkingaclustersv_reco/I");
+  fTree->Branch("nvertexkingaclustersu_reco",&nvertexkingaclustersu_reco,"nvertexkingaclustersu_reco/I");
+  fTree->Branch("nvertexkingaclustersv_reco",&nvertexkingaclustersv_reco,"nvertexkingaclustersv_reco/I");
+  
+  fTree->Branch("nlinemergerclustersu_reco",&nlinemergerclustersu_reco,"nlinemergerclustersu_reco/I");
+  fTree->Branch("nlinemergerclustersv_reco",&nlinemergerclustersv_reco,"nlinemergerclustersv_reco/I");
+  fTree->Branch("nvertexlinemergerclustersu_reco",&nvertexlinemergerclustersu_reco,"nvertexlinemergerclustersu_reco/I");
+  fTree->Branch("nvertexlinemergerclustersv_reco",&nvertexlinemergerclustersv_reco,"nvertexlinemergerclustersv_reco/I");
+  
+  fTree->Branch("ndbscanclustersu_reco",&ndbscanclustersu_reco,"ndbscanclustersu_reco/I");
+  fTree->Branch("ndbscanclustersv_reco",&ndbscanclustersv_reco,"ndbscanclustersv_reco/I");
+  fTree->Branch("nvertexdbscanclustersu_reco",&nvertexdbscanclustersu_reco,"nvertexdbscanclustersu_reco/I");
+  fTree->Branch("nvertexdbscanclustersv_reco",&nvertexdbscanclustersv_reco,"nvertexdbscanclustersv_reco/I");
+  
+  fTree->Branch("no_kingaclusters",&no_kingaclusters,"no_kingaclusters/I");
+  fTree->Branch("kingaclusters_planeNo",kingaclusters_planeNo,"kingaclusters_planeNo[no_kingaclusters]/I");
+  fTree->Branch("Start_pt_w_kingaCl", Start_pt_w_kingaCl, "Start_pt_w_kingaCl[no_kingaclusters]/D");
+  fTree->Branch("Start_pt_t_kingaCl", Start_pt_t_kingaCl, "Start_pt_t_kingaCl[no_kingaclusters]/D");
+  
+  fTree->Branch("no_linemergerclusters",&no_linemergerclusters,"no_linemergerclusters/I");
+  fTree->Branch("linemergerclusters_planeNo",linemergerclusters_planeNo,"linemergerclusters_planeNo[no_linemergerclusters]/I");
+  fTree->Branch("Start_pt_w_linemergerCl", Start_pt_w_linemergerCl, "Start_pt_w_linemergerCl[no_linemergerclusters]/D");
+  fTree->Branch("Start_pt_t_linemergerCl", Start_pt_t_linemergerCl, "Start_pt_t_linemergerCl[no_linemergerclusters]/D");
+  
+  fTree->Branch("two_trackstart_dcosx_reco",two_trackstart_dcosx_reco, "two_trackstart_dcosx_reco[2]/D");
+  fTree->Branch("two_trackstart_dcosy_reco",two_trackstart_dcosy_reco, "two_trackstart_dcosy_reco[2]/D");
+  fTree->Branch("two_trackstart_dcosz_reco",two_trackstart_dcosz_reco, "two_trackstart_dcosz_reco[2]/D");
+  fTree->Branch("two_trackexit_dcosx_reco",two_trackexit_dcosx_reco, "two_trackexit_dcosx_reco[2]/D");
+  fTree->Branch("two_trackexit_dcosy_reco",two_trackexit_dcosy_reco, "two_trackexit_dcosy_reco[2]/D");
+  fTree->Branch("two_trackexit_dcosz_reco",two_trackexit_dcosz_reco, "two_trackexit_dcosz_reco[2]/D");
+  
+  //......................................................
+  // from geant4:
+
+  fTree->Branch("no_primaries",&no_primaries,"no_primaries/I");
+  fTree->Branch("primaries_pdg",primaries_pdg,"primaries_pdg[no_primaries]/I");
+  fTree->Branch("Eng",Eng,"Eng[no_primaries]/D");
+  fTree->Branch("Px",Px,"Px[no_primaries]/D");
+  fTree->Branch("Py",Py,"Py[no_primaries]/D");
+  fTree->Branch("Pz",Pz,"Pz[no_primaries]/D");
+  fTree->Branch("StartPointx",StartPointx,"StartPointx[no_primaries]/D");
+  fTree->Branch("StartPointy",StartPointy,"StartPointy[no_primaries]/D");
+  fTree->Branch("StartPointz",StartPointz,"StartPointz[no_primaries]/D");
+  fTree->Branch("EndPointx",EndPointx,"EndPointx[no_primaries]/D");
+  fTree->Branch("EndPointy",EndPointy,"EndPointy[no_primaries]/D");
+  fTree->Branch("EndPointz",EndPointz,"EndPointz[no_primaries]/D");
+  fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[no_primaries]/I");
+  
+  fTree->Branch("Kin_Eng_reco",Kin_Eng_reco,"Kin_Eng_reco[ntracks_reco]/D");
+  //fTree->Branch("fTrkPitchC", &fTrkPitchC, "fTrkPitchC/D");
+  fTree->Branch("muon_Kin_Eng_reco",&muon_Kin_Eng_reco,"muon_Kin_Eng_reco/D");
+  
+ //..................................
+ // now from genie:
+  fTree->Branch("genie_no_primaries",&genie_no_primaries,"genie_no_primaries/I");
+  fTree->Branch("genie_primaries_pdg",genie_primaries_pdg,"genie_primaries_pdg[genie_no_primaries]/I");
+  fTree->Branch("genie_Eng",genie_Eng,"genie_Eng[genie_no_primaries]/D");
+  fTree->Branch("genie_Px",genie_Px,"genie_Px[genie_no_primaries]/D");
+  fTree->Branch("genie_Py",genie_Py,"genie_Py[genie_no_primaries]/D");
+  fTree->Branch("genie_Pz",genie_Pz,"genie_Pz[genie_no_primaries]/D");
+  fTree->Branch("genie_P",genie_P,"genie_P[genie_no_primaries]/D");
+  fTree->Branch("genie_status_code",genie_status_code,"genie_status_code[genie_no_primaries]/I");
+  fTree->Branch("genie_mass",genie_mass,"genie_mass[genie_no_primaries]/D");
+  fTree->Branch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
+  fTree->Branch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
+  fTree->Branch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
+  
+
   TString filename = "numu_numode_final.root";
   const char *fROOTfile = gSystem->FindFile("${SRT_PRIVATE_CONTEXT}/T962/CCInclusiveMacro/:${SRT_PUBLIC_CONTEXT}/T962/CCInclusiveMacro/",filename);
 
@@ -232,7 +322,7 @@ void t962::AnalysisTree::beginSubRun(const art::SubRun& sr)
 {
 
   art::Handle< sumdata::POTSummary > potListHandle;
-  sr.getByLabel(fPOTModuleLabel,potListHandle);
+  //sr.getByLabel(fPOTModuleLabel,potListHandle);
   
   if(sr.getByLabel(fPOTModuleLabel,potListHandle))
     pot=potListHandle->totpot;
@@ -287,6 +377,20 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fClusterModuleLabel,clusterListHandle))
       art::fill_ptr_vector(clusterlist, clusterListHandle);
 
+  art::Handle< std::vector<recob::Cluster>  > kingaListHandle;
+  std::vector<art::Ptr<recob::Cluster> >kingalist;  
+  if(evt.getByLabel(fKingaModuleLabel,kingaListHandle))
+    art::fill_ptr_vector(kingalist,kingaListHandle);
+
+  art::Handle< std::vector<recob::Cluster> > linemergerclusterListHandle;
+  std::vector<art::Ptr<recob::Cluster> >linemergerlist;  
+  if(evt.getByLabel(fLineMergerModuleLabel,linemergerclusterListHandle))
+    art::fill_ptr_vector(linemergerlist, linemergerclusterListHandle);
+
+  art::Handle< std::vector<recob::Cluster> > dbscanclusterListHandle;
+  std::vector<art::Ptr<recob::Cluster> >dbscanlist;
+  if(evt.getByLabel(fDbscanModuleLabel,dbscanclusterListHandle))
+    art::fill_ptr_vector(dbscanlist,dbscanclusterListHandle);
 
   art::Handle< std::vector<recob::Track> > trackListHandle;
   std::vector<art::Ptr<recob::Track> > tracklist;
@@ -307,6 +411,12 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   std::vector<art::Ptr<t962::MINOS> > minoslist;
   if (evt.getByLabel(fMINOSModuleLabel,minosListHandle))
     art::fill_ptr_vector(minoslist, minosListHandle);
+
+//  art::Handle< std::vector<t962::ScanInfo> > scanListHandle;
+//  std::vector<art::Ptr<t962::ScanInfo> > scanlist;
+//  if (evt.getByLabel(fScanModuleLabel,scanListHandle))
+//    art::fill_ptr_vector(scanlist, scanListHandle);
+
 
   art::ServiceHandle<geo::Geometry> geom;  
   art::ServiceHandle<cheat::BackTracker> bt;
@@ -434,6 +544,16 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     memset(larEnd, 0, 3);
     tracklist[i]->Extent(trackStart,trackEnd); 
     tracklist[i]->Direction(larStart,larEnd);
+
+    //kinga:
+    if(tracklist.size()==2){ // (2 track event)
+      two_trackstart_dcosx_reco[i] = larStart[0];
+      two_trackstart_dcosy_reco[i] = larStart[1];
+      two_trackstart_dcosz_reco[i] = larStart[2];       
+      two_trackexit_dcosx_reco[i] = larEnd[0];
+      two_trackexit_dcosy_reco[i] = larEnd[1];
+      two_trackexit_dcosz_reco[i] = larEnd[2];
+    }
            
     trackstart_x_reco=trackStart[0];
     trackstart_y_reco=trackStart[1];
@@ -459,8 +579,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     trkenddcosy[i]    = larEnd[1];
     trkenddcosz[i]    = larEnd[2];
     if (focal.at(i).isValid()){
-      trkke[i]          = focal.at(i).ref().KineticEnergy();
-      trkrange[i]       = focal.at(i).ref().Range();
+      trkke[i]           = focal.at(i).ref().KineticEnergy();
+      trkrange[i]        = focal.at(i).ref().Range();
+      no_dead_wires_muon = focal.at(i).ref().DeadWireResRC().size();
+      Kin_Eng_reco[i]    = focal.at(i).ref().KineticEnergy()+no_dead_wires_muon*focal.at(i).ref().TrkPitchC()*2.1;
     }
     if (fopid.at(i).isValid()){
       trkpid[i]         = fopid.at(i).ref().Pdg();
@@ -510,30 +632,187 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   nvertextracks_reco=n_vertextracks; 
   ntrackendonboundary_reco=n_endonboundarytracks;
   
-  //scan information (data only)
-  double time= -99.;
-  double y_vert=-99.;
-  double z_vert=-99.;
+
+  //From CCQEAnalysisTree
+  // 2d vertex information
+  bool found2dvtx = false;
   
- //  for(unsigned int i=0; i<scanlist.size();++i){ 
-//     time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
-//     int wire_I=scanlist[i]->Get_VertIndWire();    
-//     int wire_C=scanlist[i]->Get_VertColWire();   
-//     if(wire_I>-1 && wire_C>-1)
-//       {
-// 	wire_I=geom->PlaneWireToChannel(0,wire_I);
-// 	wire_C=geom->PlaneWireToChannel(1,wire_C);
-// 	geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
+  for (unsigned int j = 0; j<endpointlist.size();j++){
+    std::cout<<"j="<<j<<" W_VERTEX_RECO= "<<endpointlist[j]->WireNum()<<" T_VERTEX_RECO= "<<endpointlist[j]->DriftTime()<<std::endl;
+    twodvtx_w_reco[j]=endpointlist[j]->WireNum();
+    twodvtx_t_reco[j]=endpointlist[j]->DriftTime();
+    found2dvtx=true;
+  }
+  
+  //kingacluster information
+  
+  int fkingaCl_p0=0;
+  int fkingaCl_p1=0;
+  int fkingaCl_near_vertex_p0=0;
+  int fkingaCl_near_vertex_p1=0;
+  for(unsigned int ii = 0; ii < kingalist.size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> cluster = kingalist[ii];
 	
-// 	vtxx_scan=(time-60)*.031;
-// 	vtxy_scan=y_vert;
-// 	vtxz_scan=z_vert;
-// 	neutrino_scan=scanlist[i]->Get_IsNeutrino();
-// 	maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
-// 	ntracks_scan=scanlist[i]->Get_Track();
-// 	nshowers_scan=scanlist[i]->Get_NumShower(); 
-//       }
-//   }
+      if(cluster->View()==geo::kU){
+	kingaclusters_planeNo[ii]=0;
+	Start_pt_w_kingaCl[ii]=cluster->StartPos()[0];
+	Start_pt_t_kingaCl[ii]=cluster->StartPos()[1];
+	fkingaCl_p0++;
+	//std::cout<<"p0, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
+	if(fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
+	  fkingaCl_near_vertex_p0++;
+	}
+      }
+      else if(cluster->View()==geo::kV){
+	kingaclusters_planeNo[ii]=1;
+	Start_pt_w_kingaCl[ii]=cluster->StartPos()[0];
+	Start_pt_t_kingaCl[ii]=cluster->StartPos()[1];
+	fkingaCl_p1++;
+	//std::cout<<"p1, cluster# "<<ii<<" startPoint: "<<cluster->StartPos()[0]<<" , "<<cluster->StartPos()[1]<<std::endl;
+	if( fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
+	  fkingaCl_near_vertex_p1++;
+	}
+      }
+    }
+  no_kingaclusters=kingalist.size();
+  
+  nkingaclustersu_reco=fkingaCl_p0;
+  nkingaclustersv_reco=fkingaCl_p1;
+  nvertexkingaclustersu_reco=fkingaCl_near_vertex_p0;
+  nvertexkingaclustersv_reco=fkingaCl_near_vertex_p1;
+   
+  
+  //line merger cluster information
+  
+  int flinemergerCl_p0=0;
+  int flinemergerCl_p1=0;
+  int flinemergerCl_near_vertex_p0=0;
+  int flinemergerCl_near_vertex_p1=0;
+
+  for(unsigned int ii = 0; ii < linemergerlist.size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> cluster = linemergerlist[ii];
+      
+      if(cluster->View()==geo::kU){
+	linemergerclusters_planeNo[ii]=0;
+	Start_pt_w_linemergerCl[ii]=cluster->StartPos()[0];
+	Start_pt_t_linemergerCl[ii]=cluster->StartPos()[1];
+	flinemergerCl_p0++;
+	if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
+	  flinemergerCl_near_vertex_p0++;
+	}
+      }
+      else if(cluster->View()==geo::kV){
+	linemergerclusters_planeNo[ii]=1;
+	Start_pt_w_linemergerCl[ii]=cluster->StartPos()[0];
+	Start_pt_t_linemergerCl[ii]=cluster->StartPos()[1];
+	flinemergerCl_p1++;
+	if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
+	  flinemergerCl_near_vertex_p1++;
+	}
+      }
+    }
+  no_linemergerclusters=linemergerlist.size();
+  
+  nlinemergerclustersu_reco=flinemergerCl_p0;
+  nlinemergerclustersv_reco=flinemergerCl_p1;
+  nvertexlinemergerclustersu_reco=flinemergerCl_near_vertex_p0;
+  nvertexlinemergerclustersv_reco=flinemergerCl_near_vertex_p1;
+  
+  
+  //dbscan cluster information
+  
+  int fdbscanCl_p0=0;
+  int fdbscanCl_p1=0;
+  int fdbscanCl_near_vertex_p0=0;
+  int fdbscanCl_near_vertex_p1=0;
+
+  for(unsigned int ii = 0; ii < dbscanlist.size(); ++ii)
+    {
+      art::Ptr<recob::Cluster> cluster = dbscanlist[ii];
+      
+      if(cluster->View()==geo::kU){
+	fdbscanCl_p0++;
+	if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[0])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[0])<90 ){
+	  fdbscanCl_near_vertex_p0++;
+	}
+      }
+      else if(cluster->View()==geo::kV){
+	fdbscanCl_p1++;
+	if(found2dvtx==true && fabs(cluster->StartPos()[0]-twodvtx_w_reco[1])<6 && fabs(cluster->StartPos()[1]-twodvtx_t_reco[1])<90 ){
+	  fdbscanCl_near_vertex_p1++;
+	  
+	}
+      }
+    }
+  
+  ndbscanclustersu_reco=fdbscanCl_p0;
+  ndbscanclustersv_reco=fdbscanCl_p1;
+  nvertexdbscanclustersu_reco=fdbscanCl_near_vertex_p0;
+  nvertexdbscanclustersv_reco=fdbscanCl_near_vertex_p1;
+
+//////////////////////////////////////////////////////////////////////////
+/////////        HIT info:       ////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+  std::vector< art::Ptr<recob::Hit> >::iterator itr = hitlist.begin();
+  unsigned int p(0),w(0),t(0), cs(0);
+  int hit_no;
+  unsigned int channel=0;
+
+  std::cout<<"hitlist.size()= "<<hitlist.size()<<std::endl;
+   
+  no_hits=hitlist.size();
+   
+  while( itr != hitlist.end() ){
+    // std::cout<<"working on hit# "<<itr-hitlist.begin()<<std::endl;
+    hit_no=(int)(itr-hitlist.begin());
+    //std::cout<<"hit_no= "<<hit_no<<std::endl;
+    //std::cout<<"channel= "<<(*itr)->Channel()<<" ";
+    channel=(*itr)->Channel();
+    
+    geom->ChannelToWire(channel,cs,t,p,w);
+    hit_channel[hit_no]= channel;
+    hit_plane[hit_no]=p;
+    hit_wire[hit_no]=w;
+    hit_peakT[hit_no]=(*itr)->PeakTime();
+    hit_charge[hit_no]=(*itr)->Charge();
+    
+    std::cout<<"p= "<<p<<" ,w= "<<w<<" ,time= "<<(*itr)->PeakTime()<<" Charge= "<<(*itr)->Charge()<<" charge(true)= "<<(*itr)->Charge(true)<<std::endl;
+    
+    //  if((*itr)->View()==geo::kU){
+    //     std::cout<<"plane 0"<<std::endl;}
+    //     else if((*itr)->View()==geo::kV){
+    //     std::cout<<"plane 1"<<std::endl;}
+    itr++;
+  }
+  
+//  //scan information (data only)
+//  double time= -99.;
+//  double y_vert=-99.;
+//  double z_vert=-99.;
+//  
+//  for(unsigned int i=0; i<scanlist.size();++i){ 
+//    time=(scanlist[i]->Get_VertIndTime()+scanlist[i]->Get_VertColTime())/2.;  
+//    int wire_I=scanlist[i]->Get_VertIndWire();    
+//    int wire_C=scanlist[i]->Get_VertColWire();   
+//    if(wire_I>-1 && wire_C>-1)
+//      {
+//	wire_I=geom->PlaneWireToChannel(0,wire_I);
+//	wire_C=geom->PlaneWireToChannel(1,wire_C);
+//	geom->ChannelsIntersect(wire_I,wire_C,y_vert,z_vert);
+//	
+//	vtxx_scan=(time-60)*.031;
+//	vtxy_scan=y_vert;
+//	vtxz_scan=z_vert;
+//	neutrino_scan=scanlist[i]->Get_IsNeutrino();
+//	maybeneutrino_scan=scanlist[i]->Get_IsMaybeNeutrino();
+//	ntracks_scan=scanlist[i]->Get_Track();
+//	nshowers_scan=scanlist[i]->Get_NumShower(); 
+//      }
+//  }
+
   //mc truth information
   if (!isdata){
     //save single particle information
@@ -547,6 +826,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     //save neutrino interaction information
     mcevts_truth = mclist.size();
     if (mclist[0]->NeutrinoSet()){
+      //find the true neutrino corresponding to the reconstructed event
       std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
       for (size_t i = 0; i<hitlist.size(); i++){
 	if (hitlist[i]->View() == geo::kV){//collection view
@@ -587,6 +867,138 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	lep_dcosy_truth = mctruth->GetNeutrino().Lepton().Py()/mctruth->GetNeutrino().Lepton().P();
 	lep_dcosz_truth = mctruth->GetNeutrino().Lepton().Pz()/mctruth->GetNeutrino().Lepton().P();
       }
+
+      //Kinga
+      double presamplings=60.0;
+      double drifttick=(nuvtxx_truth/LArProp->DriftVelocity(LArProp->Efield(),LArProp->Temperature()))*(1./.198)+presamplings;
+      
+      twodvtx_t_truth[0]=drifttick;
+      twodvtx_t_truth[1]=drifttick;
+
+      genie_no_primaries=mctruth->NParticles();
+  
+      for(int j = 0; j < mctruth->NParticles(); ++j){
+	simb::MCParticle part(mctruth->GetParticle(j));
+    
+	//std::cout<<"pdg= "<<part.PdgCode()<<" ,Process="<<part.Process()<<" StatusCode= "<<part.StatusCode()<<" mass= "<<part.Mass()<<" p= "<<part.P()<<" E= "<<part.E()<<" trackID= "<<part.TrackId()<<" ND= "<<part.NumberDaughters()<<" Mother= "<<part.Mother()<<std::endl;
+    
+	genie_primaries_pdg[j]=part.PdgCode();
+	genie_Eng[j]=part.E();
+	genie_Px[j]=part.Px();
+	genie_Py[j]=part.Py();
+	genie_Pz[j]=part.Pz();
+	genie_P[j]=part.Px();
+	genie_status_code[j]=part.StatusCode();
+	genie_mass[j]=part.Mass();
+	genie_trackID[j]=part.TrackId();
+	genie_ND[j]=part.NumberDaughters();
+	genie_mother[j]=part.Mother();
+      }
+      
+      double fMCvertex[3];
+      fMCvertex[0] = nuvtxx_truth;
+      fMCvertex[1] = nuvtxy_truth;
+      fMCvertex[2] = nuvtxz_truth;
+      // now wire vertex:
+      unsigned int channel2,plane2,wire2,tpc2,cs; 
+      for(size_t tpc = 0; tpc < geom->NTPC(); ++tpc){
+	
+	for(unsigned int plane=0;plane<geom->Nplanes(tpc);plane++){
+	  if(plane==0){
+	    fMCvertex[0]=.3;//force time coordinate to be closer to induction plane 
+	  }
+	  else{
+	    fMCvertex[0]=-.3;//force time coordinate to be closer to collection plane
+	  }
+  
+	  try{
+	    channel2 = geom->NearestChannel(fMCvertex,plane);
+   
+	  }
+	  catch(cet::exception &e){
+	    mf::LogWarning("ccqeanalysistreeexcp")<<e;
+  
+    
+	    //std::cout<<"fMCvertex[2]= "<<fMCvertex[2]<<" plane="<<plane<<" DetLength= "<<geom->DetLength()<<" geom->Nchannels()= "<<geom->Nchannels()<<std::endl;
+	    
+	    if(plane==0 && fMCvertex[2]<5) channel2=0;
+	    else if(plane==0 && fMCvertex[2]>geom->DetLength()-5) channel2=(geom->Nchannels())/2 -1;
+	    else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
+	    else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
+	  }
+	  geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
+	  twodvtx_w_truth[plane]=wire2;
+	}
+      }
+
+      //--------------------------------------------------------------//
+      //        NOW I WILL GET INFO FROM GEANT4 TO FIND OUT HOW MANY 
+      //        PARTICLES WE CAN REALLY SEE IN OUR DETECTOR
+      //        this is needed if you want to confirm that kingaclusters 
+      ///       can correctly count tracks:
+      //--------------------------------------------------------------//
+  
+      art::Handle< std::vector<sim::Particle> > geant_list;
+      std::vector<art::Ptr<sim::Particle> > geant_part;
+      if(evt.getByLabel (fLArG4ModuleLabel,geant_list))
+	art::fill_ptr_vector(geant_part,geant_list);
+ 
+      std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
+      std::string pri("primary");
+      int primary=0;
+      //determine the number of primary particles from geant:
+  
+      for( unsigned int i = 0; i < geant_part.size(); ++i ){
+   
+	if(geant_part[i]->Process()==pri){
+	  primary++;
+	}
+      }
+  
+      no_primaries=primary;
+  
+      std::cout<<"Geant4 list: "<<std::endl;
+ 
+      for( unsigned int i = 0; i < geant_part.size(); ++i ){
+	std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
+	
+	if(geant_part[i]->Process()==pri){
+	  
+	  //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
+	  
+	  // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
+	  //     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
+	  //     fEng.push_back(geant_part[i]->E());
+	  //     
+	  
+	  primaries_pdg[i]=geant_part[i]->PdgCode();
+	  
+	  Eng[i]=geant_part[i]->E();
+	  Px[i]=geant_part[i]->Px();
+	  
+	  Py[i]=geant_part[i]->Py();
+	  Pz[i]=geant_part[i]->Pz();
+	  
+	  StartPointx[i]=geant_part[i]->Vx();
+	  StartPointy[i]=geant_part[i]->Vy();
+	  StartPointz[i]=geant_part[i]->Vz();
+	  EndPointx[i]=geant_part[i]->EndPoint()[0];
+	  EndPointy[i]=geant_part[i]->EndPoint()[1];
+	  EndPointz[i]=geant_part[i]->EndPoint()[2];
+	  
+	  NumberDaughters[i]=geant_part[i]->NumberDaughters();
+	  
+	  
+	  std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
+	  
+	  // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
+	  
+	}
+	
+      }
+ 
+
+      //beam weight, only available for nu-data
       beamwgt = 1.;
       if (nuPDG_truth == 14){
 	int bin = hBeamWeight_numu_numode->FindBin(enu_truth);
@@ -683,7 +1095,9 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       trk_vtxx_minos = fomatch.at(bestmatch).ref().ftrkVtxX;
       trk_vtxy_minos = fomatch.at(bestmatch).ref().ftrkVtxY;
       trk_vtxz_minos = fomatch.at(bestmatch).ref().ftrkVtxZ;        
-      
+
+      muon_Kin_Eng_reco = Kin_Eng_reco[bestmatch];
+
       if (!isdata){       
 	mc_index_minos = fomatch.at(bestmatch).ref().fmcIndex;
 	mc_pdg_minos = fomatch.at(bestmatch).ref().fmcPDG;
@@ -825,7 +1239,8 @@ void t962::AnalysisTree::ResetVars(){
   trk_vtxx_minos = -99999;
   trk_vtxy_minos = -99999;
   trk_vtxz_minos = -99999;
-  
+  muon_Kin_Eng_reco = -99999;
+  no_dead_wires_muon = -99999;
   mc_index_minos=-99999;
   mc_pdg_minos=-99999;
   mc_px_minos=-99999;
@@ -840,13 +1255,13 @@ void t962::AnalysisTree::ResetVars(){
   trkcontained_minos=-99999;
   rdiff_minos = 99999;
   thetadiff_minos = 99999;
-  vtxx_scan=-99999;
-  vtxy_scan=-99999;
-  vtxz_scan=-99999;
-  neutrino_scan=-99999;
-  maybeneutrino_scan=-99999;
-  ntracks_scan=-99999;
-  nshowers_scan=-99999;         
+//  vtxx_scan=-99999;
+//  vtxy_scan=-99999;
+//  vtxz_scan=-99999;
+//  neutrino_scan=-99999;
+//  maybeneutrino_scan=-99999;
+//  ntracks_scan=-99999;
+//  nshowers_scan=-99999;         
   parpdg = -99999;
   parmom = -99999;
   nuPDG_truth = -99999;
@@ -882,7 +1297,9 @@ void t962::AnalysisTree::ResetVars(){
     trkenddcosy[i] = -99999;
     trkenddcosz[i] = -99999;
     trkke[i] = -99999;
+    Kin_Eng_reco[i] = -99999;
     trkrange[i] = -99999;
+    trkpitchc[i] = -99999;
     trkpid[i] = -99999;
     trkpidndf[i] = -99999;
     trkpidchi2[i] = -99999;
@@ -896,21 +1313,99 @@ void t962::AnalysisTree::ResetVars(){
     trktruepurv[i] = -99999;
   }    
   
+  no_primaries = -99999;
+  for (int i = 0; i<kMaxPrimaries; ++i){
+    primaries_pdg[i] = -99999;
+    Eng[i] = -99999;
+    Px[i] = -99999;
+    Py[i] = -99999;
+    Pz[i] = -99999;
+    StartPointx[i] = -99999;
+    StartPointy[i] = -99999;
+    StartPointz[i] = -99999;
+    EndPointx[i] = -99999;
+    EndPointy[i] = -99999;
+    EndPointz[i] = -99999;
+    NumberDaughters[i] = -99999;
+    genie_primaries_pdg[i] = -99999;
+    genie_Eng[i] = -99999;
+    genie_Px[i] = -99999;
+    genie_Py[i] = -99999;
+    genie_Pz[i] = -99999;
+    genie_P[i] = -99999;
+    genie_status_code[i] = -99999;
+    genie_mass[i] = -99999;
+    genie_trackID[i] = -99999;
+    genie_ND[i] = -99999;
+    genie_mother[i] = -99999;
+  }    
+  
+  for (int i = 0; i<kMaxHits; ++i){
+    hit_plane[i] = -99999;
+    hit_wire[i] = -99999;
+    hit_channel[i] = -99999;
+    hit_peakT[i] = -99999;
+    hit_charge[i] = -99999;
+  }
+
+  for (int i = 0; i<2; ++i){
+    twodvtx_w_reco[i] = -99999;
+    twodvtx_t_reco[i] = -99999;
+    twodvtx_w_truth[i] = -99999;
+    twodvtx_t_truth[i] = -99999;
+  } 
+
+  nkingaclustersu_reco = -99999;
+  nkingaclustersv_reco = -99999;
+  nvertexkingaclustersu_reco = -99999;
+  nvertexkingaclustersv_reco = -99999;
+  
+  nlinemergerclustersu_reco = -99999;
+  nlinemergerclustersv_reco = -99999;
+  nvertexlinemergerclustersu_reco = -99999;
+  nvertexlinemergerclustersv_reco = -99999;
+  
+  ndbscanclustersu_reco = -99999;
+  ndbscanclustersv_reco = -99999;
+  nvertexdbscanclustersu_reco = -99999;
+  nvertexdbscanclustersv_reco = -99999;
+  
+  no_kingaclusters = -99999;
+  no_linemergerclusters = -99999;   
+
+  for (int i = 0; i<kMaxClusters; ++i){
+   kingaclusters_planeNo[i] = -99999;
+   Start_pt_w_kingaCl[i] = -99999;
+   Start_pt_t_kingaCl[i] = -99999;
+   linemergerclusters_planeNo[i] = -99999;
+   Start_pt_w_linemergerCl[i] = -99999;
+   Start_pt_t_linemergerCl[i] = -99999;
+  }
+  
+  for (int i = 0; i<2; ++i){
+    two_trackstart_dcosx_reco[i] = -99999;
+    two_trackstart_dcosy_reco[i] = -99999;
+    two_trackstart_dcosz_reco[i] = -99999;
+    two_trackexit_dcosx_reco[i] = -99999;
+    two_trackexit_dcosy_reco[i] = -99999;
+    two_trackexit_dcosz_reco[i] = -99999;
+  }
+ 
 }
 
 bool t962::AnalysisTree::EndsOnBoundary(art::Ptr<recob::Track> lar_track)
 {
-      std::vector<double> larStart, larEnd;
-      lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
-
- 	if(fabs(larEnd[0])<fboundaryWindow 
-	|| fabs(47.-larEnd[0])<fboundaryWindow 
-	|| fabs(larEnd[1]+20.)<fboundaryWindow
-	|| fabs(20.-larEnd[1])<fboundaryWindow 
-	|| fabs(larEnd[2])<fboundaryWindow 
-	|| fabs(90.-larEnd[2])<fboundaryWindow  )   
-	return true;  
-      else return false;
+  std::vector<double> larStart, larEnd;
+  lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
+  
+  if(fabs(larEnd[0])<fboundaryWindow 
+     || fabs(47.-larEnd[0])<fboundaryWindow 
+     || fabs(larEnd[1]+20.)<fboundaryWindow
+     || fabs(20.-larEnd[1])<fboundaryWindow 
+     || fabs(larEnd[2])<fboundaryWindow 
+     || fabs(90.-larEnd[2])<fboundaryWindow  )   
+    return true;  
+  else return false;
 }
 
 
