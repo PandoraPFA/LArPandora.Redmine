@@ -23,7 +23,7 @@ const int kMaxTrack      = 1000;  //maximum number of tracks
 const int kMaxClusters   = 1000;  //maximum number of clusters
 const int kMaxHits       = 20000; //maximum number of hits;
 const int kMaxPrimaries  = 1000;  //maximum number of primary particles
-
+const int kMaxTrackHits  = 1000;  //maximum number of hits on a track
 ///Track finding and building 
 namespace t962 {
    
@@ -99,6 +99,11 @@ namespace t962 {
     double Kin_Eng_reco[kMaxTrack];
     double trkrange[kMaxTrack];
     double trkpitchc[kMaxTrack];
+    int    nmaxtrkhits;
+    int    ntrkhits[kMaxTrack];
+    double trkdedx[kMaxTrack][kMaxTrackHits];
+    double trkdqdx[kMaxTrack][kMaxTrackHits];
+    double trkresrg[kMaxTrack][kMaxTrackHits];
     int    trkpid[kMaxTrack];
     int    trkpidndf[kMaxTrack];
     double trkpidchi2[kMaxTrack];
@@ -244,6 +249,7 @@ namespace t962 {
     int hit_channel[kMaxHits];
     double hit_peakT[kMaxHits];
     double hit_charge[kMaxHits];
+    double hit_ph[kMaxHits];
 
     //paddle information
     double pmttime;

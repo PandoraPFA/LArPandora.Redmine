@@ -161,6 +161,11 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trkke",trkke,"trkke[ntracks_reco]/D");
   fTree->Branch("trkrange",trkrange,"trkrange[ntracks_reco]/D");
   fTree->Branch("trkpitchc",trkpitchc,"trkpitchc[ntracks_reco]/D");
+  fTree->Branch("nmaxtrkhits",&nmaxtrkhits,"nmaxtrkhits/I");
+  fTree->Branch("ntrkhits",ntrkhits,"ntrkhits[ntracks_reco]/I");
+  fTree->Branch("trkdedx",trkdedx,"trkdedx[ntracks_reco][1000]/D");
+  fTree->Branch("trkdqdx",trkdqdx,"trkdqdx[ntracks_reco][1000]/D");
+  fTree->Branch("trkresrg",trkresrg,"trkresrg[ntracks_reco][1000]/D");
   fTree->Branch("trkpid",trkpid,"trkpid[ntracks_reco]/I");
   fTree->Branch("trkpidndf",trkpidndf,"trkpidndf[ntracks_reco]/I");
   fTree->Branch("trkpidchi2",trkpidchi2,"trkpidchi2[ntracks_reco]/D");
@@ -237,6 +242,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/I");
   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
   fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
+  fTree->Branch("hit_ph",hit_ph,"hit_ph[no_hits]/D");
 
   fTree->Branch("twodvtx_w_reco", twodvtx_w_reco, "twodvtx_w_reco[2]/D");
   fTree->Branch("twodvtx_t_reco", twodvtx_t_reco, "twodvtx_t_reco[2]/D");
@@ -613,6 +619,14 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       trkrange[i]        = focal.at(i).ref().Range();
       no_dead_wires_muon = focal.at(i).ref().DeadWireResRC().size();
       Kin_Eng_reco[i]    = focal.at(i).ref().KineticEnergy()+no_dead_wires_muon*focal.at(i).ref().TrkPitchC()*2.1;
+      ntrkhits[i]        = focal.at(i).ref().dEdx().size();
+      if (nmaxtrkhits<ntrkhits[i]) nmaxtrkhits = ntrkhits[i];
+      for (int j = 0; j<ntrkhits[i]; ++j){
+	trkdedx[i][j] = (focal.at(i).ref().dEdx())[j];
+	trkdqdx[i][j] = (focal.at(i).ref().dQdx())[j];
+	trkresrg[i][j] = (focal.at(i).ref().ResidualRange())[j];
+	//std::cout<<i<<" "<<j<<" "<<trkdedx[i][j]<<" "<<trkdqdx[i][j]<<" "<<trkresrg[i][j]<<std::endl;
+      }
     }
     if (fopid.at(i).isValid()){
       trkpid[i]         = fopid.at(i).ref().Pdg();
@@ -808,7 +822,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     hit_wire[hit_no]=w;
     hit_peakT[hit_no]=(*itr)->PeakTime();
     hit_charge[hit_no]=(*itr)->Charge();
-    
+    hit_ph[hit_no] = (*itr)->Charge(true);
     std::cout<<"p= "<<p<<" ,w= "<<w<<" ,time= "<<(*itr)->PeakTime()<<" Charge= "<<(*itr)->Charge()<<" charge(true)= "<<(*itr)->Charge(true)<<std::endl;
     
     //  if((*itr)->View()==geo::kU){
@@ -1326,6 +1340,7 @@ void t962::AnalysisTree::ResetVars(){
   tpy_flux = -99999;
   tpz_flux = -99999;
   tptype_flux = -99999;
+  nmaxtrkhits = -99999;
   for (int i = 0; i < kMaxTrack; i++){
     trkvtxx[i] = -99999;
     trkvtxy[i] = -99999;
@@ -1343,6 +1358,12 @@ void t962::AnalysisTree::ResetVars(){
     Kin_Eng_reco[i] = -99999;
     trkrange[i] = -99999;
     trkpitchc[i] = -99999;
+    ntrkhits[i] = -99999;
+    for (int j = 0; j<kMaxTrackHits; ++j){
+      trkdedx[i][j] = -99999;
+      trkdqdx[i][j] = -99999;
+      trkresrg[i][j] = -99999;
+    }
     trkpid[i] = -99999;
     trkpidndf[i] = -99999;
     trkpidchi2[i] = -99999;
@@ -1389,6 +1410,7 @@ void t962::AnalysisTree::ResetVars(){
     hit_channel[i] = -99999;
     hit_peakT[i] = -99999;
     hit_charge[i] = -99999;
+    hit_ph[i] = -99999;
   }
 
   for (int i = 0; i<2; ++i){

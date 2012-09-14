@@ -97,6 +97,7 @@ physics.analyzers.analysistree: @local::argoneut_analysistree
 #physics.producers.filter.BadRuns:      [10]
 physics.producers.matchtracks.lartracks:         "spacepts"
 physics.producers.calo.TrackModuleLabel:         "spacepts"
+physics.producers.calo.UseArea:                   true
 physics.analyzers.pid.TrackModuleLabel:          "spacepts"
 physics.analyzers.analysistree.TrackModuleLabel: "spacepts"
 
