@@ -185,7 +185,8 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trk_dcosz_minos",&trk_dcosz_minos,"trk_dcosz_minos/D");
   fTree->Branch("trk_vtxx_minos",&trk_vtxx_minos,"trk_vtxx_minos/D");
   fTree->Branch("trk_vtxy_minos",&trk_vtxy_minos,"trk_vtxy_minos/D");
-  fTree->Branch("trk_vtxz_minos",&trk_vtxz_minos,"trk_vtxz_minos/D"); 
+  fTree->Branch("trk_vtxz_minos",&trk_vtxz_minos,"trk_vtxz_minos/D");
+  fTree->Branch("trk_index_minos",&trk_index_minos,"trk_index_minos/I");
   fTree->Branch("mc_index_minos",&mc_index_minos,"mc_index_minos/F");
   fTree->Branch("mc_pdg_minos",&mc_pdg_minos,"mc_pdg_minos/D");
   fTree->Branch("mc_px_minos",&mc_px_minos,"mc_px_minos/D");
@@ -1113,6 +1114,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
 
     if (bestmatch>-1){
+      trk_index_minos = bestmatch;
       trackStart.clear();
       trackEnd.clear();
       memset(larStart, 0, 3);
@@ -1292,6 +1294,7 @@ void t962::AnalysisTree::ResetVars(){
   trk_vtxx_minos = -99999;
   trk_vtxy_minos = -99999;
   trk_vtxz_minos = -99999;
+  trk_index_minos= -99999;
   muon_Kin_Eng_reco = -99999;
   no_dead_wires_muon = -99999;
   mc_index_minos=-99999;

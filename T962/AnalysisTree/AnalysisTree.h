@@ -125,6 +125,7 @@ namespace t962 {
     double trk_vtxx_minos;
     double trk_vtxy_minos;
     double trk_vtxz_minos;
+    double trk_index_minos;
     int trkcontained_minos;
     int test_charge_minos;
     double rdiff_minos;
