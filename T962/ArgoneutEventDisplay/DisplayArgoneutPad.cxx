@@ -15,6 +15,8 @@
 #include "EventDisplay/SimulationDrawer.h"
 #include "T962/ArgoneutEventDisplay/ArgoneutRecoBaseDrawer.h"
 #include "T962/ArgoneutEventDisplay/MinosDrawer.h"
+#include "T962/ArgoneutEventDisplay/PaddlesDrawer.h"
+#include "T962/ArgoneutEventDisplay/ArgoneutDrawingOptions.h"
 
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 
@@ -49,6 +51,7 @@ DisplayArgoneutPad::~DisplayArgoneutPad()
   if (fView) { delete fView; fView = 0; }
   if (fArgoneutRecoDraw){delete fArgoneutRecoDraw; fArgoneutRecoDraw=0;}
   if (fMinosDraw){delete fMinosDraw; fMinosDraw=0;}
+  if (fPaddlesDraw){delete fPaddlesDraw; fPaddlesDraw=0;}
      
 }
 
@@ -59,7 +62,9 @@ void DisplayArgoneutPad::Draw()
   fView->Clear();
 
   art::ServiceHandle<geo::Geometry> geo;
-
+  art::ServiceHandle<argoevd::ArgoneutDrawingOptions> argoopt;
+  
+  
   // grab the event from the singleton
   const art::Event *evt = evdb::EventHolder::Instance()->GetEvent();
 
@@ -68,6 +73,7 @@ void DisplayArgoneutPad::Draw()
     this->MinosDraw()->  DetOutline3D(fView);
     this->MinosDraw()->  Minos3D     (*evt, fView);
     this->MinosDraw()->  MinosOutline3D(fView);
+    if(argoopt->fDrawPaddles) this->PaddlesDraw()->DrawPaddlesInfo3D(*evt, fView);
   }
  
 
@@ -96,6 +102,12 @@ MinosDrawer* DisplayArgoneutPad::MinosDraw()
 {
    fMinosDraw = new MinosDrawer();
    return fMinosDraw;
+}
+
+PaddlesDrawer* DisplayArgoneutPad::PaddlesDraw() 
+{
+   fPaddlesDraw = new PaddlesDrawer();
+   return fPaddlesDraw;
 }
 
 

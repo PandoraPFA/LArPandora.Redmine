@@ -3,8 +3,11 @@ BEGIN_PROLOG
 argoneut_disp_service:
 {
 
-  MINOSLabel:               "minos" # label of module making the MINOS data
-  MatchLabel:               "matchtracks" # label of module making the Argo/MINOS track associations     
+  MINOSLabel:               "minos"       # label of module making the MINOS data
+  MatchLabel:               "matchtracks" # label of module making the Argo/MINOS track associations   
+  PaddlesLabel:             "paddles"     # label of module making the Paddles data  
+  DrawPaddles:              false          # draw Paddles information or not
+  CoincidenceTime:          25            # Tolerance for Paddle time coincidences
 }
 
 

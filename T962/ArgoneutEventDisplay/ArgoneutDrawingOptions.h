@@ -24,7 +24,10 @@ namespace argoevd {
     void reconfigure(fhicl::ParameterSet const& pset);
     
     std::string          fMINOSLabel;               ///< label for MINOS track collection
-    std::string    	 fMatchLabel;               ///< label for T962/MINOS track associations			  
+    std::string    	 fMatchLabel;               ///< label for T962/MINOS track associations
+    std::string          fPaddlesLabel;             ///< label for Paddles collection
+    bool                 fDrawPaddles;              ///< Draw Paddle information or not
+    int                  fCoincidenceTime;          ///< Tolerance for Paddle time coincidences
    
   };
 }//namespace

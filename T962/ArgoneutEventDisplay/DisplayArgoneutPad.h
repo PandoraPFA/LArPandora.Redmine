@@ -12,6 +12,7 @@ namespace evdb { class View3D; }
 namespace argoevd {
    class ArgoneutRecoBaseDrawer;
    class MinosDrawer;
+   class PaddlesDrawer;
   
   /// A drawing pad showing a 3D rendering of the detector
    class DisplayArgoneutPad : public evd::DrawingPad {
@@ -23,14 +24,15 @@ namespace argoevd {
       void Draw();
       
       ArgoneutRecoBaseDrawer* ArgoneutRecoBaseDraw();
-      MinosDrawer*  MinosDraw();  
-      
-  private:
-    // void AutoZoom();
+      MinosDrawer*  MinosDraw();
+      PaddlesDrawer* PaddlesDraw();
+     
+   
   private:
     evdb::View3D* fView;  ///< Collection of graphics objects to render
     ArgoneutRecoBaseDrawer* fArgoneutRecoDraw;   ///< Drawer for recobase objects  
-    MinosDrawer*            fMinosDraw;   ///< Drawer for recobase objects      
+    MinosDrawer*            fMinosDraw;   ///< Drawer for recobase objects
+     PaddlesDrawer*            fPaddlesDraw;   ///< Drawer for Paddles
       
   };
 };

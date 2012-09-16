@@ -25,7 +25,7 @@ namespace t962{
     ~Paddles();
 
     time_t gettime() const;
-    double gettdc(int pmt_number, int hit_number) const;
+    int    gettdc(int pmt_number, int hit_number) const;
     
     void   SetTime(time_t val);      
     void   SetPMT(int i,int hit[4]);

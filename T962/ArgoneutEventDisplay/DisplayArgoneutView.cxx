@@ -22,7 +22,7 @@ namespace argoevd{
     
     this->Connect("CloseWindow()","argoevd::DisplayArgoneutView",this,"CloseWindow()");
     
-    fDisplayArgoneutPad->Draw();
+    //fDisplayArgoneutPad->Draw();
     
     evdb::Canvas::fCanvas->Update();
   }

@@ -24,6 +24,9 @@ namespace argoevd {
   {
     fMINOSLabel               = pset.get< std::string >("MINOSLabel","minos");
     fMatchLabel               = pset.get< std::string >("MatchLabel","match");
+    fPaddlesLabel             = pset.get< std::string >("PaddlesLabel","paddles");
+    fDrawPaddles              = pset.get< bool        >("DrawPaddles",false);
+    fCoincidenceTime          = pset.get< int         >("CoincidenceTime",25); 
   }  
 }
 ////////////////////////////////////////////////////////////////////////

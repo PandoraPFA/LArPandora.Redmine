@@ -17,6 +17,7 @@
  <class name="art::Assns<recob::Track, t962::MINOS, void>"       />
  
 
+ <class name="art::Wrapper< t962::Paddles > "/>
  <class name="art::Wrapper< std::vector<t962::MINOS>           >"/>
  <class name="art::Wrapper< std::vector<t962::Paddles>         >"/>
  <class name="art::Wrapper< art::Assns<recob::Track, t962::MINOS, void> >"/>

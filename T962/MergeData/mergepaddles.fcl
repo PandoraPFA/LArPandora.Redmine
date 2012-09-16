@@ -1,8 +1,6 @@
-#include "job/mergedatabeam.fcl"
-#include "job/mergedataminos.fcl"
-#include "job/mergesimminos.fcl"
+#include "job/mergedatapaddles.fcl"
 
-process_name: MergeData
+process_name: MergePaddles
 
 services:
 {
@@ -30,13 +28,10 @@ outputs:
 physics:
 {
   producers:{}
-  merge: [beam, minos]  
-  //merge: [minos]
+  merge: [paddles]
   stream1: [out1]
   trigger_paths: [merge]
   end_paths: [stream1]
 }
 
-physics.producers.beam:  @local::argoneut_mergedatabeam
-physics.producers.minos: @local::argoneut_mergedataminos
-//physics.producers.minos: @local::argoneut_mergesimminos
+physics.producers.paddles: @local::argoneut_mergedatapaddles

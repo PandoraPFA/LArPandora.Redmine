@@ -32,6 +32,7 @@ template class std::vector<t962::MINOS>;
 template class std::vector<t962::Paddles>;
 template class art::Assns<recob::Track, t962::MINOS, void>;
 
+template class art::Wrapper< t962::Paddles >;
 template class art::Wrapper< std::vector<t962::MINOS>     >;
 template class art::Wrapper< std::vector<t962::Paddles>   >;
 template class art::Wrapper< art::Assns<recob::Track, t962::MINOS, void> >;
