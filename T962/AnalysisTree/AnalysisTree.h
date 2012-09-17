@@ -54,6 +54,7 @@ namespace t962 {
     int subrun;
     int event;
     double evttime;
+    double beamtime;
     double pot;
     int isdata;
     //reconstructed information    

@@ -118,6 +118,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("subrun",&subrun,"subrun/I");
   fTree->Branch("event",&event,"event/I");
   fTree->Branch("evttime",&evttime,"evttime/D");
+  fTree->Branch("beamtime",&beamtime,"beamtime/D");
   fTree->Branch("pot",&pot,"pot/D");
   fTree->Branch("isdata",&isdata,"isdata/I");
   fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
@@ -364,6 +365,13 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   art::Timestamp ts = evt.time();
   TTimeStamp tts(ts.timeHigh(), ts.timeLow());
   evttime = tts.AsDouble();
+
+  //copied from MergeDataPaddles.cxx
+  art::Handle< raw::BeamInfo > beam;
+  if (evt.getByLabel("beam",beam)){
+    beamtime = (double)beam->get_t_ms();
+    beamtime/=1000.; //in second
+  }
 
   if (evt.isRealData()){
     isdata = 1;
@@ -1259,6 +1267,7 @@ void t962::AnalysisTree::ResetVars(){
   subrun = -99999;
   event = -99999;
   evttime = -99999;
+  beamtime = -99999;
   isdata = -99999;
   vtxx_reco = -99999;
   vtxy_reco  = -99999;
