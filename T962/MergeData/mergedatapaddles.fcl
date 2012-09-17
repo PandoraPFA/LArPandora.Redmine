@@ -1,0 +1,10 @@
+BEGIN_PROLOG
+
+argoneut_mergedatapaddles:
+{
+ module_type: "MergeDataPaddles"
+ daq:         "daq"
+}
+
+END_PROLOG
+
