@@ -65,7 +65,8 @@ namespace merge{
     
     char paddlesfilename[100];
     sprintf(paddlesfilename,"/argoneut/data/paddles/pmt_%02d_%i_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
-  //   printf("Opening /argoneut/data/paddles/pmt_%02d_%i_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
+    
+    //printf("Opening /argoneut/data/paddles/pmt_%02d_%i_%d.txt",timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_year+1900);
     std::ifstream paddlesfile(paddlesfilename);
     
     if(!paddlesfile.is_open()){
@@ -91,6 +92,7 @@ namespace merge{
     art::Handle< raw::BeamInfo > beam;
     evt.getByLabel("beam",beam);
     double tms = (double)beam->get_t_ms();
+    double mindiff = 1000.0;
     
     while(getline(paddlesfile,k)){
     
@@ -107,32 +109,32 @@ namespace merge{
        if(sv[0].compare(str0)==0){
          time = atoi(sv[1].c_str());
        }
-
        
-       //double diff = difftime(spilltime,time);
        double diff = fabs(time - tms/1000.0);
-       //double diff = fabs(time + 500 - tms);
-      //  std::cout << "time = " << time << " spilltime = " << spilltime << " tms = "
-//                  <<  std::setprecision(13) << tms << " minos utc1 = "
-//                  <<  std::setprecision(13) << utc1 << std::endl;
-       
-       //std::cout << "spilltime = " << spilltime << " time = " << time << " dif = " << dif << std::endl;
-       if(diff<1) {
+     
+     
+      //  if(diff<10 && sv[0].compare(str0)==0)
+//          std::cout << "time = " << time << " tms = " << std::setprecision(13) << tms
+//                    << " diff = " << diff << std::endl;
+ 
+       if(diff<1.5) {
+         if(diff<mindiff) mindiff = diff;
          foundpaddlesinfo = true;
        }
-       if(sv[0].compare(str1)==0 && foundpaddlesinfo) for(int i = 0; i<4; ++i) pmt1[i] = atoi(sv[i+1].c_str());
-       if(sv[0].compare(str2)==0 && foundpaddlesinfo) for(int i = 0; i<4; ++i) pmt2[i] = atoi(sv[i+1].c_str());
-       if(sv[0].compare(str3)==0 && foundpaddlesinfo) for(int i = 0; i<4; ++i) pmt3[i] = atoi(sv[i+1].c_str());
-       if(sv[0].compare(str4)==0 && foundpaddlesinfo){
-         for(int i = 0; i<4; ++i) pmt4[i] = atoi(sv[i+1].c_str());
-         paddles.SetTime(time);
+       if(sv[0].compare(str0)==0 && foundpaddlesinfo && diff==mindiff) paddles.SetTime(time);
+       if(sv[0].compare(str1)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt1[i] = atoi(sv[i+1].c_str());
+       if(sv[0].compare(str2)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt2[i] = atoi(sv[i+1].c_str());
+       if(sv[0].compare(str3)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt3[i] = atoi(sv[i+1].c_str());
+       if(sv[0].compare(str4)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt4[i] = atoi(sv[i+1].c_str());
+   
+       
+       if(foundpaddlesinfo && diff>1.5){
          paddles.SetPMT(0,pmt1);
          paddles.SetPMT(1,pmt2);
          paddles.SetPMT(2,pmt3);
          paddles.SetPMT(3,pmt4);
          break;
        }
-
     }
 
     
