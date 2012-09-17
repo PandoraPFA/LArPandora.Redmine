@@ -60,10 +60,10 @@ physics:
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  # reco: [  scanfilt, caldata, ffthit, dbcluster, hough, linemerger, track3d  ] 
-  reco: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, kingacluster, spacepts, matchtracks, calo, pid  ]
+  reco: [ caldata, ffthit, dbcluster, hough, linemerger, vertex2d, kingacluster, spacepts, kalman, matchtracks, matchtracksk, calo, calok, pid, pidk  ]
 # reco: [   caldata, ffthit, dbcluster, hough, linemerger, track3d  ]
  # reco: [ scanfilt ]
-  ana: [ analysistree ]
+  ana: [ analysistree, analysistreek ]
 # ana: [matchtracks]
  #define the output stream, there could be more than one if using filters 
   stream1:  [ out1 ]
@@ -74,7 +74,7 @@ physics:
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- #end_paths:     [ stream1, ana ] 
+# end_paths:     [ stream1, ana ] 
  end_paths:     [  ana ] 
 }
 
@@ -89,15 +89,34 @@ physics.producers.linemerger:   @local::argoneut_linemerger
 physics.producers.vertex2d:     @local::argoneut_vertex2d
 physics.producers.kingacluster: @local::argoneut_kingacluster
 physics.producers.spacepts:     @local::argoneut_spacepts
+physics.producers.kalman:       @local::argoneut_kalman
 physics.producers.matchtracks:  @local::argoneut_matchtracks
+physics.producers.matchtracksk: @local::argoneut_matchtracks
 physics.producers.calo:         @local::argoneut_calo
+physics.producers.calok:        @local::argoneut_calo
 physics.producers.pid:          @local::argoneut_chi2pid
+physics.producers.pidk:         @local::argoneut_chi2pid
 physics.analyzers.analysistree: @local::argoneut_analysistree
+physics.analyzers.analysistreek:@local::argoneut_analysistree
 #physics.producers.filter.BadEvents:    [5]
 #physics.producers.filter.BadRuns:      [10]
-physics.producers.matchtracks.lartracks:         "spacepts"
-physics.producers.calo.TrackModuleLabel:         "spacepts"
-physics.producers.calo.UseArea:                   true
-physics.analyzers.pid.TrackModuleLabel:          "spacepts"
-physics.analyzers.analysistree.TrackModuleLabel: "spacepts"
+physics.producers.kalman.Seed: 314159
+physics.producers.matchtracks.lartracks:                "spacepts"
+physics.producers.matchtracksk.lartracks:               "kalman"
+physics.producers.calo.TrackModuleLabel:                "spacepts"
+physics.producers.calo.UseArea:                         true
+physics.producers.calok.TrackModuleLabel:               "kalman"
+physics.producers.calok.UseArea:                        true
+physics.producers.pid.TrackModuleLabel:                 "spacepts"
+physics.producers.pid.CalorimetryModuleLabel:           "calo"
+physics.producers.pidk.TrackModuleLabel:                "kalman"
+physics.producers.pidk.CalorimetryModuleLabel:          "calok"
+physics.analyzers.analysistree.TrackModuleLabel:        "spacepts"
+physics.analyzers.analysistree.TrackMatchModuleLabel:   "spacepts"
+physics.analyzers.analysistree.CalorimetryModuleLabel:  "calo"
+physics.analyzers.analysistree.ParticleIDModuleLabel:   "pid"
+physics.analyzers.analysistreek.TrackModuleLabel:       "kalman"
+physics.analyzers.analysistreek.TrackMatchModuleLabel:  "matchtracksk"
+physics.analyzers.analysistreek.CalorimetryModuleLabel: "calok"
+physics.analyzers.analysistreek.ParticleIDModuleLabel:  "pidk"
 
