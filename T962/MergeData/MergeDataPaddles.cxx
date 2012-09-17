@@ -112,12 +112,12 @@ namespace merge{
        
        double diff = fabs(time - tms/1000.0);
      
-     
-      //  if(diff<10 && sv[0].compare(str0)==0)
+       double diffc = (time - tms/1000.0);
+     //   if(diff<10 && sv[0].compare(str0)==0)
 //          std::cout << "time = " << time << " tms = " << std::setprecision(13) << tms
-//                    << " diff = " << diff << std::endl;
+//                    << " diff = " << diffc << std::endl;
  
-       if(diff<1.5) {
+       if(diff<1.5 && diffc<0.0) {
          if(diff<mindiff) mindiff = diff;
          foundpaddlesinfo = true;
        }
