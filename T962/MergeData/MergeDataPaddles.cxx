@@ -117,7 +117,7 @@ namespace merge{
 //          std::cout << "time = " << time << " tms = " << std::setprecision(13) << tms
 //                    << " diff = " << diffc << std::endl;
  
-       if(diff<1.5 && diffc<0.0) {
+       if(diff<1.75 && diffc<0.0) {
          if(diff<mindiff) mindiff = diff;
          foundpaddlesinfo = true;
        }
@@ -128,7 +128,7 @@ namespace merge{
        if(sv[0].compare(str4)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt4[i] = atoi(sv[i+1].c_str());
    
        
-       if(foundpaddlesinfo && diff>1.5){
+       if(foundpaddlesinfo && diff>1.75){
          paddles.SetPMT(0,pmt1);
          paddles.SetPMT(1,pmt2);
          paddles.SetPMT(2,pmt3);
