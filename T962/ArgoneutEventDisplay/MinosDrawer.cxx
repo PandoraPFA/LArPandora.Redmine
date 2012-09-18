@@ -23,19 +23,6 @@
 #include "Utilities/AssociationUtil.h"
 #include "art/Framework/Core/FindMany.h"
 
-namespace {
-  // Utility function to make uniform error messages.
-  void writeErrMsg(const char* fcn,
-		   cet::exception const& e)
-  {
-    mf::LogWarning("MinosDrawer") << "MinosDrawer::" << fcn
-				     << " failed with message:\n"
-				     << e;
-  }
-}
-
-static const int kNCOLS = 14;
-static const int kColor[kNCOLS] = { 2, 3, 4, 5, 6, 7, 8, 29, 30, 38, 40, 41, 42, 46 };
 
 
 namespace argoevd{
@@ -59,19 +46,19 @@ namespace argoevd{
 
     art::Handle< std::vector<t962::MINOS> > minoshandle;
     art::PtrVector<t962::MINOS> temp;
-
-    try{
-       evt.getByLabel(which, minoshandle);
+    
+    evt.getByLabel(which, minoshandle);
+    if(minoshandle.failedToGet()){
+      mf::LogWarning("GetMinos") << "No MINOS information found with label = "
+                                 << which << ".  Skipping.\n";
+      return 0;
+    }
        
-       for(unsigned int i = 0; i < minoshandle->size(); ++i){
-          art::Ptr<t962::MINOS> w(minoshandle, i);
-          temp.push_back(w);
-       }
-       temp.swap(minos);
+    for(unsigned int i = 0; i < minoshandle->size(); ++i){
+      art::Ptr<t962::MINOS> w(minoshandle, i);
+      temp.push_back(w);
     }
-    catch(cet::exception& e){
-       writeErrMsg("GetMinos", e);
-    }
+    temp.swap(minos);
     
     return minos.size();
   }
@@ -115,7 +102,8 @@ namespace argoevd{
     art::ServiceHandle<argoevd::ArgoneutDrawingOptions> argoopt;
     
      art::PtrVector<t962::MINOS> minos;
-     this->GetMinos(evt, argoopt->fMINOSLabel, minos);
+     int minossize = this->GetMinos(evt, argoopt->fMINOSLabel, minos);
+     if(minossize==0) return;
 
      art::ServiceHandle<evd::RecoDrawingOptions> recoOpt;
      art::Handle< std::vector<recob::Track> > LarTrackHandle;
