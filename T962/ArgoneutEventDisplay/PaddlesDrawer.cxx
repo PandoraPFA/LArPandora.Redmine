@@ -22,21 +22,6 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 
-namespace {
-  // Utility function to make uniform error messages.
-  void writeErrMsg(const char* fcn,
-		   cet::exception const& e)
-  {
-    mf::LogWarning("PaddlesDrawer") << "PaddlesDrawer::" << fcn
-				     << " failed with message:\n"
-				     << e;
-  }
-}
-
-static const int kNCOLS = 14;
-static const int kColor[kNCOLS] = { 2, 3, 4, 5, 6, 7, 8, 29, 30, 38, 40, 41, 42, 46 };
-
-
 namespace argoevd{
 
   //......................................................................
@@ -56,13 +41,12 @@ namespace argoevd{
     art::ServiceHandle<argoevd::ArgoneutDrawingOptions> argoopt;
     
     art::Handle< t962::Paddles > paddleshandle;
-    try{
-      evt.getByLabel(argoopt->fPaddlesLabel, paddleshandle);
+    evt.getByLabel(argoopt->fPaddlesLabel, paddleshandle);
+    if(paddleshandle.failedToGet()){
+      mf::LogWarning("GetPaddles") << "No Paddles information found.  Skipping.\n";
+      return;
     }
-    catch(cet::exception& e){
-      writeErrMsg("GetPaddles", e);
-    }
-
+    
     int color[4] = {kGray, kGray, kGray, kGray};
     this->FindCoincidences(paddleshandle, color, argoopt->fCoincidenceTime);
     
