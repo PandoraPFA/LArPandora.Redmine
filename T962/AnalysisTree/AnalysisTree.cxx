@@ -606,9 +606,11 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     trackexit_x_reco=trackEnd[0];
     trackexit_y_reco=trackEnd[1];
     trackexit_z_reco=trackEnd[2];  
-    if (!isdata&&mclist[0]->NeutrinoSet()){
-      if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
-	n_vertextracks++; 
+    if (!isdata&&mclist.size()){
+      if (mclist[0]->NeutrinoSet()){
+	if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+	  n_vertextracks++; 
+      }
     }
     if(EndsOnBoundary(tracklist[i])) n_endonboundarytracks++;
     trkvtxx[i]        = trackStart[0];
@@ -878,197 +880,199 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
     //save neutrino interaction information
     mcevts_truth = mclist.size();
-    if (mclist[0]->NeutrinoSet()){
-      //find the true neutrino corresponding to the reconstructed event
-      std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-      for (size_t i = 0; i<hitlist.size(); i++){
-	if (hitlist[i]->View() == geo::kV){//collection view
-	  std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-	  for (size_t e = 0; e<eveIDs.size(); e++){
-	    art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-	    mctruthemap[mctruth]+=eveIDs[e].energy;
+    if (mcevts_truth){//at least one mc record
+      if (mclist[0]->NeutrinoSet()){//is neutrino
+	//find the true neutrino corresponding to the reconstructed event
+	std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+	for (size_t i = 0; i<hitlist.size(); i++){
+	  if (hitlist[i]->View() == geo::kV){//collection view
+	    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+	    for (size_t e = 0; e<eveIDs.size(); e++){
+	      art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+	      mctruthemap[mctruth]+=eveIDs[e].energy;
+	    }
 	  }
 	}
-      }
-      art::Ptr<simb::MCTruth> mctruth = mclist[0];
-      double maxenergy = -1;
-      int imc = 0;
-      int imc0 = 0;
-      for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
-	if ((ii->second)>maxenergy){
-	  maxenergy = ii->second;
-	  mctruth = ii->first;
-	  imc = imc0;
+	art::Ptr<simb::MCTruth> mctruth = mclist[0];
+	double maxenergy = -1;
+	int imc = 0;
+	int imc0 = 0;
+	for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+	  if ((ii->second)>maxenergy){
+	    maxenergy = ii->second;
+	    mctruth = ii->first;
+	    imc = imc0;
+	  }
+	  imc0++;
 	}
-	imc0++;
-      }
-      art::Ptr<simb::MCFlux> mcflux = fluxlist[imc];
-
-      nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
-      ccnc_truth = mctruth->GetNeutrino().CCNC();
-      mode_truth = mctruth->GetNeutrino().Mode();
-      Q2_truth = mctruth->GetNeutrino().QSqr();
-      W_truth = mctruth->GetNeutrino().W();
-      hitnuc_truth = mctruth->GetNeutrino().HitNuc();
-      enu_truth = mctruth->GetNeutrino().Nu().E();
-      nuvtxx_truth = mctruth->GetNeutrino().Nu().Vx();
-      nuvtxy_truth = mctruth->GetNeutrino().Nu().Vy();
-      nuvtxz_truth = mctruth->GetNeutrino().Nu().Vz();
-      if (mctruth->GetNeutrino().Nu().P()){
-	nu_dcosx_truth = mctruth->GetNeutrino().Nu().Px()/mctruth->GetNeutrino().Nu().P();
-	nu_dcosy_truth = mctruth->GetNeutrino().Nu().Py()/mctruth->GetNeutrino().Nu().P();
-	nu_dcosz_truth = mctruth->GetNeutrino().Nu().Pz()/mctruth->GetNeutrino().Nu().P();
-      }
-      lep_mom_truth = mctruth->GetNeutrino().Lepton().P();
-      if (mctruth->GetNeutrino().Lepton().P()){
-	lep_dcosx_truth = mctruth->GetNeutrino().Lepton().Px()/mctruth->GetNeutrino().Lepton().P();
-	lep_dcosy_truth = mctruth->GetNeutrino().Lepton().Py()/mctruth->GetNeutrino().Lepton().P();
-	lep_dcosz_truth = mctruth->GetNeutrino().Lepton().Pz()/mctruth->GetNeutrino().Lepton().P();
-      }
-      tpx_flux = mcflux->ftpx;
-      tpy_flux = mcflux->ftpy;
-      tpz_flux = mcflux->ftpz;
-      tptype_flux = mcflux->ftptype;
-
-      //Kinga
-      double presamplings=60.0;
-      double drifttick=(nuvtxx_truth/LArProp->DriftVelocity(LArProp->Efield(),LArProp->Temperature()))*(1./.198)+presamplings;
-      
-      twodvtx_t_truth[0]=drifttick;
-      twodvtx_t_truth[1]=drifttick;
-
-      genie_no_primaries=mctruth->NParticles();
-  
-      for(int j = 0; j < mctruth->NParticles(); ++j){
-	simb::MCParticle part(mctruth->GetParticle(j));
-    
-	//std::cout<<"pdg= "<<part.PdgCode()<<" ,Process="<<part.Process()<<" StatusCode= "<<part.StatusCode()<<" mass= "<<part.Mass()<<" p= "<<part.P()<<" E= "<<part.E()<<" trackID= "<<part.TrackId()<<" ND= "<<part.NumberDaughters()<<" Mother= "<<part.Mother()<<std::endl;
-    
-	genie_primaries_pdg[j]=part.PdgCode();
-	genie_Eng[j]=part.E();
-	genie_Px[j]=part.Px();
-	genie_Py[j]=part.Py();
-	genie_Pz[j]=part.Pz();
-	genie_P[j]=part.Px();
-	genie_status_code[j]=part.StatusCode();
-	genie_mass[j]=part.Mass();
-	genie_trackID[j]=part.TrackId();
-	genie_ND[j]=part.NumberDaughters();
-	genie_mother[j]=part.Mother();
-      }
-      
-      double fMCvertex[3];
-      fMCvertex[0] = nuvtxx_truth;
-      fMCvertex[1] = nuvtxy_truth;
-      fMCvertex[2] = nuvtxz_truth;
-      // now wire vertex:
-      unsigned int channel2,plane2,wire2,tpc2,cs; 
-      for(size_t tpc = 0; tpc < geom->NTPC(); ++tpc){
+	art::Ptr<simb::MCFlux> mcflux = fluxlist[imc];
 	
-	for(unsigned int plane=0;plane<geom->Nplanes(tpc);plane++){
-	  if(plane==0){
-	    fMCvertex[0]=.3;//force time coordinate to be closer to induction plane 
-	  }
-	  else{
-	    fMCvertex[0]=-.3;//force time coordinate to be closer to collection plane
-	  }
-  
-	  try{
-	    channel2 = geom->NearestChannel(fMCvertex,plane);
-   
-	  }
-	  catch(cet::exception &e){
-	    mf::LogWarning("ccqeanalysistreeexcp")<<e;
-  
-    
-	    //std::cout<<"fMCvertex[2]= "<<fMCvertex[2]<<" plane="<<plane<<" DetLength= "<<geom->DetLength()<<" geom->Nchannels()= "<<geom->Nchannels()<<std::endl;
+	nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
+	ccnc_truth = mctruth->GetNeutrino().CCNC();
+	mode_truth = mctruth->GetNeutrino().Mode();
+	Q2_truth = mctruth->GetNeutrino().QSqr();
+	W_truth = mctruth->GetNeutrino().W();
+	hitnuc_truth = mctruth->GetNeutrino().HitNuc();
+	enu_truth = mctruth->GetNeutrino().Nu().E();
+	nuvtxx_truth = mctruth->GetNeutrino().Nu().Vx();
+	nuvtxy_truth = mctruth->GetNeutrino().Nu().Vy();
+	nuvtxz_truth = mctruth->GetNeutrino().Nu().Vz();
+	if (mctruth->GetNeutrino().Nu().P()){
+	  nu_dcosx_truth = mctruth->GetNeutrino().Nu().Px()/mctruth->GetNeutrino().Nu().P();
+	  nu_dcosy_truth = mctruth->GetNeutrino().Nu().Py()/mctruth->GetNeutrino().Nu().P();
+	  nu_dcosz_truth = mctruth->GetNeutrino().Nu().Pz()/mctruth->GetNeutrino().Nu().P();
+	}
+	lep_mom_truth = mctruth->GetNeutrino().Lepton().P();
+	if (mctruth->GetNeutrino().Lepton().P()){
+	  lep_dcosx_truth = mctruth->GetNeutrino().Lepton().Px()/mctruth->GetNeutrino().Lepton().P();
+	  lep_dcosy_truth = mctruth->GetNeutrino().Lepton().Py()/mctruth->GetNeutrino().Lepton().P();
+	  lep_dcosz_truth = mctruth->GetNeutrino().Lepton().Pz()/mctruth->GetNeutrino().Lepton().P();
+	}
+	tpx_flux = mcflux->ftpx;
+	tpy_flux = mcflux->ftpy;
+	tpz_flux = mcflux->ftpz;
+	tptype_flux = mcflux->ftptype;
+	
+	//Kinga
+	double presamplings=60.0;
+	double drifttick=(nuvtxx_truth/LArProp->DriftVelocity(LArProp->Efield(),LArProp->Temperature()))*(1./.198)+presamplings;
+	
+	twodvtx_t_truth[0]=drifttick;
+	twodvtx_t_truth[1]=drifttick;
+	
+	genie_no_primaries=mctruth->NParticles();
+	
+	for(int j = 0; j < mctruth->NParticles(); ++j){
+	  simb::MCParticle part(mctruth->GetParticle(j));
+	  
+	  //std::cout<<"pdg= "<<part.PdgCode()<<" ,Process="<<part.Process()<<" StatusCode= "<<part.StatusCode()<<" mass= "<<part.Mass()<<" p= "<<part.P()<<" E= "<<part.E()<<" trackID= "<<part.TrackId()<<" ND= "<<part.NumberDaughters()<<" Mother= "<<part.Mother()<<std::endl;
+	  
+	  genie_primaries_pdg[j]=part.PdgCode();
+	  genie_Eng[j]=part.E();
+	  genie_Px[j]=part.Px();
+	  genie_Py[j]=part.Py();
+	  genie_Pz[j]=part.Pz();
+	  genie_P[j]=part.Px();
+	  genie_status_code[j]=part.StatusCode();
+	  genie_mass[j]=part.Mass();
+	  genie_trackID[j]=part.TrackId();
+	  genie_ND[j]=part.NumberDaughters();
+	  genie_mother[j]=part.Mother();
+	}
+	
+	double fMCvertex[3];
+	fMCvertex[0] = nuvtxx_truth;
+	fMCvertex[1] = nuvtxy_truth;
+	fMCvertex[2] = nuvtxz_truth;
+	// now wire vertex:
+	unsigned int channel2,plane2,wire2,tpc2,cs; 
+	for(size_t tpc = 0; tpc < geom->NTPC(); ++tpc){
+	  
+	  for(unsigned int plane=0;plane<geom->Nplanes(tpc);plane++){
+	    if(plane==0){
+	      fMCvertex[0]=.3;//force time coordinate to be closer to induction plane 
+	    }
+	    else{
+	      fMCvertex[0]=-.3;//force time coordinate to be closer to collection plane
+	    }
 	    
-	    if(plane==0 && fMCvertex[2]<5) channel2=0;
-	    else if(plane==0 && fMCvertex[2]>geom->DetLength()-5) channel2=(geom->Nchannels())/2 -1;
-	    else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
-	    else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
+	    try{
+	      channel2 = geom->NearestChannel(fMCvertex,plane);
+	      
+	    }
+	    catch(cet::exception &e){
+	      mf::LogWarning("ccqeanalysistreeexcp")<<e;
+	      
+	      
+	      //std::cout<<"fMCvertex[2]= "<<fMCvertex[2]<<" plane="<<plane<<" DetLength= "<<geom->DetLength()<<" geom->Nchannels()= "<<geom->Nchannels()<<std::endl;
+	      
+	      if(plane==0 && fMCvertex[2]<5) channel2=0;
+	      else if(plane==0 && fMCvertex[2]>geom->DetLength()-5) channel2=(geom->Nchannels())/2 -1;
+	      else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
+	      else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
+	    }
+	    geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
+	    twodvtx_w_truth[plane]=wire2;
 	  }
-	  geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
-	  twodvtx_w_truth[plane]=wire2;
-	}
-      }
-
-      //--------------------------------------------------------------//
-      //        NOW I WILL GET INFO FROM GEANT4 TO FIND OUT HOW MANY 
-      //        PARTICLES WE CAN REALLY SEE IN OUR DETECTOR
-      //        this is needed if you want to confirm that kingaclusters 
-      ///       can correctly count tracks:
-      //--------------------------------------------------------------//
-  
-      art::Handle< std::vector<sim::Particle> > geant_list;
-      std::vector<art::Ptr<sim::Particle> > geant_part;
-      if(evt.getByLabel (fLArG4ModuleLabel,geant_list))
-	art::fill_ptr_vector(geant_part,geant_list);
- 
-      std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
-      std::string pri("primary");
-      int primary=0;
-      //determine the number of primary particles from geant:
-  
-      for( unsigned int i = 0; i < geant_part.size(); ++i ){
-   
-	if(geant_part[i]->Process()==pri){
-	  primary++;
-	}
-      }
-  
-      no_primaries=primary;
-  
-      std::cout<<"Geant4 list: "<<std::endl;
- 
-      for( unsigned int i = 0; i < geant_part.size(); ++i ){
-	std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
-	
-	if(geant_part[i]->Process()==pri){
-	  
-	  //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
-	  
-	  // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
-	  //     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
-	  //     fEng.push_back(geant_part[i]->E());
-	  //     
-	  
-	  primaries_pdg[i]=geant_part[i]->PdgCode();
-	  
-	  Eng[i]=geant_part[i]->E();
-	  Px[i]=geant_part[i]->Px();
-	  
-	  Py[i]=geant_part[i]->Py();
-	  Pz[i]=geant_part[i]->Pz();
-	  
-	  StartPointx[i]=geant_part[i]->Vx();
-	  StartPointy[i]=geant_part[i]->Vy();
-	  StartPointz[i]=geant_part[i]->Vz();
-	  EndPointx[i]=geant_part[i]->EndPoint()[0];
-	  EndPointy[i]=geant_part[i]->EndPoint()[1];
-	  EndPointz[i]=geant_part[i]->EndPoint()[2];
-	  
-	  NumberDaughters[i]=geant_part[i]->NumberDaughters();
-	  
-	  
-	  std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
-	  
-	  // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
-	  
 	}
 	
-      }
- 
-
-      //beam weight, only available for nu-data
-      beamwgt = 1.;
-      if (nuPDG_truth == 14){
-	int bin = hBeamWeight_numu_numode->FindBin(enu_truth);
-	if (bin>=1&&bin<=hBeamWeight_numu_numode->GetNbinsX()) 
-	  beamwgt = hBeamWeight_numu_numode->GetBinContent(bin);
-      }
-    }
-  }
+	//--------------------------------------------------------------//
+	//        NOW I WILL GET INFO FROM GEANT4 TO FIND OUT HOW MANY 
+	//        PARTICLES WE CAN REALLY SEE IN OUR DETECTOR
+	//        this is needed if you want to confirm that kingaclusters 
+	///       can correctly count tracks:
+	//--------------------------------------------------------------//
+	
+	art::Handle< std::vector<sim::Particle> > geant_list;
+	std::vector<art::Ptr<sim::Particle> > geant_part;
+	if(evt.getByLabel (fLArG4ModuleLabel,geant_list))
+	  art::fill_ptr_vector(geant_part,geant_list);
+	
+	std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
+	std::string pri("primary");
+	int primary=0;
+	//determine the number of primary particles from geant:
+	
+	for( unsigned int i = 0; i < geant_part.size(); ++i ){
+	  
+	  if(geant_part[i]->Process()==pri){
+	    primary++;
+	  }
+	}
+	
+	no_primaries=primary;
+	
+	std::cout<<"Geant4 list: "<<std::endl;
+	
+	for( unsigned int i = 0; i < geant_part.size(); ++i ){
+	  std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
+	  
+	  if(geant_part[i]->Process()==pri){
+	    
+	    //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
+	    
+	    // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
+	    //     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
+	    //     fEng.push_back(geant_part[i]->E());
+	    //     
+	    
+	    primaries_pdg[i]=geant_part[i]->PdgCode();
+	    
+	    Eng[i]=geant_part[i]->E();
+	    Px[i]=geant_part[i]->Px();
+	    
+	    Py[i]=geant_part[i]->Py();
+	    Pz[i]=geant_part[i]->Pz();
+	  
+	    StartPointx[i]=geant_part[i]->Vx();
+	    StartPointy[i]=geant_part[i]->Vy();
+	    StartPointz[i]=geant_part[i]->Vz();
+	    EndPointx[i]=geant_part[i]->EndPoint()[0];
+	    EndPointy[i]=geant_part[i]->EndPoint()[1];
+	    EndPointz[i]=geant_part[i]->EndPoint()[2];
+	    
+	    NumberDaughters[i]=geant_part[i]->NumberDaughters();
+	    
+	  
+	    std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
+	    
+	    // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
+	    
+	  }
+	  
+	}
+	
+	
+	//beam weight, only available for nu-data
+	beamwgt = 1.;
+	if (nuPDG_truth == 14){
+	  int bin = hBeamWeight_numu_numode->FindBin(enu_truth);
+	  if (bin>=1&&bin<=hBeamWeight_numu_numode->GetNbinsX()) 
+	    beamwgt = hBeamWeight_numu_numode->GetBinContent(bin);
+	}
+      }//is neutrino
+    }//at least one mc record
+  }//mc
   //minos matching information
   try{
   //find matched MINOS information for each track
