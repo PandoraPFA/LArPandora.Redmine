@@ -878,30 +878,48 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     }
     //save neutrino interaction information
     mcevts_truth = mclist.size();
+    std::cout<<"mclist.size= "<<mclist.size()<<std::endl;
     if (mclist[0]->NeutrinoSet()){
-      //find the true neutrino corresponding to the reconstructed event
-      std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-      for (size_t i = 0; i<hitlist.size(); i++){
-	if (hitlist[i]->View() == geo::kV){//collection view
-	  std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-	  for (size_t e = 0; e<eveIDs.size(); e++){
-	    art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-	    mctruthemap[mctruth]+=eveIDs[e].energy;
-	  }
-	}
-      }
-      art::Ptr<simb::MCTruth> mctruth = mclist[0];
-      double maxenergy = -1;
+//      //find the true neutrino corresponding to the reconstructed event
+//      std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+//      for (size_t i = 0; i<hitlist.size(); i++){
+//	if (hitlist[i]->View() == geo::kV){//collection view
+//	  std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+//	  std::cout<<"eveIDs.size()= "<<eveIDs.size()<<std::endl;
+//	  for (size_t e = 0; e<eveIDs.size(); e++){
+//	    art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+//	    std::cout<<i<<" "<<e<<std::endl;
+//	    mctruthemap[mctruth]+=eveIDs[e].energy;
+//	  }
+//	}
+//      }
+//      std::cout<<"done looping"<<std::endl;
+//      art::Ptr<simb::MCTruth> mctruth = mclist[0];
+//      double maxenergy = -1;
+//      int imc = 0;
+//      int imc0 = 0;
+//      for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+//	if ((ii->second)>maxenergy){
+//	  maxenergy = ii->second;
+//	  mctruth = ii->first;
+//	  imc = imc0;
+//	}
+//	imc0++;
+//      }
       int imc = 0;
-      int imc0 = 0;
-      for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
-	if ((ii->second)>maxenergy){
-	  maxenergy = ii->second;
-	  mctruth = ii->first;
-	  imc = imc0;
+      double mind = 1e9;
+      for (size_t i = 0; i<mclist.size(); ++i){
+	double x = mclist[i]->GetNeutrino().Nu().Vx();
+	double y = mclist[i]->GetNeutrino().Nu().Vy();
+	double z = mclist[i]->GetNeutrino().Nu().Vz();
+	double dis = sqrt(pow(x-vtxx_reco,2)+pow(y-vtxy_reco,2)+pow(z-vtxz_reco,2));
+	if (dis<mind) {
+	  imc = i;
+	  mind = dis;
 	}
-	imc0++;
       }
+      std::cout<<"imc= "<<imc<<std::endl;
+      art::Ptr<simb::MCTruth> mctruth = mclist[imc];
       art::Ptr<simb::MCFlux> mcflux = fluxlist[imc];
 
       nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
@@ -938,7 +956,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       twodvtx_t_truth[1]=drifttick;
 
       genie_no_primaries=mctruth->NParticles();
-  
+      std::cout<<"mctruth->NParticles = "<<genie_no_primaries<<std::endl;
       for(int j = 0; j < mctruth->NParticles(); ++j){
 	simb::MCParticle part(mctruth->GetParticle(j));
     
@@ -975,6 +993,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   
 	  try{
 	    channel2 = geom->NearestChannel(fMCvertex,plane);
+	    geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
+	    twodvtx_w_truth[plane]=wire2;
    
 	  }
 	  catch(cet::exception &e){
@@ -988,8 +1008,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	    else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
 	    else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
 	  }
-	  geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
-	  twodvtx_w_truth[plane]=wire2;
 	}
       }
 
@@ -1009,7 +1027,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       std::string pri("primary");
       int primary=0;
       //determine the number of primary particles from geant:
-  
+      std::cout<<"geant_part.size= "<<geant_part.size()<<std::endl;
       for( unsigned int i = 0; i < geant_part.size(); ++i ){
    
 	if(geant_part[i]->Process()==pri){
