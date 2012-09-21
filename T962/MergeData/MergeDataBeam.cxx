@@ -46,8 +46,8 @@ namespace merge{
     raw::BeamInfo beam;
 
     if(MergeBeam(beam)){
-      std::auto_ptr<raw::BeamInfo> Beam(new raw::BeamInfo(beam));
-      evt.put(Beam);
+      std::unique_ptr<raw::BeamInfo> Beam(new raw::BeamInfo(beam));
+      evt.put(std::move(Beam));
     }
   
     return;

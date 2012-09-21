@@ -68,7 +68,7 @@ namespace merge{
 
       evt.getByLabel(fbeam_modulelabel,fbeam);
 	  
-      std::auto_ptr<std::vector<t962::MINOS> > MINOS_coll(new std::vector<t962::MINOS> );
+      std::unique_ptr<std::vector<t962::MINOS> > MINOS_coll(new std::vector<t962::MINOS> );
       std::vector<t962::MINOS> vec_minos;
 
       if(MergeMINOS(vec_minos)){
@@ -77,7 +77,7 @@ namespace merge{
          {
             MINOS_coll->push_back(vec_minos[i]);
          }
-         evt.put(MINOS_coll);
+         evt.put(std::move(MINOS_coll));
       }
       else{
          std::cout << "Run " << fdaq->GetRun() << " Event " << fdaq->GetEvent() << " : No MINOS time match." << std::endl;

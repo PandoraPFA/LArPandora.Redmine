@@ -72,30 +72,30 @@ namespace t962{
     // grab the geometry object to see what geometry we are using
     art::ServiceHandle<geo::Geometry> geo;
     geo::DetId_t detid = geo->DetId();
-    std::auto_ptr<sumdata::RunData> runcol(new sumdata::RunData(detid));
-    run.put(runcol);
+    std::unique_ptr<sumdata::RunData> runcol(new sumdata::RunData(detid));
+    run.put(std::move(runcol));
     return;
   }
 
   void TGMuon::endSubRun(art::SubRun& sr)
   {
-    std::auto_ptr<sumdata::POTSummary> p(new sumdata::POTSummary());    
+    std::unique_ptr<sumdata::POTSummary> p(new sumdata::POTSummary());    
     p->totpot = totalpot;
     p->totgoodpot = totalpot;    
-    sr.put(p);    
+    sr.put(std::move(p));    
     return;
   }
 
   //____________________________________________________________________________
   void TGMuon::produce(art::Event& evt)
   {
-    ///auto_ptr allows ownership to be transferred to the art::Event after the put statement
-    std::auto_ptr< std::vector<simb::MCTruth> > truthcol(new std::vector<simb::MCTruth>);
+    ///unique_ptr allows ownership to be transferred to the art::Event after the put statement
+    std::unique_ptr< std::vector<simb::MCTruth> > truthcol(new std::vector<simb::MCTruth>);
     simb::MCTruth truth;
     truth.SetOrigin(simb::kSingleParticle);
     Sample(truth);
     truthcol->push_back(truth);
-    evt.put(truthcol);
+    evt.put(std::move(truthcol));
 
     return;
   }

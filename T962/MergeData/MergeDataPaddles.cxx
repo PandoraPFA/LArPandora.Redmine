@@ -48,8 +48,8 @@ namespace merge{
     t962::Paddles paddles;
 
     if(MergePaddles(paddles,evt)){
-      std::auto_ptr<t962::Paddles> Paddles(new t962::Paddles(paddles));
-      evt.put(Paddles);
+      std::unique_ptr<t962::Paddles> Paddles(new t962::Paddles(paddles));
+      evt.put(std::move(Paddles));
     }
   
     return;

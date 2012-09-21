@@ -101,7 +101,7 @@ namespace match{
    //-------------------------------------------------
    void MatchTracks::produce(art::Event& evt)
    {
-      std::auto_ptr< art::Assns<recob::Track, t962::MINOS> > assn(new art::Assns<recob::Track, t962::MINOS>);
+      std::unique_ptr< art::Assns<recob::Track, t962::MINOS> > assn(new art::Assns<recob::Track, t962::MINOS>);
    
       art::Handle< std::vector<recob::Track> > LarTrackHandle;
       if (!evt.getByLabel(fLarTracks_label,LarTrackHandle)) return;
@@ -222,7 +222,7 @@ namespace match{
 
       }//loop over T962 tracks
                    
-      evt.put(assn);//put Associations into event
+      evt.put(std::move(assn));//put Associations into event
         
       return;
 
