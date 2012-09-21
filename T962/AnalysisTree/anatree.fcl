@@ -101,7 +101,7 @@ physics.producers.calo.UseArea:                         true
 physics.producers.pid.TrackModuleLabel:                 "spacepts"
 physics.producers.pid.CalorimetryModuleLabel:           "calo"
 physics.analyzers.analysistree.TrackModuleLabel:        "spacepts"
-physics.analyzers.analysistree.TrackMatchModuleLabel:   "spacepts"
+physics.analyzers.analysistree.TrackMatchModuleLabel:   "matchtracks"
 physics.analyzers.analysistree.CalorimetryModuleLabel:  "calo"
 physics.analyzers.analysistree.ParticleIDModuleLabel:   "pid"
 
