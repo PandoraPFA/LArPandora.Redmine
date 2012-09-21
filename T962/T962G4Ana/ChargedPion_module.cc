@@ -10,7 +10,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 
 // LArSoft includes
-#include "ChargedPion.h"
+#include "T962/T962G4Ana/ChargedPion.h"
 
 namespace cpion {
 

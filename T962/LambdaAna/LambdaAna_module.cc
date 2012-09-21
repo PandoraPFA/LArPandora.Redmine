@@ -2,7 +2,7 @@
  #include "art/Framework/Core/ModuleMacros.h" 
  
  // LArSoft includes
- #include "LambdaAna.h" 
+ #include "T962/LambdaAna/LambdaAna.h" 
  
   namespace cchyp {
  

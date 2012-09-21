@@ -12,7 +12,7 @@
 #include "art/Framework/Core/ModuleMacros.h" 
  
 // LArSoft includes
-#include "MatchFilter.h"
+#include "T962/MatchFilter/MatchFilter.h"
 
 namespace filt {
 

@@ -33,7 +33,7 @@
 #include "TDatabasePDG.h"
 #include "Simulation/sim.h"
 #include "Geometry/geo.h"
-#include "ChargedPion.h"
+#include "T962/T962G4Ana/ChargedPion.h"
 
 // ROOT includes
 #include "TH1.h"
