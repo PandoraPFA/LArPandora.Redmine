@@ -12,7 +12,6 @@ JOBFILES    := $(wildcard *.fcl)
 
 ROOTLIBS  = $(shell root-config --libs) -lEG -lTreePlayer -lGeom -lFFTW -lReflex -lEGPythia6 -lGui
 
-override CPPFLAGS += $(shell root-config --cflags) 
 override LDFLAGS += $(shell root-config --libs) 
 
 override LOADLIBES += $(ROOTLIBS) $(ROOTGLIBS) -lRGL -lGed -lX3d
