@@ -29,15 +29,14 @@
 
 #include "T962/CCRecoEffTree/CCRecoEffTree.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "Geometry/geo.h"
+#include "Geometry/Geometry.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
 #include "RecoBase/recobase.h"
 #include "RawData/RawDigit.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
-#include "SummaryData/summary.h"
-#include "Simulation/SimListUtils.h"
+#include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
 
  

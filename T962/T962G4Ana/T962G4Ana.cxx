@@ -23,7 +23,7 @@
 #include "Simulation/SimListUtils.h"
 #include "SimulationBase/simbase.h"
 #include "Simulation/sim.h"
-#include "Geometry/geo.h"
+#include "Geometry/Geometry.h"
 #include "T962/T962G4Ana/T962G4Ana.h"
 
 // ROOT includes

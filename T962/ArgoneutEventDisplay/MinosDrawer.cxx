@@ -5,7 +5,7 @@
 #include "TText.h"
 #include "TPolyMarker3D.h"
 
-#include "Geometry/geo.h"
+#include "Geometry/Geometry.h"
 #include "EventDisplayBase/View2D.h"
 #include "EventDisplayBase/View3D.h"
 #include "T962/ArgoneutEventDisplay/ArgoneutDrawingOptions.h"

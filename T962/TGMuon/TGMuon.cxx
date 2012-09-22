@@ -37,8 +37,9 @@
 
 // lar includes
 #include "T962/TGMuon/TGMuon.h"
-#include "Geometry/geo.h"
-#include "SummaryData/summary.h"
+#include "Geometry/Geometry.h"
+#include "SummaryData/RunData.h"
+#include "SummaryData/POTSummary.h"
 
 #include "TVector3.h"
 #include "TDatabasePDG.h"

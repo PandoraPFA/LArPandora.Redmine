@@ -24,8 +24,7 @@
 #include "Simulation/sim.h"
 #include "TDatabasePDG.h"
 #include "RecoBase/recobase.h"
-#include "Geometry/geo.h" 
-#include "Simulation/SimListUtils.h"
+#include "Geometry/Geometry.h" 
 #include "Utilities/AssociationUtil.h"
 
 
