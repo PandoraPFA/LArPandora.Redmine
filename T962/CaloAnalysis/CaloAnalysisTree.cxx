@@ -31,10 +31,16 @@
 #include "T962/T962_Objects/MINOS.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/PlaneGeo.h"
-#include "Simulation/SimListUtils.h"
-#include "SimulationBase/simbase.h"
+#include "MCCheater/BackTracker.h"
 #include "Simulation/sim.h"
-#include "RecoBase/recobase.h"
+#include "Simulation/ParticleList.h"
+#include "Simulation/SimChannel.h"
+#include "Simulation/EmEveIdCalculator.h"
+#include "RecoBase/Hit.h"
+#include "RecoBase/SpacePoint.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/EndPoint2D.h"
+#include "RecoBase/Vertex.h"
 #include "RawData/RawDigit.h"
 #include "SummaryData/POTSummary.h"
 #include "Utilities/LArProperties.h"
@@ -520,7 +526,9 @@ std::cout<<" IN *** MY *** CaloAnalysisTree *** ----------------"<<std::endl;
  
  ///////////////////////////
 double tot_energy=0.;
-sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt,fLArG4ModuleLabel);
+
+ art::ServiceHandle<cheat::BackTracker> bt;
+ const sim::ParticleList& plist = bt->ParticleList();
 art::ServiceHandle<geo::Geometry> geom;
 
     unsigned int cstat;    //hit cryostat number 
@@ -680,7 +688,7 @@ Kin_Eng_truth=tot_energy;
       //   FIGURE OUT WHAT PARTICLE IS IN EACH HIT, WANT TO FIND OUT PDG CODE OF
       //    SINGLE HITS AROUND PROTON TRACK
       //-------------------------------------------------------------------------
-      art::ServiceHandle<cheat::BackTracker> bt;
+   
       bt->SetEveIdCalculator(new sim::EmEveIdCalculator);
  
       art::Handle< std::vector<recob::Hit> > hitListHandle;

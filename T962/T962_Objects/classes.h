@@ -22,7 +22,7 @@
 // nutools includes
 #include "T962/T962_Objects/Paddles.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "RecoBase/recobase.h"
+#include "RecoBase/Track.h"
 
 //
 // Only include objects that we would like to be able to put into the event.

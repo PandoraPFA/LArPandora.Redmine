@@ -14,7 +14,7 @@
 #include "RawData/DAQHeader.h"
 #include "RawData/BeamInfo.h"
 #include "T962/T962_Objects/MINOS.h"
-#include "Simulation/sim.h"
+#include "Simulation/Particle.h"
 
 #include <string>
 #include <vector>

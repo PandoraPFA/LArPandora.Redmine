@@ -33,7 +33,7 @@
 #include <math.h>
 
 // nutools includes
-#include "SimulationBase/simbase.h"
+#include "SimulationBase/MCTruth.h"
 
 // lar includes
 #include "T962/TGMuon/TGMuon.h"

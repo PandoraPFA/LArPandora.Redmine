@@ -20,10 +20,14 @@
 
 #include "T962/LambdaAna/LambdaAna.h"
 #include "MCCheater/BackTracker.h"
-#include "SimulationBase/simbase.h"
-#include "Simulation/sim.h"
+#include "SimulationBase/MCTruth.h"
+#include "Simulation/Particle.h"
+#include "Simulation/EmEveIdCalculator.h"
 #include "TDatabasePDG.h"
-#include "RecoBase/recobase.h"
+#include "RecoBase/Hit.h"
+#include "RecoBase/Cluster.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Vertex.h"
 #include "Geometry/Geometry.h" 
 #include "Utilities/AssociationUtil.h"
 

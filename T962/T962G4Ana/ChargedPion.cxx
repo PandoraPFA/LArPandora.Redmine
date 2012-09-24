@@ -25,14 +25,12 @@
 #include "cetlib/exception.h"
 #include "Geometry/geo.h"
 // LArSoft Includes
-#include "SimulationBase/simbase.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/MCNeutrino.h"
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCParticle.h"
 #include "TDatabasePDG.h"
-#include "Simulation/sim.h"
-#include "Geometry/geo.h"
+#include "Simulation/Particle.h"
 #include "T962/T962G4Ana/ChargedPion.h"
 
 // ROOT includes

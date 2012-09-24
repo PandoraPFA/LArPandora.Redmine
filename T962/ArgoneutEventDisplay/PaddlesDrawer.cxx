@@ -13,7 +13,6 @@
 #include "EventDisplay/RecoDrawingOptions.h"
 
 #include "T962/T962_Objects/Paddles.h"
-#include "RecoBase/recobase.h"
 
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Principal/Event.h"

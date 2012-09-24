@@ -39,8 +39,8 @@ extern "C" {
 
 #include "Filters/ChannelFilter.h"
 //#include "T962/T962_Objects/MINOS.h"
-#include "RecoBase/recobase.h"
-#include "Geometry/geo.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Hit.h"
 
 namespace muons {
 //-----------------------------------------------------------------------------

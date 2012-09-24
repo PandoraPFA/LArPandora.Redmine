@@ -20,9 +20,10 @@
 #include "cetlib/exception.h"
 
 // LArSoft Includes
-#include "Simulation/SimListUtils.h"
-#include "SimulationBase/simbase.h"
-#include "Simulation/sim.h"
+#include "SimulationBase/MCTruth.h"
+#include "SimulationBase/MCNeutrino.h"
+#include "Simulation/ParticleList.h"
+#include "MCCheater/BackTracker.h"
 #include "Geometry/Geometry.h"
 #include "T962/T962G4Ana/T962G4Ana.h"
 
@@ -165,7 +166,8 @@ if(mc->NeutrinoSet())
         
 
     //get the list of particles from this event
- sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
+ art::ServiceHandle<cheat::BackTracker> bt;
+  const sim::ParticleList& plist = bt->ParticleList();
     art::ServiceHandle<geo::Geometry> geom;
 
     // get the particles from the event handle

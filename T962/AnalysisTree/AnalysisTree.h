@@ -10,7 +10,6 @@
 #define ANALYSISTREE_H
 
 #include "art/Framework/Core/EDAnalyzer.h"
-#include "RecoBase/recobase.h"
 
 #include <vector>
 #include <string>
@@ -24,6 +23,12 @@ const int kMaxClusters   = 1000;  //maximum number of clusters
 const int kMaxHits       = 20000; //maximum number of hits;
 const int kMaxPrimaries  = 1000;  //maximum number of primary particles
 const int kMaxTrackHits  = 1000;  //maximum number of hits on a track
+
+namespace recob{
+  class Track;
+  class Hit;
+}
+
 ///Track finding and building 
 namespace t962 {
    

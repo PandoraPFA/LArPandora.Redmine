@@ -40,17 +40,24 @@
 #include "T962/T962_Objects/Paddles.h"
 //#include "T962/T962_Objects/ScanInfo.h"
 #include "Geometry/Geometry.h"
-#include "SimulationBase/simbase.h"
-#include "Simulation/sim.h"
-#include "AnalysisBase/anabase.h"
+#include "SimulationBase/MCTruth.h"
+#include "SimulationBase/MCFlux.h"
+#include "Simulation/SimChannel.h"
+#include "AnalysisBase/Calorimetry.h"
+#include "AnalysisBase/ParticleID.h"
 #include "RawData/RawDigit.h"
 #include "RawData/BeamInfo.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "Utilities/DetectorProperties.h"
-#include "SummaryData/summary.h"
-#include "Simulation/SimListUtils.h"
+#include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Cluster.h"
+#include "RecoBase/Hit.h"
+#include "RecoBase/EndPoint2D.h"
+#include "RecoBase/Vertex.h"
+
  
 const double MPi  = 0.1396;
 const double MPro = 0.938272;
@@ -872,7 +879,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   //mc truth information
   if (!isdata){
     //save single particle information
-    sim::ParticleList plist = sim::SimListUtils::GetParticleList(evt, fG4ModuleLabel);
+    art::ServiceHandle<cheat::BackTracker> bt;
+    const sim::ParticleList& plist = bt->ParticleList();
     for ( sim::ParticleList::const_iterator ipar = plist.begin(); ipar!=plist.end(); ++ipar){
       sim::Particle *particle = ipar->second;
       parpdg = particle->PdgCode();
