@@ -224,7 +224,8 @@ namespace t962 {
     double two_trackexit_dcosz_reco[2];
 
     int no_primaries;
-    int primaries_pdg[kMaxPrimaries];
+    int geant_list_size;
+    int pdg[kMaxPrimaries];
     double Eng[kMaxPrimaries];
     double Px[kMaxPrimaries];
     double Py[kMaxPrimaries];
@@ -236,6 +237,9 @@ namespace t962 {
     double EndPointy[kMaxPrimaries];
     double EndPointz[kMaxPrimaries];
     int NumberDaughters[kMaxPrimaries];
+    int TrackId[kMaxPrimaries];
+    int Mother[kMaxPrimaries];
+    int process_primary[kMaxPrimaries];
     //from genie:
     int genie_no_primaries;
     int genie_primaries_pdg[kMaxPrimaries];

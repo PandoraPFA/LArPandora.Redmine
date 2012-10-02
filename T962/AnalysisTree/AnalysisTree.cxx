@@ -294,18 +294,30 @@ void t962::AnalysisTree::beginJob()
   // from geant4:
 
   fTree->Branch("no_primaries",&no_primaries,"no_primaries/I");
-  fTree->Branch("primaries_pdg",primaries_pdg,"primaries_pdg[no_primaries]/I");
-  fTree->Branch("Eng",Eng,"Eng[no_primaries]/D");
-  fTree->Branch("Px",Px,"Px[no_primaries]/D");
-  fTree->Branch("Py",Py,"Py[no_primaries]/D");
-  fTree->Branch("Pz",Pz,"Pz[no_primaries]/D");
-  fTree->Branch("StartPointx",StartPointx,"StartPointx[no_primaries]/D");
-  fTree->Branch("StartPointy",StartPointy,"StartPointy[no_primaries]/D");
-  fTree->Branch("StartPointz",StartPointz,"StartPointz[no_primaries]/D");
-  fTree->Branch("EndPointx",EndPointx,"EndPointx[no_primaries]/D");
-  fTree->Branch("EndPointy",EndPointy,"EndPointy[no_primaries]/D");
-  fTree->Branch("EndPointz",EndPointz,"EndPointz[no_primaries]/D");
-  fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[no_primaries]/I");
+  fTree->Branch("geant_list_size",&geant_list_size,"geant_list_size/I");
+  
+  fTree->Branch("pdg",pdg,"pdg[geant_list_size]/I");
+  fTree->Branch("Eng",Eng,"Eng[geant_list_size]/D");
+  fTree->Branch("Px",Px,"Px[geant_list_size]/D");
+  fTree->Branch("Py",Py,"Py[geant_list_size]/D");
+  fTree->Branch("Pz",Pz,"Pz[geant_list_size]/D");
+  fTree->Branch("StartPointx",StartPointx,"StartPointx[geant_list_size]/D");
+  fTree->Branch("StartPointy",StartPointy,"StartPointy[geant_list_size]/D");
+  fTree->Branch("StartPointz",StartPointz,"StartPointz[geant_list_size]/D");
+  fTree->Branch("EndPointx",EndPointx,"EndPointx[geant_list_size]/D");
+  fTree->Branch("EndPointy",EndPointy,"EndPointy[geant_list_size]/D");
+  fTree->Branch("EndPointz",EndPointz,"EndPointz[geant_list_size]/D");
+  fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[geant_list_size]/I");
+  fTree->Branch("Mother",Mother,"Mother[geant_list_size]/I");
+  fTree->Branch("TrackId",TrackId,"TrackId[geant_list_size]/I");
+  fTree->Branch("process_primary",process_primary,"process_primary[geant_list_size]/I");
+  
+  
+  
+  
+  
+  
+  
   
   fTree->Branch("Kin_Eng_reco",Kin_Eng_reco,"Kin_Eng_reco[ntracks_reco]/D");
   //fTree->Branch("fTrkPitchC", &fTrkPitchC, "fTrkPitchC/D");
@@ -1033,56 +1045,62 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
 	std::string pri("primary");
 	int primary=0;
+	int geant_particle=0;
 	//determine the number of primary particles from geant:
 	
 	for( unsigned int i = 0; i < geant_part.size(); ++i ){
-	  
+	  geant_particle++;
 	  if(geant_part[i]->Process()==pri){
 	    primary++;
 	  }
 	}
 	
 	no_primaries=primary;
+	geant_list_size=geant_particle;
 	
 	std::cout<<"Geant4 list: "<<std::endl;
 	
 	for( unsigned int i = 0; i < geant_part.size(); ++i ){
-	  std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<std::endl;
-	  
-	  if(geant_part[i]->Process()==pri){
-	    
-	    //std::cout<<"StatusCode= "<<geant_part[i]->StatusCode()<<" Mother= "<<geant_part[i]->Mother()<<std::endl;
-	    
-	    // fprimaries_pdg.push_back(geant_part[i]->PdgCode());
-	    //     std::cout<<"geant_part[i]->E()= "<<geant_part[i]->E()<<std::endl;
-	    //     fEng.push_back(geant_part[i]->E());
-	    //     
-	    
-	    primaries_pdg[i]=geant_part[i]->PdgCode();
-	    
-	    Eng[i]=geant_part[i]->E();
-	    Px[i]=geant_part[i]->Px();
-	    
-	    Py[i]=geant_part[i]->Py();
-	    Pz[i]=geant_part[i]->Pz();
-	  
-	    StartPointx[i]=geant_part[i]->Vx();
-	    StartPointy[i]=geant_part[i]->Vy();
-	    StartPointz[i]=geant_part[i]->Vz();
-	    EndPointx[i]=geant_part[i]->EndPoint()[0];
-	    EndPointy[i]=geant_part[i]->EndPoint()[1];
-	    EndPointz[i]=geant_part[i]->EndPoint()[2];
-	    
-	    NumberDaughters[i]=geant_part[i]->NumberDaughters();
-	    
-	  
-	    std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
-	    
-	    // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
-	    
-	  }
-	  
-	}
+ 
+   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" trackId= "<<geant_part[i]->TrackId()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<" Mother= "<<geant_part[i]->Mother()<<" Vertex= ("<<geant_part[i]->Vx()<<","<<geant_part[i]->Vy()<<","<<geant_part[i]->Vz()<<" ) end=("<<geant_part[i]->EndPoint()[0]<<","<<geant_part[i]->EndPoint()[1]<<","<<geant_part[i]->EndPoint()[2]<<")"<<std::endl;
+   
+   if(geant_part[i]->Process()==pri){
+   process_primary[i]=1;
+   }
+   else{
+   process_primary[i]=0;
+   }
+   
+    Mother[i]=geant_part[i]->Mother();
+    TrackId[i]=geant_part[i]->TrackId();
+    
+    
+    
+    pdg[i]=geant_part[i]->PdgCode();
+    
+    Eng[i]=geant_part[i]->E();
+    Px[i]=geant_part[i]->Px();
+   
+    Py[i]=geant_part[i]->Py();
+    Pz[i]=geant_part[i]->Pz();
+    
+   StartPointx[i]=geant_part[i]->Vx();
+   StartPointy[i]=geant_part[i]->Vy();
+   StartPointz[i]=geant_part[i]->Vz();
+   EndPointx[i]=geant_part[i]->EndPoint()[0];
+   EndPointy[i]=geant_part[i]->EndPoint()[1];
+   EndPointz[i]=geant_part[i]->EndPoint()[2];
+   
+   NumberDaughters[i]=geant_part[i]->NumberDaughters();
+   
+   
+   std::cout<<"length= "<<sqrt((EndPointx[i]-StartPointx[i])*(EndPointx[i]-StartPointx[i]) + (EndPointy[i]-StartPointy[i])*(EndPointy[i]-StartPointy[i])+ (EndPointz[i]-StartPointz[i])*(EndPointz[i]-StartPointz[i]))<<std::endl;
+   
+ // std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" trackId= "<<geant_part[i]->TrackId()<<" mother= "<<geant_part[i]->Mother()<<" NumberDaughters()= "<<geant_part[i]->NumberDaughters()<<" process= "<<geant_part[i]->Process()<<std::endl;
+     
+     
+     
+     } //geant particles
 	
 	
 	//beam weight, only available for nu-data
@@ -1416,8 +1434,9 @@ void t962::AnalysisTree::ResetVars(){
   }    
   
   no_primaries = -99999;
+  geant_list_size=-999;
   for (int i = 0; i<kMaxPrimaries; ++i){
-    primaries_pdg[i] = -99999;
+    pdg[i] = -99999;
     Eng[i] = -99999;
     Px[i] = -99999;
     Py[i] = -99999;
@@ -1429,6 +1448,9 @@ void t962::AnalysisTree::ResetVars(){
     EndPointy[i] = -99999;
     EndPointz[i] = -99999;
     NumberDaughters[i] = -99999;
+    Mother[i] = -99999;
+    TrackId[i] = -99999;
+    process_primary[i] = -99999;
     genie_primaries_pdg[i] = -99999;
     genie_Eng[i] = -99999;
     genie_Px[i] = -99999;
