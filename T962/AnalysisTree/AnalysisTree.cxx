@@ -1008,7 +1008,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	    
 	    try{
 	      channel2 = geom->NearestChannel(fMCvertex,plane);
-	      
+	      geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
+	      twodvtx_w_truth[plane]=wire2;
 	    }
 	    catch(cet::exception &e){
 	      mf::LogWarning("ccqeanalysistreeexcp")<<e;
@@ -1021,8 +1022,6 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	      else if(plane==1 && fMCvertex[2]>geom->DetLength()-5) channel2=geom->Nchannels()-1;
 	      else if(plane==1 && fMCvertex[2]<5) channel2=(geom->Nchannels())/2 -1;
 	    }
-	    geom->ChannelToWire(channel2,cs,tpc2,plane2,wire2);   
-	    twodvtx_w_truth[plane]=wire2;
 	  }
 	}
 	
