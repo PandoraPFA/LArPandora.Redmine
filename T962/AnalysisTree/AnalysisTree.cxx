@@ -468,18 +468,14 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 //  if (evt.getByLabel(fScanModuleLabel,scanListHandle))
 //    art::fill_ptr_vector(scanlist, scanListHandle);
 
-  art::Handle< std::vector<t962::Paddles> > paddlesListHandle;
-  std::vector<art::Ptr<t962::Paddles> > paddleslist;
-  if (evt.getByLabel(fPaddlesModuleLabel,paddlesListHandle))
-    art::fill_ptr_vector(paddleslist, paddlesListHandle);
-
-  if (paddleslist.size()>0){
-    pmttime = paddleslist[0]->gettime();
+  art::Handle<t962::Paddles> paddlesHandle;
+  if (evt.getByLabel(fPaddlesModuleLabel,paddlesHandle)){
+    pmttime = paddlesHandle->gettime();
     for (int i = 0; i<4; ++i){
-      pmt1[i] = paddleslist[0]->gettdc(0,i);
-      pmt2[i] = paddleslist[0]->gettdc(1,i);
-      pmt3[i] = paddleslist[0]->gettdc(2,i);
-      pmt4[i] = paddleslist[0]->gettdc(3,i);
+      pmt1[i] = paddlesHandle->gettdc(0,i);
+      pmt2[i] = paddlesHandle->gettdc(1,i);
+      pmt3[i] = paddlesHandle->gettdc(2,i);
+      pmt4[i] = paddlesHandle->gettdc(3,i);
     }
   }
 
@@ -904,41 +900,41 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     if (mcevts_truth){//at least one mc record
       if (mclist[0]->NeutrinoSet()){//is neutrino
 	//find the true neutrino corresponding to the reconstructed event
-//	std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-//	for (size_t i = 0; i<hitlist.size(); i++){
-//	  if (hitlist[i]->View() == geo::kV){//collection view
-//	    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-//	    for (size_t e = 0; e<eveIDs.size(); e++){
-//	      art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-//	      mctruthemap[mctruth]+=eveIDs[e].energy;
-//	    }
-//	  }
-//	}
-//	art::Ptr<simb::MCTruth> mctruth = mclist[0];
-//	double maxenergy = -1;
-//	int imc = 0;
-//	int imc0 = 0;
-//	for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
-//	  if ((ii->second)>maxenergy){
-//	    maxenergy = ii->second;
-//	    mctruth = ii->first;
-//	    imc = imc0;
-//	  }
-//	  imc0++;
-//	}
-	int imc = 0;
-	double mind = 1e9;
-	for (size_t i = 0; i<mclist.size(); ++i){
-	  double x = mclist[i]->GetNeutrino().Nu().Vx();
-	  double y = mclist[i]->GetNeutrino().Nu().Vy();
-	  double z = mclist[i]->GetNeutrino().Nu().Vz();
-	  double dis = sqrt(pow(x-vtxx_reco,2)+pow(y-vtxy_reco,2)+pow(z-vtxz_reco,2));
-	  if (dis<mind) {
-	    imc = i;
-	    mind = dis;
+	std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+	for (size_t i = 0; i<hitlist.size(); i++){
+	  if (hitlist[i]->View() == geo::kV){//collection view
+	    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+	    for (size_t e = 0; e<eveIDs.size(); e++){
+	      art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+	      mctruthemap[mctruth]+=eveIDs[e].energy;
+	    }
 	  }
 	}
-	art::Ptr<simb::MCTruth> mctruth = mclist[imc];
+	art::Ptr<simb::MCTruth> mctruth = mclist[0];
+	double maxenergy = -1;
+	int imc = 0;
+	int imc0 = 0;
+	for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+	  if ((ii->second)>maxenergy){
+	    maxenergy = ii->second;
+	    mctruth = ii->first;
+	    imc = imc0;
+	  }
+	  imc0++;
+	}
+//	int imc = 0;
+//	double mind = 1e9;
+//	for (size_t i = 0; i<mclist.size(); ++i){
+//	  double x = mclist[i]->GetNeutrino().Nu().Vx();
+//	  double y = mclist[i]->GetNeutrino().Nu().Vy();
+//	  double z = mclist[i]->GetNeutrino().Nu().Vz();
+//	  double dis = sqrt(pow(x-vtxx_reco,2)+pow(y-vtxy_reco,2)+pow(z-vtxz_reco,2));
+//	  if (dis<mind) {
+//	    imc = i;
+//	    mind = dis;
+//	  }
+//	}
+//	art::Ptr<simb::MCTruth> mctruth = mclist[imc];
 	art::Ptr<simb::MCFlux>  mcflux = fluxlist[imc];
 	
 	nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
