@@ -73,9 +73,36 @@ namespace merge{
        LOG_DEBUG ("badfile") << "MergePaddles could not open file named " << paddlesfilename ;
        return false;
     }
+
+    std::ifstream myfile("lastevent.txt");
+    std::string number;
+    std::vector<std::string> stream_vec;
+    if(myfile.is_open()){
+      getline(myfile,number);
+      
+      std::istringstream stream;
+      stream.clear();
+      stream.str(number);
+      stream_vec.clear();
+      std::string times;
+      while(std::getline(stream,times,' ')){
+        if(!times.empty()) stream_vec.push_back(times);
+      }
+      
+    }
+    myfile.close();
+    
+    if(stream_vec.size()==0) std::cout << "Empty stream?" << std::endl;
+    time_t lastdaqtime = (time_t) atoi(stream_vec[0].c_str());
+    time_t lasttime = (time_t) atoi(stream_vec[1].c_str());
+    
+    std::cout << "daq time = " << spilltime << std::endl;
+    std::cout << "lastdaqtime = " << lastdaqtime << std::endl;
+    std::cout << "lasttime = " << lasttime << std::endl;
     
     bool foundpaddlesinfo = false;
     time_t time;
+    std::vector<time_t> alltimes;
     int pmt1[4] = {0};
     int pmt2[4] = {0};
     int pmt3[4] = {0};
@@ -93,6 +120,9 @@ namespace merge{
     evt.getByLabel("beam",beam);
     double tms = (double)beam->get_t_ms();
     double mindiff = 1000.0;
+    int n = 0;
+    int n_match = 0;
+    int n_lastmatch = 0;
     
     while(getline(paddlesfile,k)){
     
@@ -108,18 +138,34 @@ namespace merge{
        if(sv.size()==0) continue;
        if(sv[0].compare(str0)==0){
          time = atoi(sv[1].c_str());
+         alltimes.push_back(time);
+         ++n;
+         if(time==lasttime) n_lastmatch = n;
        }
        
        double diff = fabs(time - tms/1000.0);
-     
        double diffc = (time - tms/1000.0);
        if(diff<10 && sv[0].compare(str0)==0)
          std::cout << "time = " << time << " tms = " << std::setprecision(13) << tms
                    << " diff = " << diffc << std::endl;
- 
-       if(diff<1.75 && diffc<0.0) {
-         if(diff<mindiff) mindiff = diff;
+       
+       if( diff<2.0 && time!=lasttime &&
+           ( (n - n_lastmatch)==1
+             || n_lastmatch==0 )){
+          if(n_lastmatch==0 && mindiff!=1000.0 && sv[0].compare(str0)==0)
+          {
+             std::cout << "WARNING!  First event of run file could match to 2 Paddles events!" << std::endl;
+             continue;
+          }
+         if(diff<mindiff){
+           mindiff = diff;
+           n_match = n;
+           std::cout << "Setting mindiff...n = " << n << " n_lastmatch = " << n_lastmatch << std::endl;
+         }
          foundpaddlesinfo = true;
+       }
+       if(diff<2.0 && time==lasttime){
+          if(diff < mindiff && sv[0].compare(str0)==0) std::cout << "!!!!Event wants to match to last matched Paddles!" << std::endl;
        }
        if(sv[0].compare(str0)==0 && foundpaddlesinfo && diff==mindiff) paddles.SetTime(time);
        if(sv[0].compare(str1)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt1[i] = atoi(sv[i+1].c_str());
@@ -128,7 +174,7 @@ namespace merge{
        if(sv[0].compare(str4)==0 && foundpaddlesinfo && diff==mindiff) for(int i = 0; i<4; ++i) pmt4[i] = atoi(sv[i+1].c_str());
    
        
-       if(foundpaddlesinfo && diff>1.75){
+       if(foundpaddlesinfo && diff>2.0){
          paddles.SetPMT(0,pmt1);
          paddles.SetPMT(1,pmt2);
          paddles.SetPMT(2,pmt3);
@@ -142,7 +188,15 @@ namespace merge{
       std::cout << "Matching Paddle information found!" << std::endl;
       std::cout << "beam tms = " << std::setprecision(13) << tms << std::endl;  
       std::cout << "daq time = " << spilltime << std::endl;
+      std::cout << "n_match = " << n_match << " n_lastmatch = " << n_lastmatch << std::endl;
       std::cout << paddles << std::endl;
+
+      std::ofstream myfile;
+      myfile.open("lastevent.txt");
+      myfile << spilltime << " " << paddles.gettime() ;
+      myfile.close();
+      if((n_match - n_lastmatch)>1 && n_lastmatch!=0)
+        std::cout << "Skipped Paddle event?" << std::endl;
     }
     else{
       std::cout << "No matching Paddle information found." << std::endl;
