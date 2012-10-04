@@ -676,7 +676,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       double maxe;
       HitsPurity(hitsU, trkid, purity, maxe);
       trktruepuru[i] = purity;
-      if (trkid>-1){
+      if (trkid>0){
 	const sim::Particle *particle = bt->TrackIDToParticle(trkid);
 	const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
 	double tote = 0;
@@ -688,7 +688,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       }
       HitsPurity(hitsV, trkid, purity, maxe);
       trktruepurv[i] = purity;
-      if (trkid>-1){
+      if (trkid>0){
 	const sim::Particle *particle = bt->TrackIDToParticle(trkid);
 	const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
 	double tote = 0;
