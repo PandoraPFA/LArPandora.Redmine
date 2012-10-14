@@ -175,6 +175,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("trkdedx",trkdedx,"trkdedx[ntracks_reco][1000]/D");
   fTree->Branch("trkdqdx",trkdqdx,"trkdqdx[ntracks_reco][1000]/D");
   fTree->Branch("trkresrg",trkresrg,"trkresrg[ntracks_reco][1000]/D");
+  fTree->Branch("trkhitindexc",trkhitindexc,"trkhitindexc[ntracks_reco][1000]/I");
   fTree->Branch("trkpid",trkpid,"trkpid[ntracks_reco]/I");
   fTree->Branch("trkpidndf",trkpidndf,"trkpidndf[ntracks_reco]/I");
   fTree->Branch("trkpidchi2",trkpidchi2,"trkpidchi2[ntracks_reco]/D");
@@ -253,7 +254,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
   fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
   fTree->Branch("hit_ph",hit_ph,"hit_ph[no_hits]/D");
-
+  fTree->Branch("hit_etruth",hit_etruth,"hit_etruth[no_hits]/D");
   fTree->Branch("twodvtx_w_reco", twodvtx_w_reco, "twodvtx_w_reco[2]/D");
   fTree->Branch("twodvtx_t_reco", twodvtx_t_reco, "twodvtx_t_reco[2]/D");
   fTree->Branch("twodvtx_w_truth", twodvtx_w_truth, "twodvtx_w_truth[2]/D");
@@ -311,14 +312,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("Mother",Mother,"Mother[geant_list_size]/I");
   fTree->Branch("TrackId",TrackId,"TrackId[geant_list_size]/I");
   fTree->Branch("process_primary",process_primary,"process_primary[geant_list_size]/I");
-  
-  
-  
-  
-  
-  
-  
-  
+      
   fTree->Branch("Kin_Eng_reco",Kin_Eng_reco,"Kin_Eng_reco[ntracks_reco]/D");
   //fTree->Branch("fTrkPitchC", &fTrkPitchC, "fTrkPitchC/D");
   fTree->Branch("muon_Kin_Eng_reco",&muon_Kin_Eng_reco,"muon_Kin_Eng_reco/D");
@@ -644,6 +638,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     if (focal.at(i).isValid()){
       trkke[i]           = focal.at(i).ref().KineticEnergy();
       trkrange[i]        = focal.at(i).ref().Range();
+      trkpitchc[i]       = focal.at(i).ref().TrkPitchC();
       no_dead_wires_muon = focal.at(i).ref().DeadWireResRC().size();
       Kin_Eng_reco[i]    = focal.at(i).ref().KineticEnergy()+no_dead_wires_muon*focal.at(i).ref().TrkPitchC()*2.1;
       ntrkhits[i]        = focal.at(i).ref().dEdx().size();
@@ -652,6 +647,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	trkdedx[i][j] = (focal.at(i).ref().dEdx())[j];
 	trkdqdx[i][j] = (focal.at(i).ref().dQdx())[j];
 	trkresrg[i][j] = (focal.at(i).ref().ResidualRange())[j];
+	trkhitindexc[i][j] = (focal.at(i).ref().HitIndexC())[j];
 	//std::cout<<i<<" "<<j<<" "<<trkdedx[i][j]<<" "<<trkdqdx[i][j]<<" "<<trkresrg[i][j]<<std::endl;
       }
     }
@@ -850,6 +846,12 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     hit_peakT[hit_no]=(*itr)->PeakTime();
     hit_charge[hit_no]=(*itr)->Charge();
     hit_ph[hit_no] = (*itr)->Charge(true);
+    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(*itr);
+    double etruth = 0;
+    for (size_t e = 0; e < eveIDs.size(); ++e){
+      etruth += eveIDs[e].energy;
+    }
+    hit_etruth[hit_no] = etruth;
     std::cout<<"p= "<<p<<" ,w= "<<w<<" ,time= "<<(*itr)->PeakTime()<<" Charge= "<<(*itr)->Charge()<<" charge(true)= "<<(*itr)->Charge(true)<<std::endl;
     
     //  if((*itr)->View()==geo::kU){
@@ -1414,6 +1416,7 @@ void t962::AnalysisTree::ResetVars(){
       trkdedx[i][j] = -99999;
       trkdqdx[i][j] = -99999;
       trkresrg[i][j] = -99999;
+      trkhitindexc[i][j] = -99999;
     }
     trkpid[i] = -99999;
     trkpidndf[i] = -99999;
@@ -1466,6 +1469,7 @@ void t962::AnalysisTree::ResetVars(){
     hit_peakT[i] = -99999;
     hit_charge[i] = -99999;
     hit_ph[i] = -99999;
+    hit_etruth[i] = -99999;
   }
 
   for (int i = 0; i<2; ++i){

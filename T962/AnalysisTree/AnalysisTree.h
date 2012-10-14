@@ -110,6 +110,7 @@ namespace t962 {
     double trkdedx[kMaxTrack][kMaxTrackHits];
     double trkdqdx[kMaxTrack][kMaxTrackHits];
     double trkresrg[kMaxTrack][kMaxTrackHits];
+    int    trkhitindexc[kMaxTrack][kMaxTrackHits];
     int    trkpid[kMaxTrack];
     int    trkpidndf[kMaxTrack];
     double trkpidchi2[kMaxTrack];
@@ -261,6 +262,7 @@ namespace t962 {
     double hit_peakT[kMaxHits];
     double hit_charge[kMaxHits];
     double hit_ph[kMaxHits];
+    double hit_etruth[kMaxHits];
 
     //paddle information
     double pmttime;
