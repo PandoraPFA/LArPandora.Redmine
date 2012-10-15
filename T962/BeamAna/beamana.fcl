@@ -1,0 +1,38 @@
+#include "job/larproperties.fcl"
+#include "job/databaseutil.fcl"
+#include "job/beamanamodules.fcl"
+
+process_name: BeamAna
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "beamana_hist.root" }
+  user:
+  {
+   LArProperties:  @local::argoneut_properties
+   DatabaseUtil:   @local::argoneut_database
+  }
+}
+
+#source is now a root file
+source:
+{
+  module_type: RootInput
+  maxEvents:  -1      # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers:{}
+ analyzers:{}
+ anapath:  [ beam ]
+ end_paths:     [ anapath ] 
+}
+
+
+physics.analyzers.beam:        @local::argoneut_beamana
