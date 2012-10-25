@@ -539,7 +539,7 @@ namespace cchyp {
 			    
 			    lMuonStart = parIn[j]->Position();
 			    MuonStart = lMuonStart.Vect();
-			    MuonEnd = parIn[j]->EndPoint();
+			    MuonEnd = parIn[j]->EndPosition().Vect();
 			    lMuonMom = parIn[j]->Momentum();
 			    MuonMom = lMuonMom.Vect();
 			    MuonID = parIn[j]->TrackId();
@@ -555,7 +555,7 @@ namespace cchyp {
 			    
 			    lProtonStart = parIn[j]->Position();
 			    ProtonStart = lProtonStart.Vect();
-			    ProtonEnd = parIn[j]->EndPoint();
+			    ProtonEnd = parIn[j]->EndPosition().Vect();
 			    lProtonMom = parIn[j]->Momentum();
 			    ProtonMom = lProtonMom.Vect();
 			    ProtonID = parIn[j]->TrackId();
@@ -571,7 +571,7 @@ namespace cchyp {
 			    
 			    lPionStart = parIn[j]->Position();
 			    PionStart = lPionStart.Vect();
-			    PionEnd = parIn[j]->EndPoint();
+			    PionEnd = parIn[j]->EndPosition().Vect();
 			    lPionMom = parIn[j]->Momentum();
 			    PionMom = lPionMom.Vect();
 			    PionID = parIn[j]->TrackId();
