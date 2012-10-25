@@ -1059,7 +1059,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	
 	for( unsigned int i = 0; i < geant_part.size(); ++i ){
  
-   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" trackId= "<<geant_part[i]->TrackId()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<" Mother= "<<geant_part[i]->Mother()<<" Vertex= ("<<geant_part[i]->Vx()<<","<<geant_part[i]->Vy()<<","<<geant_part[i]->Vz()<<" ) end=("<<geant_part[i]->EndPoint()[0]<<","<<geant_part[i]->EndPoint()[1]<<","<<geant_part[i]->EndPoint()[2]<<")"<<std::endl;
+   std::cout<<"pdg= "<<geant_part[i]->PdgCode()<<" Process= "<<geant_part[i]->Process()<<" trackId= "<<geant_part[i]->TrackId()<<" E= "<<geant_part[i]->E()<<" P= "<<geant_part[i]->P()<<" "<<sqrt(geant_part[i]->Px()*geant_part[i]->Px() + geant_part[i]->Py()*geant_part[i]->Py()+ geant_part[i]->Pz()*geant_part[i]->Pz())<<" Mother= "<<geant_part[i]->Mother()<<" Vertex= ("<<geant_part[i]->Vx()<<","<<geant_part[i]->Vy()<<","<<geant_part[i]->Vz()<<" ) end=("<<geant_part[i]->EndPosition()[0]<<","<<geant_part[i]->EndPosition()[1]<<","<<geant_part[i]->EndPosition()[2]<<")"<<std::endl;
    
    if(geant_part[i]->Process()==pri){
    process_primary[i]=1;
@@ -1084,9 +1084,9 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
    StartPointx[i]=geant_part[i]->Vx();
    StartPointy[i]=geant_part[i]->Vy();
    StartPointz[i]=geant_part[i]->Vz();
-   EndPointx[i]=geant_part[i]->EndPoint()[0];
-   EndPointy[i]=geant_part[i]->EndPoint()[1];
-   EndPointz[i]=geant_part[i]->EndPoint()[2];
+   EndPointx[i]=geant_part[i]->EndPosition()[0];
+   EndPointy[i]=geant_part[i]->EndPosition()[1];
+   EndPointz[i]=geant_part[i]->EndPosition()[2];
    
    NumberDaughters[i]=geant_part[i]->NumberDaughters();
    
