@@ -317,7 +317,7 @@ namespace cpion {
 	  }
 	if(pvec[j]->Process()=="primary"&&pvec[j]->PdgCode()<100000000)
 	  {
-	 //    length=(pow ( pow((pvec[j]->Vx()-pvec[j]->EndPoint()[0]),2) + pow((pvec[j]->Vy()-pvec[j]->EndPoint()[1]),2) + pow((pvec[j]->Vz()-pvec[j]->EndPoint()[2]),2), 0.5));
+	 //    length=(pow ( pow((pvec[j]->Vx()-pvec[j]->EndPosition()[0]),2) + pow((pvec[j]->Vy()-pvec[j]->EndPosition()[1]),2) + pow((pvec[j]->Vz()-pvec[j]->EndPosition()[2]),2), 0.5));
 
 	    if(pvec[j]->PdgCode()==2212)
 	      {
@@ -375,7 +375,7 @@ namespace cpion {
 	    tDaughPdg[jj]=-999;
 	  }
 
-	//std::cout<<"PARTICLE: "<<pvec[i]->PdgCode()<<" EVENT "<<Evt<<" TRACK ID "<<pvec[i]->TrackId()<<" MOTHER "<<pvec[i]->Mother()<<" PROCESS "<<pvec[i]->Process()<<" ENERGY "<<pvec[i]->E()<<" PX "<<pvec[i]->Vx()<<" PY "<<pvec[i]->Vy()<< " PZ "<<pvec[i]->Vz()<<" NDAUGHTERS "<<pvec[i]->NumberDaughters()<<" POSITION "<<pvec[i]->Position()[0]<<" ENDPOINT "<<pvec[i]->EndPoint()[0]<<" "<<pvec[i]->EndPoint()[1]<<" "<<pvec[i]->EndPoint()[2]<<std::endl;
+	//std::cout<<"PARTICLE: "<<pvec[i]->PdgCode()<<" EVENT "<<Evt<<" TRACK ID "<<pvec[i]->TrackId()<<" MOTHER "<<pvec[i]->Mother()<<" PROCESS "<<pvec[i]->Process()<<" ENERGY "<<pvec[i]->E()<<" PX "<<pvec[i]->Vx()<<" PY "<<pvec[i]->Vy()<< " PZ "<<pvec[i]->Vz()<<" NDAUGHTERS "<<pvec[i]->NumberDaughters()<<" POSITION "<<pvec[i]->Position()[0]<<" ENDPOINT "<<pvec[i]->EndPosition()[0]<<" "<<pvec[i]->EndPosition()[1]<<" "<<pvec[i]->EndPosition()[2]<<std::endl;
 
 	if(pvec[i]->Process()=="primary" && (pvec[i]->PdgCode()==211 || pvec[i]->PdgCode()==13 || pvec[i]->PdgCode()==-13))
 	  {
@@ -387,9 +387,9 @@ namespace cpion {
 		tMuVx=pvec[i]->Vx();
 		tMuVy=pvec[i]->Vy();
 		tMuVz=pvec[i]->Vz();
-		tMuEndx=pvec[i]->EndPoint()[0];
-		tMuEndy=pvec[i]->EndPoint()[1];
-		tMuEndz=pvec[i]->EndPoint()[2];
+		tMuEndx=pvec[i]->EndPosition()[0];
+		tMuEndy=pvec[i]->EndPosition()[1];
+		tMuEndz=pvec[i]->EndPosition()[2];
 		tMuPx=pvec[i]->Px();
 		tMuPy=pvec[i]->Py();
 		tMuPz=pvec[i]->Pz();
@@ -402,9 +402,9 @@ namespace cpion {
 		tMuVx=pvec[i]->Vx();
 		tMuVy=pvec[i]->Vy();
 		tMuVz=pvec[i]->Vz();
-		tMuEndx=pvec[i]->EndPoint()[0];
-		tMuEndy=pvec[i]->EndPoint()[1];
-		tMuEndz=pvec[i]->EndPoint()[2];
+		tMuEndx=pvec[i]->EndPosition()[0];
+		tMuEndy=pvec[i]->EndPosition()[1];
+		tMuEndz=pvec[i]->EndPosition()[2];
 		tMuPx=pvec[i]->Px();
 		tMuPy=pvec[i]->Py();
 		tMuPz=pvec[i]->Pz();
@@ -423,9 +423,9 @@ namespace cpion {
 		tVx=pvec[i]->Vx();
 		tVy=pvec[i]->Vy();
 		tVz=pvec[i]->Vz();
-		tEndx=pvec[i]->EndPoint()[0];
-		tEndy=pvec[i]->EndPoint()[1];
-		tEndz=pvec[i]->EndPoint()[2];
+		tEndx=pvec[i]->EndPosition()[0];
+		tEndy=pvec[i]->EndPosition()[1];
+		tEndz=pvec[i]->EndPosition()[2];
 		tPx=pvec[i]->Px();
 		tPy=pvec[i]->Py();
 		tPz=pvec[i]->Pz();
