@@ -603,9 +603,9 @@ Kin_Eng_truth=tot_energy;
    StartPointx[i]=geant_part[i]->Vx();
    StartPointy[i]=geant_part[i]->Vy();
    StartPointz[i]=geant_part[i]->Vz();
-   EndPointx[i]=geant_part[i]->EndPoint()[0];
-   EndPointy[i]=geant_part[i]->EndPoint()[1];
-   EndPointz[i]=geant_part[i]->EndPoint()[2];
+   EndPointx[i]=geant_part[i]->EndPosition()[0];
+   EndPointy[i]=geant_part[i]->EndPosition()[1];
+   EndPointz[i]=geant_part[i]->EndPosition()[2];
    
    NumberDaughters[i]=geant_part[i]->NumberDaughters();
    
