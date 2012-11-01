@@ -32,7 +32,7 @@
 #include "Geometry/Geometry.h"
 #include "SimulationBase/MCTruth.h"
 #include "Simulation/EmEveIdCalculator.h"
-#include "Simulation/Particle.h"
+#include "SimulationBase/MCParticle.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Track.h"
 #include "RecoBase/Vertex.h"
@@ -168,8 +168,6 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
   evt.getByLabel(fVertexModuleLabel,vertexListHandle);
   art::Handle< std::vector<t962::MINOS> > minosListHandle;
   evt.getByLabel(fMINOSModuleLabel,minosListHandle);
-  art::Handle< std::vector<sim::Particle> > larListHandle;
-  evt.getByLabel (fLArG4ModuleLabel,larListHandle);  
 
   art::PtrVector<simb::MCTruth> mclist;
   if(evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
@@ -200,11 +198,9 @@ void t962::CCRecoEffTree::analyze(const art::Event& evt)
     minoslist.push_back(minosHolder);
   }
   
-  art::PtrVector<sim::Particle> parIn;
-  if(evt.getByLabel(fLArG4ModuleLabel,larListHandle))
-  for(unsigned int i = 0; i < larListHandle->size(); ++i){
-      art::Ptr<sim::Particle> particle(larListHandle, i);
-      parIn.push_back(particle);
+  std::vector<const simb::MCParticle*> parIn;
+  for(unsigned int i = 0; i < bt->ParticleList().size(); ++i){
+    parIn.push_back(bt->ParticleList().Particle(i));
   }
 
   art::ServiceHandle<geo::Geometry> geom;
