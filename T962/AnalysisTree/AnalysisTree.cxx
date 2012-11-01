@@ -673,7 +673,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       HitsPurity(hitsU, trkid, purity, maxe);
       trktruepuru[i] = purity;
       if (trkid>0){
-	const sim::Particle *particle = bt->TrackIDToParticle(trkid);
+	const simb::MCParticle *particle = bt->TrackIDToParticle(trkid);
 	const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
 	double tote = 0;
 	for (size_t iide = 0; iide<vide.size(); ++iide){
@@ -685,7 +685,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
       HitsPurity(hitsV, trkid, purity, maxe);
       trktruepurv[i] = purity;
       if (trkid>0){
-	const sim::Particle *particle = bt->TrackIDToParticle(trkid);
+	const simb::MCParticle *particle = bt->TrackIDToParticle(trkid);
 	const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkid);
 	double tote = 0;
 	for (size_t iide = 0; iide<vide.size(); ++iide){
@@ -892,7 +892,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
     art::ServiceHandle<cheat::BackTracker> bt;
     const sim::ParticleList& plist = bt->ParticleList();
     for ( sim::ParticleList::const_iterator ipar = plist.begin(); ipar!=plist.end(); ++ipar){
-      sim::Particle *particle = ipar->second;
+      simb::MCParticle *particle = ipar->second;
       parpdg = particle->PdgCode();
       parmom = particle->Momentum().P();
       break;
@@ -1034,12 +1034,10 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
 	///       can correctly count tracks:
 	//--------------------------------------------------------------//
 	
-	art::Handle< std::vector<sim::Particle> > geant_list;
-	std::vector<art::Ptr<sim::Particle> > geant_part;
-	if(evt.getByLabel (fLArG4ModuleLabel,geant_list))
-	  art::fill_ptr_vector(geant_part,geant_list);
+	std::vector<const simb::MCParticle* > geant_part;
+	for(size_t p = 0; p < plist.size(); ++p) geant_part.push_back(plist.Particle(p)); 
 	
-	std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
+	std::cout<<"No of geant part= "<<geant_part.size()<<std::endl;
 	std::string pri("primary");
 	int primary=0;
 	int geant_particle=0;
