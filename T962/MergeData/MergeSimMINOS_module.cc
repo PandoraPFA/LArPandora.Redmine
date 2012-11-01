@@ -60,7 +60,6 @@ namespace merge {
    protected: 
       
       bool MergeMINOS(std::vector<t962::MINOS> & vec_minos); //method to merge MINOS data
-      art::Handle< std::vector<sim::Particle> > parHandle;
       art::Handle<raw::BeamInfo> fbeam;
       std::string fbeam_modulelabel;               // label for input BeamInfo object
       std::string  fG4ModuleLabel;
@@ -91,8 +90,6 @@ namespace merge {
    //-------------------------------------------------
    void MergeSimMINOS::produce(art::Event& evt)
    {
-      evt.getByLabel(fG4ModuleLabel, parHandle);
-//       evt.getByLabel(fbeam_modulelabel,fbeam);
 	  
       std::unique_ptr<std::vector<t962::MINOS> > MINOS_coll(new std::vector<t962::MINOS> );
       std::vector<t962::MINOS> vec_minos;
