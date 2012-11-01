@@ -30,8 +30,8 @@
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCParticle.h"
 #include "TDatabasePDG.h"
-#include "Simulation/Particle.h"
 #include "T962/T962G4Ana/ChargedPion.h"
+#include "MCCheater/BackTracker.h"
 
 // ROOT includes
 #include "TH1.h"
@@ -240,14 +240,12 @@ namespace cpion {
       }
    
     //To get Geant information
-    art::Handle< std::vector<sim::Particle> > g4list;
-    evt.getByLabel (fG4ModuleLabel,g4list);
-    art::PtrVector<sim::Particle> pvec;
+    art::ServiceHandle<cheat::BackTracker> bt;
+    std::vector<const simb::MCParticle*> pvec;
 
-    for(unsigned int l=0; l < g4list->size(); ++l)
+    for(unsigned int l=0; l < bt->ParticleList().size(); ++l)
       {
-	art::Ptr<sim::Particle> g(g4list, l);
-	pvec.push_back(g);
+	pvec.push_back(bt->ParticleList().Particle(l));
       }
 
     if(mclist->size()==0) return;

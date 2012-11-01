@@ -150,35 +150,30 @@ void T962G4Ana::analyze(const art::Event& evt)
 
 //comment out this section for through going muon simulation
 
-if(mc->NeutrinoSet())
-{
-	simb::MCNeutrino neut(mc->GetNeutrino());
-    fm_neutrino_x =neut.Nu().Vx();
-    fm_neutrino_y =neut.Nu().Vy();
-    fm_neutrino_z =neut.Nu().Vz();
-    fm_neutrino_px =neut.Nu().Px();
-    fm_neutrino_py =neut.Nu().Py();
-    fm_neutrino_pz =neut.Nu().Pz();
-    fm_neutrino_energy=neut.Nu().E();
-    fm_neutrino_pdgcode=neut.Nu().PdgCode();
-}
-//     
-        
-
-    //get the list of particles from this event
- art::ServiceHandle<cheat::BackTracker> bt;
-  const sim::ParticleList& plist = bt->ParticleList();
-    art::ServiceHandle<geo::Geometry> geom;
-
-    // get the particles from the event handle
-    art::Handle< std::vector<sim::Particle> > parHandle;
-    evt.getByLabel(fG4ModuleLabel, parHandle);
-
-    art::PtrVector<sim::Particle> pvec;
-    for(unsigned int i = 0; i < parHandle->size(); ++i){
-      art::Ptr<sim::Particle> p(parHandle, i);      
-      pvec.push_back(p);
+  if(mc->NeutrinoSet())
+    {
+      simb::MCNeutrino neut(mc->GetNeutrino());
+      fm_neutrino_x =neut.Nu().Vx();
+      fm_neutrino_y =neut.Nu().Vy();
+      fm_neutrino_z =neut.Nu().Vz();
+      fm_neutrino_px =neut.Nu().Px();
+      fm_neutrino_py =neut.Nu().Py();
+      fm_neutrino_pz =neut.Nu().Pz();
+      fm_neutrino_energy=neut.Nu().E();
+      fm_neutrino_pdgcode=neut.Nu().PdgCode();
     }
+  //     
+  
+  
+  //get the list of particles from this event
+  art::ServiceHandle<cheat::BackTracker> bt;
+  const sim::ParticleList& plist = bt->ParticleList();
+  art::ServiceHandle<geo::Geometry> geom;
+
+  std::vector<const simb::MCParticle*> pvec;
+  for(unsigned int i = 0; i < plist.size(); ++i){
+    pvec.push_back(plist.Particle(i));
+  }
 
     fm_run=evt.id().run();
     fm_event=evt.id().event(); 
