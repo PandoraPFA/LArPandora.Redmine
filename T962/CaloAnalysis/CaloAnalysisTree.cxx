@@ -33,6 +33,7 @@
 #include "Geometry/PlaneGeo.h"
 #include "MCCheater/BackTracker.h"
 #include "Simulation/sim.h"
+#include "SimulationBase/MCParticle.h"
 #include "Simulation/ParticleList.h"
 #include "Simulation/SimChannel.h"
 #include "Simulation/EmEveIdCalculator.h"
@@ -568,16 +569,11 @@ Kin_Eng_truth=tot_energy;
 ////////////////////////////////////////
  
  
- art::Handle< std::vector<sim::Particle> > geant_list;
-   if(evt.getByLabel (fLArG4ModuleLabel,geant_list));
- 
-  art::PtrVector<sim::Particle> geant_part;
-   for (unsigned int ii = 0; ii <  geant_list->size(); ++ii)
+ std::vector<const simb::MCParticle*> geant_part;
+   for (unsigned int ii = 0; ii <  plist.size(); ++ii)
     {
-      art::Ptr<sim::Particle> p(geant_list,ii);
-      geant_part.push_back(p);
+      geant_part.push_back(plist.Particle(ii));
     } 
-    std::cout<<"No of geant part= "<<geant_list->size()<<std::endl;
  std::string pri ("primary");
 
   no_geant_particles=geant_part.size();
@@ -709,7 +705,7 @@ Kin_Eng_truth=tot_energy;
 	  
 	  
 
-	  const sim::Particle* particle = bt->TrackIDToParticle((*idesitr).trackID);
+	  const simb::MCParticle* particle = bt->TrackIDToParticle((*idesitr).trackID);
 		  
 	  int pdg = particle->PdgCode();
 	  
