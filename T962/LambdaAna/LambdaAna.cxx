@@ -21,7 +21,7 @@
 #include "T962/LambdaAna/LambdaAna.h"
 #include "MCCheater/BackTracker.h"
 #include "SimulationBase/MCTruth.h"
-#include "Simulation/Particle.h"
+#include "SimulationBase/MCParticle.h"
 #include "Simulation/EmEveIdCalculator.h"
 #include "TDatabasePDG.h"
 #include "RecoBase/Hit.h"
@@ -488,13 +488,9 @@ namespace cchyp {
       unsigned int traj_points_pion; 
 
       
-    art::Handle< std::vector<sim::Particle> > larListHandle;
-    evt.getByLabel (fLArG4ModuleLabel,larListHandle);  
-
-    art::PtrVector<sim::Particle> parIn;
-    for(size_t i = 0; i < larListHandle->size(); ++i){
-      art::Ptr<sim::Particle> particle(larListHandle, i);
-      parIn.push_back(particle);
+    std::vector<const simb::MCParticle*> parIn;
+    for(size_t i = 0; i < bt->ParticleList().size(); ++i){
+      parIn.push_back(bt->ParticleList().Particle(i));
     }
 
 
