@@ -7,4 +7,11 @@ argoneut_matchfilter:
  TrackMatchModuleLabel:  "match"
 }
 
+argoneut_reversefilter:
+{
+ module_type:            "ReverseMinosFilter"
+ minostracks:            "minos"
+ dZ:                     20.0
+}
+
 END_PROLOG
