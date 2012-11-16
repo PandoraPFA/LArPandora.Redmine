@@ -1309,6 +1309,7 @@ void t962::AnalysisTree::ResetVars(){
   evttime = -99999;
   beamtime = -99999;
   isdata = -99999;
+  taulife = -99999;
   vtxx_reco = -99999;
   vtxy_reco  = -99999;
   vtxz_reco  = -99999;
