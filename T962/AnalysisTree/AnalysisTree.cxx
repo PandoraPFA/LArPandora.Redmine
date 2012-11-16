@@ -129,6 +129,7 @@ void t962::AnalysisTree::beginJob()
   fTree->Branch("beamtime",&beamtime,"beamtime/D");
   fTree->Branch("pot",&pot,"pot/D");
   fTree->Branch("isdata",&isdata,"isdata/I");
+  fTree->Branch("taulife",&taulife,"taulife/D");
   fTree->Branch("vtxx_reco",&vtxx_reco,"vtxx_reco/D");
   fTree->Branch("vtxy_reco",&vtxy_reco,"vtxy_reco/D");
   fTree->Branch("vtxz_reco",&vtxz_reco,"vtxz_reco/D");
@@ -1257,7 +1258,7 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
   catch( cet::exception &e){
     mf::LogWarning("AnalysisTree") << "caught exception " << e;
   }
-
+  taulife = LArProp->ElectronLifetime();
   fTree->Fill();
 }
 

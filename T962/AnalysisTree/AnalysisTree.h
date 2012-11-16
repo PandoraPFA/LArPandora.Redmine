@@ -61,6 +61,7 @@ namespace t962 {
     double evttime;
     double beamtime;
     double pot;
+    double taulife;
     int isdata;
     //reconstructed information    
     double vtxx_reco;
