@@ -10,6 +10,9 @@
 #include "art/Framework/Core/EDProducer.h"
 #include "TRandom3.h"
 #include "TDatabasePDG.h"
+#include "TSystem.h"
+#include "TSystemDirectory.h"
+#include "TSystemFile.h"
 
 namespace simb { class MCTruth; }
 
@@ -26,11 +29,12 @@ namespace t962 {
     void produce(art::Event& evt);
     void beginRun(art::Run& run);
     void endSubRun(art::SubRun& sr);
-    void reconfigure(fhicl::ParameterSet const& pset) {};
+    //    void reconfigure(fhicl::ParameterSet const& pset) {};
 
   private:
 
     void Sample(simb::MCTruth &mct);        
+
     
     TRandom3           *fRand;           ///< random number
     int                 fSeed;           ///< random number seed    
@@ -49,6 +53,9 @@ namespace t962 {
     float ftrkmom;
     float ftrkqp;
     float totalpot;
+
+    bool fanu;
+    std::vector<TString> fanuFileVector;
 
   };
 };

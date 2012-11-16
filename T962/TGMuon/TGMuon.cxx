@@ -47,15 +47,17 @@
 namespace t962{
 
   //____________________________________________________________________________
-  TGMuon::TGMuon(fhicl::ParameterSet const& pset)
+  TGMuon::TGMuon(fhicl::ParameterSet const& pset) : fanu(true)
   {
-    this->reconfigure(pset);
+    //    this->reconfigure(pset);
     produces< std::vector<simb::MCTruth> >();
     produces< sumdata::RunData, art::InRun >();
     produces< sumdata::POTSummary, art::InSubRun >();
     fRand = new TRandom3();
     fRand->SetSeed();
     totalpot=0.;    
+    // Irritating runtime crash from pset. For now, hardwire it above.
+    //    fanu       = pset.get< bool  >("AntiNeutrinos", false);
   }
 
   //____________________________________________________________________________
@@ -74,6 +76,27 @@ namespace t962{
     geo::DetId_t detid = geo->DetId();
     std::auto_ptr<sumdata::RunData> runcol(new sumdata::RunData(detid));
     run.put(runcol);
+
+
+    if (!fanu) return;
+    // Now, find the antineutrino files.
+
+    //    TString anuFiles("/argoneut/data/rootfiles_ART_MINOS/AntiNeutrino");
+    TString anuFiles("/argoneut/data/minos/rhc");
+    //TSystemDirectory d = ;
+    TList* l = TSystemDirectory("",anuFiles).GetListOfFiles();
+    Int_t length = l->GetSize();
+    Int_t ii(0);
+
+    while ( ii<length )
+      {
+	TSystemFile* currentFile = (TSystemFile*)(l->At(ii));
+	TString rootFile(currentFile->GetName());
+	std::cout << " currentFile is " << rootFile << std::endl;
+	fanuFileVector.push_back(anuFiles+"/"+rootFile);
+	ii++;
+      }
+    // Done calculating anuFileVector. 
     return;
   }
 
@@ -105,6 +128,15 @@ namespace t962{
   {
       //loop through MINOS root files	  
       std::string file = "/argoneut/data/outstage/spitz7/allminos_neutrinodata/allminos_neutrinodata.root";        
+      
+      int anuIndex = (int)fRand->Uniform(1,fanuFileVector.size());
+      while (anuIndex < 2)  // first 2 are . and ..
+	{
+	  anuIndex = (int)fRand->Uniform(1,fanuFileVector.size());
+	}
+      if (fanu && fanuFileVector.size()) file = (std::string)(fanuFileVector.at(anuIndex));
+      
+
       int snarl=0;
       int run=0;
       int subRun=0;
@@ -114,30 +146,30 @@ namespace t962{
       double y_offset=19.3;
       double z_offset=150.; //force particle to be well upstream of ArgoNeuT
   
-            TFile *f = new TFile(file.c_str());
-            TTree *minitree = (TTree*)f->Get("minitree");
-            minitree->SetBranchAddress("run",&frun);  
-            minitree->SetBranchAddress("subRun",&fsubRun);            
-            minitree->SetBranchAddress("trkIndex",&ftrkIndex);
-            minitree->SetBranchAddress("ntrkstp",&fntrkstp);
-            minitree->SetBranchAddress("snarl",&fsnarl);
-            minitree->SetBranchAddress("trtgtd",&ftrtgtd);
-            minitree->SetBranchAddress("trkVtxX",&ftrkVtxX);
-            minitree->SetBranchAddress("trkVtxY",&ftrkVtxY);
-            minitree->SetBranchAddress("trkVtxZ",&ftrkVtxZ);
-            minitree->SetBranchAddress("trkdcosx",&ftrkdcosx);
-            minitree->SetBranchAddress("trkdcosy",&ftrkdcosy);
-            minitree->SetBranchAddress("trkdcosz",&ftrkdcosz);
-            minitree->SetBranchAddress("trkmom",&ftrkmom);
-            minitree->SetBranchAddress("trkqp",&ftrkqp);            
-            Long64_t nentries = minitree->GetEntries();
-            Long64_t nbytes = 0;           
+      TFile *f = new TFile(file.c_str());
+      TTree *minitree = (TTree*)f->Get("minitree");
+      minitree->SetBranchAddress("run",&frun);  
+      minitree->SetBranchAddress("subRun",&fsubRun);            
+      minitree->SetBranchAddress("trkIndex",&ftrkIndex);
+      minitree->SetBranchAddress("ntrkstp",&fntrkstp);
+      minitree->SetBranchAddress("snarl",&fsnarl);
+      minitree->SetBranchAddress("trtgtd",&ftrtgtd);
+      minitree->SetBranchAddress("trkVtxX",&ftrkVtxX);
+      minitree->SetBranchAddress("trkVtxY",&ftrkVtxY);
+      minitree->SetBranchAddress("trkVtxZ",&ftrkVtxZ);
+      minitree->SetBranchAddress("trkdcosx",&ftrkdcosx);
+      minitree->SetBranchAddress("trkdcosy",&ftrkdcosy);
+      minitree->SetBranchAddress("trkdcosz",&ftrkdcosz);
+      minitree->SetBranchAddress("trkmom",&ftrkmom);
+      minitree->SetBranchAddress("trkqp",&ftrkqp);            
+      Long64_t nentries = minitree->GetEntries();
+      //Long64_t nbytes = 0;           
       
       int flag2=0;
       while(flag2==0)    
       {      
             r=(int)fRand->Uniform(1,nentries-1);
-            nbytes==minitree->GetEntry(r);
+	    minitree->GetEntry(r);
             run=frun;
             subRun=fsubRun;
             snarl=fsnarl;
@@ -146,16 +178,16 @@ namespace t962{
           
       for(int i=r-ftrkIndex;i<nentries;i++)
       {
-          nbytes==minitree->GetEntry(i);
+	minitree->GetEntry(i);
            
-          if(frun==run && fsubRun==subRun && fsnarl==snarl)
+	if(frun==run && fsubRun==subRun && fsnarl==snarl)
           flag=1;           
-           
-    	  if(flag==1 && fsnarl!=snarl)
+	
+	if(flag==1 && fsnarl!=snarl)
      	  break;
         
-     	 TVector3 x;
-		 x[0]=100.*ftrkVtxX - x_offset;
+	TVector3 x;
+	x[0]=100.*ftrkVtxX - x_offset;
     	 x[1]=100.*ftrkVtxY + y_offset;
     	 x[2]=100.*ftrkVtxZ - z_offset;        
         //don't bother passing the particle to geant if it's way outside the argoneut detector window   

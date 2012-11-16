@@ -5,6 +5,7 @@ BEGIN_PROLOG
 standard_tgmuon:
 {
  module_type:  "TGMuon"
+ AntiNeutrinos: true
 }
 
 END_PROLOG
