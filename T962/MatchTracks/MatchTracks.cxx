@@ -112,7 +112,7 @@ namespace match{
       int matchable = 0;
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
-         if(EndsOnBoundary(lartrack)) ++matchable;
+         if(EndsOnBoundary(lartrack) /*&& !StartsOnBoundary(lartrack)*/) ++matchable;
          std::cout << "T962 " << *lartrack << std::endl;
       }
       std::cout << matchable << " Matchable T962 tracks." << std::endl;
@@ -127,7 +127,7 @@ namespace match{
        for(unsigned int i=0; i<LarTrackHandle->size();++i)
        {
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
-         if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
+         if(!EndsOnBoundary(lartrack) /*|| StartsOnBoundary(lartrack)*/) continue;//track doesn't leave TPC or starts outside it.
          for(unsigned int j=0; j<MinosTrackHandle->size();++j)
          {
             art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);            
@@ -152,7 +152,7 @@ namespace match{
             
       for(unsigned int i=0; i<LarTrackHandle->size();++i){
          art::Ptr<recob::Track> lartrack(LarTrackHandle,i);
-         if(!EndsOnBoundary(lartrack)) continue;//track doesn't leave TPC
+         if(!EndsOnBoundary(lartrack) /*|| StartsOnBoundary(lartrack)*/) continue;//track doesn't leave TPC or starts outside it.
 
          for(unsigned int j=0; j<MinosTrackHandle->size();++j){
             art::Ptr<t962::MINOS> minostrack(MinosTrackHandle,j);
@@ -317,6 +317,20 @@ namespace match{
 	|| fabs(20.-larEnd[1])<fdBoundary
 	|| fabs(larEnd[2])<fdBoundary
 	|| fabs(90.-larEnd[2])<fdBoundary )   
+	return true;  
+      else return false;
+   }
+
+   bool MatchTracks::StartsOnBoundary(art::Ptr<recob::Track> lar_track)
+   {
+      std::vector<double> larStart, larEnd;
+      lar_track->Extent(larStart,larEnd);//put xyz coordinates at begin/end of track into vectors(?)
+ 	if(fabs(larStart[0])<fdBoundary
+	|| fabs(47.-larStart[0])<fdBoundary 
+	|| fabs(larStart[1]+20.)<fdBoundary
+	|| fabs(20.-larStart[1])<fdBoundary
+	|| fabs(larStart[2])<fdBoundary
+	|| fabs(90.-larStart[2])<fdBoundary )   
 	return true;  
       else return false;
    }

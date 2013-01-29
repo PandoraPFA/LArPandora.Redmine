@@ -1,9 +1,10 @@
 ////////////////////////////////////////////////////////////////////////
 /// \file  TGMuon.cxx
 /// \brief Generator for through-going muons
-/// Module designed to produce through-going muons based on MINOS data for ArgoNeuT (run 3, neutrino-mode right now)
+/// Module designed to produce through-going muons based on MINOS data for ArgoNeuT (run 3, {anti}neutrino-mode right now)
 ///
 /// \author  joshua.spitz@yale.edu
+/// {\author  echurch@yale.edu}
 ////////////////////////////////////////////////////////////////////////
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/SubRun.h" 
@@ -47,9 +48,9 @@
 namespace t962{
 
   //____________________________________________________________________________
-  TGMuon::TGMuon(fhicl::ParameterSet const& pset) : fanu(true)
+  TGMuon::TGMuon(fhicl::ParameterSet const& pset) : fTIDOffset(100),fanu(true)
   {
-    //    this->reconfigure(pset);
+    this->reconfigure(pset);
     produces< std::vector<simb::MCTruth> >();
     produces< sumdata::RunData, art::InRun >();
     produces< sumdata::POTSummary, art::InSubRun >();
@@ -57,7 +58,9 @@ namespace t962{
     fRand->SetSeed();
     totalpot=0.;    
     // Irritating runtime crash from pset. For now, hardwire it above.
-    //    fanu       = pset.get< bool  >("AntiNeutrinos", false);
+    fanu       = pset.get< bool  >("AntiNeutrinos", false);
+
+    //fSaveDir = buffer;
   }
 
   //____________________________________________________________________________
@@ -83,7 +86,20 @@ namespace t962{
 
     //    TString anuFiles("/argoneut/data/rootfiles_ART_MINOS/AntiNeutrino");
     TString anuFiles("/argoneut/data/minos/rhc");
-    //TSystemDirectory d = ;
+    //    const char* ordir(TSystem().pwd() );
+
+    FILE *fp = popen("pwd", "r");
+    while (fgets(fBuffer, sizeof(fBuffer), fp) != NULL)
+      {
+	std::cout << "TGMuon: Output from pwd is: " << fBuffer << '\n';
+	std::cout << "TGMuon: sizeof(fBuffer) is: " << sizeof(fBuffer) << '\n';
+      }
+    pclose(fp);
+
+    fSaveDir = gDirectory;
+    TString fpwd(gSystem->pwd());
+
+
     TList* l = TSystemDirectory("",anuFiles).GetListOfFiles();
     Int_t length = l->GetSize();
     Int_t ii(0);
@@ -97,6 +113,9 @@ namespace t962{
 	ii++;
       }
     // Done calculating anuFileVector. 
+    // If I don't cd back, somehow I'm left at the rhc directory, and
+    // can't write my MINOSin.txt file as desired at T962G4Ana.
+    //    TSystem().cd(ordir);
     return;
   }
 
@@ -188,8 +207,8 @@ namespace t962{
         
 	TVector3 x;
 	x[0]=100.*ftrkVtxX - x_offset;
-    	 x[1]=100.*ftrkVtxY + y_offset;
-    	 x[2]=100.*ftrkVtxZ - z_offset;        
+	x[1]=100.*ftrkVtxY + y_offset;
+	x[2]=100.*ftrkVtxZ - z_offset;        
         //don't bother passing the particle to geant if it's way outside the argoneut detector window   
       	if(100.0*ftrkVtxZ > 20. || fabs(x[0]+23.5)>100. || fabs(x[1])>100.)
       	continue;
@@ -215,7 +234,7 @@ namespace t962{
       	TLorentzVector pos(x[0], x[1], x[2], 0.0);
       	TLorentzVector pvec(ftrkdcosx*p,ftrkdcosy*p,ftrkdcosz*p,sqrt(p*p+m*m));
     
-      	int trackid = -1*(i+1); // set track id to -i as these are all primary particles and have id <= 0
+      	int trackid = -1*(i+1+fTIDOffset); // set track id to -i as these are all primary particles and have id <= 0
       	std::string primary("primary");
 
       	simb::MCParticle part(trackid, pdg, primary);
@@ -227,9 +246,12 @@ namespace t962{
        minitree->Delete();
        f->Close();
        f->Delete();
+       
+
 
    return;
   }
 
 }//end namespace evgen
 ////////////////////////////////////////////////////////////////////////
+

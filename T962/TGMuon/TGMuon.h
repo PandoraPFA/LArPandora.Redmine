@@ -29,7 +29,7 @@ namespace t962 {
     void produce(art::Event& evt);
     void beginRun(art::Run& run);
     void endSubRun(art::SubRun& sr);
-    //    void reconfigure(fhicl::ParameterSet const& pset) {};
+    void reconfigure(fhicl::ParameterSet const& pset) {};
 
   private:
 
@@ -38,6 +38,10 @@ namespace t962 {
     
     TRandom3           *fRand;           ///< random number
     int                 fSeed;           ///< random number seed    
+      
+    char fBuffer[128];
+    TDirectory* fSaveDir ;
+    TString fpwd;
     int frun;
     int fsubRun;
     int fsnarl;
@@ -54,6 +58,7 @@ namespace t962 {
     float ftrkqp;
     float totalpot;
 
+    int fTIDOffset;
     bool fanu;
     std::vector<TString> fanuFileVector;
 

@@ -413,7 +413,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
        trackexit_x_reco=trackEnd[0];
        trackexit_y_reco=trackEnd[1];
        trackexit_z_reco=trackEnd[2];  
-        if (!isdata){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
+       // EC: don't do this for non-neutrino TGMuons.
+        if (!isdata && !!fGenieGenModuleLabel.compare("tgmugenerator")){        if(sqrt(pow(trackstart_x_reco-mclist[0]->GetNeutrino().Nu().Vx(),2)+pow(trackstart_y_reco-mclist[0]->GetNeutrino().Nu().Vy(),2)+pow(trackstart_z_reco-mclist[0]->GetNeutrino().Nu().Vz(),2))<fvertextrackWindow)
        n_vertextracks++; 
        }
        
@@ -474,8 +475,8 @@ void t962::AnalysisTree::analyze(const art::Event& evt)
      nshowers_scan=scanlist[i]->Get_NumShower(); 
      }
      }
-    //mc truth information
-   if (!isdata){
+    //mc truth information. EC: don't do this for non-neutrino TGMuons.
+     if (!isdata && !!fGenieGenModuleLabel.compare("tgmugenerator")){
     nuPDG_truth = mclist[0]->GetNeutrino().Nu().PdgCode();
     ccnc_truth = mclist[0]->GetNeutrino().CCNC();
     mode_truth = mclist[0]->GetNeutrino().Mode();

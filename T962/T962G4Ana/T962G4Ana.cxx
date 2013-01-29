@@ -28,6 +28,8 @@
 
 // ROOT includes
 #include "TH1.h"
+#include "TSystem.h"
+#include "CLHEP/Random/RandFlat.h"
 
 // C++ Includes
 #include <sstream>
@@ -38,9 +40,11 @@
 
 namespace T962G4 {
    static int event=1;
+
   //-----------------------------------------------------------------------
   // Constructor
-  T962G4Ana::T962G4Ana(fhicl::ParameterSet const& pset) :
+  T962G4Ana::T962G4Ana(
+		       fhicl::ParameterSet const& pset) :
     fG4ModuleLabel(pset.get< std::string >("GeantModuleLabel")),
     fGenieGenModuleLabel             (pset.get< std::string >("GenieGenModuleLabel")),
     fm_run(0), 
@@ -75,6 +79,11 @@ namespace T962G4 {
     fm_offset_y(0.),
     fm_offset_z(0.)
   {
+    // get the random number seed, use a random default if not specified    
+    // in the configuration file.  
+    unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
+    createEngine(seed);    
+
   }
 
   //-----------------------------------------------------------------------
@@ -127,12 +136,19 @@ namespace T962G4 {
   ftree->Branch("offset_x", &fm_offset_x, "offset_x/F");
   ftree->Branch("offset_y", &fm_offset_y, "offset_y/F");
   ftree->Branch("offset_z", &fm_offset_z, "offset_z/F");
+
+  fpwd = gSystem->pwd();
+  std::cout << "T962G4Ana: pwd is: " << fpwd << '\n';
+
   }
 
   //-----------------------------------------------------------------------
 void T962G4Ana::analyze(const art::Event& evt) 
 {
-  
+  art::ServiceHandle<art::RandomNumberGenerator> rng;
+  CLHEP::HepRandomEngine &engine = rng->getEngine();
+  CLHEP::RandFlat   flat(engine);
+
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle);
 
@@ -211,40 +227,47 @@ if(mc->NeutrinoSet())
      if(pvec[i]->Process()!="primary")
      continue; 
      numinminos++;
-    simb::MCTrajectory trajectory = pvec[i]->Trajectory();
-    int numberofpoints= pvec[i]->NumberTrajectoryPoints();    
-    	for(int j=1; j<numberofpoints; j++)
-    	{
-    	TLorentzVector prevposition = trajectory.Position(j-1);
-    	TLorentzVector position = trajectory.Position(j);
-        	if(pvec[i]->Process()=="primary"&&prevposition.Z()<152.95&&position.Z()>=152.95&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
-    	numprimaries++;    	
-    	}    
+     simb::MCTrajectory trajectory = pvec[i]->Trajectory();
+     int numberofpoints= pvec[i]->NumberTrajectoryPoints();    
+     for(int j=1; j<numberofpoints; j++)
+       {
+	 TLorentzVector prevposition = trajectory.Position(j-1);
+	 TLorentzVector position = trajectory.Position(j);
+	 if(pvec[i]->Process()=="primary"&&prevposition.Z()<152.95&&position.Z()>=152.95&&!(abs(pvec[i]->PdgCode()==14)||abs(pvec[i]->PdgCode()==12)))
+	   numprimaries++;    	
+       }    
     }
-    ofstream myfile;
-    myfile.open("MINOSin.txt", std::ios::out | std::ios::app);
+    //    TSystemDirectory();
+    ofstream myfile((fpwd+std::string("/MINOSin.txt")).c_str(), std::ios::out | std::ios::app);
+
+
+
+
+    //myfile.open("./MINOSin.txt", std::ios::out | std::ios::app);
     myfile << "________________________________________________________________________________\n";    
-    myfile << "***** HEPEVT Common Event#: "<<event<<", "<<numprimaries+numinminos+1<<" particles (max 4000) ***** Double Precision\n";
+    // Change this for my overlaid snarl muons. EC, 24-Dec-2012.
+    //    myfile << "***** HEPEVT Common Event#: "<<event<<", "<<numprimaries+numinminos+1<<" particles (max 4000) ***** Double Precision\n";
+    myfile << "***** HEPEVT Common Event#: "<<fm_event<<", "<<numprimaries+numinminos+1<<" particles (max 4000) ***** Double Precision\n";
     myfile << "4-byte integers, 8-byte floating point numbers, 4000-allocated entries.\n";
     myfile << "Indx Stat Par- chil-       (  P_x,       P_y,       P_z,    Energy,       M )\n";
     myfile << "      ID  ents dren    Prod (   X,         Y,         Z,        cT)      [mm]\n";
     myfile << "________________________________________________________________________________\n";
     myfile <<"   "<<1<<" +10001    "<<0<<"    0    (    "<<fm_neutrino_px<<",  "<<fm_neutrino_py<<",  "<<fm_neutrino_pz<<",  "<<fm_neutrino_energy<<",  "<<fm_mass<<")\n";
     if(fm_neutrino_pdgcode>0)
-    myfile <<"      +"<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
+      myfile <<"      +"<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
     else
-    myfile <<"      "<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
+      myfile <<"      "<<fm_neutrino_pdgcode<<"    0    0    (      "<<(fm_neutrino_x+fm_offset_x)*10.<<",       "<<(fm_neutrino_y+fm_offset_y)*10.<<",       "<<(fm_neutrino_z+fm_offset_z)*10.<<",  0.)\n";
     for(unsigned int i = 0; i < pvec.size(); ++i){
     
-    if(pvec[i]->Process()!="primary")
-    continue;
+      if(pvec[i]->Process()!="primary")
+	continue;
     
-    simb::MCTrajectory trajectory = pvec[i]->Trajectory();
-    fm_pdgcode=pvec[i]->PdgCode();       
-    fm_mass=pvec[i]->Mass();
-    fm_trackID=i;
-    TLorentzVector initposition = trajectory.Position(0);
-    TLorentzVector initmomentum = trajectory.Momentum(0);
+      simb::MCTrajectory trajectory = pvec[i]->Trajectory();
+      fm_pdgcode=pvec[i]->PdgCode();       
+      fm_mass=pvec[i]->Mass();
+      fm_trackID=i;
+      TLorentzVector initposition = trajectory.Position(0);
+      TLorentzVector initmomentum = trajectory.Momentum(0);
     int numberofpoints= pvec[i]->NumberTrajectoryPoints();   
     
        fm_init_x=initposition.X();
@@ -262,62 +285,69 @@ if(mc->NeutrinoSet())
       myfile <<"      +"<<fm_pdgcode<<"    1    0    (      "<<(fm_init_x+fm_offset_x)*10.<<",       "<<(fm_init_y+fm_offset_y)*10.<<",       "<<(fm_init_z+fm_offset_z)*10.<<",  2.64e+06)\n";
       else
       myfile <<"      "<<fm_pdgcode<<"    1    0    (      "<<(fm_init_x+fm_offset_x)*10.<<",       "<<(fm_init_y+fm_offset_y)*10.<<",       "<<(fm_init_z+fm_offset_z)*10.<<",  2.64e+06)\n";
-    for(int j=1; j<numberofpoints; j++)
-    {
-      TLorentzVector prevposition = trajectory.Position(j-1);
-      TLorentzVector position = trajectory.Position(j);
-      TLorentzVector prevmomentum = trajectory.Momentum(j-1);
-      TLorentzVector momentum = trajectory.Momentum(j);
+      for(int j=1; j<numberofpoints; j++)
+	{
+	  TLorentzVector prevposition = trajectory.Position(j-1);
+	  TLorentzVector position = trajectory.Position(j);
+	  TLorentzVector prevmomentum = trajectory.Momentum(j-1);
+	  TLorentzVector momentum = trajectory.Momentum(j);
 
-       if(       (((prevposition.X()<0.&&position.X()>=0.)||(prevposition.X()>0.&&position.X()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
-       ||       (((prevposition.X()<47.&&position.X()>=47.)||(prevposition.X()>47.&&position.X()<=47.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
-       ||       (((prevposition.Y()<20.&&position.Y()>=20.)||(prevposition.Y()>20.&&position.Y()<=20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
-       ||       (((prevposition.Y()<-20.&&position.Y()>=-20.)||(prevposition.Y()>-20.&&position.Y()<=-20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
-       ||       (((prevposition.Z()<0.&&position.Z()>=0.)||(prevposition.Z()>0.&&position.Z()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
-       ||       (((prevposition.Z()<90.&&position.Z()>=90.)||(prevposition.Z()>90.&&position.Z()<=90.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
-       )
-       {    
-       fm_tpcexit_x=position.X();
-       fm_tpcexit_y=position.Y();
-       fm_tpcexit_z=position.Z();
-       fm_tpcexit_px=momentum.Px();
-       fm_tpcexit_py=momentum.Py();
-       fm_tpcexit_pz=momentum.Pz();
-       fm_tpcexit_energy=momentum.E(); 
-       }
+	  if(       (((prevposition.X()<0.&&position.X()>=0.)||(prevposition.X()>0.&&position.X()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+		    ||       (((prevposition.X()<47.&&position.X()>=47.)||(prevposition.X()>47.&&position.X()<=47.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+		    ||       (((prevposition.Y()<20.&&position.Y()>=20.)||(prevposition.Y()>20.&&position.Y()<=20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+		    ||       (((prevposition.Y()<-20.&&position.Y()>=-20.)||(prevposition.Y()>-20.&&position.Y()<=-20.))&&(prevposition.X()<47.&&prevposition.X()>=0.&&prevposition.Z()>0.&&prevposition.Z()<=90.))
+		    ||       (((prevposition.Z()<0.&&position.Z()>=0.)||(prevposition.Z()>0.&&position.Z()<=0.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
+		    ||       (((prevposition.Z()<90.&&position.Z()>=90.)||(prevposition.Z()>90.&&position.Z()<=90.))&&(prevposition.Y()<20.&&prevposition.Y()>=-20.&&prevposition.X()>0.&&prevposition.X()<=47.))
+		    )
+	    {    
+	      fm_tpcexit_x=position.X();
+	      fm_tpcexit_y=position.Y();
+	      fm_tpcexit_z=position.Z();
+	      fm_tpcexit_px=momentum.Px();
+	      fm_tpcexit_py=momentum.Py();
+	      fm_tpcexit_pz=momentum.Pz();
+	      fm_tpcexit_energy=momentum.E(); 
+	    }
     // if(prevposition.Z()<154.22&&position.Z()>154.22&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
 //            {
-       if(prevposition.Z()<152.95&&position.Z()>=152.95&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
-        {
-       fm_minosenter_x=position.X();
-       fm_minosenter_y=position.Y();
-       fm_minosenter_z=position.Z();
-       fm_minosenter_px=momentum.Px();
-       fm_minosenter_py=momentum.Py();
-       fm_minosenter_pz=momentum.Pz();
-       fm_minosenter_energy=momentum.E();
+	  if(prevposition.Z()<152.95&&position.Z()>=152.95&&abs(pvec[i]->PdgCode()!=14)&&abs(pvec[i]->PdgCode()!=12))
+	    {
+	      fm_minosenter_x=position.X();
+	      fm_minosenter_y=position.Y();
+	      fm_minosenter_z=position.Z();
+	      fm_minosenter_px=momentum.Px();
+	      fm_minosenter_py=momentum.Py();
+	      fm_minosenter_pz=momentum.Pz();
+	      fm_minosenter_energy=momentum.E();
 
-    primindex++;
-    myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
-    if(fm_pdgcode>0)
-    myfile <<"       +"<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
-    else
-     myfile <<"      "<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
-    
+	      primindex++;
+	      myfile <<"   "<<primindex<<"   +1    "<<primindex-1<<"    0    (    "<<fm_minosenter_px<<",  "<<fm_minosenter_py<<",  "<<fm_minosenter_pz<<",  "<<fm_minosenter_energy<<",  "<<fm_mass<<")\n";
+
+	      //  2.64e+06 is 8 musec. I now add a random offset to this
+	      // that is as large as the 10 musec NuMI beam width.
+	      double tauNom(2.64e+06); // mm
+	      double tauRan(10.0*flat.fire(1.0)); // musec
+	      double tau = tauNom + (tauRan*2.99792E11*1.e-6);
+	      if(fm_pdgcode>0)
+		//		myfile <<"       +"<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<",  2.64e+06)\n";
+		myfile <<"       +"<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<", "<< tau <<")\n";
+	      else
+		myfile <<"      "<<fm_pdgcode<<"    "<<primindex-1<<"    0    (      "<<(fm_minosenter_x+fm_offset_x)*10.<<",       "<<(fm_minosenter_y+fm_offset_y)*10.<<",       "<<(fm_minosenter_z+fm_offset_z)*10.<<", "<< tau <<")\n";
+	  
 //          
         // std::cout<<fm_pdgcode<<" at z position "<<position.Z()<<" lost "<<((prevmomentum.E()-momentum.E())*1000.)<<"MeV in "<<(position.Z()-prevposition.Z())<<"cm which is "<<((prevmomentum.E()-momentum.E())*1000.)/(position.Z()-prevposition.Z())<< "MeV/cm VolumeName is " << geom->VolumeName(position.Vect())<<" "<<geom->MaterialName(position.Vect()) << std::endl;      
 
-       fm_energylost=fm_init_energy-fm_minosenter_energy;
-       fm_deflectionangle= TMath::ACos(((fm_tpcexit_px*fm_minosenter_px)+(fm_tpcexit_py*fm_minosenter_py)+(fm_tpcexit_pz*fm_minosenter_pz))/(sqrt(pow(fm_tpcexit_px,2)+pow(fm_tpcexit_py,2)+pow(fm_tpcexit_pz,2))*sqrt(pow(fm_minosenter_px,2)+pow(fm_minosenter_py,2)+pow(fm_minosenter_pz,2))));
-//         std::cout<<"exit-enter "<<(fm_tpcexit_energy-fm_minosenter_energy)*1000.<<" "<<fm_deflectionangle<<" "<<fm_minosenter_energy<<std::endl;
-            }
+	      fm_energylost=fm_init_energy-fm_minosenter_energy;
+	      fm_deflectionangle= TMath::ACos(((fm_tpcexit_px*fm_minosenter_px)+(fm_tpcexit_py*fm_minosenter_py)+(fm_tpcexit_pz*fm_minosenter_pz))/(sqrt(pow(fm_tpcexit_px,2)+pow(fm_tpcexit_py,2)+pow(fm_tpcexit_pz,2))*sqrt(pow(fm_minosenter_px,2)+pow(fm_minosenter_py,2)+pow(fm_minosenter_pz,2))));
+	      //         std::cout<<"exit-enter "<<(fm_tpcexit_energy-fm_minosenter_energy)*1000.<<" "<<fm_deflectionangle<<" "<<fm_minosenter_energy<<std::endl;
+	    }
+	}
+      ftree->Fill();    
     }
-    ftree->Fill();    
-  }
-  myfile << "________________________________________________________________________________\n";
-  myfile.close(); 
-  event++;
-return;  
+    myfile << "________________________________________________________________________________\n";
+    myfile.close(); 
+    event++;
+    return;  
 }
 
 } // namespace T962G4

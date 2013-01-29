@@ -81,6 +81,7 @@ namespace match {
                    double &xpred, double &ypred, double &rdiff, double &totaldiff); //method to compare track kinematics
       int  AngleCompare(art::Ptr<recob::Track> lar_track, art::Handle< std::vector<t962::MINOS> > minoshandle);
       bool EndsOnBoundary(art::Ptr<recob::Track> lar_track);
+      bool StartsOnBoundary(art::Ptr<recob::Track> lar_track);
 
    }; // class MatchTracks
    
