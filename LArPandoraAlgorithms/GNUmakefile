@@ -18,6 +18,6 @@ include SoftRelTools/standard.mk
 
 override LIBLIBS += $(LOADLIBES) -L$(SRT_PRIVATE_CONTEXT)/lib/$(SRT_SUBDIR) -L$(SRT_PUBLIC_CONTEXT)/lib/$(SRT_SUBDIR) -L$(PANDORA_LIB) -lPandoraSDK -lPandoraMonitoring
 
-override CPPFLAGS += -DMONITORING=1 -I$(PANDORA_INC) -I$(PANDORA_FQ_DIR)/PandoraSDK/include -I$(PANDORA_FQ_DIR)/PandoraMonitoring/include -I$(SRT_PRIVATE_CONTEXT)/include/$(PACKAGE) -I$(SRT_PUBLIC_CONTEXT)/include/$(PACKAGE)
+override CPPFLAGS += -DMONITORING=1 -I$(PANDORA_INC) -I$(PANDORA_FQ_DIR)/PandoraSDK/include -I$(PANDORA_FQ_DIR)/PandoraMonitoring/include
 
 
