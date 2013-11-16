@@ -7,31 +7,25 @@
  */
 
 // Framework includes
-#include "art/Framework/Principal/Event.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib/exception.h"
+#include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes 
 #include "Geometry/Geometry.h"
-#include "Geometry/WireGeo.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Cluster.h"
+
+// ROOT includes
+#include "TTree.h"
 
 // Pandora includes
 #include "Api/PandoraApi.h"
 #include "Objects/ParticleFlowObject.h"
 
 // Pandora LArContent includes
-#include "LArHelpers/LArGeometryHelper.h"
-#include "LArHelpers/LArVertexHelper.h"
 #include "LArContent.h"
 
 // Local includes
@@ -39,7 +33,8 @@
 #include "MicroBooNEPseudoLayerCalculator.h"
 #include "MicroBooNETransformationCalculator.h"
 
-// std includes
+// System includes
+#include <sys/time.h>
 #include <iostream>
 
 namespace lar_pandora
@@ -66,7 +61,9 @@ LArPandora::~LArPandora()
 void LArPandora::reconfigure(fhicl::ParameterSet const &pset)
 {
     m_enableProduction = pset.get<bool>("EnableProduction",true);
-    m_enableMCParticles = pset.get<bool>("EnableMCParticles",true);
+    m_enableMCParticles = pset.get<bool>("EnableMCParticles",false);
+    m_enableMonitoring = pset.get<bool>("EnableMonitoring",false);
+
     m_configFile = pset.get<std::string>("ConfigFile");
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel","largeant");
     m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel","ffthit");
@@ -76,7 +73,10 @@ void LArPandora::reconfigure(fhicl::ParameterSet const &pset)
 
 void LArPandora::beginJob()
 {
-    this->InitializePandora();
+    this->InitializePandora();  
+
+    if (m_enableMonitoring)
+        this->InitializeMonitoring();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,15 +108,33 @@ void LArPandora::produce(art::Event &evt)
         this->CreatePandoraLinks(thePandoraHits, theHitToParticleMap);
     }
 
+    struct timeval startTime, endTime;
+
+    if (m_enableMonitoring)
+        (void) gettimeofday(&startTime, NULL);
+
     this->RunPandora();
+
+    if (m_enableMonitoring)
+        (void) gettimeofday(&endTime, NULL);
 
     if (m_enableProduction)
         this->ProduceArtClusters(evt, thePandoraHits);
 
     this->ResetPandora();
+  
+    if (m_enableMonitoring)
+    {
+        m_run   = evt.run();
+        m_event = evt.id().event();
+        m_hits  = static_cast<int>(theArtHits.size());
+        m_time  = (endTime.tv_sec + (endTime.tv_usec / 1.e6)) - (startTime.tv_sec + (startTime.tv_usec / 1.e6));
+	mf::LogDebug("LArPandora") << "   Summary: Run=" << m_run << ", Event=" << m_event << ", Hits=" << m_hits << ", Time=" << m_time << std::endl;
+        m_pRecoTree->Fill();
+    }
 
-    mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Done!] *** " << std::endl;
-    std::cout << " *** LArPandora::produce(...)  [Done!] *** " << std::endl;
+    mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
+    std::cout << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +165,18 @@ void LArPandora::InitializePandora() const
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterResetFunctions(*m_pPandora));
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_configFile));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandora::InitializeMonitoring()
+{
+    art::ServiceHandle<art::TFileService> tfs;
+    m_pRecoTree = tfs->make<TTree>("pandora", "LAr Reco");
+    m_pRecoTree->Branch("run", &m_run, "run/I");
+    m_pRecoTree->Branch("event", &m_event, "event/I");
+    m_pRecoTree->Branch("hits", &m_hits, "hits/I");
+    m_pRecoTree->Branch("time", &m_time, "time/F");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -310,7 +340,6 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
     }
 
     mf::LogDebug("LArPandora") << "   Number of Pandora hits: " << hitCounter << std::endl;
-    std::cout << "   Number of Pandora hits: " << hitCounter << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -377,7 +406,6 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
     }
 
     mf::LogDebug("LArPandora") << "   Number of Pandora neutrinos: " << neutrinoCounter << std::endl;
-    std::cout << "   Number of Pandora neutrinos: " << neutrinoCounter << std::endl;
 
 
     // Loop over G4 particles
@@ -470,7 +498,6 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
     }
 
     mf::LogDebug("LArPandora") << "   Number of Pandora particles: " << particleCounter << std::endl;
-    std::cout << "   Number of Pandora particles: " << particleCounter << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -511,7 +538,7 @@ void LArPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap
 void LArPandora::RunPandora() const
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::RunPandora() *** " << std::endl;
-
+ 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
 }
 
@@ -529,7 +556,6 @@ void LArPandora::ResetPandora() const
 void LArPandora::ProduceArtClusters(art::Event &evt, const HitMap &hitMap) const
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtClusters() *** " << std::endl;
-    std::cout << " *** LArPandora::ProduceArtClusters() *** " << std::endl;
 
     const pandora::PfoList *pPfoList = NULL;
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*m_pPandora, pPfoList));

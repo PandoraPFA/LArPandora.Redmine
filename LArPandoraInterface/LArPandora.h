@@ -19,7 +19,9 @@
 #include <string>
 
 namespace pandora {class Pandora;}
-namespace recob{class Hit;}
+namespace recob {class Hit;}
+
+class TTree;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,14 +122,28 @@ private:
     /**
      *  @brief Reset Pandora
      */
-    void ResetPandora() const;
+    void ResetPandora() const; 
+
+    /**
+     *  @brief Initialize the internal monitoring
+     */
+    void InitializeMonitoring();
+
 
     bool               m_enableProduction;      ///< 
     bool               m_enableMCParticles;     ///< 
+    bool               m_enableMonitoring;      ///<
     std::string        m_configFile;            ///< 
     std::string        m_geantModuleLabel;      ///< 
     std::string        m_hitfinderModuleLabel;  ///< 
     pandora::Pandora  *m_pPandora;              ///< 
+
+    TTree             *m_pRecoTree;             ///< 
+    int                m_run;                   ///< 
+    int                m_event;                 ///< 
+    int                m_hits;                  ///<
+    float              m_time;                  ///< 
+
 };
 
 } // namespace lar_pandora
