@@ -1,0 +1,8 @@
+<!-- Pandora settings xml file -->
+
+<pandora>
+        
+    <!-- Pandora algorithms -->
+    <algorithm type = "LArHelloWorld"/>
+
+</pandora>
