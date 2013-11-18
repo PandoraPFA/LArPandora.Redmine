@@ -1,0 +1,39 @@
+##
+## Example fcl file for LArPandoraInterface
+## (Assumes that input ROOT file contains reconstructed hits) 
+##
+
+
+#include "services.fcl"
+#include "pandoraservices.fcl"
+
+process_name: LArPandora
+
+
+### SERVICES ###
+services:
+{
+  message:      @local::standard_debug
+  user:         @local::microboone_services
+}
+
+
+### INPUT ###
+source:
+{
+  module_type: RootInput
+}
+
+
+### MODULES ###
+physics:
+{
+  producers: 
+  {  
+    pandora:    @local::standard_pandora 
+  }
+
+  reco: [ pandora ]
+
+  trigger_paths: [reco] 
+}

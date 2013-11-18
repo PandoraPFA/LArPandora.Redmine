@@ -8,6 +8,7 @@
 
 // Framework includes
 #include "art/Framework/Services/Optional/TFileService.h"
+#include "cetlib/search_path.h"
 
 // LArSoft includes 
 #include "Geometry/Geometry.h"
@@ -143,6 +144,24 @@ void LArPandora::InitializePandora() const
 { 
     mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...) *** " << std::endl;
 
+    // Find the Pandora settings file (must be within 'FW_SEARCH_PATH')
+    cet::search_path sp("FW_SEARCH_PATH");
+    std::string configFileName("");
+
+    mf::LogDebug("LArPandora") << "   Load Pandora settings: " << m_configFile << std::endl;
+    mf::LogDebug("LArPandora") << "   Search path: " << sp.to_string() << std::endl;
+
+    if (!sp.find_file(m_configFile, configFileName))
+    {
+        mf::LogError("LArPandora") << "   Failed to find: " << m_configFile << std::endl;
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "   Found it: " <<  configFileName << std::endl;
+    }
+    
+    // Identify the Geometry and load the calculators
     art::ServiceHandle<geo::Geometry> theGeometry;
 
     if (theGeometry->DetId() == geo::kMicroBooNE)
@@ -160,11 +179,14 @@ void LArPandora::InitializePandora() const
     PandoraApi::GeometryParameters geometryParameters;
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::Create(*m_pPandora, geometryParameters));
 
+    // Register the algorithms and read the settings
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*m_pPandora));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterHelperFunctions(*m_pPandora));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterResetFunctions(*m_pPandora));
 
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, m_configFile));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, configFileName));
+
+    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...)  Done! *** " << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
