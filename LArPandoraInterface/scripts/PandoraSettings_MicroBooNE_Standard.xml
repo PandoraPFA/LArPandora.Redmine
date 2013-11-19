@@ -30,7 +30,13 @@
       <OutputCaloHitListNameW>CaloHitListW</OutputCaloHitListNameW>
       <OutputCaloHitListNameU>CaloHitListU</OutputCaloHitListNameU>
       <OutputCaloHitListNameV>CaloHitListV</OutputCaloHitListNameV>
+      <FilteredCaloHitListName>CaloHitListFiltered</FilteredCaloHitListName>
       <CurrentCaloHitListReplacement>CaloHitListW</CurrentCaloHitListReplacement>
+      <OutputMCParticleListNameU>MCParticleListU</OutputMCParticleListNameU>
+      <OutputMCParticleListNameV>MCParticleListV</OutputMCParticleListNameV>
+      <OutputMCParticleListNameW>MCParticleListW</OutputMCParticleListNameW>
+      <OutputMCParticleListName3D>MCParticleList3D</OutputMCParticleListName3D>
+      <CurrentMCParticleListReplacement>MCParticleList3D</CurrentMCParticleListReplacement>
     </algorithm>
 
 
@@ -364,6 +370,9 @@
         <SeedClusterListName>ParticleSeedClustersV</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersV</NonSeedClusterListName>
     </algorithm>
+
+
+    <!-- PARTICLE MONITORING GOES HERE -->
 
 
 </pandora>
