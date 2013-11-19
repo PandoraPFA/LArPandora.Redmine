@@ -130,7 +130,7 @@ void LArPandora::produce(art::Event &evt)
         m_event = evt.id().event();
         m_hits  = static_cast<int>(theArtHits.size());
         m_time  = (endTime.tv_sec + (endTime.tv_usec / 1.e6)) - (startTime.tv_sec + (startTime.tv_usec / 1.e6));
-	mf::LogDebug("LArPandora") << "   Summary: Run=" << m_run << ", Event=" << m_event << ", Hits=" << m_hits << ", Time=" << m_time << std::endl;
+        mf::LogDebug("LArPandora") << "   Summary: Run=" << m_run << ", Event=" << m_event << ", Hits=" << m_hits << ", Time=" << m_time << std::endl;
         m_pRecoTree->Fill();
     }
 
@@ -478,7 +478,7 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
         const float dw(lar::LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
 
         if (dx * dx + dy * dy + dz * dz < 0.5 * dw * dw)
-	    continue;
+            continue;
 
         if (particle->TrackId() > id_offset)
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
