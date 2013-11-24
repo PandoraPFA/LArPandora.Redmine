@@ -9,6 +9,7 @@
 // Framework includes
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "cetlib/search_path.h"
+#include "cetlib/cpu_timer.h"
 
 // LArSoft includes 
 #include "Geometry/Geometry.h"
@@ -35,7 +36,6 @@
 #include "MicroBooNETransformationCalculator.h"
 
 // System includes
-#include <sys/time.h>
 #include <iostream>
 
 namespace lar_pandora
@@ -93,12 +93,15 @@ void LArPandora::produce(art::Event &evt)
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
     std::cout << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
 
+    cet::cpu_timer theClock;
+
     HitVector theArtHits;
     HitToParticleMap theHitToParticleMap;
     TruthToParticleMap theTruthToParticleMap;
     ParticleMap theParticleMap;
     HitMap thePandoraHits;
 
+    this->PrepareEvent(evt);
     this->CollectArtHits(evt, theArtHits, theHitToParticleMap);
     this->CreatePandoraHits(theArtHits, thePandoraHits);
 
@@ -109,31 +112,28 @@ void LArPandora::produce(art::Event &evt)
         this->CreatePandoraLinks(thePandoraHits, theHitToParticleMap);
     }
 
-    struct timeval startTime, endTime;
-
     if (m_enableMonitoring)
-        (void) gettimeofday(&startTime, NULL);
+        theClock.start();
 
     this->RunPandora();
 
     if (m_enableMonitoring)
-        (void) gettimeofday(&endTime, NULL);
+        theClock.stop();
 
     if (m_enableProduction)
         this->ProduceArtClusters(evt, thePandoraHits);
 
     this->ResetPandora();
-  
+
     if (m_enableMonitoring)
     {
         m_run   = evt.run();
         m_event = evt.id().event();
+        m_time  = theClock.accumulated_real_time();
         m_hits  = static_cast<int>(theArtHits.size());
-        m_time  = (endTime.tv_sec + (endTime.tv_usec / 1.e6)) - (startTime.tv_sec + (startTime.tv_usec / 1.e6));
-        mf::LogDebug("LArPandora") << "   Summary: Run=" << m_run << ", Event=" << m_event << ", Hits=" << m_hits << ", Time=" << m_time << std::endl;
         m_pRecoTree->Fill();
     }
-
+   
     mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
     std::cout << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
 }
@@ -194,11 +194,33 @@ void LArPandora::InitializePandora() const
 void LArPandora::InitializeMonitoring()
 {
     art::ServiceHandle<art::TFileService> tfs;
-    m_pRecoTree = tfs->make<TTree>("pandora", "LAr Reco");
+    m_pRecoTree = tfs->make<TTree>("monitoring", "LAr Reco");
     m_pRecoTree->Branch("run", &m_run, "run/I");
     m_pRecoTree->Branch("event", &m_event, "event/I");
     m_pRecoTree->Branch("hits", &m_hits, "hits/I");
     m_pRecoTree->Branch("time", &m_time, "time/F");
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandora::PrepareEvent(const art::Event &evt)
+{
+    m_run   = evt.run();
+    m_event = evt.id().event();
+    m_hits  = 0;
+    m_time  = 0.f;
+ 
+    if (m_enableMCParticles && !evt.isRealData())
+    {
+        art::ServiceHandle<cheat::BackTracker> theBackTracker; 
+
+	// Bail out if there is no back-tracking information
+        if( theBackTracker->GetSetOfTrackIDs().size() == 0 )
+	{
+	    mf::LogError("LArPandora") << "   Failed to load back-tracking data " << std::endl;
+	    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);  
+	}
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -210,8 +232,6 @@ void LArPandora::CollectArtHits(const art::Event &evt, HitVector &hitVector, Hit
     art::Handle< std::vector<recob::Hit> > hitHandle;
     evt.getByLabel(m_hitfinderModuleLabel, hitHandle);
 
-    mf::LogDebug("LArPandora") << "   Number of ART hits: " << hitHandle->size() << std::endl;
-
     art::ServiceHandle<cheat::BackTracker> theBackTracker; 
 
     for (unsigned int iHit = 0, iHitEnd = hitHandle->size(); iHit < iHitEnd; ++iHit)
@@ -219,14 +239,19 @@ void LArPandora::CollectArtHits(const art::Event &evt, HitVector &hitVector, Hit
         art::Ptr<recob::Hit> hit(hitHandle, iHit);
         hitVector.push_back(hit);
 
-        const std::vector<cheat::TrackIDE> trackCollection(theBackTracker->HitToTrackID(hit));
-
-        for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
+        if (m_enableMCParticles && !evt.isRealData())
         {
-            cheat::TrackIDE trackIDE = trackCollection.at(iTrack);
-            hitToParticleMap[hit].push_back(trackIDE);
-        }
+            const std::vector<cheat::TrackIDE> trackCollection(theBackTracker->HitToTrackID(hit));
+
+            for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
+            {
+                cheat::TrackIDE trackIDE = trackCollection.at(iTrack);
+                hitToParticleMap[hit].push_back(trackIDE);
+	    }
+	}
     }
+
+    mf::LogDebug("LArPandora") << "   Number of ART hits: " << hitVector.size() << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -238,8 +263,6 @@ void LArPandora::CollectArtParticles(const art::Event &evt, ParticleMap &particl
     art::Handle< std::vector<simb::MCParticle> > mcParticleHandle;
     evt.getByLabel(m_geantModuleLabel, mcParticleHandle);
 
-    mf::LogDebug("LArPandora") << "   Number of ART particles: " << mcParticleHandle->size() << std::endl;
-
     art::ServiceHandle<cheat::BackTracker> theBackTracker; 
 
     for (unsigned int i = 0, iEnd = mcParticleHandle->size(); i < iEnd; ++i)
@@ -250,6 +273,8 @@ void LArPandora::CollectArtParticles(const art::Event &evt, ParticleMap &particl
         art::Ptr<simb::MCTruth> truth(theBackTracker->TrackIDToMCTruth(particle->TrackId()));
         truthToParticleMap[truth].push_back(particle->TrackId());
     }
+
+    mf::LogDebug("LArPandora") << "   Number of ART particles: " << particleMap.size() << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -560,7 +585,7 @@ void LArPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap
 void LArPandora::RunPandora() const
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::RunPandora() *** " << std::endl;
- 
+
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
 }
 

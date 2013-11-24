@@ -60,6 +60,13 @@ private:
     typedef std::map< int, art::Ptr<recob::Hit> > HitMap;
 
     /**
+     *  @brief  Event Preparation 
+     * 
+     *  @param  evt  the ART event 
+     */
+    void PrepareEvent(const art::Event &evt);  
+
+    /**
      *  @brief Register the Pandora algorithms, helper functions and geometry
      */
     void InitializePandora() const;
