@@ -4,6 +4,6 @@
 
 namespace lar_pandora {
 
-  DEFINE_ART_MODULE(LArPandora);
+  DEFINE_ART_MODULE(LArPandora)
 
 } 
