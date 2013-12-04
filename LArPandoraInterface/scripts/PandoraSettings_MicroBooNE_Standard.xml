@@ -6,7 +6,7 @@
     <!-- PANDORA SETTINGS -->
 
     <IsMonitoringEnabled> true </IsMonitoringEnabled>
-    <ShouldDisplayAlgorithmInfo> true </ShouldDisplayAlgorithmInfo>
+    <ShouldDisplayAlgorithmInfo>false</ShouldDisplayAlgorithmInfo>
     <ShouldCollapseMCParticlesToPfoTarget>false</ShouldCollapseMCParticlesToPfoTarget>
 
     <!-- Plugin helper functions -->
@@ -95,10 +95,10 @@
         <VertexName>VertexW</VertexName>
     </algorithm>
     <algorithm type = "LArVertexSplitting"/>
-    <algorithm type = "LArVertexSeedFinding">
+    <!--algorithm type = "LArVertexSeedFinding">
         <SeedClusterListName>SeedClustersW</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersW</NonSeedClusterListName>
-    </algorithm>
+    </algorithm-->
     <algorithm type = "LArLengthSeedFinding">
         <SeedClusterListName>SeedClustersW</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersW</NonSeedClusterListName>
@@ -144,10 +144,10 @@
         <VertexName>VertexU</VertexName>
     </algorithm>
     <algorithm type = "LArVertexSplitting"/>
-    <algorithm type = "LArVertexSeedFinding">
+    <!--algorithm type = "LArVertexSeedFinding">
         <SeedClusterListName>SeedClustersU</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersU</NonSeedClusterListName>
-    </algorithm>
+    </algorithm-->
     <algorithm type = "LArLengthSeedFinding">
         <SeedClusterListName>SeedClustersU</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersU</NonSeedClusterListName>
@@ -193,10 +193,10 @@
         <VertexName>VertexV</VertexName>
     </algorithm>
     <algorithm type = "LArVertexSplitting"/>
-    <algorithm type = "LArVertexSeedFinding">
+    <!--algorithm type = "LArVertexSeedFinding">
         <SeedClusterListName>SeedClustersV</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersV</NonSeedClusterListName>
-    </algorithm>
+    </algorithm-->
     <algorithm type = "LArLengthSeedFinding">
         <SeedClusterListName>SeedClustersV</SeedClusterListName>
         <NonSeedClusterListName>NonSeedClustersV</NonSeedClusterListName>
@@ -239,9 +239,9 @@
     <!-- BUILD 3D PARTICLES -->
 
     <!-- 3D Reconstruction: preparation step -->
-    <algorithm type = "LArThreeDPreparation">
+    <!--algorithm type = "LArThreeDPreparation">
         <VertexName>Vertex3D</VertexName>
-    </algorithm>
+    </algorithm-->
 
 
     <!-- 3D Reconstruction: split 2D particles into seeds before 3D matching -->

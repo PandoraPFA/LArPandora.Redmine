@@ -91,7 +91,6 @@ void LArPandora::endJob()
 void LArPandora::produce(art::Event &evt)
 { 
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
-    std::cout << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
 
     cet::cpu_timer theClock;
 
@@ -135,7 +134,6 @@ void LArPandora::produce(art::Event &evt)
     }
    
     mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
-    std::cout << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
