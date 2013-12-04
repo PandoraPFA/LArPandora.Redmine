@@ -21,7 +21,9 @@ StatusCode TwoDPreparationAlgorithm::Run()
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentCaloHitList(*this, m_caloHitListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentClusterList(*this, m_clusterListName));
-    LArVertexHelper::SetCurrentVertex(m_vertexName);
+
+    if (LArVertexHelper::DoesVertexExist(m_vertexName))
+        LArVertexHelper::SetCurrentVertex(m_vertexName);
 
     return STATUS_CODE_SUCCESS;
 }

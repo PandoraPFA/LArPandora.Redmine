@@ -164,7 +164,7 @@ StatusCode ThreeDBaseAlgorithm<T>::Run()
 
         if ((NULL == m_pInputClusterListU) || (NULL == m_pInputClusterListV) || (NULL == m_pInputClusterListW))
         {
-            std::cout << "ThreeDBaseAlgorithm: one or more input cluster lists unavailable." << std::endl;
+            //std::cout << "ThreeDBaseAlgorithm: one or more input cluster lists unavailable." << std::endl;
             throw StatusCodeException(STATUS_CODE_SUCCESS);
         }
 
