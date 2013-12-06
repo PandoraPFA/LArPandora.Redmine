@@ -311,7 +311,7 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
 
     for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
-        const art::Ptr<const recob::Hit> hit = *iter;
+        const art::Ptr<recob::Hit> hit = *iter;
 
         const int hit_View(hit->View());
         const double hit_Time(hit->PeakTime());
@@ -402,7 +402,7 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
 
     for (TruthToParticleMap::const_iterator iter = truthToParticleMap.begin(), iterEnd = truthToParticleMap.end(); iter != iterEnd; ++iter)
     {
-        const art::Ptr<const simb::MCTruth> truth = iter->first;
+        const art::Ptr<simb::MCTruth> truth = iter->first;
 
         if (truth->NeutrinoSet())
         {
@@ -437,7 +437,7 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
                 if( iterJ == particleMap.end() )
                     throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-                const art::Ptr<const simb::MCParticle> particle = iterJ->second;
+                const art::Ptr<simb::MCParticle> particle = iterJ->second;
 
                 // Mother/Daughter Links
                 if (particle->Mother() == 0) 
@@ -458,7 +458,7 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
     
     for (ParticleMap::const_iterator iterI = particleMap.begin(), iterEndI = particleMap.end(); iterI != iterEndI; ++iterI )
     {
-        const art::Ptr<const simb::MCParticle> particle = iterI->second;
+        const art::Ptr<simb::MCParticle> particle = iterI->second;
 
         if (particle->TrackId() != iterI->first)
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
@@ -493,7 +493,7 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
     // Create 2D projections for Pandora event display 
     for( unsigned int i =0; i < particleVector.size(); ++i )
     {
-        const art::Ptr<const simb::MCParticle> particle = particleVector.at(i);
+        const art::Ptr<simb::MCParticle> particle = particleVector.at(i);
 
         const float dx(particle->EndX() - particle->Vx());
         const float dy(particle->EndY() - particle->Vy());
