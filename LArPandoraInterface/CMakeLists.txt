@@ -11,6 +11,8 @@ art_make( BASENAME_ONLY
           LIBRARY_NAME  LArPandoraInterface
           LIB_LIBRARIES LArPandoraAlgorithms
                         BackTracker_service
+                        DetectorProperties_service
+                        LArProperties_service
                         Geometry
                         Geometry_service
                         Simulation
@@ -39,4 +41,6 @@ art_make( BASENAME_ONLY
 install_headers()
 install_fhicl()
 install_source()
+
+add_subdirectory(scripts)
 

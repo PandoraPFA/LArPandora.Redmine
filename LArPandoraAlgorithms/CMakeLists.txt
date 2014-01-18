@@ -26,7 +26,44 @@ art_make( BASENAME_ONLY
                         ${PANDORAMONITORING}
           )
 
-install_headers()
-install_fhicl()
-install_source()
+install_headers( SUBDIRS LArCalculators
+                  LArClusterAssociation
+                  LArClusterSeedAssociation
+                  LArClusterSplitting
+                  LArClustering
+                  LArHelpers
+                  LArMonitoring
+                  LArObjects
+                  LArReclustering
+                  LArThreeDSeed
+                  LArTwoDSeed
+                  LArUtility
+                  LArVertex )
+install_fhicl( SUBDIRS LArCalculators
+                  LArClusterAssociation
+                  LArClusterSeedAssociation
+                  LArClusterSplitting
+                  LArClustering
+                  LArHelpers
+                  LArMonitoring
+                  LArObjects
+                  LArReclustering
+                  LArThreeDSeed
+                  LArTwoDSeed
+                  LArUtility
+                  LArVertex )
+install_source( SUBDIRS LArCalculators
+                  LArClusterAssociation
+                  LArClusterSeedAssociation
+                  LArClusterSplitting
+                  LArClustering
+                  LArHelpers
+                  LArMonitoring
+                  LArObjects
+                  LArReclustering
+                  LArThreeDSeed
+                  LArTwoDSeed
+                  LArUtility
+                  LArVertex )
+
 
