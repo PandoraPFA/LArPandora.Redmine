@@ -309,7 +309,7 @@ void ParticleMonitoringAlgorithm::GetMCParticleToCaloHitMatches(const CaloHitLis
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-CartesianVector ParticleMonitoringAlgorithm::GetSpacePoint(const ClusterList &clusterList, const CartesianVector &referencePoint, const bool useInnerLayer) const
+CartesianVector ParticleMonitoringAlgorithm::GetSpacePoint(const ClusterList &clusterList, const CartesianVector & /* referencePoint */, const bool useInnerLayer) const
 {
     CartesianVector spacePoint(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
