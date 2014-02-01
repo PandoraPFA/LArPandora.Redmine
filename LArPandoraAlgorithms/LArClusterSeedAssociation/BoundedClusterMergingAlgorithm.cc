@@ -409,7 +409,7 @@ void BoundedCluster::BuildBoundingBox(const Cluster *pCluster)
       for( unsigned int nLayer=minLayer; nLayer<=maxLayer; ++nLayer ){
         unsigned int ilayer = nLayer-fMinLayer;
 
-        if( ilayer>=0 && ilayer<fNumLayers ){
+        if( /* ilayer>=0 && */ ilayer<fNumLayers ){
           if( fBoxFlag[ilayer] == false ){
             fBoxMinX[ilayer] = hitX;
             fBoxMaxX[ilayer] = hitX;

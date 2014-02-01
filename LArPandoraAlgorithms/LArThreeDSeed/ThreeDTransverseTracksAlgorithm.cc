@@ -274,7 +274,7 @@ TrackOverlapResult ThreeDTransverseTracksAlgorithm::GetBestOverlapResult(FitSegm
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void ThreeDTransverseTracksAlgorithm::GetPreviousOverlapResults(const unsigned int indexU, const unsigned int indexV, const unsigned int indexW,
-    const unsigned int maxIndexU, const unsigned int maxIndexV, const unsigned int maxIndexW, FitSegmentTensor &fitSegmentSumTensor,
+    const unsigned int /*maxIndexU*/, const unsigned int /*maxIndexV*/, const unsigned int /*maxIndexW*/, FitSegmentTensor &fitSegmentSumTensor,
     TrackOverlapResultVector &trackOverlapResultVector) const
 {
     for (unsigned int iPermutation = 1; iPermutation < 8; ++iPermutation)

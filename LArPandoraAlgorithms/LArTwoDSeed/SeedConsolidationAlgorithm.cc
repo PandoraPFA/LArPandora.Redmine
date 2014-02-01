@@ -560,7 +560,7 @@ void SeedConsolidationAlgorithm::OverlapAssociation::EvaluateLayerContact(const 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode SeedConsolidationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode SeedConsolidationAlgorithm::ReadSettings(const TiXmlHandle /*xmlHandle*/)
 {
     return STATUS_CODE_SUCCESS;
 }
