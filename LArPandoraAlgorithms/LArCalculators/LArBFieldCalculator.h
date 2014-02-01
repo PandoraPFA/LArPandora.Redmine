@@ -26,7 +26,7 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void LArBFieldCalculator::Initialize(const pandora::GeometryHelper *const pGeometryHelper)
+inline void LArBFieldCalculator::Initialize(const pandora::GeometryHelper *const /*pGeometryHelper*/)
 {
 }
 
