@@ -157,7 +157,7 @@ void ShowerRebuildingAlgorithm::GetSeedClusters(const ParticleFlowObject *const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void ShowerRebuildingAlgorithm::RebuildThreeDShower(const ParticleFlowObject *const pPfo, Cluster *pSeedCluster, PfoVector &pfoVector,
+void ShowerRebuildingAlgorithm::RebuildThreeDShower(const ParticleFlowObject *const /*pPfo*/, Cluster *pSeedCluster, PfoVector &pfoVector,
     ClusterList &seedMerges, ClusterList &nonSeedMerges) const
 {
     this->GetAssociatedClusters(pSeedCluster, seedMerges, nonSeedMerges);
