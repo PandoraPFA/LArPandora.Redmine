@@ -1,3 +1,14 @@
+###############################################################################
+###  * * * * W A R N I N G * * * W A R N I N G * * * W A R N I N G * * * *  ###
+###                                                                         ###
+### This file has been deprecated after issue #5363 .                       ###
+### It is left here for backward compatibility and it will be removed soon. ###
+### Do not change this file: change LArPandoraInterface/pandoramodules.fcl  ###
+### instead, and update your FCL files to include pandoramodules.fcl        ###
+### instead of pandoraservices.fcl.                                         ###
+###                                                                         ###
+###  * * * * W A R N I N G * * * W A R N I N G * * * W A R N I N G * * * *  ###
+###############################################################################
 BEGIN_PROLOG
 
 standard_pandora:

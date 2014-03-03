@@ -1,0 +1,14 @@
+BEGIN_PROLOG
+
+standard_pandora:
+{
+  module_type:           "LArPandora"
+  ConfigFile:            "PandoraSettings_MicroBooNE_Standard.xml"
+  GeantModuleLabel:      "largeant"
+  HitFinderModuleLabel:  "ffthit"
+  EnableMCParticles:     false
+  EnableProduction:      true
+  EnableMonitoring:      false
+}
+
+END_PROLOG
