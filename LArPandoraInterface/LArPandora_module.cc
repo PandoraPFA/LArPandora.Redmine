@@ -296,8 +296,8 @@ void LArPandora::InitializePandora() const
     cet::search_path sp("FW_SEARCH_PATH");
     std::string configFileName("");
 
-    mf::LogDebug("LArPandora") << "   Load Pandora settings: " << m_configFile << std::endl;
-    mf::LogDebug("LArPandora") << "   Search path: " << sp.to_string() << std::endl;
+    mf::LogDebug("LArPandora") << "   Load Pandora settings: " << m_configFile << "\n"
+                               << "   Search path: " << sp.to_string();
 
     if (!sp.find_file(m_configFile, configFileName))
     {
@@ -306,7 +306,7 @@ void LArPandora::InitializePandora() const
     }
     else
     {
-        mf::LogDebug("LArPandora") << "   Found it: " <<  configFileName << std::endl;
+        LOG_DEBUG("LArPandora") << "   Found it: " <<  configFileName;
     }
     
     // Identify the Geometry and load the calculators
