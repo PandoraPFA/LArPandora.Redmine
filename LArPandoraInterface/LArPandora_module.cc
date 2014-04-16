@@ -283,21 +283,21 @@ void LArPandora::produce(art::Event &evt)
         m_pRecoTree->Fill();
     }
    
-    mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** ";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::InitializePandora() const
 { 
-    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...) *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::InitializePandora(...) *** ";
 
     // Find the Pandora settings file (must be within 'FW_SEARCH_PATH')
     cet::search_path sp("FW_SEARCH_PATH");
     std::string configFileName("");
 
-    mf::LogDebug("LArPandora") << "   Load Pandora settings: " << m_configFile << "\n"
-                               << "   Search path: " << sp.to_string();
+    LOG_DEBUG("LArPandora") << "   Load Pandora settings: " << m_configFile << "\n"
+                            << "   Search path: " << sp.to_string();
 
     if (!sp.find_file(m_configFile, configFileName))
     {
@@ -334,7 +334,7 @@ void LArPandora::InitializePandora() const
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, configFileName));
 
-    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...)  Done! *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::InitializePandora(...)  Done! *** ";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -375,7 +375,7 @@ void LArPandora::PrepareEvent(const art::Event &evt)
 
 void LArPandora::CollectArtHits(const art::Event &evt, HitVector &hitVector, HitToParticleMap &hitToParticleMap) const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::CollectArtHits(...) *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::CollectArtHits(...) *** ";
 
     art::Handle< std::vector<recob::Hit> > hitHandle;
     evt.getByLabel(m_hitfinderModuleLabel, hitHandle);
@@ -399,14 +399,14 @@ void LArPandora::CollectArtHits(const art::Event &evt, HitVector &hitVector, Hit
 	}
     }
 
-    mf::LogDebug("LArPandora") << "   Number of ART hits: " << hitVector.size() << std::endl;
+    LOG_DEBUG("LArPandora") << "   Number of ART hits: " << hitVector.size();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CollectArtParticles(const art::Event &evt, ParticleMap &particleMap, TruthToParticleMap &truthToParticleMap) const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::CollectArtParticles(...) *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::CollectArtParticles(...) *** ";
 
     art::Handle< std::vector<simb::MCParticle> > mcParticleHandle;
     evt.getByLabel(m_geantModuleLabel, mcParticleHandle);
@@ -422,14 +422,14 @@ void LArPandora::CollectArtParticles(const art::Event &evt, ParticleMap &particl
         truthToParticleMap[truth].push_back(particle->TrackId());
     }
 
-    mf::LogDebug("LArPandora") << "   Number of ART particles: " << particleMap.size() << std::endl;
+    LOG_DEBUG("LArPandora") << "   Number of ART particles: " << particleMap.size();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraHits(...) *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::CreatePandoraHits(...) *** ";
 
     static const double dx_cm(0.5);          // cm
     static const double int_cm(84.0);        // cm
@@ -534,14 +534,14 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters)); 
     }
 
-    mf::LogDebug("LArPandora") << "   Number of Pandora hits: " << hitCounter << std::endl;
+    LOG_DEBUG("LArPandora") << "   Number of Pandora hits: " << hitCounter;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const TruthToParticleMap &truthToParticleMap) const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraParticles(...) *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::CreatePandoraParticles(...) *** ";
     static const int id_offset = 100000000;
 
     // Vector for neutrino-induced particles
@@ -600,7 +600,7 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
         }
     }
 
-    mf::LogDebug("LArPandora") << "   Number of Pandora neutrinos: " << neutrinoCounter << std::endl;
+    LOG_DEBUG("LArPandora") << "   Number of Pandora neutrinos: " << neutrinoCounter;
 
 
     // Loop over G4 particles
@@ -692,14 +692,14 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
     }
 
-    mf::LogDebug("LArPandora") << "   Number of Pandora particles: " << particleCounter << std::endl;
+    LOG_DEBUG("LArPandora") << "   Number of Pandora particles: " << particleCounter;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap &hitToParticleMap) const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraLinks(...) *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::CreatePandoraLinks(...) *** ";
 
     for (HitMap::const_iterator iterI = hitMap.begin(), iterEndI = hitMap.end(); iterI != iterEndI ; ++iterI)
     {
@@ -732,7 +732,7 @@ void LArPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap
 
 void LArPandora::RunPandora() const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::RunPandora() *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::RunPandora() *** ";
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
 }
@@ -741,7 +741,7 @@ void LArPandora::RunPandora() const
 
 void LArPandora::ResetPandora() const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandora() *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::ResetPandora() *** ";
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*m_pPandora));
 }
@@ -750,7 +750,7 @@ void LArPandora::ResetPandora() const
 
 void LArPandora::ProduceArtClusters(art::Event &evt, const HitMap &hitMap) const
 {
-    mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtClusters() *** " << std::endl;
+    LOG_DEBUG("LArPandora") << " *** LArPandora::ProduceArtClusters() *** ";
 
     const pandora::PfoList *pPfoList = NULL;
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*m_pPandora, pPfoList));
