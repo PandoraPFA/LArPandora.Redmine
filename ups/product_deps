@@ -1,24 +1,24 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	larpandora	v1_00_08
-defaultqual	e4
+parent	larpandora	v1_01_00
+defaultqual	e5
 #
 fcldir product_dir job
 #
 product         version
-larsim		v1_00_08
-pandora		v00_13a
-gcc		v4_8_1
+larsim		v1_01_00
+pandora		v00_13b
+gcc		v4_8_2
 
 # list products required ONLY for the build
 # any products here must NOT have qualifiers
 only_for_build  cetbuildtools   v3_07_11
   
-# e4  - with gcc 4.8.1 and -std=c++11
+# e5  - with gcc 4.8.1 and -std=c++11
 qualifier	larsim		pandora		gcc	notes
-e4:debug	e4:debug	nu:e4:debug	-nq-
-e4:opt		e4:opt		nu:e4:opt	-nq-
-e4:prof		e4:prof		nu:e4:prof	-nq-
+e5:debug	e5:debug	nu:e5:debug	-nq-
+e5:opt		e5:opt		nu:e5:opt	-nq-
+e5:prof		e5:prof		nu:e5:prof	-nq-
 
 # table fragment to set FW_SEARCH_PATH 
 table_fragment_begin
