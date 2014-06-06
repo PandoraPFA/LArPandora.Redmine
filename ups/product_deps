@@ -7,7 +7,7 @@ fcldir product_dir job
 #
 product         version
 larsim		v02_00_01
-pandora		v00_13c
+pandora		v00_16
 gcc		v4_8_2
 
 # list products required ONLY for the build
