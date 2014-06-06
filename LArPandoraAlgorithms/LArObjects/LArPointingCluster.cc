@@ -1,8 +1,8 @@
 /**
  *  @file   LArContent/src/LArObjects/LArPointingCluster.cc
- * 
+ *
  *  @brief  Implementation of the lar pointing cluster class.
- * 
+ *
  *  $Log: $
  */
 
@@ -12,62 +12,110 @@
 #include "Objects/Cluster.h"
 
 #include "LArObjects/LArPointingCluster.h"
+#include "LArHelpers/LArClusterHelper.h"
 
 using namespace pandora;
 
 namespace lar
 {
 
-LArPointingCluster::LArPointingCluster::Vertex::Vertex(Cluster *const pCluster, const bool useInnerVertex, const unsigned int nLayersToSkip) :
-    m_pCluster(pCluster),
-    m_position(0.f, 0.f, 0.f),
-    m_direction(0.f, 0.f, 0.f),
-    m_rms(std::numeric_limits<float>::max()),
-    m_isInner(useInnerVertex),
-    m_nSkippedLayers(nLayersToSkip)
+LArPointingCluster::LArPointingCluster(pandora::Cluster *const pCluster) :
+    m_pCluster(pCluster)
 {
-    static const unsigned int m_numberOfLayersToFit = 30; // TODO, read from settings, probably via LArClusterHelper
-    const unsigned int innerLayer(pCluster->GetInnerPseudoLayer());
-    const unsigned int outerLayer(pCluster->GetOuterPseudoLayer());
+    TwoDSlidingFitResult slidingFitResult;
+    LArClusterHelper::LArTwoDSlidingFit(pCluster, 10, slidingFitResult);
 
-    if (useInnerVertex)
+    const float minLayerZ(slidingFitResult.GetGlobalMinLayerPosition().GetZ());
+    const float maxLayerZ(slidingFitResult.GetGlobalMaxLayerPosition().GetZ());
+
+    const int minLayer(slidingFitResult.GetMinLayer());
+    const int maxLayer(slidingFitResult.GetMaxLayer());
+
+    if (minLayer >= maxLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    const int innerLayer((minLayerZ < maxLayerZ) ? minLayer : maxLayer);
+    const int outerLayer((minLayerZ < maxLayerZ) ? maxLayer : minLayer);
+
+    if (innerLayer == minLayer)
     {
-        const unsigned int innerFitLayer(std::min(innerLayer + nLayersToSkip, outerLayer));
-        const unsigned int outerFitLayer(std::min(innerLayer + nLayersToSkip + m_numberOfLayersToFit, outerLayer));
-
-        if (outerFitLayer <= innerFitLayer)
-            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-        ClusterHelper::ClusterFitResult clusterFitResult;
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitLayers(pCluster, innerFitLayer, outerFitLayer, clusterFitResult)); 
-
-        const CartesianVector &fitIntercept(clusterFitResult.GetIntercept());
-        const CartesianVector fitDirection(clusterFitResult.GetDirection());
-        const CartesianVector innerCentroid(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer()));
-
-        m_rms = clusterFitResult.GetRms();
-        m_position = fitIntercept + fitDirection * (fitDirection.GetDotProduct(innerCentroid - fitIntercept));
-        m_direction = fitDirection;
+        m_innerVertex = Vertex(pCluster, slidingFitResult.GetGlobalMinLayerPosition(), slidingFitResult.GetGlobalMinLayerDirection(),
+            slidingFitResult.GetMinLayerRms(), true);
     }
     else
     {
-        const int innerFitLayer(std::max(static_cast<int>(outerLayer) - static_cast<int>(nLayersToSkip) - static_cast<int>(m_numberOfLayersToFit), static_cast<int>(innerLayer)));
-        const int outerFitLayer(std::max(static_cast<int>(outerLayer) - static_cast<int>(nLayersToSkip), static_cast<int>(innerLayer)));
-
-        if (outerFitLayer <= innerFitLayer)
-            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-        ClusterHelper::ClusterFitResult clusterFitResult;
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitLayers(pCluster, innerFitLayer, outerFitLayer, clusterFitResult)); 
-
-        const CartesianVector &fitIntercept(clusterFitResult.GetIntercept());
-        const CartesianVector fitDirection(clusterFitResult.GetDirection() * -1.f);
-        const CartesianVector outerCentroid(pCluster->GetCentroid(pCluster->GetOuterPseudoLayer()));
-
-        m_rms = clusterFitResult.GetRms();
-        m_position = fitIntercept + fitDirection * (fitDirection.GetDotProduct(outerCentroid - fitIntercept));
-        m_direction = fitDirection;
+        m_innerVertex = Vertex(pCluster, slidingFitResult.GetGlobalMaxLayerPosition(), slidingFitResult.GetGlobalMaxLayerDirection() * -1.f,
+            slidingFitResult.GetMaxLayerRms(), true);
     }
+
+    if (outerLayer == minLayer)
+    {
+        m_outerVertex = Vertex(pCluster, slidingFitResult.GetGlobalMinLayerPosition(), slidingFitResult.GetGlobalMinLayerDirection(),
+            slidingFitResult.GetMinLayerRms(), false);
+    }
+    else
+    {
+        m_outerVertex = Vertex(pCluster, slidingFitResult.GetGlobalMaxLayerPosition(), slidingFitResult.GetGlobalMaxLayerDirection() * -1.f,
+            slidingFitResult.GetMaxLayerRms(), false);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPointingCluster::Vertex::Vertex() :
+    m_pCluster(NULL),
+    m_position(0.f, 0.f, 0.f),
+    m_direction(0.f, 0.f, 0.f),
+    m_rms(std::numeric_limits<float>::max()),
+    m_isInner(false),
+    m_isInitialized(false)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPointingCluster::Vertex::Vertex(Cluster *const pCluster, const CartesianVector &position, const CartesianVector &direction,
+        const float rms, const bool isInner) :
+    m_pCluster(pCluster),
+    m_position(position),
+    m_direction(direction),
+    m_rms(rms),
+    m_isInner(isInner),
+    m_isInitialized(true)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPointingCluster::Vertex::Vertex(const Vertex &rhs) :
+    m_pCluster(rhs.m_pCluster),
+    m_position(rhs.m_position),
+    m_direction(rhs.m_direction),
+    m_rms(rhs.m_rms),
+    m_isInner(rhs.m_isInner),
+    m_isInitialized(rhs.m_isInitialized)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPointingCluster::Vertex::~Vertex()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPointingCluster::Vertex &LArPointingCluster::Vertex::operator=(const Vertex &rhs)
+{
+    m_pCluster = rhs.m_pCluster;
+    m_position = rhs.m_position;
+    m_direction = rhs.m_direction;
+    m_rms = rhs.m_rms;
+    m_isInner = rhs.m_isInner;
+    m_isInitialized = rhs.m_isInitialized;
+
+    return *this;
 }
 
 } // namespace lar

@@ -8,6 +8,8 @@
 
 #include "Helpers/XmlHelper.h"
 
+#include "Pandora/PandoraSettings.h"
+
 #include "Objects/Cluster.h"
 
 #include "LArHelpers/LArThreeDHelper.h"
@@ -26,23 +28,29 @@ ClusterList LArThreeDHelper::m_loneClusterList;
 
 HitType LArThreeDHelper::GetClusterHitType(const Cluster *const pCluster)
 {
+    if (0 == pCluster->GetNCaloHits())
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    if (PandoraSettings::SingleHitTypeClusteringMode())
+        return (*(pCluster->GetOrderedCaloHitList().begin()->second->begin()))->GetHitType();
+
     HitType hitType(CUSTOM);
 
-    if (pCluster->ContainsHitType(VIEW_U))
+    if (pCluster->ContainsHitType(TPC_VIEW_U))
     {
-        if (CUSTOM == hitType) hitType = VIEW_U;
+        if (CUSTOM == hitType) hitType = TPC_VIEW_U;
         else throw StatusCodeException(STATUS_CODE_FAILURE);
     }
 
-    if (pCluster->ContainsHitType(VIEW_V))
+    if (pCluster->ContainsHitType(TPC_VIEW_V))
     {
-        if (CUSTOM == hitType) hitType = VIEW_V;
+        if (CUSTOM == hitType) hitType = TPC_VIEW_V;
         else throw StatusCodeException(STATUS_CODE_FAILURE);
     }
 
-    if (pCluster->ContainsHitType(VIEW_W))
+    if (pCluster->ContainsHitType(TPC_VIEW_W))
     {
-        if (CUSTOM == hitType) hitType = VIEW_W;
+        if (CUSTOM == hitType) hitType = TPC_VIEW_W;
         else throw StatusCodeException(STATUS_CODE_FAILURE);
     }
 

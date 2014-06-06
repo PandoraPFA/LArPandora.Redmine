@@ -8,9 +8,9 @@
 #ifndef LAR_GEOMETRY_HELPER_H
 #define LAR_GEOMETRY_HELPER_H 1
 
-#include "Objects/CartesianVector.h"
+#include "Api/PandoraApi.h"
 
-#include "Pandora/StatusCodes.h"
+#include "Objects/CartesianVector.h"
 
 namespace lar
 {
@@ -47,7 +47,6 @@ public:
     static pandora::CartesianVector MergeTwoDirections(const pandora::HitType view1, const pandora::HitType view2,
         const pandora::CartesianVector &direction1, const pandora::CartesianVector &direction2);
 
-
     /**
      *  @brief  Merge 2D positions from two views to give 2D position in third view
      *
@@ -56,7 +55,7 @@ public:
      *  @param  position1 the position in the first view
      *  @param  position2 the position in the second view
      *
-     *  @param  position3 output position in the U view
+     *  @param  position3 output position in the third view
      *  @param  chi-squared
      */
     static void MergeTwoPositions(const pandora::HitType view1, const pandora::HitType view2,

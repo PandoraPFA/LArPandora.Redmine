@@ -1,8 +1,8 @@
 /**
  *  @file   LArContent/src/LArHelpers/LArPointingClusterHelper.cc
- * 
+ *
  *  @brief  Implementation of the pointing cluster helper class.
- * 
+ *
  *  $Log: $
  */
 
@@ -10,12 +10,27 @@
 #include "Helpers/XmlHelper.h"
 
 #include "LArHelpers/LArPointingClusterHelper.h"
-#include "LArHelpers/LArVertexHelper.h"
 
 using namespace pandora;
 
 namespace lar
 {
+
+float LArPointingClusterHelper::GetLengthSquared(const LArPointingCluster &pointingCluster)
+{
+    const LArPointingCluster::Vertex &innerVertex(pointingCluster.GetInnerVertex());
+    const LArPointingCluster::Vertex &outerVertex(pointingCluster.GetOuterVertex());
+    return (innerVertex.GetPosition() - outerVertex.GetPosition()).GetMagnitudeSquared();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float LArPointingClusterHelper::GetLength(const LArPointingCluster &pointingCluster)
+{
+    return std::sqrt(LArPointingClusterHelper::GetLengthSquared(pointingCluster));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 bool LArPointingClusterHelper::IsNode(const CartesianVector &parentVertex, const CartesianVector &daughterVertex)
 {
@@ -30,7 +45,7 @@ bool LArPointingClusterHelper::IsNode(const CartesianVector &parentVertex, const
 bool LArPointingClusterHelper::IsNode(const CartesianVector &parentVertex, const LArPointingCluster::Vertex &daughterVertex)
 {
     float rL(0.f), rT(0.f);
-    LArVertexHelper::GetImpactParameters(daughterVertex.GetPosition(), daughterVertex.GetDirection(), parentVertex, rL, rT);
+    LArPointingClusterHelper::GetImpactParameters(daughterVertex.GetPosition(), daughterVertex.GetDirection(), parentVertex, rL, rT);
 
     if (std::fabs(rL) > std::fabs(m_minPointingLongitudinalDistance) || rT > m_maxPointingTransverseDistance)
         return false;
@@ -43,23 +58,180 @@ bool LArPointingClusterHelper::IsNode(const CartesianVector &parentVertex, const
 bool LArPointingClusterHelper::IsEmission(const CartesianVector &parentVertex, const LArPointingCluster::Vertex &daughterVertex)
 {
     float rL(0.f), rT(0.f);
-    LArVertexHelper::GetImpactParameters(daughterVertex.GetPosition(), daughterVertex.GetDirection(), parentVertex, rL, rT);
+    LArPointingClusterHelper::GetImpactParameters(daughterVertex.GetPosition(), daughterVertex.GetDirection(), parentVertex, rL, rT);
 
     if (std::fabs(rL) > std::fabs(m_minPointingLongitudinalDistance) && (rL < 0 || rL > m_maxPointingLongitudinalDistance))
         return false;
 
-    static const float tanSqTheta(std::pow(std::tan(M_PI * m_pointingAngularAllowance / 180.f), 2.f));
+    static const float tanSqTheta(std::pow(std::tan(M_PI * m_pointingAngularAllowance / 180.f), 2.0));
 
     if (rT * rT > m_maxPointingTransverseDistance * m_maxPointingTransverseDistance + rL * rL * tanSqTheta)
-        return false;  
+        return false;
 
     return true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPointingClusterHelper::GetAverageDirection(const LArPointingCluster::Vertex &firstVertex, const LArPointingCluster::Vertex &secondVertex,
-    CartesianVector &averageDirection)
+float LArPointingClusterHelper::GetProjectedDistance(const LArPointingCluster::Vertex &pointingVertex, const Cluster *const pCluster)
+{
+    return (pointingVertex.GetPosition() - LArPointingClusterHelper::GetProjectedPosition(pointingVertex, pCluster)).GetMagnitude();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+CartesianVector LArPointingClusterHelper::GetProjectedPosition(const LArPointingCluster::Vertex &pointingVertex, const Cluster *const pCluster)
+{
+    return LArPointingClusterHelper::GetProjectedPosition(pointingVertex.GetPosition(), pointingVertex.GetDirection(), pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+CartesianVector LArPointingClusterHelper::GetProjectedPosition(const CartesianVector &vertexPosition, const CartesianVector &vertexDirection, const pandora::Cluster *const pCluster)
+{
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    CaloHit *pClosestCaloHit(NULL);
+    float closestDistanceSquared(std::numeric_limits<float>::max());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            CaloHit* pCaloHit = *hitIter;
+
+            const CartesianVector hitProjection(pCaloHit->GetPositionVector() - vertexPosition);
+            const float distanceSquared(hitProjection.GetMagnitudeSquared());
+
+            if (distanceSquared > 0.f)
+            {
+                const float cosTheta(-hitProjection.GetUnitVector().GetDotProduct(vertexDirection));
+                static const float minCosTheta(std::cos(M_PI * m_projectionAngularAllowance / 180.f));
+
+                // TODO: Try to give more weight to on-axis projections
+                if (distanceSquared < closestDistanceSquared && cosTheta > minCosTheta)
+                {
+                    pClosestCaloHit = pCaloHit;
+                    closestDistanceSquared = distanceSquared;
+                }
+            }
+            else
+            {
+                return pCaloHit->GetPositionVector();
+            }
+        }
+    }
+
+    if(pClosestCaloHit)
+        return pClosestCaloHit->GetPositionVector();
+
+    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPointingClusterHelper::GetClosestVertices(const LArPointingCluster &pointingClusterI, const LArPointingCluster &pointingClusterJ,
+    LArPointingCluster::Vertex &closestVertexI, LArPointingCluster::Vertex &closestVertexJ)
+{
+    if (pointingClusterI.GetCluster() == pointingClusterJ.GetCluster())
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+
+    for (unsigned int useInnerI = 0; useInnerI < 2; ++useInnerI)
+    {
+        const LArPointingCluster::Vertex &vtxI(useInnerI == 1 ? pointingClusterI.GetInnerVertex() : pointingClusterI.GetOuterVertex());
+        const LArPointingCluster::Vertex &endI(useInnerI == 0 ? pointingClusterI.GetInnerVertex() : pointingClusterI.GetOuterVertex());
+
+        for (unsigned int useInnerJ = 0; useInnerJ < 2; ++useInnerJ)
+        {
+            const LArPointingCluster::Vertex &vtxJ(useInnerJ == 1 ? pointingClusterJ.GetInnerVertex() : pointingClusterJ.GetOuterVertex());
+            const LArPointingCluster::Vertex &endJ(useInnerJ == 0 ? pointingClusterJ.GetInnerVertex() : pointingClusterJ.GetOuterVertex());
+
+            const float vtxI_to_vtxJ((vtxI.GetPosition() - vtxJ.GetPosition()).GetMagnitudeSquared());
+            const float vtxI_to_endJ((vtxI.GetPosition() - endJ.GetPosition()).GetMagnitudeSquared());
+            const float endI_to_vtxJ((endI.GetPosition() - vtxJ.GetPosition()).GetMagnitudeSquared());
+            const float endI_to_endJ((endI.GetPosition() - endJ.GetPosition()).GetMagnitudeSquared());
+
+            if ((vtxI_to_vtxJ < std::min(vtxI_to_endJ, std::min(endI_to_vtxJ, endI_to_endJ))) &&
+                (endI_to_endJ > std::max(vtxI_to_endJ, std::max(endI_to_vtxJ, vtxI_to_vtxJ))))
+            {
+                closestVertexI = vtxI;
+                closestVertexJ = vtxJ;
+                return;
+            }
+        }
+    }
+
+    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPointingClusterHelper::GetClosestVerticesInX(const LArPointingCluster &pointingClusterI, const LArPointingCluster &pointingClusterJ,
+    LArPointingCluster::Vertex &closestVertexI, LArPointingCluster::Vertex &closestVertexJ)
+{
+    if (pointingClusterI.GetCluster() == pointingClusterJ.GetCluster())
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+
+    for (unsigned int useInnerI = 0; useInnerI < 2; ++useInnerI)
+    {
+        const LArPointingCluster::Vertex &vtxI(useInnerI == 1 ? pointingClusterI.GetInnerVertex() : pointingClusterI.GetOuterVertex());
+        const LArPointingCluster::Vertex &endI(useInnerI == 0 ? pointingClusterI.GetInnerVertex() : pointingClusterI.GetOuterVertex());
+
+        for (unsigned int useInnerJ = 0; useInnerJ < 2; ++useInnerJ)
+        {
+            const LArPointingCluster::Vertex &vtxJ(useInnerJ == 1 ? pointingClusterJ.GetInnerVertex() : pointingClusterJ.GetOuterVertex());
+            const LArPointingCluster::Vertex &endJ(useInnerJ == 0 ? pointingClusterJ.GetInnerVertex() : pointingClusterJ.GetOuterVertex());
+
+            const float vtxI_to_vtxJ(std::fabs(vtxI.GetPosition().GetX() - vtxJ.GetPosition().GetX()));
+            const float vtxI_to_endJ(std::fabs(vtxI.GetPosition().GetX() - endJ.GetPosition().GetX()));
+            const float endI_to_vtxJ(std::fabs(endI.GetPosition().GetX() - vtxJ.GetPosition().GetX()));
+            const float endI_to_endJ(std::fabs(endI.GetPosition().GetX() - endJ.GetPosition().GetX()));
+
+            if ((vtxI_to_vtxJ < std::min(vtxI_to_endJ, std::min(endI_to_vtxJ, endI_to_endJ))) &&
+                (endI_to_endJ > std::max(vtxI_to_endJ, std::max(endI_to_vtxJ, vtxI_to_vtxJ))))
+            {
+                closestVertexI = vtxI;
+                closestVertexJ = vtxJ;
+                return;
+            }
+        }
+    }
+
+    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPointingClusterHelper::GetImpactParameters(const LArPointingCluster::Vertex &pointingVertex, 
+    const LArPointingCluster::Vertex &targetVertex, float &longitudinal, float &transverse)
+{
+    return LArPointingClusterHelper::GetImpactParameters(pointingVertex, targetVertex.GetPosition(), longitudinal, transverse);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPointingClusterHelper::GetImpactParameters(const LArPointingCluster::Vertex &pointingVertex, const CartesianVector &targetPosition, 
+    float &longitudinal, float &transverse)
+{
+    return LArPointingClusterHelper::GetImpactParameters(pointingVertex.GetPosition(), pointingVertex.GetDirection(),
+        targetPosition, longitudinal, transverse);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPointingClusterHelper::GetImpactParameters(const CartesianVector &initialPosition, const CartesianVector &initialDirection, 
+    const CartesianVector &targetPosition, float &longitudinal, float &transverse)
+{
+    // sign convention for longitudinal distance:
+    // -positive value means initial position is downstream of target position
+    transverse = initialDirection.GetCrossProduct(targetPosition-initialPosition).GetMagnitude();
+    longitudinal = -initialDirection.GetDotProduct(targetPosition-initialPosition);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPointingClusterHelper::GetAverageDirection(const LArPointingCluster::Vertex &firstVertex, 
+    const LArPointingCluster::Vertex &secondVertex, CartesianVector &averageDirection)
 {
     const Cluster *pFirstCluster(firstVertex.GetCluster());
     const Cluster *pSecondCluster(secondVertex.GetCluster());
@@ -135,7 +307,7 @@ void LArPointingClusterHelper::GetIntersection(const LArPointingCluster::Vertex 
         {
             const CartesianVector &hitPosition = (*iter2)->GetPositionVector();
 
-            LArVertexHelper::GetImpactParameters(vertexCluster.GetPosition(), vertexCluster.GetDirection(), hitPosition, rL, rT);
+            LArPointingClusterHelper::GetImpactParameters(vertexCluster.GetPosition(), vertexCluster.GetDirection(), hitPosition, rL, rT);
 
             if (rT < figureOfMerit)
             {
@@ -143,7 +315,7 @@ void LArPointingClusterHelper::GetIntersection(const LArPointingCluster::Vertex 
 
                 displacementL = rL;
                 displacementT = rT;
-                intersectPosition = hitPosition; 
+                intersectPosition = hitPosition;
                 foundIntersection = true;
             }
         }
@@ -160,25 +332,29 @@ float LArPointingClusterHelper::m_maxPointingLongitudinalDistance = 25.f;
 float LArPointingClusterHelper::m_minPointingLongitudinalDistance = -2.f;
 float LArPointingClusterHelper::m_maxPointingTransverseDistance = 2.f;
 float LArPointingClusterHelper::m_pointingAngularAllowance = 2.f; // degrees
+float LArPointingClusterHelper::m_projectionAngularAllowance = 20.f; // degrees
 
 StatusCode LArPointingClusterHelper::ReadSettings(const TiXmlHandle xmlHandle)
 {
     float maxNodeRadius = 2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxNodeRadius", maxNodeRadius));
     m_maxNodeRadiusSquared = maxNodeRadius * maxNodeRadius;
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxPointingLongitudinalDistance", m_maxPointingLongitudinalDistance));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinPointingLongitudinalDistance", m_minPointingLongitudinalDistance));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxPointingTransverseDistance", m_maxPointingTransverseDistance));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "PointingAngularAllowance", m_pointingAngularAllowance));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ProjectionAngularAllowance", m_projectionAngularAllowance));
 
     return STATUS_CODE_SUCCESS;
 }
