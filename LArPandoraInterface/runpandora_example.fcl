@@ -4,7 +4,7 @@
 ##
 
 
-#include "services.fcl"
+#include "services_microboone.fcl"
 #include "pandoraservices.fcl"
 
 process_name: LArPandora
