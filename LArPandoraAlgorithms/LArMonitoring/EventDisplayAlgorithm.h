@@ -1,8 +1,8 @@
 /**
  *  @file   LArContent/include/LArMonitoring/EventDisplayAlgorithm.h
- * 
+ *
  *  @brief  Header file for the event display algorithm
- * 
+ *
  *  $Log: $
  */
 
@@ -11,7 +11,9 @@
 
 #include "Pandora/Algorithm.h"
 
+#ifdef MONITORING
 #include "PandoraMonitoringApi.h"
+#endif
 
 namespace lar
 {
@@ -39,11 +41,8 @@ private:
     Color GetColor( unsigned int icolor );
 #endif
 
-    std::string        m_seedClusterListName;
-    std::string        m_nonSeedClusterListName;
-    std::string        m_vertexName;
+    std::string        m_clusterListName;
     std::string        m_particleListName;
-
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

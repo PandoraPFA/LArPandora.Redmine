@@ -137,6 +137,16 @@ private:
      */
     void InitializeMonitoring();
 
+    /**
+     *  @brief Loop over MC trajectory points and identify start and end points within detector
+     *
+     *  @param particle  the true particle
+     *  @param startT  the first trajectory point in the detector
+     *  @param endT  the last trajectory point in the detector
+     */
+    void GetStartAndEndPoints(const art::Ptr<simb::MCParticle> &particle, int &startT, int& endT) const;
+
+
 
     bool               m_enableProduction;      ///< 
     bool               m_enableMCParticles;     ///< 
@@ -283,21 +293,21 @@ void LArPandora::produce(art::Event &evt)
         m_pRecoTree->Fill();
     }
    
-    LOG_DEBUG("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::InitializePandora() const
 { 
-    LOG_DEBUG("LArPandora") << " *** LArPandora::InitializePandora(...) *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...) *** " << std::endl;
 
     // Find the Pandora settings file (must be within 'FW_SEARCH_PATH')
     cet::search_path sp("FW_SEARCH_PATH");
     std::string configFileName("");
 
-    LOG_DEBUG("LArPandora") << "   Load Pandora settings: " << m_configFile << "\n"
-                            << "   Search path: " << sp.to_string();
+    mf::LogDebug("LArPandora") << "   Load Pandora settings: " << m_configFile << std::endl;
+    mf::LogDebug("LArPandora") << "   Search path: " << sp.to_string() << std::endl;
 
     if (!sp.find_file(m_configFile, configFileName))
     {
@@ -306,7 +316,7 @@ void LArPandora::InitializePandora() const
     }
     else
     {
-        LOG_DEBUG("LArPandora") << "   Found it: " <<  configFileName;
+        mf::LogDebug("LArPandora") << "   Found it: " <<  configFileName << std::endl;
     }
     
     // Identify the Geometry and load the calculators
@@ -314,7 +324,6 @@ void LArPandora::InitializePandora() const
 
     if (theGeometry->DetId() == geo::kMicroBooNE)
     {
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArBFieldCalculator(*m_pPandora, new lar::LArBFieldCalculator));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerCalculator(*m_pPandora, new MicroBooNEPseudoLayerCalculator));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationCalculator(*m_pPandora, new MicroBooNETransformationCalculator));
     }
@@ -324,9 +333,6 @@ void LArPandora::InitializePandora() const
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);   
     }
 
-    PandoraApi::GeometryParameters geometryParameters;
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::Create(*m_pPandora, geometryParameters));
-
     // Register the algorithms and read the settings
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*m_pPandora));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterHelperFunctions(*m_pPandora));
@@ -334,7 +340,7 @@ void LArPandora::InitializePandora() const
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, configFileName));
 
-    LOG_DEBUG("LArPandora") << " *** LArPandora::InitializePandora(...)  Done! *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...)  Done! *** " << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -375,7 +381,7 @@ void LArPandora::PrepareEvent(const art::Event &evt)
 
 void LArPandora::CollectArtHits(const art::Event &evt, HitVector &hitVector, HitToParticleMap &hitToParticleMap) const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::CollectArtHits(...) *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::CollectArtHits(...) *** " << std::endl;
 
     art::Handle< std::vector<recob::Hit> > hitHandle;
     evt.getByLabel(m_hitfinderModuleLabel, hitHandle);
@@ -399,14 +405,14 @@ void LArPandora::CollectArtHits(const art::Event &evt, HitVector &hitVector, Hit
 	}
     }
 
-    LOG_DEBUG("LArPandora") << "   Number of ART hits: " << hitVector.size();
+    mf::LogDebug("LArPandora") << "   Number of ART hits: " << hitVector.size() << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CollectArtParticles(const art::Event &evt, ParticleMap &particleMap, TruthToParticleMap &truthToParticleMap) const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::CollectArtParticles(...) *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::CollectArtParticles(...) *** " << std::endl;
 
     art::Handle< std::vector<simb::MCParticle> > mcParticleHandle;
     evt.getByLabel(m_geantModuleLabel, mcParticleHandle);
@@ -422,14 +428,14 @@ void LArPandora::CollectArtParticles(const art::Event &evt, ParticleMap &particl
         truthToParticleMap[truth].push_back(particle->TrackId());
     }
 
-    LOG_DEBUG("LArPandora") << "   Number of ART particles: " << particleMap.size();
+    mf::LogDebug("LArPandora") << "   Number of ART particles: " << particleMap.size() << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::CreatePandoraHits(...) *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraHits(...) *** " << std::endl;
 
     static const double dx_cm(0.5);          // cm
     static const double int_cm(84.0);        // cm
@@ -466,10 +472,15 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
         const int hit_View(hit->View());
         const double hit_Time(hit->PeakTime());
         const double hit_Charge(hit->Charge(true));
+        const double hit_TimeStart(hit->StartTime());
+        const double hit_TimeEnd(hit->EndTime());
+
         const geo::WireID hit_WireID(hit->WireID());
 
         const double wpos_cm(hit_WireID.Wire * wire_pitch_cm);
         const double xpos_cm(theDetector->ConvertTicksToX(hit_Time, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
+        const double dxpos_cm(theDetector->ConvertTicksToX(hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
+                              theDetector->ConvertTicksToX(hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
 
         const double t_us((hit_Time - tdc_offset) * us_per_tdc);
         const double dQdX(hit_Charge / wire_pitch_cm); // ADC/cm
@@ -489,7 +500,7 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
         caloHitParameters.m_expectedDirection = pandora::CartesianVector(0., 0., 1.);
         caloHitParameters.m_cellNormalVector = pandora::CartesianVector(0., 0., 1.);
         caloHitParameters.m_cellSizeU = dx_cm;
-        caloHitParameters.m_cellSizeV = dx_cm;
+        caloHitParameters.m_cellSizeV = dxpos_cm;
         caloHitParameters.m_cellThickness = wire_pitch_cm;
         caloHitParameters.m_time = 0.;
         caloHitParameters.m_nCellRadiationLengths = dx_cm / rad_cm;
@@ -506,17 +517,17 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
 
         if (hit_View == geo::kW)
         {
-            caloHitParameters.m_hitType = pandora::VIEW_W;
+            caloHitParameters.m_hitType = pandora::TPC_VIEW_W;
             caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm + x0, 0., wpos_cm + w0);
         }
         else if(hit_View == geo::kU)
         {
-            caloHitParameters.m_hitType = pandora::VIEW_U;
+            caloHitParameters.m_hitType = pandora::TPC_VIEW_U;
             caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm + x0, 0., wpos_cm + u0);
         }
         else if(hit_View == geo::kV)
         {
-            caloHitParameters.m_hitType = pandora::VIEW_V;
+            caloHitParameters.m_hitType = pandora::TPC_VIEW_V;
             caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm + x0, 0., wpos_cm + v0);
         }
         else
@@ -534,18 +545,15 @@ void LArPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hitMap) c
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, caloHitParameters)); 
     }
 
-    LOG_DEBUG("LArPandora") << "   Number of Pandora hits: " << hitCounter;
+    mf::LogDebug("LArPandora") << "   Number of Pandora hits: " << hitCounter << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const TruthToParticleMap &truthToParticleMap) const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::CreatePandoraParticles(...) *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraParticles(...) *** " << std::endl;
     static const int id_offset = 100000000;
-
-    // Vector for neutrino-induced particles
-    ParticleVector particleVector;
 
     // Loop over incident particles
     int neutrinoCounter(0);
@@ -593,14 +601,11 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
                 if (particle->Mother() == 0) 
                     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetMCParentDaughterRelationship(*m_pPandora,
                         (void*)((intptr_t)neutrinoID), (void*)((intptr_t)trackID)));
-
-                // Select these particles (TODO: deal with cosmic-ray particles)
-                particleVector.push_back(particle);
             }
         }
     }
 
-    LOG_DEBUG("LArPandora") << "   Number of Pandora neutrinos: " << neutrinoCounter;
+    mf::LogDebug("LArPandora") << "   Number of Pandora neutrinos: " << neutrinoCounter << std::endl;
 
 
     // Loop over G4 particles
@@ -618,18 +623,35 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
 
         ++particleCounter;
 
-        // Create Pandora MC Particle
+        // Find Start and End Points
+        int startT(0), endT(0);
+        this->GetStartAndEndPoints(particle, startT, endT);
+
+        const float vtxX(particle->Vx(startT));
+        const float vtxY(particle->Vy(startT));
+        const float vtxZ(particle->Vz(startT));
+
+        const float endX(particle->Vx(endT));
+        const float endY(particle->Vy(endT));
+        const float endZ(particle->Vz(endT));
+
+        const float pX(particle->Px(startT));
+        const float pY(particle->Py(startT));
+        const float pZ(particle->Pz(startT));
+        const float E(particle->E(startT));
+
+        // Create 3D Pandora MC Particle
         PandoraApi::MCParticle::Parameters mcParticleParameters;
-        mcParticleParameters.m_energy = particle->E();
-        mcParticleParameters.m_momentum = pandora::CartesianVector(particle->Px(), particle->Py(), particle->Pz());
-        mcParticleParameters.m_vertex = pandora::CartesianVector(particle->Vx(), particle->Vy(), particle->Vz());
-        mcParticleParameters.m_endpoint = pandora::CartesianVector(particle->EndX(), particle->EndY(), particle->EndZ());
+        mcParticleParameters.m_energy = E;
         mcParticleParameters.m_particleId = particle->PdgCode();
+        mcParticleParameters.m_momentum = pandora::CartesianVector(pX, pY, pZ);
+        mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, vtxY, vtxZ);
+        mcParticleParameters.m_endpoint = pandora::CartesianVector(endX, endY, endZ);
         mcParticleParameters.m_mcParticleType = pandora::MC_STANDARD;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)particle->TrackId());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
 
-        // Mother/Daughter Links
+        // Create Mother/Daughter Links between 3D MC Particles
         const int id_mother(particle->Mother());
         ParticleMap::const_iterator iterJ = particleMap.find(id_mother);
 
@@ -637,69 +659,55 @@ void LArPandora::CreatePandoraParticles(const ParticleMap& particleMap, const Tr
             PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetMCParentDaughterRelationship(*m_pPandora,
                 (void*)((intptr_t)id_mother), (void*)((intptr_t)particle->TrackId())));
 
-    }
-
-
-    // Create 2D projections for Pandora event display 
-    for( unsigned int i =0; i < particleVector.size(); ++i )
-    {
-        const art::Ptr<simb::MCParticle> particle = particleVector.at(i);
-
-        const float dx(particle->EndX() - particle->Vx());
-        const float dy(particle->EndY() - particle->Vy());
-        const float dz(particle->EndZ() - particle->Vz());
+   
+        // Create 2D Pandora MC Particles for Event Display
+        const float dx(endX - vtxX);
+        const float dy(endY - vtxY);
+        const float dz(endZ - vtxZ);
         const float dw(lar::LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
 
         if (dx * dx + dy * dy + dz * dz < 0.5 * dw * dw)
             continue;
 
-        if (particle->TrackId() > id_offset)
-            throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
-        // Common parameters
-        PandoraApi::MCParticle::Parameters mcParticleParameters;
-        mcParticleParameters.m_energy = particle->E();
-        mcParticleParameters.m_particleId = particle->PdgCode();
-
         // Create U projection
-        mcParticleParameters.m_momentum = pandora::CartesianVector(particle->Px(), 0.f, 
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPU(particle->Py(), particle->Pz()));
-        mcParticleParameters.m_vertex = pandora::CartesianVector(particle->Vx(),  0.f, 
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(particle->Vy(), particle->Vz()));
-        mcParticleParameters.m_endpoint = pandora::CartesianVector(particle->EndX(),  0.f, 
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(particle->EndY(), particle->EndZ()));
+        mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f, 
+            lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPU(pY, pZ));
+        mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, 0.f, 
+            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(vtxY, vtxZ));
+        mcParticleParameters.m_endpoint = pandora::CartesianVector(endX,  0.f, 
+            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(endY, endZ));
         mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_U;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 1 * id_offset)); 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
 
         // Create V projection
-        mcParticleParameters.m_momentum = pandora::CartesianVector(particle->Px(), 0.f, 
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPV(particle->Py(), particle->Pz()));
-        mcParticleParameters.m_vertex = pandora::CartesianVector(particle->Vx(),  0.f, 
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(particle->Vy(), particle->Vz()));
-        mcParticleParameters.m_endpoint = pandora::CartesianVector(particle->EndX(),  0.f, 
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(particle->EndY(), particle->EndZ()));
+        mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f, 
+            lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPV(pY, pZ));
+        mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, 0.f, 
+            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(vtxY, vtxZ));
+        mcParticleParameters.m_endpoint = pandora::CartesianVector(endX,  0.f, 
+            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(endY, endZ));
         mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_V;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 2 * id_offset)); 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
 
         // Create W projection
-        mcParticleParameters.m_momentum = pandora::CartesianVector(particle->Px(), 0.f, particle->Pz());
-        mcParticleParameters.m_vertex = pandora::CartesianVector(particle->Vx(),  0.f, particle->Vz());
-        mcParticleParameters.m_endpoint = pandora::CartesianVector(particle->EndX(),  0.f, particle->EndZ());
+        mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f, pZ);
+        mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, 0.f, vtxZ);
+        mcParticleParameters.m_endpoint = pandora::CartesianVector(endX,  0.f, endZ);
         mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_W;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 3 * id_offset)); 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
     }
 
-    LOG_DEBUG("LArPandora") << "   Number of Pandora particles: " << particleCounter;
+    mf::LogDebug("LArPandora") << "   Number of Pandora particles: " << particleCounter << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap &hitToParticleMap) const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::CreatePandoraLinks(...) *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraLinks(...) *** " << std::endl;
 
     for (HitMap::const_iterator iterI = hitMap.begin(), iterEndI = hitMap.end(); iterI != iterEndI ; ++iterI)
     {
@@ -732,7 +740,7 @@ void LArPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap
 
 void LArPandora::RunPandora() const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::RunPandora() *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::RunPandora() *** " << std::endl;
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPandora));
 }
@@ -741,7 +749,7 @@ void LArPandora::RunPandora() const
 
 void LArPandora::ResetPandora() const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::ResetPandora() *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandora() *** " << std::endl;
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*m_pPandora));
 }
@@ -750,7 +758,7 @@ void LArPandora::ResetPandora() const
 
 void LArPandora::ProduceArtClusters(art::Event &evt, const HitMap &hitMap) const
 {
-    LOG_DEBUG("LArPandora") << " *** LArPandora::ProduceArtClusters() *** ";
+    mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtClusters() *** " << std::endl;
 
     const pandora::PfoList *pPfoList = NULL;
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*m_pPandora, pPfoList));
@@ -797,6 +805,37 @@ void LArPandora::ProduceArtClusters(art::Event &evt, const HitMap &hitMap) const
 
     evt.put(std::move(artClusterVector));
     evt.put(std::move(artClusterAssociations));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandora::GetStartAndEndPoints(const art::Ptr<simb::MCParticle> &particle, int& startT, int& endT) const
+{
+    art::ServiceHandle<geo::Geometry> theGeometry;
+
+    bool foundStartPosition(false);
+
+    const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
+
+    for (int nt = 0; nt < numTrajectoryPoints; ++nt)
+    {
+        try{
+            double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
+            unsigned int tpc   = 0;
+            unsigned int cstat = 0;
+            theGeometry->PositionToTPC(pos, tpc, cstat);
+
+            endT = nt;
+            if (!foundStartPosition)
+            {
+                startT = endT;
+                foundStartPosition = true;
+            }   
+        }
+        catch(cet::exception &e){
+            continue;
+        }
+    }
 }
 
 } // namespace lar_pandora

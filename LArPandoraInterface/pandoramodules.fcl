@@ -5,7 +5,7 @@ standard_pandora:
   module_type:           "LArPandora"
   ConfigFile:            "PandoraSettings_MicroBooNE_Standard.xml"
   GeantModuleLabel:      "largeant"
-  HitFinderModuleLabel:  "ffthit"
+  HitFinderModuleLabel:  "gaushit"
   EnableMCParticles:     false
   EnableProduction:      true
   EnableMonitoring:      false

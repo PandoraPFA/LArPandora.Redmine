@@ -22,6 +22,24 @@ class LArPointingClusterHelper
 {
 public:
     /**
+     *  @brief  Calculate distance squared between inner and outer vertices of pointing cluster
+     * 
+     *  @param  pointingCluster  the input pointing cluster
+     * 
+     *  @return float  the distance squared
+     */
+    static float GetLengthSquared(const LArPointingCluster &pointingCluster);
+
+    /**
+     *  @brief  Calculate distance squared between inner and outer vertices of pointing cluster
+     * 
+     *  @param  pointingCluster  the input pointing cluster
+     * 
+     *  @return float  the distance
+     */
+    static float GetLength(const LArPointingCluster &pointingCluster);
+
+    /**
      *  @brief  Whether specified parent and daughter vertices form a node
      * 
      *  @param  parentVertex the position of the parent cluster vertex
@@ -50,6 +68,93 @@ public:
      *  @return boolean
      */
     static bool IsEmission(const pandora::CartesianVector &parentVertex, const LArPointingCluster::Vertex &daughterVertex);
+
+    /**
+     *  @brief  Get projected distance between a cluster and a pointing cluster vertex
+     * 
+     *  @param  pointingVertex the pointing vertex
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return the projected distance
+     */
+    static float GetProjectedDistance(const LArPointingCluster::Vertex &pointingVertex, const pandora::Cluster *const pCluster);
+
+    /**
+     *  @brief  Get projected position on a cluster from a pointing cluster vertex
+     * 
+     *  @param  pointingVertex the pointing vertex
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return the projected position
+     */
+    static pandora::CartesianVector GetProjectedPosition(const LArPointingCluster::Vertex &pointingVertex, const pandora::Cluster *const pCluster);
+
+    /**
+     *  @brief  Get projected position on a cluster from a specified position and direction
+     * 
+     *  @param  initialPosition the initial position of the cluster
+     *  @param  initialDirection the initial direction of the cluster
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return the projected position
+     */
+    static pandora::CartesianVector GetProjectedPosition(const pandora::CartesianVector &initialPosition, const pandora::CartesianVector &initialDirection, const pandora::Cluster *const pCluster);
+
+    /**
+     *  @brief  Given a pair of pointing clusters, receive the closest pair of vertices (one vertex coming from each cluster)
+     * 
+     *  @param  pointingClusterI the first pointing cluster
+     *  @param  pointingClusterJ the second pointing cluster
+     *  @param  closestVertexI to receive the relevant vertex from the first pointing cluster
+     *  @param  closestVertexJ to receive the relevant vertex from the second pointing cluster
+     */
+    static void GetClosestVertices(const LArPointingCluster &pointingClusterI, const LArPointingCluster &pointingClusterJ,
+        LArPointingCluster::Vertex &closestVertexI, LArPointingCluster::Vertex &closestVertexJ);
+
+    /**
+     *  @brief  Given a pair of pointing clusters, receive the pair of vertices with smallest x-separation (one vertex coming from each cluster)
+     * 
+     *  @param  pointingClusterI the first pointing cluster
+     *  @param  pointingClusterJ the second pointing cluster
+     *  @param  closestVertexI to receive the relevant vertex from the first pointing cluster
+     *  @param  closestVertexJ to receive the relevant vertex from the second pointing cluster
+     */
+    static void GetClosestVerticesInX(const LArPointingCluster &pointingClusterI, const LArPointingCluster &pointingClusterJ,
+        LArPointingCluster::Vertex &closestVertexI, LArPointingCluster::Vertex &closestVertexJ);
+
+    /**
+     *  @brief  Calculate impact parameters between a pointing cluster vertex and a target position
+     * 
+     *  @param  pointingVertex the pointing vertex
+     *  @param  targetPosition the target position
+     *  @param  longitidinal the longitudinal displacement
+     *  @param  transverse the transverse displacement
+     */
+    static void GetImpactParameters(const LArPointingCluster::Vertex &pointingVertex, const LArPointingCluster::Vertex &targetVertex,
+        float &longitudinal, float &transverse);
+
+    /**
+     *  @brief  Calculate impact parameters between a pointing cluster vertex and a target position
+     * 
+     *  @param  pointingVertex the pointing vertex
+     *  @param  targetPosition the target position
+     *  @param  longitidinal the longitudinal displacement
+     *  @param  transverse the transverse displacement
+     */
+    static void GetImpactParameters(const LArPointingCluster::Vertex &pointingVertex, const pandora::CartesianVector &targetPosition, 
+        float &longitudinal, float &transverse);
+
+    /**
+     *  @brief  Calculate impact parameters of a specified position and direction to a target position
+     * 
+     *  @param  initialPosition the initial position of the cluster
+     *  @param  initialDirection the initial direction of the cluster
+     *  @param  targetPosition the target position
+     *  @param  longitidinal the longitudinal displacement
+     *  @param  transverse the transverse displacement
+     */
+    static void GetImpactParameters(const pandora::CartesianVector &initialPosition, const pandora::CartesianVector &initialDirection, 
+        const pandora::CartesianVector &targetPosition, float &longitudinal, float &transverse);
 
     /**
      *  @brief  Get intersection of two vertices
@@ -113,6 +218,7 @@ private:
     static float    m_minPointingLongitudinalDistance;      ///<
     static float    m_maxPointingTransverseDistance;        ///< 
     static float    m_pointingAngularAllowance;             ///< 
+    static float    m_projectionAngularAllowance;           ///< 
 };
 
 } // namespace lar
