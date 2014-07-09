@@ -788,7 +788,10 @@ void LArPandora::ProduceArtClusters(art::Event &evt, const HitMap &hitMap) const
                 HitMap::const_iterator artIter = hitMap.find(hitID);
 
                 if (artIter == hitMap.end())
-                    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                {
+                    continue; // TODO: Deal with 3D hits...
+                    //throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                }
 
                 art::Ptr<recob::Hit> hit = artIter->second;
                 artClusterHits.push_back(hit);

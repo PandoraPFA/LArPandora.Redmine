@@ -18,7 +18,11 @@ art_make( BASENAME_ONLY
                   LArThreeDReco/LArCosmicRay  
                   LArThreeDReco/LArHitCreation
                   LArThreeDReco/LArShowerMatching
-                  LArThreeDReco/LArTrackMatching
+                  LArThreeDReco/LArShowerFragments
+                  LArThreeDReco/LArLongitudinalTrackMatching
+                  LArThreeDReco/LArTransverseTrackMatching
+                  LArThreeDReco/LArTrackFragments
+                  LArThreeDReco/LArThreeDBase
                   LArTwoDReco
                   LArTwoDReco/LArClusterAssociation
                   LArTwoDReco/LArClusterCreation
@@ -27,7 +31,6 @@ art_make( BASENAME_ONLY
                   LArTwoDReco/LArCosmicRay
                   LArTwoDReco/LArSeedFinding
                   LArUtility
-                  LArVertex
           LIB_LIBRARIES ${PANDORASDK}
                         ${PANDORAMONITORING}
           )
@@ -42,7 +45,11 @@ install_headers( SUBDIRS LArCalculators
                          LArThreeDReco/LArCosmicRay  
                          LArThreeDReco/LArHitCreation
                          LArThreeDReco/LArShowerMatching
-                         LArThreeDReco/LArTrackMatching
+                         LArThreeDReco/LArShowerFragments
+                         LArThreeDReco/LArLongitudinalTrackMatching
+                         LArThreeDReco/LArTransverseTrackMatching
+                         LArThreeDReco/LArTrackFragments
+                         LArThreeDReco/LArThreeDBase
                          LArTwoDReco
                          LArTwoDReco/LArClusterAssociation
                          LArTwoDReco/LArClusterCreation
@@ -50,8 +57,7 @@ install_headers( SUBDIRS LArCalculators
                          LArTwoDReco/LArClusterSplitting
                          LArTwoDReco/LArCosmicRay
                          LArTwoDReco/LArSeedFinding
-                         LArUtility
-                         LArVertex )
+                         LArUtility )
 install_fhicl( SUBDIRS LArCalculators
                        LArCheating
                        LArHelpers
@@ -62,7 +68,11 @@ install_fhicl( SUBDIRS LArCalculators
                        LArThreeDReco/LArCosmicRay  
                        LArThreeDReco/LArHitCreation
                        LArThreeDReco/LArShowerMatching
-                       LArThreeDReco/LArTrackMatching
+                       LArThreeDReco/LArShowerFragments
+                       LArThreeDReco/LArLongitudinalTrackMatching
+                       LArThreeDReco/LArTransverseTrackMatching
+                       LArThreeDReco/LArTrackFragments
+                       LArThreeDReco/LArThreeDBase
                        LArTwoDReco
                        LArTwoDReco/LArClusterAssociation
                        LArTwoDReco/LArClusterCreation
@@ -70,8 +80,7 @@ install_fhicl( SUBDIRS LArCalculators
                        LArTwoDReco/LArClusterSplitting
                        LArTwoDReco/LArCosmicRay
                        LArTwoDReco/LArSeedFinding
-                       LArUtility
-                       LArVertex )
+                       LArUtility )
 install_source( SUBDIRS LArCalculators
                         LArCheating
                         LArHelpers
@@ -82,7 +91,11 @@ install_source( SUBDIRS LArCalculators
                         LArThreeDReco/LArCosmicRay  
                         LArThreeDReco/LArHitCreation
                         LArThreeDReco/LArShowerMatching
-                        LArThreeDReco/LArTrackMatching
+                        LArThreeDReco/LArShowerFragments
+                        LArThreeDReco/LArTransverseTrackMatching
+                        LArThreeDReco/LArLongitudinalTrackMatching
+                        LArThreeDReco/LArTrackFragments
+                        LArThreeDReco/LArThreeDBase
                         LArTwoDReco
                         LArTwoDReco/LArClusterAssociation
                         LArTwoDReco/LArClusterCreation
@@ -90,6 +103,5 @@ install_source( SUBDIRS LArCalculators
                         LArTwoDReco/LArClusterSplitting
                         LArTwoDReco/LArCosmicRay
                         LArTwoDReco/LArSeedFinding
-                        LArUtility
-                        LArVertex  )
+                        LArUtility )
 
