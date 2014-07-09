@@ -22,6 +22,7 @@ art_make( BASENAME_ONLY
                   LArThreeDReco/LArLongitudinalTrackMatching
                   LArThreeDReco/LArTransverseTrackMatching
                   LArThreeDReco/LArTrackFragments
+                  LArThreeDReco/LArThreeDBase
                   LArTwoDReco
                   LArTwoDReco/LArClusterAssociation
                   LArTwoDReco/LArClusterCreation
