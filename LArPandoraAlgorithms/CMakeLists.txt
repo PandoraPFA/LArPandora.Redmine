@@ -18,7 +18,10 @@ art_make( BASENAME_ONLY
                   LArThreeDReco/LArCosmicRay  
                   LArThreeDReco/LArHitCreation
                   LArThreeDReco/LArShowerMatching
-                  LArThreeDReco/LArTrackMatching
+                  LArThreeDReco/LArShowerFragments
+                  LArThreeDReco/LArLongitudinalTrackMatching
+                  LArThreeDReco/LArTransverseTrackMatching
+                  LArThreeDReco/LArTrackFragments
                   LArTwoDReco
                   LArTwoDReco/LArClusterAssociation
                   LArTwoDReco/LArClusterCreation
@@ -42,7 +45,11 @@ install_headers( SUBDIRS LArCalculators
                          LArThreeDReco/LArCosmicRay  
                          LArThreeDReco/LArHitCreation
                          LArThreeDReco/LArShowerMatching
-                         LArThreeDReco/LArTrackMatching
+                         LArThreeDReco/LArShowerFragments
+                         LArThreeDReco/LArLongitudinalTrackMatching
+                         LArThreeDReco/LArTransverseTrackMatching
+                         LArThreeDReco/LArTrackFragments
+                         LArThreeDReco/LArThreeDBase
                          LArTwoDReco
                          LArTwoDReco/LArClusterAssociation
                          LArTwoDReco/LArClusterCreation
@@ -62,7 +69,11 @@ install_fhicl( SUBDIRS LArCalculators
                        LArThreeDReco/LArCosmicRay  
                        LArThreeDReco/LArHitCreation
                        LArThreeDReco/LArShowerMatching
-                       LArThreeDReco/LArTrackMatching
+                       LArThreeDReco/LArShowerFragments
+                       LArThreeDReco/LArLongitudinalTrackMatching
+                       LArThreeDReco/LArTransverseTrackMatching
+                       LArThreeDReco/LArTrackFragments
+                       LArThreeDReco/LArThreeDBase
                        LArTwoDReco
                        LArTwoDReco/LArClusterAssociation
                        LArTwoDReco/LArClusterCreation
@@ -82,7 +93,11 @@ install_source( SUBDIRS LArCalculators
                         LArThreeDReco/LArCosmicRay  
                         LArThreeDReco/LArHitCreation
                         LArThreeDReco/LArShowerMatching
-                        LArThreeDReco/LArTrackMatching
+                        LArThreeDReco/LArShowerFragments
+                        LArThreeDReco/LArTransverseTrackMatching
+                        LArThreeDReco/LArLongitudinalTrackMatching
+                        LArThreeDReco/LArTrackFragments
+                        LArThreeDReco/LArThreeDBase
                         LArTwoDReco
                         LArTwoDReco/LArClusterAssociation
                         LArTwoDReco/LArClusterCreation
