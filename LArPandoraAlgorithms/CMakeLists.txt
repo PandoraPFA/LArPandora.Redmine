@@ -30,7 +30,6 @@ art_make( BASENAME_ONLY
                   LArTwoDReco/LArCosmicRay
                   LArTwoDReco/LArSeedFinding
                   LArUtility
-                  LArVertex
           LIB_LIBRARIES ${PANDORASDK}
                         ${PANDORAMONITORING}
           )
@@ -57,8 +56,7 @@ install_headers( SUBDIRS LArCalculators
                          LArTwoDReco/LArClusterSplitting
                          LArTwoDReco/LArCosmicRay
                          LArTwoDReco/LArSeedFinding
-                         LArUtility
-                         LArVertex )
+                         LArUtility )
 install_fhicl( SUBDIRS LArCalculators
                        LArCheating
                        LArHelpers
@@ -81,8 +79,7 @@ install_fhicl( SUBDIRS LArCalculators
                        LArTwoDReco/LArClusterSplitting
                        LArTwoDReco/LArCosmicRay
                        LArTwoDReco/LArSeedFinding
-                       LArUtility
-                       LArVertex )
+                       LArUtility )
 install_source( SUBDIRS LArCalculators
                         LArCheating
                         LArHelpers
@@ -105,6 +102,5 @@ install_source( SUBDIRS LArCalculators
                         LArTwoDReco/LArClusterSplitting
                         LArTwoDReco/LArCosmicRay
                         LArTwoDReco/LArSeedFinding
-                        LArUtility
-                        LArVertex  )
+                        LArUtility )
 
