@@ -5,7 +5,7 @@
 
 
 #include "services_microboone.fcl"
-#include "pandoramodules.fcl"
+#include "pandoramodules_microboone.fcl"
 
 process_name: LArPandora
 
@@ -30,7 +30,7 @@ physics:
 {
   producers: 
   {  
-    pandora:    @local::standard_pandora 
+    pandora:    @local::microboone_pandora 
   }
 
   reco: [ pandora ]

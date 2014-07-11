@@ -2,7 +2,7 @@ BEGIN_PROLOG
 
 standard_pandora:
 {
-  module_type:           "LArPandora"
+  module_type:           "MicroBooNEPandora"
   ConfigFile:            "PandoraSettings_MicroBooNE_Standard.xml"
   GeantModuleLabel:      "largeant"
   HitFinderModuleLabel:  "gaushit"
