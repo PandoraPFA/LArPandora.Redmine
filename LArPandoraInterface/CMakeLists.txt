@@ -15,6 +15,7 @@ art_make( BASENAME_ONLY
                         LArProperties_service
                         Geometry
                         Geometry_service
+                        TimeService_service
                         Simulation
                         RawData
                         RecoBase

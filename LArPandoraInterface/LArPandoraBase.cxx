@@ -4,7 +4,6 @@
 #include "cetlib/cpu_timer.h"
 
 // LArSoft includes 
-#include "Geometry/Geometry.h"
 #include "SimulationBase/MCTruth.h"
 
 // Pandora includes
@@ -37,12 +36,12 @@ LArPandoraBase::~LArPandoraBase()
 void LArPandoraBase::reconfigure(fhicl::ParameterSet const &pset)
 {
     m_enableProduction = pset.get<bool>("EnableProduction",true);
-    m_enableMCParticles = pset.get<bool>("EnableMCParticles",false);
+    m_enableMCParticles = pset.get<bool>("EnableMCParticles",true);
     m_enableMonitoring = pset.get<bool>("EnableMonitoring",false);
 
     m_configFile = pset.get<std::string>("ConfigFile");
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel","largeant");
-    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel","ffthit");
+    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel","gaushit");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -250,37 +249,6 @@ void LArPandoraBase::ResetPandora() const
     mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandora() *** " << std::endl;
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*m_pPandora));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::GetStartAndEndPoints(const art::Ptr<simb::MCParticle> &particle, int& startT, int& endT) const
-{
-    art::ServiceHandle<geo::Geometry> theGeometry;
-
-    bool foundStartPosition(false);
-
-    const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
-
-    for (int nt = 0; nt < numTrajectoryPoints; ++nt)
-    {
-        try{
-            double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
-            unsigned int tpc   = 0;
-            unsigned int cstat = 0;
-            theGeometry->PositionToTPC(pos, tpc, cstat);
-
-            endT = nt;
-            if (!foundStartPosition)
-            {
-                startT = endT;
-                foundStartPosition = true;
-            }   
-        }
-        catch(cet::exception &e){
-            continue;
-        }
-    }
 }
 
 } // namespace lar_pandora
