@@ -1,0 +1,28 @@
+<!-- Pandora settings xml file -->
+
+<pandora>
+    <!-- HELPER CLASS SETTINGS -->
+    <IsMonitoringEnabled> true </IsMonitoringEnabled>
+    <ShouldDisplayAlgorithmInfo> true </ShouldDisplayAlgorithmInfo>
+    <ShouldCollapseMCParticlesToPfoTarget> false </ShouldCollapseMCParticlesToPfoTarget>
+
+    <!-- Plugin helper functions -->
+
+    <!-- CaloHit helper settings -->
+    <CaloHitHelper>
+        <ShouldCalculateDensityWeight>false</ShouldCalculateDensityWeight>
+        <ShouldCalculateSurroundingEnergy>false</ShouldCalculateSurroundingEnergy>
+    </CaloHitHelper>
+
+     <algorithm type = "EventWriting">
+        <EventFileName>uBooNE_Events.pndr</EventFileName>
+        <GeometryFileName>uBooNE_Geometry.pndr</GeometryFileName>
+        <ShouldWriteEvents>true</ShouldWriteEvents>
+        <ShouldWriteGeometry>false</ShouldWriteGeometry>
+        <ShouldOverwriteEventFile>true</ShouldOverwriteEventFile>
+        <ShouldOverwriteGeometryFile>true</ShouldOverwriteGeometryFile>
+        <ShouldWriteMCRelationships>true</ShouldWriteMCRelationships>
+        <ShouldWriteTrackRelationships>true</ShouldWriteTrackRelationships>
+    </algorithm>
+
+</pandora>
