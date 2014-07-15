@@ -142,17 +142,6 @@ protected:
      */
     void InitializeMonitoring();
 
-    /**
-     *  @brief Loop over MC trajectory points and identify start and end points within detector
-     *
-     *  @param particle  the true particle
-     *  @param startT  the first trajectory point in the detector
-     *  @param endT  the last trajectory point in the detector
-     */
-    void GetStartAndEndPoints(const art::Ptr<simb::MCParticle> &particle, int &startT, int& endT) const;
-
-
-
     bool               m_enableProduction;      ///< 
     bool               m_enableMCParticles;     ///< 
     bool               m_enableMonitoring;      ///<

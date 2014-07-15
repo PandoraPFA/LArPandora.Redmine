@@ -364,4 +364,9 @@
         </HitCreationTools>
     </algorithm>
 
+    <algorithm type = "LArListMerging">
+        <SourcePfoListNames>CosmicRayParticles3D DaughterCosmicRayParticles3D</SourcePfoListNames>
+        <TargetPfoListNames>Particles3D Particles3D</TargetPfoListNames>
+    </algorithm>
+
 </pandora>

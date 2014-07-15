@@ -50,6 +50,23 @@ private:
     void CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap &hitToParticleMap) const;
     void ProduceArtOutput(art::Event &evt, const HitMap &hitMap) const;
 
+    /**
+     *  @brief Loop over MC trajectory points and identify start and end points within detector
+     *
+     *  @param particle  the true particle
+     *  @param startT  the first trajectory point in the detector
+     *  @param endT  the last trajectory point in the detector
+     */
+    void GetTrueStartAndEndPoints(const art::Ptr<simb::MCParticle> &particle, int &startT, int& endT) const;
+
+   /**
+     *  @brief Use detector and time services to get a true X offset for a given trajectory point
+     *
+     *  @param particle  the true particle
+     *  @param nT  the trajectory point
+     */
+    float GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nT) const;
+
     double m_x0;
     double m_y0;
     double m_z0;
@@ -70,6 +87,7 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 #include "Geometry/Geometry.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
+#include "Utilities/TimeService.h"
 #include "Utilities/AssociationUtil.h"
 #include "SimulationBase/MCTruth.h"
 #include "RecoBase/Hit.h"
@@ -164,9 +182,8 @@ void MicroBooNEPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hi
     static const double dEdX_max(25.0);      // MeV/cm
     static const double dEdX_mip(2.0);       // MeV/cm (for now)
     static const double mips_to_gev(3.5e-4); // from 100 single-electrons
-
-    static const double us_per_tdc(1.0e-3 * theDetector->SamplingRate()); // ns->us
-    static const double tdc_offset(theDetector->TriggerOffset());
+    
+    static const double recombination_factor(0.63); 
 
     static const double wire_pitch_cm(lar::LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
 
@@ -190,16 +207,15 @@ void MicroBooNEPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hi
 	const double dxpos_cm(theDetector->ConvertTicksToX(hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
 			      theDetector->ConvertTicksToX(hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
 
-	const double t_us((hit_Time - tdc_offset) * us_per_tdc);
 	const double dQdX(hit_Charge / wire_pitch_cm); // ADC/cm
-	const double dQdX_e(dQdX / (theDetector->ElectronsToADC() * exp(-t_us / theLiquidArgon->ElectronLifetime()))); // e/cm
+	const double dQdX_e(dQdX / (theDetector->ElectronsToADC() * recombination_factor)); // e/cm
 
 	double dEdX(theLiquidArgon->BirksCorrection(dQdX_e));
 
 	if ((dEdX < 0) || (dEdX > dEdX_max))
 	    dEdX = dEdX_max;
 
-	const double mips(dEdX / dEdX_mip); // TODO: Check if calibration procedure is correct
+	const double mips(dEdX / dEdX_mip); // TODO: Check if this procedure is correct
 
 	hitMap[++hitCounter] = hit;
 
@@ -315,6 +331,9 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
 
     mf::LogDebug("LArPandora") << "   Number of Pandora neutrinos: " << neutrinoCounter << std::endl;
 
+    art::ServiceHandle<util::DetectorProperties> theDetector;
+    art::ServiceHandle<util::TimeService> theTime;
+
     // Loop over G4 particles
     int particleCounter(0);
 
@@ -331,21 +350,24 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
 	++particleCounter;
 
 	// Find Start and End Points
-	int startT(0), endT(0);
-	this->GetStartAndEndPoints(particle, startT, endT);
+	int firstT(0), lastT(0);
+	this->GetTrueStartAndEndPoints(particle, firstT, lastT);
 
-	const float vtxX(particle->Vx(startT));
-	const float vtxY(particle->Vy(startT));
-	const float vtxZ(particle->Vz(startT));
+        const float vtxX0(this->GetTrueX0(particle, firstT));
+        const float endX0(this->GetTrueX0(particle, lastT));
 
-	const float endX(particle->Vx(endT));
-	const float endY(particle->Vy(endT));
-	const float endZ(particle->Vz(endT));
+	const float vtxX(particle->Vx(firstT));
+	const float vtxY(particle->Vy(firstT));
+	const float vtxZ(particle->Vz(firstT));
 
-	const float pX(particle->Px(startT));
-	const float pY(particle->Py(startT));
-	const float pZ(particle->Pz(startT));
-	const float E(particle->E(startT));
+	const float endX(particle->Vx(lastT));
+	const float endY(particle->Vy(lastT));
+	const float endZ(particle->Vz(lastT));
+
+	const float pX(particle->Px(firstT));
+	const float pY(particle->Py(firstT));
+	const float pZ(particle->Pz(firstT));
+	const float E(particle->E(firstT));
 
 	// Create 3D Pandora MC Particle
 	PandoraApi::MCParticle::Parameters mcParticleParameters;
@@ -379,9 +401,9 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
 	// Create U projection
 	mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f,
 	    lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPU(pY, pZ));
-	mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, 0.f,
+	mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX0 + vtxX, 0.f,
 	    lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(vtxY, vtxZ));
-	mcParticleParameters.m_endpoint = pandora::CartesianVector(endX,  0.f,
+	mcParticleParameters.m_endpoint = pandora::CartesianVector(endX0 + endX,  0.f,
 	    lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(endY, endZ));
 	mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_U;
 	mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 1 * id_offset));
@@ -390,9 +412,9 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
 	// Create V projection
 	mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f,
 	    lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPV(pY, pZ));
-	mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, 0.f,
+	mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX0 + vtxX, 0.f,
 	    lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(vtxY, vtxZ));
-	mcParticleParameters.m_endpoint = pandora::CartesianVector(endX,  0.f,
+	mcParticleParameters.m_endpoint = pandora::CartesianVector(endX0 + endX,  0.f,
 	    lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(endY, endZ));
 	mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_V;
 	mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 2 * id_offset));
@@ -400,8 +422,8 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
 
 	// Create W projection
 	mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f, pZ);
-	mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, 0.f, vtxZ);
-	mcParticleParameters.m_endpoint = pandora::CartesianVector(endX,  0.f, endZ);
+	mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX0 + vtxX, 0.f, vtxZ);
+	mcParticleParameters.m_endpoint = pandora::CartesianVector(endX0 + endX,  0.f, endZ);
 	mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_W;
 	mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 3 * id_offset));
 	PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
@@ -619,6 +641,54 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
     evt.put(std::move(outputTracksToClusters));
     evt.put(std::move(outputSpacePointsToHits));
     evt.put(std::move(outputClustersToHits));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void MicroBooNEPandora::GetTrueStartAndEndPoints(const art::Ptr<simb::MCParticle> &particle, int& startT, int& endT) const
+{
+    art::ServiceHandle<geo::Geometry> theGeometry;
+
+    bool foundStartPosition(false);
+
+    const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
+
+    for (int nt = 0; nt < numTrajectoryPoints; ++nt)
+    {
+        try{
+            double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
+            unsigned int tpc   = 0;
+            unsigned int cstat = 0;
+            theGeometry->PositionToTPC(pos, tpc, cstat);
+
+            endT = nt;
+            if (!foundStartPosition)
+            {
+                startT = endT;
+                foundStartPosition = true;
+            }   
+        }
+        catch(cet::exception &e){
+            continue;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float MicroBooNEPandora::GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nt) const
+{
+    art::ServiceHandle<util::DetectorProperties> theDetector;
+    art::ServiceHandle<util::TimeService> theTime;
+
+    const unsigned int tpc(0);
+    const unsigned int cstat(0);
+
+    const float vtxT(particle->T(nt));
+    const float vtxTDC(theTime->TPCG4Time2Tick(vtxT));
+    const float vtxX0(theDetector->ConvertTicksToX(vtxTDC, 1, tpc, cstat));
+
+    return vtxX0;
 }
 
 } // namespace lar_pandora
