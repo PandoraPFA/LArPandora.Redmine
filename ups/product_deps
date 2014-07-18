@@ -1,13 +1,13 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	larpandora	v02_02_01
+parent	larpandora	v02_03_00
 defaultqual	e5
 #
 fcldir product_dir job
 #
 product         version
-larsim		v02_02_01
-pandora		v00_16
+larsim		v02_03_00
+pandora		v00_16a
 gcc		v4_8_2
 
 # list products required ONLY for the build
