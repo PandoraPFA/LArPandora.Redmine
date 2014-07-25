@@ -1,9 +1,12 @@
 /**
- *  @file   LArPandora/LArPandoraBase.cc
+ *  @file   larpandora/LArPandoraInterface/LArPandoraBase.h
  * 
- *  @brief  lar pandora base class for producer module
+ *  @brief  base class for LArPandoraInterface producer module
  * 
  */
+
+#ifndef LAR_PANDORA_BASE_H
+#define LAR_PANDORA_BASE_H 1
 
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
@@ -159,3 +162,5 @@ protected:
 };
 
 } // namespace lar_pandora
+
+#endif // #ifndef LAR_PANDORA_BASE_H

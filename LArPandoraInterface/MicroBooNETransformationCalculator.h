@@ -1,5 +1,5 @@
 /**
- *  @file   LArPandora/MicroBooNETransformationCalculator.h
+ *  @file   larpandora/LArPandoraInterface/MicroBooNETransformationCalculator.h
  * 
  *  @brief  Header file for the MicroBooNE transformation calculator class.
  * 

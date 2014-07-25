@@ -1,5 +1,5 @@
 /**
- *  @file   LArPandora/MicroBooNEPseudoLayerCalculator.h
+ *  @file   larpandora/LArPandoraInterface/MicroBooNEPseudoLayerCalculator.h
  * 
  *  @brief  Header file for the MicroBooNE pseudo layer calculator class.
  * 
@@ -68,6 +68,6 @@ inline pandora::PseudoLayer MicroBooNEPseudoLayerCalculator::GetPseudoLayerAtIp(
     return 0;
 }
 
-} // namespace lar
+} // namespace lar_pandora
 
 #endif // #ifndef MICRO_BOONE_PSEUDO_LAYER_CALCULATOR_H

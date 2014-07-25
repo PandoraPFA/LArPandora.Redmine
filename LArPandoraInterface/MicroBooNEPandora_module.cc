@@ -16,6 +16,7 @@
 
 // Local includes
 #include "LArPandoraBase.h"
+#include "LArPandoraHelper.h"
 
 // std includes
 #include <string>
@@ -500,6 +501,9 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
     typedef std::map< const pandora::CaloHit*, TVector3 > ThreeDHitMap;
     typedef std::vector< TVector3 > ThreeDHitVector;
 
+    int spacePointCounter(0);
+    int clusterCounter(0);
+
     // Loop over Pandora particles
     for (pandora::PfoVector::iterator pIter = pfoVector.begin(), pIterEnd = pfoVector.end(); pIter != pIterEnd; ++pIter)
     {
@@ -580,7 +584,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 	    double dxdydz[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // TODO: Fill in representative errors
 	    double chi2(0.0);
 
-	    recob::SpacePoint newSpacePoint(xyz, dxdydz, chi2);
+	    recob::SpacePoint newSpacePoint(xyz, dxdydz, chi2, spacePointCounter++);
 	    outputSpacePoints->push_back(newSpacePoint);
 
 	    util::CreateAssn(*this, evt, *(outputSpacePoints.get()), hitVector, *(outputSpacePointsToHits.get()));
@@ -622,7 +626,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 	    if (hitVector.empty())
 		throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-	    recob::Cluster newCluster;
+	    recob::Cluster newCluster(LArPandoraHelper::BuildCluster(clusterCounter++, hitVector));
 	    outputClusters->push_back(newCluster);
 
 	    util::CreateAssn(*this, evt, *(outputClusters.get()), hitVector, *(outputClustersToHits.get()));
@@ -632,6 +636,10 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 		    outputClusters->size() - 1, outputClusters->size());
 	}
     }
+
+    mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;
+    mf::LogDebug("LArPandora") << "   Number of new space points: " << outputSpacePoints->size() << std::endl;
+    mf::LogDebug("LArPandora") << "   Number of new clusters: " << outputClusters->size() << std::endl;
 
     evt.put(std::move(outputTracks));
     evt.put(std::move(outputSpacePoints));
