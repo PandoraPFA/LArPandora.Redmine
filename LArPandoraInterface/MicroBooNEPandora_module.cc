@@ -88,7 +88,7 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 #include "RecoBase/Hit.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/SpacePoint.h"
-#include "RecoBase/Particle.h"
+#include "RecoBase/PFParticle.h"
 
 // Local includes
 #include "LArContent.h"
@@ -103,12 +103,12 @@ namespace lar_pandora {
 
 MicroBooNEPandora::MicroBooNEPandora(fhicl::ParameterSet const &pset) : LArPandoraBase(pset)
 {
-    produces< std::vector<recob::Particle> >();
+    produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
 
-    produces< art::Assns<recob::Particle, recob::SpacePoint> >();
-    produces< art::Assns<recob::Particle, recob::Cluster> >();
+    produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
+    produces< art::Assns<recob::PFParticle, recob::Cluster> >();
     produces< art::Assns<recob::SpacePoint, recob::Hit> >();
     produces< art::Assns<recob::Cluster, recob::Hit> >();
 
@@ -484,12 +484,12 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
     std::sort(pfoVector.begin(), pfoVector.end(), lar::LArPfoHelper::SortByNHits);
 
     // Set up ART outputs
-    std::unique_ptr< std::vector<recob::Particle> >      outputParticles( new std::vector<recob::Particle> );
+    std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
     std::unique_ptr< std::vector<recob::SpacePoint> > outputSpacePoints( new std::vector<recob::SpacePoint> );
     std::unique_ptr< std::vector<recob::Cluster> >    outputClusters( new std::vector<recob::Cluster> );
 
-    std::unique_ptr< art::Assns<recob::Particle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::Particle, recob::SpacePoint> );
-    std::unique_ptr< art::Assns<recob::Particle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::Particle, recob::Cluster> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >   outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >      outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
 
@@ -497,8 +497,8 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
     typedef std::map< const pandora::CaloHit*, TVector3 > ThreeDHitMap;
     typedef std::vector< TVector3 > ThreeDHitVector;
 
-    size_t spacePointCounter(0);
-    size_t clusterCounter(0);
+    int spacePointCounter(0);
+    int clusterCounter(0);
     size_t particleCounter(0);
 
     // Build map of Pandora particles
@@ -523,7 +523,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
         const size_t pfoIdCode(qIter->second);
         
         // Get Pfo Parents
-        size_t parentIdCode(std::numeric_limits<size_t>::max());
+        size_t parentIdCode(recob::PFParticle::kPFParticlePrimary);
         const pandora::PfoList &parentList(pPfo->GetParentPfoList());
 
         if (!parentList.empty())
@@ -599,16 +599,8 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 	}
 
 	// Build Particle
-        recob::Particle newParticle(pPfo->GetParticleId(), pfoIdCode);
+        recob::PFParticle newParticle(pPfo->GetParticleId(), pfoIdCode, parentIdCode, daughterIdCodes);
 	outputParticles->push_back(newParticle);
-
-        newParticle.SetParent(parentIdCode);
-
-        for (std::vector<size_t>::const_iterator dIter = daughterIdCodes.begin(), dIterEnd = daughterIdCodes.end(); dIter != dIterEnd; ++dIter)
-        {
-            const size_t daughterIdCode = *dIter;  
-            newParticle.AddDaughter(daughterIdCode);
-        }
 
 	// Build Space Points
 	for (pandora::CaloHitList::const_iterator hIter = pandoraHitList3D.begin(), hIterEnd = pandoraHitList3D.end(); hIter != hIterEnd; ++hIter)
