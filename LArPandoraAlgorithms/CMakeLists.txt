@@ -16,13 +16,14 @@ art_make( BASENAME_ONLY
                   LArThreeDReco
                   LArThreeDReco/LArClusterSplitting  
                   LArThreeDReco/LArCosmicRay  
+                  LArThreeDReco/LArEventBuilding
                   LArThreeDReco/LArHitCreation
-                  LArThreeDReco/LArShowerMatching
-                  LArThreeDReco/LArShowerFragments
                   LArThreeDReco/LArLongitudinalTrackMatching
-                  LArThreeDReco/LArTransverseTrackMatching
-                  LArThreeDReco/LArTrackFragments
+                  LArThreeDReco/LArShowerFragments
+                  LArThreeDReco/LArShowerMatching
                   LArThreeDReco/LArThreeDBase
+                  LArThreeDReco/LArTrackFragments
+                  LArThreeDReco/LArTransverseTrackMatching
                   LArTwoDReco
                   LArTwoDReco/LArClusterAssociation
                   LArTwoDReco/LArClusterCreation
@@ -43,13 +44,14 @@ install_headers( SUBDIRS LArCalculators
                          LArThreeDReco
                          LArThreeDReco/LArClusterSplitting
                          LArThreeDReco/LArCosmicRay  
+                         LArThreeDReco/LArEventBuilding
                          LArThreeDReco/LArHitCreation
-                         LArThreeDReco/LArShowerMatching
-                         LArThreeDReco/LArShowerFragments
                          LArThreeDReco/LArLongitudinalTrackMatching
-                         LArThreeDReco/LArTransverseTrackMatching
-                         LArThreeDReco/LArTrackFragments
+                         LArThreeDReco/LArShowerFragments
+                         LArThreeDReco/LArShowerMatching
                          LArThreeDReco/LArThreeDBase
+                         LArThreeDReco/LArTrackFragments
+                         LArThreeDReco/LArTransverseTrackMatching
                          LArTwoDReco
                          LArTwoDReco/LArClusterAssociation
                          LArTwoDReco/LArClusterCreation
@@ -66,13 +68,14 @@ install_fhicl( SUBDIRS LArCalculators
                        LArThreeDReco
                        LArThreeDReco/LArClusterSplitting
                        LArThreeDReco/LArCosmicRay  
+                       LArThreeDReco/LArEventBuilding
                        LArThreeDReco/LArHitCreation
-                       LArThreeDReco/LArShowerMatching
-                       LArThreeDReco/LArShowerFragments
                        LArThreeDReco/LArLongitudinalTrackMatching
-                       LArThreeDReco/LArTransverseTrackMatching
-                       LArThreeDReco/LArTrackFragments
+                       LArThreeDReco/LArShowerFragments
+                       LArThreeDReco/LArShowerMatching
                        LArThreeDReco/LArThreeDBase
+                       LArThreeDReco/LArTrackFragments
+                       LArThreeDReco/LArTransverseTrackMatching
                        LArTwoDReco
                        LArTwoDReco/LArClusterAssociation
                        LArTwoDReco/LArClusterCreation
