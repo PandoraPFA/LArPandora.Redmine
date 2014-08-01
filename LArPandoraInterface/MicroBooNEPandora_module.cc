@@ -482,10 +482,10 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 	return;
     }
 
-    pandora::PfoVector pfoVector;
-    for (pandora::PfoList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
-	pfoVector.push_back(*iter);
-
+    // Obtain a sorted vector of all Pfos and their daughters
+    pandora::PfoList connectedPfoList;
+    lar::LArPfoHelper::GetAllConnectedPfos(*pPfoList, connectedPfoList);
+    pandora::PfoVector pfoVector(connectedPfoList.begin(), connectedPfoList.end());
     std::sort(pfoVector.begin(), pfoVector.end(), lar::LArPfoHelper::SortByNHits);
 
     // Set up ART outputs
@@ -546,7 +546,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 	}
 
 	// Step 0: Track or shower?
-	bool foundTrack(true && !pandoraHitList3D.empty()); // TODO: Need Pandora flag for track or shower
+	bool foundTrack(lar::LArPfoHelper::IsTrack(pPfo) && !pandoraHitList3D.empty()); // TODO: Showers
 
 	// Step 1: Build Track or Shower
 	if (foundTrack)
@@ -604,6 +604,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 
 	    pandora::CaloHitList pandoraHitList2D;
 	    pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList2D);
+            pandoraHitList2D.insert(pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
 
 	    HitVector hitVector;
 	    for (pandora::CaloHitList::const_iterator hIter = pandoraHitList2D.begin(), hIterEnd = pandoraHitList2D.end(); hIter != hIterEnd; ++hIter)
