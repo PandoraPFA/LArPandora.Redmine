@@ -92,7 +92,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
         Sqxy += thisCharge * thisWire * thisTime;
     }
 
-    if (endWire > startWire)
+    if (endWire >= startWire)
     {
         dQdW = Sq / (1.0 + endWire - startWire);
         sigmadQdW = 0.0; 
