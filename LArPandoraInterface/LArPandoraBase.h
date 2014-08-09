@@ -12,7 +12,9 @@
 #include "art/Framework/Core/EDProducer.h"
 
 // LArSoft includes
-#include "MCCheater/BackTracker.h"
+#include "SimulationBase/MCParticle.h"
+#include "Simulation/SimChannel.h"
+#include "SimulationBase/MCTruth.h"
 #include "RecoBase/Hit.h"
 
 // Pandora includes

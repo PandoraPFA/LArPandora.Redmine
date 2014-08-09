@@ -4,8 +4,6 @@
 #include "cetlib/cpu_timer.h"
 
 // LArSoft includes 
-#include "SimulationBase/MCTruth.h"
-#include "Simulation/SimChannel.h"
 #include "Utilities/TimeService.h"
 #include "Utilities/AssociationUtil.h"
 
@@ -168,20 +166,6 @@ void LArPandoraBase::PrepareEvent(const art::Event &evt)
     m_event = evt.id().event();
     m_hits  = 0;
     m_time  = 0.f;
- 
-    /*
-    if (m_enableMCParticles && !evt.isRealData())
-    {
-        art::ServiceHandle<cheat::BackTracker> theBackTracker; 
-
-	// Bail out if there is no back-tracking information
-        if( theBackTracker->GetSetOfTrackIDs().size() == 0 )
-	{
-	    mf::LogError("LArPandora") << "   Failed to load back-tracking data " << std::endl;
-	    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);  
-	}
-    }
-    */
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -240,16 +224,12 @@ void LArPandoraBase::CollectArtParticles(const art::Event &evt, ParticleMap &par
 
     art::FindOneP<simb::MCTruth> mcTruthAssociation(mcParticleHandle, evt, m_geantModuleLabel);
 
-    //art::ServiceHandle<cheat::BackTracker> theBackTracker; 
-
     for (unsigned int i = 0, iEnd = mcParticleHandle->size(); i < iEnd; ++i)
     {
         art::Ptr<simb::MCParticle> particle(mcParticleHandle, i);
         particleMap[particle->TrackId()] = particle;
 
 	art::Ptr<simb::MCTruth> truth(mcTruthAssociation.at(i));
-
-        //art::Ptr<simb::MCTruth> truth(theBackTracker->TrackIDToMCTruth(particle->TrackId()));
         truthToParticleMap[truth].push_back(particle->TrackId());
     }
 
