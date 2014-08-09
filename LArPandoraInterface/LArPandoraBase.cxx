@@ -5,6 +5,8 @@
 
 // LArSoft includes 
 #include "SimulationBase/MCTruth.h"
+#include "Simulation/SimChannel.h"
+#include "Utilities/TimeService.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
@@ -188,7 +190,17 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
     art::Handle< std::vector<recob::Hit> > hitHandle;
     evt.getByLabel(m_hitfinderModuleLabel, hitHandle);
 
-    art::ServiceHandle<cheat::BackTracker> theBackTracker; 
+    art::Handle< std::vector<sim::SimChannel> > simChannelHandle;
+    evt.getByLabel(m_geantModuleLabel, simChannelHandle);
+    std::vector<sim::SimChannel> const& simChannelVector(*simChannelHandle);
+    
+    //I'm using a pointer here, with the intention that this not really be used elsewhere...
+    std::map<uint32_t,const sim::SimChannel*> simChannelMap;
+    for(auto const& simchannel : simChannelVector)
+      simChannelMap[simchannel.Channel()] = &simchannel;
+
+    //we're gonna probably need the time service to convert hit times to TDCs
+    art::ServiceHandle<util::TimeService> ts;
 
     for (unsigned int iHit = 0, iHitEnd = hitHandle->size(); iHit < iHitEnd; ++iHit)
     {
@@ -197,8 +209,12 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
 
         if (m_enableMCParticles && !evt.isRealData())
         {
-            const std::vector<cheat::TrackIDE> trackCollection(theBackTracker->HitToTrackID(hit));
+	  
+	  int start_tdc = ts->TPCTick2TDC( hit->StartTime() );
+	  int end_tdc   = ts->TPCTick2TDC( hit->EndTime()   );
 
+	  std::vector<cheat::TrackIDE> trackCollection((simChannelMap[hit->Channel()])->TrackIDEs(start_tdc,end_tdc));
+	  
             for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
             {
                 cheat::TrackIDE trackIDE = trackCollection.at(iTrack);
