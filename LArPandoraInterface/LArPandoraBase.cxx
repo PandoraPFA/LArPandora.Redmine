@@ -4,6 +4,7 @@
 #include "cetlib/cpu_timer.h"
 
 // LArSoft includes 
+#include "Geometry/Geometry.h"
 #include "Utilities/TimeService.h"
 #include "Utilities/AssociationUtil.h"
 
@@ -182,9 +183,10 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
     std::vector<sim::SimChannel> const& simChannelVector(*simChannelHandle);
     
     //I'm using a pointer here, with the intention that this not really be used elsewhere...
-    std::map<uint32_t,const sim::SimChannel*> simChannelMap;
-    for(auto const& simchannel : simChannelVector)
-      simChannelMap[simchannel.Channel()] = &simchannel;
+    art::ServiceHandle<geo::Geometry> geom;
+    std::vector<const sim::SimChannel*> sortedSimChannelVector(geom->Nchannels(),0);
+    for( auto const& simchannel : simChannelVector)
+      sortedSimChannelVector.at(simchannel.Channel()) = &simchannel;
 
     //we're gonna probably need the time service to convert hit times to TDCs
     art::ServiceHandle<util::TimeService> ts;
@@ -200,7 +202,7 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
 	  int start_tdc = ts->TPCTick2TDC( hit->StartTime() );
 	  int end_tdc   = ts->TPCTick2TDC( hit->EndTime()   );
 
-	  std::vector<cheat::TrackIDE> trackCollection((simChannelMap[hit->Channel()])->TrackIDEs(start_tdc,end_tdc));
+	  std::vector<cheat::TrackIDE> trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc,end_tdc));
 	  
             for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
             {
