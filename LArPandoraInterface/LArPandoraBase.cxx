@@ -7,6 +7,7 @@
 #include "SimulationBase/MCTruth.h"
 #include "Simulation/SimChannel.h"
 #include "Utilities/TimeService.h"
+#include "Utilities/AssociationUtil.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
@@ -168,6 +169,7 @@ void LArPandoraBase::PrepareEvent(const art::Event &evt)
     m_hits  = 0;
     m_time  = 0.f;
  
+    /*
     if (m_enableMCParticles && !evt.isRealData())
     {
         art::ServiceHandle<cheat::BackTracker> theBackTracker; 
@@ -179,6 +181,7 @@ void LArPandoraBase::PrepareEvent(const art::Event &evt)
 	    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_INITIALIZED);  
 	}
     }
+    */
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -235,14 +238,18 @@ void LArPandoraBase::CollectArtParticles(const art::Event &evt, ParticleMap &par
     art::Handle< std::vector<simb::MCParticle> > mcParticleHandle;
     evt.getByLabel(m_geantModuleLabel, mcParticleHandle);
 
-    art::ServiceHandle<cheat::BackTracker> theBackTracker; 
+    art::FindOneP<simb::MCTruth> mcTruthAssociation(mcParticleHandle, evt, m_geantModuleLabel);
+
+    //art::ServiceHandle<cheat::BackTracker> theBackTracker; 
 
     for (unsigned int i = 0, iEnd = mcParticleHandle->size(); i < iEnd; ++i)
     {
         art::Ptr<simb::MCParticle> particle(mcParticleHandle, i);
         particleMap[particle->TrackId()] = particle;
 
-        art::Ptr<simb::MCTruth> truth(theBackTracker->TrackIDToMCTruth(particle->TrackId()));
+	art::Ptr<simb::MCTruth> truth(mcTruthAssociation.at(i));
+
+        //art::Ptr<simb::MCTruth> truth(theBackTracker->TrackIDToMCTruth(particle->TrackId()));
         truthToParticleMap[truth].push_back(particle->TrackId());
     }
 
