@@ -60,7 +60,7 @@ public:
 protected:
     typedef std::vector< art::Ptr<simb::MCParticle> > ParticleVector;
     typedef std::vector< art::Ptr<recob::Hit> >  HitVector;
-    typedef std::map< art::Ptr<recob::Hit>, std::vector<cheat::TrackIDE> > HitToParticleMap;
+    typedef std::map< art::Ptr<recob::Hit>, std::vector<sim::TrackIDE> > HitToParticleMap;
     typedef std::map< art::Ptr<simb::MCTruth>, std::vector<int> > TruthToParticleMap;
     typedef std::map< int, art::Ptr<simb::MCParticle> > ParticleMap;
     typedef std::map< int, art::Ptr<recob::Hit> > HitMap;

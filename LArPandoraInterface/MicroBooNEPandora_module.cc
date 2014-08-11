@@ -444,14 +444,14 @@ void MicroBooNEPandora::CreatePandoraLinks(const HitMap &hitMap, const HitToPart
 	if (iterJ == hitToParticleMap.end())
 	    continue;
 
-	std::vector<cheat::TrackIDE> trackCollection = iterJ->second;
+	std::vector<sim::TrackIDE> trackCollection = iterJ->second;
 
 	if (trackCollection.size() == 0)
 	    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
 	for (unsigned int k = 0; k < trackCollection.size(); ++k)
 	{
-	    const cheat::TrackIDE trackIDE(trackCollection.at(k));
+	    const sim::TrackIDE trackIDE(trackCollection.at(k));
 	    const int trackID(std::abs(trackIDE.trackID)); // TODO: Find out why std::abs is needed
 	    const float energyFrac(trackIDE.energyFrac);
 

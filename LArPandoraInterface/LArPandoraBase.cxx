@@ -202,11 +202,11 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
 	  int start_tdc = ts->TPCTick2TDC( hit->StartTime() );
 	  int end_tdc   = ts->TPCTick2TDC( hit->EndTime()   );
 
-	  std::vector<cheat::TrackIDE> trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc,end_tdc));
+	  std::vector<sim::TrackIDE> trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc,end_tdc));
 	  
             for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
             {
-                cheat::TrackIDE trackIDE = trackCollection.at(iTrack);
+                sim::TrackIDE trackIDE = trackCollection.at(iTrack);
                 hitToParticleMap[hit].push_back(trackIDE);
 	    }
 	}
