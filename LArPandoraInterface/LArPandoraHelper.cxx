@@ -15,14 +15,12 @@
 
 namespace lar_pandora {
 
-// TODO: Turn this into a ART service
-
 recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector)
-{ 
+{
     mf::LogDebug("LArPandora") << "   Building Cluster [" << hitVector.size() << "]" << std::endl;
-    
+
     if (hitVector.empty())
-        throw cet::exception("LArPandoraHelper") << "BuildCluster --- No input hits were provided";
+        throw cet::exception("LArPandoraHelper") << " BuildCluster --- No input hits were provided ";
 
     // Fill list of cluster properties
     geo::View_t view(geo::kUnknown);
@@ -34,7 +32,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
     double dQdW(0.0), sigmadQdW(0.0);
     double dTdW(0.0), sigmadTdW(0.0);
-   
+
     double Sq(0.0), Sqx(0.0), Sqy(0.0), Sqxy(0.0), Sqxx(0.0);
 
     // Loop over vector of hits and calculate properties
@@ -55,51 +53,43 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
             view = thisView;
             planeID = thisPlaneID;
         }
-        
+
         if (!(thisView == view && thisPlaneID == planeID))
         {
-            throw cet::exception("LArPandoraHelper") << "BuildCluster --- Input hits have inconsistent plane IDs";
+            throw cet::exception("LArPandoraHelper") << " BuildCluster --- Input hits have inconsistent plane IDs ";
         }
 
         if (thisWire < startWire)
         {
             startWire = thisWire;
             sigmaStartWire = thisWireSigma;
+            startTime = thisTime;
+            sigmaStartTime = thisTimeSigma;
         }
 
         if (thisWire > endWire)
         {
             endWire = thisWire;
             sigmaEndWire = thisWireSigma;
-        }
-
-        if (thisTime < startTime)
-        {
-            startTime = thisTime;
-            sigmaStartTime = thisTimeSigma;
-        }
-
-        if (thisTime > endTime)
-        {
             endTime = thisTime;
             sigmaEndTime = thisTimeSigma;
         }
 
         Sq   += thisCharge;
-        Sqx  += thisCharge * thisWire; 
-        Sqy  += thisCharge * thisTime; 
-        Sqxx += thisCharge * thisWire * thisWire; 
+        Sqx  += thisCharge * thisWire;
+        Sqy  += thisCharge * thisTime;
+        Sqxx += thisCharge * thisWire * thisWire;
         Sqxy += thisCharge * thisWire * thisTime;
     }
 
     if (endWire >= startWire)
     {
         dQdW = Sq / (1.0 + endWire - startWire);
-        sigmadQdW = 0.0; 
+        sigmadQdW = 0.0;
     }
     else
     {
-        throw cet::exception("LArPandoraHelper") << "BuildCluster --- Failed to find start and end wires";
+        throw cet::exception("LArPandoraHelper") << " BuildCluster --- Failed to find start and end wires ";
     }
 
     const double numerator(Sq * Sqxy - Sqx * Sqy);
