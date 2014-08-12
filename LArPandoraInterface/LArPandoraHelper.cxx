@@ -59,7 +59,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
             throw cet::exception("LArPandoraHelper") << " BuildCluster --- Input hits have inconsistent plane IDs ";
         }
 
-        if (thisWire < startWire)
+        if (thisWire < startWire || (thisWire == startWire && thisTime < startTime))
         {
             startWire = thisWire;
             sigmaStartWire = thisWireSigma;
@@ -67,7 +67,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
             sigmaStartTime = thisTimeSigma;
         }
 
-        if (thisWire > endWire)
+        if (thisWire > endWire || (thisWire == endWire && thisTime > endTime))
         {
             endWire = thisWire;
             sigmaEndWire = thisWireSigma;
