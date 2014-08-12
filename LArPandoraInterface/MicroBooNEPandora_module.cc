@@ -61,12 +61,6 @@ private:
      *  @param nT  the trajectory point
      */
     float GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nT) const;
-
-    double m_x0;
-    double m_y0;
-    double m_z0;
-    double m_u0;
-    double m_v0;
 };
 
 DEFINE_ART_MODULE(MicroBooNEPandora)
@@ -109,12 +103,6 @@ MicroBooNEPandora::MicroBooNEPandora(fhicl::ParameterSet const &pset) : LArPando
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
     produces< art::Assns<recob::SpacePoint, recob::Hit> >();
     produces< art::Assns<recob::Cluster, recob::Hit> >();
-
-    m_x0 = 0.0;
-    m_y0 = 0.0;
-    m_z0 = 0.0;
-    m_u0 = 0.0;
-    m_v0 = 0.0;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,20 +130,7 @@ void MicroBooNEPandora::CreatePandoraGeometry()
     {
         mf::LogError("LArPandora") << " Geometry helpers not yet available for detector: " << theGeometry->GetDetectorName() << std::endl;
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
-    }
-
-    // Calculate offsets between Pandora and LArSoft coordinate systems
-    // TODO: Find the wireID -> Upos and wireID -> Vpos conversions in LArSoft
-    // TODO: Incorporate the LArSoft coordinate system into Pandora
-    double uvIntersectY(0.0), uvIntersectZ(0.0), uwIntersectY(0.0), uwIntersectZ(0.0);
-    theGeometry->IntersectionPoint(0, 0, geo::kU,geo::kV, 0, 0, uvIntersectY, uvIntersectZ);
-    theGeometry->IntersectionPoint(0, 0, geo::kU,geo::kW, 0, 0, uwIntersectY, uwIntersectZ);
-
-    m_x0 = 0.0;
-    m_y0 = uvIntersectY;
-    m_z0 = uwIntersectZ;
-    m_u0 = lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(uvIntersectY, uvIntersectZ);
-    m_v0 = lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(uvIntersectY, uvIntersectZ);
+    } 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,21 +141,32 @@ void MicroBooNEPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hi
 
     // TODO: Select hits to be used in reconstruction (e.g. needed for multi-pass reconstruction)
 
+    // Set up ART services
+    art::ServiceHandle<geo::Geometry> theGeometry;
     art::ServiceHandle<util::DetectorProperties> theDetector;
     art::ServiceHandle<util::LArProperties> theLiquidArgon;
 
-    static const double dx_cm(0.5);          // cm
-    static const double int_cm(84.0);        // cm
-    static const double rad_cm(14.0);        // cm
-    static const double dEdX_max(25.0);      // MeV/cm
-    static const double dEdX_mip(2.0);       // MeV/cm (for now)
-    static const double mips_to_gev(3.5e-4); // from 100 single-electrons
-
-    static const double recombination_factor(0.63);
+    // Assign some scaling parameters for making Pandora hits
+    static const double dx_cm(0.5);                 // cm
+    static const double int_cm(84.0);               // cm
+    static const double rad_cm(14.0);               // cm
+    static const double dEdX_max(25.0);             // MeV/cm
+    static const double dEdX_mip(2.0);              // MeV/cm (for now)
+    static const double mips_to_gev(3.5e-4);        // from 100 single-electrons
+    static const double recombination_factor(0.63); //
 
     static const double wire_pitch_cm(lar::LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
+ 
+    // Calculate offsets between real and 'wire number * wire pitch' coordinate systems
+    double uvIntersectY(0.0), uvIntersectZ(0.0), uwIntersectY(0.0), uwIntersectZ(0.0);
+    theGeometry->IntersectionPoint(0, 0, geo::kU,geo::kV, 0, 0, uvIntersectY, uvIntersectZ);
+    theGeometry->IntersectionPoint(0, 0, geo::kU,geo::kW, 0, 0, uwIntersectY, uwIntersectZ);
 
-    // Loop over hits
+    const double u0_cm(lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(uvIntersectY, uvIntersectZ));
+    const double v0_cm(lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(uvIntersectY, uvIntersectZ));
+    const double w0_cm(uwIntersectZ);
+
+    // Loop over ART hits
     int hitCounter(0);
 
     for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
@@ -235,17 +221,17 @@ void MicroBooNEPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hi
         if (hit_View == geo::kW)
         {
             caloHitParameters.m_hitType = pandora::TPC_VIEW_W;
-            caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm + m_x0, 0., wpos_cm + m_z0);
+            caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., wpos_cm + w0_cm);
         }
         else if(hit_View == geo::kU)
         {
             caloHitParameters.m_hitType = pandora::TPC_VIEW_U;
-            caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm + m_x0, 0., wpos_cm + m_u0);
+            caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., wpos_cm + u0_cm);
         }
         else if(hit_View == geo::kV)
         {
             caloHitParameters.m_hitType = pandora::TPC_VIEW_V;
-            caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm + m_x0, 0., wpos_cm + m_v0);
+            caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., wpos_cm + v0_cm);
         }
         else
         {
@@ -583,9 +569,9 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
             if (pandora::TPC_3D != pCaloHit3D->GetHitType())
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            const double xpos_cm(pCaloHit3D->GetPositionVector().GetX() - m_x0);
-            const double ypos_cm(pCaloHit3D->GetPositionVector().GetY() - m_y0);
-            const double zpos_cm(pCaloHit3D->GetPositionVector().GetZ() - m_z0);
+            const double xpos_cm(pCaloHit3D->GetPositionVector().GetX());
+            const double ypos_cm(pCaloHit3D->GetPositionVector().GetY());
+            const double zpos_cm(pCaloHit3D->GetPositionVector().GetZ());
 
             TVector3 xyz(xpos_cm, ypos_cm, zpos_cm);
             TVector3 dxdydz(0.0, 0.0, 0.0); // TODO: Fill in representative errors
