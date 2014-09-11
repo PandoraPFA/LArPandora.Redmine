@@ -121,7 +121,7 @@ void MicroBooNEPandora::CreatePandoraGeometry()
     // Identify the Geometry and load the calculators
     art::ServiceHandle<geo::Geometry> theGeometry;
 
-    if (theGeometry->DetectorName().find("microboone"))
+    if (std::string::npos != theGeometry->DetectorName().find("microboone"))
     {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerCalculator(*m_pPandora, new MicroBooNEPseudoLayerCalculator));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationCalculator(*m_pPandora, new MicroBooNETransformationCalculator));
