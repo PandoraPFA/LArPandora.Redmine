@@ -12,13 +12,13 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 bool SplitShowersTool::Run(ThreeDShowersAlgorithm *pAlgorithm, TensorType &overlapTensor)
 {
-    if (PandoraSettings::ShouldDisplayAlgorithmInfo())
-       std::cout << "----> Running Algorithm Tool: " << this << ", " << m_algorithmToolType << std::endl;
+    if (PandoraContentApi::GetSettings(*pAlgorithm)->ShouldDisplayAlgorithmInfo())
+       std::cout << "----> Running Algorithm Tool: " << this << ", " << this->GetType() << std::endl;
 
     ClusterMergeMap clusterMergeMap;
     this->FindSplitShowers(pAlgorithm, overlapTensor, clusterMergeMap);
@@ -308,4 +308,4 @@ StatusCode SplitShowersTool::ReadSettings(const TiXmlHandle xmlHandle)
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

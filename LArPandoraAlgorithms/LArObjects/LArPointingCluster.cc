@@ -11,16 +11,13 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
-LArPointingCluster::LArPointingCluster(Cluster *const pCluster)
+LArPointingCluster::LArPointingCluster(Cluster *const pCluster, const unsigned int fitHalfLayerWindow, const float fitLayerPitch)
 {
-    const unsigned int halfWindowLayers(10); // TODO - add to settings, or add to constructor
-
-    TwoDSlidingFitResult slidingFitResult;
-    LArClusterHelper::LArTwoDSlidingFit(pCluster, halfWindowLayers, slidingFitResult);
-
+    // TODO remove default layer fit window and z pitch values
+    const TwoDSlidingFitResult slidingFitResult(pCluster, fitHalfLayerWindow, fitLayerPitch);
     this->BuildPointingCluster(slidingFitResult);
 }
 
@@ -130,4 +127,4 @@ LArPointingCluster::Vertex &LArPointingCluster::Vertex::operator=(const Vertex &
     return *this;
 }
 
-} // namespace lar
+} // namespace lar_content

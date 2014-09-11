@@ -14,18 +14,20 @@
 
 #include "LArObjects/LArPointingCluster.h"
 
+#include "LArPlugins/LArTransformationPlugin.h"
+
 #include "LArThreeDReco/LArTransverseTrackMatching/LongTracksTool.h"
 #include "LArThreeDReco/LArTransverseTrackMatching/MissingTrackSegmentTool.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 bool MissingTrackSegmentTool::Run(ThreeDTransverseTracksAlgorithm *pAlgorithm, TensorType &overlapTensor)
 {
-    if (PandoraSettings::ShouldDisplayAlgorithmInfo())
-       std::cout << "----> Running Algorithm Tool: " << this << ", " << m_algorithmToolType << std::endl;
+    if (PandoraContentApi::GetSettings(*pAlgorithm)->ShouldDisplayAlgorithmInfo())
+       std::cout << "----> Running Algorithm Tool: " << this << ", " << this->GetType() << std::endl;
 
     ProtoParticleVector protoParticleVector; ClusterMergeMap clusterMergeMap;
     this->FindTracks(pAlgorithm, overlapTensor, protoParticleVector, clusterMergeMap);
@@ -165,6 +167,8 @@ void MissingTrackSegmentTool::GetCandidateClusters(ThreeDTransverseTracksAlgorit
 void MissingTrackSegmentTool::GetSlidingFitResultMap(ThreeDTransverseTracksAlgorithm *pAlgorithm, const ClusterList &candidateClusterList,
     SlidingFitResultMap &slidingFitResultMap) const
 {
+    const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+
     for (ClusterList::const_iterator iter = candidateClusterList.begin(), iterEnd = candidateClusterList.end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster(*iter);
@@ -172,7 +176,7 @@ void MissingTrackSegmentTool::GetSlidingFitResultMap(ThreeDTransverseTracksAlgor
         try
         {
             const TwoDSlidingFitResult &slidingFitResult(pAlgorithm->GetCachedSlidingFitResult(pCluster));
-            slidingFitResultMap[pCluster] = slidingFitResult;
+            (void) slidingFitResultMap.insert(SlidingFitResultMap::value_type(pCluster, slidingFitResult));
             continue;
         }
         catch (StatusCodeException &)
@@ -181,9 +185,8 @@ void MissingTrackSegmentTool::GetSlidingFitResultMap(ThreeDTransverseTracksAlgor
 
         try
         {
-            TwoDSlidingFitResult slidingFitResult;
-            LArClusterHelper::LArTwoDSlidingFit(pCluster, pAlgorithm->GetSlidingFitWindow(), slidingFitResult);
-            slidingFitResultMap[pCluster] = slidingFitResult;
+            const TwoDSlidingFitResult slidingFitResult(pCluster, pAlgorithm->GetSlidingFitWindow(), slidingFitPitch);
+            (void) slidingFitResultMap.insert(SlidingFitResultMap::value_type(pCluster, slidingFitResult));
             continue;
         }
         catch (StatusCodeException &)
@@ -217,7 +220,7 @@ void MissingTrackSegmentTool::GetSegmentOverlapMap(ThreeDTransverseTracksAlgorit
             CartesianVector fitVector1(0.f, 0.f, 0.f), fitVector2(0.f, 0.f, 0.f);
             fitResult1.GetGlobalFitPositionAtX(x, fitVector1);
             fitResult2.GetGlobalFitPositionAtX(x, fitVector2);
-            const float prediction(LArGeometryHelper::MergeTwoPositions(particle.m_hitType1, particle.m_hitType2, fitVector1.GetZ(), fitVector2.GetZ()));
+            const float prediction(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), particle.m_hitType1, particle.m_hitType2, fitVector1.GetZ(), fitVector2.GetZ()));
 
             for (SlidingFitResultMap::const_iterator iter = slidingFitResultMap.begin(), iterEnd = slidingFitResultMap.end(); iter != iterEnd; ++iter)
             {
@@ -348,9 +351,9 @@ MissingTrackSegmentTool::Particle::Particle(const TensorType::Element &element)
 
     m_shortHitType = ((xOverlap.GetXSpanU() < xOverlap.GetXSpanV()) && (xOverlap.GetXSpanU() < xOverlap.GetXSpanW())) ? TPC_VIEW_U :
         ((xOverlap.GetXSpanV() < xOverlap.GetXSpanU()) && (xOverlap.GetXSpanV() < xOverlap.GetXSpanW())) ? TPC_VIEW_V :
-        ((xOverlap.GetXSpanW() < xOverlap.GetXSpanU()) && (xOverlap.GetXSpanW() < xOverlap.GetXSpanV())) ? TPC_VIEW_W : CUSTOM;
+        ((xOverlap.GetXSpanW() < xOverlap.GetXSpanU()) && (xOverlap.GetXSpanW() < xOverlap.GetXSpanV())) ? TPC_VIEW_W : HIT_CUSTOM;
 
-    if (CUSTOM == m_shortHitType)
+    if (HIT_CUSTOM == m_shortHitType)
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
     m_pShortCluster = (TPC_VIEW_U == m_shortHitType) ? element.GetClusterU() : (TPC_VIEW_V == m_shortHitType) ? element.GetClusterV() : element.GetClusterW();
@@ -425,4 +428,4 @@ StatusCode MissingTrackSegmentTool::ReadSettings(const TiXmlHandle xmlHandle)
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

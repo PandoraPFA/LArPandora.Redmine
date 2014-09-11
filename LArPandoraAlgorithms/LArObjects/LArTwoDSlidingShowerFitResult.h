@@ -12,7 +12,7 @@
 
 #include "LArObjects/LArTwoDSlidingFitResult.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -37,8 +37,9 @@ public:
      * 
      *  @param  pCluster address of the candidate shower cluster
      *  @param  slidingFitWindow the sliding fit window
+     *  @param  slidingFitLayerPitch the sliding fit z pitch, units cm
      */
-    TwoDSlidingShowerFitResult(const pandora::Cluster *const pCluster, const unsigned int slidingFitWindow);
+    TwoDSlidingShowerFitResult(const pandora::Cluster *const pCluster, const unsigned int slidingFitWindow, const float slidingFitLayerPitch);
 
     /**
      *  @brief  Get the sliding fit result for the full shower cluster
@@ -70,6 +71,16 @@ public:
     void GetShowerEdges(const float x, pandora::FloatVector &edgePositions) const;
 
 private:
+    /**
+     *  @brief  Perform two dimensional sliding fit to shower edge, using specified primary axis
+     *
+     *  @param  fullShowerFit the result of fitting the full shower
+     *  @param  showerEdge the shower edge
+     * 
+     *  @return the shower edge fit result
+     */
+    static TwoDSlidingFitResult LArTwoDShowerEdgeFit(const TwoDSlidingFitResult &fullShowerFit, const ShowerEdge showerEdge);
+
     TwoDSlidingFitResult    m_showerFitResult;              ///< The sliding fit result for the full shower cluster
     TwoDSlidingFitResult    m_negativeEdgeFitResult;        ///< The sliding fit result for the negative shower edge
     TwoDSlidingFitResult    m_positiveEdgeFitResult;        ///< The sliding fit result for the positive shower edge
@@ -176,6 +187,6 @@ inline float ShowerExtent::GetLowEdgeZ() const
     return m_lowEdgeZ;
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_SLIDING_SHOWER_FIT_RESULT_H

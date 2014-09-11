@@ -8,11 +8,11 @@ include_directories( $ENV{PANDORA_FQ_DIR}/PandoraMonitoring/include )
 
 art_make( BASENAME_ONLY
           LIBRARY_NAME  LArPandoraAlgorithms
-          SUBDIRS LArCalculators
-                  LArCheating
+          SUBDIRS LArCheating
                   LArHelpers
                   LArMonitoring
                   LArObjects
+                  LArPlugins
                   LArThreeDReco
                   LArThreeDReco/LArClusterSplitting  
                   LArThreeDReco/LArCosmicRay  
@@ -36,11 +36,11 @@ art_make( BASENAME_ONLY
                         ${PANDORAMONITORING}
           )
 
-install_headers( SUBDIRS LArCalculators
-                         LArCheating
+install_headers( SUBDIRS LArCheating
                          LArHelpers
                          LArMonitoring
                          LArObjects
+                         LArPlugins
                          LArThreeDReco
                          LArThreeDReco/LArClusterSplitting
                          LArThreeDReco/LArCosmicRay  
@@ -60,11 +60,11 @@ install_headers( SUBDIRS LArCalculators
                          LArTwoDReco/LArCosmicRay
                          LArTwoDReco/LArSeedFinding
                          LArUtility )
-install_fhicl( SUBDIRS LArCalculators
-                       LArCheating
+install_fhicl( SUBDIRS LArCheating
                        LArHelpers
                        LArMonitoring
                        LArObjects
+                       LArPlugins
                        LArThreeDReco
                        LArThreeDReco/LArClusterSplitting
                        LArThreeDReco/LArCosmicRay  
@@ -84,11 +84,11 @@ install_fhicl( SUBDIRS LArCalculators
                        LArTwoDReco/LArCosmicRay
                        LArTwoDReco/LArSeedFinding
                        LArUtility )
-install_source( SUBDIRS LArCalculators
-                        LArCheating
+install_source( SUBDIRS LArCheating
                         LArHelpers
                         LArMonitoring
                         LArObjects
+                        LArPlugins
                         LArThreeDReco
                         LArThreeDReco/LArClusterSplitting
                         LArThreeDReco/LArCosmicRay  

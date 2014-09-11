@@ -12,7 +12,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
  
 StatusCode VertexSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult &slidingFitResult, CartesianVector &splitPosition) const
@@ -24,7 +24,7 @@ StatusCode VertexSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitR
     Vertex *pSelectedVertex(NULL);
     for (VertexList::const_iterator iter = pVertexList->begin(), iterEnd = pVertexList->end(); iter != iterEnd; ++iter)
     {
-        // TODO vertex selection
+        // TODO Vertex selection
         return STATUS_CODE_NOT_INITIALIZED;
     }
 
@@ -81,4 +81,4 @@ StatusCode VertexSplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     return TwoDSlidingFitSplittingAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

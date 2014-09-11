@@ -1,7 +1,7 @@
 /**
  *  @file   LArContent/include/LArThreeDReco/LArClusterSplitting/ThreeDTrackSplittingAlgorithm.h
  * 
- *  @brief  Header file for the cosmic ray identification algorithm class.
+ *  @brief  Header file for the three d track splitting algorithm class.
  * 
  *  $Log: $
  */
@@ -12,7 +12,7 @@
 
 #include "LArObjects/LArPointingCluster.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -68,6 +68,6 @@ inline pandora::Algorithm *ThreeDTrackSplittingAlgorithm::Factory::CreateAlgorit
     return new ThreeDTrackSplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_THREE_D_TRACK_SPLITTING_ALGORITHM_H

@@ -10,9 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArHelpers/LArClusterHelper.h"
+#include "LArObjects/LArTwoDSlidingFitResult.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -89,6 +89,6 @@ private:
     unsigned int m_halfWindowLayers;           ///< Size of layer window for sliding fit results
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_SLIDING_FIT_CONSOLIDATION_ALGORITHM_H

@@ -15,7 +15,7 @@
 
 #include "LArThreeDReco/LArThreeDBase/ThreeDTracksBaseAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 class TransverseTensorTool;
@@ -48,10 +48,6 @@ public:
     static bool SortByNMatchedSamplingPoints(const TensorType::Element &lhs, const TensorType::Element &rhs);
 
 private:
-    typedef TwoDSlidingFitResult::LayerFitResultMap LayerFitResultMap;
-    typedef TwoDSlidingFitResult::FitSegment FitSegment;
-    typedef TwoDSlidingFitResult::FitSegmentList FitSegmentList;
-
     typedef std::map<unsigned int, TransverseOverlapResult> FitSegmentToOverlapResultMap;
     typedef std::map<unsigned int, FitSegmentToOverlapResultMap> FitSegmentMatrix;
     typedef std::map<unsigned int, FitSegmentMatrix> FitSegmentTensor;
@@ -160,6 +156,6 @@ inline pandora::Algorithm *ThreeDTransverseTracksAlgorithm::Factory::CreateAlgor
     return new ThreeDTransverseTracksAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_THREE_D_TRANSVERSE_TRACKS_ALGORITHM_H

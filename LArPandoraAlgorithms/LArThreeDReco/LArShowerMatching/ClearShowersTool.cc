@@ -12,7 +12,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 bool ClearShowersTool::HasLargeDirectConnections(IteratorList::const_iterator iIter, const IteratorList &iteratorList)
@@ -62,8 +62,8 @@ bool ClearShowersTool::IsLargerThanDirectConnections(IteratorList::const_iterato
 
 bool ClearShowersTool::Run(ThreeDShowersAlgorithm *pAlgorithm, TensorType &overlapTensor)
 {
-    if (PandoraSettings::ShouldDisplayAlgorithmInfo())
-       std::cout << "----> Running Algorithm Tool: " << this << ", " << m_algorithmToolType << std::endl;
+    if (PandoraContentApi::GetSettings(*pAlgorithm)->ShouldDisplayAlgorithmInfo())
+       std::cout << "----> Running Algorithm Tool: " << this << ", " << this->GetType() << std::endl;
 
     ProtoParticleVector protoParticleVector;
     this->FindClearShowers(overlapTensor, protoParticleVector);
@@ -166,4 +166,4 @@ StatusCode ClearShowersTool::ReadSettings(const TiXmlHandle xmlHandle)
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

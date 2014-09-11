@@ -10,11 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "Helpers/ClusterHelper.h"
-
 #include "LArTwoDReco/LArClusterAssociation/ClusterAssociationAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -368,6 +366,6 @@ inline pandora::Algorithm *TransverseAssociationAlgorithm::Factory::CreateAlgori
     return new TransverseAssociationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TRANSVERSE_ASSOCIATION_ALGORITHM_H

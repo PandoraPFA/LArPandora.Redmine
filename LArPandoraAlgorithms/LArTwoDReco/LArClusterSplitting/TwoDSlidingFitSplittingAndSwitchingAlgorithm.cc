@@ -8,13 +8,16 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArPointingClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
 
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAndSwitchingAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode TwoDSlidingFitSplittingAndSwitchingAlgorithm::Run()
@@ -37,8 +40,9 @@ StatusCode TwoDSlidingFitSplittingAndSwitchingAlgorithm::Run()
             continue;
 
         TwoDSlidingFitResultMap::iterator sIter1 = slidingFitResultMap.find(*iter1);
+
         if (slidingFitResultMap.end() == sIter1)
-            throw StatusCodeException(STATUS_CODE_FAILURE);
+            continue;
 
         const TwoDSlidingFitResult &slidingFitResult1(sIter1->second);
 
@@ -48,8 +52,9 @@ StatusCode TwoDSlidingFitSplittingAndSwitchingAlgorithm::Run()
                 continue;
 
             TwoDSlidingFitResultMap::iterator sIter2 = slidingFitResultMap.find(*iter2);
+
             if (slidingFitResultMap.end() == sIter2)
-                throw StatusCodeException(STATUS_CODE_FAILURE);
+                continue;
 
             const TwoDSlidingFitResult &slidingFitResult2(sIter2->second);
 
@@ -60,15 +65,13 @@ StatusCode TwoDSlidingFitSplittingAndSwitchingAlgorithm::Run()
             CartesianVector firstDirection(0.f,0.f,0.f);
             CartesianVector secondDirection(0.f,0.f,0.f);
 
-            if (STATUS_CODE_SUCCESS != this->FindBestSplitPosition(slidingFitResult1, slidingFitResult2,
-                splitPosition, firstDirection, secondDirection))
+            if (STATUS_CODE_SUCCESS != this->FindBestSplitPosition(slidingFitResult1, slidingFitResult2, splitPosition, firstDirection, secondDirection))
                 continue;
 
-            Cluster* pCluster1 = const_cast<Cluster*>(slidingFitResult1.GetCluster());
-            Cluster* pCluster2 = const_cast<Cluster*>(slidingFitResult2.GetCluster());
+            Cluster *pCluster1 = const_cast<Cluster*>(slidingFitResult1.GetCluster());
+            Cluster *pCluster2 = const_cast<Cluster*>(slidingFitResult2.GetCluster());
 
-            if (STATUS_CODE_SUCCESS != this->ReplaceClusters(pCluster1, pCluster2,
-                splitPosition, firstDirection, secondDirection))
+            if (STATUS_CODE_SUCCESS != this->ReplaceClusters(pCluster1, pCluster2, splitPosition, firstDirection, secondDirection))
                 continue;
 
             slidingFitResultMap.erase(sIter1);
@@ -106,15 +109,24 @@ void TwoDSlidingFitSplittingAndSwitchingAlgorithm::GetListOfCleanClusters(const 
 void TwoDSlidingFitSplittingAndSwitchingAlgorithm::BuildSlidingFitResultMap(const ClusterVector &clusterVector,
     TwoDSlidingFitResultMap &slidingFitResultMap) const
 {
+    const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
         if (slidingFitResultMap.end() == slidingFitResultMap.find(*iter))
         {
-            TwoDSlidingFitResult slidingFitResult;
-            LArClusterHelper::LArTwoDSlidingFit(*iter, m_halfWindowLayers, slidingFitResult);
+            try
+            {
+                const TwoDSlidingFitResult slidingFitResult(*iter, m_halfWindowLayers, slidingFitPitch);
 
-            if (!slidingFitResultMap.insert(TwoDSlidingFitResultMap::value_type(*iter, slidingFitResult)).second)
-                throw StatusCodeException(STATUS_CODE_FAILURE);
+                if (!slidingFitResultMap.insert(TwoDSlidingFitResultMap::value_type(*iter, slidingFitResult)).second)
+                    throw StatusCodeException(STATUS_CODE_FAILURE);
+            }
+            catch (StatusCodeException &statusCodeException)
+            {
+                if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+                    throw statusCodeException;
+            }
         }
     }
 }
@@ -191,4 +203,4 @@ StatusCode TwoDSlidingFitSplittingAndSwitchingAlgorithm::ReadSettings(const TiXm
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

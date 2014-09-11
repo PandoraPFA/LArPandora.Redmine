@@ -11,11 +11,14 @@
 #include "LArTwoDReco/LArCosmicRay/CosmicRaySplittingAlgorithm.h"
 
 #include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
 #include "LArHelpers/LArPointingClusterHelper.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode CosmicRaySplittingAlgorithm::Run()
@@ -40,8 +43,9 @@ StatusCode CosmicRaySplittingAlgorithm::Run()
             continue;
 
         TwoDSlidingFitResultMap::const_iterator bFitIter = slidingFitResultMap.find(*bIter);
+
         if (slidingFitResultMap.end() == bFitIter)
-            throw StatusCodeException(STATUS_CODE_FAILURE);
+            continue;
 
         const TwoDSlidingFitResult &branchSlidingFitResult(bFitIter->second);
 
@@ -66,8 +70,9 @@ StatusCode CosmicRaySplittingAlgorithm::Run()
                 continue;
 
             TwoDSlidingFitResultMap::const_iterator rFitIter = slidingFitResultMap.find(*rIter);
+
             if (slidingFitResultMap.end() == rFitIter)
-                throw StatusCodeException(STATUS_CODE_FAILURE);
+                continue;
 
             const TwoDSlidingFitResult &replacementSlidingFitResult(rFitIter->second);
 
@@ -177,15 +182,24 @@ void CosmicRaySplittingAlgorithm::GetListOfCleanClusters(const ClusterList *cons
 void CosmicRaySplittingAlgorithm::BuildSlidingFitResultMap(const ClusterVector &clusterVector,
     TwoDSlidingFitResultMap &slidingFitResultMap) const
 {
+    const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
         if (slidingFitResultMap.end() == slidingFitResultMap.find(*iter))
         {
-            TwoDSlidingFitResult slidingFitResult;
-            LArClusterHelper::LArTwoDSlidingFit(*iter, m_halfWindowLayers, slidingFitResult);
+            try
+            {
+                const TwoDSlidingFitResult slidingFitResult(*iter, m_halfWindowLayers, slidingFitPitch);
 
-            if (!slidingFitResultMap.insert(TwoDSlidingFitResultMap::value_type(*iter, slidingFitResult)).second)
-                throw StatusCodeException(STATUS_CODE_FAILURE);
+                if (!slidingFitResultMap.insert(TwoDSlidingFitResultMap::value_type(*iter, slidingFitResult)).second)
+                    throw StatusCodeException(STATUS_CODE_FAILURE);
+            }
+            catch (StatusCodeException &statusCodeException)
+            {
+                if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+                    throw statusCodeException;
+            }
         }
     }
 }
@@ -530,4 +544,4 @@ StatusCode CosmicRaySplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

@@ -84,8 +84,8 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 
 // Local includes
 #include "LArContent.h"
-#include "MicroBooNEPseudoLayerCalculator.h"
-#include "MicroBooNETransformationCalculator.h"
+#include "MicroBooNEPseudoLayerPlugin.h"
+#include "MicroBooNETransformationPlugin.h"
 
 // System includes
 #include <iostream>
@@ -118,13 +118,13 @@ void MicroBooNEPandora::CreatePandoraGeometry()
 {
     mf::LogDebug("LArPandora") << " *** MicroBooNEPandora::CreatePandoraGeometry(...) *** " << std::endl;
 
-    // Identify the Geometry and load the calculators
+    // Identify the Geometry and load the plugins
     art::ServiceHandle<geo::Geometry> theGeometry;
 
-    if (theGeometry->DetectorName().find("microboone"))
+    if (std::string::npos != theGeometry->DetectorName().find("microboone"))
     {
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerCalculator(*m_pPandora, new MicroBooNEPseudoLayerCalculator));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationCalculator(*m_pPandora, new MicroBooNETransformationCalculator));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPandora, new MicroBooNEPseudoLayerPlugin));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*m_pPandora, new MicroBooNETransformationPlugin));
     }
     else
     {
@@ -155,15 +155,15 @@ void MicroBooNEPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hi
     static const double mips_to_gev(3.5e-4);        // from 100 single-electrons
     static const double recombination_factor(0.63); //
 
-    static const double wire_pitch_cm(lar::LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
+    const double wire_pitch_cm(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->GetWireZPitch());
  
     // Calculate offsets between real and 'wire number * wire pitch' coordinate systems
     double uvIntersectY(0.0), uvIntersectZ(0.0), uwIntersectY(0.0), uwIntersectZ(0.0);
     theGeometry->IntersectionPoint(0, 0, geo::kU,geo::kV, 0, 0, uvIntersectY, uvIntersectZ);
     theGeometry->IntersectionPoint(0, 0, geo::kU,geo::kW, 0, 0, uwIntersectY, uwIntersectZ);
 
-    const double u0_cm(lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(uvIntersectY, uvIntersectZ));
-    const double v0_cm(lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(uvIntersectY, uvIntersectZ));
+    const double u0_cm(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->YZtoU(uvIntersectY, uvIntersectZ));
+    const double v0_cm(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->YZtoV(uvIntersectY, uvIntersectZ));
     const double w0_cm(uwIntersectZ);
 
     // Loop over ART hits
@@ -209,7 +209,7 @@ void MicroBooNEPandora::CreatePandoraHits(const HitVector &hitVector, HitMap &hi
         caloHitParameters.m_nCellRadiationLengths = dx_cm / rad_cm;
         caloHitParameters.m_nCellInteractionLengths = dx_cm / int_cm;
         caloHitParameters.m_isDigital = false;
-        caloHitParameters.m_detectorRegion = pandora::ENDCAP;
+        caloHitParameters.m_hitRegion = pandora::SINGLE_REGION;
         caloHitParameters.m_layer = 0;
         caloHitParameters.m_isInOuterSamplingLayer = false;
         caloHitParameters.m_inputEnergy = hit_Charge;
@@ -282,7 +282,7 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
             mcParticleParameters.m_vertex = pandora::CartesianVector(neutrino.Nu().Vx(), neutrino.Nu().Vy(), neutrino.Nu().Vz());
             mcParticleParameters.m_endpoint = pandora::CartesianVector(neutrino.Nu().Vx(), neutrino.Nu().Vy(), neutrino.Nu().Vz());
             mcParticleParameters.m_particleId = neutrino.Nu().PdgCode();
-            mcParticleParameters.m_mcParticleType = pandora::MC_STANDARD;
+            mcParticleParameters.m_mcParticleType = pandora::MC_3D;
             mcParticleParameters.m_pParentAddress = (void*)((intptr_t)neutrinoID);
             PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
 
@@ -355,7 +355,7 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
         mcParticleParameters.m_momentum = pandora::CartesianVector(pX, pY, pZ);
         mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX, vtxY, vtxZ);
         mcParticleParameters.m_endpoint = pandora::CartesianVector(endX, endY, endZ);
-        mcParticleParameters.m_mcParticleType = pandora::MC_STANDARD;
+        mcParticleParameters.m_mcParticleType = pandora::MC_3D;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)particle->TrackId());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
 
@@ -372,29 +372,29 @@ void MicroBooNEPandora::CreatePandoraParticles(const ParticleMap& particleMap, c
         const float dx(endX - vtxX);
         const float dy(endY - vtxY);
         const float dz(endZ - vtxZ);
-        const float dw(lar::LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
+        const float dw(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->GetWireZPitch());
 
         if (dx * dx + dy * dy + dz * dz < 0.5 * dw * dw)
             continue;
 
         // Create U projection
         mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f,
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPU(pY, pZ));
+            lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->PYPZtoPU(pY, pZ));
         mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX0 + vtxX, 0.f,
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(vtxY, vtxZ));
+            lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->YZtoU(vtxY, vtxZ));
         mcParticleParameters.m_endpoint = pandora::CartesianVector(endX0 + endX,  0.f,
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoU(endY, endZ));
+            lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->YZtoU(endY, endZ));
         mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_U;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 1 * id_offset));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
 
         // Create V projection
         mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f,
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->PYPZtoPV(pY, pZ));
+            lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->PYPZtoPV(pY, pZ));
         mcParticleParameters.m_vertex = pandora::CartesianVector(vtxX0 + vtxX, 0.f,
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(vtxY, vtxZ));
+            lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->YZtoV(vtxY, vtxZ));
         mcParticleParameters.m_endpoint = pandora::CartesianVector(endX0 + endX,  0.f,
-            lar::LArGeometryHelper::GetLArTransformationCalculator()->YZtoV(endY, endZ));
+            lar_content::LArGeometryHelper::GetLArTransformationPlugin(*m_pPandora)->YZtoV(endY, endZ));
         mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_V;
         mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 2 * id_offset));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, mcParticleParameters));
@@ -462,9 +462,9 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
 
     // Obtain a sorted vector of all Pfos and their daughters
     pandora::PfoList connectedPfoList;
-    lar::LArPfoHelper::GetAllConnectedPfos(*pPfoList, connectedPfoList);
+    lar_content::LArPfoHelper::GetAllConnectedPfos(*pPfoList, connectedPfoList);
     pandora::PfoVector pfoVector(connectedPfoList.begin(), connectedPfoList.end());
-    std::sort(pfoVector.begin(), pfoVector.end(), lar::LArPfoHelper::SortByNHits);
+    std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
     // Set up ART outputs
     std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
@@ -553,7 +553,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
         {
             const pandora::Cluster *const pCluster = *cIter;
 
-            if (pandora::TPC_3D != lar::LArClusterHelper::GetClusterHitType(pCluster))
+            if (pandora::TPC_3D != lar_content::LArClusterHelper::GetClusterHitType(pCluster))
                 continue;
 
             pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList3D);
@@ -627,7 +627,7 @@ void MicroBooNEPandora::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) 
         {
             const pandora::Cluster *const pCluster = *cIter;
 
-            if (pandora::TPC_3D == lar::LArClusterHelper::GetClusterHitType(pCluster))
+            if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
                 continue;
 
             pandora::CaloHitList pandoraHitList2D;

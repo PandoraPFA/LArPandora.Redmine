@@ -9,15 +9,18 @@
 #include "Pandora/AlgorithmHeaders.h"
 
 #include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
 
 #include "LArObjects/LArPointingCluster.h"
 #include "LArObjects/LArTrackOverlapResult.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
 
 #include "LArThreeDReco/LArThreeDBase/ThreeDTracksBaseAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 template<typename T>
@@ -129,7 +132,18 @@ bool ThreeDTracksBaseAlgorithm<T>::SortSplitPositions(const pandora::CartesianVe
 template<typename T>
 void ThreeDTracksBaseAlgorithm<T>::UpdateForNewCluster(Cluster *const pNewCluster)
 {
-    this->AddToSlidingFitCache(pNewCluster);
+    try
+    {
+        this->AddToSlidingFitCache(pNewCluster);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+            throw statusCodeException;
+
+        return;
+    }
+
     ThreeDBaseAlgorithm<T>::UpdateForNewCluster(pNewCluster);
 }
 
@@ -176,7 +190,15 @@ void ThreeDTracksBaseAlgorithm<T>::PreparationStep()
 
     for (ClusterList::const_iterator iter = allClustersList.begin(), iterEnd = allClustersList.end(); iter != iterEnd; ++iter)
     {
-        this->AddToSlidingFitCache(*iter);
+        try
+        {
+            this->AddToSlidingFitCache(*iter);
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+                throw statusCodeException;
+        }
     }
 }
 
@@ -194,7 +216,7 @@ void ThreeDTracksBaseAlgorithm<T>::TidyUp()
 template<typename T>
 void ThreeDTracksBaseAlgorithm<T>::SetPfoParameters(const ProtoParticle &protoParticle, PandoraContentApi::ParticleFlowObject::Parameters &pfoParameters) const
 {
-    // TODO - correct these placeholder parameters
+    // TODO Correct these placeholder parameters
     pfoParameters.m_particleId = MU_MINUS; // Track
     pfoParameters.m_charge = PdgTable::GetParticleCharge(pfoParameters.m_particleId.Get());
     pfoParameters.m_mass = PdgTable::GetParticleMass(pfoParameters.m_particleId.Get());
@@ -210,8 +232,8 @@ void ThreeDTracksBaseAlgorithm<T>::SetPfoParameters(const ProtoParticle &protoPa
 template<typename T>
 void ThreeDTracksBaseAlgorithm<T>::AddToSlidingFitCache(Cluster *const pCluster)
 {
-    TwoDSlidingFitResult slidingFitResult;
-    LArClusterHelper::LArTwoDSlidingFit(pCluster, m_slidingFitWindow, slidingFitResult);
+    const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+    const TwoDSlidingFitResult slidingFitResult(pCluster, m_slidingFitWindow, slidingFitPitch);
 
     if (!m_slidingFitResultMap.insert(TwoDSlidingFitResultMap::value_type(pCluster, slidingFitResult)).second)
         throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -253,4 +275,4 @@ template class ThreeDTracksBaseAlgorithm<TransverseOverlapResult>;
 template class ThreeDTracksBaseAlgorithm<LongitudinalOverlapResult>;
 template class ThreeDTracksBaseAlgorithm<FragmentOverlapResult>;
 
-} // namespace lar
+} // namespace lar_content

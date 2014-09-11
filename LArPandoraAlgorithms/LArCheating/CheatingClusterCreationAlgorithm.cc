@@ -12,7 +12,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode CheatingClusterCreationAlgorithm::Run()
@@ -45,7 +45,7 @@ StatusCode CheatingClusterCreationAlgorithm::Run()
 
 void CheatingClusterCreationAlgorithm::SimpleMCParticleCollection(CaloHit *const pCaloHit, MCParticleToHitListMap &mcParticleToHitListMap) const
 {
-    const MCParticle *pMCParticle(pCaloHit->GetMainMCParticle());
+    const MCParticle *pMCParticle(MCParticleHelper::GetMainMCParticle(pCaloHit));
 
     if (!this->SelectMCParticlesForClustering(pMCParticle))
         return;
@@ -120,4 +120,4 @@ StatusCode CheatingClusterCreationAlgorithm::ReadSettings(const TiXmlHandle xmlH
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

@@ -15,7 +15,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode DeltaRayIdentificationAlgorithm::Run()
@@ -26,7 +26,7 @@ StatusCode DeltaRayIdentificationAlgorithm::Run()
 
     if (parentPfos.empty())
     {
-        std::cout << "DeltaRayIdentificationAlgorithm: could not find pfo list " << m_parentPfoListName << std::endl;
+        std::cout << "DeltaRayIdentificationAlgorithm: pfo list " << m_parentPfoListName << " unavailable." << std::endl;
         return STATUS_CODE_SUCCESS;
     }
 
@@ -337,4 +337,4 @@ StatusCode DeltaRayIdentificationAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

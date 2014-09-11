@@ -11,11 +11,13 @@
 #include "LArHelpers/LArClusterHelper.h"
 #include "LArHelpers/LArGeometryHelper.h"
 
+#include "LArPlugins/LArTransformationPlugin.h"
+
 #include "LArThreeDReco/LArShowerMatching/ThreeDShowersAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 bool ThreeDShowersAlgorithm::SortByNMatchedSamplingPoints(const TensorType::Element &lhs, const TensorType::Element &rhs)
@@ -45,7 +47,18 @@ const TwoDSlidingShowerFitResult &ThreeDShowersAlgorithm::GetCachedSlidingFitRes
 
 void ThreeDShowersAlgorithm::UpdateForNewCluster(Cluster *const pNewCluster)
 {
-    this->AddToSlidingFitCache(pNewCluster);
+    try
+    {
+        this->AddToSlidingFitCache(pNewCluster);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+            throw statusCodeException;
+
+        return;
+    }
+
     ThreeDBaseAlgorithm<ShowerOverlapResult>::UpdateForNewCluster(pNewCluster);
 }
 
@@ -82,7 +95,7 @@ void ThreeDShowersAlgorithm::SelectInputClusters(const ClusterList *const pInput
 
 void ThreeDShowersAlgorithm::SetPfoParameters(const ProtoParticle &protoParticle, PandoraContentApi::ParticleFlowObject::Parameters &pfoParameters) const
 {
-    // TODO - correct these placeholder parameters
+    // TODO Correct these placeholder parameters
     pfoParameters.m_particleId = E_MINUS; // Shower
     pfoParameters.m_charge = PdgTable::GetParticleCharge(pfoParameters.m_particleId.Get());
     pfoParameters.m_mass = PdgTable::GetParticleMass(pfoParameters.m_particleId.Get());
@@ -104,7 +117,15 @@ void ThreeDShowersAlgorithm::PreparationStep()
 
     for (ClusterList::const_iterator iter = allClustersList.begin(), iterEnd = allClustersList.end(); iter != iterEnd; ++iter)
     {
-        this->AddToSlidingFitCache(*iter);
+        try
+        {
+            this->AddToSlidingFitCache(*iter);
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+                throw statusCodeException;
+        }
     }
 }
 
@@ -120,7 +141,8 @@ void ThreeDShowersAlgorithm::TidyUp()
 
 void ThreeDShowersAlgorithm::AddToSlidingFitCache(Cluster *const pCluster)
 {
-    const TwoDSlidingShowerFitResult slidingShowerFitResult(pCluster, m_slidingFitWindow);
+    const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+    const TwoDSlidingShowerFitResult slidingShowerFitResult(pCluster, m_slidingFitWindow, slidingFitPitch);
 
     if (!m_slidingFitResultMap.insert(TwoDSlidingShowerFitResultMap::value_type(pCluster, slidingShowerFitResult)).second)
         throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -221,10 +243,10 @@ void ThreeDShowersAlgorithm::GetShowerPositionMaps(const TwoDSlidingShowerFitRes
             {
                 const float uMin(uValues.front()), uMax(uValues.back());
                 const float vMin(vValues.front()), vMax(vValues.back());
-                const float uv2wMinMin(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_V, uMin, vMin));
-                const float uv2wMaxMax(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_V, uMax, vMax));
-                const float uv2wMinMax(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_V, uMin, vMax));
-                const float uv2wMaxMin(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_V, uMax, vMin));
+                const float uv2wMinMin(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_V, uMin, vMin));
+                const float uv2wMaxMax(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_V, uMax, vMax));
+                const float uv2wMinMax(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_V, uMin, vMax));
+                const float uv2wMaxMin(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_V, uMax, vMin));
                 positionMapsW.first.insert(ShowerPositionMap::value_type(xBin, ShowerExtent(x, uv2wMinMin, uv2wMaxMax)));
                 positionMapsW.second.insert(ShowerPositionMap::value_type(xBin, ShowerExtent(x, uv2wMinMax, uv2wMaxMin)));
             }
@@ -233,10 +255,10 @@ void ThreeDShowersAlgorithm::GetShowerPositionMaps(const TwoDSlidingShowerFitRes
             {
                 const float uMin(uValues.front()), uMax(uValues.back());
                 const float wMin(wValues.front()), wMax(wValues.back());
-                const float uw2vMinMin(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_W, uMin, wMin));
-                const float uw2vMaxMax(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_W, uMax, wMax));
-                const float uw2vMinMax(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_W, uMin, wMax));
-                const float uw2vMaxMin(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_U, TPC_VIEW_W, uMax, wMin));
+                const float uw2vMinMin(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_W, uMin, wMin));
+                const float uw2vMaxMax(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_W, uMax, wMax));
+                const float uw2vMinMax(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_W, uMin, wMax));
+                const float uw2vMaxMin(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_U, TPC_VIEW_W, uMax, wMin));
                 positionMapsV.first.insert(ShowerPositionMap::value_type(xBin, ShowerExtent(x, uw2vMinMin, uw2vMaxMax)));
                 positionMapsV.second.insert(ShowerPositionMap::value_type(xBin, ShowerExtent(x, uw2vMinMax, uw2vMaxMin)));
             }
@@ -245,10 +267,10 @@ void ThreeDShowersAlgorithm::GetShowerPositionMaps(const TwoDSlidingShowerFitRes
             {
                 const float vMin(vValues.front()), vMax(vValues.back());
                 const float wMin(wValues.front()), wMax(wValues.back());
-                const float vw2uMinMin(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_V, TPC_VIEW_W, vMin, wMin));
-                const float vw2uMaxMax(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_V, TPC_VIEW_W, vMax, wMax));
-                const float vw2uMinMax(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_V, TPC_VIEW_W, vMin, wMax));
-                const float vw2uMaxMin(LArGeometryHelper::MergeTwoPositions(TPC_VIEW_V, TPC_VIEW_W, vMax, wMin));
+                const float vw2uMinMin(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_V, TPC_VIEW_W, vMin, wMin));
+                const float vw2uMaxMax(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_V, TPC_VIEW_W, vMax, wMax));
+                const float vw2uMinMax(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_V, TPC_VIEW_W, vMin, wMax));
+                const float vw2uMaxMin(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), TPC_VIEW_V, TPC_VIEW_W, vMax, wMin));
                 positionMapsU.first.insert(ShowerPositionMap::value_type(xBin, ShowerExtent(x, vw2uMinMin, vw2uMaxMax)));
                 positionMapsU.second.insert(ShowerPositionMap::value_type(xBin, ShowerExtent(x, vw2uMinMax, vw2uMaxMin)));
             }
@@ -410,4 +432,4 @@ StatusCode ThreeDShowersAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     return ThreeDBaseAlgorithm<ShowerOverlapResult>::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

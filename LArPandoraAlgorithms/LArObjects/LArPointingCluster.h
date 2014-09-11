@@ -10,7 +10,7 @@
 
 #include "LArObjects/LArTwoDSlidingFitResult.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -117,8 +117,10 @@ public:
      *  @brief  Constructor
      * 
      *  @param  pCluster address of the cluster
+     *  @param  fitHalfLayerWindow the fit layer half window
+     *  @param  fitLayerPitch the fit layer pitch, units cm
      */
-    LArPointingCluster(pandora::Cluster *const pCluster);
+    LArPointingCluster(pandora::Cluster *const pCluster, const unsigned int fitHalfLayerWindow = 10, const float fitLayerPitch = 0.3f);
 
     /**
      *  @brief  Constructor
@@ -273,6 +275,6 @@ inline bool LArPointingCluster::Vertex::IsInitialized() const
     return m_isInitialized;
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_POINTING_CLUSTER_H

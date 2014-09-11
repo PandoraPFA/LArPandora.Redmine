@@ -8,11 +8,16 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
+
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitConsolidationAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode TwoDSlidingFitConsolidationAlgorithm::Run()
@@ -48,7 +53,7 @@ void TwoDSlidingFitConsolidationAlgorithm::SortInputClusters(const ClusterList *
 {
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
-        Cluster* pCluster = *iter;
+        Cluster *pCluster = *iter;
 
         const float thisLengthSquared(LArClusterHelper::GetLengthSquared(pCluster));
 
@@ -67,11 +72,20 @@ void TwoDSlidingFitConsolidationAlgorithm::SortInputClusters(const ClusterList *
 void TwoDSlidingFitConsolidationAlgorithm::BuildSlidingLinearFits(const ClusterVector &trackClusters,
     TwoDSlidingFitResultList &slidingFitResultList) const
 {
+    const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+
     for (ClusterVector::const_iterator iter = trackClusters.begin(), iterEnd = trackClusters.end(); iter != iterEnd; ++iter)
     {
-         TwoDSlidingFitResult slidingFitResult;
-         LArClusterHelper::LArTwoDSlidingFit(*iter, m_halfWindowLayers, slidingFitResult);
-         slidingFitResultList.push_back(slidingFitResult);
+        try
+        {
+            const TwoDSlidingFitResult slidingFitResult(*iter, m_halfWindowLayers, slidingFitPitch);
+            slidingFitResultList.push_back(slidingFitResult);
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+                throw statusCodeException;
+        }
     }
 }
 
@@ -88,8 +102,8 @@ StatusCode TwoDSlidingFitConsolidationAlgorithm::RemoveHitsFromClusters(const Cl
         if (caloHitListToRemove.empty())
             continue;
 
-	if(unavailableClusters.count(pCluster))
-	  continue;
+        if (unavailableClusters.count(pCluster))
+            continue;
 
         CaloHitList caloHitList, caloHitListToKeep;
         pCluster->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
@@ -130,8 +144,8 @@ StatusCode TwoDSlidingFitConsolidationAlgorithm::AddHitsToClusters(const Cluster
         if (caloHitList.empty())
             continue;
 
-	if(unavailableClusters.count(pCluster))
-	  continue;
+        if (unavailableClusters.count(pCluster))
+            continue;
 
         unavailableClusters.insert(pCluster);
 
@@ -204,4 +218,4 @@ StatusCode TwoDSlidingFitConsolidationAlgorithm::ReadSettings(const TiXmlHandle 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

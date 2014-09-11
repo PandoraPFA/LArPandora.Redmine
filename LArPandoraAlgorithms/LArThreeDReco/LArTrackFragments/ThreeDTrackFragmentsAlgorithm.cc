@@ -8,21 +8,31 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArCalculators/LArPseudoLayerCalculator.h"
-
 #include "LArHelpers/LArClusterHelper.h"
 #include "LArHelpers/LArGeometryHelper.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
 
 #include "LArThreeDReco/LArTrackFragments/ThreeDTrackFragmentsAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 void ThreeDTrackFragmentsAlgorithm::UpdateForNewCluster(Cluster *const pNewCluster)
 {
-    this->AddToSlidingFitCache(pNewCluster);
+    try
+    {
+        this->AddToSlidingFitCache(pNewCluster);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+            throw statusCodeException;
+
+        return;
+    }
 
     const HitType hitType(LArClusterHelper::GetClusterHitType(pNewCluster));
 
@@ -72,28 +82,18 @@ void ThreeDTrackFragmentsAlgorithm::UpdateForNewCluster(Cluster *const pNewClust
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void ThreeDTrackFragmentsAlgorithm::RebuildClusters(Cluster* pClusterToDelete, ClusterList &newClusters) const
+void ThreeDTrackFragmentsAlgorithm::RebuildClusters(const ClusterList &rebuildList, ClusterList &newClusters) const
 {
-    const HitType hitType(LArClusterHelper::GetClusterHitType(pClusterToDelete));
+    const ClusterList *pNewClusterList = NULL;
+    std::string oldClusterListName, newClusterListName;
 
-    std::string currentCaloHitListName((TPC_VIEW_U == hitType) ? m_inputCaloHitListNameU :
-                                       (TPC_VIEW_V == hitType) ? m_inputCaloHitListNameV : m_inputCaloHitListNameW);
-    std::string currentClusterListName((TPC_VIEW_U == hitType) ? this->GetClusterListNameU() :
-                                       (TPC_VIEW_V == hitType) ? this->GetClusterListNameV() : this->GetClusterListNameW());
-
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentList<CaloHit>(*this, currentCaloHitListName));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentList<Cluster>(*this, currentClusterListName));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Delete<Cluster>(*this, pClusterToDelete));
-
-    const ClusterList *pClusterList = NULL;
-    std::string newClusterListName;
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeReclustering(*this, TrackList(), rebuildList,
+        oldClusterListName));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_reclusteringAlgorithmName,
-        pClusterList, newClusterListName));
+        pNewClusterList, newClusterListName));
 
-    newClusters.insert(pClusterList->begin(), pClusterList->end());
-
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveList<Cluster>(*this, newClusterListName, currentClusterListName));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentList<Cluster>(*this, currentClusterListName));
+    newClusters.insert(pNewClusterList->begin(), pNewClusterList->end());
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndReclustering(*this, newClusterListName));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,20 +126,10 @@ void ThreeDTrackFragmentsAlgorithm::CalculateOverlapResult(Cluster *pClusterU, C
     const HitType missingHitType(
         ((NULL != pClusterU) && (NULL != pClusterV) && (NULL == pClusterW)) ? TPC_VIEW_W :
         ((NULL != pClusterU) && (NULL == pClusterV) && (NULL != pClusterW)) ? TPC_VIEW_V :
-        ((NULL == pClusterU) && (NULL != pClusterV) && (NULL != pClusterW)) ? TPC_VIEW_U : CUSTOM);
+        ((NULL == pClusterU) && (NULL != pClusterV) && (NULL != pClusterW)) ? TPC_VIEW_U : HIT_CUSTOM);
 
-    if (CUSTOM == missingHitType)
+    if (HIT_CUSTOM == missingHitType)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    const TwoDSlidingFitResult &fitResult1((TPC_VIEW_U == missingHitType) ? this->GetCachedSlidingFitResult(pClusterV) :
-        (TPC_VIEW_V == missingHitType) ? this->GetCachedSlidingFitResult(pClusterU) : this->GetCachedSlidingFitResult(pClusterU));
-
-    const TwoDSlidingFitResult &fitResult2((TPC_VIEW_U == missingHitType) ? this->GetCachedSlidingFitResult(pClusterW) :
-        (TPC_VIEW_V == missingHitType) ? this->GetCachedSlidingFitResult(pClusterW) : this->GetCachedSlidingFitResult(pClusterV));
-
-    const ClusterList &inputClusterList((TPC_VIEW_U == missingHitType) ? this->GetInputClusterListU() :
-        (TPC_VIEW_V == missingHitType) ? this->GetInputClusterListV() : this->GetInputClusterListW());
-
 
     // Calculate new overlap result and replace old overlap result where necessary
     FragmentOverlapResult oldOverlapResult, newOverlapResult;
@@ -147,12 +137,24 @@ void ThreeDTrackFragmentsAlgorithm::CalculateOverlapResult(Cluster *pClusterU, C
 
     try
     {
+        const TwoDSlidingFitResult &fitResult1((TPC_VIEW_U == missingHitType) ? this->GetCachedSlidingFitResult(pClusterV) :
+            (TPC_VIEW_V == missingHitType) ? this->GetCachedSlidingFitResult(pClusterU) : this->GetCachedSlidingFitResult(pClusterU));
+
+        const TwoDSlidingFitResult &fitResult2((TPC_VIEW_U == missingHitType) ? this->GetCachedSlidingFitResult(pClusterW) :
+            (TPC_VIEW_V == missingHitType) ? this->GetCachedSlidingFitResult(pClusterW) : this->GetCachedSlidingFitResult(pClusterV));
+
+        const ClusterList &inputClusterList((TPC_VIEW_U == missingHitType) ? this->GetInputClusterListU() :
+            (TPC_VIEW_V == missingHitType) ? this->GetInputClusterListV() : this->GetInputClusterListW());
+
         Cluster *pBestMatchedCluster(NULL);
         this->CalculateOverlapResult(fitResult1, fitResult2, inputClusterList, pBestMatchedCluster, newOverlapResult);
 
         pMatchedClusterU = ((NULL != pClusterU) ? pClusterU : pBestMatchedCluster);
         pMatchedClusterV = ((NULL != pClusterV) ? pClusterV : pBestMatchedCluster);
         pMatchedClusterW = ((NULL != pClusterW) ? pClusterW : pBestMatchedCluster);
+
+        if (NULL == pMatchedClusterU || NULL == pMatchedClusterV || NULL == pMatchedClusterW)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
 
         oldOverlapResult = m_overlapTensor.GetOverlapResult(pMatchedClusterU, pMatchedClusterV, pMatchedClusterW);
     }
@@ -164,9 +166,6 @@ void ThreeDTrackFragmentsAlgorithm::CalculateOverlapResult(Cluster *pClusterU, C
 
     if (!newOverlapResult.IsInitialized())
         return;
-
-    if (NULL == pMatchedClusterU || NULL == pMatchedClusterV || NULL == pMatchedClusterW)
-        throw StatusCodeException(STATUS_CODE_FAILURE);
 
     if (!oldOverlapResult.IsInitialized())
     {
@@ -246,9 +245,9 @@ void ThreeDTrackFragmentsAlgorithm::GetProjectedPositions(const TwoDSlidingFitRe
     const HitType hitType2(LArClusterHelper::GetClusterHitType(pCluster2));
     const HitType hitType3((TPC_VIEW_U != hitType1 && TPC_VIEW_U != hitType2) ? TPC_VIEW_U :
                            (TPC_VIEW_V != hitType1 && TPC_VIEW_V != hitType2) ? TPC_VIEW_V :
-                           (TPC_VIEW_W != hitType1 && TPC_VIEW_W != hitType2) ? TPC_VIEW_W : CUSTOM);
+                           (TPC_VIEW_W != hitType1 && TPC_VIEW_W != hitType2) ? TPC_VIEW_W : HIT_CUSTOM);
 
-    if (CUSTOM == hitType3)
+    if (HIT_CUSTOM == hitType3)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     // Check absolute and fractional overlap in x coordinate
@@ -284,16 +283,16 @@ void ThreeDTrackFragmentsAlgorithm::GetProjectedPositions(const TwoDSlidingFitRe
     // Calculate vertex and end positions (3D)
     float vtxChi2(0.f);
     CartesianVector vtxPosition3D(0.f, 0.f, 0.f);
-    LArGeometryHelper::MergeTwoPositions3D(hitType1, hitType2, vtxPosition1, vtxPosition2, vtxPosition3D, vtxChi2);
+    LArGeometryHelper::MergeTwoPositions3D(this->GetPandora(), hitType1, hitType2, vtxPosition1, vtxPosition2, vtxPosition3D, vtxChi2);
 
     float endChi2(0.f);
     CartesianVector endPosition3D(0.f, 0.f, 0.f);
-    LArGeometryHelper::MergeTwoPositions3D(hitType1, hitType2, endPosition1, endPosition2, endPosition3D, endChi2);
+    LArGeometryHelper::MergeTwoPositions3D(this->GetPandora(), hitType1, hitType2, endPosition1, endPosition2, endPosition3D, endChi2);
 
-    const CartesianVector vtxProjection3(LArGeometryHelper::ProjectPosition(vtxPosition3D, hitType3));
-    const CartesianVector endProjection3(LArGeometryHelper::ProjectPosition(endPosition3D, hitType3));
+    const CartesianVector vtxProjection3(LArGeometryHelper::ProjectPosition(this->GetPandora(), vtxPosition3D, hitType3));
+    const CartesianVector endProjection3(LArGeometryHelper::ProjectPosition(this->GetPandora(), endPosition3D, hitType3));
 
-    const float samplingPitch(0.5f * LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
+    const float samplingPitch(0.5f * LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
     const float nSamplingPoints((endProjection3 - vtxProjection3).GetMagnitude() / samplingPitch);
 
     if (nSamplingPoints < 1.f)
@@ -306,8 +305,8 @@ void ThreeDTrackFragmentsAlgorithm::GetProjectedPositions(const TwoDSlidingFitRe
     for (float iSample = 0.5f; iSample < nSamplingPoints; iSample += 1.f)
     {
         const CartesianVector linearPosition3D(vtxPosition3D + (endPosition3D - vtxPosition3D) * (iSample / nSamplingPoints));
-        const CartesianVector linearPosition1(LArGeometryHelper::ProjectPosition(linearPosition3D, hitType1));
-        const CartesianVector linearPosition2(LArGeometryHelper::ProjectPosition(linearPosition3D, hitType2));
+        const CartesianVector linearPosition1(LArGeometryHelper::ProjectPosition(this->GetPandora(), linearPosition3D, hitType1));
+        const CartesianVector linearPosition2(LArGeometryHelper::ProjectPosition(this->GetPandora(), linearPosition3D, hitType2));
 
         try
         {
@@ -320,17 +319,16 @@ void ThreeDTrackFragmentsAlgorithm::GetProjectedPositions(const TwoDSlidingFitRe
             fitResult1.GetLocalPosition(fitPosition1, rL1, rT1);
             fitResult2.GetLocalPosition(fitPosition2, rL2, rT2);
 
-            const TwoDSlidingFitResult::FitSegment& fitSegment1 = fitResult1.GetFitSegment(rL1);
-            const TwoDSlidingFitResult::FitSegment& fitSegment2 = fitResult2.GetFitSegment(rL2);
+            const FitSegment &fitSegment1 = fitResult1.GetFitSegment(rL1);
+            const FitSegment &fitSegment2 = fitResult2.GetFitSegment(rL2);
 
             const float x(0.5 * (fitPosition1.GetX() + fitPosition2.GetX()));
             CartesianVector position1(0.f, 0.f, 0.f), position2(0.f, 0.f, 0.f), position3(0.f, 0.f, 0.f);
             fitResult1.GetTransverseProjection(x, fitSegment1, position1);
             fitResult2.GetTransverseProjection(x, fitSegment2, position2);
-            LArGeometryHelper::MergeTwoPositions(hitType1, hitType2, position1, position2, position3, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType1, hitType2, position1, position2, position3, chi2);
 
-            // TODO: For highly multi-valued x, the projected positions can be unreliable.
-            //       Need to make the interpolation more robust for these cases.
+            // TODO For highly multi-valued x, projected positions can be unreliable. Need to make interpolation more robust for these cases.
             if (foundLastPosition)
             {
                 const float thisDisplacement((lastPosition - position3).GetMagnitude());
@@ -554,8 +552,7 @@ bool ThreeDTrackFragmentsAlgorithm::CheckMatchedClusters(const CartesianPointLis
 
 bool ThreeDTrackFragmentsAlgorithm::CheckOverlapResult(const FragmentOverlapResult &overlapResult) const
 {
-    // ATTN: This method is currently mirrored in ClearTrackFragments tool
-
+    // ATTN This method is currently mirrored in ClearTrackFragments tool
     if (overlapResult.GetMatchedFraction() < m_minMatchedSamplingPointFraction)
         return false;
 
@@ -591,10 +588,6 @@ void ThreeDTrackFragmentsAlgorithm::ExamineTensor()
 
 StatusCode ThreeDTrackFragmentsAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputCaloHitListNameU", m_inputCaloHitListNameU));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputCaloHitListNameV", m_inputCaloHitListNameV));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputCaloHitListNameW", m_inputCaloHitListNameW));
-
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle,
         "ClusterRebuilding", m_reclusteringAlgorithmName));
 
@@ -624,10 +617,10 @@ StatusCode ThreeDTrackFragmentsAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinXOverlapFraction", m_minXOverlapFraction));
 
-    m_maxPointDisplacement = 1.5f;
+    float maxPointDisplacement = 1.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxPointDisplacement", m_maxPointDisplacement));
-    m_maxPointDisplacementSquared = m_maxPointDisplacement * m_maxPointDisplacement;
+        "MaxPointDisplacement", maxPointDisplacement));
+    m_maxPointDisplacementSquared = maxPointDisplacement * maxPointDisplacement;
 
     m_minMatchedSamplingPointFraction = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -640,4 +633,4 @@ StatusCode ThreeDTrackFragmentsAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     return ThreeDTracksBaseAlgorithm<FragmentOverlapResult>::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content
