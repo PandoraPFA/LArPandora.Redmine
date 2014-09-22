@@ -14,7 +14,6 @@ art_make( BASENAME_ONLY
                   LArObjects
                   LArPlugins
                   LArThreeDReco
-                  LArThreeDReco/LArClusterSplitting  
                   LArThreeDReco/LArCosmicRay  
                   LArThreeDReco/LArEventBuilding
                   LArThreeDReco/LArHitCreation
@@ -42,7 +41,6 @@ install_headers( SUBDIRS LArCheating
                          LArObjects
                          LArPlugins
                          LArThreeDReco
-                         LArThreeDReco/LArClusterSplitting
                          LArThreeDReco/LArCosmicRay  
                          LArThreeDReco/LArEventBuilding
                          LArThreeDReco/LArHitCreation
@@ -66,7 +64,6 @@ install_fhicl( SUBDIRS LArCheating
                        LArObjects
                        LArPlugins
                        LArThreeDReco
-                       LArThreeDReco/LArClusterSplitting
                        LArThreeDReco/LArCosmicRay  
                        LArThreeDReco/LArEventBuilding
                        LArThreeDReco/LArHitCreation
@@ -90,7 +87,6 @@ install_source( SUBDIRS LArCheating
                         LArObjects
                         LArPlugins
                         LArThreeDReco
-                        LArThreeDReco/LArClusterSplitting
                         LArThreeDReco/LArCosmicRay  
                         LArThreeDReco/LArHitCreation
                         LArThreeDReco/LArShowerMatching
