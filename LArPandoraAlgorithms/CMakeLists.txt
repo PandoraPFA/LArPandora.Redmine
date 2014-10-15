@@ -18,6 +18,7 @@ art_make( BASENAME_ONLY
                   LArThreeDReco/LArEventBuilding
                   LArThreeDReco/LArHitCreation
                   LArThreeDReco/LArLongitudinalTrackMatching
+                  LArThreeDReco/LArPfoMopUp
                   LArThreeDReco/LArShowerFragments
                   LArThreeDReco/LArShowerMatching
                   LArThreeDReco/LArThreeDBase
@@ -31,6 +32,7 @@ art_make( BASENAME_ONLY
                   LArTwoDReco/LArCosmicRay
                   LArTwoDReco/LArSeedFinding
                   LArUtility
+                  LArVertex
           LIB_LIBRARIES ${PANDORASDK}
                         ${PANDORAMONITORING}
           )
@@ -45,6 +47,7 @@ install_headers( SUBDIRS LArCheating
                          LArThreeDReco/LArEventBuilding
                          LArThreeDReco/LArHitCreation
                          LArThreeDReco/LArLongitudinalTrackMatching
+                         LArThreeDReco/LArPfoMopUp
                          LArThreeDReco/LArShowerFragments
                          LArThreeDReco/LArShowerMatching
                          LArThreeDReco/LArThreeDBase
@@ -57,7 +60,8 @@ install_headers( SUBDIRS LArCheating
                          LArTwoDReco/LArClusterSplitting
                          LArTwoDReco/LArCosmicRay
                          LArTwoDReco/LArSeedFinding
-                         LArUtility )
+                         LArUtility
+                         LArVertex )
 install_fhicl( SUBDIRS LArCheating
                        LArHelpers
                        LArMonitoring
@@ -68,6 +72,7 @@ install_fhicl( SUBDIRS LArCheating
                        LArThreeDReco/LArEventBuilding
                        LArThreeDReco/LArHitCreation
                        LArThreeDReco/LArLongitudinalTrackMatching
+                       LArThreeDReco/LArPfoMopUp
                        LArThreeDReco/LArShowerFragments
                        LArThreeDReco/LArShowerMatching
                        LArThreeDReco/LArThreeDBase
@@ -80,7 +85,8 @@ install_fhicl( SUBDIRS LArCheating
                        LArTwoDReco/LArClusterSplitting
                        LArTwoDReco/LArCosmicRay
                        LArTwoDReco/LArSeedFinding
-                       LArUtility )
+                       LArUtility
+                       LArVertex )
 install_source( SUBDIRS LArCheating
                         LArHelpers
                         LArMonitoring
@@ -92,6 +98,7 @@ install_source( SUBDIRS LArCheating
                         LArThreeDReco/LArShowerMatching
                         LArThreeDReco/LArShowerFragments
                         LArThreeDReco/LArTransverseTrackMatching
+                        LArThreeDReco/LArPfoMopUp
                         LArThreeDReco/LArLongitudinalTrackMatching
                         LArThreeDReco/LArTrackFragments
                         LArThreeDReco/LArThreeDBase
@@ -102,5 +109,6 @@ install_source( SUBDIRS LArCheating
                         LArTwoDReco/LArClusterSplitting
                         LArTwoDReco/LArCosmicRay
                         LArTwoDReco/LArSeedFinding
-                        LArUtility )
+                        LArUtility
+                        LArVertex )
 

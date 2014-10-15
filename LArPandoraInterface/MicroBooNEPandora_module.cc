@@ -82,8 +82,11 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/PFParticle.h"
 
-// Local includes
+// LArContent includes
+#include "LArHelpers/LArPfoHelper.h"
 #include "LArContent.h"
+
+// Local includes
 #include "MicroBooNEPseudoLayerPlugin.h"
 #include "MicroBooNETransformationPlugin.h"
 
