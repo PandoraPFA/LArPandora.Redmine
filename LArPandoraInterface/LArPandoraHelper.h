@@ -10,12 +10,12 @@
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Hit.h"
 
-namespace lar_pandora {
+namespace lar_pandora 
+{
 
-  class LArPandoraHelper 
-  {
-  public:
-
+class LArPandoraHelper 
+{
+public:
     /**
      *  @brief Build a recob::Cluster object from an input vector of recob::Hit objects
      *
@@ -23,10 +23,7 @@ namespace lar_pandora {
      *  @param hitVector  The input vector of hits
      */
     static recob::Cluster BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector);
-
-  private:
-
-  };
+};
 
 } // namespace lar_pandora
 

@@ -10,12 +10,14 @@
 
 #include "LArHelpers/LArMCParticleHelper.h"
 
-namespace lar
+#include <cstdlib>
+
+namespace lar_content
 {
 
 using namespace pandora;
 
-bool LArMCParticleHelper::IsNeutrinoInduced(const MCParticle *const pMCParticle)
+bool LArMCParticleHelper::IsNeutrinoFinalState(const MCParticle *const pMCParticle)
 {
     return ((pMCParticle->GetParentList().size() == 1) && (LArMCParticleHelper::IsNeutrino(*(pMCParticle->GetParentList().begin()))));
 }
@@ -60,7 +62,7 @@ const MCParticle *LArMCParticleHelper::GetParentNeutrino(const MCParticle *const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-int LArMCParticleHelper::GetPrimaryNeutrino(const MCParticle *const pMCParticle)
+int LArMCParticleHelper::GetParentNeutrinoId(const MCParticle *const pMCParticle)
 {
     try
     {
@@ -73,4 +75,4 @@ int LArMCParticleHelper::GetPrimaryNeutrino(const MCParticle *const pMCParticle)
     }
 }
 
-} // namespace lar
+} // namespace lar_content

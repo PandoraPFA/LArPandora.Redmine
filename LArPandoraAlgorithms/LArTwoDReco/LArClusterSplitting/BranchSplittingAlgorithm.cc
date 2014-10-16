@@ -14,8 +14,19 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+BranchSplittingAlgorithm::BranchSplittingAlgorithm() :
+    m_maxTransverseDisplacement(1.5f),
+    m_maxLongitudinalDisplacement(10.f),
+    m_minLongitudinalExtension(3.f),
+    m_minCosRelativeAngle(0.966f),
+    m_projectionAngularAllowance(20.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 void BranchSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult &branchSlidingFit, const TwoDSlidingFitResult &principalSlidingFit, 
     CartesianVector &principalStartPosition, CartesianVector &branchSplitPosition, CartesianVector &branchSplitDirection) const
@@ -47,26 +58,34 @@ void BranchSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult 
             // Project the principal vertex onto the branch cluster
             CartesianVector projectedBranchPosition(0.f,0.f,0.f);
             float projectedDistanceSquared(std::numeric_limits<float>::max());
+            float branchDistanceSquared(0.f), replacementDistanceSquared(0.f), commonDistanceSquared(0.f);
 
             try
             {
-                projectedBranchPosition = LArPointingClusterHelper::GetProjectedPosition(principalVertexPosition, principalVertexDirection, branchSlidingFit.GetCluster());
-                projectedDistanceSquared = (projectedBranchPosition - principalVertexPosition).GetMagnitudeSquared();
+                projectedBranchPosition = LArPointingClusterHelper::GetProjectedPosition(principalVertexPosition, principalVertexDirection,
+                    branchSlidingFit.GetCluster(), m_projectionAngularAllowance);
+                projectedDistanceSquared   = (projectedBranchPosition - principalVertexPosition).GetMagnitudeSquared();
+                replacementDistanceSquared = (projectedBranchPosition - principalEndPosition).GetMagnitudeSquared();
+                branchDistanceSquared      = (projectedBranchPosition - branchVertexPosition).GetMagnitudeSquared(); 
+                commonDistanceSquared      = (projectedBranchPosition - branchEndPosition).GetMagnitudeSquared(); 
             }
             catch (StatusCodeException &)
             {
             }
 
-            if (projectedDistanceSquared > m_maxLongitudinalDisplacement *m_maxLongitudinalDisplacement)
+            if (projectedDistanceSquared > m_maxLongitudinalDisplacement * m_maxLongitudinalDisplacement)
                 continue;
 
-            if ((projectedBranchPosition - branchEndPosition).GetMagnitudeSquared() < projectedDistanceSquared)
+            if (projectedDistanceSquared > commonDistanceSquared)
                 continue;
 
-            if (principalVertexDirection.GetDotProduct(principalEndPosition - branchVertexPosition) < m_minLongitudinalExtension)
+            if (replacementDistanceSquared < m_minLongitudinalExtension * m_minLongitudinalExtension)
                 continue;
 
-            // Require that principal vertex and branch projection have good pointing
+            if (branchDistanceSquared > 4.f * replacementDistanceSquared)
+                continue;
+
+            // Require that principal vertex and branch projection have good (and improved) pointing
             bool foundSplit(false);
 
             const float halfWindowLength(branchSlidingFit.GetLayerFitHalfWindowLength());
@@ -81,6 +100,17 @@ void BranchSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult 
 
                 CartesianVector projectedBranchDirection(1==branchForward ? forwardDirection : forwardDirection * -1.f);
                 const float cosTheta(-projectedBranchDirection.GetDotProduct(principalVertexDirection));
+
+                try
+                {
+                    const float currentCosTheta(branchSlidingFit.GetCosScatteringAngle(localL)); 
+
+                    if (cosTheta < currentCosTheta)
+                        continue;
+                }
+                catch (StatusCodeException &)
+                {
+                }
 
                 float rT1(0.f), rL1(0.f), rT2(0.f), rL2(0.f);
                 LArPointingClusterHelper::GetImpactParameters(projectedBranchPosition, projectedBranchDirection, principalVertexPosition, rL1, rT1);
@@ -110,23 +140,22 @@ void BranchSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult 
 
 StatusCode BranchSplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxTransverseDisplacement = 1.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTransverseDisplacement", m_maxTransverseDisplacement));
 
-    m_maxLongitudinalDisplacement = 10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxLongitudinalDisplacement", m_maxLongitudinalDisplacement));
 
-    m_minLongitudinalExtension = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinLongitudinalExtension", m_minLongitudinalExtension));
 
-    m_minCosRelativeAngle = 0.966;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCosRelativeAngle", m_minCosRelativeAngle));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ProjectionAngularAllowance", m_projectionAngularAllowance));
 
     return TwoDSlidingFitSplittingAndSplicingAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

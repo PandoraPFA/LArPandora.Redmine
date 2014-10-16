@@ -14,7 +14,7 @@
 
 #include "LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -31,6 +31,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    CosmicRayExtensionAlgorithm();
 
 private:
     void GetListOfCleanClusters(const pandora::ClusterList *const pClusterList, pandora::ClusterVector &clusterVector) const;
@@ -61,8 +66,8 @@ private:
 
     float    m_minClusterLength;                ///<
     float    m_minSeedClusterLength;            ///<
-    float    m_maxTransverseDisplacement;       ///<
     float    m_maxLongitudinalDisplacement;     ///<
+    float    m_maxTransverseDisplacement;       ///<
     float    m_minCosRelativeAngle;             ///<
     float    m_maxAverageRms;                   ///<
 };
@@ -74,6 +79,6 @@ inline pandora::Algorithm *CosmicRayExtensionAlgorithm::Factory::CreateAlgorithm
     return new CosmicRayExtensionAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_COSMIC_RAY_EXTENSION_ALGORITHM_H

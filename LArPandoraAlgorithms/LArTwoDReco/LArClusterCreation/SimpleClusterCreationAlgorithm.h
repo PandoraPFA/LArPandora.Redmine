@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    SimpleClusterCreationAlgorithm();
 
 private:
     pandora::StatusCode Run();
@@ -72,9 +77,6 @@ private:
 
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
-    std::string          m_inputCaloHitListName;         ///< The input calo hit list name
-    std::string          m_outputClusterListName;        ///< The output cluster list name
-
     float                m_clusteringWindowSquared;      ///< Maximum distance (squared) for two hits to be joined
 };
 
@@ -85,6 +87,6 @@ inline pandora::Algorithm *SimpleClusterCreationAlgorithm::Factory::CreateAlgori
     return new SimpleClusterCreationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_SIMPLE_CLUSTER_CREATION_ALGORITHM_H

@@ -15,8 +15,17 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+DeltaRayIdentificationAlgorithm::DeltaRayIdentificationAlgorithm() :
+    m_distanceForMatching(3.f),
+    m_minParentLengthSquared(10.f * 10.f),
+    m_maxDaughterLengthSquared(175.f * 175.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode DeltaRayIdentificationAlgorithm::Run()
 {
@@ -26,7 +35,7 @@ StatusCode DeltaRayIdentificationAlgorithm::Run()
 
     if (parentPfos.empty())
     {
-        std::cout << "DeltaRayIdentificationAlgorithm: could not find pfo list " << m_parentPfoListName << std::endl;
+        std::cout << "DeltaRayIdentificationAlgorithm: pfo list " << m_parentPfoListName << " unavailable." << std::endl;
         return STATUS_CODE_SUCCESS;
     }
 
@@ -166,16 +175,6 @@ bool DeltaRayIdentificationAlgorithm::IsAssociated(const ParticleFlowObject *con
 
     if (displacement > displacementCut)
         return false;
-
-// --- BEGIN EVENT DISPLAY ---
-// PfoList tempList1, tempList2;
-// tempList1.insert((ParticleFlowObject*)pParentPfo);
-// tempList2.insert((ParticleFlowObject*)pDaughterPfo);
-// PandoraMonitoringApi::SetEveDisplayParameters(false, DETECTOR_VIEW_XZ);
-// PandoraMonitoringApi::VisualizeParticleFlowObjects(&tempList1, "Parent", RED, false, false);
-// PandoraMonitoringApi::VisualizeParticleFlowObjects(&tempList2, "Daughter", BLUE, false, false);
-// PandoraMonitoringApi::ViewEvent();
-// --- END EVENT DISPLAY ---
 
     return true;
 }
@@ -320,16 +319,15 @@ StatusCode DeltaRayIdentificationAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ParentPfoListName", m_parentPfoListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "DaughterPfoListName", m_daughterPfoListName));
 
-    m_distanceForMatching = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DistanceForMatching", m_distanceForMatching));
 
-    float minParentLength = 10.f;
+    float minParentLength = std::sqrt(m_minParentLengthSquared);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinParentLength", minParentLength));
     m_minParentLengthSquared = minParentLength * minParentLength;
 
-    float maxDaughterLength = 175.f;
+    float maxDaughterLength = std::sqrt(m_maxDaughterLengthSquared);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxDaughterLength", maxDaughterLength));
     m_maxDaughterLengthSquared = maxDaughterLength * maxDaughterLength;
@@ -337,4 +335,4 @@ StatusCode DeltaRayIdentificationAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

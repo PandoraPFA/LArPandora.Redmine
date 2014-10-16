@@ -15,7 +15,7 @@
 
 #include "LArThreeDReco/LArThreeDBase/ThreeDTracksBaseAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 class TransverseTensorTool;
@@ -38,6 +38,11 @@ public:
     };
 
     /**
+     *  @brief  Default constructor
+     */
+    ThreeDTransverseTracksAlgorithm();
+
+    /**
      *  @brief  Sort tensor elements by number of matched sampling points, using matched fraction then xoverlap span to resolve ties
      *
      *  @param  lhs the first tensor element
@@ -48,10 +53,6 @@ public:
     static bool SortByNMatchedSamplingPoints(const TensorType::Element &lhs, const TensorType::Element &rhs);
 
 private:
-    typedef TwoDSlidingFitResult::LayerFitResultMap LayerFitResultMap;
-    typedef TwoDSlidingFitResult::FitSegment FitSegment;
-    typedef TwoDSlidingFitResult::FitSegmentList FitSegmentList;
-
     typedef std::map<unsigned int, TransverseOverlapResult> FitSegmentToOverlapResultMap;
     typedef std::map<unsigned int, FitSegmentToOverlapResultMap> FitSegmentMatrix;
     typedef std::map<unsigned int, FitSegmentMatrix> FitSegmentTensor;
@@ -118,6 +119,9 @@ private:
     void ExamineTensor();
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
+    typedef std::vector<TransverseTensorTool*> TensorToolList;
+    TensorToolList              m_algorithmToolList;        ///< The algorithm tool list
+
     unsigned int                m_nMaxTensorToolRepeats;    ///< The maximum number of repeat loops over tensor tools
     float                       m_pseudoChi2Cut;            ///< The pseudo chi2 cut to identify matched sampling points
     float                       m_minSegmentMatchedFraction;///< The minimum segment matched sampling fraction to allow segment grouping
@@ -125,9 +129,6 @@ private:
     float                       m_minOverallMatchedFraction;///< The minimum matched sampling fraction to allow particle creation
     unsigned int                m_minOverallMatchedPoints;  ///< The minimum number of matched segment sampling points to allow particle creation
     float                       m_minSamplingPointsPerLayer;///< The minimum number of sampling points per layer to allow particle creation
-
-    typedef std::vector<TransverseTensorTool*> TensorToolList;
-    TensorToolList              m_algorithmToolList;        ///< The algorithm tool list
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,6 +161,6 @@ inline pandora::Algorithm *ThreeDTransverseTracksAlgorithm::Factory::CreateAlgor
     return new ThreeDTransverseTracksAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_THREE_D_TRANSVERSE_TRACKS_ALGORITHM_H

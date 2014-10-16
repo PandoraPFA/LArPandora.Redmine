@@ -8,38 +8,60 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
+
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
-StatusCode TwoDSlidingFitSplittingAlgorithm::SplitCluster(const Cluster *const pCluster, CaloHitList &firstHitList, CaloHitList &secondHitList) const
+TwoDSlidingFitSplittingAlgorithm::TwoDSlidingFitSplittingAlgorithm() :
+    m_slidingFitHalfWindow(20),
+    m_minClusterLength(10.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TwoDSlidingFitSplittingAlgorithm::DivideCaloHits(const Cluster *const pCluster, CaloHitList &firstHitList, CaloHitList &secondHitList) const
 {
     if (LArClusterHelper::GetLengthSquared(pCluster) < m_minClusterLength * m_minClusterLength)
         return STATUS_CODE_NOT_FOUND;
 
-    TwoDSlidingFitResult slidingFitResult;
-    LArClusterHelper::LArTwoDSlidingFit(pCluster, m_slidingFitHalfWindow, slidingFitResult);
+    try
+    {
+        const float slidingFitPitch(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
+        const TwoDSlidingFitResult slidingFitResult(pCluster, m_slidingFitHalfWindow, slidingFitPitch);
+        CartesianVector splitPosition(0.f, 0.f, 0.f);
 
-    CartesianVector splitPosition(0.f, 0.f, 0.f);
-
-    if (STATUS_CODE_SUCCESS == this->FindBestSplitPosition(slidingFitResult, splitPosition))
-        return this->SplitCluster(slidingFitResult, splitPosition, firstHitList, secondHitList);
+        if (STATUS_CODE_SUCCESS == this->FindBestSplitPosition(slidingFitResult, splitPosition))
+        {
+            return this->DivideCaloHits(slidingFitResult, splitPosition, firstHitList, secondHitList);
+        }
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
+            throw statusCodeException;
+    }
 
     return STATUS_CODE_NOT_FOUND;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TwoDSlidingFitSplittingAlgorithm::SplitCluster(const TwoDSlidingFitResult &slidingFitResult, const CartesianVector &splitPosition, 
+StatusCode TwoDSlidingFitSplittingAlgorithm::DivideCaloHits(const TwoDSlidingFitResult &slidingFitResult, const CartesianVector &splitPosition, 
     CaloHitList &firstCaloHitList, CaloHitList &secondCaloHitList) const
 {
     float rL(0.f), rT(0.f);
     slidingFitResult.GetLocalPosition(splitPosition, rL, rT);
 
-    const Cluster* pCluster = slidingFitResult.GetCluster();
+    const Cluster *pCluster(slidingFitResult.GetCluster());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(); iter != orderedCaloHitList.end(); ++iter)
@@ -72,15 +94,13 @@ StatusCode TwoDSlidingFitSplittingAlgorithm::SplitCluster(const TwoDSlidingFitRe
 
 StatusCode TwoDSlidingFitSplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_slidingFitHalfWindow = 20;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "SlidingFitHalfWindow", m_slidingFitHalfWindow));
 
-    m_minClusterLength = 10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterLength", m_minClusterLength));
 
     return ClusterSplittingAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

@@ -14,7 +14,7 @@
 
 #include "LArTwoDReco/LArClusterMopUp/ClusterMopUpAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -32,6 +32,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    BoundedClusterMergingAlgorithm();
 
 private:
     /**
@@ -94,6 +99,6 @@ inline pandora::Algorithm *BoundedClusterMergingAlgorithm::Factory::CreateAlgori
     return new BoundedClusterMergingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_BOUNDED_CLUSTER_MERGING_ALGORITHM_H

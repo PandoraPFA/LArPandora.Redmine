@@ -12,15 +12,26 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
-StatusCode LayerSplittingAlgorithm::SplitCluster(const Cluster *const pCluster, CaloHitList &firstHitList, CaloHitList &secondHitList) const
+LayerSplittingAlgorithm::LayerSplittingAlgorithm() :
+    m_minClusterLayers(20),
+    m_layerWindow(10),
+    m_maxScatterRms(0.35f),
+    m_maxScatterCosTheta(0.5f),
+    m_maxSlidingCosTheta(0.866f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode LayerSplittingAlgorithm::DivideCaloHits(const Cluster *const pCluster, CaloHitList &firstHitList, CaloHitList &secondHitList) const
 {
     unsigned int splitLayer(0);
 
     if (STATUS_CODE_SUCCESS == this->FindBestSplitLayer(pCluster, splitLayer))
-        return this->SplitCluster(pCluster, splitLayer, firstHitList, secondHitList);
+        return this->DivideCaloHits(pCluster, splitLayer, firstHitList, secondHitList);
 
     return STATUS_CODE_NOT_FOUND;
 }
@@ -99,14 +110,6 @@ StatusCode LayerSplittingAlgorithm::FindBestSplitLayer(const Cluster *const pClu
     if (!foundSplit)
         return STATUS_CODE_NOT_FOUND;
 
-// --- BEGIN DISPLAY ---
-// ClusterList tempList;
-// tempList.insert((Cluster*)pCluster);
-// PANDORA_MONITORING_API(SetEveDisplayParameters(false, false, -1, 1));
-// PANDORA_MONITORING_API(VisualizeClusters(&tempList, "Cluster", GREEN));
-// PANDORA_MONITORING_API(AddMarkerToVisualization(&bestPosition, "SplitPosition", RED, 2.75));
-// PANDORA_MONITORING_API(ViewEvent());
-// --- END DISPLAY ---
     return STATUS_CODE_SUCCESS;
 }
 
@@ -146,7 +149,7 @@ float LayerSplittingAlgorithm::CalculateRms(const Cluster *const pCluster, const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode LayerSplittingAlgorithm::SplitCluster(const Cluster *const pCluster, const unsigned int &splitLayer, CaloHitList &firstHitList, CaloHitList &secondHitList) const
+StatusCode LayerSplittingAlgorithm::DivideCaloHits(const Cluster *const pCluster, const unsigned int &splitLayer, CaloHitList &firstHitList, CaloHitList &secondHitList) const
 {
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -179,27 +182,22 @@ StatusCode LayerSplittingAlgorithm::SplitCluster(const Cluster *const pCluster, 
 
 StatusCode LayerSplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_minClusterLayers = 20;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterLayers", m_minClusterLayers));
 
-    m_layerWindow = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerWindow", m_layerWindow));
 
-    m_maxScatterRms = 0.35f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxScatterRms", m_maxScatterRms));
 
-    m_maxScatterCosTheta = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxScatterCosTheta", m_maxScatterCosTheta));
 
-    m_maxSlidingCosTheta = 0.866f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSlidingCosTheta", m_maxSlidingCosTheta));
 
     return ClusterSplittingAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

@@ -18,7 +18,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 template <typename T>
@@ -88,8 +88,8 @@ bool ThreeDBaseAlgorithm<T>::MakeClusterMerges(const ClusterMergeMap &clusterMer
             if (deletedClusters.count(pParentCluster) || deletedClusters.count(pDaughterCluster))
                 throw StatusCodeException(STATUS_CODE_FAILURE);
 
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pDaughterCluster, clusterListName, clusterListName));
             this->UpdateUponMerge(pParentCluster, pDaughterCluster);
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pDaughterCluster, clusterListName, clusterListName));
             deletedClusters.insert(pDaughterCluster);
         }
     }
@@ -314,4 +314,4 @@ template class ThreeDBaseAlgorithm<LongitudinalOverlapResult>;
 template class ThreeDBaseAlgorithm<FragmentOverlapResult>;
 template class ThreeDBaseAlgorithm<ShowerOverlapResult>;
 
-} // namespace lar
+} // namespace lar_content

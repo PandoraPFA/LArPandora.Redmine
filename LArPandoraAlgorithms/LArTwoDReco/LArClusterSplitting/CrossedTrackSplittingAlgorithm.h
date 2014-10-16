@@ -12,7 +12,7 @@
 
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAndSwitchingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -29,6 +29,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    CrossedTrackSplittingAlgorithm();
 
 private:
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
@@ -57,6 +62,6 @@ inline pandora::Algorithm *CrossedTrackSplittingAlgorithm::Factory::CreateAlgori
     return new CrossedTrackSplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_CROSSED_TRACK_SPLITTING_ALGORITHM_H

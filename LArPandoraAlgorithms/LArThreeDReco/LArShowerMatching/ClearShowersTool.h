@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArShowerMatching/ThreeDShowersAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    ClearShowersTool();
 
     /**
      *  @brief  Whether a large shower-like element shares clusters with any other long elements
@@ -87,6 +92,6 @@ inline pandora::AlgorithmTool *ClearShowersTool::Factory::CreateAlgorithmTool() 
     return new ClearShowersTool();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef CLEAR_SHOWERS_TOOL_H

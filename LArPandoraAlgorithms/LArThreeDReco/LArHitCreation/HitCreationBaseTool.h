@@ -10,7 +10,7 @@
 
 #include "Pandora/AlgorithmTool.h"
 
-namespace lar
+namespace lar_content
 {
 
 class ThreeDHitCreationAlgorithm;
@@ -33,6 +33,16 @@ public:
      */
     virtual void Run(ThreeDHitCreationAlgorithm *pAlgorithm, const pandora::ParticleFlowObject *const pPfo, const pandora::CaloHitList &inputTwoDHits,
         pandora::CaloHitList &newThreeDHits) = 0;
+
+    /**
+     *  @brief  Default constructor
+     */
+    HitCreationBaseTool();
+
+    /**
+     *  @brief  Destructor
+     */
+    virtual ~HitCreationBaseTool();
 
 protected:
     /**
@@ -82,6 +92,6 @@ protected:
     float   m_sigmaX;                   ///< Resolution in x dimension, used for delta x correction to chi squared
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_HIT_CREATION_BASE_TOOL_H

@@ -10,7 +10,7 @@
 
 #include "LArTwoDReco/LArClusterSplitting/ClusterSplittingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -28,9 +28,14 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    LayerSplittingAlgorithm();
+
 private:
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
-    pandora::StatusCode SplitCluster(const pandora::Cluster *const pCluster, pandora::CaloHitList &firstCaloHitList,
+    pandora::StatusCode DivideCaloHits(const pandora::Cluster *const pCluster, pandora::CaloHitList &firstCaloHitList,
         pandora::CaloHitList &secondCaloHitList) const;
 
     /**
@@ -49,7 +54,7 @@ private:
      *  @param  firstCaloHitList the hits in the first cluster fragment
      *  @param  secondCaloHitList the hits in the second cluster fragment
      */
-    pandora::StatusCode SplitCluster(const pandora::Cluster *const pCluster, const unsigned int &splitLayer,
+    pandora::StatusCode DivideCaloHits(const pandora::Cluster *const pCluster, const unsigned int &splitLayer,
         pandora::CaloHitList &firstCaloHitList, pandora::CaloHitList &secondCaloHitList) const;
 
     /**
@@ -61,8 +66,8 @@ private:
      */
     float CalculateRms(const pandora::Cluster *const pCluster, const unsigned int &firstLayer, const unsigned int& secondLayer) const;
 
-    unsigned int    m_layerWindow;            ///<
     unsigned int    m_minClusterLayers;       ///<
+    unsigned int    m_layerWindow;            ///<
     float           m_maxScatterRms;          ///<
     float           m_maxScatterCosTheta;     ///<
     float           m_maxSlidingCosTheta;     ///<
@@ -75,6 +80,6 @@ inline pandora::Algorithm *LayerSplittingAlgorithm::Factory::CreateAlgorithm() c
     return new LayerSplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_LAYER_SPLITTING_ALGORITHM_H

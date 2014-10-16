@@ -12,7 +12,7 @@
 
 #include "LArTwoDReco/LArClusterAssociation/ClusterGrowingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -29,6 +29,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    DeltaRayGrowingAlgorithm();
 
 private:
     void GetListOfCleanClusters(const pandora::ClusterList *const pClusterList, pandora::ClusterVector &cleanClusters) const;
@@ -60,6 +65,6 @@ inline pandora::Algorithm *DeltaRayGrowingAlgorithm::Factory::CreateAlgorithm() 
     return new DeltaRayGrowingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_DELTA_RAY_GROWING_ALGORITHM_H

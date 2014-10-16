@@ -14,7 +14,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode EventDisplayAlgorithm::Run()
@@ -34,7 +34,7 @@ StatusCode EventDisplayAlgorithm::Run()
 
 
     // Hit type
-    HitType hitType(CUSTOM);
+    HitType hitType(HIT_CUSTOM);
 
 
     // Add the seed clusters
@@ -45,18 +45,19 @@ StatusCode EventDisplayAlgorithm::Run()
         for ( ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter )
         {
             Cluster *pCluster = *iter;
+            const HitType clusterHitType(LArClusterHelper::GetClusterHitType(pCluster));
 
-            if (hitType == CUSTOM && pCluster->ContainsHitType(TPC_VIEW_U))
-                hitType = TPC_VIEW_U;
+            if (HIT_CUSTOM == hitType)
+            {
+                if ((TPC_VIEW_U != clusterHitType) && (TPC_VIEW_V != clusterHitType) && (TPC_VIEW_W != clusterHitType))
+                    throw StatusCodeException(STATUS_CODE_FAILURE);
 
-            if (hitType == CUSTOM && pCluster->ContainsHitType(TPC_VIEW_V))
-                hitType = TPC_VIEW_V;
-
-            if (hitType == CUSTOM && pCluster->ContainsHitType(TPC_VIEW_W))
-                hitType = TPC_VIEW_W;
-
-            if (pCluster->ContainsHitType(hitType) == false)
+                hitType = clusterHitType;
+            }
+            else if (hitType != clusterHitType)
+            {
                 throw StatusCodeException(STATUS_CODE_FAILURE);
+            }
 
             if (pCluster->IsAvailable())
                 clusterList.insert(pCluster);
@@ -65,7 +66,9 @@ StatusCode EventDisplayAlgorithm::Run()
 
 
     // Start Drawing Stuff
+#ifdef MONITORING
     unsigned int n(0);
+#endif
 
     if ( NULL != pPfoList )
     {
@@ -81,29 +84,28 @@ StatusCode EventDisplayAlgorithm::Run()
             {
                 Cluster *pCluster = *cIter;
 
-                if ( pCluster->ContainsHitType(hitType) )
+                if (hitType == LArClusterHelper::GetClusterHitType(pCluster))
                     particleClusterList.insert(pCluster);
             }
 
-            PANDORA_MONITORING_API(VisualizeClusters(&particleClusterList, "Particles", GetColor(n++) ));
+            PANDORA_MONITORING_API(VisualizeClusters(this->GetPandora(), &particleClusterList, "Particles", GetColor(n++) ));
         }
 
-        PANDORA_MONITORING_API(VisualizeClusters(&clusterList, "Clusters", GRAY ));
+        PANDORA_MONITORING_API(VisualizeClusters(this->GetPandora(), &clusterList, "Clusters", GRAY ));
     }
 
     else if( NULL != pClusterList )
     {
         for( ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter )
         {
-            Cluster* pCluster = *iter;
+            Cluster *pCluster = *iter;
             ClusterList tempList;
             tempList.insert(pCluster);
-            PANDORA_MONITORING_API(VisualizeClusters(&tempList, "Clusters", GetColor(n++) ));
+            PANDORA_MONITORING_API(VisualizeClusters(this->GetPandora(), &tempList, "Clusters", GetColor(n++) ));
         }
     }
 
-    PANDORA_MONITORING_API(ViewEvent());
-
+    PANDORA_MONITORING_API(ViewEvent(this->GetPandora()));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -126,8 +128,7 @@ Color EventDisplayAlgorithm::GetColor( unsigned int icolor )
     case 6: return GRAY;
     case 7: return TEAL;
     case 8: return AZURE;
-    case 9: return DARKYELLOW;
-    default: return YELLOW;
+    default: return DARKYELLOW;
     }
 
     return YELLOW;
@@ -138,15 +139,10 @@ Color EventDisplayAlgorithm::GetColor( unsigned int icolor )
 
 StatusCode EventDisplayAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_clusterListName = "ClusterListName";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ClusterListName", m_clusterListName));
-
-    m_particleListName = "ParticleListName";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ParticleListName", m_particleListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListName", m_clusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ParticleListName", m_particleListName));
 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

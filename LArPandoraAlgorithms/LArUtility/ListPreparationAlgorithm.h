@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    ListPreparationAlgorithm();
 
 private:
     pandora::StatusCode Run();
@@ -51,6 +56,9 @@ private:
     void ProcessMCParticles();
 
     float           m_mipEquivalentCut;                 ///< Minimum mip equivalent energy for calo hit
+    float           m_minCellLengthScale;               ///< The minimum length scale for calo hit
+    float           m_maxCellLengthScale;               ///< The maximum length scale for calo hit
+
     bool            m_onlyAvailableCaloHits;            ///< Whether to only include available calo hits
     std::string     m_inputCaloHitListName;             ///< The input calo hit list name
     std::string     m_outputCaloHitListNameU;           ///< The output calo hit list name for TPC_VIEW_U hits
@@ -75,6 +83,6 @@ inline pandora::Algorithm *ListPreparationAlgorithm::Factory::CreateAlgorithm() 
     return new ListPreparationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_LIST_PREPARATION_ALGORITHM_H

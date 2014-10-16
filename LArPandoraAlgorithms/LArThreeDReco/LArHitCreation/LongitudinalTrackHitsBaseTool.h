@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArHitCreation/TrackHitsBaseTool.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -18,6 +18,12 @@ namespace lar
  */
 class LongitudinalTrackHitsBaseTool : public TrackHitsBaseTool
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    LongitudinalTrackHitsBaseTool();
+
 protected:
     /**
      *  @brief  Create three dimensional hits, using an input list of two dimensional hits and two associated sliding fit results
@@ -74,6 +80,6 @@ private:
     float  m_minTrackLengthSquared;       ///<
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LONGITUDINAL_TRACK_HITS_BASE_TOOL_H

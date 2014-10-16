@@ -14,7 +14,7 @@
 
 #include "LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -32,6 +32,11 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    TransverseExtensionAlgorithm();
+
 private:
     void GetListOfCleanClusters(const pandora::ClusterList *const pClusterList, pandora::ClusterVector &clusterVector) const;
     void FillClusterAssociationMatrix(const pandora::ClusterVector &clusterVector, ClusterAssociationMatrix &clusterAssociationMatrix) const;
@@ -46,9 +51,7 @@ private:
      */
     void FillClusterAssociationMatrix(const LArPointingCluster &parentCluster, const pandora::Cluster* const pDaughterCluster, ClusterAssociationMatrix &clusterAssociationMatrix) const;
 
-
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
-
 
     float m_minClusterLength;              ///<
     float m_maxLongitudinalDisplacement;   ///<
@@ -62,6 +65,6 @@ inline pandora::Algorithm *TransverseExtensionAlgorithm::Factory::CreateAlgorith
     return new TransverseExtensionAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TRANSVERSE_EXTENSION_ALGORITHM_H

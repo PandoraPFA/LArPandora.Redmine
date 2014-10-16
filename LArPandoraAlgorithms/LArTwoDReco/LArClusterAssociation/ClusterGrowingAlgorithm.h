@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -18,6 +18,12 @@ namespace lar
  */
 class ClusterGrowingAlgorithm : public pandora::Algorithm
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    ClusterGrowingAlgorithm();
+
 protected:
     virtual pandora::StatusCode Run();
     virtual pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
@@ -74,6 +80,6 @@ private:
     float           m_maxClusterSeparation;  ///< Maximum distance at which clusters can be joined
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_CLUSTER_GROWING_ALGORITHM_H

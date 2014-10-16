@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArTrackFragments/ThreeDTrackFragmentsAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    ClearTrackFragmentsTool();
 
     bool Run(ThreeDTrackFragmentsAlgorithm *pAlgorithm, TensorType &overlapTensor);
 
@@ -149,6 +154,6 @@ inline pandora::AlgorithmTool *ClearTrackFragmentsTool::Factory::CreateAlgorithm
     return new ClearTrackFragmentsTool();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef CLEAR_TRACK_FRAGMENTS_TOOL_H

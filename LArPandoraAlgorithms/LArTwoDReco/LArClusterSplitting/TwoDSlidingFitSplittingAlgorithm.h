@@ -8,11 +8,11 @@
 #ifndef LAR_TWO_D_SLIDING_FIT_SPLITTING_ALGORITHM_H
 #define LAR_TWO_D_SLIDING_FIT_SPLITTING_ALGORITHM_H 1
 
-#include "LArHelpers/LArClusterHelper.h"
+#include "LArObjects/LArTwoDSlidingFitResult.h"
 
 #include "LArTwoDReco/LArClusterSplitting/ClusterSplittingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -20,6 +20,12 @@ namespace lar
  */
 class TwoDSlidingFitSplittingAlgorithm : public ClusterSplittingAlgorithm
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    TwoDSlidingFitSplittingAlgorithm();
+
 protected:
     virtual pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
@@ -35,7 +41,7 @@ protected:
         pandora::CartesianVector& splitPosition) const = 0;
 
 private:
-    pandora::StatusCode SplitCluster(const pandora::Cluster *const pCluster, pandora::CaloHitList &firstCaloHitList,
+    pandora::StatusCode DivideCaloHits(const pandora::Cluster *const pCluster, pandora::CaloHitList &firstCaloHitList,
         pandora::CaloHitList &secondCaloHitList) const;
 
     /**
@@ -48,13 +54,13 @@ private:
      *
      *  @return pandora::StatusCode
      */
-    pandora::StatusCode SplitCluster(const TwoDSlidingFitResult &slidingFitResult, const pandora::CartesianVector& splitPosition, 
+    pandora::StatusCode DivideCaloHits(const TwoDSlidingFitResult &slidingFitResult, const pandora::CartesianVector& splitPosition, 
         pandora::CaloHitList &firstCaloHitList, pandora::CaloHitList &secondCaloHitList) const;
 
     unsigned int    m_slidingFitHalfWindow;   ///<
     float           m_minClusterLength;       ///<
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_SLIDING_FIT_SPLITTING_ALGORITHM_H

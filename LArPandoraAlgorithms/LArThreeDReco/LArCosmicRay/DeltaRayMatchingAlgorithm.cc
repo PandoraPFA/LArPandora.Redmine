@@ -8,18 +8,28 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArCalculators/LArPseudoLayerCalculator.h"
-
 #include "LArHelpers/LArClusterHelper.h"
 #include "LArHelpers/LArGeometryHelper.h"
 #include "LArHelpers/LArPfoHelper.h"
+
+#include "LArPlugins/LArTransformationPlugin.h"
 
 #include "LArThreeDReco/LArCosmicRay/DeltaRayMatchingAlgorithm.h"
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+DeltaRayMatchingAlgorithm::DeltaRayMatchingAlgorithm() :
+    m_minCaloHitsPerCluster(3),
+    m_xOverlapWindow(1.f),
+    m_distanceForMatching(5.f),
+    m_pseudoChi2Cut(3.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode DeltaRayMatchingAlgorithm::Run()
 {
@@ -28,7 +38,7 @@ StatusCode DeltaRayMatchingAlgorithm::Run()
 
     if (pfoVector.empty())
     {
-        std::cout << "DeltaRayMatchingAlgorithm: could not find pfo list " << m_parentPfoListName << std::endl;
+        std::cout << "DeltaRayMatchingAlgorithm: pfo list " << m_parentPfoListName << " unavailable." << std::endl;
         return STATUS_CODE_SUCCESS;
     }
 
@@ -177,8 +187,7 @@ void DeltaRayMatchingAlgorithm::ThreeViewMatching(const ClusterVector &clusters1
                 ParticleFlowObject *pBestPfo = NULL;
                 this->FindBestParentPfo(pCluster1, pCluster2, pCluster3, pBestPfo);
 
-                // ATTN: need to record all matches when all three views are used
-
+                // ATTN Need to record all matches when all three views are used
                 particleList.push_back(Particle(pCluster1, pCluster2, pCluster3, pBestPfo));
             }
         }
@@ -406,11 +415,11 @@ bool DeltaRayMatchingAlgorithm::AreClustersMatched(const Cluster *const pCluster
             const float dz1(zMax1 - zMin1);
             const float dz2(zMax2 - zMin2);
             const float dz3(zMax3 - zMin3);
-            const float dz4(LArGeometryHelper::GetLArPseudoLayerCalculator()->GetZPitch());
+            const float dz4(LArGeometryHelper::GetLArTransformationPlugin(this->GetPandora())->GetWireZPitch());
 
-            const float zproj1(LArGeometryHelper::MergeTwoPositions(hitType2, hitType3, z2, z3));
-            const float zproj2(LArGeometryHelper::MergeTwoPositions(hitType3, hitType1, z3, z1));
-            const float zproj3(LArGeometryHelper::MergeTwoPositions(hitType1, hitType2, z1, z2));
+            const float zproj1(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType2, hitType3, z2, z3));
+            const float zproj2(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType3, hitType1, z3, z1));
+            const float zproj3(LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType1, hitType2, z1, z2));
 
             const float deltaSquared(((z1 - zproj1) * (z1 - zproj1) + (z2 - zproj2) * (z2 - zproj2) + (z3 - zproj3) * (z3 - zproj3)) / 3.f);
             const float sigmaSquared(dz1 * dz1 + dz2 * dz2 + dz3 * dz3 + dz4 * dz4);
@@ -516,7 +525,7 @@ void DeltaRayMatchingAlgorithm::CreateDaughterPfo(const ClusterList &clusterList
     const PfoList *pPfoList = NULL; std::string pfoListName;
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryListAndSetCurrent(*this, pPfoList, pfoListName));
 
-    // TODO - correct these placeholder parameters
+    // TODO Correct these placeholder parameters
     PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
     pfoParameters.m_particleId = E_MINUS; // SHOWER
     pfoParameters.m_charge = PdgTable::GetParticleCharge(pfoParameters.m_particleId.Get());
@@ -569,9 +578,9 @@ DeltaRayMatchingAlgorithm::Particle::Particle(Cluster *const pCluster1, Cluster 
     m_pClusterW(NULL),
     m_pParentPfo(NULL)
 {
-    const HitType hitType1(NULL != pCluster1 ? LArClusterHelper::GetClusterHitType(pCluster1) : CUSTOM);
-    const HitType hitType2(NULL != pCluster2 ? LArClusterHelper::GetClusterHitType(pCluster2) : CUSTOM);
-    const HitType hitType3(NULL != pCluster3 ? LArClusterHelper::GetClusterHitType(pCluster3) : CUSTOM);
+    const HitType hitType1(NULL != pCluster1 ? LArClusterHelper::GetClusterHitType(pCluster1) : HIT_CUSTOM);
+    const HitType hitType2(NULL != pCluster2 ? LArClusterHelper::GetClusterHitType(pCluster2) : HIT_CUSTOM);
+    const HitType hitType3(NULL != pCluster3 ? LArClusterHelper::GetClusterHitType(pCluster3) : HIT_CUSTOM);
 
     m_pClusterU = ((TPC_VIEW_U == hitType1) ? pCluster1 : (TPC_VIEW_U == hitType2) ? pCluster2 : (TPC_VIEW_U == hitType3) ? pCluster3 : NULL);
     m_pClusterV = ((TPC_VIEW_V == hitType1) ? pCluster1 : (TPC_VIEW_V == hitType2) ? pCluster2 : (TPC_VIEW_V == hitType3) ? pCluster3 : NULL);
@@ -647,23 +656,19 @@ StatusCode DeltaRayMatchingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputClusterListNameV", m_inputClusterListNameV));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputClusterListNameW", m_inputClusterListNameW));
 
-    m_minCaloHitsPerCluster = 3;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
 
-    m_xOverlapWindow = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "OverlapWindow", m_xOverlapWindow));
 
-    m_distanceForMatching = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DistanceForMatching", m_distanceForMatching));
 
-    m_pseudoChi2Cut = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "PseudoChi2Cut", m_pseudoChi2Cut));
 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

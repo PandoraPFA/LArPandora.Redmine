@@ -12,8 +12,16 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+TwoDParticleCreationAlgorithm::TwoDParticleCreationAlgorithm() :
+    m_minHitsInCluster(5),
+    m_minClusterEnergy(0.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode TwoDParticleCreationAlgorithm::Run()
 {
@@ -64,23 +72,23 @@ StatusCode TwoDParticleCreationAlgorithm::CreatePFOs(const ClusterList *const pC
         if (pCluster->GetNCaloHits() < m_minHitsInCluster)
             continue;
 
-        // TODO - finalize particle id and energy measurement here
-        const float clusterEnergy(pCluster->GetCorrectedElectromagneticEnergy());
+        // TODO Finalize particle id and energy measurement here
+        const float clusterEnergy(pCluster->GetElectromagneticEnergy());
 
         if (clusterEnergy < m_minClusterEnergy)
             continue;
 
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
 
-        // TODO - finalize particle id here
-        const ParticleType particleType(ParticleIdHelper::IsMuonFast(pCluster) ? MU_MINUS : PHOTON);
+        // TODO Finalize particle id here
+        const ParticleType particleType(PandoraContentApi::GetPlugins(*this)->GetParticleId()->IsMuon(pCluster) ? MU_MINUS : PHOTON);
 
-        const ClusterHelper::ClusterFitResult &fitToAllHitsResult(pCluster->GetFitToAllHitsResult());
+        const ClusterFitResult &fitToAllHitsResult(pCluster->GetFitToAllHitsResult());
 
         if (!fitToAllHitsResult.IsFitSuccessful())
             continue;
 
-        // TODO - check remaining parameters
+        // TODO Check remaining parameters
         pfoParameters.m_particleId = particleType;
         pfoParameters.m_charge = 0;
         pfoParameters.m_mass = 0.;
@@ -100,20 +108,17 @@ StatusCode TwoDParticleCreationAlgorithm::CreatePFOs(const ClusterList *const pC
 StatusCode TwoDParticleCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "OutputPfoListName", m_outputPfoListName));
-
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListNameU", m_inputClusterListNameU));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListNameV", m_inputClusterListNameV));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListNameW", m_inputClusterListNameW));
 
-    m_minHitsInCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_minClusterEnergy = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterEnergy", m_minClusterEnergy));
 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

@@ -11,16 +11,13 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
-LArPointingCluster::LArPointingCluster(Cluster *const pCluster)
+LArPointingCluster::LArPointingCluster(const Cluster *const pCluster, const unsigned int fitHalfLayerWindow, const float fitLayerPitch)
 {
-    const unsigned int halfWindowLayers(10); // TODO - add to settings, or add to constructor
-
-    TwoDSlidingFitResult slidingFitResult;
-    LArClusterHelper::LArTwoDSlidingFit(pCluster, halfWindowLayers, slidingFitResult);
-
+    // TODO remove default layer fit window and z pitch values
+    const TwoDSlidingFitResult slidingFitResult(pCluster, fitHalfLayerWindow, fitLayerPitch);
     this->BuildPointingCluster(slidingFitResult);
 }
 
@@ -35,7 +32,7 @@ LArPointingCluster::LArPointingCluster(const TwoDSlidingFitResult &slidingFitRes
 
 void LArPointingCluster::BuildPointingCluster(const TwoDSlidingFitResult &slidingFitResult)
 {
-    m_pCluster = const_cast<Cluster*>(slidingFitResult.GetCluster());
+    m_pCluster = slidingFitResult.GetCluster();
 
     const float minLayerZ(slidingFitResult.GetGlobalMinLayerPosition().GetZ());
     const float maxLayerZ(slidingFitResult.GetGlobalMaxLayerPosition().GetZ());
@@ -87,7 +84,7 @@ LArPointingCluster::Vertex::Vertex() :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-LArPointingCluster::Vertex::Vertex(Cluster *const pCluster, const CartesianVector &position, const CartesianVector &direction,
+LArPointingCluster::Vertex::Vertex(const Cluster *const pCluster, const CartesianVector &position, const CartesianVector &direction,
         const float rms, const bool isInner) :
     m_pCluster(pCluster),
     m_position(position),
@@ -130,4 +127,4 @@ LArPointingCluster::Vertex &LArPointingCluster::Vertex::operator=(const Vertex &
     return *this;
 }
 
-} // namespace lar
+} // namespace lar_content

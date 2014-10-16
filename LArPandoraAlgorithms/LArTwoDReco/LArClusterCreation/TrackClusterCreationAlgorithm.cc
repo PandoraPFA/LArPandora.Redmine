@@ -12,8 +12,19 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+TrackClusterCreationAlgorithm::TrackClusterCreationAlgorithm() :
+    m_mergeBackFilteredHits(true),
+    m_maxGapLayers(2),
+    m_maxCaloHitSeparationSquared(1.3f * 1.3f),
+    m_minCaloHitSeparationSquared( 0.4f *  0.4f),
+    m_closeSeparationSquared(0.9f * 0.9f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode TrackClusterCreationAlgorithm::Run()
 {
@@ -293,7 +304,7 @@ void TrackClusterCreationAlgorithm::CreatePrimaryAssociation(CaloHit *pCaloHitI,
 {
     const float distanceSquared((pCaloHitJ->GetPositionVector() - pCaloHitI->GetPositionVector()).GetMagnitudeSquared());
 
-    if (distanceSquared > HitAssociation::m_maxSeparationSquared)
+    if (distanceSquared > m_maxCaloHitSeparationSquared)
         return;
 
     HitAssociationMap::iterator forwardIter = forwardHitAssociationMap.find(pCaloHitI);
@@ -335,14 +346,20 @@ void TrackClusterCreationAlgorithm::CreateSecondaryAssociation(CaloHit *pCaloHit
 
     if ((forwardAssociation.GetPrimaryTarget() != pCaloHitJ) && (backwardAssociation.GetPrimaryTarget() == pCaloHitI))
     {
-        if (backwardAssociation.GetPrimaryDistanceSquared() < forwardAssociation.GetSecondaryDistanceSquared())
+        if ((backwardAssociation.GetPrimaryDistanceSquared() < forwardAssociation.GetSecondaryDistanceSquared()) &&
+            (backwardAssociation.GetPrimaryDistanceSquared() < m_closeSeparationSquared))
+        {
             forwardAssociation.SetSecondaryTarget(pCaloHitJ, backwardAssociation.GetPrimaryDistanceSquared());
+        }
     }
 
     if ((backwardAssociation.GetPrimaryTarget() != pCaloHitI) && (forwardAssociation.GetPrimaryTarget() == pCaloHitJ))
     {
-        if (forwardAssociation.GetPrimaryDistanceSquared() < backwardAssociation.GetSecondaryDistanceSquared())
+        if ((forwardAssociation.GetPrimaryDistanceSquared() < backwardAssociation.GetSecondaryDistanceSquared()) &&
+            (forwardAssociation.GetPrimaryDistanceSquared() < m_closeSeparationSquared))
+        {
             backwardAssociation.SetSecondaryTarget(pCaloHitI, forwardAssociation.GetPrimaryDistanceSquared());
+        }
     }
 }
 
@@ -405,43 +422,30 @@ CaloHit *TrackClusterCreationAlgorithm::TraceHitAssociation(CaloHit *pCaloHit, c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float TrackClusterCreationAlgorithm::HitAssociation::m_maxSeparationSquared = std::numeric_limits<float>::max();
-float TrackClusterCreationAlgorithm::HitAssociation::m_closeSeparationSquared = std::numeric_limits<float>::max();
-
 StatusCode TrackClusterCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_inputCaloHitListName = "";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "InputCaloHitListName", m_inputCaloHitListName));
-
-    m_outputClusterListName = "PrimaryClusterList";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "OutputClusterListName", m_outputClusterListName));
-
-    m_mergeBackFilteredHits = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MergeBackFilteredHits", m_mergeBackFilteredHits));
 
-    m_maxGapLayers = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxGapLayers", m_maxGapLayers));
 
-    float maxSeparation = 1.3f; // cm
+    float maxCaloHitSeparation = std::sqrt(m_maxCaloHitSeparationSquared);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxSeparation", maxSeparation));
-    HitAssociation::m_maxSeparationSquared = maxSeparation * maxSeparation;
+        "MaxCaloHitSeparation", maxCaloHitSeparation));
+    m_maxCaloHitSeparationSquared = maxCaloHitSeparation * maxCaloHitSeparation;
 
-    float closeSeparation = 0.9f; // cm
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CloseSeparation", closeSeparation));
-    HitAssociation::m_closeSeparationSquared = closeSeparation * closeSeparation;
-
-    float minCaloHitSeparation = 0.4f; // cm
+    float minCaloHitSeparation = std::sqrt(m_minCaloHitSeparationSquared);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitSeparation", minCaloHitSeparation));
     m_minCaloHitSeparationSquared = minCaloHitSeparation * minCaloHitSeparation;
 
+    float closeSeparation = std::sqrt(m_closeSeparationSquared);
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseSeparation", closeSeparation));
+    m_closeSeparationSquared = closeSeparation * closeSeparation;
+
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

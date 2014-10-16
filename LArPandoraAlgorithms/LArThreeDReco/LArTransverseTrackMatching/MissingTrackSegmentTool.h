@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    MissingTrackSegmentTool();
 
     bool Run(ThreeDTransverseTracksAlgorithm *pAlgorithm, TensorType &overlapTensor);
 
@@ -216,6 +221,6 @@ inline MissingTrackSegmentTool::SegmentOverlap::SegmentOverlap() :
 {
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef MISSING_TRACK_SEGMENT_TOOL_H

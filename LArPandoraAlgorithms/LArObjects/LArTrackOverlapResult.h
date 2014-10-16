@@ -16,7 +16,7 @@
 #include <cmath>
 #include <vector>
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -49,7 +49,7 @@ public:
     /**
      *  @brief  Destructor
      */
-    ~TrackOverlapResult();
+    virtual ~TrackOverlapResult();
 
     /**
      *  @brief  Whether the track overlap result has been initialized
@@ -442,6 +442,6 @@ inline const pandora::ClusterList &FragmentOverlapResult::GetFragmentClusterList
     return m_clusterList;
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TRACK_OVERLAP_RESULT_H

@@ -12,8 +12,18 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+LongTracksTool::LongTracksTool() :
+    m_minMatchedFraction(0.9f),
+    m_minMatchedSamplingPoints(20),
+    m_minXOverlapFraction(0.9f),
+    m_minMatchedSamplingPointRatio(2)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 bool LongTracksTool::HasLongDirectConnections(IteratorList::const_iterator iIter, const IteratorList &iteratorList)
 {
@@ -58,8 +68,8 @@ bool LongTracksTool::IsLongerThanDirectConnections(IteratorList::const_iterator 
 
 bool LongTracksTool::Run(ThreeDTransverseTracksAlgorithm *pAlgorithm, TensorType &overlapTensor)
 {
-    if (PandoraSettings::ShouldDisplayAlgorithmInfo())
-       std::cout << "----> Running Algorithm Tool: " << this << ", " << m_algorithmToolType << std::endl;
+    if (PandoraContentApi::GetSettings(*pAlgorithm)->ShouldDisplayAlgorithmInfo())
+       std::cout << "----> Running Algorithm Tool: " << this << ", " << this->GetType() << std::endl;
 
     ProtoParticleVector protoParticleVector;
     this->FindLongTracks(overlapTensor, protoParticleVector);
@@ -139,23 +149,19 @@ void LongTracksTool::SelectLongElements(const TensorType::ElementList &elementLi
 
 StatusCode LongTracksTool::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_minMatchedFraction = 0.9f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMatchedFraction", m_minMatchedFraction));
 
-    m_minMatchedSamplingPoints = 20;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMatchedSamplingPoints", m_minMatchedSamplingPoints));
 
-    m_minXOverlapFraction = 0.9f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinXOverlapFraction", m_minXOverlapFraction));
 
-    m_minMatchedSamplingPointRatio = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMatchedSamplingPointRatio", m_minMatchedSamplingPointRatio));
 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

@@ -13,7 +13,7 @@
 #include <map>
 #include <vector>
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -86,18 +86,6 @@ public:
      */
     void GetUnambiguousElements(const bool ignoreUnavailable, ElementList &elementList) const;
 
-    typedef bool (AmbiguityFunction)(const pandora::ClusterList &, const pandora::ClusterList &, const pandora::ClusterList &,
-        pandora::Cluster *&pClusterU, pandora::Cluster *&pClusterV, pandora::Cluster *&pClusterW);
-
-    /**
-     *  @brief  Get unambiguous elements with a custom definition of unambiguous
-     * 
-     *  @param  ignoreUnavailable whether to ignore unavailable clusters
-     *  @param  pAmbiguityFunction the address of the ambiguity function
-     *  @param  elementList to receive the unambiguous element list
-     */
-    void GetUnambiguousElements(const bool ignoreUnavailable, AmbiguityFunction *pAmbiguityFunction, ElementList &elementList) const;
-
     /**
      *  @brief  Default ambiguity function, checking that only one U, V and W cluster is found
      * 
@@ -110,8 +98,8 @@ public:
      * 
      *  @return boolean
      */
-    static bool DefaultAmbiguityFunction(const pandora::ClusterList &clusterListU, const pandora::ClusterList &clusterListV, const pandora::ClusterList &clusterListW,
-        pandora::Cluster *&pClusterU, pandora::Cluster *&pClusterV, pandora::Cluster *&pClusterW);
+    bool DefaultAmbiguityFunction(const pandora::ClusterList &clusterListU, const pandora::ClusterList &clusterListV, const pandora::ClusterList &clusterListW,
+        pandora::Cluster *&pClusterU, pandora::Cluster *&pClusterV, pandora::Cluster *&pClusterW) const;
 
     /**
      *  @brief  Get the number of connections for a specified cluster
@@ -279,14 +267,6 @@ private:
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline void OverlapTensor<T>::GetUnambiguousElements(const bool ignoreUnavailable, ElementList &elementList) const
-{
-    this->GetUnambiguousElements(ignoreUnavailable, &DefaultAmbiguityFunction, elementList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template <typename T>
 inline void OverlapTensor<T>::GetNConnections(pandora::Cluster *const pCluster, const bool ignoreUnavailable, unsigned int &nU, unsigned int &nV,
     unsigned int &nW) const
 {
@@ -442,6 +422,6 @@ const typename OverlapTensor<T>::OverlapResult &OverlapTensor<T>::Element::GetOv
     return m_overlapResult;
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_OVERLAP_TENSOR_H

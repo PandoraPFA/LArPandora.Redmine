@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    TwoDParticleCreationAlgorithm();
 
 private:
     pandora::StatusCode Run();
@@ -55,6 +60,6 @@ inline pandora::Algorithm *TwoDParticleCreationAlgorithm::Factory::CreateAlgorit
     return new TwoDParticleCreationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_PARTICLE_CREATION_ALGORITHM_H

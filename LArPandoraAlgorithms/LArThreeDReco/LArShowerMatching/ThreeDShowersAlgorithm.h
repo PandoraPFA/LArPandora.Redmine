@@ -15,7 +15,7 @@
 
 #include "LArThreeDReco/LArThreeDBase/ThreeDBaseAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 class ShowerTensorTool;
@@ -36,6 +36,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    ThreeDShowersAlgorithm();
 
     /**
      *  @brief  Sort tensor elements by number of matched sampling points, using matched fraction then xoverlap span to resolve ties
@@ -200,6 +205,6 @@ inline pandora::Algorithm *ThreeDShowersAlgorithm::Factory::CreateAlgorithm() co
     return new ThreeDShowersAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_THREE_D_SHOWERS_ALGORITHM_H

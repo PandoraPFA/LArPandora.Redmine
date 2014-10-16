@@ -1,16 +1,15 @@
 <!-- Pandora settings xml file -->
 
 <pandora>
-    <!-- HELPER CLASS SETTINGS -->
+    <!-- GLOBAL SETTINGS -->
     <IsMonitoringEnabled>false</IsMonitoringEnabled>
     <ShouldDisplayAlgorithmInfo>false</ShouldDisplayAlgorithmInfo>
     <SingleHitTypeClusteringMode>true</SingleHitTypeClusteringMode>
-    <ShouldCollapseMCParticlesToPfoTarget>false</ShouldCollapseMCParticlesToPfoTarget>
 
-    <EmShowerFastFunction>LArEmShowerId</EmShowerFastFunction>
-    <PhotonFastFunction>LArPhotonId</PhotonFastFunction>
-    <ElectronFastFunction>LArElectronId</ElectronFastFunction>
-    <MuonFastFunction>LArMuonId</MuonFastFunction>
+    <!-- PLUGIN SETTINGS -->
+    <MuonPlugin>LArMuonId</MuonPlugin>
+
+    <!-- ALGORITHM SETTINGS -->
 
     <!-- COSMIC RAY RECONSTRUCTION -->
     <algorithm type = "LArListPreparation">
@@ -142,9 +141,6 @@
     </algorithm>
     <algorithm type = "LArThreeDTrackFragments">
         <MinClusterLength>10.0</MinClusterLength>
-        <InputCaloHitListNameU>CaloHitListU</InputCaloHitListNameU>
-        <InputCaloHitListNameV>CaloHitListV</InputCaloHitListNameV>
-        <InputCaloHitListNameW>CaloHitListW</InputCaloHitListNameW>
         <InputClusterListNameU>ClustersU</InputClusterListNameU>
         <InputClusterListNameV>ClustersV</InputClusterListNameV>
         <InputClusterListNameW>ClustersW</InputClusterListNameW>
@@ -294,7 +290,7 @@
         <MipEquivalentCut>0.</MipEquivalentCut>
     </algorithm>
 
-    <!-- 2D neutrino-induced event reconstruction, W View -->
+    <!-- 2D neutrino-induced event track reconstruction, W View -->
     <algorithm type = "LArClusteringParent">
         <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
         <InputCaloHitListName>NeutrinoCaloHitListW</InputCaloHitListName>
@@ -305,10 +301,11 @@
     <algorithm type = "LArLongitudinalAssociation"/>
     <algorithm type = "LArTransverseAssociation"/>
     <algorithm type = "LArLongitudinalExtension"/>
+    <algorithm type = "LArTransverseExtension"/>
     <algorithm type = "LArBranchSplitting"/>
     <algorithm type = "LArKinkSplitting"/>
 
-    <!-- 2D neutrino-induced event reconstruction, U View -->
+    <!-- 2D neutrino-induced event track reconstruction, U View -->
     <algorithm type = "LArClusteringParent">
         <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
         <InputCaloHitListName>NeutrinoCaloHitListU</InputCaloHitListName>
@@ -319,10 +316,11 @@
     <algorithm type = "LArLongitudinalAssociation"/>
     <algorithm type = "LArTransverseAssociation"/>
     <algorithm type = "LArLongitudinalExtension"/>
+    <algorithm type = "LArTransverseExtension"/>
     <algorithm type = "LArBranchSplitting"/>
     <algorithm type = "LArKinkSplitting"/>
 
-    <!-- 2D neutrino-induced event reconstruction, V View -->
+    <!-- 2D neutrino-induced event track reconstruction, V View -->
     <algorithm type = "LArClusteringParent">
         <algorithm type = "LArTrackClusterCreation" description = "ClusterFormation"/>
         <InputCaloHitListName>NeutrinoCaloHitListV</InputCaloHitListName>
@@ -333,10 +331,37 @@
     <algorithm type = "LArLongitudinalAssociation"/>
     <algorithm type = "LArTransverseAssociation"/>
     <algorithm type = "LArLongitudinalExtension"/>
+    <algorithm type = "LArTransverseExtension"/>
     <algorithm type = "LArBranchSplitting"/>
     <algorithm type = "LArKinkSplitting"/>
 
-    <!-- 3D neutrino-induced event reconstruction -->
+    <!-- 3D vertex reconstruction -->
+    <algorithm type = "LArCheatingVertexCreation">
+        <OutputVertexListName>SelectedVertices</OutputVertexListName>
+        <ReplaceCurrentVertexList>true</ReplaceCurrentVertexList>
+    </algorithm>
+    <!--algorithm type = "LArCandidateVertexCreation">
+        <OutputVertexListName>CandidateVertices</OutputVertexListName>
+        <ReplaceCurrentVertexList>true</ReplaceCurrentVertexList>
+    </algorithm>
+    <algorithm type = "LArVertexSelection">
+        <OutputVertexListName>SelectedVertices</OutputVertexListName>
+        <ReplaceCurrentVertexList>true</ReplaceCurrentVertexList>
+    </algorithm-->
+    <algorithm type = "LArVertexSplitting">
+        <InputClusterList>ClustersU</InputClusterList>
+        <MinClusterLength>5.</MinClusterLength>
+    </algorithm>
+    <algorithm type = "LArVertexSplitting">
+        <InputClusterList>ClustersV</InputClusterList>
+        <MinClusterLength>5.</MinClusterLength>
+    </algorithm>
+    <algorithm type = "LArVertexSplitting">
+        <InputClusterList>ClustersW</InputClusterList>
+        <MinClusterLength>5.</MinClusterLength>
+    </algorithm>
+
+    <!-- 3D neutrino-induced event track reconstruction -->
     <algorithm type = "LArThreeDTransverseTracks">
         <InputClusterListNameU>ClustersU</InputClusterListNameU>
         <InputClusterListNameV>ClustersV</InputClusterListNameV>
@@ -367,9 +392,6 @@
     </algorithm>
     <algorithm type = "LArThreeDTrackFragments">
         <MinClusterLength>5.0</MinClusterLength>
-        <InputCaloHitListNameU>NeutrinoCaloHitListU</InputCaloHitListNameU>
-        <InputCaloHitListNameV>NeutrinoCaloHitListV</InputCaloHitListNameV>
-        <InputCaloHitListNameW>NeutrinoCaloHitListW</InputCaloHitListNameW>
         <InputClusterListNameU>ClustersU</InputClusterListNameU>
         <InputClusterListNameV>ClustersV</InputClusterListNameV>
         <InputClusterListNameW>ClustersW</InputClusterListNameW>
@@ -382,21 +404,10 @@
 
     <!-- NEUTRINO-INDUCED EVENT RECONSTRUCTION: SHOWERS -->
     <algorithm type = "LArClusterCharacterisation">
-        <InputClusterListName>ClustersU</InputClusterListName>
+        <InputClusterListNames>ClustersU ClustersV ClustersW</InputClusterListNames>
         <ShouldRemoveShowerPfos>true</ShouldRemoveShowerPfos>
         <InputPfoListNames>TrackParticles3D</InputPfoListNames>
     </algorithm>
-    <algorithm type = "LArClusterCharacterisation">
-        <InputClusterListName>ClustersV</InputClusterListName>
-        <ShouldRemoveShowerPfos>true</ShouldRemoveShowerPfos>
-        <InputPfoListNames>TrackParticles3D</InputPfoListNames>
-    </algorithm>
-    <algorithm type = "LArClusterCharacterisation">
-        <InputClusterListName>ClustersW</InputClusterListName>
-        <ShouldRemoveShowerPfos>true</ShouldRemoveShowerPfos>
-        <InputPfoListNames>TrackParticles3D</InputPfoListNames>
-    </algorithm>
-
     <algorithm type = "LArThreeDShowers">
         <InputClusterListNameU>ClustersU</InputClusterListNameU>
         <InputClusterListNameV>ClustersV</InputClusterListNameV>
@@ -415,6 +426,35 @@
         <PfoListName>ShowerParticles3D</PfoListName>
         <RemnantClusterListNames>ClustersU ClustersV ClustersW</RemnantClusterListNames>
     </algorithm>
+    <algorithm type = "LArThreeDTrackFragments">
+        <InputClusterListNameU>ClustersU</InputClusterListNameU>
+        <InputClusterListNameV>ClustersV</InputClusterListNameV>
+        <InputClusterListNameW>ClustersW</InputClusterListNameW>
+        <OutputPfoListName>TrackParticles3D</OutputPfoListName>
+        <MinXOverlap>1.</MinXOverlap>
+        <MinClusterLength>1.</MinClusterLength>
+        <MinXOverlapFraction>0.5</MinXOverlapFraction>
+        <MinMatchedSamplingPointFraction>0.5</MinMatchedSamplingPointFraction>
+        <MaxPointDisplacement>2.5</MaxPointDisplacement>
+        <TrackTools>
+            <tool type = "LArClearTrackFragments"/>
+        </TrackTools>
+        <algorithm type = "LArSimpleClusterCreation" description = "ClusterRebuilding"/>
+    </algorithm>
+    <algorithm type = "LArThreeDRemnants">
+        <InputClusterListNameU>ClustersU</InputClusterListNameU>
+        <InputClusterListNameV>ClustersV</InputClusterListNameV>
+        <InputClusterListNameW>ClustersW</InputClusterListNameW>
+        <OutputPfoListName>ShowerParticles3D</OutputPfoListName>
+        <TrackTools>
+            <tool type = "LArClearRemnants"/>
+        </TrackTools>
+    </algorithm>
+    <algorithm type = "LArVertexBasedPfoMerging">
+        <TrackPfoListName>TrackParticles3D</TrackPfoListName>
+        <ShowerPfoListName>ShowerParticles3D</ShowerPfoListName>
+        <ClusterListNames>ClustersU ClustersV ClustersW</ClusterListNames>
+    </algorithm>
     <algorithm type = "LArConeBasedMerging">
         <PfoListName>ShowerParticles3D</PfoListName>
         <RemnantClusterListNames>ClustersU ClustersV ClustersW</RemnantClusterListNames>
@@ -429,7 +469,7 @@
         <InputPfoListName>TrackParticles3D</InputPfoListName>
         <OutputCaloHitListName>TrackCaloHitList3D</OutputCaloHitListName>
         <OutputClusterListName>TrackClusters3D</OutputClusterListName>
-        <HitCreationTools>   
+        <HitCreationTools>
             <tool type = "LArClearTransverseTrackHits"><MinViews>3</MinViews></tool>
             <tool type = "LArClearLongitudinalTrackHits"><MinViews>3</MinViews></tool>
             <tool type = "LArMultiValuedLongitudinalTrackHits"><MinViews>3</MinViews></tool>
@@ -472,6 +512,20 @@
         <ShowCurrentClusters>false</ShowCurrentClusters>
         <ShowCurrentPfos>false</ShowCurrentPfos>
         <PfoListNames>OutputParticles3D</PfoListNames>
+        <ShowDetector>false</ShowDetector>
+        <ShowOnlyAvailable>false</ShowOnlyAvailable>
+        <BlackBackground>false</BlackBackground>
+        <HitColors>iterate</HitColors>
+        <DetectorView>xz</DetectorView>
+    </algorithm>
+
+    <algorithm type = "LArVisualMonitoring">
+        <ShowMCParticles>false</ShowMCParticles>
+        <ShowCurrentCaloHits>false</ShowCurrentCaloHits>
+        <ShowCurrentTracks>false</ShowCurrentTracks>
+        <ShowCurrentClusters>false</ShowCurrentClusters>
+        <ShowCurrentPfos>false</ShowCurrentPfos>
+        <ClusterListNames>CosmicRayClusters3D DaughterCosmicRayClusters3D TrackClusters3D ShowerClusters3D</ClusterListNames>
         <ShowDetector>false</ShowDetector>
         <ShowOnlyAvailable>false</ShowOnlyAvailable>
         <BlackBackground>false</BlackBackground>

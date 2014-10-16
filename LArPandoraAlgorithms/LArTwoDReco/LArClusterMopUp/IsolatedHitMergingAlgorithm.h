@@ -12,7 +12,7 @@
 
 #include "LArTwoDReco/LArClusterMopUp/ClusterMopUpAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -29,6 +29,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    IsolatedHitMergingAlgorithm();
 
 private:
     void ClusterMopUp(const pandora::ClusterList &pfoClusters, const pandora::ClusterList &remnantClusters, const ClusterToListNameMap &clusterToListNameMap) const;
@@ -77,6 +82,6 @@ inline pandora::Algorithm *IsolatedHitMergingAlgorithm::Factory::CreateAlgorithm
     return new IsolatedHitMergingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_ISOLATED_HIT_MERGING_ALGORITHM_H

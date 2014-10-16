@@ -10,9 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "Helpers/ClusterHelper.h"
-
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -20,6 +18,12 @@ namespace lar
  */
 class ClusterAssociationAlgorithm : public pandora::Algorithm
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    ClusterAssociationAlgorithm();
+
 protected:
     virtual pandora::StatusCode Run();
     virtual pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
@@ -121,6 +125,6 @@ private:
     bool         m_resolveAmbiguousAssociations;        ///< Whether to resolve ambiguous associations
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_CLUSTER_ASSOCIATION_ALGORITHM_H

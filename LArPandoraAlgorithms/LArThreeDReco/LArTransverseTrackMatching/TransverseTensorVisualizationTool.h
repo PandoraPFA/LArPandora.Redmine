@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    TransverseTensorVisualizationTool();
 
     bool Run(ThreeDTransverseTracksAlgorithm *pAlgorithm, TensorType &overlapTensor);
 
@@ -46,6 +51,6 @@ inline pandora::AlgorithmTool *TransverseTensorVisualizationTool::Factory::Creat
     return new TransverseTensorVisualizationTool();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef TRANSVERSE_TENSOR_VISUALIZATION_TOOL_H

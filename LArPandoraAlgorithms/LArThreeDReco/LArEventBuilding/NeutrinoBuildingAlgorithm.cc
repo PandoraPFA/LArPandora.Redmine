@@ -14,7 +14,7 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode NeutrinoBuildingAlgorithm::Run()
@@ -63,13 +63,20 @@ void NeutrinoBuildingAlgorithm::GetDaughterPfoList(PfoList &pfoList) const
 
 void NeutrinoBuildingAlgorithm::CreateNeutrinoPfo(ParticleFlowObject *&pNeutrinoPfo) const
 {
-    // TODO - correct these placeholder parameters
+    // TODO Correct these placeholder parameters
     PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
     pfoParameters.m_particleId = NU_MU;
     pfoParameters.m_charge = PdgTable::GetParticleCharge(pfoParameters.m_particleId.Get());
     pfoParameters.m_mass = PdgTable::GetParticleMass(pfoParameters.m_particleId.Get());
     pfoParameters.m_energy = 0.f;
     pfoParameters.m_momentum = CartesianVector(0.f, 0.f, 0.f);
+
+    const VertexList *pVertexList(NULL);
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentList(*this, pVertexList));
+    Vertex *const pVertex((1 == pVertexList->size()) ? *(pVertexList->begin()) : NULL);
+
+    if ((NULL != pVertex) && (VERTEX_3D == pVertex->GetVertexType()))
+        pfoParameters.m_vertexList.insert(pVertex);
 
     std::string neutrinoPfoListName;
     const PfoList *pNeutrinoPfoList = NULL;
@@ -155,4 +162,4 @@ StatusCode NeutrinoBuildingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

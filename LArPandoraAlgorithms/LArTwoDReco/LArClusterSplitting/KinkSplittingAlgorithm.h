@@ -10,7 +10,7 @@
 
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    KinkSplittingAlgorithm();
 
 private:
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
@@ -53,6 +58,6 @@ inline pandora::Algorithm *KinkSplittingAlgorithm::Factory::CreateAlgorithm() co
     return new KinkSplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_KINK_SPLITTING_ALGORITHM_H

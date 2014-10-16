@@ -10,11 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "Helpers/ClusterHelper.h"
-
 #include "LArTwoDReco/LArClusterAssociation/ClusterAssociationAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -31,6 +29,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    TransverseAssociationAlgorithm();
 
 private:
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
@@ -316,8 +319,8 @@ private:
     float          m_clusterTanAngle;                  ///<
 
     float          m_maxTransverseOverlap;             ///<
-    float          m_maxLongitudinalOverlap;           ///<
     float          m_maxProjectedOverlap;              ///<
+    float          m_maxLongitudinalOverlap;           ///<
 
     float          m_transverseClusterMinCosTheta;     ///<
     float          m_transverseClusterMinLength;       ///<
@@ -368,6 +371,6 @@ inline pandora::Algorithm *TransverseAssociationAlgorithm::Factory::CreateAlgori
     return new TransverseAssociationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TRANSVERSE_ASSOCIATION_ALGORITHM_H

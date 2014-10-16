@@ -12,7 +12,7 @@
 
 #include "LArHelpers/LArClusterHelper.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -20,6 +20,11 @@ namespace lar
  */
 class TwoDSlidingFitSplittingAndSplicingAlgorithm : public pandora::Algorithm
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    TwoDSlidingFitSplittingAndSplicingAlgorithm();
 
 protected:
     virtual pandora::StatusCode Run();
@@ -180,8 +185,8 @@ private:
 
     unsigned int  m_shortHalfWindowLayers;          ///<
     unsigned int  m_longHalfWindowLayers;           ///<
-    float         m_vetoDisplacement;               ///<
     float         m_minClusterLength;               ///<
+    float         m_vetoDisplacement;               ///<
     bool          m_runCosmicMode;                  ///<
 };
 
@@ -235,6 +240,6 @@ inline const pandora::CartesianVector &TwoDSlidingFitSplittingAndSplicingAlgorit
     return m_branchDirection;
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_SLIDING_FIT_SPLITTING_AND_SPLICING_ALGORITHM_H

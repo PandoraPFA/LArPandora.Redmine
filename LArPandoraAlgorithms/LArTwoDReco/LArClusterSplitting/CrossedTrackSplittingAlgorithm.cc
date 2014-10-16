@@ -15,8 +15,17 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+CrossedTrackSplittingAlgorithm::CrossedTrackSplittingAlgorithm() :
+    m_maxClusterSeparation(2.f),
+    m_maxClusterSeparationSquared(m_maxClusterSeparation * m_maxClusterSeparation),
+    m_minCosRelativeAngle(0.966f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode CrossedTrackSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult &slidingFitResult1, const TwoDSlidingFitResult &slidingFitResult2,
     CartesianVector &splitPosition, CartesianVector &firstDirection, CartesianVector &secondDirection) const
@@ -146,19 +155,6 @@ StatusCode CrossedTrackSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidi
     if (!foundSplit)
         return STATUS_CODE_NOT_FOUND;
 
-// --- EVENT DISPLAY [BEGIN] ---
-// ClusterList tempList1, tempList2;
-// Cluster* pCluster1 = (Cluster*)(slidingFitResult1.GetCluster());
-// Cluster* pCluster2 = (Cluster*)(slidingFitResult2.GetCluster());
-// tempList1.insert(pCluster1);
-// tempList2.insert(pCluster2);
-// PandoraMonitoringApi::SetEveDisplayParameters(false, DETECTOR_VIEW_XZ);
-// PandoraMonitoringApi::VisualizeClusters(&tempList1, "Cluster1", RED);
-// PandoraMonitoringApi::VisualizeClusters(&tempList2, "Cluster2", BLUE);
-// PandoraMonitoringApi::AddMarkerToVisualization(&splitPosition,"SplitPosition",BLACK,2.5);
-// PandoraMonitoringApi::ViewEvent();
-// --- EVENT DISPLAY [END] ---
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -167,7 +163,7 @@ StatusCode CrossedTrackSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidi
 void CrossedTrackSplittingAlgorithm::FindCandidateSplitPositions(const Cluster *const pCluster1, const Cluster *const pCluster2,
     CartesianPointList &candidateList) const
 {
-    // TODO: The following is double-double counting
+    // ATTN The following is double-double counting
     CaloHitList caloHitList1, caloHitList2;
     pCluster1->GetOrderedCaloHitList().GetCaloHitList(caloHitList1);
     pCluster2->GetOrderedCaloHitList().GetCaloHitList(caloHitList2);
@@ -199,16 +195,14 @@ void CrossedTrackSplittingAlgorithm::FindCandidateSplitPositions(const Cluster *
 
 StatusCode CrossedTrackSplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxClusterSeparation = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxClusterSeparation", m_maxClusterSeparation));
     m_maxClusterSeparationSquared = m_maxClusterSeparation * m_maxClusterSeparation;
 
-    m_minCosRelativeAngle = 0.966;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCosRelativeAngle", m_minCosRelativeAngle));
 
     return TwoDSlidingFitSplittingAndSwitchingAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

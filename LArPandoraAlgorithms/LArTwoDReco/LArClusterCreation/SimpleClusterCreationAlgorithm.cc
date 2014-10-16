@@ -12,8 +12,15 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+SimpleClusterCreationAlgorithm::SimpleClusterCreationAlgorithm() :
+    m_clusteringWindowSquared(1.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode SimpleClusterCreationAlgorithm::Run()
 {
@@ -136,15 +143,7 @@ void SimpleClusterCreationAlgorithm::CollectAssociatedHits(CaloHit *pSeedCaloHit
 
 StatusCode SimpleClusterCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_inputCaloHitListName = "";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "InputCaloHitListName", m_inputCaloHitListName));
-
-    m_outputClusterListName = "PrimaryClusterList";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "OutputClusterListName", m_outputClusterListName));
-
-    float clusteringWindow = 1.f;
+    float clusteringWindow = std::sqrt(m_clusteringWindowSquared);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusteringWindow", clusteringWindow));
     m_clusteringWindowSquared = clusteringWindow * clusteringWindow;
@@ -152,4 +151,4 @@ StatusCode SimpleClusterCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

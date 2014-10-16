@@ -12,7 +12,7 @@
 
 #include "LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -29,6 +29,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    LongitudinalExtensionAlgorithm();
 
 private:
     void GetListOfCleanClusters(const pandora::ClusterList *const pClusterList, pandora::ClusterVector &clusterVector) const;
@@ -50,9 +55,9 @@ private:
     float   m_clusterMinLayerOccupancy;             ///<
     float   m_nodeMaxDisplacement;                  ///<
     float   m_nodeMaxCosRelativeAngle;              ///<
-    float   m_emissionMaxCosRelativeAngle;          ///<
     float   m_emissionMaxLongitudinalDisplacement;  ///<
     float   m_emissionMaxTransverseDisplacement;    ///<
+    float   m_emissionMaxCosRelativeAngle;          ///<
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,6 +67,6 @@ inline pandora::Algorithm *LongitudinalExtensionAlgorithm::Factory::CreateAlgori
     return new LongitudinalExtensionAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_LONGITUDINAL_EXTENSION_ALGORITHM_H

@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    TrackSplittingTool();
 
     bool Run(ThreeDTransverseTracksAlgorithm *pAlgorithm, TensorType &overlapTensor);
 
@@ -80,10 +85,11 @@ private:
      * 
      *  @param  pAlgorithm address of the calling algorithm
      *  @param  element the tensor element
+     *  @param  isMinX whether to look for track splits at min or max x coordinate
      *  @param  usedClusters the list of used clusters
      *  @param  splitPositionMap to receive the split position map
      */
-    bool PassesChecks(ThreeDTransverseTracksAlgorithm *pAlgorithm, const TensorType::Element &element, pandora::ClusterList &usedClusters,
+    bool PassesChecks(ThreeDTransverseTracksAlgorithm *pAlgorithm, const TensorType::Element &element, const bool isMinX, pandora::ClusterList &usedClusters,
         SplitPositionMap &splitPositionMap) const;
 
     /**
@@ -115,6 +121,6 @@ inline pandora::AlgorithmTool *TrackSplittingTool::Factory::CreateAlgorithmTool(
     return new TrackSplittingTool();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef TRACK_SPLITTING_TOOL_H

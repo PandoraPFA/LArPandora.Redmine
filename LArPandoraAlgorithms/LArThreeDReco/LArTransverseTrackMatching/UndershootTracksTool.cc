@@ -18,11 +18,15 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 UndershootTracksTool::UndershootTracksTool() :
-    ThreeDKinkBaseTool(2)
+    ThreeDKinkBaseTool(2),
+    m_splitMode(false),
+    m_maxTransverseImpactParameter(5.f),
+    m_minImpactParameterCosTheta(0.5f),
+    m_cosThetaCutForKinkSearch(0.75f)
 {
 }
 
@@ -149,9 +153,9 @@ bool UndershootTracksTool::IsThreeDKink(ThreeDTransverseTracksAlgorithm *pAlgori
 
         CartesianVector minus(0.f, 0.f, 0.f), split(0.f, 0.f, 0.f), plus(0.f, 0.f, 0.f);
         float chi2Minus(std::numeric_limits<float>::max()), chi2Split(std::numeric_limits<float>::max()), chi2Plus(std::numeric_limits<float>::max());
-        LArGeometryHelper::MergeThreePositions3D(hitType1, hitType2, hitType3, minus1, minus2, minus3, minus, chi2Minus);
-        LArGeometryHelper::MergeThreePositions3D(hitType1, hitType2, hitType3, split1, split2, split3, split, chi2Split);
-        LArGeometryHelper::MergeThreePositions3D(hitType1, hitType2, hitType3, plus1, plus2, plus3, plus, chi2Plus);
+        LArGeometryHelper::MergeThreePositions3D(this->GetPandora(), hitType1, hitType2, hitType3, minus1, minus2, minus3, minus, chi2Minus);
+        LArGeometryHelper::MergeThreePositions3D(this->GetPandora(), hitType1, hitType2, hitType3, split1, split2, split3, split, chi2Split);
+        LArGeometryHelper::MergeThreePositions3D(this->GetPandora(), hitType1, hitType2, hitType3, plus1, plus2, plus3, plus, chi2Plus);
 
         // Apply final cuts
         const CartesianVector minusToSplit((split - minus).GetUnitVector());
@@ -191,23 +195,19 @@ UndershootTracksTool::Particle::Particle(const TensorType::Element &elementA, co
 
 StatusCode UndershootTracksTool::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_splitMode = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "SplitMode", m_splitMode));
 
-    m_maxTransverseImpactParameter = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTransverseImpactParameter", m_maxTransverseImpactParameter));
 
-    m_minImpactParameterCosTheta = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinImpactParameterCosTheta", m_minImpactParameterCosTheta));
 
-    m_cosThetaCutForKinkSearch = 0.75f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CosThetaCutForKinkSearch", m_cosThetaCutForKinkSearch));
 
     return ThreeDKinkBaseTool::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

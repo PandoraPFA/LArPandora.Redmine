@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    DeltaRayIdentificationAlgorithm();
 
 private:
     pandora::StatusCode Run();
@@ -126,6 +131,6 @@ inline pandora::Algorithm *DeltaRayIdentificationAlgorithm::Factory::CreateAlgor
     return new DeltaRayIdentificationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_DELTA_RAY_IDENTIFICATION_ALGORITHM_H

@@ -12,14 +12,22 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
-StatusCode KinkSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult &slidingFitResult,
-    CartesianVector& splitPosition) const
+KinkSplittingAlgorithm::KinkSplittingAlgorithm() :
+    m_maxScatterRms(0.2f),
+    m_maxScatterCosTheta(0.905f),
+    m_maxSlidingCosTheta(0.985f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode KinkSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitResult &slidingFitResult, CartesianVector& splitPosition) const
 {
     // Search for scatters by scanning over the layers in the sliding fit result
-    const TwoDSlidingFitResult::LayerFitResultMap &layerFitResultMap(slidingFitResult.GetLayerFitResultMap());
+    const LayerFitResultMap &layerFitResultMap(slidingFitResult.GetLayerFitResultMap());
     const int minLayer(layerFitResultMap.begin()->first), maxLayer(layerFitResultMap.rbegin()->first);
 
     const int nLayersHalfWindow(slidingFitResult.GetLayerFitHalfWindow());
@@ -32,8 +40,7 @@ StatusCode KinkSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitRes
 
     float bestCosTheta(1.f);
 
-    for (TwoDSlidingFitResult::LayerFitResultMap::const_iterator iter = layerFitResultMap.begin(), iterEnd = layerFitResultMap.end();
-        iter != iterEnd; ++iter)
+    for (LayerFitResultMap::const_iterator iter = layerFitResultMap.begin(), iterEnd = layerFitResultMap.end(); iter != iterEnd; ++iter)
     {
         const int iLayer(iter->first);
 
@@ -79,15 +86,6 @@ StatusCode KinkSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitRes
     if (!foundSplit)
         return STATUS_CODE_NOT_FOUND;
 
-// --- BEGIN DISPLAY ---
-// ClusterList tempList;
-// tempList.insert((Cluster*)slidingFitResult.GetCluster());
-// PANDORA_MONITORING_API(SetEveDisplayParameters(false, DETECTOR_VIEW_XZ));
-// PANDORA_MONITORING_API(VisualizeClusters(&tempList, "Cluster", GREEN));
-// PANDORA_MONITORING_API(AddMarkerToVisualization(&splitPosition, "SplitPosition", RED, 2.75));
-// PANDORA_MONITORING_API(ViewEvent());
-// --- END DISPLAY ---
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -95,19 +93,16 @@ StatusCode KinkSplittingAlgorithm::FindBestSplitPosition(const TwoDSlidingFitRes
 
 StatusCode KinkSplittingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxScatterRms = 0.2f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxScatterRms", m_maxScatterRms));
 
-    m_maxScatterCosTheta = 0.905;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxScatterCosTheta", m_maxScatterCosTheta));
 
-    m_maxSlidingCosTheta = 0.985;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSlidingCosTeta", m_maxSlidingCosTheta));
 
     return TwoDSlidingFitSplittingAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

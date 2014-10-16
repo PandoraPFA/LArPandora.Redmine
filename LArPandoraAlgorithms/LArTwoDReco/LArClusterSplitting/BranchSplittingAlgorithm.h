@@ -10,7 +10,7 @@
 
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAndSplicingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -28,6 +28,11 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    BranchSplittingAlgorithm();
+
 private:
     void FindBestSplitPosition(const TwoDSlidingFitResult &branchSlidingFit, const TwoDSlidingFitResult &replacementSlidingFit, 
         pandora::CartesianVector &replacementStartPosition, pandora::CartesianVector &branchSplitPosition, 
@@ -35,10 +40,11 @@ private:
 
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
-    float         m_maxTransverseDisplacement;      ///<
-    float         m_maxLongitudinalDisplacement;    ///<
-    float         m_minLongitudinalExtension;       ///<
-    float         m_minCosRelativeAngle;            ///<
+    float           m_maxTransverseDisplacement;        ///< 
+    float           m_maxLongitudinalDisplacement;      ///< 
+    float           m_minLongitudinalExtension;         ///< 
+    float           m_minCosRelativeAngle;              ///< 
+    float           m_projectionAngularAllowance;       ///< 
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,6 +54,6 @@ inline pandora::Algorithm *BranchSplittingAlgorithm::Factory::CreateAlgorithm() 
     return new BranchSplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_BRANCH_SPLITTING_ALGORITHM_H

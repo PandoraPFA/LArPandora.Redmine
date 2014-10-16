@@ -12,7 +12,7 @@
 
 #include "LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -29,6 +29,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    DeltaRayExtensionAlgorithm();
 
 private:
     void GetListOfCleanClusters(const pandora::ClusterList *const pClusterList, pandora::ClusterVector &clusterVector) const;
@@ -50,8 +55,8 @@ private:
     float    m_minClusterLength;                ///<
     float    m_maxClusterLength;                ///<
 
-    float    m_maxTransverseDisplacement;       ///<
     float    m_maxLongitudinalDisplacement;     ///<
+    float    m_maxTransverseDisplacement;       ///<
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,6 +66,6 @@ inline pandora::Algorithm *DeltaRayExtensionAlgorithm::Factory::CreateAlgorithm(
     return new DeltaRayExtensionAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_DELTA_RAY_EXTENSION_ALGORITHM_H

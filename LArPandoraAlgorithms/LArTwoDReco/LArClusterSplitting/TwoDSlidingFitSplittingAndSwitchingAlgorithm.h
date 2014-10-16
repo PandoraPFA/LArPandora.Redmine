@@ -10,9 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArHelpers/LArClusterHelper.h"
+#include "LArObjects/LArTwoDSlidingFitResult.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -20,6 +20,11 @@ namespace lar
  */
 class TwoDSlidingFitSplittingAndSwitchingAlgorithm : public pandora::Algorithm
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    TwoDSlidingFitSplittingAndSwitchingAlgorithm();
 
 protected:
     virtual pandora::StatusCode Run();
@@ -38,7 +43,6 @@ protected:
         pandora::CartesianVector &splitPosition, pandora::CartesianVector &direction1, pandora::CartesianVector &direction2) const = 0;
 
 private:
-
     /**
      *  @brief  Populate cluster vector with subset of cluster list, containing clusters judged to be clean
      *
@@ -85,6 +89,6 @@ private:
     float         m_minClusterLength;     ///< minimum length of clusters
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_SLIDING_FIT_SPLITTING_AND_SWITCHING_ALGORITHM_H

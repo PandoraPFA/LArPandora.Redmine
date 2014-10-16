@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    ClusteringParentAlgorithm();
 
 private:
     pandora::StatusCode Run();
@@ -49,6 +54,6 @@ inline pandora::Algorithm *ClusteringParentAlgorithm::Factory::CreateAlgorithm()
     return new ClusteringParentAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_CLUSTERING_PARENT_ALGORITHM_H

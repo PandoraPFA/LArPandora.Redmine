@@ -8,17 +8,17 @@ include_directories( $ENV{PANDORA_FQ_DIR}/PandoraMonitoring/include )
 
 art_make( BASENAME_ONLY
           LIBRARY_NAME  LArPandoraAlgorithms
-          SUBDIRS LArCalculators
-                  LArCheating
+          SUBDIRS LArCheating
                   LArHelpers
                   LArMonitoring
                   LArObjects
+                  LArPlugins
                   LArThreeDReco
-                  LArThreeDReco/LArClusterSplitting  
                   LArThreeDReco/LArCosmicRay  
                   LArThreeDReco/LArEventBuilding
                   LArThreeDReco/LArHitCreation
                   LArThreeDReco/LArLongitudinalTrackMatching
+                  LArThreeDReco/LArPfoMopUp
                   LArThreeDReco/LArShowerFragments
                   LArThreeDReco/LArShowerMatching
                   LArThreeDReco/LArThreeDBase
@@ -32,21 +32,22 @@ art_make( BASENAME_ONLY
                   LArTwoDReco/LArCosmicRay
                   LArTwoDReco/LArSeedFinding
                   LArUtility
+                  LArVertex
           LIB_LIBRARIES ${PANDORASDK}
                         ${PANDORAMONITORING}
           )
 
-install_headers( SUBDIRS LArCalculators
-                         LArCheating
+install_headers( SUBDIRS LArCheating
                          LArHelpers
                          LArMonitoring
                          LArObjects
+                         LArPlugins
                          LArThreeDReco
-                         LArThreeDReco/LArClusterSplitting
                          LArThreeDReco/LArCosmicRay  
                          LArThreeDReco/LArEventBuilding
                          LArThreeDReco/LArHitCreation
                          LArThreeDReco/LArLongitudinalTrackMatching
+                         LArThreeDReco/LArPfoMopUp
                          LArThreeDReco/LArShowerFragments
                          LArThreeDReco/LArShowerMatching
                          LArThreeDReco/LArThreeDBase
@@ -59,18 +60,19 @@ install_headers( SUBDIRS LArCalculators
                          LArTwoDReco/LArClusterSplitting
                          LArTwoDReco/LArCosmicRay
                          LArTwoDReco/LArSeedFinding
-                         LArUtility )
-install_fhicl( SUBDIRS LArCalculators
-                       LArCheating
+                         LArUtility
+                         LArVertex )
+install_fhicl( SUBDIRS LArCheating
                        LArHelpers
                        LArMonitoring
                        LArObjects
+                       LArPlugins
                        LArThreeDReco
-                       LArThreeDReco/LArClusterSplitting
                        LArThreeDReco/LArCosmicRay  
                        LArThreeDReco/LArEventBuilding
                        LArThreeDReco/LArHitCreation
                        LArThreeDReco/LArLongitudinalTrackMatching
+                       LArThreeDReco/LArPfoMopUp
                        LArThreeDReco/LArShowerFragments
                        LArThreeDReco/LArShowerMatching
                        LArThreeDReco/LArThreeDBase
@@ -83,19 +85,20 @@ install_fhicl( SUBDIRS LArCalculators
                        LArTwoDReco/LArClusterSplitting
                        LArTwoDReco/LArCosmicRay
                        LArTwoDReco/LArSeedFinding
-                       LArUtility )
-install_source( SUBDIRS LArCalculators
-                        LArCheating
+                       LArUtility
+                       LArVertex )
+install_source( SUBDIRS LArCheating
                         LArHelpers
                         LArMonitoring
                         LArObjects
+                        LArPlugins
                         LArThreeDReco
-                        LArThreeDReco/LArClusterSplitting
                         LArThreeDReco/LArCosmicRay  
                         LArThreeDReco/LArHitCreation
                         LArThreeDReco/LArShowerMatching
                         LArThreeDReco/LArShowerFragments
                         LArThreeDReco/LArTransverseTrackMatching
+                        LArThreeDReco/LArPfoMopUp
                         LArThreeDReco/LArLongitudinalTrackMatching
                         LArThreeDReco/LArTrackFragments
                         LArThreeDReco/LArThreeDBase
@@ -106,5 +109,6 @@ install_source( SUBDIRS LArCalculators
                         LArTwoDReco/LArClusterSplitting
                         LArTwoDReco/LArCosmicRay
                         LArTwoDReco/LArSeedFinding
-                        LArUtility )
+                        LArUtility
+                        LArVertex )
 

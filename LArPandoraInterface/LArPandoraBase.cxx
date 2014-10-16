@@ -139,8 +139,7 @@ void LArPandoraBase::InitializePandora()
 
     // Register the algorithms and read the settings
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*m_pPandora));
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterHelperFunctions(*m_pPandora));
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterResetFunctions(*m_pPandora));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*m_pPandora));
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPandora, configFileName));
 
@@ -184,8 +183,9 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
     
     //I'm using a pointer here, with the intention that this not really be used elsewhere...
     art::ServiceHandle<geo::Geometry> geom;
-    std::vector<const sim::SimChannel*> sortedSimChannelVector(geom->Nchannels(),0);
-    for( auto const& simchannel : simChannelVector)
+    std::vector<const sim::SimChannel*> sortedSimChannelVector(geom->Nchannels(), 0);
+
+    for (auto const &simchannel : simChannelVector)
       sortedSimChannelVector.at(simchannel.Channel()) = &simchannel;
 
     //we're gonna probably need the time service to convert hit times to TDCs
@@ -198,18 +198,17 @@ void LArPandoraBase::CollectArtHits(const art::Event &evt, HitVector &hitVector,
 
         if (m_enableMCParticles && !evt.isRealData())
         {
-	  
-	  int start_tdc = ts->TPCTick2TDC( hit->StartTime() );
-	  int end_tdc   = ts->TPCTick2TDC( hit->EndTime()   );
+            const int start_tdc(ts->TPCTick2TDC(hit->StartTime()));
+            const int end_tdc(ts->TPCTick2TDC(hit->EndTime()));
 
-	  std::vector<sim::TrackIDE> trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc,end_tdc));
-	  
+            const std::vector<sim::TrackIDE> trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc, end_tdc));
+
             for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
             {
                 sim::TrackIDE trackIDE = trackCollection.at(iTrack);
                 hitToParticleMap[hit].push_back(trackIDE);
-	    }
-	}
+            }
+        }
     }
 
     mf::LogDebug("LArPandora") << "   Number of ART hits: " << hitVector.size() << std::endl;
@@ -231,7 +230,7 @@ void LArPandoraBase::CollectArtParticles(const art::Event &evt, ParticleMap &par
         art::Ptr<simb::MCParticle> particle(mcParticleHandle, i);
         particleMap[particle->TrackId()] = particle;
 
-	art::Ptr<simb::MCTruth> truth(mcTruthAssociation.at(i));
+        art::Ptr<simb::MCTruth> truth(mcTruthAssociation.at(i));
         truthToParticleMap[truth].push_back(particle->TrackId());
     }
 

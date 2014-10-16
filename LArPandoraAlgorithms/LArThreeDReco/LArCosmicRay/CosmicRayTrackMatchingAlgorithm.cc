@@ -15,8 +15,19 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+CosmicRayTrackMatchingAlgorithm::CosmicRayTrackMatchingAlgorithm() :
+    m_clusterMinLength(10.f),
+    m_vtxXOverlap(3.f),
+    m_minXOverlap(3.f),
+    m_minXOverlapFraction(0.8f),
+    m_maxDisplacement(10.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode CosmicRayTrackMatchingAlgorithm::Run()
 {
@@ -43,25 +54,6 @@ StatusCode CosmicRayTrackMatchingAlgorithm::Run()
     this->MatchThreeViews(matchedClusterUV, matchedClusterVW, matchedClusterWU, particleList);
     this->MatchTwoViews(matchedClusterUV, matchedClusterVW, matchedClusterWU, particleList);
     this->BuildParticles(particleList);
-
-// --- BEGIN EVENT DISPLAY ---
-// ClusterList tempListU, tempListV, tempListW;
-// for (ParticleList::const_iterator iter = particleList.begin(), iterEnd = particleList.end(); iter != iterEnd; ++iter)
-// {
-// const Particle &particle = *iter;
-// Cluster* pClusterU = const_cast<Cluster*>(particle.m_pClusterU);
-// Cluster* pClusterV = const_cast<Cluster*>(particle.m_pClusterV);
-// Cluster* pClusterW = const_cast<Cluster*>(particle.m_pClusterW);
-// if(pClusterU) tempListU.insert(pClusterU);
-// if(pClusterV) tempListV.insert(pClusterV);
-// if(pClusterW) tempListW.insert(pClusterW);
-// }
-// PandoraMonitoringApi::SetEveDisplayParameters(false, DETECTOR_VIEW_XZ);
-// PandoraMonitoringApi::VisualizeClusters(&tempListU, "MatchedClusterU", RED);
-// PandoraMonitoringApi::VisualizeClusters(&tempListV, "MatchedClusterV", BLUE);
-// PandoraMonitoringApi::VisualizeClusters(&tempListW, "MatchedClusterW", GREEN);
-// PandoraMonitoringApi::ViewEvent();
-// --- END EVENT DISPLAY ---
 
     return STATUS_CODE_SUCCESS;
 }
@@ -395,12 +387,12 @@ bool CosmicRayTrackMatchingAlgorithm::CheckMatchedClusters3D(const Cluster *cons
             CartesianVector projVtx2(0.f,0.f,0.f), projEnd2(0.f,0.f,0.f);
             CartesianVector projVtx3(0.f,0.f,0.f), projEnd3(0.f,0.f,0.f);
 
-            LArGeometryHelper::MergeTwoPositions(hitType1, hitType2, vtx1, vtx2, projVtx3, chi2);
-            LArGeometryHelper::MergeTwoPositions(hitType1, hitType2, end1, end2, projEnd3, chi2);
-            LArGeometryHelper::MergeTwoPositions(hitType2, hitType3, vtx2, vtx3, projVtx1, chi2);
-            LArGeometryHelper::MergeTwoPositions(hitType2, hitType3, end2, end3, projEnd1, chi2);
-            LArGeometryHelper::MergeTwoPositions(hitType3, hitType1, vtx3, vtx1, projVtx2, chi2);
-            LArGeometryHelper::MergeTwoPositions(hitType3, hitType1, end3, end1, projEnd2, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType1, hitType2, vtx1, vtx2, projVtx3, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType1, hitType2, end1, end2, projEnd3, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType2, hitType3, vtx2, vtx3, projVtx1, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType2, hitType3, end2, end3, projEnd1, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType3, hitType1, vtx3, vtx1, projVtx2, chi2);
+            LArGeometryHelper::MergeTwoPositions(this->GetPandora(), hitType3, hitType1, end3, end1, projEnd2, chi2);
 
             const bool matchedVtx1(LArClusterHelper::GetClosestDistance(projVtx1, pCluster1) < m_maxDisplacement);
             const bool matchedVtx2(LArClusterHelper::GetClosestDistance(projVtx2, pCluster2) < m_maxDisplacement);
@@ -454,7 +446,7 @@ void CosmicRayTrackMatchingAlgorithm::BuildParticles(const ParticleList &particl
         if (pClusterV) clusterList.insert(pClusterV);
         if (pClusterW) clusterList.insert(pClusterW);
 
-        // TODO - correct these placeholder parameters
+        // TODO Correct these placeholder parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
         pfoParameters.m_particleId = MU_MINUS; // TRACK
         pfoParameters.m_charge = PdgTable::GetParticleCharge(pfoParameters.m_particleId.Get());
@@ -498,27 +490,22 @@ StatusCode CosmicRayTrackMatchingAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputClusterListNameV", m_inputClusterListNameV));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "InputClusterListNameW", m_inputClusterListNameW));
 
-    m_clusterMinLength = 10.f; // cm
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterMinLength", m_clusterMinLength));
 
-    m_vtxXOverlap = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "VtxXOverlap", m_vtxXOverlap));
 
-    m_minXOverlap = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinXOverlap", m_minXOverlap));
 
-    m_minXOverlapFraction = 0.8f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinXOverlapFraction", m_minXOverlapFraction));
 
-    m_maxDisplacement = 10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxDisplacement", m_maxDisplacement));
 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

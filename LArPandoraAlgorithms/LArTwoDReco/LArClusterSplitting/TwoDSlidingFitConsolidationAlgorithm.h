@@ -10,9 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArHelpers/LArClusterHelper.h"
+#include "LArObjects/LArTwoDSlidingFitResult.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -20,6 +20,12 @@ namespace lar
  */
 class TwoDSlidingFitConsolidationAlgorithm : public pandora::Algorithm
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    TwoDSlidingFitConsolidationAlgorithm();
+
 protected:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
@@ -39,7 +45,6 @@ protected:
         ClusterToHitMap &caloHitsToAdd, ClusterToHitMap &caloHitsToRemove) const = 0;
 
 private:
-
     /**
      *  @brief Sort input cluster list into track-like clusters and shower-like clusters
      *
@@ -82,13 +87,12 @@ private:
      */
     pandora::StatusCode RebuildClusters(const ClusterToHitMap &clustersAtStart, const pandora::ClusterList &unavailableClusters) const;
 
-
     std::string  m_reclusteringAlgorithmName;  ///< Name of daughter algorithm to use for cluster re-building
-    float        m_maxClusterLength;           ///< Maximum length of shower clusters to use in re-building
     float        m_minTrackLength;             ///< Minimum length of track clusters to consolidate
+    float        m_maxClusterLength;           ///< Maximum length of shower clusters to use in re-building
     unsigned int m_halfWindowLayers;           ///< Size of layer window for sliding fit results
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_TWO_D_SLIDING_FIT_CONSOLIDATION_ALGORITHM_H

@@ -12,7 +12,7 @@
 
 #include "Pandora/Algorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -30,13 +30,16 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    VertexSplittingAlgorithm();
+
 private:
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
     pandora::StatusCode FindBestSplitPosition(const TwoDSlidingFitResult &slidingFitResult, pandora::CartesianVector &splitPosition) const;
 
-    float           m_splitDisplacement;            ///< Maximum displacement of vertex from cluster
     float           m_splitDisplacementSquared;     ///< Maximum displacement squared
-    float           m_vertexDisplacement;           ///< Maximum displacement of split from vertex
     float           m_vertexDisplacementSquared;    ///< Maximum displacement squared
 };
 
@@ -47,6 +50,6 @@ inline pandora::Algorithm *VertexSplittingAlgorithm::Factory::CreateAlgorithm() 
     return new VertexSplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_VERTEX_SPLITTING_ALGORITHM_H

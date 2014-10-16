@@ -8,9 +8,11 @@
 #ifndef THREE_D_KINK_BASE_TOOL_H
 #define THREE_D_KINK_BASE_TOOL_H 1
 
+#include "LArObjects/LArPointingCluster.h"
+
 #include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -89,8 +91,8 @@ protected:
 
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
-    bool            m_majorityRulesMode;                ///< Whether to run in majority rules mode (always split overshoots, always merge undershoots)
     unsigned int    m_nCommonClusters;                  ///< The number of common clusters
+    bool            m_majorityRulesMode;                ///< Whether to run in majority rules mode (always split overshoots, always merge undershoots)
     float           m_minMatchedFraction;               ///< The min matched sampling point fraction for use as a key tensor element
     unsigned int    m_minMatchedSamplingPoints;         ///< The min number of matched sampling points for use as a key tensor element
     float           m_minLongitudinalImpactParameter;   ///< The min longitudinal impact parameter for connecting accompanying clusters
@@ -129,6 +131,6 @@ private:
     bool ApplyChanges(ThreeDTransverseTracksAlgorithm *pAlgorithm, const ModificationList &modificationList) const;
 };
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef THREE_D_KINK_BASE_TOOL_H

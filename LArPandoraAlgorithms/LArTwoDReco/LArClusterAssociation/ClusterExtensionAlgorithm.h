@@ -10,7 +10,7 @@
 
 #include "LArTwoDReco/LArClusterAssociation/ClusterMergingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -19,8 +19,6 @@ namespace lar
 class ClusterExtensionAlgorithm : public ClusterMergingAlgorithm
 {
 protected:
-    virtual pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
-
     void PopulateClusterMergeMap(const pandora::ClusterVector &clusterVector, ClusterMergeMap &clusterMergeMatrix) const;
 
     /**
@@ -112,7 +110,6 @@ protected:
      *  @param  clusterMergeMap the map of cluster merges
      */
     virtual void FillClusterMergeMap(const ClusterAssociationMatrix &clusterAssociationMatrix, ClusterMergeMap &clusterMergeMap) const = 0;
-
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -155,6 +152,6 @@ inline float ClusterExtensionAlgorithm::ClusterAssociation::GetFigureOfMerit() c
     return m_fom;
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_CLUSTER_EXTENSION_ALGORITHM_H

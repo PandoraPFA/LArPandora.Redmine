@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    LongTracksTool();
 
     /**
      *  @brief  Whether a long element shares clusters with any other long elements
@@ -85,6 +90,6 @@ inline pandora::AlgorithmTool *LongTracksTool::Factory::CreateAlgorithmTool() co
     return new LongTracksTool();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LONG_TRACKS_TOOL_H

@@ -15,7 +15,7 @@
 
 #include "LArThreeDReco/LArThreeDBase/ThreeDTracksBaseAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 class FragmentTensorTool;
@@ -37,15 +37,20 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    ThreeDTrackFragmentsAlgorithm();
+
     void UpdateForNewCluster(pandora::Cluster *const pNewCluster);
 
     /**
      *  @brief  Rebuild clusters after fragmentation
      *
-     *  @param pCluster the cluster to be rebuilt
+     *  @param rebuildList the list of clusters containing hits to be rebuilt
      *  @param newClusters the output list of clusters
      */
-    void RebuildClusters(pandora::Cluster *pCluster, pandora::ClusterList &newClusters) const;
+    void RebuildClusters(const pandora::ClusterList &rebuildList, pandora::ClusterList &newClusters) const;
 
 protected:
     void PerformMainLoop();
@@ -132,24 +137,19 @@ protected:
     pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     typedef std::map<pandora::Cluster*, unsigned int> ClusterToMatchedHitsMap;
-    typedef std::vector<FragmentTensorTool*> TensorToolList;
 
-    std::string         m_inputCaloHitListNameU;            ///< Name of the view U calo hit list
-    std::string         m_inputCaloHitListNameV;            ///< Name of the view V calo hit list
-    std::string         m_inputCaloHitListNameW;            ///< Name of the view W calo hit list
     std::string         m_reclusteringAlgorithmName;        ///< Name of daughter algorithm to use for cluster re-building
 
-    unsigned int        m_nMaxTensorToolRepeats;            ///< The maximum number of repeat loops over tensor tools
+    typedef std::vector<FragmentTensorTool*> TensorToolList;
     TensorToolList      m_algorithmToolList;                ///< The algorithm tool list
+
+    unsigned int        m_nMaxTensorToolRepeats;            ///< The maximum number of repeat loops over tensor tools
 
     float               m_minXOverlap;                      ///< requirement on minimum X overlap for associated clusters
     float               m_minXOverlapFraction;              ///< requirement on minimum X overlap fraction for associated clusters
-    float               m_maxPointDisplacement;             ///< maximum allowed distance between projected points and associated hits
     float               m_maxPointDisplacementSquared;      ///< maximum allowed distance (squared) between projected points and associated hits
-    unsigned int        m_minMatchedSamplingPoints;         ///< minimum number of matched sampling points
     float               m_minMatchedSamplingPointFraction;  ///< minimum fraction of matched sampling points
     unsigned int        m_minMatchedHits;                   ///< minimum number of matched calo hits
-
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -181,6 +181,6 @@ inline pandora::Algorithm *ThreeDTrackFragmentsAlgorithm::Factory::CreateAlgorit
     return new ThreeDTrackFragmentsAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_THREE_D_TRACK_FRAGMENTS_ALGORITHM_H

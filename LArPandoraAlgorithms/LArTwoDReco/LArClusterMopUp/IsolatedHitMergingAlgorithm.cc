@@ -14,8 +14,17 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+IsolatedHitMergingAlgorithm::IsolatedHitMergingAlgorithm() :
+    m_maxCaloHitsInCluster(10),
+    m_hitLayerSearchWindow(10),
+    m_maxHitClusterDistance(5.f)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 void IsolatedHitMergingAlgorithm::ClusterMopUp(const ClusterList &pfoClusters, const ClusterList &remnantClusters,
     const ClusterToListNameMap &clusterToListNameMap) const
@@ -128,19 +137,16 @@ float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluste
 
 StatusCode IsolatedHitMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxCaloHitsInCluster = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
         "MaxCaloHitsInCluster", m_maxCaloHitsInCluster));
 
-    m_hitLayerSearchWindow = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
         "HitLayerSearchWindow", m_hitLayerSearchWindow));
 
-    m_maxHitClusterDistance = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, 
         "MaxHitClusterDistance", m_maxHitClusterDistance));
 
     return ClusterMopUpAlgorithm::ReadSettings(xmlHandle);
 }
 
-} // namespace lar
+} // namespace lar_content

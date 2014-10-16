@@ -11,7 +11,7 @@
 #include "Pandora/Algorithm.h"
 #include "Pandora/AlgorithmTool.h"
 
-namespace lar
+namespace lar_content
 {
 
 class HitCreationBaseTool;
@@ -68,13 +68,22 @@ public:
     void AddThreeDHitsToPfo(pandora::ParticleFlowObject *const pPfo, pandora::CaloHitList &caloHitList, pandora::Cluster *&pCluster3D) const;
 
     /**
-     *  @brief  Create a new three dimensional cluster, using a list of provided three dimensional hits
+     *  @brief  Create a new three dimensional hit from a two dimensional hit
      *
      *  @param  pCaloHit2D the address of the two dimensional calo hit, for which a new three dimensional hit is to be created
      *  @param  position3D the position vector for the new three dimensional calo hit
      *  @param  pCaloHit3D to receive the address of the new three dimensional calo hit
      */
     void CreateThreeDHit(pandora::CaloHit *pCaloHit2D, const pandora::CartesianVector &position3D, pandora::CaloHit *&pCaloHit3D) const;
+
+    /**
+     *  @brief  Check that a new three dimensional position is not unphysical
+     *
+     *  @param  position3D the position vector for the new three dimensional calo hit
+     *
+     *  @param  boolean  
+     */
+    bool CheckThreeDHit(const pandora::CartesianVector &position3D) const;
 
 private:
     pandora::StatusCode Run();
@@ -107,12 +116,12 @@ private:
     void SeparateTwoDHits(const pandora::ParticleFlowObject *const pPfo, pandora::CaloHitList &usedHits,
         pandora::CaloHitList &remainingHits) const;
 
+    typedef std::vector<HitCreationBaseTool*> HitCreationToolList;
+    HitCreationToolList     m_algorithmToolList;        ///< The algorithm tool list
+
     std::string             m_inputPfoListName;         ///< The name of the input pfo list
     std::string             m_outputCaloHitListName;    ///< The name of the output calo hit list
     std::string             m_outputClusterListName;    ///< The name of the output cluster list
-
-    typedef std::vector<HitCreationBaseTool*> HitCreationToolList;
-    HitCreationToolList     m_algorithmToolList;        ///< The algorithm tool list
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,6 +131,6 @@ inline pandora::Algorithm *ThreeDHitCreationAlgorithm::Factory::CreateAlgorithm(
     return new ThreeDHitCreationAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_THREE_D_HIT_CREATION_ALGORITHM_H

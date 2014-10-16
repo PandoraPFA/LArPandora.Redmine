@@ -10,7 +10,7 @@
 
 #include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAndSplicingAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    DeltaRaySplittingAlgorithm();
 
 private:
     void FindBestSplitPosition(const TwoDSlidingFitResult &branchSlidingFit, const TwoDSlidingFitResult &replacementSlidingFit, 
@@ -48,6 +53,6 @@ inline pandora::Algorithm *DeltaRaySplittingAlgorithm::Factory::CreateAlgorithm(
     return new DeltaRaySplittingAlgorithm();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef LAR_DELTA_RAY_SPLITTING_ALGORITHM_H

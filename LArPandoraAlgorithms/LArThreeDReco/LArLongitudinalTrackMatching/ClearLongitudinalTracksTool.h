@@ -10,7 +10,7 @@
 
 #include "LArThreeDReco/LArLongitudinalTrackMatching/ThreeDLongitudinalTracksAlgorithm.h"
 
-namespace lar
+namespace lar_content
 {
 
 /**
@@ -27,6 +27,11 @@ public:
     public:
         pandora::AlgorithmTool *CreateAlgorithmTool() const;
     };
+
+    /**
+     *  @brief  Default constructor
+     */
+    ClearLongitudinalTracksTool();
 
     bool Run(ThreeDLongitudinalTracksAlgorithm *pAlgorithm, TensorType &overlapTensor);
 
@@ -52,6 +57,6 @@ inline pandora::AlgorithmTool *ClearLongitudinalTracksTool::Factory::CreateAlgor
     return new ClearLongitudinalTracksTool();
 }
 
-} // namespace lar
+} // namespace lar_content
 
 #endif // #ifndef CLEAR_LONGITUDINAL_TRACKS_TOOL_H

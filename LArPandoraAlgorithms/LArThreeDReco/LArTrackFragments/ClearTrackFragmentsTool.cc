@@ -14,13 +14,21 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
+
+ClearTrackFragmentsTool::ClearTrackFragmentsTool() :
+    m_minMatchedSamplingPointFraction(0.5f),
+    m_minMatchedHits(5)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 bool ClearTrackFragmentsTool::Run(ThreeDTrackFragmentsAlgorithm *pAlgorithm, TensorType &overlapTensor)
 {
-    if (PandoraSettings::ShouldDisplayAlgorithmInfo())
-       std::cout << "----> Running Algorithm Tool: " << this << ", " << m_algorithmToolType << std::endl;
+    if (PandoraContentApi::GetSettings(*pAlgorithm)->ShouldDisplayAlgorithmInfo())
+       std::cout << "----> Running Algorithm Tool: " << this << ", " << this->GetType() << std::endl;
 
     return this->FindTrackFragments(pAlgorithm, overlapTensor);
 }
@@ -100,7 +108,7 @@ bool ClearTrackFragmentsTool::GetAndCheckElementList(const TensorType &overlapTe
     overlapTensor.GetConnectedElements(pCluster, true, elementList, nU, nV, nW);
 
     // Only allow one fragment hit type
-    HitType fragmentHitType(CUSTOM);
+    HitType fragmentHitType(HIT_CUSTOM);
 
     for (TensorType::ElementList::const_iterator eIter = elementList.begin(); eIter != elementList.end(); ++eIter)
     {
@@ -109,7 +117,7 @@ bool ClearTrackFragmentsTool::GetAndCheckElementList(const TensorType &overlapTe
         if (!((TPC_VIEW_U == thisHitType) || (TPC_VIEW_V == thisHitType) || (TPC_VIEW_W == thisHitType)))
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
-        if (thisHitType != fragmentHitType && CUSTOM != fragmentHitType)
+        if (thisHitType != fragmentHitType && HIT_CUSTOM != fragmentHitType)
             return false;
 
         fragmentHitType = thisHitType;
@@ -142,7 +150,7 @@ bool ClearTrackFragmentsTool::CheckForHitAmbiguities(const TensorType::ElementLi
 
 bool ClearTrackFragmentsTool::CheckOverlapResult(const TensorType::OverlapResult &overlapResult) const
 {
-    // ATTN: This method is currently mirrored in ThreeDTrackFragmentsAlgorithm algorithm
+    // ATTN This method is currently mirrored in ThreeDTrackFragmentsAlgorithm algorithm
 
     if (overlapResult.GetMatchedFraction() < m_minMatchedSamplingPointFraction)
         return false;
@@ -285,7 +293,7 @@ void ClearTrackFragmentsTool::Recluster(ThreeDTrackFragmentsAlgorithm *pAlgorith
     }
     else
     {
-        // ATTN: Can't delete these clusters yet
+        // ATTN Can't delete these clusters yet
         for (CaloHitList::const_iterator hIter = daughterHits.begin(), hIterEnd = daughterHits.end(); hIter != hIterEnd; ++hIter)
         {
             CaloHit *pCaloHit = *hIter;
@@ -324,18 +332,22 @@ void ClearTrackFragmentsTool::Recluster(ThreeDTrackFragmentsAlgorithm *pAlgorith
 void ClearTrackFragmentsTool::RebuildClusters(ThreeDTrackFragmentsAlgorithm *pAlgorithm, const ClusterList &modifiedClusters,
     const ClusterList &deletedClusters, ClusterList &newClusters) const
 {
+    ClusterList rebuildList;
+
     for (ClusterList::const_iterator cIter = modifiedClusters.begin(), cIterEnd = modifiedClusters.end(); cIter != cIterEnd; ++cIter)
     {
         Cluster *pCluster = *cIter;
 
-        if (deletedClusters.count(pCluster))
+        if (deletedClusters.count(pCluster) || !pCluster->IsAvailable())
             continue;
 
-        if (!pCluster->IsAvailable())
-            continue;
-
-        pAlgorithm->RebuildClusters(pCluster, newClusters);
+        rebuildList.insert(pCluster);
     }
+
+    if (rebuildList.empty())
+        return;
+        
+    pAlgorithm->RebuildClusters(rebuildList, newClusters);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -402,15 +414,13 @@ void ClearTrackFragmentsTool::GetAffectedKeyClusters(const TensorType &overlapTe
 
 StatusCode ClearTrackFragmentsTool::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_minMatchedSamplingPointFraction = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMatchedSamplingPointFraction", m_minMatchedSamplingPointFraction));
 
-    m_minMatchedHits = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMatchedHits", m_minMatchedHits));
 
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content

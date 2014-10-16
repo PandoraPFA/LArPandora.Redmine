@@ -15,13 +15,19 @@
 
 using namespace pandora;
 
-namespace lar
+namespace lar_content
 {
 
 StatusCode CheatingCosmicRayIdentificationAlg::Run()
 {
     const PfoList *pPfoList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetList(*this, m_inputPfoListName, pPfoList));
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, PandoraContentApi::GetList(*this, m_inputPfoListName, pPfoList));
+
+    if (NULL == pPfoList)
+    {
+        std::cout << "CheatingCosmicRayIdentificationAlg: pfo list " << m_inputPfoListName << " unavailable." << std::endl;
+        return STATUS_CODE_SUCCESS;
+    }
 
     PfoList outputPfoList, outputDaughterPfoList;
 
@@ -43,7 +49,7 @@ StatusCode CheatingCosmicRayIdentificationAlg::Run()
             {
                 const MCParticle *pMCParticle(MCParticleHelper::GetMainMCParticle(pCluster));
 
-                if (!LArMCParticleHelper::GetPrimaryNeutrino(pMCParticle))
+                if (!LArMCParticleHelper::GetParentNeutrinoId(pMCParticle))
                     isCosmicRay = true;
             }
             catch (StatusCodeException &)
@@ -99,4 +105,4 @@ StatusCode CheatingCosmicRayIdentificationAlg::ReadSettings(const TiXmlHandle xm
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace lar
+} // namespace lar_content
