@@ -1,7 +1,7 @@
 /**
- *  @file   larpandora/LArPandoraInterface/MicroBooNEPandora_module.cc
+ *  @file   larpandora/LArPandoraInterface/LBNE35tPandora_module.cc
  *
- *  @brief  Producer module for MicroBooNE
+ *  @brief  Producer module for LBNE 35t detector.
  *
  */
 
@@ -20,29 +20,34 @@ namespace lar_pandora
 {
 
 /**
- *  @brief  MicroBooNEPandora class
+ *  @brief  LBNE35tPandora class
  */
-class MicroBooNEPandora : public LArPandoraParticleCreator
+class LBNE35tPandora : public LArPandoraParticleCreator
 {
-public:
+public: 
+
     /**
      *  @brief  Constructor
      *
      *  @param  pset
      */
-    MicroBooNEPandora(fhicl::ParameterSet const &pset);
+    LBNE35tPandora(fhicl::ParameterSet const &pset);
 
     /**
      *  @brief  Destructor
      */
-    virtual ~MicroBooNEPandora();
+    virtual ~LBNE35tPandora();
 
 private:
+
     unsigned int GetPandoraVolumeID(const unsigned int cstat, const unsigned int tpc) const;
     void ConfigurePandoraGeometry() const;
+
+    bool            m_useShortVolume;      ///<
+    bool            m_useLongVolume;       ///<
 };
 
-DEFINE_ART_MODULE(MicroBooNEPandora)
+DEFINE_ART_MODULE(LBNE35tPandora)
 
 } // namespace lar_pandora
 
@@ -56,31 +61,34 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 #include "LArContent.h"
 
 // Local includes (LArPandoraInterface)
-#include "MicroBooNEPseudoLayerPlugin.h"
-#include "MicroBooNETransformationPlugin.h"
+#include "LBNE35tPseudoLayerPlugin.h"
+#include "LBNE35tTransformationPlugin.h"
+#include "LBNE35tGeometryHelper.h"
 
 namespace lar_pandora {
 
-MicroBooNEPandora::MicroBooNEPandora(fhicl::ParameterSet const &pset) : LArPandoraParticleCreator(pset)
-{  
+LBNE35tPandora::LBNE35tPandora(fhicl::ParameterSet const &pset) : LArPandoraParticleCreator(pset)
+{
+    m_useShortVolume = pset.get<bool>("UseShortVolume",true);
+    m_useLongVolume = pset.get<bool>("UseLongVolume",true);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-MicroBooNEPandora::~MicroBooNEPandora()
+LBNE35tPandora::~LBNE35tPandora()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void MicroBooNEPandora::ConfigurePandoraGeometry() const
+void LBNE35tPandora::ConfigurePandoraGeometry() const
 {
-    mf::LogDebug("LArPandora") << " *** MicroBooNEPandora::ConfigurePandoraGeometry(...) *** " << std::endl;
+    mf::LogDebug("LArPandora") << " *** LBNE35tPandora::ConfigurePandoraGeometry(...) *** " << std::endl;
 
     // Identify the Geometry and load the plugins
     art::ServiceHandle<geo::Geometry> theGeometry;
 
-    if (std::string::npos == theGeometry->DetectorName().find("microboone"))
+    if (std::string::npos == theGeometry->DetectorName().find("lbne35t"))
     {
         mf::LogError("LArPandora") << " Error! Using invalid geometry: " << theGeometry->DetectorName() << std::endl;
         throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
@@ -89,21 +97,38 @@ void MicroBooNEPandora::ConfigurePandoraGeometry() const
     for (PandoraInstanceMap::const_iterator pIter = m_pandoraInstanceMap.begin(), pIterEnd = m_pandoraInstanceMap.end(); 
         pIter != pIterEnd; ++pIter)
     {
+        const unsigned int      volumeID = pIter->first;
         const pandora::Pandora *pPandora = pIter->second;
+
+        const bool isForward((1 == volumeID) ? true : false); // ATTN: Sign of rotation matrix is taken from Volume ID
     
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora, 
-            new MicroBooNEPseudoLayerPlugin));
+            new LBNE35tPseudoLayerPlugin));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*pPandora, 
-            new MicroBooNETransformationPlugin));
+            new LBNE35tTransformationPlugin(isForward)));
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-unsigned int MicroBooNEPandora::GetPandoraVolumeID(const unsigned int, const unsigned int) const
-{
-    return 0;
+unsigned int LBNE35tPandora::GetPandoraVolumeID(const unsigned int cstat, const unsigned int tpc) const
+{    
+    const LBNE35tGeometryHelper::LBNE35tVolume volumeID(LBNE35tGeometryHelper::GetVolumeID(cstat, tpc));
+
+    if (LBNE35tGeometryHelper::kShortVolume == volumeID) 
+    {
+        if (m_useShortVolume) 
+            return 0;
+    }
+
+    if (LBNE35tGeometryHelper::kLongVolume == volumeID) 
+    {
+        if (m_useLongVolume) 
+            return 1;
+    }
+
+    throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
 }
 
 } // namespace lar_pandora

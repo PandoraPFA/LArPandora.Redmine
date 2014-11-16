@@ -20,7 +20,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     mf::LogDebug("LArPandora") << "   Building Cluster [" << hitVector.size() << "]" << std::endl;
 
     if (hitVector.empty())
-        throw cet::exception("LArPandoraHelper") << " BuildCluster --- No input hits were provided ";
+        throw cet::exception("LArPandoraHelper") << " LArPandoraHelper::BuildCluster --- No input hits were provided ";
 
     // Fill list of cluster properties
     geo::View_t view(geo::kUnknown);
@@ -56,7 +56,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
 
         if (!(thisView == view && thisPlaneID == planeID))
         {
-            throw cet::exception("LArPandoraHelper") << " BuildCluster --- Input hits have inconsistent plane IDs ";
+            throw cet::exception("LArPandoraHelper") << " LArPandoraHelper::BuildCluster --- Input hits have inconsistent plane IDs ";
         }
 
         if (thisWire < startWire || (thisWire == startWire && thisTime < startTime))
@@ -89,7 +89,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     }
     else
     {
-        throw cet::exception("LArPandoraHelper") << " BuildCluster --- Failed to find start and end wires ";
+        throw cet::exception("LArPandoraHelper") << " LArPandoraHelper::BuildCluster --- Failed to find start and end wires ";
     }
 
     const double numerator(Sq * Sqxy - Sqx * Sqy);

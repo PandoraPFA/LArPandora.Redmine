@@ -1,3 +1,5 @@
+#### Legacy script, to avoid breaking uboonecode ####
+
 BEGIN_PROLOG
 
 standard_pandora:
@@ -9,6 +11,7 @@ standard_pandora:
   EnableMCParticles:     true
   EnableProduction:      true
   EnableMonitoring:      false
+  UseHitWidths:          true
 }
 
 END_PROLOG

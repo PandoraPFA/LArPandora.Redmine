@@ -1,8 +1,37 @@
-#include "pandoramodules.fcl"
-
 BEGIN_PROLOG
 
-microboone_pandora:   @local::standard_pandora
+microboone_pandora:
+{
+  module_type:           "MicroBooNEPandora"
+  ConfigFile:            "PandoraSettings_MicroBooNE_Standard.xml"
+  GeantModuleLabel:      "largeant"
+  HitFinderModuleLabel:  "gaushit"
+  EnableMCParticles:     true
+  EnableProduction:      true
+  EnableMonitoring:      false
+  UseHitWidths:          true
+}
+
+microboone_pandoracosmic:
+{
+  module_type:           "MicroBooNEPandora"
+  ConfigFile:            "PandoraSettings_MicroBooNE_Cosmic.xml"
+}
+
+microboone_pandoraneutrino:
+{
+  module_type:           "MicroBooNEPandora"
+  ConfigFile:            "PandoraSettings_MicroBooNE_Neutrino.xml"
+}
+
+microboone_pandorawriter:
+{
+  module_type:           "MicroBooNEPandora"
+  ConfigFile:            "PandoraSettings_Write.xml"
+  EnableMCParticles:     true
+  EnableProduction:      false
+  EnableMonitoring:      false
+  UseHitWidths:          true
+}
 
 END_PROLOG
-

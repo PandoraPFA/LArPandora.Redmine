@@ -1,8 +1,8 @@
 /**
  *  @file   larpandora/LArPandoraInterface/LArPandoraBase.h
- * 
- *  @brief  base class for LArPandoraInterface producer module
- * 
+ *
+ *  @brief  Base producer module for reconstructing recob::PFParticles from recob::Hits
+ *
  */
 
 #ifndef LAR_PANDORA_BASE_H
@@ -11,17 +11,11 @@
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
 
-// LArSoft includes
-#include "SimulationBase/MCParticle.h"
-#include "Simulation/SimChannel.h"
-#include "SimulationBase/MCTruth.h"
-#include "RecoBase/Hit.h"
+// Local includes
+#include "LArPandoraCollector.h"
 
 // Pandora includes
 #include "Api/PandoraApi.h"
-
-// ROOT includes
-#include "TTree.h"
 
 // std includes
 #include <string>
@@ -41,7 +35,7 @@ class LArPandoraBase : public art::EDProducer
 public:
     /**
      *  @brief  Constructor
-     * 
+     *
      *  @param  pset
      */
     LArPandoraBase(fhicl::ParameterSet const &pset);
@@ -51,26 +45,25 @@ public:
      */
     virtual ~LArPandoraBase();
 
-    void beginJob();
-    void endJob();
-    void produce(art::Event &evt);
-
-    void reconfigure(fhicl::ParameterSet const &pset);
+    virtual void beginJob();
 
 protected:
-    typedef std::vector< art::Ptr<simb::MCParticle> > ParticleVector;
-    typedef std::vector< art::Ptr<recob::Hit> >  HitVector;
-    typedef std::map< art::Ptr<recob::Hit>, std::vector<sim::TrackIDE> > HitToParticleMap;
-    typedef std::map< art::Ptr<simb::MCTruth>, std::vector<int> > TruthToParticleMap;
-    typedef std::map< int, art::Ptr<simb::MCParticle> > ParticleMap;
-    typedef std::map< int, art::Ptr<recob::Hit> > HitMap;
+
+    typedef std::map< int, const pandora::Pandora* > PandoraInstanceMap;
+    typedef std::map< const pandora::Pandora*, std::vector<int> > PandoraAddressList;
+  
+    /**
+     *  @brief Create Pandora instances and register Pandora geometry
+     */
+    virtual void ConfigurePandoraGeometry() const = 0;
 
     /**
-     *  @brief  Event Preparation 
-     * 
-     *  @param  evt  the ART event 
+     *  @brief Return an identification number for the drift volume
+     *
+     *  @param cstat the ID number of the cryostat
+     *  @param tpc the ID number of the TPC
      */
-    void PrepareEvent(const art::Event &evt);  
+    virtual unsigned int GetPandoraVolumeID(const unsigned int cstat, const unsigned int tpc) const = 0;
 
     /**
      *  @brief Register the Pandora algorithms, helper functions and geometry
@@ -78,89 +71,129 @@ protected:
     void InitializePandora();
 
     /**
-     *  @brief  Extract the ART hits and the ART hit-particle relationships
-     * 
-     *  @param  evt  the ART event 
-     *  @param  hits  the ART hits for this event
-     *  @param  hitToParticleMap  mapping from each ART hit to its underlying G4 track ID
+     *  @brief Create the Pandora 2D hits from the ART hits
+     *
+     *  @param hits  the input list of ART hits for this event
+     *  @param hitMap  mapping from Pandora hit addresses to ART hits
      */
-    void CollectArtHits(const art::Event &evt, HitVector &hits, HitToParticleMap &hitToParticleMap) const;
+    void CreatePandoraHits2D(const HitVector &hitVector, HitMap &hitMap) const;
 
     /**
-     *  @brief Extract the ART MC particles
-     * 
-     *  @param evt  the ART event 
-     *  @param particleMap  mapping from each G4 track ID to its corresponding ART MC particle
-     *  @param truthMap  mapping from each G4 track ID to its corresponding ART MC primary particle
+     *  @brief Create the Pandora 3D hits from the ART space points
+     *
+     *  @param spacepoints  the input list of ART spacepoints for this event
+     *  @param spacePointsToHits  the mapping between ART space points and ART hits
+     *  @param spacePointMap  mapping from Pandora hit addresses to ART space points
      */
-    void CollectArtParticles(const art::Event &evt, ParticleMap &particleMap, TruthToParticleMap &truthToParticleMap) const;
-
-    /**
-     *  @brief Register the Pandora geometry
-     */
-    virtual void CreatePandoraGeometry() = 0;
-
-    /**
-     *  @brief Create the Pandora hits from the ART hits
-     * 
-     *  @param hits  the ART hits for this event
-     *  @param hitMap  mapping from Pandora hit ID to ART hit 
-     */
-    virtual void CreatePandoraHits(const HitVector &hits, HitMap &hitMap) const = 0;
+    void CreatePandoraHits3D(const SpacePointVector &spacePointVector, const SpacePointsToHits &spacePointsToHits,
+        SpacePointMap &spacePointMap) const;
 
     /**
      *  @brief Create the Pandora MC particles from the MC particles
-     * 
-     *  @param particleMap  mapping from each G4 track ID to its corresponding ART MC particle 
-     *  @param truthMap  mapping from each G4 track ID to its corresponding ART MC primary particle
+     *
+     *  @param truthToParticles  mapping from MC truth to MC particles
+     *  @param particlesToTruth  mapping from MC particles to MC truth
      */
-    virtual void CreatePandoraParticles(const ParticleMap &particleMap, const TruthToParticleMap &truthToParticleMap) const = 0;
+    void CreatePandoraParticles(const MCTruthToMCParticles &truthToParticles, 
+        const MCParticlesToMCTruth &particlesToTruth) const;
 
     /**
-     *  @brief Create the Pandora hit-particle links
-     * 
-     *  @param hitMap  mapping from Pandora hit ID to ART hit  
+     *  @brief Create 2D projections of the Pandora MC particles
+     *
+     *  @param particleVector  the input vector of MC particles
+     */
+    void CreatePandoraParticles2D(const MCParticleVector &particleVector) const;
+
+    /**
+     *  @brief Create links between the 2D hits and Pandora MC particles
+     *
+     *  @param hitMap  mapping from Pandora hit addresses to ART hits
      *  @param hitToParticleMap  mapping from each ART hit to its underlying G4 track ID
      */
-    virtual void CreatePandoraLinks(const HitMap &hitMap, const HitToParticleMap &hitToParticleMap) const = 0;
+    void CreatePandoraLinks2D(const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap) const;
 
     /**
-     *  @brief Convert the Pandora PFOs into ART clusters and write into ART event
-     * 
-     *  @param evt  the ART event  
-     *  @param hitMap  mapping from Pandora hit ID to ART hit   
+     *  @brief Create the Pandora instances
      */
-    virtual void ProduceArtOutput(art::Event &evt, const HitMap &hitMap) const = 0;
+    void CreatePandoraInstances();
 
     /**
-     *  @brief Process the event using Pandora
+     *  @brief Process the event using each Pandora instance
      */
-    void RunPandora() const;
+    void RunPandoraInstances() const;
 
     /**
-     *  @brief Reset Pandora
+     *  @brief Reset each Pandora instance
      */
-    void ResetPandora() const; 
+    void ResetPandoraInstances() const;
 
     /**
-     *  @brief Initialize the internal monitoring
+     *  @brief Delete each Pandora instance
      */
-    void InitializeMonitoring();
+    void DeletePandoraInstances();
 
-    bool               m_enableProduction;      ///< 
-    bool               m_enableMCParticles;     ///< 
-    bool               m_enableMonitoring;      ///<
-    std::string        m_configFile;            ///< 
-    std::string        m_geantModuleLabel;      ///< 
-    std::string        m_hitfinderModuleLabel;  ///< 
-    pandora::Pandora  *m_pPandora;              ///< 
+    /**
+     *  @brief Loop over MC trajectory points and identify start and end points within the detector
+     *
+     *  @param volumeID  the drift volume
+     *  @param particle  the true particle
+     *  @param startT  the first trajectory point in the detector
+     *  @param endT  the last trajectory point in the detector
+     */
+    void GetTrueStartAndEndPoints(const unsigned int volumeID, const art::Ptr<simb::MCParticle> &particle,
+        int &startT, int& endT) const;
 
-    TTree             *m_pRecoTree;             ///< 
-    int                m_run;                   ///< 
-    int                m_event;                 ///< 
-    int                m_hits;                  ///<
-    float              m_time;                  ///< 
+    /**
+     *  @brief Loop over MC trajectory points and identify start and end points within a given cryostat and TPC
+     *
+     *  @param cstat  the cryostat
+     *  @param tpc  the TPC
+     *  @param particle  the true particle
+     *  @param startT  the first trajectory point in the detector
+     *  @param endT  the last trajectory point in the detector
+     */
+    void GetTrueStartAndEndPoints(const unsigned int cstat, const unsigned int tpc,
+        const art::Ptr<simb::MCParticle> &particle, int &startT, int& endT) const;
 
+    /**
+     *  @brief Use detector and time services to get a true X offset for a given trajectory point
+     *
+     *  @param particle  the true particle
+     *  @param nT  the trajectory point
+     */
+    float GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nT) const;
+
+    /**
+     *  @brief Convert charge in ADCs to approximate MIPs
+     *
+     *  @param hit_Charge  the input charge
+     *  @param hit_View  the input view number
+     */
+    double GetMips(const double hit_Charge, const geo::View_t hit_View) const;
+
+
+    bool                 m_enableProduction;      ///<
+    bool                 m_enableMCParticles;     ///<
+    bool                 m_enableMonitoring;      ///<
+
+    std::string          m_configFile;            ///<
+    std::string          m_geantModuleLabel;      ///<
+    std::string          m_hitfinderModuleLabel;  ///<
+    std::string          m_spacepointModuleLabel; ///<
+    std::string          m_pandoraModuleLabel;    ///<
+
+    bool                 m_useHitWidths;          ///<
+    int                  m_uidOffset;             ///<
+
+    double               m_dx_cm;                 ///<
+    double               m_int_cm;                ///<
+    double               m_rad_cm;                ///< 
+    double               m_dEdX_max;              ///< 
+    double               m_dEdX_mip;              ///< 
+    double               m_mips_to_gev;           ///< 
+    double               m_recombination_factor;  ///<
+
+    PandoraInstanceMap   m_pandoraInstanceMap;    ///<
 };
 
 } // namespace lar_pandora
