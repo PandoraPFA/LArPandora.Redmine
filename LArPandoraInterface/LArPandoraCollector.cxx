@@ -194,6 +194,33 @@ void LArPandoraCollector::CollectPFParticles(const art::Event &evt, const std::s
 	}
     }
 }
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+    PFParticlesToTracks &particlesToTracks)
+{
+    art::Handle< std::vector<recob::Track> > theTracks;
+    evt.getByLabel(label, theTracks);
+
+    if (!theTracks.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find tracks... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theTracks->size() << " Tracks " << std::endl;
+    }
+
+    art::FindOneP<recob::PFParticle> theParticleAssns(theTracks, evt, label);
+    for (unsigned int i = 0; i < theTracks->size(); ++i)
+    {
+        const art::Ptr<recob::Track> track(theTracks, i);
+        trackVector.push_back(track);
+        const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
+        particlesToTracks[particle].push_back(track);
+    }
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -332,7 +359,7 @@ void LArPandoraCollector::SelectFinalStatePFParticles(const PFParticleVector &in
 void LArPandoraCollector::CollectSimChannels(const art::Event &evt, const std::string label, SimChannelVector &simChannelVector)
 {
     if (evt.isRealData())
-        throw cet::exception("LArPandoraCollector") << " PandoraCollector::CollectSimChannels --- Trying to access MC truth from real data ";
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectSimChannels --- Trying to access MC truth from real data ";
 
     art::Handle< std::vector<sim::SimChannel> > theSimChannels;
     evt.getByLabel(label, theSimChannels);
@@ -359,7 +386,7 @@ void LArPandoraCollector::CollectSimChannels(const art::Event &evt, const std::s
 void LArPandoraCollector::CollectMCParticles(const art::Event &evt, const std::string label, MCParticleVector &particleVector)
 {
     if (evt.isRealData())
-        throw cet::exception("LArPandoraCollector") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
     art::Handle< std::vector<simb::MCParticle> > theParticles;
     evt.getByLabel(label, theParticles);
@@ -387,7 +414,7 @@ void LArPandoraCollector::CollectMCParticles(const art::Event &evt, const std::s
     MCParticlesToMCTruth &particlesToTruth)
 {
     if (evt.isRealData())
-        throw cet::exception("LArPandoraCollector") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
     art::Handle< std::vector<simb::MCParticle> > theParticles;
     evt.getByLabel(label, theParticles);

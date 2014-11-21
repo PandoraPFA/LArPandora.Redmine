@@ -10,12 +10,40 @@
 // Local includes
 #include "LArPandoraCollector.h"
 
-
 // Pandora includes
 #include "Helpers/ClusterFitHelper.h"
 
+// ROOT includes
+#include "TVector3.h"
+
 namespace lar_pandora
 {
+
+/**
+ *  @brief  PFParticleTrajectoryPoint class
+ */
+class PFParticleTrajectoryPoint
+{
+  public:  
+    /**
+     *  @brief  Constructor
+     *
+     *  @param  position
+     *  @param  displacement
+     */
+    PFParticleTrajectoryPoint(const pandora::CartesianVector &position, const float displacement);
+
+    pandora::CartesianVector m_position; 
+    float                    m_displacement; 
+
+    bool operator < (const PFParticleTrajectoryPoint& rhs) const
+    {
+        return (m_displacement < rhs.m_displacement);
+    }
+};
+
+typedef std::vector<PFParticleTrajectoryPoint> PFParticleTrajectoryPointList;
+
 
 /**
  *  @brief  PFParticleSeed class
@@ -23,6 +51,7 @@ namespace lar_pandora
 class PFParticleSeed
 {
 public:
+
     /**
      *  @brief  Constructor
      *
@@ -57,13 +86,43 @@ public:
 
 private:
 
+    bool                           m_isInitialized;    ///<
+    pandora::CartesianVector       m_innerPosition;    ///<
+    pandora::CartesianVector       m_innerDirection;   ///<
+    pandora::CartesianVector       m_outerPosition;    ///<
+    pandora::CartesianVector       m_outerDirection;   ///<
+};
+
+
+/**
+ *  @brief  PFParticleFitter class
+ */
+class PFParticleFitter
+{
+public:
     /**
-     *  @brief Build a list of PANDORA space points from a vector of ART space points
+     *  @brief Build a sorted vector of PANDORA space points from a vector of ART space points
+     *
+     *  @param  spacepoints  the input list of ART space points
+     *  @param  pointList  the output list of ROOT space points (sorted by distance along track)
+     */
+    static void BuildSortedPointList(const SpacePointVector &spacepoints, std::vector<TVector3> &pointList);
+
+    /**
+     *  @brief Build a vector of PANDORA space points from a vector of ART space points
      *
      *  @param  spacepoints  the input list of ART space points
      *  @param  pointList  the output list of PANDORA space points
      */
-    void BuildPointList(const SpacePointVector &spacepoints, pandora::CartesianPointList &pointList) const;
+    static void BuildPointList(const SpacePointVector &spacepoints, pandora::CartesianPointList &pointList);
+
+    /**
+     *  @brief Build a vector of trajectory points from a vector of space points
+     *
+     *  @param  spacepoints  the input list of space points
+     *  @param  tarjectoryPointList  the output list of trajectory points
+     */
+    static void BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList);
 
     /**
      *  @brief Find the extremal coordinates from a given set of space points
@@ -72,8 +131,8 @@ private:
      *  @param  innerCoordinate  the inner extremal coordinate (minimum z value)
      *  @param  outerCoordinate  the outer extremal coordinate (maximum z value)
      */
-    void GetExtremalCoordinates(const pandora::CartesianPointList &pointList, pandora::CartesianVector &innerCoordinate, 
-        pandora::CartesianVector &outerCoordinate) const;
+    static void GetExtremalCoordinates(const pandora::CartesianPointList &pointList, pandora::CartesianVector &innerCoordinate, 
+        pandora::CartesianVector &outerCoordinate);
 
     /**
      *  @brief Fit the start/end region of a given set of space points
@@ -83,15 +142,8 @@ private:
      *  @param  vertexDirection  the input seed vertex direction 
      *  @param  fittedDirection  the output fitted vertex direction
      */
-    void FitPoints(const pandora::CartesianPointList &pointList, const pandora::CartesianVector &vertexPosition,
-        const pandora::CartesianVector &vertexDirection, pandora::CartesianVector &fittedDirection) const;
-
-
-    bool                           m_isInitialized;    ///<
-    pandora::CartesianVector       m_innerPosition;    ///<
-    pandora::CartesianVector       m_innerDirection;   ///<
-    pandora::CartesianVector       m_outerPosition;    ///<
-    pandora::CartesianVector       m_outerDirection;   ///<
+    static void FitPoints(const pandora::CartesianPointList &pointList, const pandora::CartesianVector &vertexPosition,
+        const pandora::CartesianVector &vertexDirection, pandora::CartesianVector &fittedDirection);
 };
 
 } // namespace lar_pandora

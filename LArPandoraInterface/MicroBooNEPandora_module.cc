@@ -49,6 +49,9 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
 
+// Framework includes
+#include "cetlib/exception.h"
+
 // LArSoft includes
 #include "Geometry/Geometry.h"
 
@@ -83,7 +86,7 @@ void MicroBooNEPandora::ConfigurePandoraGeometry() const
     if (std::string::npos == theGeometry->DetectorName().find("microboone"))
     {
         mf::LogError("LArPandora") << " Error! Using invalid geometry: " << theGeometry->DetectorName() << std::endl;
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+        throw cet::exception("LArPandora") << " MicroBooNEPandora::ConfigurePandoraGeometry --- Invalid Geometry: " << theGeometry->DetectorName();
     }
 
     for (PandoraInstanceMap::const_iterator pIter = m_pandoraInstanceMap.begin(), pIterEnd = m_pandoraInstanceMap.end(); 

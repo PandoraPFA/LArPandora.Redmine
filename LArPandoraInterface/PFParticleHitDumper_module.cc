@@ -220,7 +220,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector, particlesToSpacePoints);
     LArPandoraCollector::BuildPFParticleHitMaps(particleVector, particlesToSpacePoints, spacePointsToHits, particlesToHits, hitsToParticles);
 
-    std::cout << "  PFParticles (with SpacePoints): " << particleVector.size() << std::endl; 
+    std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
 
 
     // Get geometry and detector properties
@@ -260,12 +260,12 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 
         // define UVW as closest distance from (0,0) to wire
         double xyzStart[3];
-        theGeometry->TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetStart(xyzStart);
+        theGeometry->Cryostat(wireID.Cryostat).TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetStart(xyzStart);
         const double ay(xyzStart[1]);
         const double az(xyzStart[2]);
 
         double xyzEnd[3];
-        theGeometry->TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetEnd(xyzEnd);
+        theGeometry->Cryostat(wireID.Cryostat).TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetEnd(xyzEnd);
         const double by(xyzEnd[1]);
         const double bz(xyzEnd[2]);
 

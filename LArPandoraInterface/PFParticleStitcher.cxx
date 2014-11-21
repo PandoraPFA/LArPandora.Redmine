@@ -1,6 +1,7 @@
 // Framework includes
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "cetlib/cpu_timer.h"
+#include "cetlib/exception.h"
 
 // LArSoft includes
 #include "Utilities/AssociationUtil.h"
@@ -115,10 +116,13 @@ void PFParticleStitcher::produce(art::Event &evt)
     {
         const art::Ptr<recob::PFParticle> particle = iter->first;
         const SpacePointVector &spacepoints = iter->second;
+
+	if(spacepoints.empty())
+	    continue;
+
         particleSeedMap.insert(PFParticleSeedMap::value_type(particle, PFParticleSeed(spacepoints)));
         particleVolumeMap.insert(PFParticleVolumeMap::value_type(particle, this->GetVolumeID(spacepoints, spacePointsToHits)));
     }
-
 
     // Match Parent PFParticles across drift volumes
     // =============================================
@@ -131,7 +135,6 @@ void PFParticleStitcher::produce(art::Event &evt)
 
     if (m_enableMonitoring)
         this->WriteParticleMatches(particleMatches, particleSeedMap);
-
 
     // Merge PFParticles
     // =================
@@ -256,7 +259,7 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 	{    
 	    PFParticleMap::const_iterator iter3A = particleMap.find(oldParticle->Parent());
             if (particleMap.end() == iter3A)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- No trace of particle in particle maps";
 
             const art::Ptr<recob::PFParticle> oldParentParticle = iter3A->second;
 
@@ -281,7 +284,7 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 
 	    PFParticleMap::const_iterator iter3B = particleMap.find(oldDaughterCode);
             if (particleMap.end() == iter3B)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- No trace of particle in particle maps";
 
             const art::Ptr<recob::PFParticle> oldDaughterParticle = iter3B->second;
 
@@ -349,7 +352,7 @@ unsigned int PFParticleStitcher::GetVolumeID(const SpacePointVector &spacePoints
 
 	SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
         if (spacePointsToHits.end() == iter2)
-            throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+            throw cet::exception("LArPandora") << " PFParticleStitcher::GetVolumeID --- Found a space point without an associated hit";
 
         const art::Ptr<recob::Hit> hit = iter2->second;
         const geo::WireID hit_WireID(hit->WireID());
@@ -357,7 +360,7 @@ unsigned int PFParticleStitcher::GetVolumeID(const SpacePointVector &spacePoints
         return this->GetVolumeID(hit_WireID.Cryostat, hit_WireID.TPC);
     }
 
-    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+    throw cet::exception("LArPandora") << " PFParticleStitcher::GetVolumeID --- No volume ID for this collection of hits";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -376,12 +379,10 @@ void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particle
             m_particle2 = particle2->Self();
 
             PFParticleSeedMap::const_iterator iter3 = particleSeedMap.find(particle1);
-            if (particleSeedMap.end() == iter3)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
             PFParticleSeedMap::const_iterator iter4 = particleSeedMap.find(particle2);
-            if (particleSeedMap.end() == iter4)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+
+            if (particleSeedMap.end() == iter3 || particleSeedMap.end() == iter4)
+	        throw cet::exception("LArPandora") << " PFParticleStitcher::WriteParticleMatches --- No trace of particle seed in seed maps";
 
             const PFParticleSeed seed1(iter3->second);
             const PFParticleSeed seed2(iter4->second);
@@ -438,12 +439,10 @@ void PFParticleStitcher::CreateParticleMatches(const PFParticleVector &particleV
 	        continue;
 
 	    PFParticleVolumeMap::const_iterator vIter1 = particleVolumeMap.find(particle1);
-            if (particleVolumeMap.end() == vIter1)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
             PFParticleVolumeMap::const_iterator vIter2 = particleVolumeMap.find(particle2);
-            if (particleVolumeMap.end() == vIter2)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+
+            if (particleVolumeMap.end() == vIter1 || particleVolumeMap.end() == vIter2)
+	        continue;
 
             const unsigned int volume1(vIter1->second);
             const unsigned int volume2(vIter2->second);
@@ -462,12 +461,10 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
     const PFParticleSeedMap &particleSeedMap, ParticleAssociationMatrix &particleAssociationMatrix) const
 {
     PFParticleSeedMap::const_iterator iter1 = particleSeedMap.find(particle1);
-    if (particleSeedMap.end() == iter1)
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
     PFParticleSeedMap::const_iterator iter2 = particleSeedMap.find(particle2);
-    if (particleSeedMap.end() == iter2)
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+
+    if (particleSeedMap.end() == iter1 || particleSeedMap.end() == iter2)
+        return;
 
     const PFParticleSeed seed1(iter1->second);
     const PFParticleSeed seed2(iter2->second);
@@ -611,7 +608,7 @@ void PFParticleStitcher::SelectParticleMatches(const PFParticleMap &particleMap,
 	{
 	    PFParticleMap::const_iterator pIter = particleMap.find(bestParticleInner);
             if (particleMap.end() == pIter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " PFParticleStitcher::SelectParticleMatches --- No trace of particle in particle maps";
 
 	    const art::Ptr<recob::PFParticle> daughterParticle = pIter->second;
             (void) intermediateAssociationMatrix[parentParticle].insert(ParticleAssociationMap::value_type(daughterParticle, bestAssociationInner));
@@ -621,7 +618,7 @@ void PFParticleStitcher::SelectParticleMatches(const PFParticleMap &particleMap,
 	{
             PFParticleMap::const_iterator pIter = particleMap.find(bestParticleOuter);
             if (particleMap.end() == pIter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " PFParticleStitcher::SelectParticleMatches --- No trace of particle in particle maps";
 
             const art::Ptr<recob::PFParticle> daughterParticle = pIter->second;
             (void) intermediateAssociationMatrix[parentParticle].insert(ParticleAssociationMap::value_type(daughterParticle, bestAssociationOuter));
@@ -688,7 +685,7 @@ void PFParticleStitcher::SelectParticleMerges(const PFParticleVector &particleVe
 	    const art::Ptr<recob::PFParticle> associatedParticle = *iter2;
 
             if (vetoList.count(associatedParticle))
-	        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " PFParticleStitcher::SelectParticleMerges --- This particle has been counted twice!";
 
             vetoList.insert(associatedParticle);
             outputMergeMap[seedParticle].insert(associatedParticle);
@@ -798,7 +795,7 @@ void PFParticleStitcher::GetClosestVertices(const PFParticleSeed& seed1, const P
 	}
     }
 
-    // Can't find closest vertices [bail out]
+    // Can't find closest vertices [bail out] (ATTN: throw Pandora exception here, as code is based on pandora objects) 
     throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 }
 

@@ -12,6 +12,7 @@
 #include "RecoBase/Hit.h"
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Cluster.h"
+#include "RecoBase/Track.h"
 #include "RecoBase/PFParticle.h"
 
 #include "SimulationBase/MCParticle.h"
@@ -25,12 +26,14 @@ namespace lar_pandora
 typedef std::vector< art::Ptr<recob::Hit> >         HitVector;
 typedef std::vector< art::Ptr<recob::SpacePoint> >  SpacePointVector;
 typedef std::vector< art::Ptr<recob::Cluster> >     ClusterVector;
+typedef std::vector< art::Ptr<recob::Track> >       TrackVector;
 typedef std::vector< art::Ptr<recob::PFParticle> >  PFParticleVector;
 typedef std::vector< art::Ptr<simb::MCTruth> >      MCTruthVector;
 typedef std::vector< art::Ptr<simb::MCParticle> >   MCParticleVector;
 typedef std::vector< art::Ptr<sim::SimChannel> >    SimChannelVector;
 typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 
+typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ClusterVector >                PFParticlesToClusters;
 typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PFParticlesToSpacePoints;
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
@@ -80,7 +83,7 @@ public:
     static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector);
 
     /**
-     *  @brief Collect the reconstructed SpacePoints from the ART event record
+     *  @brief Collect the reconstructed SpacePoints and associated hits from the ART event record
      *
      *  @param evt the ART event record
      *  @param label the label for the SpacePoint list in the event
@@ -91,18 +94,18 @@ public:
         SpacePointsToHits &spacePointsToHits);   
 
     /**
-     *  @brief Collect the reconstructed Clusters from the ART event record
+     *  @brief Collect the reconstructed Clusters and associated hits from the ART event record
      *
      *  @param evt the ART event record
-     *  @param label the label for the Cluster list in the event
+     *  @param label the label for the SpacePoint list in the event
      *  @param clusterVector the output vector of Cluster objects
      *  @param clustersToHits the output map from Cluster to Hit objects
      */
     static void CollectClusters(const art::Event &evt, const std::string label, ClusterVector &clusterVector, 
-        ClustersToHits &clustersToHits);
+        ClustersToHits &clustersToHits);   
 
     /**
-     *  @brief Collect the reconstructed PFParticles from the ART event record
+     *  @brief Collect the reconstructed PFParticles and associated SpacePoints from the ART event record
      *
      *  @param evt the ART event record
      *  @param label the label for the PFParticle list in the event
@@ -113,7 +116,7 @@ public:
         PFParticlesToSpacePoints &particlesToSpacePoints);  
 
     /**
-     *  @brief Collect the reconstructed PFParticles from the ART event record
+     *  @brief Collect the reconstructed PFParticles and associated Clusters from the ART event record
      *
      *  @param evt the ART event record
      *  @param label the label for the PFParticle list in the event
@@ -122,6 +125,17 @@ public:
      */
     static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
         PFParticlesToClusters &particlesToClusters);
+
+    /**
+     *  @brief Collect the reconstructed PFParticles and associated Tracks from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param trackVector the output vector of Track objects
+     *  @param particlesToTracks the output map from PFParticle to Track objects
+     */
+    static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+        PFParticlesToTracks &particlesToTracks);
 
     /**
      *  @brief Build mapping between PFParticles and Hits using PFParticle/SpacePoint/Hit maps

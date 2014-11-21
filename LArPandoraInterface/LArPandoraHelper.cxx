@@ -6,6 +6,7 @@
  */
 
 #include "LArPandoraHelper.h"
+#include "PFParticleSeed.h"
 
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -17,10 +18,10 @@ namespace lar_pandora {
 
 recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector)
 {
-    mf::LogDebug("LArPandora") << "   Building Cluster [" << hitVector.size() << "]" << std::endl;
+  mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
 
     if (hitVector.empty())
-        throw cet::exception("LArPandoraHelper") << " LArPandoraHelper::BuildCluster --- No input hits were provided ";
+        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildCluster --- No input hits were provided ";
 
     // Fill list of cluster properties
     geo::View_t view(geo::kUnknown);
@@ -56,7 +57,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
 
         if (!(thisView == view && thisPlaneID == planeID))
         {
-            throw cet::exception("LArPandoraHelper") << " LArPandoraHelper::BuildCluster --- Input hits have inconsistent plane IDs ";
+            throw cet::exception("LArPandora") << " LArPandoraHelper::BuildCluster --- Input hits have inconsistent plane IDs ";
         }
 
         if (thisWire < startWire || (thisWire == startWire && thisTime < startTime))
@@ -89,7 +90,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     }
     else
     {
-        throw cet::exception("LArPandoraHelper") << " LArPandoraHelper::BuildCluster --- Failed to find start and end wires ";
+        throw cet::exception("LArPandora") << " LArPandora::BuildCluster --- Failed to find start and end wires ";
     }
 
     const double numerator(Sq * Sqxy - Sqx * Sqy);
@@ -106,6 +107,36 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
                           endWire, sigmaEndWire, endTime, sigmaEndTime,
                           dTdW, sigmadTdW, dQdW, sigmadQdW,
                           Sq, view, id, planeID);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------  
+
+recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<art::Ptr<recob::SpacePoint>> &spacepoints)
+{
+    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of Space Points = " << spacepoints.size() << std::endl;
+
+    if (spacepoints.empty())
+        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No input hits were provided ";
+
+    // Fill list of track properties
+    std::vector<TVector3>               abc;
+    std::vector<TVector3>               xyz;
+    std::vector<TVector3>               dxdydz;
+    std::vector< std::vector <double> > dQdx = std::vector< std::vector<double> >(0);
+    std::vector<double>                 fitMomentum = std::vector<double>(2, util::kBogusD);
+
+    // Loop over vector of space points
+    PFParticleFitter::BuildSortedPointList(spacepoints, abc);
+
+    for (std::vector<TVector3>::const_iterator iter = abc.begin(), iterEnd = abc.end(); iter != iterEnd; ++iter)
+    {
+        const TVector3 &thisPoint = *iter;
+        xyz.push_back(TVector3(thisPoint.x(), thisPoint.y(), thisPoint.z()));
+        dxdydz.push_back(TVector3(0.0, 0.0, 0.0)); // TODO: Fill in these errors
+    }
+
+    // Return a new recob::Track object (of the Bezier flavour)
+    return recob::Track(xyz, dxdydz, dQdx, fitMomentum, id);
 }
 
 } // namespace lar_pandora

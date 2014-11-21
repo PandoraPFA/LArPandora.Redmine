@@ -165,7 +165,7 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
         const double hit_TimeEnd(hit->EndTime());
 
         double xyz[3];
-        theGeometry->TPC(hit_WireID.TPC).Plane(hit_WireID.Plane).Wire(hit_WireID.Wire).GetCenter(xyz);
+        theGeometry->Cryostat(hit_WireID.Cryostat).TPC(hit_WireID.TPC).Plane(hit_WireID.Plane).Wire(hit_WireID.Wire).GetCenter(xyz);
         const double y0_cm(xyz[1]);
         const double z0_cm(xyz[2]);
 

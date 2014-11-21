@@ -91,7 +91,7 @@ void LBNE35tPandora::ConfigurePandoraGeometry() const
     if (std::string::npos == theGeometry->DetectorName().find("lbne35t"))
     {
         mf::LogError("LArPandora") << " Error! Using invalid geometry: " << theGeometry->DetectorName() << std::endl;
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+        throw cet::exception("LArPandora") << " LBNE35tPandora::ConfigurePandoraGeometry --- Invalid Geometry: " << theGeometry->DetectorName();
     }
 
     for (PandoraInstanceMap::const_iterator pIter = m_pandoraInstanceMap.begin(), pIterEnd = m_pandoraInstanceMap.end(); 

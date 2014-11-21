@@ -2,7 +2,6 @@
  *  @file   larpandora/LArPandoraInterface/PFParticleAnalysis_module.cc
  *
  *  @brief  Analysis module for created particles
- *
  */
 
 // Framework Includes

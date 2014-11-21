@@ -35,10 +35,11 @@ outputs:
 physics:
 {
   producers:{
-    caldata:   @local::lbne35t_calwire	
-    hitcheat:  @local::lbne35t_hitcheater
-    pandora1:  @local::lbne35t_pandora
-    pandora2:  @local::lbne35t_particlestitcher
+    caldata:           @local::lbne35t_calwire	
+    hitcheat:          @local::lbne35t_hitcheater
+    pandora:           @local::lbne35t_pandora
+    particlestitcher:  @local::lbne35t_particlestitcher
+    particletracks:    {module_type: PFParticleTrackMaker}
   }
 
   filters:{
@@ -46,12 +47,12 @@ physics:
   } 
 
   analyzers:{
-    pandorana: {module_type: PFParticleAnalysis}
+    pandorana:         {module_type: PFParticleAnalysis}
     pandoramonitoring: {module_type: PFParticleMonitoring}
   }
 
   ### Set up a chain of Producer modules
-  reco: [ caldata, hitcheat, pandora1, pandora2 ]
+  reco: [ caldata, hitcheat, pandora, particlestitcher, particletracks ]
 
   ### Set up a chain of Analyzer modules
   ana: [ pandorana, pandoramonitoring ]
@@ -67,13 +68,14 @@ physics:
 }
 
 ### Configure the Producer modules
-physics.producers.pandora1.HitFinderModuleLabel: "hitcheat"
-physics.producers.pandora2.PFParticleModuleLabel: "pandora1"
-physics.producers.pandora2.UseXCoordinate: false
+physics.producers.pandora.HitFinderModuleLabel: "hitcheat"
+physics.producers.particlestitcher.PFParticleModuleLabel: "pandora"
+physics.producers.particlestitcher.UseXCoordinate: false
+physics.producers.particletracks.PFParticleModuleLabel: "particlestitcher"
 
 ### Configure the Analyzer modules
 physics.analyzers.pandoramonitoring.UseDaughterPFParticles:  true
 physics.analyzers.pandoramonitoring.HitFinderModule: "hitcheat"
-physics.analyzers.pandoramonitoring.SpacePointModule: "pandora1"
-physics.analyzers.pandoramonitoring.PFParticleModule: "pandora2"
-physics.analyzers.pandorana.PFParticleModule: "pandora2"
+physics.analyzers.pandoramonitoring.SpacePointModule: "pandora"
+physics.analyzers.pandoramonitoring.PFParticleModule: "particlestitcher"
+physics.analyzers.pandorana.PFParticleModule: "particlestitcher"
