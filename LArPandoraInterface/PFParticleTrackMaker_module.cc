@@ -145,6 +145,9 @@ void PFParticleTrackMaker::produce(art::Event &evt)
         const art::Ptr<recob::PFParticle> particle = iter->first;
         const SpacePointVector &spacepoints = iter->second;
 
+        if (!LArPandoraCollector::IsTrack(particle))
+	    continue;
+
         if (!LArPandoraCollector::IsFinalState(particleMap, particle))
 	    continue;
 

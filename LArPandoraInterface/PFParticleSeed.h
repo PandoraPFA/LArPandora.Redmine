@@ -60,9 +60,26 @@ public:
     PFParticleSeed(const SpacePointVector &spacepoints);
 
     /**
+     *  @brief  Constructor
+     *
+     *  @param  SpacePointVector
+     */
+    PFParticleSeed(const pandora::CartesianPointList &pointList);
+
+    /**
      *  @brief  Destructor
      */
     ~PFParticleSeed();
+
+    /**
+     *  @brief Initialise Particle Seed
+     */
+    void Initialize(const pandora::CartesianPointList &pointList);
+
+    /**
+     *  @brief Check initialisation
+     */
+    bool IsInitialized() const;
 
     /**
      *  @brief  Return vertex position 

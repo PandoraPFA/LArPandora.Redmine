@@ -6,8 +6,9 @@
 #include "Utilities/AssociationUtil.h"
 #include "SimulationBase/MCTruth.h"
 #include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
 #include "RecoBase/SpacePoint.h"
+#include "RecoBase/Seed.h"
+#include "RecoBase/Cluster.h"
 #include "RecoBase/PFParticle.h"
 
 // Pandora includes
@@ -20,6 +21,7 @@
 // Local includes (LArPandoraInterface)
 #include "LArPandoraParticleCreator.h"
 #include "LArPandoraHelper.h"
+#include "PFParticleSeed.h"
 
 // System includes
 #include <iostream>
@@ -31,7 +33,7 @@ LArPandoraParticleCreator::LArPandoraParticleCreator(fhicl::ParameterSet const &
 {
     produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
-    produces< std::vector<recob::Cluster> >();
+    produces< std::vector<recob::Cluster> >(); 
 
     produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
@@ -207,8 +209,6 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
     typedef std::map< const pandora::ParticleFlowObject*, size_t> ThreeDParticleMap;
-    typedef std::map< const pandora::CaloHit*, TVector3 > ThreeDHitMap;
-    typedef std::vector< TVector3 > ThreeDHitVector;
     typedef std::map< int, HitVector > HitArray;
 
     int spacePointCounter(0);
@@ -290,9 +290,13 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList3D);
         }
 
-        // Get Pandora 3D Positions
-        ThreeDHitMap spacePointMap;
-        ThreeDHitVector spacePointList, spacePointErrorList;
+        // Build Particle
+        recob::PFParticle newParticle(pPfo->GetParticleId(), pfoIdCode, parentIdCode, daughterIdCodes);
+        outputParticles->push_back(newParticle);
+
+        // Build Space Points (TODO: Order 3D hits according to displacement along 3D cluster)
+	pandora::CartesianPointList pointList;
+
         for (pandora::CaloHitList::const_iterator hIter = pandoraHitList3D.begin(), hIterEnd = pandoraHitList3D.end(); hIter != hIterEnd; ++hIter)
         {
             const pandora::CaloHit *const pCaloHit3D = *hIter;
@@ -300,28 +304,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             if (pandora::TPC_3D != pCaloHit3D->GetHitType())
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            const double xpos_cm(pCaloHit3D->GetPositionVector().GetX());
-            const double ypos_cm(pCaloHit3D->GetPositionVector().GetY());
-            const double zpos_cm(pCaloHit3D->GetPositionVector().GetZ());
-
-            const TVector3 xyz(xpos_cm, ypos_cm, zpos_cm);
-            const TVector3 dxdydz(0.0, 0.0, 0.0); // TODO: Fill in representative errors
-
-            spacePointList.push_back(xyz);
-            spacePointErrorList.push_back(dxdydz);
-            spacePointMap.insert( std::pair<const pandora::CaloHit* const, TVector3>(pCaloHit3D, xyz) );
-        }
-
-        // Build Particle
-        recob::PFParticle newParticle(pPfo->GetParticleId(), pfoIdCode, parentIdCode, daughterIdCodes);
-        outputParticles->push_back(newParticle);
-
-        // Build Space Points (TODO: Order 3D hits according to displacement along 3D cluster)
-        for (pandora::CaloHitList::const_iterator hIter = pandoraHitList3D.begin(), hIterEnd = pandoraHitList3D.end(); hIter != hIterEnd; ++hIter)
-        {
-            const pandora::CaloHit *const pCaloHit3D = *hIter;
             const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentCaloHitAddress());
-
             const void *const pHitAddress(pCaloHit2D->GetParentCaloHitAddress());
             const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
             const int hitID((int)(hitID_temp));
@@ -335,14 +318,11 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             const art::Ptr<recob::Hit> hit = artIter->second;
             hitVector.push_back(hit);
 
-            ThreeDHitMap::const_iterator vIter = spacePointMap.find(pCaloHit3D);
-            if (spacePointMap.end() == vIter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+            const pandora::CartesianVector point(pCaloHit3D->GetPositionVector());
+            pointList.push_back(point);
 
-            const TVector3 point(vIter->second);
-
-            double xyz[3] = { point.x(), point.y(), point.z() };
-            double dxdydz[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // TODO: Fill in representative errors
+            double xyz[3] = { point.GetX(), point.GetY(), point.GetZ() };
+            double dxdydz[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // TODO: Fill in errors
             double chi2(0.0);
 
             recob::SpacePoint newSpacePoint(xyz, dxdydz, chi2, spacePointCounter++);
@@ -353,7 +333,29 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                 outputSpacePoints->size() - 1, outputSpacePoints->size());
         }
 
-        // Build Clusters (TODO: Order 2D hits according to displacement along 2D cluster)
+        // Build Seeds (TODO: Persist these into the data stream)
+	if (lar_content::LArPfoHelper::IsTrack(pPfo) && !pointList.empty())
+	{
+	    const PFParticleSeed seed(pointList); // (TODO: Get this information from Pandora output)
+            if (seed.IsInitialized())
+	    {
+	        for (int n=0; n<2; ++n)
+		{
+		    const pandora::CartesianVector vtxPos((0 == n) ? seed.GetInnerPosition() : seed.GetOuterPosition());
+                    const pandora::CartesianVector vtxDir((0 == n) ? seed.GetInnerDirection() : seed.GetOuterDirection());
+	        
+	            double pos[3]     = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
+                    double dir[3]     = { vtxDir.GetX(), vtxDir.GetY(), vtxDir.GetZ() };
+                    double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+                    double dirErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+		
+		    recob::Seed newSeed(pos, dir, posErr, dirErr);
+                    (void) newSeed.IsValid(); // <---- PLACEHOLDER (Until ART will accept PFParticle/Seed associations)
+		}
+	    }
+	}
+
+        // Build Clusters 
         for (pandora::ClusterList::const_iterator cIter = pfoClusterList.begin(), cIterEnd = pfoClusterList.end(); cIter != cIterEnd; ++cIter)
         {
             const pandora::Cluster *const pCluster = *cIter;

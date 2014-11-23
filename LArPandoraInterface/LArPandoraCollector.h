@@ -12,6 +12,7 @@
 #include "RecoBase/Hit.h"
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Cluster.h"
+#include "RecoBase/Seed.h"
 #include "RecoBase/Track.h"
 #include "RecoBase/PFParticle.h"
 
@@ -26,6 +27,7 @@ namespace lar_pandora
 typedef std::vector< art::Ptr<recob::Hit> >         HitVector;
 typedef std::vector< art::Ptr<recob::SpacePoint> >  SpacePointVector;
 typedef std::vector< art::Ptr<recob::Cluster> >     ClusterVector;
+typedef std::vector< art::Ptr<recob::Seed> >        SeedVector;
 typedef std::vector< art::Ptr<recob::Track> >       TrackVector;
 typedef std::vector< art::Ptr<recob::PFParticle> >  PFParticleVector;
 typedef std::vector< art::Ptr<simb::MCTruth> >      MCTruthVector;
@@ -35,6 +37,7 @@ typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ClusterVector >                PFParticlesToClusters;
+typedef std::map< art::Ptr<recob::PFParticle>, SeedVector >                   PFParticlesToSeeds;
 typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PFParticlesToSpacePoints;
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
@@ -135,7 +138,18 @@ public:
      *  @param particlesToTracks the output map from PFParticle to Track objects
      */
     static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
-        PFParticlesToTracks &particlesToTracks);
+        PFParticlesToTracks &particlesToTracks);   
+
+    /**
+     *  @brief Collect the reconstructed PFParticles and associated Tracks from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param seedVector the output vector of Seed objects
+     *  @param particlesToSeeds the output map from PFParticle to Seed objects
+     */
+    static void CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
+        PFParticlesToSeeds &particlesToSeeds);
 
     /**
      *  @brief Build mapping between PFParticles and Hits using PFParticle/SpacePoint/Hit maps
@@ -297,6 +311,23 @@ public:
      */
     static bool IsNeutrino(const art::Ptr<recob::PFParticle> particle);
 
+    /**
+     *  @brief Determine whether a particle has been reconstructed as track-like
+     *
+     *  @param particle the input particle
+     *
+     *  @return true/false
+     */
+    static bool IsTrack(const art::Ptr<recob::PFParticle> particle);
+
+    /**
+     *  @brief Determine whether a particle has been reconstructed as shower-like
+     *
+     *  @param particle the input particle
+     *
+     *  @return true/false
+     */
+    static bool IsShower(const art::Ptr<recob::PFParticle> particle);
 };
 
 } // namespace lar_pandora

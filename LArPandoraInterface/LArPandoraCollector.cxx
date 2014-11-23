@@ -17,6 +17,8 @@
 #include "Geometry/Geometry.h"
 #include "Utilities/TimeService.h"
 
+#include "Objects/ParticleFlowObject.h"
+
 #include <limits>
 #include <iostream>
 
@@ -219,6 +221,39 @@ void LArPandoraCollector::CollectTracks(const art::Event &evt, const std::string
         trackVector.push_back(track);
         const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
         particlesToTracks[particle].push_back(track);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector, 
+    PFParticlesToSeeds &particlesToSeeds)
+{
+    art::Handle< std::vector<recob::Seed> > theSeeds;
+    evt.getByLabel(label, theSeeds);
+
+    if (!theSeeds.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find seeds... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theSeeds->size() << " Seeds " << std::endl;
+    }
+
+    art::FindManyP<recob::PFParticle> theSeedAssns(theSeeds, evt, label);
+    for (unsigned int i = 0; i < theSeeds->size(); ++i)
+    {
+        const art::Ptr<recob::Seed> seed(theSeeds, i);
+        seedVector.push_back(seed);
+
+        const std::vector< art::Ptr<recob::PFParticle> > particles = theSeedAssns.at(i);
+        for (unsigned int j=0; j<particles.size(); ++j)
+	{
+	    const art::Ptr<recob::PFParticle> particle = particles.at(j);          
+            particlesToSeeds[particle].push_back(seed);
+	}
     }
 }
 
@@ -666,10 +701,31 @@ bool LArPandoraCollector::IsFinalState(const PFParticleMap &particleMap, const a
 
 bool LArPandoraCollector::IsNeutrino(const art::Ptr<recob::PFParticle> particle)
 {
-    if (std::abs(particle->PdgCode()) == 12 || std::abs(particle->PdgCode()) == 14 || std::abs(particle->PdgCode()) == 16)
-        return true;
-    
-    return false;
+    const int pdg(particle->PdgCode());
+
+    // electron, muon, tau (use Pandora PDG tables)
+    return ((pandora::NU_E == std::abs(pdg)) || (pandora::NU_MU == std::abs(pdg)) || (pandora::NU_TAU == std::abs(pdg)));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraCollector::IsTrack(const art::Ptr<recob::PFParticle> particle)
+{
+    const int pdg(particle->PdgCode());
+
+    // muon, pion, proton, kaon (use Pandora PDG tables)
+    return ((pandora::MU_MINUS == std::abs(pdg)) || (pandora::PI_PLUS == std::abs(pdg)) || (pandora::PROTON == std::abs(pdg)) || 
+	    (pandora::K_PLUS == std::abs(pdg)));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraCollector::IsShower(const art::Ptr<recob::PFParticle> particle)
+{
+    const int pdg(particle->PdgCode());
+
+    // electron, photon (use Pandora PDG tables)
+    return ((pandora::E_MINUS == std::abs(pdg)) || (pandora::PHOTON == std::abs(pdg)));
 }
 
 

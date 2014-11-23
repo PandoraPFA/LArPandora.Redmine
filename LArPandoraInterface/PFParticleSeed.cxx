@@ -21,7 +21,25 @@ PFParticleSeed::PFParticleSeed(const SpacePointVector &spacepoints) :
 {
     pandora::CartesianPointList pointList;
     PFParticleFitter::BuildPointList(spacepoints, pointList);
-    
+    this->Initialize(pointList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleSeed::PFParticleSeed(const pandora::CartesianPointList &pointList) : 
+    m_isInitialized(false), 
+    m_innerPosition(0.f, 0.f, 0.f),
+    m_innerDirection(0.f, 0.f, 0.f),
+    m_outerPosition(0.f, 0.f, 0.f),
+    m_outerDirection(0.f, 0.f, 0.f)
+{
+    this->Initialize(pointList);
+}
+   
+//------------------------------------------------------------------------------------------------------------------------------------------ 
+
+void PFParticleSeed::Initialize(const pandora::CartesianPointList &pointList)
+{
     try
     {
         PFParticleFitter::GetExtremalCoordinates(pointList, m_innerPosition, m_outerPosition);
@@ -48,7 +66,14 @@ PFParticleSeed::~PFParticleSeed()
 {
 
 }
- 
+  
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleSeed::IsInitialized() const
+{
+    return m_isInitialized;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 pandora::CartesianVector PFParticleSeed::GetInnerPosition() const 
