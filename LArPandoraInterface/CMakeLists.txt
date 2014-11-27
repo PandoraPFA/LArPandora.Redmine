@@ -10,7 +10,6 @@ include_directories( $ENV{PANDORA_FQ_DIR}/PandoraMonitoring/include )
 art_make( BASENAME_ONLY
           LIBRARY_NAME  LArPandoraInterface
           LIB_LIBRARIES LArPandoraAlgorithms
-                        BackTracker_service
                         DetectorProperties_service
                         LArProperties_service
                         Geometry
