@@ -119,24 +119,28 @@ recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<art::P
         throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No input hits were provided ";
 
     // Fill list of track properties
-    std::vector<TVector3>               abc;
     std::vector<TVector3>               xyz;
-    std::vector<TVector3>               dxdydz;
+    std::vector<TVector3>               pxpypz;
     std::vector< std::vector <double> > dQdx = std::vector< std::vector<double> >(0);
     std::vector<double>                 fitMomentum = std::vector<double>(2, util::kBogusD);
 
     // Loop over vector of space points
-    PFParticleFitter::BuildSortedPointList(spacepoints, abc);
+    PFParticleTrajectoryPointList trajectorypoints;
+    PFParticleFitter::BuildTrajectoryPointList(spacepoints, trajectorypoints);
 
-    for (std::vector<TVector3>::const_iterator iter = abc.begin(), iterEnd = abc.end(); iter != iterEnd; ++iter)
+    if (trajectorypoints.empty())
+        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No trajectory points were found ";
+
+    for (PFParticleTrajectoryPointList::const_iterator iter = trajectorypoints.begin(), iterEnd = trajectorypoints.end(); 
+        iter != iterEnd; ++iter)
     {
-        const TVector3 &thisPoint = *iter;
-        xyz.push_back(TVector3(thisPoint.x(), thisPoint.y(), thisPoint.z()));
-        dxdydz.push_back(TVector3(0.0, 0.0, 0.0)); // TODO: Fill in these errors
+        const PFParticleTrajectoryPoint &nextPoint = *iter;
+        xyz.push_back(TVector3(nextPoint.m_position.GetX(), nextPoint.m_position.GetY(), nextPoint.m_position.GetZ()));
+        pxpypz.push_back(TVector3(nextPoint.m_direction.GetX(), nextPoint.m_direction.GetY(), nextPoint.m_direction.GetZ())); 
     }
 
     // Return a new recob::Track object (of the Bezier flavour)
-    return recob::Track(xyz, dxdydz, dQdx, fitMomentum, id);
+    return recob::Track(xyz, pxpypz, dQdx, fitMomentum, id);
 }
 
 } // namespace lar_pandora

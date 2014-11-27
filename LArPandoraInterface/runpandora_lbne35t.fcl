@@ -72,6 +72,7 @@ physics.producers.pandora.HitFinderModuleLabel: "hitcheat"
 physics.producers.particlestitcher.PFParticleModuleLabel: "pandora"
 physics.producers.particlestitcher.UseXCoordinate: false
 physics.producers.particletracks.PFParticleModuleLabel: "particlestitcher"
+physics.producers.particletracks.SpacePointModuleLabel: "pandora"
 
 ### Configure the Analyzer modules
 physics.analyzers.pandoramonitoring.UseDaughterPFParticles:  true

@@ -29,12 +29,15 @@ class PFParticleTrajectoryPoint
      *  @brief  Constructor
      *
      *  @param  position
+     *  @param  direction
      *  @param  displacement
      */
-    PFParticleTrajectoryPoint(const pandora::CartesianVector &position, const float displacement);
+    PFParticleTrajectoryPoint(const pandora::CartesianVector &position, const pandora::CartesianVector &direction, 
+        const float displacement);
 
-    pandora::CartesianVector m_position; 
-    float                    m_displacement; 
+    pandora::CartesianVector  m_position; 
+    pandora::CartesianVector  m_direction; 
+    float                     m_displacement; 
 
     bool operator < (const PFParticleTrajectoryPoint& rhs) const
     {
@@ -117,13 +120,6 @@ private:
 class PFParticleFitter
 {
 public:
-    /**
-     *  @brief Build a sorted vector of PANDORA space points from a vector of ART space points
-     *
-     *  @param  spacepoints  the input list of ART space points
-     *  @param  pointList  the output list of ROOT space points (sorted by distance along track)
-     */
-    static void BuildSortedPointList(const SpacePointVector &spacepoints, std::vector<TVector3> &pointList);
 
     /**
      *  @brief Build a vector of PANDORA space points from a vector of ART space points
