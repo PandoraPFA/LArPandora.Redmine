@@ -4,8 +4,9 @@
 
 namespace lar_pandora {
 
-PFParticleTrajectoryPoint::PFParticleTrajectoryPoint(const pandora::CartesianVector &position, const float displacement) :
-    m_position(position), m_displacement(displacement)
+PFParticleTrajectoryPoint::PFParticleTrajectoryPoint(const pandora::CartesianVector &position, const pandora::CartesianVector &direction,
+    const float displacement) :
+    m_position(position), m_direction(direction), m_displacement(displacement)
 {
 }
 
@@ -128,38 +129,12 @@ void PFParticleFitter::BuildPointList(const SpacePointVector &spacepoints, pando
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleFitter::BuildSortedPointList(const SpacePointVector &spacepoints, std::vector<TVector3> &pointList)
-{
-    PFParticleTrajectoryPointList trajectoryPointList;
-    PFParticleFitter::BuildTrajectoryPointList(spacepoints, trajectoryPointList);
-
-    std::sort(trajectoryPointList.begin(), trajectoryPointList.end());
-
-    for (PFParticleTrajectoryPointList::const_iterator iter = trajectoryPointList.begin(), iterEnd = trajectoryPointList.end();
-	 iter != iterEnd; ++iter)
-    {
-        const PFParticleTrajectoryPoint nextPoint = *iter;
-        pointList.push_back(TVector3(nextPoint.m_position.GetX(), nextPoint.m_position.GetY(), nextPoint.m_position.GetZ()));  
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList)
 {
     pandora::CartesianPointList pointList;
     PFParticleFitter::BuildPointList(spacepoints, pointList);
 
-    if (pointList.empty())
-    {
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
-    }
-    else if (pointList.size() == 1)
-    {
-        trajectoryPointList.push_back(PFParticleTrajectoryPoint(*(pointList.begin()), 0.f));
-	return;
-    }
-    else
+    if (pointList.size() > 1) // need at least two points for a trajectory
     {
         pandora::CartesianVector innerPosition(0.f, 0.f, 0.f);
         pandora::CartesianVector outerPosition(0.f, 0.f, 0.f);
@@ -167,13 +142,17 @@ void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoi
         PFParticleFitter::GetExtremalCoordinates(pointList, innerPosition, outerPosition);
 	const pandora::CartesianVector vertexDirection((outerPosition - innerPosition).GetUnitVector());
 
+        // TODO: Fit the points here
+
         for (pandora::CartesianPointList::const_iterator iter = pointList.begin(), iterEnd = pointList.end(); iter != iterEnd; ++iter)
         {
             const pandora::CartesianVector &thisPosition = *iter;
             const float thisDisplacement(vertexDirection.GetDotProduct(thisPosition - innerPosition));
-            trajectoryPointList.push_back(PFParticleTrajectoryPoint(thisPosition, thisDisplacement));
+            trajectoryPointList.push_back(PFParticleTrajectoryPoint(thisPosition, vertexDirection, thisDisplacement));
 	}
     }
+
+    std::sort(trajectoryPointList.begin(), trajectoryPointList.end());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

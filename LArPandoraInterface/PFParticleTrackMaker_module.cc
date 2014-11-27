@@ -49,7 +49,10 @@ private:
      */
     void reconfigure(fhicl::ParameterSet const &pset);
 
-    std::string   m_particleLabel;
+    unsigned int   m_minSpacePoints;
+
+    std::string    m_particleLabel;
+    std::string    m_spacepointLabel;
 };
 
 DEFINE_ART_MODULE(PFParticleTrackMaker)
@@ -58,6 +61,9 @@ DEFINE_ART_MODULE(PFParticleTrackMaker)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
+
+// Framework includes
+#include "cetlib/exception.h"
 
 // Local includes
 #include "LArPandoraCollector.h"
@@ -69,6 +75,7 @@ DEFINE_ART_MODULE(PFParticleTrackMaker)
 #include "Geometry/Geometry.h"
 #include "RecoBase/PFParticle.h"
 #include "RecoBase/Track.h"
+#include "RecoBase/Hit.h"
 
 namespace lar_pandora {
 
@@ -76,6 +83,7 @@ PFParticleTrackMaker::PFParticleTrackMaker(fhicl::ParameterSet const &pset) : ar
 {
     produces< std::vector<recob::Track> >();    
     produces< art::Assns<recob::Track, recob::PFParticle> >();
+    produces< art::Assns<recob::Track, recob::Hit> >();
 
     this->reconfigure(pset); 
 }
@@ -90,7 +98,9 @@ PFParticleTrackMaker::~PFParticleTrackMaker()
 
 void PFParticleTrackMaker::reconfigure(fhicl::ParameterSet const &pset)
 {
-    m_particleLabel = pset.get<std::string>("PFParticleModuleLabel","pandora");
+    m_particleLabel   = pset.get<std::string>("PFParticleModuleLabel","pandora");
+    m_spacepointLabel = pset.get<std::string>("SpacePointModuleLabel", "pandora");
+    m_minSpacePoints  = pset.get<unsigned int>("MinSpacePoints",3); 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,6 +125,7 @@ void PFParticleTrackMaker::produce(art::Event &evt)
     // ==================
     std::unique_ptr< std::vector<recob::Track> > outputTracks( new std::vector<recob::Track> );
     std::unique_ptr< art::Assns<recob::Track, recob::PFParticle> > outputTracksToParticles( new art::Assns<recob::Track, recob::PFParticle> );
+    std::unique_ptr< art::Assns<recob::Track, recob::Hit> > outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
 
 
     // Get particles and space points
@@ -122,9 +133,12 @@ void PFParticleTrackMaker::produce(art::Event &evt)
     PFParticleMap            particleMap;
     PFParticleVector         particleVector;
     PFParticlesToSpacePoints particlesToSpacePoints;
+    SpacePointVector         spacePointVector;
+    SpacePointsToHits        spacePointsToHits;
     
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector, particlesToSpacePoints);
-    
+    LArPandoraCollector::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits);
+
 
     // Build mapping from particle to particle ID for parent/daughter navigation
     // =========================================================================
@@ -139,11 +153,14 @@ void PFParticleTrackMaker::produce(art::Event &evt)
     // ====================================================
     unsigned int trackCounter(0);
 
-    for (PFParticlesToSpacePoints::const_iterator iter = particlesToSpacePoints.begin(), iterEnd = particlesToSpacePoints.end(); 
-        iter != iterEnd; ++iter)
+    for (PFParticlesToSpacePoints::const_iterator iter1 = particlesToSpacePoints.begin(), iterEnd1 = particlesToSpacePoints.end(); 
+        iter1 != iterEnd1; ++iter1)
     {
-        const art::Ptr<recob::PFParticle> particle = iter->first;
-        const SpacePointVector &spacepoints = iter->second;
+        const art::Ptr<recob::PFParticle> particle = iter1->first;
+        const SpacePointVector &spacepoints = iter1->second;
+
+        if (spacepoints.size() < m_minSpacePoints)
+	    continue;
 
         if (!LArPandoraCollector::IsTrack(particle))
 	    continue;
@@ -151,24 +168,35 @@ void PFParticleTrackMaker::produce(art::Event &evt)
         if (!LArPandoraCollector::IsFinalState(particleMap, particle))
 	    continue;
 
-        if (spacepoints.empty())
-	    continue;
-
         mf::LogDebug("LArPandora") << "   Building new track [" << trackCounter << "] (spacepoints=" << spacepoints.size() << ")" << std::endl; 
 
         PFParticleVector particles;
         particles.push_back(particle);
 
+        HitVector hits;
+	for (SpacePointVector::const_iterator iter2 = spacepoints.begin(), iterEnd2 = spacepoints.end(); iter2 != iterEnd2; ++iter2)
+	{
+	    const art::Ptr<recob::SpacePoint> spacepoint = *iter2;
+	    SpacePointsToHits::const_iterator iter3 = spacePointsToHits.find(spacepoint);
+            if (spacePointsToHits.end() == iter3)
+	        throw cet::exception("LArPandora") << " PFParticleTrackMaker::produce --- Found space point without associated hit";
+
+            const art::Ptr<recob::Hit> hit = iter3->second;
+            hits.push_back(hit);
+	}
+
         recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, spacepoints));
         outputTracks->push_back(newTrack);
 
 	util::CreateAssn(*this, evt, *(outputTracks.get()), particles, *(outputTracksToParticles.get()));
+        util::CreateAssn(*this, evt, *(outputTracks.get()), hits, *(outputTracksToHits.get()));
     }
 
     mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;
     
     evt.put(std::move(outputTracks));
     evt.put(std::move(outputTracksToParticles));
+    evt.put(std::move(outputTracksToHits));
 }
 
 } // namespace lar_pandora
