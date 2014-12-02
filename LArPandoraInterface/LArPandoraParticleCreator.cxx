@@ -34,9 +34,11 @@ LArPandoraParticleCreator::LArPandoraParticleCreator(fhicl::ParameterSet const &
     produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >(); 
+    produces< std::vector<recob::Seed> >();
 
     produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
+    produces< art::Assns<recob::PFParticle, recob::Seed> >();
     produces< art::Assns<recob::SpacePoint, recob::Hit> >();
     produces< art::Assns<recob::Cluster, recob::Hit> >();
 }
@@ -195,9 +197,11 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
     std::unique_ptr< std::vector<recob::SpacePoint> > outputSpacePoints( new std::vector<recob::SpacePoint> );
     std::unique_ptr< std::vector<recob::Cluster> >    outputClusters( new std::vector<recob::Cluster> );
+    std::unique_ptr< std::vector<recob::Seed> >       outputSeeds( new std::vector<recob::Seed> );
 
     std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Seed> >    outputParticlesToSeeds( new art::Assns<recob::PFParticle, recob::Seed> );
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >   outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >      outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
 
@@ -350,7 +354,10 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                     double dirErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
 		
 		    recob::Seed newSeed(pos, dir, posErr, dirErr);
-                    (void) newSeed.IsValid(); // <---- PLACEHOLDER (Until ART will accept PFParticle/Seed associations)
+                    outputSeeds->push_back(newSeed);
+
+                    util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
+                        outputSeeds->size() - 1, outputSeeds->size());
 		}
 	    }
 	}
@@ -407,13 +414,16 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     mf::LogDebug("LArPandora") << "   Number of new particles: " << outputParticles->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new clusters: " << outputClusters->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new space points: " << outputSpacePoints->size() << std::endl;
+    mf::LogDebug("LArPandora") << "   Number of new seeds: " << outputSeeds->size() << std::endl;
 
     evt.put(std::move(outputParticles));
     evt.put(std::move(outputSpacePoints));
     evt.put(std::move(outputClusters));
+    evt.put(std::move(outputSeeds));
 
     evt.put(std::move(outputParticlesToSpacePoints));
     evt.put(std::move(outputParticlesToClusters));
+    evt.put(std::move(outputParticlesToSeeds));
     evt.put(std::move(outputSpacePointsToHits));
     evt.put(std::move(outputClustersToHits));
 }
