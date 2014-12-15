@@ -339,16 +339,16 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         const art::Ptr<recob::PFParticle> recoParticle = *iter;
 
         if (LArPandoraCollector::IsNeutrino(recoParticle))
-	{
+        {
             m_nNeutrinoPfos++; 
-	}
+        }
         else if (LArPandoraCollector::IsFinalState(recoParticleMap, recoParticle))
         {
-	    m_nPrimaryPfos++;
+            m_nPrimaryPfos++;
         }
         else 
         {
-	    m_nDaughterPfos++;
+            m_nDaughterPfos++;
         }
     }
 
@@ -359,24 +359,24 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         const HitVector &trueHitVector = iter->second;
 
         if (trueHitVector.empty())
-	    continue;
+            continue;
 
         m_mcPdg = trueParticle->PdgCode();
         m_mcNuPdg = 0;
         m_pfoPdg = 0;
-	m_pfoNuPdg = 0;
+        m_pfoNuPdg = 0;
 
         MCParticlesToMCTruth::const_iterator nuIter = particlesToTruth.find(trueParticle);
         if (particlesToTruth.end() == nuIter)
             throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a true particle without any ancestry information ";
         
-	const art::Ptr<simb::MCTruth> trueNeutrino = nuIter->second;
+        const art::Ptr<simb::MCTruth> trueNeutrino = nuIter->second;
 
         if (trueNeutrino->NeutrinoSet())
-	{
+        {
             const simb::MCNeutrino neutrino(trueNeutrino->GetNeutrino()); 
             m_mcNuPdg = neutrino.Nu().PdgCode();
-	}
+        }
 
         m_nMCHits = trueHitVector.size();
         m_nMCHitsU = this->CountHitsByType(geo::kU, trueHitVector);
@@ -393,20 +393,20 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_nMatchedHitsV = 0;
         m_nMatchedHitsW = 0;
 
-	MCParticlesToPFParticles::const_iterator pIter1 = matchedParticles.find(trueParticle);
+        MCParticlesToPFParticles::const_iterator pIter1 = matchedParticles.find(trueParticle);
         if (matchedParticles.end() != pIter1)
-	{
-	    const art::Ptr<recob::PFParticle> recoParticle = pIter1->second;
+        {
+            const art::Ptr<recob::PFParticle> recoParticle = pIter1->second;
             m_pfoPdg = recoParticle->PdgCode();
             m_pfoNuPdg = LArPandoraCollector::GetParentNeutrino(recoParticleMap, recoParticle);
 
-	    PFParticlesToHits::const_iterator pIter2 = recoParticlesToHits.find(recoParticle);
+            PFParticlesToHits::const_iterator pIter2 = recoParticlesToHits.find(recoParticle);
             if (recoParticlesToHits.end() == pIter2)
                 throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a reco particle without any hits ";
 
             const HitVector &recoHitVector = pIter2->second;
          
-	    MCParticlesToHits::const_iterator pIter3 = matchedHits.find(trueParticle);
+            MCParticlesToHits::const_iterator pIter3 = matchedHits.find(trueParticle);
             if (matchedHits.end() == pIter3)
                 throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a matched true particle without matched hits ";
 
@@ -421,16 +421,16 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
             m_nMatchedHitsU = this->CountHitsByType(geo::kU, matchedHitVector);
             m_nMatchedHitsV = this->CountHitsByType(geo::kV, matchedHitVector);
             m_nMatchedHitsW = this->CountHitsByType(geo::kW, matchedHitVector);
-	}
+        }
 
         m_purity = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nPfoHits));
         m_completeness = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nMCHits));
 
-	std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId() 
+        std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId() 
                   << ", trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg 
                   << " mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits << std::endl;
 
-	m_pRecoTree->Fill();
+        m_pRecoTree->Fill();
         ++m_index; // Increment index number
     }
 }
@@ -449,41 +449,41 @@ void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoPar
         MCParticlesToHits truthContributionMap;
 
         for (HitVector::const_iterator iter2 = hitVector.begin(), iterEnd2 = hitVector.end(); iter2 != iterEnd2; ++iter2)
-	{
-	    const art::Ptr<recob::Hit> hit = *iter2;
+        {
+            const art::Ptr<recob::Hit> hit = *iter2;
 
-	    HitsToMCParticles::const_iterator iter3 = trueHitsToParticles.find(hit);
+            HitsToMCParticles::const_iterator iter3 = trueHitsToParticles.find(hit);
             if (trueHitsToParticles.end() == iter3)
-	        continue;
+                continue;
 
-	    const art::Ptr<simb::MCParticle> trueParticle = iter3->second;
+            const art::Ptr<simb::MCParticle> trueParticle = iter3->second;
 
             truthContributionMap[trueParticle].push_back(hit);
-	}
+        }
          
-	MCParticlesToHits::const_iterator mIter = truthContributionMap.end();
+        MCParticlesToHits::const_iterator mIter = truthContributionMap.end();
 
         for (MCParticlesToHits::const_iterator iter4 = truthContributionMap.begin(), iterEnd4 = truthContributionMap.end(); 
             iter4 != iterEnd4; ++iter4)
-	{
-	    if ((truthContributionMap.end() == mIter) || (iter4->second.size() > mIter->second.size()))
-	    {
-	        mIter = iter4;
-	    }
-	}
+        {
+            if ((truthContributionMap.end() == mIter) || (iter4->second.size() > mIter->second.size()))
+            {
+                mIter = iter4;
+            }
+        }
 
-	if (truthContributionMap.end() != mIter)
-	{
-	    const art::Ptr<simb::MCParticle> trueParticle = mIter->first;
+        if (truthContributionMap.end() != mIter)
+        {
+            const art::Ptr<simb::MCParticle> trueParticle = mIter->first;
 
-	    MCParticlesToHits::const_iterator iter5 = matchedHits.find(trueParticle);
+            MCParticlesToHits::const_iterator iter5 = matchedHits.find(trueParticle);
 
             if ((matchedHits.end() == iter5) || (mIter->second.size() > iter5->second.size()))
-	    {
-	        matchedParticles[trueParticle] = recoParticle;
+            {
+                matchedParticles[trueParticle] = recoParticle;
                 matchedHits[trueParticle] = mIter->second;
-	    }
-	}
+            }
+        }
     }
 }
 
@@ -519,7 +519,7 @@ int PFParticleMonitoring::CountHitsByType(const int view, const HitVector &hitVe
     {
         const art::Ptr<recob::Hit> hit = *iter;
         if (hit->View() == view)
-	    ++nHits;
+            ++nHits;
     }
 
     return nHits;
