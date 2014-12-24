@@ -255,7 +255,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
         m_plane = wireID.Plane;
         m_wire  = wireID.Wire; 
 
-        m_q = hit->Charge();
+        m_q = hit->Integral();
         m_x = theDetector->ConvertTicksToX(hit->PeakTime(), wireID.Plane, wireID.TPC, wireID.Cryostat);
 
         // define UVW as closest distance from (0,0) to wire

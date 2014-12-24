@@ -7,6 +7,8 @@
 #ifndef LAR_PANDORA_HELPER_H
 #define LAR_PANDORA_HELPER_H
 
+#include "art/Persistency/Common/Ptr.h" 
+
 #include "RecoBase/Track.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/SpacePoint.h"

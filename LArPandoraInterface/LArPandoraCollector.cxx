@@ -14,6 +14,7 @@
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "Geometry/Geometry.h"
 #include "Utilities/TimeService.h"
 
@@ -496,8 +497,8 @@ void LArPandoraCollector::BuildMCParticleHitMaps(const HitVector &hitVector, con
     {
         const art::Ptr<recob::Hit> hit = *iter;
         
-        const int start_tdc(ts->TPCTick2TDC(hit->StartTime()));
-        const int end_tdc(ts->TPCTick2TDC(hit->EndTime()));
+        const raw::TDCtick_t start_tdc(ts->TPCTick2TDC(hit->StartTick()));
+        const raw::TDCtick_t end_tdc(ts->TPCTick2TDC(hit->EndTick()));
 
         const TrackIDEVector trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc, end_tdc));
 
