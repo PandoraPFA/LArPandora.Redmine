@@ -244,9 +244,9 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 
         HitsToPFParticles::const_iterator pIter = hitsToParticles.find(hit);
         if (hitsToParticles.end() != pIter)
-	{
-	    const art::Ptr<recob::PFParticle> particle = pIter->second;
-	    m_particle = particle->Self();
+        {
+            const art::Ptr<recob::PFParticle> particle = pIter->second;
+            m_particle = particle->Self();
         }
                 
         const geo::WireID &wireID(hit->WireID());
@@ -310,36 +310,36 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
         m_primary = 0;
 
         if (particle->IsPrimary())
-	{
-	    m_primary = 1;
-	}
+        {
+            m_primary = 1;
+        }
         else
-	{
-	    const size_t parentID(particle->Parent());
-	    PFParticleMap::const_iterator pIter = theParticleMap.find(parentID);
+        {
+            const size_t parentID(particle->Parent());
+            PFParticleMap::const_iterator pIter = theParticleMap.find(parentID);
             if (theParticleMap.end() == pIter)
                 throw cet::exception("LArPandora") << " PFParticleHitDumper::analyze --- Found particle with ID code";
 
-	    const art::Ptr<recob::PFParticle> particleParent = pIter->second;
+            const art::Ptr<recob::PFParticle> particleParent = pIter->second;
             if (LArPandoraCollector::IsNeutrino(particleParent))
                 m_primary = 1;
-	}
+        }
 
         std::cout << "    PFPARTICLE [" << m_particle << "] [Primary=" << m_primary << "] (" << spacepoints.size() << " Space Points)" << std::endl;
 
         for (unsigned int j=0; j<spacepoints.size(); ++j)
-	{
-	    const art::Ptr<recob::SpacePoint> spacepoint = spacepoints.at(j);
+        {
+            const art::Ptr<recob::SpacePoint> spacepoint = spacepoints.at(j);
 
-	    m_x = spacepoint->XYZ()[0];
+            m_x = spacepoint->XYZ()[0];
             m_y = spacepoint->XYZ()[1];
             m_z = spacepoint->XYZ()[2];
 
-	    SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
+            SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
             if (spacePointsToHits.end() == iter2)
                 throw cet::exception("LArPandora") << " PFParticleHitDumper::analyze --- Found space point without associated hit";
 
-	    const art::Ptr<recob::Hit> hit = iter2->second;
+            const art::Ptr<recob::Hit> hit = iter2->second;
             const geo::WireID &wireID(hit->WireID());
 
             m_cstat = wireID.Cryostat;
@@ -347,7 +347,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
             m_plane = wireID.Plane;
 
             m_pReco3D->Fill();
-	}
+        }
     }
 }
 

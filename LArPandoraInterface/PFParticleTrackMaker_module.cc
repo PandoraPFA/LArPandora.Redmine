@@ -160,13 +160,13 @@ void PFParticleTrackMaker::produce(art::Event &evt)
         const SpacePointVector &spacepoints = iter1->second;
 
         if (spacepoints.size() < m_minSpacePoints)
-	    continue;
+            continue;
 
         if (!LArPandoraCollector::IsTrack(particle))
-	    continue;
+            continue;
 
         if (!LArPandoraCollector::IsFinalState(particleMap, particle))
-	    continue;
+            continue;
 
         mf::LogDebug("LArPandora") << "   Building new track [" << trackCounter << "] (spacepoints=" << spacepoints.size() << ")" << std::endl; 
 
@@ -174,21 +174,21 @@ void PFParticleTrackMaker::produce(art::Event &evt)
         particles.push_back(particle);
 
         HitVector hits;
-	for (SpacePointVector::const_iterator iter2 = spacepoints.begin(), iterEnd2 = spacepoints.end(); iter2 != iterEnd2; ++iter2)
-	{
-	    const art::Ptr<recob::SpacePoint> spacepoint = *iter2;
-	    SpacePointsToHits::const_iterator iter3 = spacePointsToHits.find(spacepoint);
+        for (SpacePointVector::const_iterator iter2 = spacepoints.begin(), iterEnd2 = spacepoints.end(); iter2 != iterEnd2; ++iter2)
+        {
+            const art::Ptr<recob::SpacePoint> spacepoint = *iter2;
+            SpacePointsToHits::const_iterator iter3 = spacePointsToHits.find(spacepoint);
             if (spacePointsToHits.end() == iter3)
-	        throw cet::exception("LArPandora") << " PFParticleTrackMaker::produce --- Found space point without associated hit";
+                throw cet::exception("LArPandora") << " PFParticleTrackMaker::produce --- Found space point without associated hit";
 
             const art::Ptr<recob::Hit> hit = iter3->second;
             hits.push_back(hit);
-	}
+        }
 
         recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, spacepoints));
         outputTracks->push_back(newTrack);
 
-	util::CreateAssn(*this, evt, *(outputTracks.get()), particles, *(outputTracksToParticles.get()));
+        util::CreateAssn(*this, evt, *(outputTracks.get()), particles, *(outputTracksToParticles.get()));
         util::CreateAssn(*this, evt, *(outputTracks.get()), hits, *(outputTracksToHits.get()));
     }
 

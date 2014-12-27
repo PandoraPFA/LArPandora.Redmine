@@ -87,7 +87,7 @@ void LArPandoraParticleCreator::produce(art::Event &evt)
         LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, artMCParticleVector);
         LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
         LArPandoraCollector::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
-	LArPandoraCollector::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
+        LArPandoraCollector::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
     }
 
     // Create PANDORA objects
@@ -299,7 +299,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
         outputParticles->push_back(newParticle);
 
         // Build Space Points (TODO: Order 3D hits according to displacement along 3D cluster)
-	pandora::CartesianPointList pointList;
+        pandora::CartesianPointList pointList;
 
         for (pandora::CaloHitList::const_iterator hIter = pandoraHitList3D.begin(), hIterEnd = pandoraHitList3D.end(); hIter != hIterEnd; ++hIter)
         {
@@ -338,29 +338,29 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
         }
 
         // Build Seeds (TODO: Persist these into the data stream)
-	if (lar_content::LArPfoHelper::IsTrack(pPfo) && !pointList.empty())
-	{
-	    const PFParticleSeed seed(pointList); // (TODO: Get this information from Pandora output)
+        if (lar_content::LArPfoHelper::IsTrack(pPfo) && !pointList.empty())
+        {
+            const PFParticleSeed seed(pointList); // (TODO: Get this information from Pandora output)
             if (seed.IsInitialized())
-	    {
-	        for (int n=0; n<2; ++n)
-		{
-		    const pandora::CartesianVector vtxPos((0 == n) ? seed.GetInnerPosition() : seed.GetOuterPosition());
+            {
+                for (int n=0; n<2; ++n)
+                {
+                    const pandora::CartesianVector vtxPos((0 == n) ? seed.GetInnerPosition() : seed.GetOuterPosition());
                     const pandora::CartesianVector vtxDir((0 == n) ? seed.GetInnerDirection() : seed.GetOuterDirection());
-	        
-	            double pos[3]     = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
+
+                    double pos[3]     = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
                     double dir[3]     = { vtxDir.GetX(), vtxDir.GetY(), vtxDir.GetZ() };
                     double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
                     double dirErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
-		
-		    recob::Seed newSeed(pos, dir, posErr, dirErr);
+
+                    recob::Seed newSeed(pos, dir, posErr, dirErr);
                     outputSeeds->push_back(newSeed);
 
                     util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
                         outputSeeds->size() - 1, outputSeeds->size());
-		}
-	    }
-	}
+                }
+            }
+        }
 
         // Build Clusters 
         for (pandora::ClusterList::const_iterator cIter = pfoClusterList.begin(), cIterEnd = pfoClusterList.end(); cIter != cIterEnd; ++cIter)
@@ -379,7 +379,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             {
                 const pandora::CaloHit *const pCaloHit = *hIter;
 
-	        const void *const pHitAddress(pCaloHit->GetParentCaloHitAddress());
+                const void *const pHitAddress(pCaloHit->GetParentCaloHitAddress());
                 const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
                 const int hitID((int)(hitID_temp));
 
@@ -399,15 +399,15 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
             for (HitArray::const_iterator hIter = hitArray.begin(), hIterEnd = hitArray.end(); hIter != hIterEnd; ++hIter)
-	    {
-	        const HitVector hitVector(hIter->second);
+            {
+                const HitVector hitVector(hIter->second);
                 recob::Cluster newCluster(LArPandoraHelper::BuildCluster(clusterCounter++, hitVector));
                 outputClusters->push_back(newCluster);
-	    
+
                 util::CreateAssn(*this, evt, *(outputClusters.get()), hitVector, *(outputClustersToHits.get()));
                 util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),
                     outputClusters->size() - 1, outputClusters->size());
-	    }
+            }
         }
     }
 

@@ -205,29 +205,29 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
 
         m_index = n;
         m_self = particle->Self();
-	m_pdgcode = particle->PdgCode();
-	m_primary = particle->IsPrimary();
-	m_parent = (particle->IsPrimary() ? -1 : particle->Parent());
+        m_pdgcode = particle->PdgCode();
+        m_primary = particle->IsPrimary();
+        m_parent = (particle->IsPrimary() ? -1 : particle->Parent());
         m_neutrino = LArPandoraCollector::GetParentNeutrino(particleMap, particle);
         m_finalstate = LArPandoraCollector::IsFinalState(particleMap, particle);
 
         m_clusters = 0;
         m_spacepoints = 0;
 
-	PFParticlesToClusters::const_iterator iter1 = particlesToClusters.find(particle);
+        PFParticlesToClusters::const_iterator iter1 = particlesToClusters.find(particle);
         if (particlesToClusters.end() != iter1)
-	    m_clusters = iter1->second.size();
+            m_clusters = iter1->second.size();
 
         PFParticlesToSpacePoints::const_iterator iter2 = particlesToSpacePoints.find(particle);
         if (particlesToSpacePoints.end() != iter2)
-	    m_spacepoints = iter2->second.size();
+            m_spacepoints = iter2->second.size();
 
         std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
                   << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
                   << " (Self=" << m_self << ", Parent=" << m_parent << ")"
                   << " (Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ") " << std::endl;
 
-	m_pRecoTree->Fill();
+        m_pRecoTree->Fill();
     }
 }
 

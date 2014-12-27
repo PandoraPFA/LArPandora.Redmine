@@ -231,10 +231,10 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
 
         // Store the hit address
         if (hitCounter >= m_uidOffset)
-	{
+        {
             mf::LogError("LArPandora") << " --- WARNING: TOO MANY HITS !!! (hitCounter=" << hitCounter << ")" << std::endl;
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-	}
+        }
 
         hitMap[hitCounter] = hit;
 
@@ -250,10 +250,10 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
         const unsigned int volID = pIter1->first;
         const pandora::Pandora *const pPandora = pIter1->second;
 
-	PandoraAddressList::const_iterator pIter2 = pandoraAddressList.find(pPandora);
+        PandoraAddressList::const_iterator pIter2 = pandoraAddressList.find(pPandora);
         const unsigned int numHits((pandoraAddressList.end() == pIter2) ? 0 : pIter2->second.size());
 
-	mf::LogDebug("LArPandora") << "   Number of Pandora 2D Hits [" << volID << "] " << numHits << std::endl;
+        mf::LogDebug("LArPandora") << "   Number of Pandora 2D Hits [" << volID << "] " << numHits << std::endl;
     }
 }
 
@@ -282,7 +282,7 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
         const double ypos_cm(spacepoint->XYZ()[1]);
         const double zpos_cm(spacepoint->XYZ()[2]);
 
-	SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
+        SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
         if (spacePointsToHits.end() == iter2)
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
@@ -334,7 +334,7 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
 
             PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters));
             pandoraAddressList[pPandora].push_back(spacePointCounter);
-	}
+        }
     } 
  
     // Print out results
@@ -344,10 +344,10 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
         const unsigned int volID = pIter1->first;
         const pandora::Pandora *const pPandora = pIter1->second;
 
-	PandoraAddressList::const_iterator pIter2 = pandoraAddressList.find(pPandora);
+        PandoraAddressList::const_iterator pIter2 = pandoraAddressList.find(pPandora);
         const unsigned int numHits((pandoraAddressList.end() == pIter2) ? 0 : pIter2->second.size());
 
-	mf::LogDebug("LArPandora") << "   Number of Pandora 3D Hits [" << volID << "] " << numHits << std::endl;
+        mf::LogDebug("LArPandora") << "   Number of Pandora 3D Hits [" << volID << "] " << numHits << std::endl;
     }
 }
 
@@ -365,7 +365,7 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
         iter != iterEnd; ++iter)
     {
         const art::Ptr<simb::MCParticle> particle = iter->first;
-        particleMap[particle->TrackId()] = particle;	    
+        particleMap[particle->TrackId()] = particle;
     }
 
     // Loop over MC truth objects
@@ -406,8 +406,8 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
             const MCParticleVector &particleVector = iter1->second;
             
             for (MCParticleVector::const_iterator iter2 = particleVector.begin(), iterEnd2 = particleVector.end(); iter2 != iterEnd2; ++iter2)
-	    {
-	        const art::Ptr<simb::MCParticle> particle = *iter2;
+            {
+                const art::Ptr<simb::MCParticle> particle = *iter2;
                 const int trackID(particle->TrackId());
 
                 // Mother/Daughter Links

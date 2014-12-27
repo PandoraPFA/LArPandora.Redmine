@@ -45,12 +45,12 @@ void PFParticleSeed::Initialize(const pandora::CartesianPointList &pointList)
     {
         PFParticleFitter::GetExtremalCoordinates(pointList, m_innerPosition, m_outerPosition);
 
-	pandora::CartesianVector axisDirection((m_outerPosition - m_innerPosition).GetUnitVector());
-	pandora::CartesianVector innerDirection(0.f, 0.f, 0.f);
+        pandora::CartesianVector axisDirection((m_outerPosition - m_innerPosition).GetUnitVector());
+        pandora::CartesianVector innerDirection(0.f, 0.f, 0.f);
         pandora::CartesianVector outerDirection(0.f, 0.f, 0.f);
 
-	PFParticleFitter::FitPoints(pointList, m_innerPosition, axisDirection, innerDirection);
-	PFParticleFitter::FitPoints(pointList, m_outerPosition, axisDirection, outerDirection);
+        PFParticleFitter::FitPoints(pointList, m_innerPosition, axisDirection, innerDirection);
+        PFParticleFitter::FitPoints(pointList, m_outerPosition, axisDirection, outerDirection);
 
         m_innerDirection = (innerDirection.GetDotProduct(axisDirection) > 0.f ? innerDirection : innerDirection * -1.f);
         m_outerDirection = (outerDirection.GetDotProduct(axisDirection) < 0.f ? outerDirection : outerDirection * -1.f);
@@ -140,7 +140,7 @@ void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoi
         pandora::CartesianVector outerPosition(0.f, 0.f, 0.f);
 
         PFParticleFitter::GetExtremalCoordinates(pointList, innerPosition, outerPosition);
-	const pandora::CartesianVector vertexDirection((outerPosition - innerPosition).GetUnitVector());
+        const pandora::CartesianVector vertexDirection((outerPosition - innerPosition).GetUnitVector());
 
         // TODO: Fit the points here
 
@@ -149,7 +149,7 @@ void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoi
             const pandora::CartesianVector &thisPosition = *iter;
             const float thisDisplacement(vertexDirection.GetDotProduct(thisPosition - innerPosition));
             trajectoryPointList.push_back(PFParticleTrajectoryPoint(thisPosition, vertexDirection, thisDisplacement));
-	}
+        }
     }
 
     std::sort(trajectoryPointList.begin(), trajectoryPointList.end());
@@ -219,13 +219,13 @@ void PFParticleFitter::GetExtremalCoordinates(const pandora::CartesianPointList 
             const float thisDistanceSquared((point1 - point2).GetMagnitudeSquared());
 
             if (thisDistanceSquared > maxDistanceSquared)
-	    {
+            {
                 maxDistanceSquared = thisDistanceSquared;
-	        innerCoordinate = ((point1.GetZ() < point2.GetZ()) ? point1 : point2);
-	        outerCoordinate = ((point1.GetZ() < point2.GetZ()) ? point2 : point1);
+                innerCoordinate = ((point1.GetZ() < point2.GetZ()) ? point1 : point2);
+                outerCoordinate = ((point1.GetZ() < point2.GetZ()) ? point2 : point1);
                 foundExtremalCoordinates = true;
-	    }
-	}
+            }
+        }
     }
 
     if (!foundExtremalCoordinates)
@@ -248,14 +248,14 @@ void PFParticleFitter::FitPoints(const pandora::CartesianPointList &pointList, c
         const float thisDisplacement(vertexDirection.GetDotProduct(thisPosition - vertexPosition));
 
         if (thisDisplacement > m_maxDisplacement)
-	    continue;
+            continue;
 
         fitPointList.push_back(pandora::ClusterFitPoint(thisPosition, vertexDirection, m_cellSize, 1.f, 0));
     }
          
     pandora::ClusterFitResult fitResult;   
     pandora::ClusterFitHelper::FitPoints(fitPointList, fitResult);
-	
+
     if (!fitResult.IsFitSuccessful())
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
 

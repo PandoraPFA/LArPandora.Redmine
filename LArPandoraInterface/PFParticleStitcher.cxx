@@ -112,13 +112,13 @@ void PFParticleStitcher::produce(art::Event &evt)
 
     // Create particle seeds, and associate them with drift volumes
     for (PFParticlesToSpacePoints::const_iterator iter =  particlesToSpacePoints.begin(), iterEnd = particlesToSpacePoints.end(); 
-	 iter != iterEnd; ++iter)
+        iter != iterEnd; ++iter)
     {
         const art::Ptr<recob::PFParticle> particle = iter->first;
         const SpacePointVector &spacepoints = iter->second;
 
-	if(spacepoints.empty())
-	    continue;
+        if(spacepoints.empty())
+            continue;
 
         particleSeedMap.insert(PFParticleSeedMap::value_type(particle, PFParticleSeed(spacepoints)));
         particleVolumeMap.insert(PFParticleVolumeMap::value_type(particle, this->GetVolumeID(spacepoints, spacePointsToHits)));
@@ -182,17 +182,17 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
         const art::Ptr<recob::PFParticle> particle = iter->second;
 
         if (LArPandoraCollector::IsFinalState(particleMap, particle))
-	{
+        {
             parentParticles.push_back(particle);
-	}
+        }
         else if (LArPandoraCollector::IsNeutrino(particle))
-	{
-	    // TODO: Recover neutrinos
-	}
+        {
+            // TODO: Recover neutrinos
+        }
         else
-	{
-	    daughterParticles.push_back(particle);
-	}
+        {
+            daughterParticles.push_back(particle);
+        }
     }
 
  
@@ -212,14 +212,14 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
         particleIdMap[particle] = particleCounter;
 
         for (PFParticleList::const_iterator iter2 = iter1->second.begin(), iterEnd2 = iter1->second.end(); iter2 != iterEnd2; ++iter2)
-	{
+        {
             const art::Ptr<recob::PFParticle> mergedParticle = *iter2;
 
             if (particle->Self() == mergedParticle->Self())
-	        continue;
+                continue;
 
             mergeIdMap[mergedParticle] = particleCounter;
-	}
+        }
     }
 
     for (PFParticleVector::const_iterator iter1 = daughterParticles.begin(), iterEnd1 = daughterParticles.end(); iter1 != iterEnd1; ++iter1)
@@ -237,16 +237,16 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 
         // Get the old particles
         PFParticleList oldParticleList;
-	PFParticleMergeMap::const_iterator iter2A = particleMerges.find(oldParticle);
+        PFParticleMergeMap::const_iterator iter2A = particleMerges.find(oldParticle);
 
         if (particleMerges.end() == iter2A)
-	{
-	    oldParticleList.insert(oldParticle);
-	}
+        {
+            oldParticleList.insert(oldParticle);
+        }
         else
-	{
+        {
             oldParticleList.insert(iter2A->second.begin(), iter2A->second.end());
-	}
+        }
 
         // Get the new particle codes
         const int newPdgCode(oldParticle->PdgCode());
@@ -256,47 +256,47 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
         size_t newParentCode(recob::PFParticle::kPFParticlePrimary);
 
         if (!oldParticle->IsPrimary())
-	{    
-	    PFParticleMap::const_iterator iter3A = particleMap.find(oldParticle->Parent());
+        {    
+            PFParticleMap::const_iterator iter3A = particleMap.find(oldParticle->Parent());
             if (particleMap.end() == iter3A)
                 throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- No trace of particle in particle maps";
 
             const art::Ptr<recob::PFParticle> oldParentParticle = iter3A->second;
 
             if (particleIdMap.find(oldParentParticle) != particleIdMap.end())
-	    {
-	        newParentCode = particleIdMap[oldParentParticle];
-	    }
+            {
+                newParentCode = particleIdMap[oldParentParticle];
+            }
             else if (mergeIdMap.find(oldParentParticle) != mergeIdMap.end())
-	    {
+            {
                 newParentCode = mergeIdMap[oldParentParticle];
-	    }
-	}
+            }
+        }
 
         // Get the new daughter particles
-	std::vector<size_t> newDaughterCodes;
+        std::vector<size_t> newDaughterCodes;
 
-	const std::vector<size_t> &oldDaughterCodes = oldParticle->Daughters();
+        const std::vector<size_t> &oldDaughterCodes = oldParticle->Daughters();
 
         for (std::vector<size_t>::const_iterator iter2B = oldDaughterCodes.begin(), iterEnd2B = oldDaughterCodes.end(); iter2B != iterEnd2B; ++iter2B)
-	{
-	    int oldDaughterCode = static_cast<int>(*iter2B);
+        {
+            int oldDaughterCode = static_cast<int>(*iter2B);
 
-	    PFParticleMap::const_iterator iter3B = particleMap.find(oldDaughterCode);
+            PFParticleMap::const_iterator iter3B = particleMap.find(oldDaughterCode);
             if (particleMap.end() == iter3B)
                 throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- No trace of particle in particle maps";
 
             const art::Ptr<recob::PFParticle> oldDaughterParticle = iter3B->second;
 
             if (particleIdMap.find(oldDaughterParticle) != particleIdMap.end())
-	    {
-	        newDaughterCodes.push_back(particleIdMap[oldDaughterParticle]);
-	    }
+            {
+                newDaughterCodes.push_back(particleIdMap[oldDaughterParticle]);
+            }
             else if (mergeIdMap.find(oldDaughterParticle) != mergeIdMap.end())
-	    {
-	        newDaughterCodes.push_back(mergeIdMap[oldDaughterParticle]);
-	    }
-	}
+            {
+                newDaughterCodes.push_back(mergeIdMap[oldDaughterParticle]);
+            }
+        }
 
         // Build new particle
         recob::PFParticle newParticle(newPdgCode, newSelfCode, newParentCode, newDaughterCodes);
@@ -307,29 +307,29 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
         SpacePointVector spacePointVector;
 
         for (PFParticleList::const_iterator iter4 = oldParticleList.begin(), iterEnd4 = oldParticleList.end(); iter4 != iterEnd4; ++iter4)
-	{
-	    const art::Ptr<recob::PFParticle> particle = *iter4;
+        {
+            const art::Ptr<recob::PFParticle> particle = *iter4;
           
-	    PFParticlesToClusters::const_iterator iter5 = particlesToClusters.find(particle);
+            PFParticlesToClusters::const_iterator iter5 = particlesToClusters.find(particle);
             if (particlesToClusters.end() == iter5)
-	        continue;
+                continue;
 
             for (ClusterVector::const_iterator iter6 = iter5->second.begin(), iterEnd6 = iter5->second.end(); iter6 != iterEnd6; ++iter6)
-	    {
-	        const art::Ptr<recob::Cluster> cluster = *iter6;
+            {
+                const art::Ptr<recob::Cluster> cluster = *iter6;
                 clusterVector.push_back(cluster);
-	    }
+            }
 
             PFParticlesToSpacePoints::const_iterator iter7 = particlesToSpacePoints.find(particle);
             if (particlesToSpacePoints.end() == iter7)
-	        continue;
+                continue;
 
             for (SpacePointVector::const_iterator iter8 = iter7->second.begin(), iterEnd8 = iter7->second.end(); iter8 != iterEnd8; ++iter8)
-	    {
-	        const art::Ptr<recob::SpacePoint> spacepoint = *iter8;
+            {
+                const art::Ptr<recob::SpacePoint> spacepoint = *iter8;
                 spacePointVector.push_back(spacepoint);
-	    }
-	}
+            }
+        }
 
         util::CreateAssn(*this, evt, *(outputParticles.get()), clusterVector, *(outputParticlesToClusters.get()));
         util::CreateAssn(*this, evt, *(outputParticles.get()), spacePointVector, *(outputParticlesToSpacePoints.get()));
@@ -350,7 +350,7 @@ unsigned int PFParticleStitcher::GetVolumeID(const SpacePointVector &spacePoints
     {
         const art::Ptr<recob::SpacePoint> spacepoint = *iter1;
 
-	SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
+        SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
         if (spacePointsToHits.end() == iter2)
             throw cet::exception("LArPandora") << " PFParticleStitcher::GetVolumeID --- Found a space point without an associated hit";
 
@@ -382,7 +382,7 @@ void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particle
             PFParticleSeedMap::const_iterator iter4 = particleSeedMap.find(particle2);
 
             if (particleSeedMap.end() == iter3 || particleSeedMap.end() == iter4)
-	        throw cet::exception("LArPandora") << " PFParticleStitcher::WriteParticleMatches --- No trace of particle seed in seed maps";
+                throw cet::exception("LArPandora") << " PFParticleStitcher::WriteParticleMatches --- No trace of particle seed in seed maps";
 
             const PFParticleSeed seed1(iter3->second);
             const PFParticleSeed seed2(iter4->second);
@@ -404,18 +404,18 @@ void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particle
             {
                 this->GetImpactParameters3D(vtx1, dir1, vtx2, m_longitudinalDisplacement, m_transverseDisplacement);
                 m_longitudinalDisplacementCut = this->GetLongitudinalDisplacementCut3D(dir1);
-	    }
+            }
             else
             {
                 this->GetImpactParameters2D(vtx1, dir1, vtx2, m_longitudinalDisplacement, m_transverseDisplacement);
                 m_longitudinalDisplacementCut = this->GetLongitudinalDisplacementCut2D(dir1);
-	    }
+            }
             
             m_cosRelativeAngle = -dir1.GetDotProduct(dir2);
             m_deltaX = this->GetDeltaX(vtx1, dir1, vtx2);
 
             m_pRecoTree->Fill();
-	}
+        }
     }
 }
 
@@ -433,25 +433,25 @@ void PFParticleStitcher::CreateParticleMatches(const PFParticleVector &particleV
             const art::Ptr<recob::PFParticle> particle2 = *pIter2;
 
             if (particle1->Self() == particle2->Self())
-	        continue;
+                continue;
 
             if (particle1->PdgCode() != particle2->PdgCode())
-	        continue;
+                continue;
 
-	    PFParticleVolumeMap::const_iterator vIter1 = particleVolumeMap.find(particle1);
+            PFParticleVolumeMap::const_iterator vIter1 = particleVolumeMap.find(particle1);
             PFParticleVolumeMap::const_iterator vIter2 = particleVolumeMap.find(particle2);
 
             if (particleVolumeMap.end() == vIter1 || particleVolumeMap.end() == vIter2)
-	        continue;
+                continue;
 
             const unsigned int volume1(vIter1->second);
             const unsigned int volume2(vIter2->second);
 
             if (volume1 == volume2)
-	        continue;
+                continue;
 
-	    this->CreateParticleMatches(particle1, particle2, particleSeedMap, particleAssociationMatrix);
-	}
+            this->CreateParticleMatches(particle1, particle2, particleSeedMap, particleAssociationMatrix);
+        }
     }
 }
 
@@ -506,13 +506,13 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
     else
     {
         try
-	{
+        {
             this->GetImpactParameters2D(vtx1, dir1, vtx2, rL1, rT1);
             this->GetImpactParameters2D(vtx2, dir2, vtx1, rL2, rT2);
-	}
+        }
         catch (pandora::StatusCodeException& )
         {
-	    return;
+            return;
         }
     }
 
@@ -525,12 +525,12 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
         {
             rCutL1 = this->GetLongitudinalDisplacementCut3D(dir1);
             rCutL2 = this->GetLongitudinalDisplacementCut3D(dir2);
-	}
+        }
         else
-	{
+        {
             rCutL1 = this->GetLongitudinalDisplacementCut2D(dir1);
             rCutL2 = this->GetLongitudinalDisplacementCut2D(dir2);
-	}
+        }
     }
     catch (pandora::StatusCodeException& )
     {
@@ -548,12 +548,12 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
                                 << "     id1=" << particle1->Self() << ", id2=" << particle2->Self() << std::endl
                                 << "     cosTheta=" << -dir1.GetDotProduct(dir2) << std::endl
                                 << "     rL1=" << rL1 << ", rT1=" << rT1 << ", rL2=" << rL2 << ", rT2=" << rT2 << std::endl
-	                        << "     Length1=" << std::sqrt(particleLength1) << " Length2=" << std::sqrt(particleLength2) << std::endl;
+                                << "     Length1=" << std::sqrt(particleLength1) << " Length2=" << std::sqrt(particleLength2) << std::endl;
 
     (void) particleAssociationMatrix[particle1].insert(ParticleAssociationMap::value_type(particle2, 
             ParticleAssociation(vertexType1, vertexType2, particleLength2)));
     (void) particleAssociationMatrix[particle2].insert(ParticleAssociationMap::value_type(particle1, 
-	    ParticleAssociation(vertexType2, vertexType1, particleLength1)));
+            ParticleAssociation(vertexType2, vertexType1, particleLength1)));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -580,7 +580,7 @@ void PFParticleStitcher::SelectParticleMatches(const PFParticleMap &particleMap,
         for (ParticleAssociationMap::const_iterator iter2 = particleAssociationMap.begin(), iterEnd2 = particleAssociationMap.end(); 
             iter2 != iterEnd2; ++iter2)
         {
-	    const art::Ptr<recob::PFParticle> daughterParticle(iter2->first);
+            const art::Ptr<recob::PFParticle> daughterParticle(iter2->first);
             const ParticleAssociation &particleAssociation(iter2->second);
 
             // Inner associations
@@ -605,24 +605,24 @@ void PFParticleStitcher::SelectParticleMatches(const PFParticleMap &particleMap,
         }
 
         if (bestAssociationInner.GetFigureOfMerit() > std::numeric_limits<float>::epsilon())
-	{
-	    PFParticleMap::const_iterator pIter = particleMap.find(bestParticleInner);
+        {
+            PFParticleMap::const_iterator pIter = particleMap.find(bestParticleInner);
             if (particleMap.end() == pIter)
                 throw cet::exception("LArPandora") << " PFParticleStitcher::SelectParticleMatches --- No trace of particle in particle maps";
 
-	    const art::Ptr<recob::PFParticle> daughterParticle = pIter->second;
+            const art::Ptr<recob::PFParticle> daughterParticle = pIter->second;
             (void) intermediateAssociationMatrix[parentParticle].insert(ParticleAssociationMap::value_type(daughterParticle, bestAssociationInner));
-	}
+        }
 
         if (bestAssociationOuter.GetFigureOfMerit() > std::numeric_limits<float>::epsilon())
-	{
+        {
             PFParticleMap::const_iterator pIter = particleMap.find(bestParticleOuter);
             if (particleMap.end() == pIter)
                 throw cet::exception("LArPandora") << " PFParticleStitcher::SelectParticleMatches --- No trace of particle in particle maps";
 
             const art::Ptr<recob::PFParticle> daughterParticle = pIter->second;
             (void) intermediateAssociationMatrix[parentParticle].insert(ParticleAssociationMap::value_type(daughterParticle, bestAssociationOuter));
-	}
+        }
     }
 
     // Second step: make the merge if A -> X and B -> Y is in fact A -> B and B -> A
@@ -634,7 +634,7 @@ void PFParticleStitcher::SelectParticleMatches(const PFParticleMap &particleMap,
 
         for (ParticleAssociationMap::const_iterator iter4 = parentAssociationMap.begin(), iterEnd4 = parentAssociationMap.end(); iter4 != iterEnd4; ++iter4)
         {
-	    const art::Ptr<recob::PFParticle> daughterParticle(iter4->first);
+            const art::Ptr<recob::PFParticle> daughterParticle(iter4->first);
             const ParticleAssociation &parentToDaughterAssociation(iter4->second);
 
             ParticleAssociationMatrix::const_iterator iter5 = intermediateAssociationMatrix.find(daughterParticle);
@@ -654,7 +654,7 @@ void PFParticleStitcher::SelectParticleMatches(const PFParticleMap &particleMap,
             if (parentToDaughterAssociation.GetParent() == daughterToParentAssociation.GetDaughter() &&
                 parentToDaughterAssociation.GetDaughter() == daughterToParentAssociation.GetParent())
             {
-	        particleMergeMap[parentParticle].insert(daughterParticle);
+                particleMergeMap[parentParticle].insert(daughterParticle);
             }
         }
     }
@@ -672,7 +672,7 @@ void PFParticleStitcher::SelectParticleMerges(const PFParticleVector &particleVe
         const art::Ptr<recob::PFParticle> seedParticle = *iter1;
 
         if (vetoList.count(seedParticle))
-	    continue;
+            continue;
 
         PFParticleList mergeList;
         this->CollectAssociatedParticles(seedParticle, seedParticle, inputMergeMap, vetoList, mergeList);
@@ -682,7 +682,7 @@ void PFParticleStitcher::SelectParticleMerges(const PFParticleVector &particleVe
 
         for (PFParticleList::const_iterator iter2 = mergeList.begin(), iterEnd2 = mergeList.end(); iter2 != iterEnd2; ++iter2)
         {
-	    const art::Ptr<recob::PFParticle> associatedParticle = *iter2;
+            const art::Ptr<recob::PFParticle> associatedParticle = *iter2;
 
             if (vetoList.count(associatedParticle))
                 throw cet::exception("LArPandora") << " PFParticleStitcher::SelectParticleMerges --- This particle has been counted twice!";
@@ -748,51 +748,51 @@ void PFParticleStitcher::GetClosestVertices(const PFParticleSeed& seed1, const P
 
             // Project seed1 onto seed2
             if (m_useXcoordinate)
-	    {
+            {
                 this->GetImpactParameters3D(vtx1, dir1, vtx2, vtxL, vtxT);
                 this->GetImpactParameters3D(vtx1, dir1, end2, endL, endT);
-	    }
+            }
             else
-	    {
+                {
                 try
-		{
+                {
                     this->GetImpactParameters2D(vtx1, dir1, vtx2, vtxL, vtxT);
                     this->GetImpactParameters2D(vtx1, dir1, end2, endL, endT);
-		}
+                }
                 catch (pandora::StatusCodeException& )
                 {
-		    continue;
+                    continue;
                 }
-	    }
+            }
 
             if (vtxL > endL || endL < 0.f)
-	        continue;
+                continue;
             
             // Project seed2 onto seed1
             if (m_useXcoordinate)
-	    {
+            {
                 this->GetImpactParameters3D(vtx2, dir2, vtx1, vtxL, vtxT);
                 this->GetImpactParameters3D(vtx2, dir2, end1, endL, endT);
-	    }
+            }
             else
-	    {
+            {
                 try
-		{
+                {
                     this->GetImpactParameters2D(vtx2, dir2, vtx1, vtxL, vtxT);
                     this->GetImpactParameters2D(vtx2, dir2, end1, endL, endT);
-		}
+                }
                 catch (pandora::StatusCodeException& )
                 {
-		    continue;
+                    continue;
                 }
-	    }
+            }
 
             if (vtxL > endL || endL < 0.f)
-	        continue;
+                continue;
 
             // These are the closest vertices [return]
             return;
-	}
+        }
     }
 
     // Can't find closest vertices [bail out] (ATTN: throw Pandora exception here, as code is based on pandora objects) 

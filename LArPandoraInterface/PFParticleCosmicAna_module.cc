@@ -242,7 +242,7 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
             const art::Ptr<anab::CosmicTag> cosmicTag(theCosmicTags, i);
             const art::Ptr<recob::Track> track = theCosmicAssns.at(i);
             recoTracksToCosmicTags[track] = cosmicTag;
-	}
+        }
     }
 
 
@@ -255,7 +255,7 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
         const HitVector &hitVector = iter1->second;
 
         if (hitVector.empty())
-	    continue;
+            continue;
  
         m_self          = recoParticle->Self();
         m_pdgCode       = recoParticle->PdgCode();
@@ -269,37 +269,37 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
         m_nCosmicHits   = 0;
 
         // Get cosmic tags associated with this particle
-	PFParticlesToTracks::const_iterator iter2 = recoParticlesToTracks.find(recoParticle);
+        PFParticlesToTracks::const_iterator iter2 = recoParticlesToTracks.find(recoParticle);
         if (recoParticlesToTracks.end() != iter2)
-	{
-	    for (TrackVector::const_iterator iter3 = iter2->second.begin(), iterEnd3 = iter2->second.end(); iter3 != iterEnd3; ++iter3)
-	    {
+        {
+            for (TrackVector::const_iterator iter3 = iter2->second.begin(), iterEnd3 = iter2->second.end(); iter3 != iterEnd3; ++iter3)
+            {
                 const art::Ptr<recob::Track> track = *iter3;
 
-		TracksToCosmicTags::const_iterator iter4 = recoTracksToCosmicTags.find(track);
+                TracksToCosmicTags::const_iterator iter4 = recoTracksToCosmicTags.find(track);
                 if (recoTracksToCosmicTags.end() != iter4)
-		{
-		    const art::Ptr<anab::CosmicTag> cosmicTag = iter4->second;
+                {
+                    const art::Ptr<anab::CosmicTag> cosmicTag = iter4->second;
                     const float thisScore(cosmicTag->CosmicScore());
                     if (thisScore > m_cosmicScore)
-		        m_cosmicScore = thisScore;
-		}
+                        m_cosmicScore = thisScore;
+                }
 
                 ++m_nTracks;
-	    }
+            }
 
             if (m_cosmicScore > m_cosmicScoreThreshold)
-	        m_cosmicTag = 1; 
-	}
+                m_cosmicTag = 1; 
+        }
 
         // Loop over hits associated with this particle
         for (HitVector::const_iterator iter2 = hitVector.begin(), iterEnd2 = hitVector.end(); iter2 != iterEnd2; ++iter2)
-	{
-	    const art::Ptr<recob::Hit> hit = *iter2;
+        {
+            const art::Ptr<recob::Hit> hit = *iter2;
 
             HitsToMCParticles::const_iterator iter3 = trueHitsToParticles.find(hit);
             if (trueHitsToParticles.end() == iter3)
-	        continue;
+                continue;
 
             const art::Ptr<simb::MCParticle> trueParticle = iter3->second;
 
@@ -310,16 +310,16 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
             const art::Ptr<simb::MCTruth> truth = iter4->second;
 
             if (truth->NeutrinoSet())
-	    {
-	        ++m_nNeutrinoHits;
-	    }
-            else
-	    {
-	        ++m_nCosmicHits;
-	    }
-	}
+            {
+                ++m_nNeutrinoHits;
+            }
+                else
+            {
+                ++m_nCosmicHits;
+            }
+        }
 
-	std::cout << "   PFParticle: [" << m_index << "] nCosmicHits=" << m_nCosmicHits << ", nNeutrinoHits=" << m_nNeutrinoHits << ", nTracks=" << m_nTracks << ", cosmicTag=" << m_cosmicTag << ", cosmicScore=" << m_cosmicScore << std::endl;
+        std::cout << "   PFParticle: [" << m_index << "] nCosmicHits=" << m_nCosmicHits << ", nNeutrinoHits=" << m_nNeutrinoHits << ", nTracks=" << m_nTracks << ", cosmicTag=" << m_cosmicTag << ", cosmicScore=" << m_cosmicScore << std::endl;
 
         m_pCosmicTree->Fill();
         ++m_index;
