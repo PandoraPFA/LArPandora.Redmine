@@ -497,8 +497,8 @@ void LArPandoraCollector::BuildMCParticleHitMaps(const HitVector &hitVector, con
     {
         const art::Ptr<recob::Hit> hit = *iter;
         
-        const raw::TDCtick_t start_tdc(ts->TPCTick2TDC(hit->StartTick()));
-        const raw::TDCtick_t end_tdc(ts->TPCTick2TDC(hit->EndTick()));
+        const raw::TDCtick_t start_tdc(ts->TPCTick2TDC(hit->PeakTimeMinusRMS()));
+        const raw::TDCtick_t end_tdc(ts->TPCTick2TDC(hit->PeakTimePlusRMS()));
 
         const TrackIDEVector trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc, end_tdc));
 

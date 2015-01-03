@@ -162,8 +162,8 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
 
         const double hit_Time(hit->PeakTime());
         const double hit_Charge(hit->Integral());
-        const raw::TDCtick_t hit_TimeStart(hit->StartTick());
-        const raw::TDCtick_t hit_TimeEnd(hit->EndTick());
+        const double hit_TimeStart(hit->PeakTimeMinusRMS());
+        const double hit_TimeEnd(hit->PeakTimePlusRMS());
 
         double xyz[3];
         theGeometry->Cryostat(hit_WireID.Cryostat).TPC(hit_WireID.TPC).Plane(hit_WireID.Plane).Wire(hit_WireID.Wire).GetCenter(xyz);
@@ -173,8 +173,8 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
         const double wire_pitch_cm(theGeometry->WirePitch(hit_View)); // cm
 
         const double xpos_cm(theDetector->ConvertTicksToX(hit_Time, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
-        const double dxpos_cm(std::fabs(theDetector->ConvertTicksToX((double)hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
-	    theDetector->ConvertTicksToX((double)hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
+        const double dxpos_cm(std::fabs(theDetector->ConvertTicksToX(hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
+	    theDetector->ConvertTicksToX(hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
 
         const double mips(this->GetMips(hit_Charge, hit_View));
 

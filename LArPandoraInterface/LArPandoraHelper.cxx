@@ -45,7 +45,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
         const double thisWire(hit->WireID().Wire);
         const double thisWireSigma(0.5);
         const double thisTime(hit->PeakTime());
-        const double thisTimeSigma(double(hit->EndTick() - hit->StartTick()));
+        const double thisTimeSigma(double(2.*hit->RMS()));
         const geo::View_t thisView(hit->View());
         const geo::PlaneID thisPlaneID(hit->WireID().planeID());
 
