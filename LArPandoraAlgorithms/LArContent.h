@@ -18,6 +18,7 @@
 #include "LArHelpers/LArGeometryHelper.h"
 
 #include "LArMonitoring/EventDisplayAlgorithm.h"
+#include "LArMonitoring/ParticleAnalysisAlgorithm.h"
 #include "LArMonitoring/ParticleMonitoringAlgorithm.h"
 #include "LArMonitoring/VisualMonitoringAlgorithm.h"
 
@@ -29,9 +30,10 @@
 #include "LArThreeDReco/LArCosmicRay/DeltaRayMatchingAlgorithm.h"
 #include "LArThreeDReco/LArCosmicRay/CosmicRayTrackMatchingAlgorithm.h"
 #include "LArThreeDReco/LArCosmicRay/CosmicRayVertexBuildingAlgorithm.h"
-#include "LArThreeDReco/LArEventBuilding/NeutrinoEventCreationAlgorithm.h"
 #include "LArThreeDReco/LArEventBuilding/NeutrinoEventBuildingAlgorithm.h"
+#include "LArThreeDReco/LArEventBuilding/NeutrinoEventCreationAlgorithm.h"
 #include "LArThreeDReco/LArEventBuilding/NeutrinoVertexBuildingAlgorithm.h"
+#include "LArThreeDReco/LArEventBuilding/NeutrinoVertexCreationAlgorithm.h"
 #include "LArThreeDReco/LArHitCreation/ClearLongitudinalTrackHitsTool.h"
 #include "LArThreeDReco/LArHitCreation/ClearTransverseTrackHitsTool.h"
 #include "LArThreeDReco/LArHitCreation/DeltaRayShowerHitsTool.h"
@@ -107,6 +109,7 @@ class LArContent
 public:
     #define LAR_ALGORITHM_LIST(d)                                                                                               \
         d("LArEventDisplay",                        lar_content::EventDisplayAlgorithm::Factory)                                \
+        d("LArParticleAnalysis",                    lar_content::ParticleAnalysisAlgorithm::Factory)                            \
         d("LArParticleMonitoring",                  lar_content::ParticleMonitoringAlgorithm::Factory)                          \
         d("LArVisualMonitoring",                    lar_content::VisualMonitoringAlgorithm::Factory)                            \
         d("LArCheatingClusterCharacterisation",     lar_content::CheatingClusterCharacterisationAlgorithm::Factory)             \
@@ -118,9 +121,10 @@ public:
         d("LArCosmicRayIdentification",             lar_content::CosmicRayIdentificationAlgorithm::Factory)                     \
         d("LArCosmicRayTrackMatching",              lar_content::CosmicRayTrackMatchingAlgorithm::Factory)                      \
         d("LArCosmicRayVertexBuilding",             lar_content::CosmicRayVertexBuildingAlgorithm::Factory)                     \
-        d("LArNeutrinoEventCreation",               lar_content::NeutrinoEventCreationAlgorithm::Factory)                       \
         d("LArNeutrinoEventBuilding",               lar_content::NeutrinoEventBuildingAlgorithm::Factory)                       \
+        d("LArNeutrinoEventCreation",               lar_content::NeutrinoEventCreationAlgorithm::Factory)                       \
         d("LArNeutrinoVertexBuilding",              lar_content::NeutrinoVertexBuildingAlgorithm::Factory)                      \
+        d("LArNeutrinoVertexCreation",              lar_content::NeutrinoVertexCreationAlgorithm::Factory)                      \
         d("LArDeltaRayIdentification",              lar_content::DeltaRayIdentificationAlgorithm::Factory)                      \
         d("LArDeltaRayMatching",                    lar_content::DeltaRayMatchingAlgorithm::Factory)                            \
         d("LArThreeDHitCreation",                   lar_content::ThreeDHitCreationAlgorithm::Factory)                           \
