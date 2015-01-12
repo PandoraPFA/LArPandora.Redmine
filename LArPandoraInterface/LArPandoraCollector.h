@@ -13,7 +13,9 @@
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Seed.h"
+#include "RecoBase/Vertex.h"
 #include "RecoBase/Track.h"
+#include "RecoBase/Shower.h"
 #include "RecoBase/PFParticle.h"
 
 #include "SimulationBase/MCParticle.h"
@@ -28,7 +30,9 @@ typedef std::vector< art::Ptr<recob::Hit> >         HitVector;
 typedef std::vector< art::Ptr<recob::SpacePoint> >  SpacePointVector;
 typedef std::vector< art::Ptr<recob::Cluster> >     ClusterVector;
 typedef std::vector< art::Ptr<recob::Seed> >        SeedVector;
+typedef std::vector< art::Ptr<recob::Vertex> >      VertexVector;
 typedef std::vector< art::Ptr<recob::Track> >       TrackVector;
+typedef std::vector< art::Ptr<recob::Shower> >      ShowerVector;
 typedef std::vector< art::Ptr<recob::PFParticle> >  PFParticleVector;
 typedef std::vector< art::Ptr<simb::MCTruth> >      MCTruthVector;
 typedef std::vector< art::Ptr<simb::MCParticle> >   MCParticleVector;
@@ -36,8 +40,10 @@ typedef std::vector< art::Ptr<sim::SimChannel> >    SimChannelVector;
 typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
+typedef std::map< art::Ptr<recob::PFParticle>, ShowerVector >                 PFParticlesToShowers;
 typedef std::map< art::Ptr<recob::PFParticle>, ClusterVector >                PFParticlesToClusters;
 typedef std::map< art::Ptr<recob::PFParticle>, SeedVector >                   PFParticlesToSeeds;
+typedef std::map< art::Ptr<recob::PFParticle>, VertexVector >                 PFParticlesToVertices;
 typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PFParticlesToSpacePoints;
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
@@ -141,7 +147,7 @@ public:
         PFParticlesToTracks &particlesToTracks);   
 
     /**
-     *  @brief Collect the reconstructed PFParticles and associated Tracks from the ART event record
+     *  @brief Collect the reconstructed PFParticles and associated Seeds from the ART event record
      *
      *  @param evt the ART event record
      *  @param label the label for the PFParticle list in the event
@@ -150,6 +156,17 @@ public:
      */
     static void CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
         PFParticlesToSeeds &particlesToSeeds);
+
+    /**
+     *  @brief Collect the reconstructed PFParticles and associated Vertices from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param vertexVector the output vector of Vertex objects
+     *  @param particlesToVertices the output map from PFParticle to Vertex objects
+     */
+    static void CollectVertices(const art::Event &evt, const std::string label, VertexVector &vertexVector,
+        PFParticlesToVertices &particlesToVertices);
 
     /**
      *  @brief Build mapping between PFParticles and Hits using PFParticle/SpacePoint/Hit maps

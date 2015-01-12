@@ -67,9 +67,14 @@ private:
      int          m_parent;                ///<
      int          m_neutrino;              ///<
      int          m_finalstate;            ///<
+     int          m_vertex;                ///<
 
      int          m_clusters;              ///<
      int          m_spacepoints;           ///<
+
+     double       m_vtxx;                  ///< 
+     double       m_vtxy;                  ///<
+     double       m_vtxz;                  ///<
 
      std::string  m_particleLabel;         ///<
 };
@@ -140,8 +145,12 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("parent", &m_parent, "parent/I"); 
     m_pRecoTree->Branch("neutrino", &m_neutrino, "neutrino/I");  
     m_pRecoTree->Branch("finalstate", &m_finalstate, "finalstate/I"); 
+    m_pRecoTree->Branch("vertex", &m_vertex, "vertex/I"); 
     m_pRecoTree->Branch("clusters", &m_clusters, "clusters/I");
-    m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I");
+    m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I"); 
+    m_pRecoTree->Branch("vtxx", &m_vtxx, "vtxx/D");
+    m_pRecoTree->Branch("vtxy", &m_vtxy, "vtxy/D");
+    m_pRecoTree->Branch("vtxz", &m_vtxz, "vtxz/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,10 +175,15 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_parent = 0;
     m_neutrino = 0;
     m_finalstate = 0;
+    m_vertex = 0;
 
     m_clusters = 0;
     m_spacepoints = 0;
       
+    m_vtxx = 0.0;
+    m_vtxy = 0.0;
+    m_vtxz = 0.0;
+
     std::cout << "  Run: " << m_run << std::endl;
     std::cout << "  Event: " << m_event << std::endl; 
 
@@ -183,7 +197,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles1, particlesToClusters);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles2, particlesToSpacePoints);
-
+    
     std::cout << "  PFParticles: " << particleVector.size() << std::endl;
 
     if (particleVector.empty())
@@ -192,10 +206,18 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         return;
     }
 
+    // Get the reconstructed vertices
+    // ==============================
+    VertexVector vertexVector;
+    PFParticlesToVertices particlesToVertices;
+
+    LArPandoraCollector::CollectVertices(evt, m_particleLabel, vertexVector, particlesToVertices);
+
     // Build an indexed map of the PFParticles
     // =======================================
     PFParticleMap particleMap;
     this->BuildParticleMap(particleVector, particleMap);
+
 
     // Write PFParticle properties to ROOT file
     // ========================================
@@ -210,10 +232,15 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_parent = (particle->IsPrimary() ? -1 : particle->Parent());
         m_neutrino = LArPandoraCollector::GetParentNeutrino(particleMap, particle);
         m_finalstate = LArPandoraCollector::IsFinalState(particleMap, particle);
+        m_vertex = 0;
 
         m_clusters = 0;
         m_spacepoints = 0;
-
+      
+        m_vtxx = 0.0;
+        m_vtxy = 0.0;
+        m_vtxz = 0.0;
+     
         PFParticlesToClusters::const_iterator iter1 = particlesToClusters.find(particle);
         if (particlesToClusters.end() != iter1)
             m_clusters = iter1->second.size();
@@ -221,6 +248,23 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         PFParticlesToSpacePoints::const_iterator iter2 = particlesToSpacePoints.find(particle);
         if (particlesToSpacePoints.end() != iter2)
             m_spacepoints = iter2->second.size();
+
+        PFParticlesToVertices::const_iterator iter3 = particlesToVertices.find(particle);
+        if (particlesToVertices.end() != iter3)
+        {
+            const VertexVector vertexVector = iter3->second;
+            if (!vertexVector.empty())
+            {
+                const art::Ptr<recob::Vertex> vertex = *(vertexVector.begin());
+                double xyz[3] = {0.0, 0.0, 0.0} ;
+                vertex->XYZ(xyz);
+
+                m_vertex = 1;
+                m_vtxx = xyz[0];
+                m_vtxy = xyz[1];
+                m_vtxz = xyz[2];
+            }
+        }
 
         std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
                   << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
