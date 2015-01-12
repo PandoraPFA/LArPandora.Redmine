@@ -1,27 +1,23 @@
 BEGIN_PROLOG
 
-microboone_pandora:
-{
-  module_type:           "MicroBooNEPandora"
-  ConfigFile:            "PandoraSettings_MicroBooNE_Standard.xml"
-  GeantModuleLabel:      "largeant"
-  HitFinderModuleLabel:  "gaushit"
-  EnableMCParticles:     true
-  EnableProduction:      true
-  EnableMonitoring:      false
-  UseHitWidths:          true
-}
-
 microboone_pandoracosmic:
 {
   module_type:           "MicroBooNEPandora"
   ConfigFile:            "PandoraSettings_MicroBooNE_Cosmic.xml"
+  GeantModuleLabel:      "largeant"
+  HitFinderModuleLabel:  "gaushit"
+  EnableMCParticles:     false
+  UseHitWidths:          true
 }
 
 microboone_pandoraneutrino:
 {
   module_type:           "MicroBooNEPandora"
   ConfigFile:            "PandoraSettings_MicroBooNE_Neutrino.xml"
+  GeantModuleLabel:      "largeant"
+  HitFinderModuleLabel:  "gaushit"
+  EnableMCParticles:     false
+  UseHitWidths:          true
 }
 
 microboone_pandorawriter:
