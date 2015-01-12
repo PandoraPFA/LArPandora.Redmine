@@ -23,7 +23,6 @@
 // Local includes (LArPandoraInterface)
 #include "LArPandoraParticleCreator.h"
 #include "LArPandoraHelper.h"
-#include "PFParticleSeed.h"
 
 // System includes
 #include <iostream>

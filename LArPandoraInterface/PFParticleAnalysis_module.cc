@@ -75,6 +75,10 @@ private:
      double       m_vtxx;                  ///< 
      double       m_vtxy;                  ///<
      double       m_vtxz;                  ///<
+     double       m_px;                    ///< 
+     double       m_py;                    ///<
+     double       m_pz;                    ///<
+     double       m_ptot;                  ///<
 
      std::string  m_particleLabel;         ///<
 };
@@ -151,6 +155,10 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("vtxx", &m_vtxx, "vtxx/D");
     m_pRecoTree->Branch("vtxy", &m_vtxy, "vtxy/D");
     m_pRecoTree->Branch("vtxz", &m_vtxz, "vtxz/D");
+    m_pRecoTree->Branch("px", &m_px, "px/D");
+    m_pRecoTree->Branch("py", &m_py, "py/D");
+    m_pRecoTree->Branch("pz", &m_pz, "pz/D");
+    m_pRecoTree->Branch("ptot", &m_ptot, "ptot/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,6 +192,11 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_vtxy = 0.0;
     m_vtxz = 0.0;
 
+    m_px = 0.0;
+    m_py = 0.0;
+    m_pz = 0.0;
+    m_ptot = 0.0;
+
     std::cout << "  Run: " << m_run << std::endl;
     std::cout << "  Event: " << m_event << std::endl; 
 
@@ -210,8 +223,13 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     // ==============================
     VertexVector vertexVector;
     PFParticlesToVertices particlesToVertices;
-
     LArPandoraCollector::CollectVertices(evt, m_particleLabel, vertexVector, particlesToVertices);
+
+    // Get the reconstructed seeds
+    // ===========================
+    SeedVector seedVector;
+    PFParticlesToSeeds particlesToSeeds;
+    LArPandoraCollector::CollectSeeds(evt, m_particleLabel, seedVector, particlesToSeeds);
 
     // Build an indexed map of the PFParticles
     // =======================================
@@ -241,6 +259,11 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_vtxy = 0.0;
         m_vtxz = 0.0;
      
+        m_px = 0.0;
+        m_py = 0.0;
+        m_pz = 0.0;
+        m_ptot = 0.0;
+
         PFParticlesToClusters::const_iterator iter1 = particlesToClusters.find(particle);
         if (particlesToClusters.end() != iter1)
             m_clusters = iter1->second.size();
@@ -252,9 +275,12 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         PFParticlesToVertices::const_iterator iter3 = particlesToVertices.find(particle);
         if (particlesToVertices.end() != iter3)
         {
-            const VertexVector vertexVector = iter3->second;
+            const VertexVector &vertexVector = iter3->second;
             if (!vertexVector.empty())
             {
+                if (vertexVector.size() !=1 )
+                    std::cout << " Warning: Found particle with more than one associated vertex " << std::endl;
+
                 const art::Ptr<recob::Vertex> vertex = *(vertexVector.begin());
                 double xyz[3] = {0.0, 0.0, 0.0} ;
                 vertex->XYZ(xyz);
@@ -263,6 +289,27 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 m_vtxx = xyz[0];
                 m_vtxy = xyz[1];
                 m_vtxz = xyz[2];
+            }
+        }
+
+        PFParticlesToSeeds::const_iterator iter4 = particlesToSeeds.find(particle);
+        if (particlesToSeeds.end() != iter4)
+        {
+            const SeedVector &seedVector = iter4->second;
+            if (!seedVector.empty())
+            {
+                if (seedVector.size() !=1 )
+                  std::cout << " Warning: Found particle with more than one associated seed " << std::endl;
+
+                const art::Ptr<recob::Seed> seed = *(seedVector.begin());
+                double pxpypz[3] = {0.0, 0.0, 0.0} ;
+                double err[3] = {0.0, 0.0, 0.0} ;
+                seed->GetDirection(pxpypz, err);
+
+                m_px = pxpypz[0];
+                m_py = pxpypz[1];
+                m_pz = pxpypz[2];
+                m_ptot = std::sqrt(m_px * m_px + m_py * m_py + m_pz * m_pz);
             }
         }
 
