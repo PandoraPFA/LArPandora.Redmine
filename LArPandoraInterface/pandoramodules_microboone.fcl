@@ -30,4 +30,6 @@ microboone_pandorawriter:
   UseHitWidths:          true
 }
 
+microboone_pandora:   @local::microboone_pandoraneutrino
+
 END_PROLOG

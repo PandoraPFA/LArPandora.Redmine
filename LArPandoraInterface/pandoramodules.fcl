@@ -1,0 +1,17 @@
+#### Legacy script, to avoid breaking uboonecode ####
+
+BEGIN_PROLOG
+
+standard_pandora:
+{
+  module_type:           "MicroBooNEPandora"
+  ConfigFile:            "PandoraSettings_MicroBooNE_Neutrino.xml"
+  GeantModuleLabel:      "largeant"
+  HitFinderModuleLabel:  "gaushit"
+  EnableMCParticles:     false
+  EnableProduction:      true
+  EnableMonitoring:      false
+  UseHitWidths:          true
+}
+
+END_PROLOG
