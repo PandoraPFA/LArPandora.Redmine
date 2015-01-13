@@ -30,7 +30,7 @@ physics:
 {
   producers: 
   {  
-    pandora:    @local::microboone_pandora 
+    pandora:    @local::microboone_pandorawriter
   }
 
   reco: [ pandora ]

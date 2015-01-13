@@ -55,11 +55,14 @@ protected:
      */
     void InitializeMonitoring();
 
+    bool      m_buildTracks;           ///<
+    bool      m_buildShowers;          ///<
 
     TTree    *m_pRecoTree;             ///<
     int       m_run;                   ///<
     int       m_event;                 ///<
     int       m_hits;                  ///<
+    float     m_collectionTime;        ///<
     float     m_inputTime;             ///<
     float     m_processTime;           ///<
     float     m_outputTime;            ///<
