@@ -3,29 +3,26 @@
 ## (Assumes that input ROOT file contains reconstructed hits) 
 ##
 
-
 #include "services_microboone.fcl"
 #include "pandoramodules_microboone.fcl"
 
-process_name: LArPandora
+process_name: MicroBooNEPandora
 
-
-### SERVICES ###
 services:
 {
+  TFileService: { fileName: "ntuple.root" }
   message:      @local::standard_debug
   user:         @local::microboone_services
 }
 
-
-### INPUT ###
+### Define input file format
 source:
 {
   module_type: RootInput
+  skipEvents : 0
 }
 
-
-### MODULES ###
+### Define the modules and create chains
 physics:
 {
   producers: 
@@ -33,7 +30,36 @@ physics:
     pandora:    @local::microboone_pandoraneutrino
   }
 
+  analyzers:
+  { 
+    pandorana: {module_type: PFParticleAnalysis}
+    pandorahits: {module_type: PFParticleHitDumper}
+    pandoramonitoring:  {module_type: PFParticleMonitoring}
+  }
+
+  ### Set up a chain of Producer modules
   reco: [ pandora ]
 
-  trigger_paths: [reco] 
+  ### Set up a chain of Analyzer modules
+  ana: [ pandorana, pandorahits, pandoramonitoring ]
+
+  ### Set up the trigger paths (these are the modules that modify the event)
+  trigger_paths: [ reco ] 
+
+  ### Set up the end paths (these are the modules that do not modify the event)
+  end_paths: [ ana ] 
 }
+
+### Configure the Producer modules
+physics.producers.pandora.EnableMonitoring: true
+
+### Configure the Analyzer modules
+physics.analyzers.pandoramonitoring.UseDaughterPFParticles:  true
+physics.analyzers.pandoramonitoring.HitFinderModule: "gaushit"
+physics.analyzers.pandoramonitoring.SpacePointModule: "pandora"
+physics.analyzers.pandoramonitoring.PFParticleModule: "pandora"
+physics.analyzers.pandorahits.HitFinderModule: "gaushit"
+physics.analyzers.pandorahits.SpacePointModule: "pandora"
+physics.analyzers.pandorahits.PFParticleModule: "pandora"
+physics.analyzers.pandorana.PFParticleModule: "pandora"
+
