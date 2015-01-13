@@ -30,10 +30,10 @@ physics:
 {
   producers: 
   {  
-    pandoraneutrino:    @local::microboone_pandoraneutrino
+    pandora:    @local::microboone_pandoraneutrino
   }
 
-  reco: [ pandoraneutrino ]
+  reco: [ pandora ]
 
   trigger_paths: [reco] 
 }

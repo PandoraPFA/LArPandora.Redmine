@@ -13,6 +13,7 @@ process_name: LArPandora
 ### SERVICES ###
 services:
 {
+  TFileService: { fileName: "ntuple.root" }
   message:      @local::standard_debug
   user:         @local::microboone_services
 }
@@ -22,6 +23,7 @@ services:
 source:
 {
   module_type: RootInput
+  skipEvents : 0
 }
 
 
@@ -30,10 +32,20 @@ physics:
 {
   producers: 
   {  
-    pandoracosmic:    @local::microboone_pandoracosmic
+    pandora:    @local::microboone_pandorawriter 
   }
 
-  reco: [ pandoracosmic ]
+  analyzers:
+  { 
+
+  }
+
+  reco: [ pandora ]
+
+  ana: [ ]
 
   trigger_paths: [reco] 
+
+  end_paths: [ ] 
 }
+
