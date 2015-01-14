@@ -23,8 +23,9 @@ ListPreparationAlgorithm::ListPreparationAlgorithm() :
     m_maxCellLengthScale(2.f),
     m_onlyAvailableCaloHits(true),
     m_inputCaloHitListName("Input"),
-    m_mcNeutrinoSelection(false),
-    m_inputMCParticleListName("Input")
+    m_inputMCParticleListName("Input"),
+    m_selectNeutrinos(true),
+    m_selectCosmics(true)
 {
 }
 
@@ -80,6 +81,8 @@ void ListPreparationAlgorithm::ProcessCaloHits()
     if (pCaloHitList->empty())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
+    const bool checkMC(!m_selectNeutrinos || !m_selectCosmics);
+
     CaloHitList selectedCaloHitListU, selectedCaloHitListV, selectedCaloHitListW;
 
     for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
@@ -92,16 +95,48 @@ void ListPreparationAlgorithm::ProcessCaloHits()
         if (pCaloHit->GetMipEquivalentEnergy() < m_mipEquivalentCut)
             continue;
 
-        if ((pCaloHit->GetCellLengthScale() < m_minCellLengthScale) || (pCaloHit->GetCellLengthScale() > m_maxCellLengthScale))
-        {
-            std::cout << "ListPreparationAlgorithm: found a hit with extent " << pCaloHit->GetCellLengthScale() << ", will remove it" << std::endl;
-            continue;
-        }
-
         if (pCaloHit->GetInputEnergy() < std::numeric_limits<float>::epsilon())
         {
             std::cout << "ListPreparationAlgorithm: found a hit with zero energy, will remove it" << std::endl;
             continue;
+        }
+
+        if (pCaloHit->GetCellLengthScale() < m_minCellLengthScale)
+        {
+            if (pCaloHit->GetCellLengthScale() < std::numeric_limits<float>::epsilon())
+            {           
+                std::cout << "ListPreparationAlgorithm: found a hit with zero extent, will remove it" << std::endl;
+            }
+            else
+            {
+                if (PandoraContentApi::GetSettings(*this)->ShouldDisplayAlgorithmInfo())
+                    std::cout << "ListPreparationAlgorithm: found a hit with extent " << pCaloHit->GetCellLengthScale() 
+                              << " (<" << m_minCellLengthScale << "), will remove it" << std::endl;
+            }
+            continue;
+        }
+
+        if (pCaloHit->GetCellLengthScale() > m_maxCellLengthScale)
+        {
+            if (PandoraContentApi::GetSettings(*this)->ShouldDisplayAlgorithmInfo())
+                std::cout << "ListPreparationAlgorithm: found a hit with extent " << pCaloHit->GetCellLengthScale() 
+                          << " (>" << m_maxCellLengthScale << "), will remove it" << std::endl;
+            continue;
+        }
+  
+        if (checkMC)
+        {
+            try
+            {
+                const bool isNeutrinoInduced(LArMCParticleHelper::IsNeutrinoInduced(pCaloHit));
+                const bool isSelected(isNeutrinoInduced ? m_selectNeutrinos : m_selectCosmics);
+
+                if (!isSelected)
+                    continue;
+            }
+            catch (StatusCodeException &)
+            {
+            }     
         }
 
         if (TPC_VIEW_U == (*hitIter)->GetHitType())
@@ -197,12 +232,20 @@ void ListPreparationAlgorithm::ProcessMCParticles()
     if (pMCParticleList->empty())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
+    const bool checkMC(!m_selectNeutrinos || !m_selectCosmics);
+
     MCParticleList mcParticleListU, mcParticleListV, mcParticleListW, mcParticleList3D;
 
     for (MCParticleList::const_iterator mcIter = pMCParticleList->begin(), mcIterEnd = pMCParticleList->end(); mcIter != mcIterEnd; ++mcIter)
     {
-        if (m_mcNeutrinoSelection && !LArMCParticleHelper::GetParentNeutrinoId(*mcIter))
-            continue;
+        if (checkMC)
+        {
+            const bool isNeutrinoInduced(LArMCParticleHelper::IsNeutrinoInduced(*mcIter));
+            const bool isSelected(isNeutrinoInduced ? m_selectNeutrinos : m_selectCosmics);
+
+            if (!isSelected)
+                continue;
+        }
 
         if (MC_VIEW_U == (*mcIter)->GetMCParticleType())
         {
@@ -275,9 +318,6 @@ StatusCode ListPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "CurrentCaloHitListReplacement", m_currentCaloHitListReplacement));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MCNeutrinoSelection", m_mcNeutrinoSelection));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InputMCParticleListName", m_inputMCParticleListName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
@@ -294,6 +334,12 @@ StatusCode ListPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CurrentMCParticleListReplacement", m_currentMCParticleListReplacement));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "SelectNeutrinos", m_selectNeutrinos));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "SelectCosmics", m_selectCosmics));
 
     return STATUS_CODE_SUCCESS;
 }

@@ -5,10 +5,10 @@ BEGIN_PROLOG
 standard_pandora:
 {
   module_type:           "MicroBooNEPandora"
-  ConfigFile:            "PandoraSettings_MicroBooNE_Standard.xml"
+  ConfigFile:            "PandoraSettings_MicroBooNE_Neutrino.xml"
   GeantModuleLabel:      "largeant"
   HitFinderModuleLabel:  "gaushit"
-  EnableMCParticles:     true
+  EnableMCParticles:     false
   EnableProduction:      true
   EnableMonitoring:      false
   UseHitWidths:          true

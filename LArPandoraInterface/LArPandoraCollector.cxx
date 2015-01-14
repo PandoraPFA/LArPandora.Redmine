@@ -197,6 +197,7 @@ void LArPandoraCollector::CollectPFParticles(const art::Event &evt, const std::s
         }
     }
 }
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraCollector::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
@@ -256,6 +257,39 @@ void LArPandoraCollector::CollectSeeds(const art::Event &evt, const std::string 
             particlesToSeeds[particle].push_back(seed);
         }
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::CollectVertices(const art::Event &evt, const std::string label, VertexVector &vertexVector,
+    PFParticlesToVertices &particlesToVertices)
+{
+    art::Handle< std::vector<recob::Vertex> > theVertices;
+    evt.getByLabel(label, theVertices);
+
+    if (!theVertices.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find vertices... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theVertices->size() << " Vertices " << std::endl;
+    }
+
+    art::FindManyP<recob::PFParticle> theVerticesAssns(theVertices, evt, label);
+    for (unsigned int i = 0; i < theVertices->size(); ++i)
+    {
+        const art::Ptr<recob::Vertex> vertex(theVertices, i);
+        vertexVector.push_back(vertex);
+
+        const std::vector< art::Ptr<recob::PFParticle> > particles = theVerticesAssns.at(i);
+        for (unsigned int j=0; j<particles.size(); ++j)
+        {
+            const art::Ptr<recob::PFParticle> particle = particles.at(j);          
+            particlesToVertices[particle].push_back(vertex);
+        }
+    } 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
