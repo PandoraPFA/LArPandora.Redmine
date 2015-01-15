@@ -136,6 +136,17 @@ public:
         PFParticlesToClusters &particlesToClusters);
 
     /**
+     *  @brief Collect the reconstructed PFParticles and associated Showers from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param showerVector the output vector of Shower objects
+     *  @param particlesToShowers the output map from PFParticle to Shower objects
+     */
+    static void CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+        PFParticlesToShowers &particlesToShowers);   
+
+    /**
      *  @brief Collect the reconstructed PFParticles and associated Tracks from the ART event record
      *
      *  @param evt the ART event record

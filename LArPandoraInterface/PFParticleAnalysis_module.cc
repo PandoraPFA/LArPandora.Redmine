@@ -10,6 +10,7 @@
 
 // ROOT includes
 #include "TTree.h"
+#include "TVector3.h"
 
 // Local includes
 #include "LArPandoraCollector.h"
@@ -68,17 +69,25 @@ private:
      int          m_neutrino;              ///<
      int          m_finalstate;            ///<
      int          m_vertex;                ///<
+     int          m_track;                 ///<
 
      int          m_clusters;              ///<
      int          m_spacepoints;           ///<
 
-     double       m_vtxx;                  ///< 
-     double       m_vtxy;                  ///<
-     double       m_vtxz;                  ///<
-     double       m_px;                    ///< 
-     double       m_py;                    ///<
-     double       m_pz;                    ///<
-     double       m_ptot;                  ///<
+     double       m_pfovtxx;               ///< 
+     double       m_pfovtxy;               ///<
+     double       m_pfovtxz;               ///<
+     double       m_pfopx;                 ///< 
+     double       m_pfopy;                 ///<
+     double       m_pfopz;                 ///<
+     double       m_pfoptot;               ///<
+
+     double       m_trkvtxx;               ///< 
+     double       m_trkvtxy;               ///<
+     double       m_trkvtxz;               ///<
+     double       m_trkdirx;               ///< 
+     double       m_trkdiry;               ///<
+     double       m_trkdirz;               ///<
 
      std::string  m_particleLabel;         ///<
 };
@@ -150,15 +159,22 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("neutrino", &m_neutrino, "neutrino/I");  
     m_pRecoTree->Branch("finalstate", &m_finalstate, "finalstate/I"); 
     m_pRecoTree->Branch("vertex", &m_vertex, "vertex/I"); 
+    m_pRecoTree->Branch("track", &m_track, "track/I"); 
     m_pRecoTree->Branch("clusters", &m_clusters, "clusters/I");
     m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I"); 
-    m_pRecoTree->Branch("vtxx", &m_vtxx, "vtxx/D");
-    m_pRecoTree->Branch("vtxy", &m_vtxy, "vtxy/D");
-    m_pRecoTree->Branch("vtxz", &m_vtxz, "vtxz/D");
-    m_pRecoTree->Branch("px", &m_px, "px/D");
-    m_pRecoTree->Branch("py", &m_py, "py/D");
-    m_pRecoTree->Branch("pz", &m_pz, "pz/D");
-    m_pRecoTree->Branch("ptot", &m_ptot, "ptot/D");
+    m_pRecoTree->Branch("pfovtxx", &m_pfovtxx, "pfovtxx/D");
+    m_pRecoTree->Branch("pfovtxy", &m_pfovtxy, "pfovtxy/D");
+    m_pRecoTree->Branch("pfovtxz", &m_pfovtxz, "pfovtxz/D");
+    m_pRecoTree->Branch("pfopx", &m_pfopx, "pfopx/D");
+    m_pRecoTree->Branch("pfopy", &m_pfopy, "pfopy/D");
+    m_pRecoTree->Branch("pfopz", &m_pfopz, "pfopz/D");
+    m_pRecoTree->Branch("pfoptot", &m_pfoptot, "pfoptot/D");
+    m_pRecoTree->Branch("trkvtxx", &m_trkvtxx, "trkvtxx/D");
+    m_pRecoTree->Branch("trkvtxy", &m_trkvtxy, "trkvtxy/D");
+    m_pRecoTree->Branch("trkvtxz", &m_trkvtxz, "trkvtxz/D");
+    m_pRecoTree->Branch("trkdirx", &m_trkdirx, "trkdirx/D");
+    m_pRecoTree->Branch("trkdiry", &m_trkdiry, "trkdiry/D");
+    m_pRecoTree->Branch("trkdirz", &m_trkdirz, "trkdirz/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,18 +200,25 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_neutrino = 0;
     m_finalstate = 0;
     m_vertex = 0;
+    m_track = 0;
 
     m_clusters = 0;
     m_spacepoints = 0;
       
-    m_vtxx = 0.0;
-    m_vtxy = 0.0;
-    m_vtxz = 0.0;
+    m_pfovtxx = 0.0;
+    m_pfovtxy = 0.0;
+    m_pfovtxz = 0.0;
+    m_pfopx = 0.0;
+    m_pfopy = 0.0;
+    m_pfopz = 0.0;
+    m_pfoptot = 0.0;
 
-    m_px = 0.0;
-    m_py = 0.0;
-    m_pz = 0.0;
-    m_ptot = 0.0;
+    m_trkvtxx = 0.0;
+    m_trkvtxy = 0.0;
+    m_trkvtxz = 0.0;
+    m_trkdirx = 0.0;
+    m_trkdiry = 0.0;
+    m_trkdirz = 0.0;
 
     std::cout << "  Run: " << m_run << std::endl;
     std::cout << "  Event: " << m_event << std::endl; 
@@ -231,6 +254,12 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     PFParticlesToSeeds particlesToSeeds;
     LArPandoraCollector::CollectSeeds(evt, m_particleLabel, seedVector, particlesToSeeds);
 
+    // Get the reconstructed tracks
+    // ============================
+    TrackVector trackVector;
+    PFParticlesToTracks particlesToTracks;
+    LArPandoraCollector::CollectTracks(evt, m_particleLabel, trackVector, particlesToTracks);
+
     // Build an indexed map of the PFParticles
     // =======================================
     PFParticleMap particleMap;
@@ -251,27 +280,37 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_neutrino = LArPandoraCollector::GetParentNeutrino(particleMap, particle);
         m_finalstate = LArPandoraCollector::IsFinalState(particleMap, particle);
         m_vertex = 0;
+        m_track = 0;
 
         m_clusters = 0;
         m_spacepoints = 0;
       
-        m_vtxx = 0.0;
-        m_vtxy = 0.0;
-        m_vtxz = 0.0;
-     
-        m_px = 0.0;
-        m_py = 0.0;
-        m_pz = 0.0;
-        m_ptot = 0.0;
+        m_pfovtxx = 0.0;
+        m_pfovtxy = 0.0;
+        m_pfovtxz = 0.0;
+        m_pfopx = 0.0;
+        m_pfopy = 0.0;
+        m_pfopz = 0.0;
+        m_pfoptot = 0.0;
 
+        m_trkvtxx = 0.0;
+        m_trkvtxy = 0.0;
+        m_trkvtxz = 0.0;
+        m_trkdirx = 0.0;
+        m_trkdiry = 0.0;
+        m_trkdirz = 0.0;
+
+        // Particles <-> Clusters
         PFParticlesToClusters::const_iterator iter1 = particlesToClusters.find(particle);
         if (particlesToClusters.end() != iter1)
             m_clusters = iter1->second.size();
 
+        // Particles <-> SpacePoints
         PFParticlesToSpacePoints::const_iterator iter2 = particlesToSpacePoints.find(particle);
         if (particlesToSpacePoints.end() != iter2)
             m_spacepoints = iter2->second.size();
 
+        // Particles <-> Vertices
         PFParticlesToVertices::const_iterator iter3 = particlesToVertices.find(particle);
         if (particlesToVertices.end() != iter3)
         {
@@ -286,12 +325,13 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 vertex->XYZ(xyz);
 
                 m_vertex = 1;
-                m_vtxx = xyz[0];
-                m_vtxy = xyz[1];
-                m_vtxz = xyz[2];
+                m_pfovtxx = xyz[0];
+                m_pfovtxy = xyz[1];
+                m_pfovtxz = xyz[2];
             }
         }
 
+        // Particles <-> Seeds
         PFParticlesToSeeds::const_iterator iter4 = particlesToSeeds.find(particle);
         if (particlesToSeeds.end() != iter4)
         {
@@ -306,17 +346,42 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 double err[3] = {0.0, 0.0, 0.0} ;
                 seed->GetDirection(pxpypz, err);
 
-                m_px = pxpypz[0];
-                m_py = pxpypz[1];
-                m_pz = pxpypz[2];
-                m_ptot = std::sqrt(m_px * m_px + m_py * m_py + m_pz * m_pz);
+                m_pfopx = pxpypz[0];
+                m_pfopy = pxpypz[1];
+                m_pfopz = pxpypz[2];
+                m_pfoptot = std::sqrt(m_pfopx * m_pfopx + m_pfopy * m_pfopy + m_pfopz * m_pfopz);
+            }
+        }
+
+        // Particles <-> Tracks
+        PFParticlesToTracks::const_iterator iter5 = particlesToTracks.find(particle);
+        if (particlesToTracks.end() != iter5)
+        {
+            const TrackVector &trackVector = iter5->second;
+            if (!trackVector.empty())
+            {
+                if (trackVector.size() !=1 )
+                  std::cout << " Warning: Found particle with more than one associated track " << std::endl;
+ 
+                const art::Ptr<recob::Track> track = *(trackVector.begin());
+                const TVector3 &trackVertexPosition = track->Vertex();
+                const TVector3 &trackVertexDirection = track->VertexDirection();
+
+                m_track = 1;
+                m_trkvtxx = trackVertexPosition.x();
+                m_trkvtxy = trackVertexPosition.y();
+                m_trkvtxz = trackVertexPosition.z();
+                m_trkdirx = trackVertexDirection.x();
+                m_trkdiry = trackVertexDirection.y();
+                m_trkdirz = trackVertexDirection.z();                
             }
         }
 
         std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
                   << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
                   << " (Self=" << m_self << ", Parent=" << m_parent << ")"
-                  << " (Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ") " << std::endl;
+                  << " (Vertex=" << m_vertex << ", Seed=" << (m_pfoptot > 0) << ", Track=" << m_track
+                  << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ") " << std::endl;
 
         m_pRecoTree->Fill();
     }
