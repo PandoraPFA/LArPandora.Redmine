@@ -5,8 +5,8 @@
  *
  *  $Log: $
  */
-#ifndef LAR_PANDORA_LBNE_35T_TRANSFORMATION_PLUGIN_H
-#define LAR_PANDORA_LBNE_35T_TRANSFORMATION_PLUGIN_H 1
+#ifndef LBNE_35T_TRANSFORMATION_PLUGIN_H
+#define LBNE_35T_TRANSFORMATION_PLUGIN_H 1
 
 #include "LArPandoraTransformationPlugin.h"
 
@@ -27,4 +27,4 @@ public:
 
 } // namespace lar_pandora
 
-#endif // #ifndef LAR_PANDORA_LBNE_35T_TRANSFORMATION_PLUGIN_H
+#endif // #ifndef LBNE_35T_TRANSFORMATION_PLUGIN_H

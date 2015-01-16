@@ -5,8 +5,8 @@
  *
  *  $Log: $
  */
-#ifndef LAR_PANDORA_LBNE_35T_PSEUDO_LAYER_PLUGIN_H
-#define LAR_PANDORA_LBNE_35T_PSEUDO_LAYER_PLUGIN_H 1
+#ifndef LBNE_35T_PSEUDO_LAYER_PLUGIN_H
+#define LBNE_35T_PSEUDO_LAYER_PLUGIN_H 1
 
 #include "LArPandoraPseudoLayerPlugin.h"
 
@@ -27,4 +27,4 @@ public:
 
 } // namespace lar
 
-#endif // #ifndef LAR_PANDORA_LBNE_35T_PSEUDO_LAYER_PLUGIN_H
+#endif // #ifndef LBNE_35T_PSEUDO_LAYER_PLUGIN_H
