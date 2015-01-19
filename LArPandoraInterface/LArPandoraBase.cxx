@@ -549,7 +549,7 @@ void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVe
             const float dx(endX - vtxX);
             const float dy(endY - vtxY);
             const float dz(endZ - vtxZ);
-            const float dw(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->GetWireZPitch());
+            const float dw(lar_content::LArGeometryHelper::GetWireZPitch(*pPandora));
 
             if (dx * dx + dy * dy + dz * dz < 0.5 * dw * dw)
                 continue;
