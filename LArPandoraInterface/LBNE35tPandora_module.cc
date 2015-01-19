@@ -100,7 +100,7 @@ void LBNE35tPandora::ConfigurePandoraGeometry() const
         const unsigned int      volumeID = pIter->first;
         const pandora::Pandora *pPandora = pIter->second;
 
-        const bool isForward((1 == volumeID) ? true : false); // ATTN: Sign of rotation matrix is taken from Volume ID
+        const bool isForward((0 == volumeID) ? true : false); // ATTN: Sign of rotation matrix is taken from Volume ID
     
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora, 
             new LBNE35tPseudoLayerPlugin));
