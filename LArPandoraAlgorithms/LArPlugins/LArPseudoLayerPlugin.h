@@ -1,22 +1,22 @@
 /**
- *  @file   larpandora/LArPandoraInterface/LarPandoraPseudoLayerPlugin.h
+ *  @file   LArContent/LArPlugins/LarPandoraPseudoLayerPlugin.h
  *
- *  @brief  Header file for the LarPandora pseudo layer plugin class.
+ *  @brief  Header file for the lar pseudo layer plugin class.
  *
  *  $Log: $
  */
-#ifndef LAR_PANDORA_PSEUDO_LAYER_PLUGIN_H
-#define LAR_PANDORA_PSEUDO_LAYER_PLUGIN_H 1
+#ifndef LAR_PSEUDO_LAYER_PLUGIN_H
+#define LAR_PSEUDO_LAYER_PLUGIN_H 1
 
 #include "Plugins/PseudoLayerPlugin.h"
 
-namespace lar_pandora
+namespace lar_content
 {
 
 /**
  *  @brief  LarPandoraPseudoLayerPlugin class
  */
-class LArPandoraPseudoLayerPlugin : public pandora::PseudoLayerPlugin
+class LArPseudoLayerPlugin : public pandora::PseudoLayerPlugin
 {
 public:
     /**
@@ -24,7 +24,7 @@ public:
      *
      *  @param  zPitch the wire pitch
      */
-    LArPandoraPseudoLayerPlugin(const float zPitch);
+    LArPseudoLayerPlugin(const float zPitch);
 
     /**
      *  @brief  Get pseudolayer corresponding to a specified z coordinate
@@ -34,6 +34,13 @@ public:
      *  @return the pseudolayer
      */
     unsigned int GetPseudoLayer(const float zCoordinate) const;
+
+    /**
+     *  @brief  Get the wire pitch
+     *
+     *  @return the wire pitch
+     */
+    float GetZPitch() const;
 
 private:
     unsigned int GetPseudoLayer(const pandora::CartesianVector &positionVector) const;
@@ -47,11 +54,18 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline unsigned int LArPandoraPseudoLayerPlugin::GetPseudoLayerAtIp() const
+inline unsigned int LArPseudoLayerPlugin::GetPseudoLayerAtIp() const
 {
     return 0;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float LArPseudoLayerPlugin::GetZPitch() const
+{
+    return m_zPitch;
+}
+
 } // namespace lar
 
-#endif // #ifndef LAR_PANDORA_PSEUDO_LAYER_PLUGIN_H
+#endif // #ifndef LAR_PSEUDO_LAYER_PLUGIN_H

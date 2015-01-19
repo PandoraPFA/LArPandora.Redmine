@@ -1,22 +1,22 @@
 /**
- *  @file   larpandora/LArPandoraInterface/LArPandoraTransformationPlugin.h
+ *  @file   LArContent/LArPlugins/LArRotationalTransformationPlugin.h
  *
- *  @brief  Header file for the LArPandora transformation plugin class.
+ *  @brief  Header file for the rotational transformation plugin class.
  *
  *  $Log: $
  */
-#ifndef LAR_PANDORA_TRANSFORMATION_PLUGIN_H
-#define LAR_PANDORA_TRANSFORMATION_PLUGIN_H 1
+#ifndef LAR_ROTATIONAL_TRANSFORMATION_PLUGIN_H
+#define LAR_ROTATIONAL_TRANSFORMATION_PLUGIN_H 1
 
 #include "LArPlugins/LArTransformationPlugin.h"
 
-namespace lar_pandora
+namespace lar_content
 {
 
 /**
- *  @brief  LArPandoraTransformationPlugin class
+ *  @brief  LArRotationalTransformationPlugin class
  */
-class LArPandoraTransformationPlugin : public lar_content::LArTransformationPlugin
+class LArRotationalTransformationPlugin : public lar_content::LArTransformationPlugin
 {
 public:
 
@@ -26,14 +26,13 @@ public:
      *  @param  thetaU  the angle from the W axis to the U axis (radians)
      *  @param  thetaV  the angle from the W axis to the V axis (radians)
      *  @param  sigmaUVW  nominal spatial resolution for U, V and W (cm)
-     *  @param  wireZPitch  the wire pitch (cm)
      */
-    LArPandoraTransformationPlugin(const float thetaU, const float thetaV, const float sigmaUVW, const float wireZPitch);
+    LArRotationalTransformationPlugin(const float thetaU, const float thetaV, const float sigmaUVW);
 
     /**
      *  @brief  Destructor
      */
-    virtual ~LArPandoraTransformationPlugin();
+    virtual ~LArRotationalTransformationPlugin();
 
     virtual float UVtoW(const float u, const float v) const;
 
@@ -70,6 +69,6 @@ private:
     const float     m_cosV;            ///< cos(thetaV)
 };
 
-} // namespace lar_pandora
+} // namespace lar_content
 
-#endif // #ifndef LAR_PANDORA_TRANSFORMATION_PLUGIN_H
+#endif // #ifndef LAR_ROTATIONAL_TRANSFORMATION_PLUGIN_H

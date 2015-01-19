@@ -1,23 +1,23 @@
 /**
- *  @file   larpandora/LArPandoraInterface/LArPandoraTransformationPlugin.cxx
+ *  @file   LArContent/LArPlugins/LArRotationalTransformationPlugin.cc
  *
- *  @brief  Implementation of the LArPandora transformation plugin class.
+ *  @brief  Implementation of the rotational transformation plugin class.
  *
  *  $Log: $
  */
 
 #include "Objects/CartesianVector.h"
 
-#include "LArPandoraTransformationPlugin.h"
+#include "LArPlugins/LArRotationalTransformationPlugin.h"
 
 #include <cmath>
 
-namespace lar_pandora
+namespace lar_content
 {
 
-LArPandoraTransformationPlugin::LArPandoraTransformationPlugin(const float thetaU, const float thetaV, const float sigmaUVW,
-    const float wireZPitch) : 
-    LArTransformationPlugin(wireZPitch),
+using namespace pandora;
+
+LArRotationalTransformationPlugin::LArRotationalTransformationPlugin(const float thetaU, const float thetaV, const float sigmaUVW) : 
     m_thetaU(thetaU),
     m_thetaV(thetaV),
     m_sigmaUVW(sigmaUVW),
@@ -33,69 +33,69 @@ LArPandoraTransformationPlugin::LArPandoraTransformationPlugin(const float theta
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-LArPandoraTransformationPlugin::~LArPandoraTransformationPlugin()
+LArRotationalTransformationPlugin::~LArRotationalTransformationPlugin()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::UVtoW(const float u, const float v) const
+float LArRotationalTransformationPlugin::UVtoW(const float u, const float v) const
 {
     return this->UVtoZ(u, v);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::VWtoU(const float v, const float w) const
+float LArRotationalTransformationPlugin::VWtoU(const float v, const float w) const
 {
     return (w * m_sinUplusV - v * m_sinU) / m_sinV;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::WUtoV(const float w, const float u) const
+float LArRotationalTransformationPlugin::WUtoV(const float w, const float u) const
 {
     return (w * m_sinUplusV - u * m_sinV) / m_sinU;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::UVtoY(const float u, const float v) const
+float LArRotationalTransformationPlugin::UVtoY(const float u, const float v) const
 {
     return (v * m_cosU - u * m_cosV) / m_sinUplusV;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::UVtoZ(const float u, const float v) const
+float LArRotationalTransformationPlugin::UVtoZ(const float u, const float v) const
 {
     return (v * m_sinU + u * m_sinV) / m_sinUplusV;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::YZtoU(const float y, const float z) const
+float LArRotationalTransformationPlugin::YZtoU(const float y, const float z) const
 {
     return z * m_cosU - y * m_sinU;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::YZtoV(const float y, const float z) const
+float LArRotationalTransformationPlugin::YZtoV(const float y, const float z) const
 {
     return z * m_cosV + y * m_sinV;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraTransformationPlugin::GetSigmaUVW() const
+float LArRotationalTransformationPlugin::GetSigmaUVW() const
 {
     return m_sigmaUVW;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraTransformationPlugin::GetMinChiSquaredYZ(const float u, const float v, const float w, const float sigmaU, const float sigmaV,
+void LArRotationalTransformationPlugin::GetMinChiSquaredYZ(const float u, const float v, const float w, const float sigmaU, const float sigmaV,
     const float sigmaW, float &y, float &z, float &chiSquared) const
 {
     // Obtain expression for chi2, differentiate wrt y and z, set both results to zero and solve simultaneously.
@@ -110,19 +110,17 @@ void LArPandoraTransformationPlugin::GetMinChiSquaredYZ(const float u, const flo
         ((sigmaV * m_sinU * m_sinU) + (sigmaW * m_cosV * m_cosV * m_sinU * m_sinU) + (2. * sigmaW * m_cosU * m_cosV * m_sinU * m_sinV) +
          (sigmaU * m_sinV * m_sinV) + (sigmaW * m_cosU * m_cosU * m_sinV * m_sinV));
 
-    const float deltaU(u - LArPandoraTransformationPlugin::YZtoU(y, z));
-    const float deltaV(v - LArPandoraTransformationPlugin::YZtoV(y, z));
+    const float deltaU(u - LArRotationalTransformationPlugin::YZtoU(y, z));
+    const float deltaV(v - LArRotationalTransformationPlugin::YZtoV(y, z));
     const float deltaW(w - z);
     chiSquared = ((deltaU * deltaU) / (sigmaU * sigmaU)) + ((deltaV * deltaV) / (sigmaV * sigmaV)) + ((deltaW * deltaW) / (sigmaW * sigmaW));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraTransformationPlugin::GetProjectedYZ(const PositionAndType &hitPositionAndType, const PositionAndType &fitPositionAndType1,
+void LArRotationalTransformationPlugin::GetProjectedYZ(const PositionAndType &hitPositionAndType, const PositionAndType &fitPositionAndType1,
     const PositionAndType &fitPositionAndType2, const float sigmaHit, const float sigmaFit, float &y, float &z, float &chiSquared) const
 {
-    using namespace pandora;
-
     const HitType hitType(hitPositionAndType.second), fitType1(fitPositionAndType1.second), fitType2(fitPositionAndType2.second);
 
     if (((hitType == fitType1) || (hitType == fitType2) || (fitType1 == fitType2)) ||
@@ -137,12 +135,12 @@ void LArPandoraTransformationPlugin::GetProjectedYZ(const PositionAndType &hitPo
     const float v((TPC_VIEW_V == hitType) ? hitPositionAndType.first : (TPC_VIEW_V == fitType1) ? fitPositionAndType1.first : fitPositionAndType2.first);
     const float w((TPC_VIEW_W == hitType) ? hitPositionAndType.first : (TPC_VIEW_W == fitType1) ? fitPositionAndType1.first : fitPositionAndType2.first);
 
-    const float uPrime((TPC_VIEW_U == hitType) ? LArPandoraTransformationPlugin::VWtoU(v, w) : u);
-    const float vPrime((TPC_VIEW_V == hitType) ? LArPandoraTransformationPlugin::WUtoV(w, u) : v);
-    const CartesianVector input(0.f, LArPandoraTransformationPlugin::UVtoY(uPrime, vPrime), LArPandoraTransformationPlugin::UVtoZ(uPrime, vPrime));
+    const float uPrime((TPC_VIEW_U == hitType) ? LArRotationalTransformationPlugin::VWtoU(v, w) : u);
+    const float vPrime((TPC_VIEW_V == hitType) ? LArRotationalTransformationPlugin::WUtoV(w, u) : v);
+    const CartesianVector input(0.f, LArRotationalTransformationPlugin::UVtoY(uPrime, vPrime), LArRotationalTransformationPlugin::UVtoZ(uPrime, vPrime));
 
     const float position((TPC_VIEW_U == hitType) ? u : (TPC_VIEW_V == hitType) ? v : w);
-    const float fitPosition((TPC_VIEW_U == hitType) ? LArPandoraTransformationPlugin::VWtoU(v, w) : (TPC_VIEW_V == hitType) ? LArPandoraTransformationPlugin::WUtoV(w, u) : LArPandoraTransformationPlugin::UVtoW(u, v));
+    const float fitPosition((TPC_VIEW_U == hitType) ? LArRotationalTransformationPlugin::VWtoU(v, w) : (TPC_VIEW_V == hitType) ? LArRotationalTransformationPlugin::WUtoV(w, u) : LArRotationalTransformationPlugin::UVtoW(u, v));
     const CartesianVector uUnit(0., -m_cosU, m_sinU), vUnit(0., m_cosV, m_sinV), wUnit(0., 0., 1.);
     const CartesianVector &unitVector((TPC_VIEW_U == hitType) ? uUnit : (TPC_VIEW_V == hitType) ? vUnit : wUnit);
 
@@ -153,10 +151,10 @@ void LArPandoraTransformationPlugin::GetProjectedYZ(const PositionAndType &hitPo
     const float sigmaU((TPC_VIEW_U == hitType) ? sigmaHit : sigmaFit);
     const float sigmaV((TPC_VIEW_V == hitType) ? sigmaHit : sigmaFit);
     const float sigmaW((TPC_VIEW_W == hitType) ? sigmaHit : sigmaFit);
-    const float deltaU(u - LArPandoraTransformationPlugin::YZtoU(y, z));
-    const float deltaV(v - LArPandoraTransformationPlugin::YZtoV(y, z));
+    const float deltaU(u - LArRotationalTransformationPlugin::YZtoU(y, z));
+    const float deltaV(v - LArRotationalTransformationPlugin::YZtoV(y, z));
     const float deltaW(w - z);
     chiSquared = ((deltaU * deltaU) / (sigmaU * sigmaU)) + ((deltaV * deltaV) / (sigmaV * sigmaV)) + ((deltaW * deltaW) / (sigmaW * sigmaW));
 }
 
-} // namespace lar_pandora
+} // namespace lar_content
