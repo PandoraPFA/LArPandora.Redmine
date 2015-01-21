@@ -31,8 +31,8 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     double startTime(+std::numeric_limits<float>::max()), sigmaStartTime(0.0);
     double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
-    double dQdW(0.0), sigmadQdW(0.0);
-    double dTdW(0.0), sigmadTdW(0.0);
+    double dQdW(0.0) /* , sigmadQdW(0.0) */;
+    double dTdW(0.0) /* , sigmadTdW(0.0) */;
 
     double Sq(0.0), Sqx(0.0), Sqy(0.0), Sqxy(0.0), Sqxx(0.0);
 
@@ -82,31 +82,55 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
         Sqxx += thisCharge * thisWire * thisWire;
         Sqxy += thisCharge * thisWire * thisTime;
     }
-
+    
     if (endWire >= startWire)
     {
         dQdW = Sq / (1.0 + endWire - startWire);
-        sigmadQdW = 0.0;
+    //    sigmadQdW = 0.0;
     }
     else
     {
         throw cet::exception("LArPandora") << " LArPandora::BuildCluster --- Failed to find start and end wires ";
     }
-
+    
     const double numerator(Sq * Sqxy - Sqx * Sqy);
     const double denominator(Sq * Sqxx - Sqx * Sqx);
 
     if (denominator > 0.0)
     {
         dTdW = numerator / denominator;
-        sigmadTdW = 0.0;
+    //    sigmadTdW = 0.0;
     }
 
     // Return a new recob::Cluster object
-    return recob::Cluster(startWire, sigmaStartWire, startTime, sigmaStartTime,
-                          endWire, sigmaEndWire, endTime, sigmaEndTime,
-                          dTdW, sigmadTdW, dQdW, sigmadQdW,
-                          Sq, view, id, planeID);
+    // FIXME fiiixmeeeeeeeee
+    return recob::Cluster(
+      startWire,             // start_wire
+      sigmaStartWire,        // sigma_start_wire
+      startTime,             // start_tick
+      sigmaStartTime,        // sigma_start_tick
+      dQdW,            // start_charge charge on the start wire FIXME (this should not be dQ/dW)
+      std::atan(dTdW), // start_angle angle of the start of the cluster, in [-pi,pi] FIXME
+      0.,             // start_opening opening angle at the start of the cluster  FIXME
+      endWire,               // end_wire
+      sigmaEndWire,          // sigma_end_wire
+      endTime,               // end_tick
+      sigmaEndTime,          // sigma_end_tick
+      0.,             // end_charge charge on the end wire  FIXME
+      0.,             // end_angle angle of the end of the cluster, in [-pi,pi]  FIXME
+      0.,             // end_opening opening angle at the end of the cluster  FIXME
+      0.,             // integral total charge from fitted shape of hits  FIXME
+      0.,             // integral_stddev standard deviation of hit charge from fitted shape  FIXME
+      0.,             // summedADC total charge from signal ADC of hits  FIXME
+      0.,             // summedADC_stddev standard deviation of signal ADC of hits  FIXME
+      hitVector.size(),      // n_hits
+      0.,             // wires_over_hits wires covered by cluster, divided by number of hits  FIXME
+      0.,             // width a measure of the cluster width  FIXME
+      id,                    // ID
+      view,                  // view
+      planeID,               // plane
+      recob::Cluster::Sentry // check that all the parameters are in
+      );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------  
