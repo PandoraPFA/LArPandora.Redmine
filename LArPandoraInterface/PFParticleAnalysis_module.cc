@@ -86,10 +86,16 @@ private:
      double       m_trkvtxx;               ///< 
      double       m_trkvtxy;               ///<
      double       m_trkvtxz;               ///<
-     double       m_trkdirx;               ///< 
-     double       m_trkdiry;               ///<
-     double       m_trkdirz;               ///<
-
+     double       m_trkvtxdirx;            ///< 
+     double       m_trkvtxdiry;            ///<
+     double       m_trkvtxdirz;            ///<
+     double       m_trkendx;               ///< 
+     double       m_trkendy;               ///<
+     double       m_trkendz;               ///<
+     double       m_trkenddirx;            ///< 
+     double       m_trkenddiry;            ///<
+     double       m_trkenddirz;            ///<
+  
      std::string  m_spacepointLabel;       ///< 
      std::string  m_particleLabel;         ///<
      std::string  m_trackLabel;            ///<
@@ -178,9 +184,15 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("trkvtxx", &m_trkvtxx, "trkvtxx/D");
     m_pRecoTree->Branch("trkvtxy", &m_trkvtxy, "trkvtxy/D");
     m_pRecoTree->Branch("trkvtxz", &m_trkvtxz, "trkvtxz/D");
-    m_pRecoTree->Branch("trkdirx", &m_trkdirx, "trkdirx/D");
-    m_pRecoTree->Branch("trkdiry", &m_trkdiry, "trkdiry/D");
-    m_pRecoTree->Branch("trkdirz", &m_trkdirz, "trkdirz/D");
+    m_pRecoTree->Branch("trkvtxdirx", &m_trkvtxdirx, "trkdvtxirx/D");
+    m_pRecoTree->Branch("trkvtxdiry", &m_trkvtxdiry, "trkdvtxiry/D");
+    m_pRecoTree->Branch("trkvtxdirz", &m_trkvtxdirz, "trkvtxdirz/D");
+    m_pRecoTree->Branch("trkendx", &m_trkendx, "trkendx/D");
+    m_pRecoTree->Branch("trkendy", &m_trkendy, "trkendy/D");
+    m_pRecoTree->Branch("trkendz", &m_trkendz, "trkendz/D");
+    m_pRecoTree->Branch("trkenddirx", &m_trkenddirx, "trkdendirx/D");
+    m_pRecoTree->Branch("trkenddiry", &m_trkenddiry, "trkdendiry/D");
+    m_pRecoTree->Branch("trkenddirz", &m_trkenddirz, "trkenddirz/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -223,9 +235,15 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_trkvtxx = 0.0;
     m_trkvtxy = 0.0;
     m_trkvtxz = 0.0;
-    m_trkdirx = 0.0;
-    m_trkdiry = 0.0;
-    m_trkdirz = 0.0;
+    m_trkvtxdirx = 0.0;
+    m_trkvtxdiry = 0.0;
+    m_trkvtxdirz = 0.0;
+    m_trkendx = 0.0;
+    m_trkendy = 0.0;
+    m_trkendz = 0.0;
+    m_trkenddirx = 0.0;
+    m_trkenddiry = 0.0;
+    m_trkenddirz = 0.0;
 
     std::cout << "  Run: " << m_run << std::endl;
     std::cout << "  Event: " << m_event << std::endl; 
@@ -307,10 +325,16 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_trkvtxx = 0.0;
         m_trkvtxy = 0.0;
         m_trkvtxz = 0.0;
-        m_trkdirx = 0.0;
-        m_trkdiry = 0.0;
-        m_trkdirz = 0.0;
-
+        m_trkvtxdirx = 0.0;
+        m_trkvtxdiry = 0.0;
+        m_trkvtxdirz = 0.0;
+        m_trkendx = 0.0;
+        m_trkendy = 0.0;
+        m_trkendz = 0.0;
+        m_trkenddirx = 0.0;
+        m_trkenddiry = 0.0;
+        m_trkenddirz = 0.0;
+	
         // Particles <-> Clusters
         PFParticlesToClusters::const_iterator cIter = particlesToClusters.find(particle);
         if (particlesToClusters.end() != cIter)
@@ -380,16 +404,24 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                   std::cout << " Warning: Found particle with more than one associated track " << std::endl;
  
                 const art::Ptr<recob::Track> track = *(trackVector.begin());
-                const TVector3 &trackVertexPosition = track->Vertex();
-                const TVector3 &trackVertexDirection = track->VertexDirection();
-
+                const TVector3 &trackVtxPosition = track->Vertex();
+                const TVector3 &trackVtxDirection = track->VertexDirection();
+                const TVector3 &trackEndPosition = track->End();
+                const TVector3 &trackEndDirection = track->EndDirection();
+		
                 m_track = 1;
-                m_trkvtxx = trackVertexPosition.x();
-                m_trkvtxy = trackVertexPosition.y();
-                m_trkvtxz = trackVertexPosition.z();
-                m_trkdirx = trackVertexDirection.x();
-                m_trkdiry = trackVertexDirection.y();
-                m_trkdirz = trackVertexDirection.z();                
+                m_trkvtxx = trackVtxPosition.x();
+                m_trkvtxy = trackVtxPosition.y();
+                m_trkvtxz = trackVtxPosition.z();
+                m_trkvtxdirx = trackVtxDirection.x();
+                m_trkvtxdiry = trackVtxDirection.y();
+                m_trkvtxdirz = trackVtxDirection.z();
+		m_trkendx = trackEndPosition.x();
+                m_trkendy = trackEndPosition.y();
+                m_trkendz = trackEndPosition.z();
+                m_trkenddirx = trackEndDirection.x();
+                m_trkenddiry = trackEndDirection.y();
+                m_trkenddirz = trackEndDirection.z();    
             }
         }
 
