@@ -441,7 +441,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 
         std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId()
                   << ", trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg
-                  << " mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits << std::endl;
+                  << ", mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits << std::endl;
 
         m_pRecoTree->Fill();
         ++m_index; // Increment index number

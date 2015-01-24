@@ -73,6 +73,7 @@ private:
 
      int          m_clusters;              ///<
      int          m_spacepoints;           ///<
+     int          m_hits;                  ///<
 
      double       m_pfovtxx;               ///< 
      double       m_pfovtxy;               ///<
@@ -89,7 +90,9 @@ private:
      double       m_trkdiry;               ///<
      double       m_trkdirz;               ///<
 
+     std::string  m_spacepointLabel;       ///< 
      std::string  m_particleLabel;         ///<
+     std::string  m_trackLabel;            ///<
 };
 
 DEFINE_ART_MODULE(PFParticleAnalysis)
@@ -136,7 +139,9 @@ PFParticleAnalysis::~PFParticleAnalysis()
 
 void PFParticleAnalysis::reconfigure(fhicl::ParameterSet const &pset)
 {
+    m_spacepointLabel = pset.get<std::string>("SpacePointModule", "pandora");
     m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
+    m_trackLabel = pset.get<std::string>("TrackModule","pandora");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,6 +167,7 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("track", &m_track, "track/I"); 
     m_pRecoTree->Branch("clusters", &m_clusters, "clusters/I");
     m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I"); 
+    m_pRecoTree->Branch("hits", &m_hits, "hits/I"); 
     m_pRecoTree->Branch("pfovtxx", &m_pfovtxx, "pfovtxx/D");
     m_pRecoTree->Branch("pfovtxy", &m_pfovtxy, "pfovtxy/D");
     m_pRecoTree->Branch("pfovtxz", &m_pfovtxz, "pfovtxz/D");
@@ -204,6 +210,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
 
     m_clusters = 0;
     m_spacepoints = 0;
+    m_hits = 0;
       
     m_pfovtxx = 0.0;
     m_pfovtxy = 0.0;
@@ -229,11 +236,14 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     PFParticleVector particles1, particles2;
     PFParticlesToClusters particlesToClusters;
     PFParticlesToSpacePoints particlesToSpacePoints;
+    PFParticlesToHits particlesToHits;
+    HitsToPFParticles hitsToParticles;
 
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles1, particlesToClusters);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles2, particlesToSpacePoints);
-    
+    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
+
     std::cout << "  PFParticles: " << particleVector.size() << std::endl;
 
     if (particleVector.empty())
@@ -258,7 +268,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     // ============================
     TrackVector trackVector;
     PFParticlesToTracks particlesToTracks;
-    LArPandoraCollector::CollectTracks(evt, m_particleLabel, trackVector, particlesToTracks);
+    LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
 
     // Build an indexed map of the PFParticles
     // =======================================
@@ -284,6 +294,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
 
         m_clusters = 0;
         m_spacepoints = 0;
+        m_hits = 0;
       
         m_pfovtxx = 0.0;
         m_pfovtxy = 0.0;
@@ -301,20 +312,25 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_trkdirz = 0.0;
 
         // Particles <-> Clusters
-        PFParticlesToClusters::const_iterator iter1 = particlesToClusters.find(particle);
-        if (particlesToClusters.end() != iter1)
-            m_clusters = iter1->second.size();
+        PFParticlesToClusters::const_iterator cIter = particlesToClusters.find(particle);
+        if (particlesToClusters.end() != cIter)
+            m_clusters = cIter->second.size();
 
         // Particles <-> SpacePoints
-        PFParticlesToSpacePoints::const_iterator iter2 = particlesToSpacePoints.find(particle);
-        if (particlesToSpacePoints.end() != iter2)
-            m_spacepoints = iter2->second.size();
+        PFParticlesToSpacePoints::const_iterator pIter = particlesToSpacePoints.find(particle);
+        if (particlesToSpacePoints.end() != pIter)
+            m_spacepoints = pIter->second.size();
+
+        // Particles <-> Hits
+        PFParticlesToHits::const_iterator hIter = particlesToHits.find(particle);
+        if (particlesToHits.end() != hIter)
+            m_hits = hIter->second.size();
 
         // Particles <-> Vertices
-        PFParticlesToVertices::const_iterator iter3 = particlesToVertices.find(particle);
-        if (particlesToVertices.end() != iter3)
+        PFParticlesToVertices::const_iterator vIter = particlesToVertices.find(particle);
+        if (particlesToVertices.end() != vIter)
         {
-            const VertexVector &vertexVector = iter3->second;
+            const VertexVector &vertexVector = vIter->second;
             if (!vertexVector.empty())
             {
                 if (vertexVector.size() !=1 )
@@ -332,10 +348,10 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         }
 
         // Particles <-> Seeds
-        PFParticlesToSeeds::const_iterator iter4 = particlesToSeeds.find(particle);
-        if (particlesToSeeds.end() != iter4)
+        PFParticlesToSeeds::const_iterator sIter = particlesToSeeds.find(particle);
+        if (particlesToSeeds.end() != sIter)
         {
-            const SeedVector &seedVector = iter4->second;
+            const SeedVector &seedVector = sIter->second;
             if (!seedVector.empty())
             {
                 if (seedVector.size() !=1 )
@@ -354,10 +370,10 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         }
 
         // Particles <-> Tracks
-        PFParticlesToTracks::const_iterator iter5 = particlesToTracks.find(particle);
-        if (particlesToTracks.end() != iter5)
+        PFParticlesToTracks::const_iterator tIter = particlesToTracks.find(particle);
+        if (particlesToTracks.end() != tIter)
         {
-            const TrackVector &trackVector = iter5->second;
+            const TrackVector &trackVector = tIter->second;
             if (!trackVector.empty())
             {
                 if (trackVector.size() !=1 )
@@ -381,7 +397,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                   << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
                   << " (Self=" << m_self << ", Parent=" << m_parent << ")"
                   << " (Vertex=" << m_vertex << ", Seed=" << (m_pfoptot > 0) << ", Track=" << m_track
-                  << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ") " << std::endl;
+                  << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ", Hits=" << m_hits << ") " << std::endl;
 
         m_pRecoTree->Fill();
     }
