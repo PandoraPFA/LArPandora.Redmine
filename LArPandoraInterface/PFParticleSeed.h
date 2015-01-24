@@ -133,9 +133,11 @@ public:
      *  @brief Build a vector of trajectory points from a vector of space points
      *
      *  @param  spacepoints  the input list of space points
-     *  @param  tarjectoryPointList  the output list of trajectory points
+     *  @param  trajectoryPointList  the output list of trajectory points
+     *  @param  isCosmic  choice of vertex (true for highest vertex in Y, false for lowest vertex in Z) 
      */
-    static void BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList);
+    static void BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList,
+        const bool isCosmic = true);
 
     /**
      *  @brief Find the extremal coordinates from a given set of space points
