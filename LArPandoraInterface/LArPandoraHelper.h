@@ -13,6 +13,7 @@
 #include "RecoBase/Cluster.h"
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Hit.h"
+#include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
 namespace lar_pandora 
 {
@@ -25,8 +26,15 @@ public:
      *
      *  @param id  The id code for the cluster
      *  @param hitVector  The input vector of hits
+     *  @param algo Algorithm set to fill cluster members
+     *  
+     *  If you don't know which algorithm to pick, StandardClusterParamsAlg is
+     *  a good default.
      */
-    static recob::Cluster BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector);
+    static recob::Cluster BuildCluster(
+      const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
+      cluster::ClusterParamsAlgBase& algo
+      );
 
     /**
      *  @brief Build a recob::Track object from an input vector of recob::SpacePoint objects

@@ -11,6 +11,7 @@
 #include "RecoBase/Cluster.h"
 #include "RecoBase/PFParticle.h"
 #include "RecoBase/Vertex.h"
+#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
@@ -235,6 +236,11 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
 
+    // prepare the algorithm to compute the cluster characteristics;
+    // we use the "standard" one here; configuration would happen here,
+    // but we are using the default configuration for that algorithm
+    cluster::StandardClusterParamsAlg ClusterParamAlgo;
+    
 
     // Obtain a sorted vector of all output Pfos and their daughters
     pandora::PfoList connectedPfoList;
@@ -437,8 +443,10 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             for (HitArray::const_iterator hIter = hitArray.begin(), hIterEnd = hitArray.end(); hIter != hIterEnd; ++hIter)
             {
                 const HitVector hitVector(hIter->second);
-                recob::Cluster newCluster(LArPandoraHelper::BuildCluster(clusterCounter++, hitVector)); // TODO: Account for isolated hits
-                outputClusters->push_back(newCluster);
+                recob::Cluster newCluster(LArPandoraHelper::BuildCluster
+                  (clusterCounter++, hitVector, ClusterParamAlgo)
+                  ); // TODO: Account for isolated hits
+                outputClusters->emplace_back(std::move(newCluster));
 
                 util::CreateAssn(*this, evt, *(outputClusters.get()), hitVector, *(outputClustersToHits.get()));
                 util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),

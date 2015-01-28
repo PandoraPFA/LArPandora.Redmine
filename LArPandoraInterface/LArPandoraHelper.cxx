@@ -7,16 +7,24 @@
 
 #include "LArPandoraHelper.h"
 #include "PFParticleSeed.h"
+#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
+#include "RecoAlg/ClusterParamsImportWrapper.h"
+#include "ClusterFinder/ClusterCreator.h"
 
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <limits>
+#include <algorithm> // std::transform()
+#include <iterator> // std::back_inserter()
 #include <iostream>
 
 namespace lar_pandora {
 
-recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector)
+recob::Cluster LArPandoraHelper::BuildCluster(
+  const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
+  cluster::ClusterParamsAlgBase& algo
+)
 {
   mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
 
@@ -31,17 +39,19 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     double startTime(+std::numeric_limits<float>::max()), sigmaStartTime(0.0);
     double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
-    double dQdW(0.0) /* , sigmadQdW(0.0) */;
-    double dTdW(0.0) /* , sigmadTdW(0.0) */;
+  /* // removed per new recob::Cluster v14
+    double dQdW(0.0), sigmadQdW(0.0);
+    double dTdW(0.0), sigmadTdW(0.0);
 
     double Sq(0.0), Sqx(0.0), Sqy(0.0), Sqxy(0.0), Sqxx(0.0);
-
+  */
     // Loop over vector of hits and calculate properties
     for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
         const art::Ptr<recob::Hit> hit = *iter;
 
-        const double thisCharge(hit->Integral());
+     // removed per new recob::Cluster v14
+     // const double thisCharge(hit->Integral());
         const double thisWire(hit->WireID().Wire);
         const double thisWireSigma(0.5);
         const double thisTime(hit->PeakTime());
@@ -76,13 +86,15 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
             sigmaEndTime = thisTimeSigma;
         }
 
+      /* // removed per new recob::Cluster v14
         Sq   += thisCharge;
         Sqx  += thisCharge * thisWire;
         Sqy  += thisCharge * thisTime;
         Sqxx += thisCharge * thisWire * thisWire;
         Sqxy += thisCharge * thisWire * thisTime;
+      */
     }
-    
+  /* // removed per new recob::Cluster v14
     if (endWire >= startWire)
     {
         dQdW = Sq / (1.0 + endWire - startWire);
@@ -101,7 +113,37 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
         dTdW = numerator / denominator;
     //    sigmadTdW = 0.0;
     }
+  */
+    // feed the algorithm with all the cluster hits;
+    // usually this work is done by ClusterParamsImportWrapper<>,
+    // but that is a static wrapper, and to use it we should make
+    // this member function a template of the wrapped algorithm
+    // (that would not be too bad anyway: users would barely notice,
+    // but all this code should be moved into a header or a "tcc" file).
+    // Instead, we are doing the hard work here:
+    std::vector<recob::Hit const*> hits;
+    std::transform(hitVector.begin(), hitVector.end(), std::back_inserter(hits),
+      [](art::Ptr<recob::Hit> const& ptr) { return &*ptr; });
+    algo.SetHits(hits);
+    
+    // create the recob::Cluster directly in the vector
+    return cluster::ClusterCreator(
+      algo,                  // algo
+      startWire,             // start_wire
+      sigmaStartWire,        // sigma_start_wire
+      startTime,             // start_tick
+      sigmaStartTime,        // sigma_start_tick
+      endWire,               // end_wire
+      sigmaEndWire,          // sigma_end_wire
+      endTime,               // end_tick
+      sigmaEndTime,          // sigma_end_tick
+      id,                    // ID
+      view,                  // view
+      planeID,               // plane
+      recob::Cluster::Sentry // sentry
+      ).move();
 
+  /* // removed per new recob::Cluster v14
     // Return a new recob::Cluster object
     // FIXME fiiixmeeeeeeeee
     return recob::Cluster(
@@ -131,6 +173,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
       planeID,               // plane
       recob::Cluster::Sentry // check that all the parameters are in
       );
+    */
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------  
