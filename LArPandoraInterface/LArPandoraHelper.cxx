@@ -39,19 +39,12 @@ recob::Cluster LArPandoraHelper::BuildCluster(
     double startTime(+std::numeric_limits<float>::max()), sigmaStartTime(0.0);
     double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
-  /* // removed per new recob::Cluster v14
-    double dQdW(0.0), sigmadQdW(0.0);
-    double dTdW(0.0), sigmadTdW(0.0);
-
-    double Sq(0.0), Sqx(0.0), Sqy(0.0), Sqxy(0.0), Sqxx(0.0);
-  */
+    
     // Loop over vector of hits and calculate properties
     for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
         const art::Ptr<recob::Hit> hit = *iter;
 
-     // removed per new recob::Cluster v14
-     // const double thisCharge(hit->Integral());
         const double thisWire(hit->WireID().Wire);
         const double thisWireSigma(0.5);
         const double thisTime(hit->PeakTime());
@@ -86,34 +79,8 @@ recob::Cluster LArPandoraHelper::BuildCluster(
             sigmaEndTime = thisTimeSigma;
         }
 
-      /* // removed per new recob::Cluster v14
-        Sq   += thisCharge;
-        Sqx  += thisCharge * thisWire;
-        Sqy  += thisCharge * thisTime;
-        Sqxx += thisCharge * thisWire * thisWire;
-        Sqxy += thisCharge * thisWire * thisTime;
-      */
-    }
-  /* // removed per new recob::Cluster v14
-    if (endWire >= startWire)
-    {
-        dQdW = Sq / (1.0 + endWire - startWire);
-    //    sigmadQdW = 0.0;
-    }
-    else
-    {
-        throw cet::exception("LArPandora") << " LArPandora::BuildCluster --- Failed to find start and end wires ";
     }
     
-    const double numerator(Sq * Sqxy - Sqx * Sqy);
-    const double denominator(Sq * Sqxx - Sqx * Sqx);
-
-    if (denominator > 0.0)
-    {
-        dTdW = numerator / denominator;
-    //    sigmadTdW = 0.0;
-    }
-  */
     // feed the algorithm with all the cluster hits;
     // usually this work is done by ClusterParamsImportWrapper<>,
     // but that is a static wrapper, and to use it we should make
@@ -142,38 +109,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(
       planeID,               // plane
       recob::Cluster::Sentry // sentry
       ).move();
-
-  /* // removed per new recob::Cluster v14
-    // Return a new recob::Cluster object
-    // FIXME fiiixmeeeeeeeee
-    return recob::Cluster(
-      startWire,             // start_wire
-      sigmaStartWire,        // sigma_start_wire
-      startTime,             // start_tick
-      sigmaStartTime,        // sigma_start_tick
-      dQdW,            // start_charge charge on the start wire FIXME (this should not be dQ/dW)
-      std::atan(dTdW), // start_angle angle of the start of the cluster, in [-pi,pi] FIXME
-      0.,             // start_opening opening angle at the start of the cluster  FIXME
-      endWire,               // end_wire
-      sigmaEndWire,          // sigma_end_wire
-      endTime,               // end_tick
-      sigmaEndTime,          // sigma_end_tick
-      0.,             // end_charge charge on the end wire  FIXME
-      0.,             // end_angle angle of the end of the cluster, in [-pi,pi]  FIXME
-      0.,             // end_opening opening angle at the end of the cluster  FIXME
-      0.,             // integral total charge from fitted shape of hits  FIXME
-      0.,             // integral_stddev standard deviation of hit charge from fitted shape  FIXME
-      0.,             // summedADC total charge from signal ADC of hits  FIXME
-      0.,             // summedADC_stddev standard deviation of signal ADC of hits  FIXME
-      hitVector.size(),      // n_hits
-      0.,             // wires_over_hits wires covered by cluster, divided by number of hits  FIXME
-      0.,             // width a measure of the cluster width  FIXME
-      id,                    // ID
-      view,                  // view
-      planeID,               // plane
-      recob::Cluster::Sentry // check that all the parameters are in
-      );
-    */
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------  
