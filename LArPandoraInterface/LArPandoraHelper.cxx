@@ -23,6 +23,7 @@ namespace lar_pandora {
 
 recob::Cluster LArPandoraHelper::BuildCluster(
   const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
+  std::set<art::Ptr<recob::Hit>> const& isolatedHits,
   cluster::ClusterParamsAlgBase& algo
 )
 {
@@ -40,11 +41,18 @@ recob::Cluster LArPandoraHelper::BuildCluster(
     double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
     
+    // select in this vector only the core hits
+    std::vector<recob::Hit const*> hits;
+    
     // Loop over vector of hits and calculate properties
     for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
-        const art::Ptr<recob::Hit> hit = *iter;
-
+        art::Ptr<recob::Hit> const& hit = *iter;
+        
+        // count for the cluster algorithms only if not in the isolated hit list
+        if (isolatedHits.count(hit) != 0)
+          hits.push_back(&*hit);
+        
         const double thisWire(hit->WireID().Wire);
         const double thisWireSigma(0.5);
         const double thisTime(hit->PeakTime());
@@ -81,16 +89,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(
 
     }
     
-    // feed the algorithm with all the cluster hits;
-    // usually this work is done by ClusterParamsImportWrapper<>,
-    // but that is a static wrapper, and to use it we should make
-    // this member function a template of the wrapped algorithm
-    // (that would not be too bad anyway: users would barely notice,
-    // but all this code should be moved into a header or a "tcc" file).
-    // Instead, we are doing the hard work here:
-    std::vector<recob::Hit const*> hits;
-    std::transform(hitVector.begin(), hitVector.end(), std::back_inserter(hits),
-      [](art::Ptr<recob::Hit> const& ptr) { return &*ptr; });
+    // feed the algorithm with all the cluster hits
     algo.SetHits(hits);
     
     // create the recob::Cluster directly in the vector

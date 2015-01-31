@@ -404,6 +404,10 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                 outputSpacePoints->size() - 1, outputSpacePoints->size());
         }
 
+        // TODO: fill this set with the "isolated" (or non-core) hits
+        // (may want to do it per-cluster)
+        std::set<art::Ptr<recob::Hit>> isolatedHits;
+        
         // Build Clusters 
         for (pandora::ClusterList::const_iterator cIter = pfoClusterList.begin(), cIterEnd = pfoClusterList.end(); cIter != cIterEnd; ++cIter)
         {
@@ -442,9 +446,9 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
 
             for (HitArray::const_iterator hIter = hitArray.begin(), hIterEnd = hitArray.end(); hIter != hIterEnd; ++hIter)
             {
-                const HitVector hitVector(hIter->second);
+                const HitVector& hitVector(hIter->second);
                 recob::Cluster newCluster(LArPandoraHelper::BuildCluster
-                  (clusterCounter++, hitVector, ClusterParamAlgo)
+                  (clusterCounter++, hitVector, isolatedHits, ClusterParamAlgo)
                   ); // TODO: Account for isolated hits
                 outputClusters->emplace_back(std::move(newCluster));
 

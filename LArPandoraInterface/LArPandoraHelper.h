@@ -7,6 +7,9 @@
 #ifndef LAR_PANDORA_HELPER_H
 #define LAR_PANDORA_HELPER_H
 
+#include <vector>
+#include <set>
+
 #include "art/Persistency/Common/Ptr.h" 
 
 #include "RecoBase/Track.h"
@@ -26,13 +29,18 @@ public:
      *
      *  @param id  The id code for the cluster
      *  @param hitVector  The input vector of hits
+     *  @param isolatedHits set of isolated hits
      *  @param algo Algorithm set to fill cluster members
      *  
      *  If you don't know which algorithm to pick, StandardClusterParamsAlg is
      *  a good default.
+     *  
+     *  The hits that are isolated (that is, present in isolatedHits) are not
+     *  fed to the cluster parameter algorithms.
      */
     static recob::Cluster BuildCluster(
       const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
+      std::set<art::Ptr<recob::Hit>> const& isolatedHits,
       cluster::ClusterParamsAlgBase& algo
       );
 
