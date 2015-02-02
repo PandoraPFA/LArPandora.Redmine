@@ -57,6 +57,9 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
     
+    std::vector<recob::Hit const*> hits_for_params;
+    hits_for_params.reserve(hitVector.size());
+    
     for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
         art::Ptr<recob::Hit> const& hit = *iter;
@@ -78,7 +81,9 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
         {
             throw cet::exception("LArPandora") << " LArPandoraHelper::BuildCluster --- Input hits have inconsistent plane IDs ";
         }
-
+        
+        hits_for_params.push_back(&*hit);
+        
         if (hitList.count(hit))
             continue;
 
@@ -101,7 +106,7 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     }
     
     // feed the algorithm with all the cluster hits
-    algo.SetHits(hits);
+    algo.SetHits(hits_for_params);
     
     // create the recob::Cluster directly in the vector
     return cluster::ClusterCreator(
