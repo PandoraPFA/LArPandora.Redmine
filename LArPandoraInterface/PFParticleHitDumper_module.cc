@@ -257,6 +257,12 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     std::cout << "  Event: " << m_event << std::endl; 
 
 
+    // Need DetectorProperties service to convert from ticks to X
+    art::ServiceHandle<util::DetectorProperties> theDetector;
+
+    // Need geometry service to convert channel to wire ID
+    art::ServiceHandle<geo::Geometry> theGeometry;
+
     // Get particles, space points, hits (and wires)
     // =============================================
     PFParticleVector         particleVector;
@@ -453,7 +459,7 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
         m_plane = wireID.Plane;
         m_wire  = wireID.Wire; 
 
-        m_q = hit->Charge();
+        m_q = hit->Integral();
         m_x = theDetector->ConvertTicksToX(hit->PeakTime(), wireID.Plane, wireID.TPC, wireID.Cryostat);
         m_w = this->GetUVW(wireID);
      
