@@ -25,6 +25,30 @@
 
 namespace lar_pandora {
 
+void LArPandoraCollector::CollectWires(const art::Event &evt, const std::string label, WireVector &wireVector)
+{
+    art::Handle< std::vector<recob::Wire> > theWires;
+    evt.getByLabel(label, theWires);
+
+    if (!theWires.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find wires... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theWires->size() << " Wires " << std::endl;
+    }
+
+    for (unsigned int i = 0; i < theWires->size(); ++i)
+    {
+        const art::Ptr<recob::Wire> wire(theWires, i);
+        wireVector.push_back(wire);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraCollector::CollectHits(const art::Event &evt, const std::string label, HitVector &hitVector)
 {
     art::Handle< std::vector<recob::Hit> > theHits;
@@ -195,6 +219,34 @@ void LArPandoraCollector::CollectPFParticles(const art::Event &evt, const std::s
             const art::Ptr<recob::Cluster> cluster = clusters.at(j);
             particlesToClusters[particle].push_back(cluster);
         }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+    PFParticlesToShowers &particlesToShowers)
+{
+    art::Handle< std::vector<recob::Shower> > theShowers;
+    evt.getByLabel(label, theShowers);
+
+    if (!theShowers.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find showers... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theShowers->size() << " Showers " << std::endl;
+    }
+
+    art::FindOneP<recob::PFParticle> theParticleAssns(theShowers, evt, label);
+    for (unsigned int i = 0; i < theShowers->size(); ++i)
+    {
+        const art::Ptr<recob::Shower> shower(theShowers, i);
+        showerVector.push_back(shower);
+        const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
+        particlesToShowers[particle].push_back(shower);
     }
 }
 
@@ -385,20 +437,40 @@ void LArPandoraCollector::BuildPFParticleHitMaps(const PFParticleVector &particl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraCollector::BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_cluster,
-    PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode)
+void LArPandoraCollector::BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_middle,
+    PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode, const bool useClusters)
 {
-    PFParticleVector particleVector;
-    PFParticlesToClusters particlesToClusters;
+    // Use intermediate clusters
+    if (useClusters)
+    {    
+        PFParticleVector particleVector;
+        PFParticlesToClusters particlesToClusters;
 
-    ClusterVector clusterVector; 
-    ClustersToHits clustersToHits;
+        ClusterVector clusterVector; 
+        ClustersToHits clustersToHits;
 
-    LArPandoraCollector::CollectPFParticles(evt, label_pfpart, particleVector, particlesToClusters);
-    LArPandoraCollector::CollectClusters(evt, label_cluster, clusterVector, clustersToHits);
+        LArPandoraCollector::CollectPFParticles(evt, label_pfpart, particleVector, particlesToClusters);
+        LArPandoraCollector::CollectClusters(evt, label_middle, clusterVector, clustersToHits);
 
-    LArPandoraCollector::BuildPFParticleHitMaps(particleVector, particlesToClusters, clustersToHits, 
-        particlesToHits, hitsToParticles, daughterMode);
+        LArPandoraCollector::BuildPFParticleHitMaps(particleVector, particlesToClusters, clustersToHits, 
+            particlesToHits, hitsToParticles, daughterMode);
+    }
+
+    // Use intermediate space points
+    else
+    {
+        PFParticleVector particleVector;
+        PFParticlesToSpacePoints particlesToSpacePoints;
+
+        SpacePointVector spacePointVector; 
+        SpacePointsToHits spacePointsToHits;
+
+        LArPandoraCollector::CollectPFParticles(evt, label_pfpart, particleVector, particlesToSpacePoints);
+        LArPandoraCollector::CollectSpacePoints(evt, label_middle, spacePointVector, spacePointsToHits);
+
+        LArPandoraCollector::BuildPFParticleHitMaps(particleVector, particlesToSpacePoints, spacePointsToHits, 
+            particlesToHits, hitsToParticles, daughterMode);   
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

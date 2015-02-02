@@ -9,6 +9,7 @@
 
 #include "art/Framework/Principal/Event.h"
 
+#include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Cluster.h"
@@ -26,6 +27,7 @@ namespace lar_pandora
 {
 
 // Try to make my code more readable!
+typedef std::vector< art::Ptr<recob::Wire> >        WireVector;
 typedef std::vector< art::Ptr<recob::Hit> >         HitVector;
 typedef std::vector< art::Ptr<recob::SpacePoint> >  SpacePointVector;
 typedef std::vector< art::Ptr<recob::Cluster> >     ClusterVector;
@@ -72,6 +74,15 @@ public:
         kUseDaughters = 1,       // Use both parent and daughter partcles
         kAddDaughters = 2        // Absorb daughter particles into parent particles
     };
+
+    /**
+     *  @brief Collect the reconstructed wires from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the Wire list in the event
+     *  @param wireVector the ouput vector of Wire objects
+     */
+    static void CollectWires(const art::Event &evt, const std::string label, WireVector &wireVector);
 
     /**
      *  @brief Collect the reconstructed Hits from the ART event record
@@ -134,6 +145,17 @@ public:
      */
     static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
         PFParticlesToClusters &particlesToClusters);
+
+    /**
+     *  @brief Collect the reconstructed PFParticles and associated Showers from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param showerVector the output vector of Shower objects
+     *  @param particlesToShowers the output map from PFParticle to Shower objects
+     */
+    static void CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+        PFParticlesToShowers &particlesToShowers);   
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated Tracks from the ART event record
@@ -200,13 +222,16 @@ public:
      *  @brief Build mapping between PFParticles and Hits starting from ART event record
      *
      *  @param evt the ART event record
-     *  @param label the label for the PFParticle list in the event
+     *  @param label_pfpart the label for the PFParticle list in the event
+     *  @param label_space the label for the Intermediate list in the event
      *  @param particlesToHits output map from PFParticle to Hit objects
      *  @param hitsToParticles output map from Hit to PFParticle objects
      *  @param daughterMode treatment of daughter particles in construction of maps
+     *  @param useClusters choice of intermediate object (true for Clusters, false for SpacePoints)
      */
-    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_cluster,
-        PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters);
+    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_mid,
+        PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters,
+        const bool useClusters = true);
 
     /**
      *  @brief Collect a vector of SimChannel objects from the ART event record

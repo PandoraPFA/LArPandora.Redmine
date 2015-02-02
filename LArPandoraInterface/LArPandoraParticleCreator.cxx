@@ -18,6 +18,7 @@
 
 // Local includes (LArPandoraAlgorithms)
 #include "LArContent.h"
+#include "LArHelpers/LArClusterHelper.h"
 #include "LArHelpers/LArPfoHelper.h"
 
 // Local includes (LArPandoraInterface)
@@ -243,12 +244,14 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
     typedef std::map< const pandora::ParticleFlowObject*, size_t> ThreeDParticleMap;
-    typedef std::map< const pandora::Vertex*, unsigned int> ThreeDVertexMap;
+    typedef std::map< const pandora::Vertex*, unsigned int> ThreeDVertexMap; 
+    typedef std::set< art::Ptr<recob::Hit> > HitList;
     typedef std::map< int, HitVector > HitArray;
 
     int vertexCounter(0);
     int spacePointCounter(0);
     int clusterCounter(0);
+    int trackCounter(0);
     size_t particleCounter(0);
 
     // Build maps of Pandora particles and Pandora vertices
@@ -296,7 +299,6 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     for (pandora::PfoVector::iterator pIter = pfoVector.begin(), pIterEnd = pfoVector.end(); pIter != pIterEnd; ++pIter)
     {
         const pandora::ParticleFlowObject *const pPfo = *pIter;
-        const pandora::ClusterList &pfoClusterList = pPfo->GetClusterList();
 
         // Get Pfo ID
         ThreeDParticleMap::const_iterator qIter = particleMap.find(pPfo);
@@ -347,24 +349,17 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             }
         }
 
-        // Get Pandora 3D Hits
-        pandora::CaloHitList pandoraHitList3D;
-        for (pandora::ClusterList::const_iterator cIter = pfoClusterList.begin(), cIterEnd = pfoClusterList.end(); cIter != cIterEnd; ++cIter)
-        {
-            const pandora::Cluster *const pCluster = *cIter;
-
-            if (pandora::TPC_3D != lar_content::LArClusterHelper::GetClusterHitType(pCluster))
-                continue;
-
-            pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList3D);
-        }
-
         // Build Particle
         recob::PFParticle newParticle(pPfo->GetParticleId(), pfoIdCode, parentIdCode, daughterIdCodes);
         outputParticles->push_back(newParticle);
 
-        // Build Space Points (TODO: Order 3D hits according to displacement along 3D cluster)
-        for (pandora::CaloHitList::const_iterator hIter = pandoraHitList3D.begin(), hIterEnd = pandoraHitList3D.end(); hIter != hIterEnd; ++hIter)
+        // Build 3D Space Points 
+        pandora::CaloHitList pandoraHitList3D;
+        lar_content::LArPfoHelper::GetCaloHits(pPfo, pandora::TPC_3D, pandoraHitList3D);
+        pandora::CaloHitVector pandoraHitVector3D(pandoraHitList3D.begin(), pandoraHitList3D.end());
+        std::sort(pandoraHitVector3D.begin(), pandoraHitVector3D.end(), lar_content::LArClusterHelper::SortByPosition);
+
+        for (pandora::CaloHitVector::const_iterator hIter = pandoraHitVector3D.begin(), hIterEnd = pandoraHitVector3D.end(); hIter != hIterEnd; ++hIter)
         {
             const pandora::CaloHit *const pCaloHit3D = *hIter;
 
@@ -398,8 +393,11 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                 outputSpacePoints->size() - 1, outputSpacePoints->size());
         }
 
-        // Build Clusters 
-        for (pandora::ClusterList::const_iterator cIter = pfoClusterList.begin(), cIterEnd = pfoClusterList.end(); cIter != cIterEnd; ++cIter)
+        // Build 2D Clusters   
+        pandora::ClusterVector pandoraClusterVector(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
+        std::sort(pandoraClusterVector.begin(), pandoraClusterVector.end(), lar_content::LArClusterHelper::SortByNHits);
+ 
+        for (pandora::ClusterVector::const_iterator cIter = pandoraClusterVector.begin(), cIterEnd = pandoraClusterVector.end(); cIter != cIterEnd; ++cIter)
         {
             const pandora::Cluster *const pCluster = *cIter;
 
@@ -409,9 +407,13 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             pandora::CaloHitList pandoraHitList2D;
             pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList2D);
             pandoraHitList2D.insert(pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
+            pandora::CaloHitVector pandoraHitVector2D(pandoraHitList2D.begin(), pandoraHitList2D.end());
+            std::sort(pandoraHitVector2D.begin(), pandoraHitVector2D.end(), lar_content::LArClusterHelper::SortByPosition);
 
+            HitList  hitList;
             HitArray hitArray;
-            for (pandora::CaloHitList::const_iterator hIter = pandoraHitList2D.begin(), hIterEnd = pandoraHitList2D.end(); hIter != hIterEnd; ++hIter)
+
+            for (pandora::CaloHitVector::const_iterator hIter = pandoraHitVector2D.begin(), hIterEnd = pandoraHitVector2D.end(); hIter != hIterEnd; ++hIter)
             {
                 const pandora::CaloHit *const pCaloHit = *hIter;
 
@@ -429,6 +431,9 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                 const unsigned int volID(100000 * wireID.Cryostat + wireID.TPC);
 
                 hitArray[volID].push_back(hit);
+
+                if (pCaloHit->IsIsolated())
+                    hitList.insert(hit);
             }
 
             if (hitArray.empty())
@@ -437,7 +442,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             for (HitArray::const_iterator hIter = hitArray.begin(), hIterEnd = hitArray.end(); hIter != hIterEnd; ++hIter)
             {
                 const HitVector hitVector(hIter->second);
-                recob::Cluster newCluster(LArPandoraHelper::BuildCluster(clusterCounter++, hitVector)); // TODO: Account for isolated hits
+                recob::Cluster newCluster(LArPandoraHelper::BuildCluster(clusterCounter++, hitVector, hitList)); 
                 outputClusters->push_back(newCluster);
 
                 util::CreateAssn(*this, evt, *(outputClusters.get()), hitVector, *(outputClustersToHits.get()));
@@ -446,7 +451,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             }
         }  
 
-        // Associate Vertex and Build Seeds
+        // Associate Vertex and Build Seeds (and Tracks)
         if (!pPfo->GetVertexList().empty())
         {
             if(pPfo->GetVertexList().size() != 1)
@@ -478,11 +483,26 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
 
                 util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
                     outputSeeds->size() - 1, outputSeeds->size());
+
+                if (m_buildTracks)
+                {
+                    try
+                    {
+                        recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, pPfo)); 
+                        outputTracks->push_back(newTrack);
+
+                        util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
+                            outputTracks->size() - 1, outputTracks->size());
+                    }
+                    catch (cet::exception &e)
+                    {
+                    }
+                }
             }
         }
 
         //
-        // TODO: Build Tracks and Showers here
+        // TODO: Build Showers here
         //
     }
 

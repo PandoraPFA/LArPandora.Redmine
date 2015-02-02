@@ -1,35 +1,28 @@
 BEGIN_PROLOG
 
-microboone_pandoracosmic:
-{
-  module_type:           "MicroBooNEPandora"
-  ConfigFile:            "PandoraSettings_MicroBooNE_Cosmic.xml"
-  GeantModuleLabel:      "largeant"
-  HitFinderModuleLabel:  "gaushit"
-  EnableMCParticles:     false
-  UseHitWidths:          true
-}
-
-microboone_pandoraneutrino:
+microboone_pandora:
 {
   module_type:           "MicroBooNEPandora"
   ConfigFile:            "PandoraSettings_MicroBooNE_Neutrino.xml"
   GeantModuleLabel:      "largeant"
   HitFinderModuleLabel:  "gaushit"
   EnableMCParticles:     false
-  UseHitWidths:          true
-}
-
-microboone_pandorawriter:
-{
-  module_type:           "MicroBooNEPandora"
-  ConfigFile:            "PandoraSettings_Write.xml"
-  EnableMCParticles:     true
-  EnableProduction:      false
+  EnableProduction:      true
   EnableMonitoring:      false
   UseHitWidths:          true
+  BuildTracks:           false
+  BuildShowers:          false
 }
 
-microboone_pandora:   @local::microboone_pandoraneutrino
+microboone_pandoracosmic:   @local::microboone_pandora
+microboone_pandoracosmic.ConfigFile:          "PandoraSettings_MicroBooNE_Cosmic.xml"
+
+microboone_pandoraneutrino: @local::microboone_pandora
+microboone_pandoraneutrino.ConfigFile:        "PandoraSettings_MicroBooNE_Neutrino.xml"
+
+microboone_pandorawriter:   @local::microboone_pandora
+microboone_pandorawriter.ConfigFile:          "PandoraSettings_Write.xml"
+microboone_pandorawriter.EnableMCParticles:   true
+microboone_pandorawriter.EnableProduction:    false
 
 END_PROLOG
