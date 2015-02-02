@@ -18,10 +18,12 @@
 #include "RecoBase/Hit.h"
 #include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
-namespace lar_pandora 
+#include "Objects/ParticleFlowObject.h"
+
+namespace lar_pandora
 {
 
-class LArPandoraHelper 
+class LArPandoraHelper
 {
 public:
     /**
@@ -29,7 +31,7 @@ public:
      *
      *  @param id  The id code for the cluster
      *  @param hitVector  The input vector of hits
-     *  @param isolatedHits set of isolated hits
+     *  @param hitList    The input list of isolated hits
      *  @param algo Algorithm set to fill cluster members
      *  
      *  If you don't know which algorithm to pick, StandardClusterParamsAlg is
@@ -38,11 +40,18 @@ public:
      *  The hits that are isolated (that is, present in isolatedHits) are not
      *  fed to the cluster parameter algorithms.
      */
-    static recob::Cluster BuildCluster(
-      const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
-      std::set<art::Ptr<recob::Hit>> const& isolatedHits,
-      cluster::ClusterParamsAlgBase& algo
-      );
+    static recob::Cluster BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
+        const std::set<art::Ptr<recob::Hit>> &hitList,
+        cluster::ClusterParamsAlgBase& algo
+        );
+
+    /**
+     *  @brief Build a recob::Track object from an input Pandora particle flow object
+     *
+     *  @param id  The id code for the track
+     *  @param pPfo  The particle flow object
+     */
+    static recob::Track BuildTrack(const int id, const pandora::ParticleFlowObject *const pPfo);
 
     /**
      *  @brief Build a recob::Track object from an input vector of recob::SpacePoint objects

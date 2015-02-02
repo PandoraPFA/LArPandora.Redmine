@@ -1,7 +1,7 @@
 /**
- *  @file   larpandora/LArPandoraInterface/LBNE35tPandora_module.cc
+ *  @file   larpandora/LArPandoraInterface/LBNE4APAPandora_module.cc
  *
- *  @brief  Producer module for LBNE 35t detector.
+ *  @brief  Producer module for LBNE 4APA detector.
  *
  */
 
@@ -20,9 +20,9 @@ namespace lar_pandora
 {
 
 /**
- *  @brief  LBNE35tPandora class
+ *  @brief  LBNE4APAPandora class
  */
-class LBNE35tPandora : public LArPandoraParticleCreator
+class LBNE4APAPandora : public LArPandoraParticleCreator
 {
 public: 
 
@@ -31,23 +31,23 @@ public:
      *
      *  @param  pset
      */
-    LBNE35tPandora(fhicl::ParameterSet const &pset);
+    LBNE4APAPandora(fhicl::ParameterSet const &pset);
 
     /**
      *  @brief  Destructor
      */
-    virtual ~LBNE35tPandora();
+    virtual ~LBNE4APAPandora();
 
 private:
 
     unsigned int GetPandoraVolumeID(const unsigned int cstat, const unsigned int tpc) const;
     void ConfigurePandoraGeometry() const;
 
-    bool            m_useShortVolume;      ///<
-    bool            m_useLongVolume;       ///<
+    bool            m_useLeftVolume;      ///<
+    bool            m_useRightVolume;       ///<
 };
 
-DEFINE_ART_MODULE(LBNE35tPandora)
+DEFINE_ART_MODULE(LBNE4APAPandora)
 
 } // namespace lar_pandora
 
@@ -61,37 +61,37 @@ DEFINE_ART_MODULE(LBNE35tPandora)
 #include "LArContent.h"
 
 // Local includes (LArPandoraInterface)
-#include "LBNE35tPseudoLayerPlugin.h"
-#include "LBNE35tTransformationPlugin.h"
-#include "LBNE35tGeometryHelper.h"
+#include "LBNE4APAPseudoLayerPlugin.h"
+#include "LBNE4APATransformationPlugin.h"
+#include "LBNE4APAGeometryHelper.h"
 
 namespace lar_pandora {
 
-LBNE35tPandora::LBNE35tPandora(fhicl::ParameterSet const &pset) : LArPandoraParticleCreator(pset)
+LBNE4APAPandora::LBNE4APAPandora(fhicl::ParameterSet const &pset) : LArPandoraParticleCreator(pset)
 {
-    m_useShortVolume = pset.get<bool>("UseShortVolume",true);
-    m_useLongVolume = pset.get<bool>("UseLongVolume",true);
+    m_useLeftVolume = pset.get<bool>("UseLeftVolume",true);
+    m_useRightVolume = pset.get<bool>("UseRightVolume",true);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-LBNE35tPandora::~LBNE35tPandora()
+LBNE4APAPandora::~LBNE4APAPandora()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LBNE35tPandora::ConfigurePandoraGeometry() const
+void LBNE4APAPandora::ConfigurePandoraGeometry() const
 {
-    mf::LogDebug("LArPandora") << " *** LBNE35tPandora::ConfigurePandoraGeometry(...) *** " << std::endl;
+    mf::LogDebug("LArPandora") << " *** LBNE4APAPandora::ConfigurePandoraGeometry(...) *** " << std::endl;
 
     // Identify the Geometry and load the plugins
     art::ServiceHandle<geo::Geometry> theGeometry;
 
-    if (std::string::npos == theGeometry->DetectorName().find("lbne35t"))
+    if (std::string::npos == theGeometry->DetectorName().find("lbne10kt"))
     {
         mf::LogError("LArPandora") << " Error! Using invalid geometry: " << theGeometry->DetectorName() << std::endl;
-        throw cet::exception("LArPandora") << " LBNE35tPandora::ConfigurePandoraGeometry --- Invalid Geometry: " << theGeometry->DetectorName();
+        throw cet::exception("LArPandora") << " LBNE4APAPandora::ConfigurePandoraGeometry --- Invalid Geometry: " << theGeometry->DetectorName();
     }
 
     for (PandoraInstanceMap::const_iterator pIter = m_pandoraInstanceMap.begin(), pIterEnd = m_pandoraInstanceMap.end(); 
@@ -103,28 +103,28 @@ void LBNE35tPandora::ConfigurePandoraGeometry() const
         const bool isForward((0 == volumeID) ? true : false); // ATTN: Sign of rotation matrix is taken from Volume ID
     
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora, 
-            new LBNE35tPseudoLayerPlugin));
+            new LBNE4APAPseudoLayerPlugin));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*pPandora, 
-            new LBNE35tTransformationPlugin(isForward)));
+            new LBNE4APATransformationPlugin(isForward)));
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-unsigned int LBNE35tPandora::GetPandoraVolumeID(const unsigned int cstat, const unsigned int tpc) const
+unsigned int LBNE4APAPandora::GetPandoraVolumeID(const unsigned int cstat, const unsigned int tpc) const
 {    
-    const LBNE35tGeometryHelper::LBNE35tVolume volumeID(LBNE35tGeometryHelper::GetVolumeID(cstat, tpc));
+    const LBNE4APAGeometryHelper::LBNE4APAVolume volumeID(LBNE4APAGeometryHelper::GetVolumeID(cstat, tpc));
 
-    if (LBNE35tGeometryHelper::kShortVolume == volumeID) 
+    if (LBNE4APAGeometryHelper::kLeftVolume == volumeID) 
     {
-        if (m_useShortVolume) 
+        if (m_useLeftVolume) 
             return 0;
     }
 
-    if (LBNE35tGeometryHelper::kLongVolume == volumeID) 
+    if (LBNE4APAGeometryHelper::kRightVolume == volumeID) 
     {
-        if (m_useLongVolume) 
+        if (m_useRightVolume) 
             return 1;
     }
 

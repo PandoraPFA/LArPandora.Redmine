@@ -31,7 +31,7 @@ class PFParticleMonitoring : public art::EDAnalyzer
 public:
     /**
      *  @brief  Constructor
-     * 
+     *
      *  @param  pset
      */
      PFParticleMonitoring(fhicl::ParameterSet const &pset);
@@ -56,7 +56,7 @@ private:
      *  @param matchedParticles the output matches between reconstructed and true particles
      *  @param matchedHits the output matches between reconstructed particles and hits
      */
-     void GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles, 
+     void GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles,
          MCParticlesToPFParticles &matchedParticles, MCParticlesToHits &matchedHits) const;
 
     /**
@@ -83,12 +83,19 @@ private:
      */
      int CountHitsByType(const int view, const HitVector &hitVector) const;
 
+    /**
+     *  @brief Calculate length of true particle from its trajectory points
+     *
+     *  @param trueParticle the input true particle
+     */
+     double GetLength(const art::Ptr<simb::MCParticle> trueParticle) const;
 
-     TTree       *m_pRecoTree;              ///< 
 
-     int          m_run;                    ///< 
-     int          m_event;                  ///< 
-     int          m_index;                  ///< 
+     TTree       *m_pRecoTree;              ///<
+
+     int          m_run;                    ///<
+     int          m_event;                  ///<
+     int          m_index;                  ///<
 
      int          m_nMCParticles;           ///<
      int          m_nNeutrinoPfos;          ///<
@@ -99,6 +106,7 @@ private:
      int          m_pfoPdg;                 ///<
      int          m_pfoNuPdg;               ///<
 
+     double       m_mcLength;               ///<
      double       m_completeness;           ///<
      double       m_purity;                 ///<
 
@@ -135,9 +143,9 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 // implementation follows
 /**
  *  @file   LArPandora/PFParticleMonitoring.cxx
- * 
+ *
  *  @brief  Implementation of the lar pandora analysis producer.
- * 
+ *
  *  $Log: $
  */
 
@@ -150,7 +158,7 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-// LArSoft includes 
+// LArSoft includes
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
@@ -201,9 +209,9 @@ void PFParticleMonitoring::reconfigure(fhicl::ParameterSet const &pset)
 
 void PFParticleMonitoring::beginJob()
 {
-    mf::LogDebug("LArPandora") << " *** PFParticleMonitoring::beginJob() *** " << std::endl; 
+    mf::LogDebug("LArPandora") << " *** PFParticleMonitoring::beginJob() *** " << std::endl;
 
-    // 
+    //
     art::ServiceHandle<art::TFileService> tfs;
 
     m_pRecoTree = tfs->make<TTree>("pandora", "LAr Reco vs True");
@@ -218,10 +226,11 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("mcNuPdg", &m_mcNuPdg, "mcNuPdg/I");
     m_pRecoTree->Branch("pfoPdg", &m_pfoPdg, "pfoPdg/I");
     m_pRecoTree->Branch("pfoNuPdg", &m_pfoNuPdg, "pfoNuPdg/I");
+    m_pRecoTree->Branch("mcLength", &m_mcLength, "mcLength/D");
     m_pRecoTree->Branch("completeness", &m_completeness, "completeness/D");
     m_pRecoTree->Branch("purity", &m_purity, "purity/D");
-    m_pRecoTree->Branch("nMCHits", &m_nMCHits, "nMCHits/I");  
-    m_pRecoTree->Branch("nPfoHits", &m_nPfoHits, "nPfoHits/I");  
+    m_pRecoTree->Branch("nMCHits", &m_nMCHits, "nMCHits/I");
+    m_pRecoTree->Branch("nPfoHits", &m_nPfoHits, "nPfoHits/I");
     m_pRecoTree->Branch("nMatchedHits", &m_nMatchedHits, "nMatchedHits/I");
     m_pRecoTree->Branch("nMCHitsU", &m_nMCHitsU, "nMCHitsU/I");
     m_pRecoTree->Branch("nMCHitsV", &m_nMCHitsV, "nMCHitsV/I");
@@ -260,6 +269,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_pfoPdg = 0;
     m_pfoNuPdg = 0;
 
+    m_mcLength = 0.0;
+
     m_completeness = 0.0;
     m_purity = 0.0;
 
@@ -277,7 +288,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_nMatchedHitsW = 0;
 
     std::cout << "  Run: " << m_run << std::endl;
-    std::cout << "  Event: " << m_event << std::endl; 
+    std::cout << "  Event: " << m_event << std::endl;
 
 
     // Match Reco Particles to Hits
@@ -287,7 +298,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     HitsToPFParticles recoHitsToParticles;
 
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
-    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, recoParticlesToHits, recoHitsToParticles, 
+    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, recoParticlesToHits, recoHitsToParticles,
         (m_useDaughterPFParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kIgnoreDaughters));
 
     std::cout << "  PFParticles: " << recoParticleVector.size() << std::endl;
@@ -315,11 +326,11 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 
     // Match Reco Particles to True Particles
     // ======================================
-    MCParticlesToPFParticles matchedParticles; 
+    MCParticlesToPFParticles matchedParticles;
     MCParticlesToHits matchedHits;
     this->GetRecoToTrueMatches(recoParticlesToHits, trueHitsToParticles, matchedParticles, matchedHits);
 
-  
+
     // Build Reco Particle Maps (for Parent/Daughter Navigation)
     // =========================================================
     PFParticleMap recoParticleMap;
@@ -340,13 +351,13 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 
         if (LArPandoraCollector::IsNeutrino(recoParticle))
         {
-            m_nNeutrinoPfos++; 
+            m_nNeutrinoPfos++;
         }
         else if (LArPandoraCollector::IsFinalState(recoParticleMap, recoParticle))
         {
             m_nPrimaryPfos++;
         }
-        else 
+        else
         {
             m_nDaughterPfos++;
         }
@@ -366,15 +377,17 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_pfoPdg = 0;
         m_pfoNuPdg = 0;
 
+        m_mcLength = this->GetLength(trueParticle);
+
         MCParticlesToMCTruth::const_iterator nuIter = particlesToTruth.find(trueParticle);
         if (particlesToTruth.end() == nuIter)
             throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a true particle without any ancestry information ";
-        
+
         const art::Ptr<simb::MCTruth> trueNeutrino = nuIter->second;
 
         if (trueNeutrino->NeutrinoSet())
         {
-            const simb::MCNeutrino neutrino(trueNeutrino->GetNeutrino()); 
+            const simb::MCNeutrino neutrino(trueNeutrino->GetNeutrino());
             m_mcNuPdg = neutrino.Nu().PdgCode();
         }
 
@@ -405,13 +418,13 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                 throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a reco particle without any hits ";
 
             const HitVector &recoHitVector = pIter2->second;
-         
+
             MCParticlesToHits::const_iterator pIter3 = matchedHits.find(trueParticle);
             if (matchedHits.end() == pIter3)
                 throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a matched true particle without matched hits ";
 
             const HitVector &matchedHitVector = pIter3->second;
-           
+
             m_nPfoHits = recoHitVector.size();
             m_nPfoHitsU = this->CountHitsByType(geo::kU, recoHitVector);
             m_nPfoHitsV = this->CountHitsByType(geo::kV, recoHitVector);
@@ -426,9 +439,9 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_purity = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nPfoHits));
         m_completeness = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nMCHits));
 
-        std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId() 
-                  << ", trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg 
-                  << " mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits << std::endl;
+        std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId()
+                  << ", trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg
+                  << ", mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits << std::endl;
 
         m_pRecoTree->Fill();
         ++m_index; // Increment index number
@@ -437,10 +450,10 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles, 
+void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles,
     MCParticlesToPFParticles &matchedParticles, MCParticlesToHits &matchedHits) const
 {
-    for (PFParticlesToHits::const_iterator iter1 = recoParticlesToHits.begin(), iterEnd1 = recoParticlesToHits.end(); 
+    for (PFParticlesToHits::const_iterator iter1 = recoParticlesToHits.begin(), iterEnd1 = recoParticlesToHits.end();
         iter1 != iterEnd1; ++iter1)
     {
         const art::Ptr<recob::PFParticle> recoParticle = iter1->first;
@@ -460,10 +473,10 @@ void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoPar
 
             truthContributionMap[trueParticle].push_back(hit);
         }
-         
+
         MCParticlesToHits::const_iterator mIter = truthContributionMap.end();
 
-        for (MCParticlesToHits::const_iterator iter4 = truthContributionMap.begin(), iterEnd4 = truthContributionMap.end(); 
+        for (MCParticlesToHits::const_iterator iter4 = truthContributionMap.begin(), iterEnd4 = truthContributionMap.end();
             iter4 != iterEnd4; ++iter4)
         {
             if ((truthContributionMap.end() == mIter) || (iter4->second.size() > mIter->second.size()))
@@ -523,6 +536,48 @@ int PFParticleMonitoring::CountHitsByType(const int view, const HitVector &hitVe
     }
 
     return nHits;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+double PFParticleMonitoring::GetLength(const art::Ptr<simb::MCParticle> particle) const
+{
+    art::ServiceHandle<geo::Geometry> theGeometry;
+
+    bool foundStartPosition(false);
+    int startT(0), endT(0);
+
+    const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
+
+    for (int nt = 0; nt < numTrajectoryPoints; ++nt)
+    {
+        try
+        {
+            double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
+            unsigned int which_tpc(std::numeric_limits<unsigned int>::max());
+            unsigned int which_cstat(std::numeric_limits<unsigned int>::max());
+            theGeometry->PositionToTPC(pos, which_tpc, which_cstat);
+
+            endT = nt;
+            if (!foundStartPosition)
+            {
+                startT = endT;
+                foundStartPosition = true;
+            }
+        }
+        catch (cet::exception &e){
+            continue;
+        }
+    }
+
+    if (!foundStartPosition)
+        return 0.0;
+
+    const double dx(particle->Vx(endT) - particle->Vx(startT));
+    const double dy(particle->Vy(endT) - particle->Vy(startT));
+    const double dz(particle->Vz(endT) - particle->Vz(startT));
+
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 } //namespace lar_pandora

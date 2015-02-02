@@ -1,22 +1,22 @@
 /**
- *  @file   larpandora/LArPandoraInterface/LArPandoraTransformationPlugin.h
+ *  @file   LArContent/LArPlugins/LArRotationalTransformationPlugin.h
  *
- *  @brief  Header file for the LArPandora transformation plugin class.
+ *  @brief  Header file for the rotational transformation plugin class.
  *
  *  $Log: $
  */
-#ifndef LAR_PANDORA_TRANSFORMATION_PLUGIN_H
-#define LAR_PANDORA_TRANSFORMATION_PLUGIN_H 1
+#ifndef LAR_ROTATIONAL_TRANSFORMATION_PLUGIN_H
+#define LAR_ROTATIONAL_TRANSFORMATION_PLUGIN_H 1
 
 #include "LArPlugins/LArTransformationPlugin.h"
 
-namespace lar_pandora
+namespace lar_content
 {
 
 /**
- *  @brief  LArPandoraTransformationPlugin class
+ *  @brief  LArRotationalTransformationPlugin class
  */
-class LArPandoraTransformationPlugin : public lar_content::LArTransformationPlugin
+class LArRotationalTransformationPlugin : public lar_content::LArTransformationPlugin
 {
 public:
 
@@ -25,16 +25,14 @@ public:
      *
      *  @param  thetaU  the angle from the W axis to the U axis (radians)
      *  @param  thetaV  the angle from the W axis to the V axis (radians)
-     *  @param  H  the height of the drift volume (cm)
      *  @param  sigmaUVW  nominal spatial resolution for U, V and W (cm)
-     *  @param  wireZPitch  the wire pitch (cm)
      */
-    LArPandoraTransformationPlugin(const float thetaU, const float thetaV, const float H, const float sigmaUVW, const float wireZPitch);
+    LArRotationalTransformationPlugin(const float thetaU, const float thetaV, const float sigmaUVW);
 
     /**
      *  @brief  Destructor
      */
-    virtual ~LArPandoraTransformationPlugin();
+    virtual ~LArRotationalTransformationPlugin();
 
     virtual float UVtoW(const float u, const float v) const;
 
@@ -50,19 +48,7 @@ public:
 
     virtual float YZtoV(const float y, const float z) const;
 
-    virtual float PUPVtoPW(const float pu, const float pv) const;
-
-    virtual float PVPWtoPU(const float pv, const float pw) const;
-
-    virtual float PWPUtoPV(const float pw, const float pu) const;
-
-    virtual float PYPZtoPU(const float py, const float pz) const;
-
-    virtual float PYPZtoPV(const float py, const float pz) const;
-
     virtual float GetSigmaUVW() const;
-
-    virtual float GetWireZPitch() const;
 
     virtual void GetMinChiSquaredYZ(const float u, const float v, const float w, const float sigmaU, const float sigmaV, const float sigmaW,
         float &y, float &z, float &chiSquared) const;
@@ -74,9 +60,7 @@ private:
 
     const float     m_thetaU;          ///< inclination of U wires (radians)
     const float     m_thetaV;          ///< inclination of V wires (radians)
-    const float     m_H;               ///< height (cm)
     const float     m_sigmaUVW;        ///< resolution (cm), for calculation of chi2
-    const float     m_wireZPitch;      ///< wire z pitch (cm)
     const float     m_sinUminusV;      ///< sin(thetaU-thetaV)
     const float     m_sinUplusV;       ///< sin(thetaU+thetaV)
     const float     m_sinU;            ///< sin(thetaU)
@@ -85,6 +69,6 @@ private:
     const float     m_cosV;            ///< cos(thetaV)
 };
 
-} // namespace lar_pandora
+} // namespace lar_content
 
-#endif // #ifndef LAR_PANDORA_TRANSFORMATION_PLUGIN_H
+#endif // #ifndef LAR_ROTATIONAL_TRANSFORMATION_PLUGIN_H

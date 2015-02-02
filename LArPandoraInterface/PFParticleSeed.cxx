@@ -129,7 +129,8 @@ void PFParticleFitter::BuildPointList(const SpacePointVector &spacepoints, pando
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList)
+void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList,
+    const bool isCosmic)
 {
     pandora::CartesianPointList pointList;
     PFParticleFitter::BuildPointList(spacepoints, pointList);
@@ -138,17 +139,20 @@ void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoi
     {
         pandora::CartesianVector innerPosition(0.f, 0.f, 0.f);
         pandora::CartesianVector outerPosition(0.f, 0.f, 0.f);
-
         PFParticleFitter::GetExtremalCoordinates(pointList, innerPosition, outerPosition);
-        const pandora::CartesianVector vertexDirection((outerPosition - innerPosition).GetUnitVector());
+
+        const bool switchEnds(isCosmic && (outerPosition.GetY() > innerPosition.GetY()));
+        const pandora::CartesianVector vtxPosition(switchEnds ? outerPosition : innerPosition);
+        const pandora::CartesianVector endPosition(switchEnds ? innerPosition : outerPosition);
+        const pandora::CartesianVector vtxDirection((endPosition - vtxPosition).GetUnitVector());
 
         // TODO: Fit the points here
 
         for (pandora::CartesianPointList::const_iterator iter = pointList.begin(), iterEnd = pointList.end(); iter != iterEnd; ++iter)
         {
             const pandora::CartesianVector &thisPosition = *iter;
-            const float thisDisplacement(vertexDirection.GetDotProduct(thisPosition - innerPosition));
-            trajectoryPointList.push_back(PFParticleTrajectoryPoint(thisPosition, vertexDirection, thisDisplacement));
+            const float thisDisplacement(vtxDirection.GetDotProduct(thisPosition - vtxPosition));
+            trajectoryPointList.push_back(PFParticleTrajectoryPoint(thisPosition, vtxDirection, thisDisplacement));
         }
     }
 

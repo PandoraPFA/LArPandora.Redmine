@@ -5,10 +5,10 @@
  *
  *  $Log: $
  */
-#ifndef LAR_PANDORA_LBNE_35T_PSEUDO_LAYER_PLUGIN_H
-#define LAR_PANDORA_LBNE_35T_PSEUDO_LAYER_PLUGIN_H 1
+#ifndef LBNE_35T_PSEUDO_LAYER_PLUGIN_H
+#define LBNE_35T_PSEUDO_LAYER_PLUGIN_H 1
 
-#include "LArPandoraPseudoLayerPlugin.h"
+#include "LArPlugins/LArPseudoLayerPlugin.h"
 
 namespace lar_pandora
 {
@@ -16,7 +16,7 @@ namespace lar_pandora
 /**
  *  @brief  LBNE35tPseudoLayerPlugin class
  */
-class LBNE35tPseudoLayerPlugin : public LArPandoraPseudoLayerPlugin
+class LBNE35tPseudoLayerPlugin : public lar_content::LArPseudoLayerPlugin
 {
 public:
     /**
@@ -27,4 +27,4 @@ public:
 
 } // namespace lar
 
-#endif // #ifndef LAR_PANDORA_LBNE_35T_PSEUDO_LAYER_PLUGIN_H
+#endif // #ifndef LBNE_35T_PSEUDO_LAYER_PLUGIN_H
