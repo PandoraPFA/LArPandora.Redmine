@@ -19,6 +19,9 @@ art_make( BASENAME_ONLY
                         RawData
                         RecoBase
                         Utilities
+                        ClusterRecoUtil
+                        RecoAlg
+                        ClusterFinder
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         ${SIMULATIONBASE}

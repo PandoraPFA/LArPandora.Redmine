@@ -5,12 +5,18 @@
  *
  */
 
+#include "LArPandoraHelper.h"
+#include "PFParticleSeed.h"
+
 // Framework includes
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // LArSoft includes
 #include "Geometry/Geometry.h"
+#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
+#include "RecoAlg/ClusterParamsImportWrapper.h"
+#include "ClusterFinder/ClusterCreator.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
@@ -27,13 +33,16 @@
 
 // System includes
 #include <limits>
+#include <algorithm> // std::transform()
+#include <iterator> // std::back_inserter()
 #include <iostream>
 
 namespace lar_pandora {
 
 recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
-    const std::set<art::Ptr<recob::Hit>> &hitList)
-{
+    const std::set<art::Ptr<recob::Hit>> &hitList,
+    cluster::ClusterParamsAlgBase& algo
+) {
     mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
 
     if (hitVector.empty())
@@ -47,19 +56,14 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
     double startTime(+std::numeric_limits<float>::max()), sigmaStartTime(0.0);
     double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
     double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
-    double dQdW(0.0), sigmadQdW(0.0);
-    double dTdW(0.0), sigmadTdW(0.0);
-    double totalCharge(0.0);
-
-    double Sq(0.0), Sqx(0.0), Sqy(0.0), Sqxy(0.0), Sqxx(0.0);
-
-    // Loop over vector of hits and calculate cluster properties
-    // (Hits flagged as 'isolated' by Pandora are excluded from all properties except total charge)
+    
+    std::vector<recob::Hit const*> hits_for_params;
+    hits_for_params.reserve(hitVector.size());
+    
     for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
-        const art::Ptr<recob::Hit> hit = *iter;
-
-        const double thisCharge(hit->Integral());
+        art::Ptr<recob::Hit> const& hit = *iter;
+        
         const double thisWire(hit->WireID().Wire);
         const double thisWireSigma(0.5);
         const double thisTime(hit->PeakTime());
@@ -77,9 +81,9 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
         {
             throw cet::exception("LArPandora") << " LArPandoraHelper::BuildCluster --- Input hits have inconsistent plane IDs ";
         }
-
-        totalCharge += thisCharge;
-
+        
+        hits_for_params.push_back(&*hit);
+        
         if (hitList.count(hit))
             continue;
 
@@ -99,37 +103,28 @@ recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<ar
             sigmaEndTime = thisTimeSigma;
         }
 
-        Sq   += thisCharge;
-        Sqx  += thisCharge * thisWire;
-        Sqy  += thisCharge * thisTime;
-        Sqxx += thisCharge * thisWire * thisWire;
-        Sqxy += thisCharge * thisWire * thisTime;
     }
-
-    if (endWire >= startWire)
-    {
-        dQdW = Sq / (1.0 + endWire - startWire);
-        sigmadQdW = 0.0;
-    }
-    else
-    {
-        throw cet::exception("LArPandora") << " LArPandora::BuildCluster --- Failed to find start and end wires ";
-    }
-
-    const double numerator(Sq * Sqxy - Sqx * Sqy);
-    const double denominator(Sq * Sqxx - Sqx * Sqx);
-
-    if (denominator > 0.0)
-    {
-        dTdW = numerator / denominator;
-        sigmadTdW = 0.0;
-    }
-
-    // Return a new recob::Cluster object
-    return recob::Cluster(startWire, sigmaStartWire, startTime, sigmaStartTime,
-                          endWire, sigmaEndWire, endTime, sigmaEndTime,
-                          dTdW, sigmadTdW, dQdW, sigmadQdW,
-                          totalCharge, view, id, planeID);
+    
+    // feed the algorithm with all the cluster hits
+    algo.SetHits(hits_for_params);
+    
+    // create the recob::Cluster directly in the vector
+    return cluster::ClusterCreator(
+      algo,                  // algo
+      startWire,             // start_wire
+      sigmaStartWire,        // sigma_start_wire
+      startTime,             // start_tick
+      sigmaStartTime,        // sigma_start_tick
+      endWire,               // end_wire
+      sigmaEndWire,          // sigma_end_wire
+      endTime,               // end_tick
+      sigmaEndTime,          // sigma_end_tick
+      id,                    // ID
+      view,                  // view
+      planeID,               // plane
+      recob::Cluster::Sentry // sentry
+      ).move();
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

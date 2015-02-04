@@ -283,59 +283,6 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     if (m_storeWires)
         LArPandoraCollector::CollectWires(evt, m_calwireLabel, wireVector);
 
-    // Loop over Hits (Fill 2D Tree)
-    // =============================
-    if (hitVector.empty())
-    {
-        m_pReco2D->Fill();
-    }
-    
-    for (unsigned int i = 0; i<hitVector.size(); ++i)
-    {
-        const art::Ptr<recob::Hit> hit = hitVector.at(i);
-
-        m_particle = -1;
-
-        HitsToPFParticles::const_iterator pIter = hitsToParticles.find(hit);
-        if (hitsToParticles.end() != pIter)
-        {
-            const art::Ptr<recob::PFParticle> particle = pIter->second;
-            m_particle = particle->Self();
-        }
-                
-        const geo::WireID &wireID(hit->WireID());
-        m_cstat = wireID.Cryostat;
-        m_tpc   = wireID.TPC;
-        m_plane = wireID.Plane;
-        m_wire  = wireID.Wire; 
-
-        m_q = hit->Integral();
-        m_x = theDetector->ConvertTicksToX(hit->PeakTime(), wireID.Plane, wireID.TPC, wireID.Cryostat);
-
-        // define UVW as closest distance from (0,0) to wire
-        double xyzStart[3];
-        theGeometry->Cryostat(wireID.Cryostat).TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetStart(xyzStart);
-        const double ay(xyzStart[1]);
-        const double az(xyzStart[2]);
-
-        double xyzEnd[3];
-        theGeometry->Cryostat(wireID.Cryostat).TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetEnd(xyzEnd);
-        const double by(xyzEnd[1]);
-        const double bz(xyzEnd[2]);
-
-        const double ny(by - ay);
-        const double nz(bz - az);
-        const double N2(ny * ny + nz * nz);
-
-        const double ry(ay - (ay * ny + az * nz) * ny / N2);
-        const double rz(az - (ay * ny + az * nz) * nz / N2);
-        const double sign((rz >0.0) ? +1.0 : -1.0);
-
-        m_w = sign * std::sqrt(ry * ry + rz * rz);
-
-        m_pReco2D->Fill();
-    }
-
     std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
    
     // Loop over PFParticles (Fill 3D Reco Tree)
