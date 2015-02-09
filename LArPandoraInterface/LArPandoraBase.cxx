@@ -777,25 +777,18 @@ void LArPandoraBase::GetTrueStartAndEndPoints(const unsigned int cstat, const un
 
     for (int nt = 0; nt < numTrajectoryPoints; ++nt)
     {
-        try
-        {
-            double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
-            unsigned int which_tpc(std::numeric_limits<unsigned int>::max());
-            unsigned int which_cstat(std::numeric_limits<unsigned int>::max());
-            theGeometry->PositionToTPC(pos, which_tpc, which_cstat);
-
-            if (!(cstat == which_cstat && tpc == which_tpc))
-                continue;
-
-            endT = nt;
-            if (!foundStartPosition)
-            {
-                startT = endT;
-                foundStartPosition = true;
-            }
-        }
-        catch (cet::exception &e){
+        const double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
+        geo::TPCID tpcID = theGeometry->FindTPCAtPosition(pos);
+        if (!tpcID.isValid) continue;
+        
+        if (!(cstat == tpcID.Cryostat && tpc == tpcID.TPC))
             continue;
+
+        endT = nt;
+        if (!foundStartPosition)
+        {
+            startT = endT;
+            foundStartPosition = true;
         }
     }
 }
