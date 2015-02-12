@@ -12,6 +12,7 @@
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/TimeService.h"
 
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "SimulationBase/MCTruth.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Cluster.h"
@@ -160,9 +161,9 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
         const pandora::Pandora *const pPandora = pIter->second;
 
         const double hit_Time(hit->PeakTime());
-        const double hit_Charge(hit->Charge());
-        const double hit_TimeStart(hit->StartTime());
-        const double hit_TimeEnd(hit->EndTime());
+        const double hit_Charge(hit->Integral());
+        const double hit_TimeStart(hit->PeakTimeMinusRMS());
+        const double hit_TimeEnd(hit->PeakTimePlusRMS());
 
         double xyz[3];
         theGeometry->Cryostat(hit_WireID.Cryostat).TPC(hit_WireID.TPC).Plane(hit_WireID.Plane).Wire(hit_WireID.Wire).GetCenter(xyz);
@@ -173,7 +174,7 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
 
         const double xpos_cm(theDetector->ConvertTicksToX(hit_Time, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
         const double dxpos_cm(std::fabs(theDetector->ConvertTicksToX(hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
-            theDetector->ConvertTicksToX(hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
+	    theDetector->ConvertTicksToX(hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
 
         const double mips(this->GetMips(hit_Charge, hit_View));
 
@@ -288,7 +289,7 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
         const art::Ptr<recob::Hit> hit = iter2->second;
  
         const geo::View_t hit_View(hit->View());
-        const double hit_Charge(hit->Charge());
+        const double hit_Charge(hit->Integral());
         
         const double wire_pitch_cm(theGeometry->WirePitch(hit_View));
         const double mips(this->GetMips(hit_Charge, hit_View));
@@ -776,25 +777,18 @@ void LArPandoraBase::GetTrueStartAndEndPoints(const unsigned int cstat, const un
 
     for (int nt = 0; nt < numTrajectoryPoints; ++nt)
     {
-        try
-        {
-            double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
-            unsigned int which_tpc(std::numeric_limits<unsigned int>::max());
-            unsigned int which_cstat(std::numeric_limits<unsigned int>::max());
-            theGeometry->PositionToTPC(pos, which_tpc, which_cstat);
-
-            if (!(cstat == which_cstat && tpc == which_tpc))
-                continue;
-
-            endT = nt;
-            if (!foundStartPosition)
-            {
-                startT = endT;
-                foundStartPosition = true;
-            }
-        }
-        catch (cet::exception &e){
+        const double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
+        geo::TPCID tpcID = theGeometry->FindTPCAtPosition(pos);
+        if (!tpcID.isValid) continue;
+        
+        if (!(cstat == tpcID.Cryostat && tpc == tpcID.TPC))
             continue;
+
+        endT = nt;
+        if (!foundStartPosition)
+        {
+            startT = endT;
+            foundStartPosition = true;
         }
     }
 }
