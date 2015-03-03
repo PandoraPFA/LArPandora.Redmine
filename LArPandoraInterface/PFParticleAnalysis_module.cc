@@ -70,10 +70,13 @@ private:
      int          m_finalstate;            ///<
      int          m_vertex;                ///<
      int          m_track;                 ///<
+     int          m_trackid;               ///<
 
      int          m_clusters;              ///<
      int          m_spacepoints;           ///<
      int          m_hits;                  ///<
+     int          m_trajectorypoints;      ///<
+     int          m_trackhits;             ///<
 
      double       m_pfovtxx;               ///< 
      double       m_pfovtxy;               ///<
@@ -95,6 +98,8 @@ private:
      double       m_trkenddirx;            ///< 
      double       m_trkenddiry;            ///<
      double       m_trkenddirz;            ///<
+     double       m_trklength;             ///<
+     double       m_trkstraightlength;     ///<
   
      std::string  m_spacepointLabel;       ///< 
      std::string  m_particleLabel;         ///<
@@ -171,9 +176,12 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("finalstate", &m_finalstate, "finalstate/I"); 
     m_pRecoTree->Branch("vertex", &m_vertex, "vertex/I"); 
     m_pRecoTree->Branch("track", &m_track, "track/I"); 
+    m_pRecoTree->Branch("trackid", &m_trackid, "trackid/I"); 
     m_pRecoTree->Branch("clusters", &m_clusters, "clusters/I");
     m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I"); 
     m_pRecoTree->Branch("hits", &m_hits, "hits/I"); 
+    m_pRecoTree->Branch("trackhits", &m_trackhits, "trackhits/I");
+    m_pRecoTree->Branch("trajectorypoints", &m_trajectorypoints, "trajectorypoints/I");
     m_pRecoTree->Branch("pfovtxx", &m_pfovtxx, "pfovtxx/D");
     m_pRecoTree->Branch("pfovtxy", &m_pfovtxy, "pfovtxy/D");
     m_pRecoTree->Branch("pfovtxz", &m_pfovtxz, "pfovtxz/D");
@@ -184,15 +192,17 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("trkvtxx", &m_trkvtxx, "trkvtxx/D");
     m_pRecoTree->Branch("trkvtxy", &m_trkvtxy, "trkvtxy/D");
     m_pRecoTree->Branch("trkvtxz", &m_trkvtxz, "trkvtxz/D");
-    m_pRecoTree->Branch("trkvtxdirx", &m_trkvtxdirx, "trkdvtxirx/D");
-    m_pRecoTree->Branch("trkvtxdiry", &m_trkvtxdiry, "trkdvtxiry/D");
+    m_pRecoTree->Branch("trkvtxdirx", &m_trkvtxdirx, "trkvtxdirx/D");
+    m_pRecoTree->Branch("trkvtxdiry", &m_trkvtxdiry, "trkvtxdiry/D");
     m_pRecoTree->Branch("trkvtxdirz", &m_trkvtxdirz, "trkvtxdirz/D");
     m_pRecoTree->Branch("trkendx", &m_trkendx, "trkendx/D");
     m_pRecoTree->Branch("trkendy", &m_trkendy, "trkendy/D");
     m_pRecoTree->Branch("trkendz", &m_trkendz, "trkendz/D");
-    m_pRecoTree->Branch("trkenddirx", &m_trkenddirx, "trkdendirx/D");
-    m_pRecoTree->Branch("trkenddiry", &m_trkenddiry, "trkdendiry/D");
+    m_pRecoTree->Branch("trkenddirx", &m_trkenddirx, "trkenddirx/D");
+    m_pRecoTree->Branch("trkenddiry", &m_trkenddiry, "trkenddiry/D");
     m_pRecoTree->Branch("trkenddirz", &m_trkenddirz, "trkenddirz/D");
+    m_pRecoTree->Branch("trklength", &m_trklength, "trklength/D");
+    m_pRecoTree->Branch("trkstraightlength", &m_trkstraightlength, "trkstraightlength/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,10 +229,13 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_finalstate = 0;
     m_vertex = 0;
     m_track = 0;
+    m_trackid = -999;
 
     m_clusters = 0;
     m_spacepoints = 0;
     m_hits = 0;
+    m_trajectorypoints = 0;
+    m_trackhits = 0;
       
     m_pfovtxx = 0.0;
     m_pfovtxy = 0.0;
@@ -244,6 +257,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_trkenddirx = 0.0;
     m_trkenddiry = 0.0;
     m_trkenddirz = 0.0;
+    m_trklength = 0.0;
+    m_trkstraightlength = 0.0;
 
     std::cout << "  Run: " << m_run << std::endl;
     std::cout << "  Event: " << m_event << std::endl; 
@@ -284,9 +299,11 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
 
     // Get the reconstructed tracks
     // ============================
-    TrackVector trackVector;
+    TrackVector trackVector, trackVector2;
     PFParticlesToTracks particlesToTracks;
+    TracksToHits tracksToHits;
     LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
+    LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector2, tracksToHits);
 
     // Build an indexed map of the PFParticles
     // =======================================
@@ -309,10 +326,13 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_finalstate = LArPandoraCollector::IsFinalState(particleMap, particle);
         m_vertex = 0;
         m_track = 0;
+        m_trackid = -999;
 
         m_clusters = 0;
         m_spacepoints = 0;
         m_hits = 0;
+        m_trajectorypoints = 0;
+        m_trackhits = 0;
       
         m_pfovtxx = 0.0;
         m_pfovtxy = 0.0;
@@ -334,6 +354,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_trkenddirx = 0.0;
         m_trkenddiry = 0.0;
         m_trkenddirz = 0.0;
+        m_trklength = 0.0;
+        m_trkstraightlength = 0.0;
 	
         // Particles <-> Clusters
         PFParticlesToClusters::const_iterator cIter = particlesToClusters.find(particle);
@@ -410,6 +432,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 const TVector3 &trackEndDirection = track->EndDirection();
 		
                 m_track = 1;
+                m_trackid = track->ID();
+                m_trajectorypoints = track->NumberTrajectoryPoints();
                 m_trkvtxx = trackVtxPosition.x();
                 m_trkvtxy = trackVtxPosition.y();
                 m_trkvtxz = trackVtxPosition.z();
@@ -421,7 +445,13 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 m_trkendz = trackEndPosition.z();
                 m_trkenddirx = trackEndDirection.x();
                 m_trkenddiry = trackEndDirection.y();
-                m_trkenddirz = trackEndDirection.z();    
+                m_trkenddirz = trackEndDirection.z();
+                m_trklength = track->Length();
+                m_trkstraightlength = (trackEndPosition - trackVtxPosition).Mag();
+
+                TracksToHits::const_iterator tIter2 = tracksToHits.find(track);
+                if (tracksToHits.end() != tIter2)
+		    m_trackhits = tIter2->second.size();
             }
         }
 

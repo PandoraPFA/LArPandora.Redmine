@@ -49,6 +49,7 @@ private:
      */
     void reconfigure(fhicl::ParameterSet const &pset);
 
+    bool           m_cosmicMode;
     unsigned int   m_minSpacePoints;
 
     std::string    m_particleLabel;
@@ -68,7 +69,6 @@ DEFINE_ART_MODULE(PFParticleTrackMaker)
 // Local includes
 #include "LArPandoraCollector.h"
 #include "LArPandoraHelper.h"
-#include "PFParticleSeed.h"
 
 // LArSoft includes
 #include "Utilities/AssociationUtil.h"
@@ -101,6 +101,7 @@ void PFParticleTrackMaker::reconfigure(fhicl::ParameterSet const &pset)
     m_particleLabel   = pset.get<std::string>("PFParticleModuleLabel","pandora");
     m_spacepointLabel = pset.get<std::string>("SpacePointModuleLabel", "pandora");
     m_minSpacePoints  = pset.get<unsigned int>("MinSpacePoints",3); 
+    m_cosmicMode      = pset.get<bool>("CosmicMode",true);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,7 +169,7 @@ void PFParticleTrackMaker::produce(art::Event &evt)
         if (!LArPandoraCollector::IsFinalState(particleMap, particle))
             continue;
 
-        mf::LogDebug("LArPandora") << "   Building new track [" << trackCounter << "] (spacepoints=" << spacepoints.size() << ")" << std::endl; 
+	mf::LogDebug("LArPandora") << "   Building new track [" << trackCounter << "] (spacepoints=" << spacepoints.size() << ")" << std::endl; 
 
         PFParticleVector particles;
         particles.push_back(particle);
@@ -179,17 +180,24 @@ void PFParticleTrackMaker::produce(art::Event &evt)
             const art::Ptr<recob::SpacePoint> spacepoint = *iter2;
             SpacePointsToHits::const_iterator iter3 = spacePointsToHits.find(spacepoint);
             if (spacePointsToHits.end() == iter3)
-                throw cet::exception("LArPandora") << " PFParticleTrackMaker::produce --- Found space point without associated hit";
+                throw cet::exception("LArPandora") << " PFParticleTrackMaker::produce --- Found space point without associated hit ";
 
             const art::Ptr<recob::Hit> hit = iter3->second;
             hits.push_back(hit);
         }
 
-        recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, spacepoints));
-        outputTracks->push_back(newTrack);
+        try
+	{
+            recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, spacepoints, m_cosmicMode));
+            outputTracks->push_back(newTrack);
 
-        util::CreateAssn(*this, evt, *(outputTracks.get()), particles, *(outputTracksToParticles.get()));
-        util::CreateAssn(*this, evt, *(outputTracks.get()), hits, *(outputTracksToHits.get()));
+            util::CreateAssn(*this, evt, *(outputTracks.get()), particles, *(outputTracksToParticles.get()));
+            util::CreateAssn(*this, evt, *(outputTracks.get()), hits, *(outputTracksToHits.get()));
+	}
+        catch (cet::exception &e)
+	{
+	    mf::LogWarning("LArPandora") << " PFParticleTrackMaker::produce --- Warning: Failed to build track " << std::endl;
+	}
     }
 
     mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;

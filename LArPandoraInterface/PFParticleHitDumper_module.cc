@@ -49,6 +49,13 @@ public:
 private:
 
     /**
+     *  @brief Store 3D track hits
+     *
+     *  @param particlesToTracks mapping between 3D track hits and PFParticles
+     */
+     void FillRecoTracks(const PFParticlesToTracks &particlesToTracks);
+
+    /**
      *  @brief Store 3D hits
      *
      *  @param particleVector the input vector of PFParticles
@@ -80,6 +87,7 @@ private:
      */
      double GetUVW(const geo::WireID &wireID) const;
 
+     TTree       *m_pRecoTracks;     ///<
      TTree       *m_pReco3D;         ///< 
      TTree       *m_pReco2D;         ///<
      TTree       *m_pRecoWire;       ///<
@@ -104,6 +112,7 @@ private:
      std::string  m_hitfinderLabel;  ///<
      std::string  m_spacepointLabel; ///< 
      std::string  m_particleLabel;   ///<
+     std::string  m_trackLabel;      ///<
 
      bool         m_storeWires;      ///<
 };
@@ -147,8 +156,7 @@ DEFINE_ART_MODULE(PFParticleHitDumper)
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/PFParticle.h"
-
-
+#include "RecoBase/Track.h"
 
 // std includes
 #include <iostream>
@@ -172,6 +180,7 @@ PFParticleHitDumper::~PFParticleHitDumper()
 void PFParticleHitDumper::reconfigure(fhicl::ParameterSet const &pset)
 {
     m_storeWires      = pset.get<bool>("StoreWires", false);
+    m_trackLabel      = pset.get<std::string>("TrackModule", "pandora");
     m_particleLabel   = pset.get<std::string>("PFParticleModule", "pandora");
     m_spacepointLabel = pset.get<std::string>("SpacePointModule", "pandora");
     m_hitfinderLabel  = pset.get<std::string>("HitFinderModule", "gaushit");
@@ -186,6 +195,14 @@ void PFParticleHitDumper::beginJob()
 
     // 
     art::ServiceHandle<art::TFileService> tfs;
+
+    m_pRecoTracks = tfs->make<TTree>("pandoraTracks", "LAr Reco Tracks");
+    m_pRecoTracks->Branch("run", &m_run,"run/I");
+    m_pRecoTracks->Branch("event", &m_event,"event/I");
+    m_pRecoTracks->Branch("particle", &m_particle, "particle/I");
+    m_pRecoTracks->Branch("x", &m_x, "x/D");
+    m_pRecoTracks->Branch("y", &m_y, "y/D");
+    m_pRecoTracks->Branch("z", &m_z, "z/D");
 
     m_pReco3D = tfs->make<TTree>("pandora3D", "LAr Reco 3D");
     m_pReco3D->Branch("run", &m_run,"run/I");
@@ -263,20 +280,23 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     // Need geometry service to convert channel to wire ID
     art::ServiceHandle<geo::Geometry> theGeometry;
 
-    // Get particles, space points, hits (and wires)
-    // =============================================
+    // Get particles, tracks, space points, hits (and wires)
+    // ====================================================
+    TrackVector              trackVector;
     PFParticleVector         particleVector;
     SpacePointVector         spacePointVector;
     HitVector                hitVector;
     WireVector               wireVector;
 
-    SpacePointsToHits        spacePointsToHits;
+    PFParticlesToTracks      particlesToTracks;
     PFParticlesToSpacePoints particlesToSpacePoints;
-    HitsToPFParticles        hitsToParticles;
     PFParticlesToHits        particlesToHits;
+    HitsToPFParticles        hitsToParticles;
+    SpacePointsToHits        spacePointsToHits;
 
     LArPandoraCollector::CollectHits(evt, m_hitfinderLabel, hitVector);
     LArPandoraCollector::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits);
+    LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector, particlesToSpacePoints);
     LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
 
@@ -285,6 +305,11 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 
     std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
    
+    // Loop over Tracks (Fill 3D Track Tree)
+    // =====================================
+    std::cout << "   PFParticleHitDumper::FillRecoTracks(...) " << std::endl;
+    this->FillRecoTracks(particlesToTracks);
+
     // Loop over PFParticles (Fill 3D Reco Tree)
     // =========================================
     std::cout << "   PFParticleHitDumper::FillReco3D(...) " << std::endl;
@@ -303,9 +328,65 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToTracks)
+{ 
+    // Initialise variables
+    m_particle = -1;
+    m_x = 0.0;
+    m_y = 0.0;
+    m_z = 0.0;
+
+    // Create dummy entry if there are no particles
+    if (particlesToTracks.empty())
+    {
+        m_pRecoTracks->Fill();
+    }
+
+    // Loop over tracks
+    for (PFParticlesToTracks::const_iterator iter = particlesToTracks.begin(), iterEnd = particlesToTracks.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::PFParticle> particle = iter->first;
+        const TrackVector &trackVector = iter->second;
+  
+        m_particle = particle->Self();
+
+        if (!trackVector.empty())
+        {
+            if (trackVector.size() !=1 )
+                std::cout << " Warning: Found particle with more than one associated track " << std::endl;
+	        
+            const art::Ptr<recob::Track> track = *(trackVector.begin());
+
+            std::cout << "    PFPARTICLE [" << m_particle << "] (" << track->NumberTrajectoryPoints() << " Trajectory Points)" << std::endl;
+
+	    for (unsigned p = 0; p < track->NumberTrajectoryPoints(); ++p)
+            {
+	        const TVector3 position(track->LocationAtPoint(p));
+                m_x = position.x();
+                m_y = position.y();
+                m_z = position.z();
+
+                m_pRecoTracks->Fill();
+	    }
+	}
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints,
     const SpacePointsToHits &spacePointsToHits)
-{
+{ 
+    // Initialise variables
+    m_particle = -1;
+    m_primary = 0;
+    m_cstat = 0;
+    m_tpc = 0;
+    m_plane = 0;
+    m_x = 0.0;
+    m_y = 0.0;
+    m_z = 0.0;
+
     // Create dummy entry if there are no particles
     if (particleVector.empty())
     {
@@ -376,7 +457,17 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFParticles &hitsToParticles)
-{
+{ 
+    // Initialise variables
+    m_particle = -1;
+    m_cstat = 0;
+    m_tpc = 0;
+    m_plane = 0;
+    m_wire = 0;
+    m_x = 0.0;
+    m_w = 0.0;
+    m_q = 0.0;
+
     // Create dummy entry if there are no 2D hits 
     if (hitVector.empty())
     {

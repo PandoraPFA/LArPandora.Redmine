@@ -100,6 +100,15 @@ void LArPandoraCollector::CollectPFParticles(const art::Event &evt, const std::s
 void LArPandoraCollector::CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
     SpacePointsToHits &spacePointsToHits)
 {
+    HitsToSpacePoints hitsToSpacePoints;
+    return LArPandoraCollector::CollectSpacePoints(evt, label, spacePointVector, spacePointsToHits, hitsToSpacePoints);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
+    SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints)
+{
     art::Handle< std::vector<recob::SpacePoint> > theSpacePoints;
     evt.getByLabel(label, theSpacePoints);
  
@@ -120,6 +129,7 @@ void LArPandoraCollector::CollectSpacePoints(const art::Event &evt, const std::s
         spacePointVector.push_back(spacepoint);
         const art::Ptr<recob::Hit> hit = theHitAssns.at(i);
         spacePointsToHits[spacepoint] = hit;
+        hitsToSpacePoints[hit] = spacepoint;
     }
 }
 
@@ -275,6 +285,38 @@ void LArPandoraCollector::CollectTracks(const art::Event &evt, const std::string
         trackVector.push_back(track);
         const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
         particlesToTracks[particle].push_back(track);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector, TracksToHits &tracksToHits)
+{
+    art::Handle< std::vector<recob::Track> > theTracks;
+    evt.getByLabel(label, theTracks);
+
+    if (!theTracks.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find tracks... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theTracks->size() << " Tracks " << std::endl;
+    }
+
+    art::FindManyP<recob::Hit> theHitAssns(theTracks, evt, label);
+    for (unsigned int i = 0; i < theTracks->size(); ++i)
+    {
+        const art::Ptr<recob::Track> track(theTracks, i);
+        trackVector.push_back(track);
+
+        const std::vector< art::Ptr<recob::Hit> > hits = theHitAssns.at(i);
+        for (unsigned int j=0; j<hits.size(); ++j)
+        {
+            const art::Ptr<recob::Hit> hit = hits.at(j);          
+            tracksToHits[track].push_back(hit);
+        }
     }
 }
 
@@ -756,6 +798,23 @@ art::Ptr<simb::MCParticle> LArPandoraCollector::GetParentMCParticle(const MCPart
 
     const art::Ptr<simb::MCParticle> outputParticle = pIter2->second;
     return outputParticle;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<recob::Track> LArPandoraCollector::GetPrimaryTrack(const PFParticlesToTracks &particlesToTracks, const art::Ptr<recob::PFParticle> particle)
+{
+    PFParticlesToTracks::const_iterator tIter = particlesToTracks.find(particle);
+
+    if (particlesToTracks.end() == tIter || tIter->second.empty())
+        throw cet::exception("LArPandora") << " PandoraCollector::GetPrimaryTrack --- Failed to find associated track ";
+
+    if (tIter->second.size() != 1)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetPrimaryTrack --- Found more than one associated track ";
+
+    const art::Ptr<recob::Track> primaryTrack = *(tIter->second.begin());
+    return primaryTrack;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

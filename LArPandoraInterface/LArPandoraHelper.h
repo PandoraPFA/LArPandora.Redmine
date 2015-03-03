@@ -19,6 +19,7 @@
 #include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
 #include "Objects/ParticleFlowObject.h"
+#include "Objects/TrackState.h"
 
 namespace lar_pandora
 {
@@ -41,9 +42,7 @@ public:
      *  fed to the cluster parameter algorithms.
      */
     static recob::Cluster BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
-        const std::set<art::Ptr<recob::Hit>> &hitList,
-        cluster::ClusterParamsAlgBase& algo
-        );
+        const std::set<art::Ptr<recob::Hit>> &hitList, cluster::ClusterParamsAlgBase& algo);
 
     /**
      *  @brief Build a recob::Track object from an input Pandora particle flow object
@@ -54,12 +53,22 @@ public:
     static recob::Track BuildTrack(const int id, const pandora::ParticleFlowObject *const pPfo);
 
     /**
+     *  @brief Merge a set of recob::Track objects
+     *
+     *  @param id  The id code for the tracks
+     *  @param trackStateVector  The vector of trajectory points for this track
+     */
+    static recob::Track BuildTrack(const int id, const std::vector<pandora::TrackState> &trackVector);
+
+    /**
      *  @brief Build a recob::Track object from an input vector of recob::SpacePoint objects
      *
      *  @param id  The id code for the track
      *  @param spacePointVector  The input vector of space points
+     *  @param isCosmic  choice of track direction
      */
-    static recob::Track BuildTrack(const int id, const std::vector<art::Ptr<recob::SpacePoint>> &spacePointVector);
+    static recob::Track BuildTrack(const int id, const std::vector<art::Ptr<recob::SpacePoint>> &spacePointVector,
+        const bool isCosmic);
 };
 
 } // namespace lar_pandora

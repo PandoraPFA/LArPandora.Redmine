@@ -5,9 +5,6 @@
  *
  */
 
-#include "LArPandoraHelper.h"
-#include "PFParticleSeed.h"
-
 // Framework includes
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -40,9 +37,8 @@
 namespace lar_pandora {
 
 recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
-    const std::set<art::Ptr<recob::Hit>> &hitList,
-    cluster::ClusterParamsAlgBase& algo
-) {
+    const std::set<art::Ptr<recob::Hit>> &hitList, cluster::ClusterParamsAlgBase& algo) 
+{
     mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
 
     if (hitVector.empty())
@@ -148,8 +144,37 @@ recob::Track LArPandoraHelper::BuildTrack(const int id, const pandora::ParticleF
     {
     }
 
+    return BuildTrack(id, trackStateVector);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<art::Ptr<recob::SpacePoint>> &spacepoints, const bool isCosmic)
+{
+    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of Space Points = " << spacepoints.size() << std::endl;
+
+    // Use linear regression to calculate 3D trajectory points
+    std::vector<pandora::TrackState> trackStateVector;
+
+    try
+    {
+        PFParticleFitter::GetLinearTrajectory(spacepoints, trackStateVector, isCosmic);
+    }
+    catch (pandora::StatusCodeException &statusCodeException)
+    {
+    }
+
+    return BuildTrack(id, trackStateVector);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<pandora::TrackState> &trackStateVector)
+{
+    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of trajectory points = " << trackStateVector.size() << std::endl;
+
     if (trackStateVector.empty())
-        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- Failed to build track: " << id;
+        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No input trajectory points were provided ";
 
     // Fill list of track properties
     std::vector<TVector3>               xyz;
@@ -166,40 +191,6 @@ recob::Track LArPandoraHelper::BuildTrack(const int id, const pandora::ParticleF
         const pandora::CartesianVector direction(nextPoint.GetMomentum().GetUnitVector());
         xyz.push_back(TVector3(position.GetX(), position.GetY(), position.GetZ()));
         pxpypz.push_back(TVector3(direction.GetX(), direction.GetY(), direction.GetZ()));
-    }
-
-    // Return a new recob::Track object (of the Bezier variety)
-    return recob::Track(xyz, pxpypz, dQdx, fitMomentum, id);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<art::Ptr<recob::SpacePoint>> &spacepoints)
-{
-    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of Space Points = " << spacepoints.size() << std::endl;
-
-    if (spacepoints.empty())
-        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No input hits were provided ";
-
-    // Fill list of track properties
-    std::vector<TVector3>               xyz;
-    std::vector<TVector3>               pxpypz;
-    std::vector< std::vector <double> > dQdx = std::vector< std::vector<double> >(0);
-    std::vector<double>                 fitMomentum = std::vector<double>(2, util::kBogusD);
-
-    // Loop over vector of space points
-    PFParticleTrajectoryPointList trajectorypoints;
-    PFParticleFitter::BuildTrajectoryPointList(spacepoints, trajectorypoints);
-
-    if (trajectorypoints.empty())
-        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No trajectory points were found ";
-
-    for (PFParticleTrajectoryPointList::const_iterator iter = trajectorypoints.begin(), iterEnd = trajectorypoints.end();
-        iter != iterEnd; ++iter)
-    {
-        const PFParticleTrajectoryPoint &nextPoint = *iter;
-        xyz.push_back(TVector3(nextPoint.m_position.GetX(), nextPoint.m_position.GetY(), nextPoint.m_position.GetZ()));
-        pxpypz.push_back(TVector3(nextPoint.m_direction.GetX(), nextPoint.m_direction.GetY(), nextPoint.m_direction.GetZ()));
     }
 
     // Return a new recob::Track object (of the Bezier variety)

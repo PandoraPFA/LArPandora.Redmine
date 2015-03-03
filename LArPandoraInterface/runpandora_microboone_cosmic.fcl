@@ -61,5 +61,5 @@ physics.analyzers.pandoramonitoring.PFParticleModule: "pandora"
 physics.analyzers.pandorahits.HitFinderModule: "gaushit"
 physics.analyzers.pandorahits.SpacePointModule: "pandora"
 physics.analyzers.pandorahits.PFParticleModule: "pandora"
+physics.analyzers.pandorana.SpacePointModule: "pandora"
 physics.analyzers.pandorana.PFParticleModule: "pandora"
-

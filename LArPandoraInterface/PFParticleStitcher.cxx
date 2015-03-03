@@ -4,15 +4,22 @@
 #include "cetlib/exception.h"
 
 // LArSoft includes
+#include "Geometry/Geometry.h"
+#include "Geometry/CryostatGeo.h"
+#include "Geometry/TPCGeo.h"
 #include "Utilities/AssociationUtil.h"
 #include "SimulationBase/MCTruth.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/SpacePoint.h"
+#include "RecoBase/Seed.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Vertex.h"
 #include "RecoBase/PFParticle.h"
 
 // Local includes 
 #include "PFParticleStitcher.h"
+#include "LArPandoraHelper.h"
 
 // System includes
 #include <iostream>
@@ -22,10 +29,19 @@ namespace lar_pandora {
 
 PFParticleStitcher::PFParticleStitcher(fhicl::ParameterSet const &pset) : art::EDProducer()
 {
-    produces< std::vector<recob::PFParticle> >();    
+    produces< std::vector<recob::PFParticle> >();
+    produces< std::vector<recob::Seed> >();
+    produces< std::vector<recob::Track> >();
+    produces< std::vector<recob::Vertex> >();
+
     produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-    
+    produces< art::Assns<recob::PFParticle, recob::Seed> >();
+    produces< art::Assns<recob::PFParticle, recob::Track> >();
+    produces< art::Assns<recob::PFParticle, recob::Vertex> >();
+
+    produces< art::Assns<recob::Track, recob::Hit> >();
+
     this->reconfigure(pset);
 }
 
@@ -41,7 +57,9 @@ void PFParticleStitcher::reconfigure(fhicl::ParameterSet const &pset)
 {
     m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
     m_particleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
+    m_trackLabel = pset.get<std::string>("TrackModuleLabel", "pandora");
 
+    m_enableStitching = pset.get<bool>("EnableStitching", true);
     m_useXcoordinate = pset.get<bool>("UseXCoordinate", true);
     m_minCosRelativeAngle = pset.get<float>("MaxCosRelativeAngle", 0.966);
     m_maxLongitudinalDisplacementX = pset.get<float>("MaxLongitudinalDisplacementX", 15.f);
@@ -74,71 +92,90 @@ void PFParticleStitcher::produce(art::Event &evt)
     mf::LogDebug("LArPandora") << " *** PFParticleStitcher::produce(...)  [Run=" << m_run << ", Event=" << m_event << "] *** " << std::endl;
 
 
-    // Collect reconstructed PFParticles
-    // =================================
+    // Collect reconstructed particles and tracks
+    // ==========================================
+    TrackVector              inputTracks;
+    VertexVector             inputVertices;
     PFParticleVector         inputParticles;
     PFParticleVector         inputParticles2;
     PFParticleVector         parentParticles;
 
-    PFParticlesToClusters    particlesToClusters;
+    HitsToPFParticles        hitsToParticles;
+    PFParticlesToHits        particlesToHits;
     PFParticlesToSpacePoints particlesToSpacePoints;
-    PFParticleSeedMap        particleSeedMap;
+    PFParticlesToClusters    particlesToClusters; 
+    PFParticlesToTracks      particlesToTracks;
+    PFParticlesToVertices    particlesToVertices;
+    PFParticleTrackMap       particleTrackMap;
     PFParticleVolumeMap      particleVolumeMap;
     PFParticleMap            particleMap;
 
-    SpacePointVector         inputSpacePoints;
-    SpacePointsToHits        spacePointsToHits;
-
+    LArPandoraCollector::CollectTracks(evt, m_trackLabel, inputTracks, particlesToTracks);
+    LArPandoraCollector::CollectVertices(evt, m_particleLabel, inputVertices, particlesToVertices);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, inputParticles, particlesToClusters);
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, inputParticles2, particlesToSpacePoints);
-    LArPandoraCollector::CollectSpacePoints(evt, m_particleLabel, inputSpacePoints, spacePointsToHits); // (Assume that these were made 
-                                                                                                        //  along with the PFParticles)
-    
+    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_particleLabel, particlesToHits, hitsToParticles);
+
     // Build mapping from particle to particle ID for parent/daughter navigation
-    for (PFParticleVector::const_iterator iter = inputParticles.begin(), iterEnd = inputParticles.end(); iter != iterEnd; ++iter)
+    for (PFParticleVector::const_iterator pIter = inputParticles.begin(), pIterEnd = inputParticles.end(); pIter != pIterEnd; ++pIter)
     {
-        const art::Ptr<recob::PFParticle> particle = *iter;
+        const art::Ptr<recob::PFParticle> particle = *pIter;
         particleMap[particle->Self()] = particle;
     }
    
     // Select final-state particles
-    for (PFParticleVector::const_iterator iter = inputParticles.begin(), iterEnd = inputParticles.end(); iter != iterEnd; ++iter)
+    for (PFParticleVector::const_iterator pIter = inputParticles.begin(), pIterEnd = inputParticles.end(); pIter != pIterEnd; ++pIter)
     {
-        const art::Ptr<recob::PFParticle> particle = *iter;
+        const art::Ptr<recob::PFParticle> particle = *pIter;
 
         if (LArPandoraCollector::IsFinalState(particleMap, particle))
             parentParticles.push_back(particle);
     }
 
-    // Create particle seeds, and associate them with drift volumes
-    for (PFParticlesToSpacePoints::const_iterator iter =  particlesToSpacePoints.begin(), iterEnd = particlesToSpacePoints.end(); 
-        iter != iterEnd; ++iter)
+    // Create particle track objects, and associate them with drift volumes
+    for (PFParticleVector::const_iterator pIter = parentParticles.begin(), pIterEnd = parentParticles.end(); pIter != pIterEnd; ++pIter)
     {
-        const art::Ptr<recob::PFParticle> particle = iter->first;
-        const SpacePointVector &spacepoints = iter->second;
+        const art::Ptr<recob::PFParticle> particle = *pIter;
 
-        if(spacepoints.empty())
-            continue;
+        if (particlesToTracks.end() == particlesToTracks.find(particle))
+	    continue;
 
-        particleSeedMap.insert(PFParticleSeedMap::value_type(particle, PFParticleSeed(spacepoints)));
-        particleVolumeMap.insert(PFParticleVolumeMap::value_type(particle, this->GetVolumeID(spacepoints, spacePointsToHits)));
+        const art::Ptr<recob::Track> track = LArPandoraCollector::GetPrimaryTrack(particlesToTracks, particle);
+
+	PFParticlesToHits::const_iterator hIter = particlesToHits.find(particle);
+        if (particlesToHits.end() == hIter)
+            throw cet::exception("LArPandora") << " PFParticleStitcher::produce --- Found a particle without any associated hits";
+
+        const HitVector &hits = hIter->second;
+
+        particleTrackMap.insert(PFParticleTrackMap::value_type(particle, PFParticleTrack(track)));
+        particleVolumeMap.insert(PFParticleVolumeMap::value_type(particle, this->GetVolumeID(hits)));
     }
 
-    // Match Parent PFParticles across drift volumes
-    // =============================================
+
+    // Match PFParticles across drift volumes
+    // ======================================
     ParticleAssociationMatrix particleAssociationMatrix;
     PFParticleMergeMap particleMatches, particleMerges;
+    PFParticleTrajectoryMap particleTrajectories;
 
-    this->CreateParticleMatches(parentParticles, particleVolumeMap, particleSeedMap, particleAssociationMatrix);
+    this->CreateParticleMatches(parentParticles, particleVolumeMap, particleTrackMap, particleAssociationMatrix);
     this->SelectParticleMatches(particleMap, particleAssociationMatrix, particleMatches);
-    this->SelectParticleMerges(parentParticles, particleMatches, particleMerges);
 
     if (m_enableMonitoring)
-        this->WriteParticleMatches(particleMatches, particleSeedMap);
+        this->WriteParticleMatches(particleMatches, particleTrackMap);
 
-    // Merge PFParticles
-    // =================
-    this->ProduceArtOutput(evt, particleMap, particleMerges, particlesToClusters, particlesToSpacePoints);
+
+    // Create lists of PFParticles and track trajectory points to be merged
+    // ====================================================================
+    this->SelectParticleMerges(parentParticles, particleMatches, particleMerges);
+    this->OrderParticleMerges(particleMerges, particlesToTracks, particlesToHits, particleTrajectories);
+
+
+    // Merge PFParticles and output to ART framework
+    // =============================================
+    this->ProduceArtOutput(evt, particleMap, particleMerges, particleTrajectories, 
+        particlesToVertices, particlesToClusters, particlesToSpacePoints, particlesToHits);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -161,16 +198,26 @@ void PFParticleStitcher::InitializeMonitoring()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &particleMap, const PFParticleMergeMap &particleMerges, 
-    const PFParticlesToClusters &particlesToClusters, const PFParticlesToSpacePoints &particlesToSpacePoints)
+    const PFParticleTrajectoryMap &particleTrajectories, const PFParticlesToVertices &particlesToVertices,
+    const PFParticlesToClusters &particlesToClusters, const PFParticlesToSpacePoints &particlesToSpacePoints, 
+    const PFParticlesToHits &particlesToHits)
 {
     mf::LogDebug("LArPandora") << " **** PFParticleStitcher::ProduceArtOutput(...) **** " << std::endl;
 
     // Set up ART outputs
     // ==================
     std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
+    std::unique_ptr< std::vector<recob::Seed> >       outputSeeds( new std::vector<recob::Seed> );
+    std::unique_ptr< std::vector<recob::Track> >      outputTracks( new std::vector<recob::Track> );
+    std::unique_ptr< std::vector<recob::Vertex> >     outputVertices( new std::vector<recob::Vertex> );
+
     std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
-   
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> >      outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Seed> >       outputParticlesToSeeds( new art::Assns<recob::PFParticle, recob::Seed> );
+    std::unique_ptr< art::Assns<recob::Track, recob::Hit> >             outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
+
 
     // Select final-state particles
     // ============================
@@ -202,12 +249,13 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 
     PFParticleIDMap particleIdMap;
     PFParticleIDMap mergeIdMap;
-    
+
+    int vertexCounter(0);
+    int trackCounter(0);
     size_t particleCounter(0);
  
     for (PFParticleMergeMap::const_iterator iter1 = particleMerges.begin(), iterEnd1 = particleMerges.end(); iter1 != iterEnd1; ++iter1)
     {
-        ++particleCounter;
         const art::Ptr<recob::PFParticle> particle = iter1->first;
         particleIdMap[particle] = particleCounter;
 
@@ -220,12 +268,143 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 
             mergeIdMap[mergedParticle] = particleCounter;
         }
+
+        particleCounter++;
     }
 
     for (PFParticleVector::const_iterator iter1 = daughterParticles.begin(), iterEnd1 = daughterParticles.end(); iter1 != iterEnd1; ++iter1)
     {
         const art::Ptr<recob::PFParticle> particle = *iter1;
-        particleIdMap[particle] = (++particleCounter);
+        particleIdMap[particle] = (particleCounter++);
+    }
+
+
+    // Create new vertices
+    // ===================
+    typedef std::map<art::Ptr<recob::PFParticle>, unsigned int> PFParticleElementMap; 
+    typedef std::map<art::Ptr<recob::Vertex>, unsigned int> VertexElementMap;
+
+    PFParticleElementMap particleElementMap;
+    VertexElementMap vertexElementMap;
+
+    std::vector<TVector3> vertexVector;
+
+    for (PFParticleIDMap::const_iterator iter1 = particleIdMap.begin(), iterEnd1 = particleIdMap.end(); iter1 != iterEnd1; ++iter1)
+    {
+        const art::Ptr<recob::PFParticle> particle = iter1->first;
+
+        // Get the old particles
+        PFParticleList oldParticleList;
+        PFParticleMergeMap::const_iterator iter2 = particleMerges.find(particle);
+
+        if (particleMerges.end() == iter2)
+        {
+            oldParticleList.insert(particle);
+        }
+        else
+        {
+            oldParticleList.insert(iter2->second.begin(), iter2->second.end());
+        }
+
+        // Get the old vertex positions
+        VertexVector oldVertexList;
+
+        for (PFParticleList::const_iterator iter3 = oldParticleList.begin(), iterEnd3 = oldParticleList.end(); iter3 != iterEnd3; ++iter3)
+        {
+	    PFParticlesToVertices::const_iterator iter4 = particlesToVertices.find(*iter3);
+
+	    if (particlesToVertices.end() == iter4 || iter4->second.empty())
+	        continue;
+
+            if (iter4->second.size() != 1)
+	        throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- Found a particle with multiple vertices ";
+
+            oldVertexList.push_back(*(iter4->second.begin()));
+	}
+
+	VertexVector::const_iterator vIter = (oldVertexList.size() != 1 ? oldVertexList.end() : oldVertexList.begin());
+
+        // Get the new vertex position
+        bool foundNewVertex(false);
+        TVector3 newVertexPosition(0.0, 0.0, 0.0);
+
+        if (oldVertexList.end() == vIter)
+	{
+	    PFParticleTrajectoryMap::const_iterator iter5 = particleTrajectories.find(particle);
+
+            if (!(particleTrajectories.end() == iter5 || iter5->second.empty()))
+	    {
+                const pandora::CartesianVector &vtxPosition = (iter5->second.front()).GetPosition();
+                const pandora::CartesianVector &endPosition = (iter5->second.back()).GetPosition();
+                float bestDistanceSquared(0.5f * (endPosition - vtxPosition).GetMagnitudeSquared());
+
+                newVertexPosition.SetXYZ(vtxPosition.GetX(), vtxPosition.GetY(), vtxPosition.GetZ());
+                foundNewVertex = true;
+
+                for (VertexVector::const_iterator iter6 = oldVertexList.begin(), iterEnd6 = oldVertexList.end(); iter6 != iterEnd6; ++iter6)
+	        {
+	            const art::Ptr<recob::Vertex> vertex = *iter6;
+                    double oldPosition[3] = {0.0, 0.0, 0.0};
+                    vertex->XYZ(oldPosition);
+                    const TVector3 oldVertexPosition(oldPosition[0], oldPosition[1], oldPosition[2]);
+                    const float thisDistanceSquared((oldVertexPosition - newVertexPosition).Mag2());
+                    if (thisDistanceSquared < bestDistanceSquared)
+	            {
+		        bestDistanceSquared = thisDistanceSquared;
+                        vIter = iter6;
+	            }
+		}
+	    }
+	}
+
+        // Choose which vertices will be created
+        bool foundNewElement(false);
+        unsigned int element(vertexVector.size());
+        TVector3 newElementPosition(0.0, 0.0, 0.0);
+
+        if (oldVertexList.end() != vIter) // Recreate an old vertex
+	{
+	    const art::Ptr<recob::Vertex> vertex = *vIter;
+
+            VertexElementMap::const_iterator vIter1 = vertexElementMap.find(vertex);
+
+            if (vertexElementMap.end() != vIter1)
+	    {
+	        element = vIter1->second;
+	    }
+            else
+	    {
+	        vertexElementMap.insert(VertexElementMap::value_type(vertex, element));
+                double position[3] = {0.0, 0.0, 0.0};
+                vertex->XYZ(position);
+                newElementPosition.SetXYZ(position[0], position[1], position[2]);
+                foundNewElement = true;
+	    }
+	}
+        else if (foundNewVertex) // Create a new vertex
+	{
+            newElementPosition = newVertexPosition;
+            foundNewElement = true;
+	}
+        else // There is no vertex (skip event)
+	{
+	    continue;
+	}
+	
+        // Record vertex positions
+        particleElementMap.insert(PFParticleElementMap::value_type(particle, element));
+
+        if (foundNewElement)
+            vertexVector.push_back(newElementPosition);
+    }
+
+    // Create vertices
+    for (std::vector<TVector3>::const_iterator vIter = vertexVector.begin(), vIterEnd = vertexVector.end(); vIter != vIterEnd; ++vIter)
+    {
+        const TVector3 position(*vIter);
+        double pos[3] = { position.x(), position.y(), position.z() };
+        recob::Vertex newVertex(pos, vertexCounter++);
+        outputVertices->push_back(newVertex);
     }
 
 
@@ -302,7 +481,8 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
         recob::PFParticle newParticle(newPdgCode, newSelfCode, newParentCode, newDaughterCodes);
         outputParticles->push_back(newParticle);
 
-        // Build associations between new particle and old clusters, old space points
+        // Associate new particle with clusters and space points
+        HitVector hitVector;
         ClusterVector clusterVector;
         SpacePointVector spacePointVector;
 
@@ -310,53 +490,116 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
         {
             const art::Ptr<recob::PFParticle> particle = *iter4;
           
-            PFParticlesToClusters::const_iterator iter5 = particlesToClusters.find(particle);
-            if (particlesToClusters.end() == iter5)
+            // hits
+	    PFParticlesToHits::const_iterator hIter1 = particlesToHits.find(particle);
+            if (particlesToHits.end() == hIter1)
+	        continue;
+
+            for (HitVector::const_iterator hIter2 = hIter1->second.begin(), hIterEnd2 = hIter1->second.end(); hIter2 != hIterEnd2; ++hIter2)
+	    {
+	        const art::Ptr<recob::Hit> hit = *hIter2;
+                hitVector.push_back(hit);
+	    }
+
+            // clusters
+            PFParticlesToClusters::const_iterator cIter1 = particlesToClusters.find(particle);
+            if (particlesToClusters.end() == cIter1)
                 continue;
 
-            for (ClusterVector::const_iterator iter6 = iter5->second.begin(), iterEnd6 = iter5->second.end(); iter6 != iterEnd6; ++iter6)
+            for (ClusterVector::const_iterator cIter2 = cIter1->second.begin(), cIterEnd2 = cIter1->second.end(); cIter2 != cIterEnd2; ++cIter2)
             {
-                const art::Ptr<recob::Cluster> cluster = *iter6;
+                const art::Ptr<recob::Cluster> cluster = *cIter2;
                 clusterVector.push_back(cluster);
             }
 
-            PFParticlesToSpacePoints::const_iterator iter7 = particlesToSpacePoints.find(particle);
-            if (particlesToSpacePoints.end() == iter7)
+            // space points
+            PFParticlesToSpacePoints::const_iterator sIter1 = particlesToSpacePoints.find(particle);
+            if (particlesToSpacePoints.end() == sIter1)
                 continue;
 
-            for (SpacePointVector::const_iterator iter8 = iter7->second.begin(), iterEnd8 = iter7->second.end(); iter8 != iterEnd8; ++iter8)
+            for (SpacePointVector::const_iterator sIter2 = sIter1->second.begin(), sIterEnd2 = sIter1->second.end(); sIter2 != sIterEnd2; ++sIter2)
             {
-                const art::Ptr<recob::SpacePoint> spacepoint = *iter8;
+                const art::Ptr<recob::SpacePoint> spacepoint = *sIter2;
                 spacePointVector.push_back(spacepoint);
             }
         }
 
         util::CreateAssn(*this, evt, *(outputParticles.get()), clusterVector, *(outputParticlesToClusters.get()));
         util::CreateAssn(*this, evt, *(outputParticles.get()), spacePointVector, *(outputParticlesToSpacePoints.get()));
+
+        // Associate new particle with vertex
+	PFParticleElementMap::const_iterator iter5 = particleElementMap.find(oldParticle);
+
+        if (particleElementMap.end() != iter5)
+	{
+	    const unsigned int vtxElement(iter5->second);
+
+            util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputVertices.get()), *(outputParticlesToVertices.get()),
+                vtxElement, vtxElement + 1);
+	}
+
+        // Build new track and new seed, and associate to new particle
+	PFParticleTrajectoryMap::const_iterator iter6 = particleTrajectories.find(oldParticle);
+
+        if (particleTrajectories.end() != iter6)
+	{
+	    const std::vector<pandora::TrackState> &trackStateVector = iter6->second;
+
+            if (trackStateVector.empty())
+                throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- Found a track without any trajectory points";
+
+            // Build track
+            recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, trackStateVector)); 
+            outputTracks->push_back(newTrack);  
+
+            util::CreateAssn(*this, evt, *(outputTracks.get()), hitVector, *(outputTracksToHits.get()));
+            util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
+	        outputTracks->size() - 1, outputTracks->size());
+
+            // Build seed
+            const pandora::TrackState &trackState = trackStateVector.front();
+            const pandora::CartesianVector &vtxPos = trackState.GetPosition();
+            const pandora::CartesianVector &vtxDir = trackState.GetMomentum().GetUnitVector();
+
+            double pos[3]     = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
+            double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+            double dir[3]     = { vtxDir.GetX(), vtxDir.GetY(), vtxDir.GetZ() };
+            double dirErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+
+            recob::Seed newSeed(pos, dir, posErr, dirErr);
+            outputSeeds->push_back(newSeed);
+
+            util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
+                outputSeeds->size() - 1, outputSeeds->size());
+	}
     }
 
     mf::LogDebug("LArPandora") << "   Number of new particles: " << outputParticles->size() << std::endl;
+    mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;
+    mf::LogDebug("LArPandora") << "   Number of new seeds: " << outputSeeds->size() << std::endl;
+    mf::LogDebug("LArPandora") << "   Number of new vertices: " << outputVertices->size() << std::endl;
     
     evt.put(std::move(outputParticles));
+    evt.put(std::move(outputSeeds));
+    evt.put(std::move(outputTracks));
+    evt.put(std::move(outputVertices));
+
     evt.put(std::move(outputParticlesToSpacePoints));
     evt.put(std::move(outputParticlesToClusters));
+    evt.put(std::move(outputParticlesToVertices));
+    evt.put(std::move(outputParticlesToTracks));
+    evt.put(std::move(outputParticlesToSeeds));
+    evt.put(std::move(outputTracksToHits));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-unsigned int PFParticleStitcher::GetVolumeID(const SpacePointVector &spacePoints, const SpacePointsToHits &spacePointsToHits) const
+unsigned int PFParticleStitcher::GetVolumeID(const HitVector &hitVector) const
 {
-    for (SpacePointVector::const_iterator iter1 = spacePoints.begin(), iterEnd1 = spacePoints.end(); iter1 != iterEnd1; ++iter1)
+    for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
-        const art::Ptr<recob::SpacePoint> spacepoint = *iter1;
-
-        SpacePointsToHits::const_iterator iter2 = spacePointsToHits.find(spacepoint);
-        if (spacePointsToHits.end() == iter2)
-            throw cet::exception("LArPandora") << " PFParticleStitcher::GetVolumeID --- Found a space point without an associated hit";
-
-        const art::Ptr<recob::Hit> hit = iter2->second;
+        const art::Ptr<recob::Hit> hit = *iter;
         const geo::WireID hit_WireID(hit->WireID());
-
         return this->GetVolumeID(hit_WireID.Cryostat, hit_WireID.TPC);
     }
 
@@ -365,7 +608,31 @@ unsigned int PFParticleStitcher::GetVolumeID(const SpacePointVector &spacePoints
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particleMergeMap, const PFParticleSeedMap &particleSeedMap)
+TVector3 PFParticleStitcher::GetVolumeCenter(const HitVector &hitVector) const
+{
+    art::ServiceHandle<geo::Geometry> theGeometry;  
+
+    TVector3 sumPosition(0.0, 0.0, 0.0);
+    float sumCharge(0.f);
+
+    for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::Hit> hit = *iter;
+        const geo::WireID hit_WireID(hit->WireID());
+        const float thisCharge(hit->Integral());
+        sumPosition += thisCharge * theGeometry->Cryostat(hit_WireID.Cryostat).TPC(hit_WireID.TPC).LocalToWorld(TVector3(0.0, 0.0, 0.0));
+        sumCharge += thisCharge;
+    }
+
+    if (sumCharge > std::numeric_limits<float>::epsilon())
+        return (sumPosition * (1.0 / sumCharge));
+
+    throw cet::exception("LArPandora") << " PFParticleStitcher::GetVolumeCenter --- No volume center for this collection of hits";
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particleMergeMap, const PFParticleTrackMap &particleTrackMap)
 {
     for (PFParticleMergeMap::const_iterator iter1 = particleMergeMap.begin(), iterEnd1 = particleMergeMap.end(); iter1 != iterEnd1; ++iter1)    
     {
@@ -378,14 +645,14 @@ void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particle
             m_particle1 = particle1->Self();
             m_particle2 = particle2->Self();
 
-            PFParticleSeedMap::const_iterator iter3 = particleSeedMap.find(particle1);
-            PFParticleSeedMap::const_iterator iter4 = particleSeedMap.find(particle2);
+            PFParticleTrackMap::const_iterator iter3 = particleTrackMap.find(particle1);
+            PFParticleTrackMap::const_iterator iter4 = particleTrackMap.find(particle2);
 
-            if (particleSeedMap.end() == iter3 || particleSeedMap.end() == iter4)
+            if (particleTrackMap.end() == iter3 || particleTrackMap.end() == iter4)
                 throw cet::exception("LArPandora") << " PFParticleStitcher::WriteParticleMatches --- No trace of particle seed in seed maps";
 
-            const PFParticleSeed seed1(iter3->second);
-            const PFParticleSeed seed2(iter4->second);
+            const PFParticleTrack seed1(iter3->second);
+            const PFParticleTrack seed2(iter4->second);
 
             // Get closest pair of vertices
             ParticleAssociation::VertexType vertexType1(ParticleAssociation::UNDEFINED);
@@ -422,7 +689,7 @@ void PFParticleStitcher::WriteParticleMatches(const PFParticleMergeMap &particle
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleStitcher::CreateParticleMatches(const PFParticleVector &particleVector, const PFParticleVolumeMap &particleVolumeMap,
-    const PFParticleSeedMap &particleSeedMap, ParticleAssociationMatrix &particleAssociationMatrix) const
+    const PFParticleTrackMap &particleTrackMap, ParticleAssociationMatrix &particleAssociationMatrix) const
 {
     for (PFParticleVector::const_iterator pIter1 = particleVector.begin(), pIterEnd1 = particleVector.end(); pIter1 != pIterEnd1; ++pIter1)
     {
@@ -447,10 +714,11 @@ void PFParticleStitcher::CreateParticleMatches(const PFParticleVector &particleV
             const unsigned int volume1(vIter1->second);
             const unsigned int volume2(vIter2->second);
 
+            // TODO: Require NEIGHBOURING volumes
             if (volume1 == volume2)
                 continue;
 
-            this->CreateParticleMatches(particle1, particle2, particleSeedMap, particleAssociationMatrix);
+            this->CreateParticleMatches(particle1, particle2, particleTrackMap, particleAssociationMatrix);
         }
     }
 }
@@ -458,16 +726,19 @@ void PFParticleStitcher::CreateParticleMatches(const PFParticleVector &particleV
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle> particle1, const art::Ptr<recob::PFParticle> particle2,
-    const PFParticleSeedMap &particleSeedMap, ParticleAssociationMatrix &particleAssociationMatrix) const
+    const PFParticleTrackMap &particleTrackMap, ParticleAssociationMatrix &particleAssociationMatrix) const
 {
-    PFParticleSeedMap::const_iterator iter1 = particleSeedMap.find(particle1);
-    PFParticleSeedMap::const_iterator iter2 = particleSeedMap.find(particle2);
-
-    if (particleSeedMap.end() == iter1 || particleSeedMap.end() == iter2)
+    if (!m_enableStitching)
         return;
 
-    const PFParticleSeed seed1(iter1->second);
-    const PFParticleSeed seed2(iter2->second);
+    PFParticleTrackMap::const_iterator iter1 = particleTrackMap.find(particle1);
+    PFParticleTrackMap::const_iterator iter2 = particleTrackMap.find(particle2);
+
+    if (particleTrackMap.end() == iter1 || particleTrackMap.end() == iter2)
+        return;
+
+    const PFParticleTrack seed1(iter1->second);
+    const PFParticleTrack seed2(iter2->second);
 
     // Get closest pair of vertices
     ParticleAssociation::VertexType vertexType1(ParticleAssociation::UNDEFINED);
@@ -544,11 +815,11 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
     const float particleLength1((seed1.GetInnerPosition() - seed1.GetOuterPosition()).GetMagnitudeSquared());
     const float particleLength2((seed2.GetInnerPosition() - seed2.GetOuterPosition()).GetMagnitudeSquared());
 
-    mf::LogDebug("LArPandora")  << "   *** ParticleStitcher::MatchParticles(...) *** " << std::endl
-                                << "     id1=" << particle1->Self() << ", id2=" << particle2->Self() << std::endl
-                                << "     cosTheta=" << -dir1.GetDotProduct(dir2) << std::endl
-                                << "     rL1=" << rL1 << ", rT1=" << rT1 << ", rL2=" << rL2 << ", rT2=" << rT2 << std::endl
-                                << "     Length1=" << std::sqrt(particleLength1) << " Length2=" << std::sqrt(particleLength2) << std::endl;
+    mf::LogDebug("LArPandora") << " *** ParticleStitcher::MatchParticles(...) *** " << std::endl
+                               << "     id1=" << particle1->Self() << ", id2=" << particle2->Self() << std::endl
+                               << "     cosTheta=" << -dir1.GetDotProduct(dir2) << std::endl
+                               << "     rL1=" << rL1 << ", rT1=" << rT1 << ", rL2=" << rL2 << ", rT2=" << rT2 << std::endl
+                               << "     Length1=" << std::sqrt(particleLength1) << " Length2=" << std::sqrt(particleLength2) << std::endl;
 
     (void) particleAssociationMatrix[particle1].insert(ParticleAssociationMap::value_type(particle2, 
             ParticleAssociation(vertexType1, vertexType2, particleLength2)));
@@ -690,9 +961,93 @@ void PFParticleStitcher::SelectParticleMerges(const PFParticleVector &particleVe
             vetoList.insert(associatedParticle);
             outputMergeMap[seedParticle].insert(associatedParticle);
 
-            mf::LogDebug("LArPandora")  << "   *** ParticleStitcher::SelectMerges(...) *** " << std::endl
-                                        << "     Seed=" << seedParticle->Self() << ", Associated=" << associatedParticle->Self() << std::endl;
+            mf::LogDebug("LArPandora") << " *** ParticleStitcher::SelectMerges(...) *** " << std::endl
+                                       << "     Seed=" << seedParticle->Self() << ", Associated=" << associatedParticle->Self() << std::endl;
         }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleStitcher::OrderParticleMerges(const PFParticleMergeMap &particleMerges, const PFParticlesToTracks &particlesToTracks, 
+    const PFParticlesToHits &particlesToHits, PFParticleTrajectoryMap &particleTrajectories) const
+{
+    // Create typedef for track trajectory
+    typedef std::map< const float, std::vector<pandora::TrackState> > TrackTrajectoryMap;
+
+    // Loop over top-level particles 
+    for (PFParticleMergeMap::const_iterator iter = particleMerges.begin(), iterEnd = particleMerges.end(); iter != iterEnd; ++iter)    
+    {
+        const art::Ptr<recob::PFParticle> primaryParticle = iter->first;
+
+        if (particlesToTracks.end() == particlesToTracks.find(primaryParticle))
+	    continue;
+
+        // First loop: find direction of longest track
+        TVector3 trackDirection(0.0, 0.0, 0.0);
+        float trackLengthSquared(0.f);
+
+        for (PFParticleList::const_iterator pIter = iter->second.begin(), pIterEnd = iter->second.end(); pIter != pIterEnd; ++pIter)
+        {
+            const art::Ptr<recob::PFParticle> particle = *pIter;  
+            const art::Ptr<recob::Track> track = LArPandoraCollector::GetPrimaryTrack(particlesToTracks, particle);
+            const float thisLengthSquared((track->End() - track->Vertex()).Mag2());
+
+            if (thisLengthSquared > trackLengthSquared)
+	    {
+                trackDirection = track->VertexDirection();
+                trackLengthSquared = thisLengthSquared;
+	    }
+	}
+
+        // Second loop: build ordered list of trajectory points for each track
+	TrackTrajectoryMap trajectoryMap;
+
+        for (PFParticleList::const_iterator pIter = iter->second.begin(), pIterEnd = iter->second.end(); pIter != pIterEnd; ++pIter)
+        {
+            const art::Ptr<recob::PFParticle> particle = *pIter;  
+            const art::Ptr<recob::Track> track = LArPandoraCollector::GetPrimaryTrack(particlesToTracks, particle);
+	
+            PFParticlesToHits::const_iterator hIter = particlesToHits.find(particle);
+            if (particlesToHits.end() == hIter)
+	        continue;
+
+            const HitVector &hits = hIter->second;
+
+            if(hits.empty())
+                continue;
+
+            const TVector3 detectorPosition(this->GetVolumeCenter(hits));
+            const bool isForward(trackDirection.Dot(track->End() - track->Vertex()) > 0.0);
+            const float displacement(trackDirection.Dot(detectorPosition));
+            const float propagation(isForward ? +1.0 : -1.0);
+
+            // Fill vector of TrackState objects
+	    std::vector<pandora::TrackState> trackStateVector;
+
+            for (unsigned p = 0; p < track->NumberTrajectoryPoints(); ++p)
+	    {
+	        const unsigned pEntry(isForward ? p : track->NumberTrajectoryPoints() - p);
+                const TVector3 position(track->LocationAtPoint(pEntry));
+                const TVector3 direction(propagation * track->DirectionAtPoint(pEntry));
+
+                trackStateVector.push_back(pandora::TrackState(
+		    pandora::CartesianVector(position.x(), position.y(), position.z()), 
+		    pandora::CartesianVector(direction.x(), direction.y(), direction.z())));
+	    }
+
+            trajectoryMap.insert(TrackTrajectoryMap::value_type(displacement, trackStateVector));
+	}
+
+        // Third loop: concatenate trajectory points
+        for (TrackTrajectoryMap::const_iterator tIter1 = trajectoryMap.begin(), tIterEnd1 = trajectoryMap.end(); tIter1 != tIterEnd1; ++tIter1)
+	{
+            for (std::vector<pandora::TrackState>::const_iterator tIter2 = tIter1->second.begin(), tIterEnd2 = tIter1->second.end();
+		 tIter2 != tIterEnd2; ++tIter2)
+	    {
+                particleTrajectories[primaryParticle].push_back(*tIter2);
+	    }
+	}
     }
 }
 
@@ -727,7 +1082,7 @@ void PFParticleStitcher::CollectAssociatedParticles(art::Ptr<recob::PFParticle> 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleStitcher::GetClosestVertices(const PFParticleSeed& seed1, const PFParticleSeed &seed2, 
+void PFParticleStitcher::GetClosestVertices(const PFParticleTrack& seed1, const PFParticleTrack &seed2, 
     ParticleAssociation::VertexType &vertexType1, ParticleAssociation::VertexType &vertexType2) const
 {
     for (unsigned int inner1 = 0; inner1 < 2; ++inner1)
@@ -873,6 +1228,61 @@ float PFParticleStitcher::GetDeltaX(const pandora::CartesianVector &initialPosit
     const float R(initialDirectionYZ.GetUnitVector().GetDotProduct(initialPositionYZ - targetPositionYZ) / initialDirectionYZ.GetMagnitude());
 
     return (-1.f * initialDirectionX.GetUnitVector().GetDotProduct(targetPosition - (initialPosition - initialDirection * R)));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleStitcher::PFParticleTrack::PFParticleTrack(const art::Ptr<recob::Track> track) : 
+    m_innerPosition(0.f, 0.f, 0.f),
+    m_innerDirection(0.f, 0.f, 0.f),
+    m_outerPosition(0.f, 0.f, 0.f),
+    m_outerDirection(0.f, 0.f, 0.f)
+{
+    const bool isForward(track->Vertex().z() <= track->End().z());
+    const TVector3 innerPosition(isForward ? track->Vertex() : track->End()); 
+    const TVector3 outerPosition(isForward ? track->End() : track->Vertex());    
+    const TVector3 innerDirection(isForward ? track->VertexDirection() : -1.0 * track->EndDirection());
+    const TVector3 outerDirection(isForward ? -1.0 * track->EndDirection() : track->VertexDirection());
+                
+    m_innerPosition  = pandora::CartesianVector(innerPosition.x(), innerPosition.y(), innerPosition.z());
+    m_outerPosition  = pandora::CartesianVector(outerPosition.x(), outerPosition.y(), outerPosition.z());
+    m_innerDirection = pandora::CartesianVector(innerDirection.x(), innerDirection.y(), innerDirection.z());
+    m_outerDirection = pandora::CartesianVector(outerDirection.x(), outerDirection.y(), outerDirection.z());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleStitcher::PFParticleTrack::~PFParticleTrack()
+{
+}
+  
+//------------------------------------------------------------------------------------------------------------------------------------------
+    
+pandora::CartesianVector PFParticleStitcher::PFParticleTrack::GetInnerPosition() const 
+{ 
+    return m_innerPosition;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::CartesianVector PFParticleStitcher::PFParticleTrack::GetInnerDirection() const 
+{ 
+    return m_innerDirection;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::CartesianVector PFParticleStitcher::PFParticleTrack::GetOuterPosition() const 
+{ 
+    return m_outerPosition;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::CartesianVector PFParticleStitcher::PFParticleTrack::GetOuterDirection() const 
+{ 
+    return m_outerDirection;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
