@@ -48,12 +48,14 @@ typedef std::map< art::Ptr<recob::PFParticle>, SeedVector >                   PF
 typedef std::map< art::Ptr<recob::PFParticle>, VertexVector >                 PFParticlesToVertices;
 typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PFParticlesToSpacePoints;
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
+typedef std::map< art::Ptr<recob::Track>,      HitVector >                    TracksToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
 typedef std::map< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit> >         SpacePointsToHits;
 typedef std::map< art::Ptr<simb::MCTruth>,     MCParticleVector >             MCTruthToMCParticles;
 typedef std::map< art::Ptr<simb::MCParticle>,  art::Ptr<simb::MCTruth> >      MCParticlesToMCTruth;
 typedef std::map< art::Ptr<simb::MCParticle>,  HitVector >                    MCParticlesToHits;
 typedef std::map< art::Ptr<simb::MCParticle>,  art::Ptr<recob::PFParticle> >  MCParticlesToPFParticles;
+typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<recob::SpacePoint> >  HitsToSpacePoints;
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<recob::PFParticle> >  HitsToPFParticles;
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCParticle> >   HitsToMCParticles;
 typedef std::map< art::Ptr<recob::Hit>,        TrackIDEVector >               HitsToTrackIDEs;
@@ -114,6 +116,18 @@ public:
         SpacePointsToHits &spacePointsToHits);   
 
     /**
+     *  @brief Collect the reconstructed SpacePoints and associated hits from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the SpacePoint list in the event
+     *  @param spacePointVector the output vector of SpacePoint objects
+     *  @param spacePointsToHits the output map from SpacePoint to Hit objects
+     *  @param hitsToSpacePoints the output map from Hit to SpacePoint objects
+     */
+    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
+        SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints);   
+
+    /**
      *  @brief Collect the reconstructed Clusters and associated hits from the ART event record
      *
      *  @param evt the ART event record
@@ -167,6 +181,17 @@ public:
      */
     static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
         PFParticlesToTracks &particlesToTracks);   
+
+    /**
+     *  @brief Collect the reconstructed Tracks and associated Hits from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param trackVector the output vector of Track objects
+     *  @param tracksToHits the output map from Track to Hit objects
+     */
+    static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+        TracksToHits &tracksToHits);
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated Seeds from the ART event record
@@ -323,6 +348,14 @@ public:
      *  @return the output parent final-state particle
      */
     static art::Ptr<simb::MCParticle> GetParentMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> daughterParticle);
+
+    /**
+     *  @brief Return the primary track associated with a PFParticle
+     *
+     *  @param particlesToTracks the mapping between particles and tracks
+     *  @param particle  the input particle
+     */
+    static art::Ptr<recob::Track> GetPrimaryTrack(const PFParticlesToTracks &particlesToTracks, const art::Ptr<recob::PFParticle> particle);
 
     /**
      *  @brief Return the parent neutrino PDG code (or zero for cosmics) for a given reconstructed particle

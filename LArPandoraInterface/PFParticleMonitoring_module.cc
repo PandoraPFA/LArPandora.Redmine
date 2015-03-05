@@ -84,12 +84,23 @@ private:
      int CountHitsByType(const int view, const HitVector &hitVector) const;
 
     /**
-     *  @brief Calculate length of true particle from its trajectory points
+     *  @brief Find the start and end points of the true particle in the active region of detector
      *
      *  @param trueParticle the input true particle
+     *  @param startT  the true start point
+     *  @param endT  the true end point
      */
-     double GetLength(const art::Ptr<simb::MCParticle> trueParticle) const;
+     void GetStartAndEndPoints(const art::Ptr<simb::MCParticle> trueParticle, int &startT, int &endT) const;
 
+    /**
+     *  @brief Find the length of the true particle trajectory through the active region of the detector
+     *
+     *  @param trueParticle the input true particle
+     *  @param startT  the true start point
+     *  @param endT  the true end point
+     */
+     double GetLength(const art::Ptr<simb::MCParticle> trueParticle, const int startT, const int endT) const;
+     
 
      TTree       *m_pRecoTree;              ///<
 
@@ -106,7 +117,33 @@ private:
      int          m_pfoPdg;                 ///<
      int          m_pfoNuPdg;               ///<
 
+     int          m_pfoVertex;              ///<
+     double       m_pfoVtxX;                ///<
+     double       m_pfoVtxY;                ///<
+     double       m_pfoVtxZ;                ///<
+     double       m_pfoEndX;                ///<
+     double       m_pfoEndY;                ///<
+     double       m_pfoEndZ;                ///<
+     double       m_pfoDirX;                ///<
+     double       m_pfoDirY;                ///<
+     double       m_pfoDirZ;                ///<
+     double       m_pfoLength;              ///<
+     double       m_pfoStraightLength;      ///<
+
+     int          m_mcVertex;               ///<
+     double       m_mcVtxX;                 ///<
+     double       m_mcVtxY;                 ///<
+     double       m_mcVtxZ;                 ///<
+     double       m_mcEndX;                 ///<
+     double       m_mcEndY;                 ///<
+     double       m_mcEndZ;                 ///<
+     double       m_mcDirX;                 ///<
+     double       m_mcDirY;                 ///<
+     double       m_mcDirZ;                 ///<
+     double       m_mcEnergy;               ///<
      double       m_mcLength;               ///<
+     double       m_mcStraightLength;       ///<
+
      double       m_completeness;           ///<
      double       m_purity;                 ///<
 
@@ -126,9 +163,13 @@ private:
      int          m_nMatchedHitsV;          ///<
      int          m_nMatchedHitsW;          ///<
 
+     double       m_spacepointsMinX;        ///<
+     double       m_spacepointsMaxX;        ///<
+     
      std::string  m_hitfinderLabel;         ///<
      std::string  m_spacepointLabel;        ///<
      std::string  m_particleLabel;          ///<
+     std::string  m_trackLabel;             ///<
      std::string  m_geantModuleLabel;       ///<
 
      bool         m_useDaughterPFParticles; ///<
@@ -174,6 +215,7 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/PFParticle.h"
+#include "RecoBase/Track.h"
 
 // std includes
 #include <iostream>
@@ -196,6 +238,7 @@ PFParticleMonitoring::~PFParticleMonitoring()
 
 void PFParticleMonitoring::reconfigure(fhicl::ParameterSet const &pset)
 {
+    m_trackLabel = pset.get<std::string>("TrackModule","pandora");
     m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
     m_spacepointLabel = pset.get<std::string>("SpacePointModule","pandora");
     m_hitfinderLabel = pset.get<std::string>("HitFinderModule","gaushit");
@@ -226,7 +269,31 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("mcNuPdg", &m_mcNuPdg, "mcNuPdg/I");
     m_pRecoTree->Branch("pfoPdg", &m_pfoPdg, "pfoPdg/I");
     m_pRecoTree->Branch("pfoNuPdg", &m_pfoNuPdg, "pfoNuPdg/I");
+    m_pRecoTree->Branch("pfoVertex", &m_pfoVertex, "pfoVertex/I");
+    m_pRecoTree->Branch("pfoVtxX", &m_pfoVtxX, "pfoVtxX/D");
+    m_pRecoTree->Branch("pfoVtxY", &m_pfoVtxY, "pfoVtxY/D");
+    m_pRecoTree->Branch("pfoVtxZ", &m_pfoVtxZ, "pfoVtxZ/D");
+    m_pRecoTree->Branch("pfoEndX", &m_pfoEndX, "pfoEndX/D");
+    m_pRecoTree->Branch("pfoEndY", &m_pfoEndY, "pfoEndY/D");
+    m_pRecoTree->Branch("pfoEndZ", &m_pfoEndZ, "pfoEndZ/D");
+    m_pRecoTree->Branch("pfoDirX", &m_pfoDirX, "pfoDirX/D");
+    m_pRecoTree->Branch("pfoDirY", &m_pfoDirY, "pfoDirY/D");
+    m_pRecoTree->Branch("pfoDirZ", &m_pfoDirZ, "pfoDirZ/D");
+    m_pRecoTree->Branch("pfoLength", &m_pfoLength, "pfoLength/D");
+    m_pRecoTree->Branch("pfoStraightLength", &m_pfoStraightLength, "pfoStraightLength/D");
+    m_pRecoTree->Branch("mcVertex", &m_mcVertex, "mcVertex/I");
+    m_pRecoTree->Branch("mcVtxX", &m_mcVtxX, "mcVtxX/D");
+    m_pRecoTree->Branch("mcVtxY", &m_mcVtxY, "mcVtxY/D");
+    m_pRecoTree->Branch("mcVtxZ", &m_mcVtxZ, "mcVtxZ/D");
+    m_pRecoTree->Branch("mcEndX", &m_mcEndX, "mcEndX/D");
+    m_pRecoTree->Branch("mcEndY", &m_mcEndY, "mcEndY/D");
+    m_pRecoTree->Branch("mcEndZ", &m_mcEndZ, "mcEndZ/D"); 
+    m_pRecoTree->Branch("mcDirX", &m_mcDirX, "mcDirX/D");
+    m_pRecoTree->Branch("mcDirY", &m_mcDirY, "mcDirY/D");
+    m_pRecoTree->Branch("mcDirZ", &m_mcDirZ, "mcDirZ/D");
+    m_pRecoTree->Branch("mcEnergy", &m_mcEnergy, "mcEnergy/D");
     m_pRecoTree->Branch("mcLength", &m_mcLength, "mcLength/D");
+    m_pRecoTree->Branch("mcStraightLength", &m_mcStraightLength, "mcStraightLength/D");
     m_pRecoTree->Branch("completeness", &m_completeness, "completeness/D");
     m_pRecoTree->Branch("purity", &m_purity, "purity/D");
     m_pRecoTree->Branch("nMCHits", &m_nMCHits, "nMCHits/I");
@@ -241,6 +308,8 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("nMatchedHitsU", &m_nMatchedHitsU, "nMatchedHitsU/I");
     m_pRecoTree->Branch("nMatchedHitsV", &m_nMatchedHitsV, "nMatchedHitsV/I");
     m_pRecoTree->Branch("nMatchedHitsW", &m_nMatchedHitsW, "nMatchedHitsW/I");
+    m_pRecoTree->Branch("spacepointsMinX", &m_spacepointsMinX, "spacepointsMinX/D");
+    m_pRecoTree->Branch("spacepointsMaxX", &m_spacepointsMaxX, "spacepointsMaxX/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -269,7 +338,32 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_pfoPdg = 0;
     m_pfoNuPdg = 0;
 
+    m_pfoVertex = 0;
+    m_pfoVtxX = 0.0;
+    m_pfoVtxY = 0.0;
+    m_pfoVtxZ = 0.0;
+    m_pfoEndX = 0.0;
+    m_pfoEndY = 0.0;
+    m_pfoEndZ = 0.0;
+    m_pfoDirX = 0.0;
+    m_pfoDirY = 0.0;
+    m_pfoDirZ = 0.0;
+    m_pfoLength = 0.0;
+    m_pfoStraightLength = 0.0;
+   
+    m_mcVertex = 0;
+    m_mcVtxX = 0.0;
+    m_mcVtxY = 0.0;
+    m_mcVtxZ = 0.0;
+    m_mcEndX = 0.0;
+    m_mcEndY = 0.0;
+    m_mcEndZ = 0.0;
+    m_mcDirX = 0.0;
+    m_mcDirY = 0.0;
+    m_mcDirZ = 0.0;
+    m_mcEnergy = 0.0;
     m_mcLength = 0.0;
+    m_mcStraightLength = 0.0;
 
     m_completeness = 0.0;
     m_purity = 0.0;
@@ -287,9 +381,37 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_nMatchedHitsV = 0;
     m_nMatchedHitsW = 0;
 
+    m_spacepointsMinX = 0.0;
+    m_spacepointsMaxX = 0.0;
+    
     std::cout << "  Run: " << m_run << std::endl;
     std::cout << "  Event: " << m_event << std::endl;
 
+
+    // Collect SpacePoints and SpacePoint <-> Hit Associations
+    // =======================================================
+    SpacePointVector spacePointVector;
+    SpacePointsToHits spacePointsToHits;
+    HitsToSpacePoints hitsToSpacePoints;
+    LArPandoraCollector::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits, hitsToSpacePoints);
+
+    std::cout << "  SpacePoints: " << spacePointVector.size() << std::endl;
+
+    // Collect Tracks and PFParticle <-> Track Associations
+    // ====================================================
+    TrackVector recoTrackVector;
+    PFParticlesToTracks recoParticlesToTracks;
+    LArPandoraCollector::CollectTracks(evt, m_trackLabel, recoTrackVector, recoParticlesToTracks);
+    
+    std::cout << "  Tracks: " << recoTrackVector.size() << std::endl;
+
+    // Collect Vertices and PFParticle <-> Vertex Associations
+    // =======================================================
+    VertexVector recoVertexVector;
+    PFParticlesToVertices recoParticlesToVertices;
+    LArPandoraCollector::CollectVertices(evt, m_particleLabel, recoVertexVector, recoParticlesToVertices);
+
+    std::cout << "  Vertices: " << recoVertexVector.size() << std::endl;
 
     // Match Reco Particles to Hits
     // ============================
@@ -377,7 +499,90 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_pfoPdg = 0;
         m_pfoNuPdg = 0;
 
-        m_mcLength = this->GetLength(trueParticle);
+        m_pfoVertex = 0;
+        m_pfoVtxX = 0.0;
+        m_pfoVtxY = 0.0;
+        m_pfoVtxZ = 0.0;
+        m_pfoEndX = 0.0;
+        m_pfoEndY = 0.0;
+        m_pfoEndZ = 0.0;
+        m_pfoDirX = 0.0;
+        m_pfoDirY = 0.0;
+        m_pfoDirZ = 0.0;
+        m_pfoLength = 0.0;
+        m_pfoStraightLength = 0.0;
+
+        m_mcVertex = 0;
+        m_mcVtxX = 0.0;
+        m_mcVtxY = 0.0;
+        m_mcVtxZ = 0.0;
+        m_mcEndX = 0.0;
+        m_mcEndY = 0.0;
+        m_mcEndZ = 0.0;
+        m_mcDirX = 0.0;
+        m_mcDirY = 0.0;
+        m_mcDirZ = 0.0;
+        m_mcEnergy = 0.0;
+        m_mcLength = 0.0;
+        m_mcStraightLength = 0.0;
+
+        m_completeness = 0.0;
+        m_purity = 0.0;
+
+        m_nMCHits = 0;
+        m_nMCHitsU = 0;
+        m_nMCHitsV = 0;
+        m_nMCHitsW = 0;
+
+        m_nPfoHits = 0;
+        m_nPfoHitsU = 0;
+        m_nPfoHitsV = 0;
+        m_nPfoHitsW = 0;
+
+        m_nMatchedHits = 0;
+        m_nMatchedHitsU = 0;
+        m_nMatchedHitsV = 0;
+        m_nMatchedHitsW = 0;
+ 
+        m_spacepointsMinX = 0.0;
+        m_spacepointsMaxX = 0.0;
+
+        // Set true properties
+        try
+	{
+            int startT(-1);
+            int endT(-1);
+            this->GetStartAndEndPoints(trueParticle, startT, endT);
+
+	    // vertex and end positions
+            m_mcVertex = 1;
+            m_mcVtxX = trueParticle->Vx(startT);
+            m_mcVtxY = trueParticle->Vy(startT);
+            m_mcVtxZ = trueParticle->Vz(startT);
+            m_mcEndX = trueParticle->Vx(endT);
+            m_mcEndY = trueParticle->Vy(endT); 
+            m_mcEndZ = trueParticle->Vz(endT);
+            
+            const double dx(m_mcEndX - m_mcVtxX);
+            const double dy(m_mcEndY - m_mcVtxY);
+            const double dz(m_mcEndZ - m_mcVtxZ);
+
+            m_mcStraightLength = std::sqrt(dx * dx + dy *dy + dz * dz);
+            m_mcLength = this->GetLength(trueParticle, startT, endT);
+            
+            // energy and momentum
+            const double Ptot(trueParticle->P(startT));
+
+            if (Ptot > 0.0)
+	    {
+	        m_mcDirX = trueParticle->Px(startT) / Ptot;
+                m_mcDirY = trueParticle->Py(startT) / Ptot;
+                m_mcDirZ = trueParticle->Pz(startT) / Ptot;
+                m_mcEnergy = trueParticle->E(startT);
+	    }
+	}
+        catch (cet::exception &e){
+	}
 
         MCParticlesToMCTruth::const_iterator nuIter = particlesToTruth.find(trueParticle);
         if (particlesToTruth.end() == nuIter)
@@ -391,20 +596,40 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
             m_mcNuPdg = neutrino.Nu().PdgCode();
         }
 
+
+        // Find min and max X positions of space points
+        bool foundSpacePoints(false);
+
+        for (HitVector::const_iterator hIter1 = trueHitVector.begin(), hIterEnd1 = trueHitVector.end(); hIter1 != hIterEnd1; ++hIter1)
+	{
+	    const art::Ptr<recob::Hit> hit = *hIter1;
+            
+	    HitsToSpacePoints::const_iterator hIter2 = hitsToSpacePoints.find(hit);
+            if (hitsToSpacePoints.end() == hIter2)
+	        continue;
+
+            const art::Ptr<recob::SpacePoint> spacepoint = hIter2->second;
+            const double X(spacepoint->XYZ()[0]);
+
+            if (!foundSpacePoints)
+	    {
+                m_spacepointsMinX = X;
+                m_spacepointsMaxX = X;
+                foundSpacePoints = true;
+	    }
+            else
+	    {
+	        m_spacepointsMinX = std::min(m_spacepointsMinX, X);
+                m_spacepointsMaxX = std::max(m_spacepointsMaxX, X);
+	    }
+	}
+  
+
+        // Match true and reconstructed hits
         m_nMCHits = trueHitVector.size();
         m_nMCHitsU = this->CountHitsByType(geo::kU, trueHitVector);
         m_nMCHitsV = this->CountHitsByType(geo::kV, trueHitVector);
         m_nMCHitsW = this->CountHitsByType(geo::kW, trueHitVector);
-
-        m_nPfoHits = 0;
-        m_nPfoHitsU = 0;
-        m_nPfoHitsV = 0;
-        m_nPfoHitsW = 0;
-
-        m_nMatchedHits = 0;
-        m_nMatchedHitsU = 0;
-        m_nMatchedHitsV = 0;
-        m_nMatchedHitsW = 0;
 
         MCParticlesToPFParticles::const_iterator pIter1 = matchedParticles.find(trueParticle);
         if (matchedParticles.end() != pIter1)
@@ -434,6 +659,54 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
             m_nMatchedHitsU = this->CountHitsByType(geo::kU, matchedHitVector);
             m_nMatchedHitsV = this->CountHitsByType(geo::kV, matchedHitVector);
             m_nMatchedHitsW = this->CountHitsByType(geo::kW, matchedHitVector);
+
+	    PFParticlesToVertices::const_iterator pIter4 = recoParticlesToVertices.find(recoParticle);
+            if (recoParticlesToVertices.end() != pIter4)
+	    {
+                const VertexVector &vertexVector = pIter4->second;
+                if (!vertexVector.empty())
+                {
+                    if (vertexVector.size() !=1 )
+                        std::cout << " Warning: Found particle with more than one associated vertex " << std::endl;
+
+                    const art::Ptr<recob::Vertex> recoVertex = *(vertexVector.begin());
+                    double xyz[3] = {0.0, 0.0, 0.0} ;
+                    recoVertex->XYZ(xyz);
+
+                    m_pfoVertex = 1;
+                    m_pfoVtxX = xyz[0];
+                    m_pfoVtxY = xyz[1];
+                    m_pfoVtxZ = xyz[2];
+                }
+	    }
+
+	    PFParticlesToTracks::const_iterator pIter5 = recoParticlesToTracks.find(recoParticle);
+            if (recoParticlesToTracks.end() != pIter5)
+	    {
+                const TrackVector &trackVector = pIter5->second;
+                if (!trackVector.empty())
+                {
+                    if (trackVector.size() !=1 )
+                        std::cout << " Warning: Found particle with more than one associated track " << std::endl;
+	        
+                    const art::Ptr<recob::Track> recoTrack = *(trackVector.begin());
+                    const TVector3 &vtxPosition = recoTrack->Vertex();
+                    const TVector3 &endPosition = recoTrack->End();
+                    const TVector3 &vtxDirection = recoTrack->VertexDirection();
+
+                    m_pfoVtxX = vtxPosition.x();
+                    m_pfoVtxY = vtxPosition.y();
+                    m_pfoVtxZ = vtxPosition.z();
+                    m_pfoEndX = endPosition.x();
+                    m_pfoEndY = endPosition.y();
+                    m_pfoEndZ = endPosition.z();
+                    m_pfoDirX = vtxDirection.x();
+                    m_pfoDirY = vtxDirection.y();
+                    m_pfoDirZ = vtxDirection.z();
+		    m_pfoStraightLength = (endPosition - vtxPosition).Mag();
+                    m_pfoLength = recoTrack->Length();
+		}
+	    }
         }
 
         m_purity = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nPfoHits));
@@ -540,12 +813,11 @@ int PFParticleMonitoring::CountHitsByType(const int view, const HitVector &hitVe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-double PFParticleMonitoring::GetLength(const art::Ptr<simb::MCParticle> particle) const
+void PFParticleMonitoring::GetStartAndEndPoints(const art::Ptr<simb::MCParticle> particle, int &startT, int &endT) const
 {
     art::ServiceHandle<geo::Geometry> theGeometry;
 
     bool foundStartPosition(false);
-    int startT(0), endT(0);
 
     const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
 
@@ -557,6 +829,8 @@ double PFParticleMonitoring::GetLength(const art::Ptr<simb::MCParticle> particle
             unsigned int which_tpc(std::numeric_limits<unsigned int>::max());
             unsigned int which_cstat(std::numeric_limits<unsigned int>::max());
             theGeometry->PositionToTPC(pos, which_tpc, which_cstat);
+
+            // TODO: Apply fiducial cut due to readout window
 
             endT = nt;
             if (!foundStartPosition)
@@ -571,13 +845,27 @@ double PFParticleMonitoring::GetLength(const art::Ptr<simb::MCParticle> particle
     }
 
     if (!foundStartPosition)
+        throw cet::exception("LArPandora");
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+double PFParticleMonitoring::GetLength(const art::Ptr<simb::MCParticle> particle, const int startT, const int endT) const
+{
+    if (endT <= startT)
         return 0.0;
 
-    const double dx(particle->Vx(endT) - particle->Vx(startT));
-    const double dy(particle->Vy(endT) - particle->Vy(startT));
-    const double dz(particle->Vz(endT) - particle->Vz(startT));
+    double length(0.0);
 
-    return std::sqrt(dx * dx + dy * dy + dz * dz);
+    for (int nt = startT; nt < endT; ++nt)
+    {
+        const double dx(particle->Vx(nt+1) - particle->Vx(nt));
+        const double dy(particle->Vy(nt+1) - particle->Vy(nt));
+        const double dz(particle->Vz(nt+1) - particle->Vz(nt));
+        length += sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    return length;
 }
 
 } //namespace lar_pandora

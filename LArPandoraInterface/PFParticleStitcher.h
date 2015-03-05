@@ -12,7 +12,10 @@
 
 // Local includes
 #include "LArPandoraCollector.h"
-#include "PFParticleSeed.h"
+
+// Pandora includes
+#include "Objects/CartesianVector.h"
+#include "Objects/TrackState.h"
 
 // ROOT includes
 #include "TTree.h"
@@ -50,7 +53,54 @@ public:
 
 protected:
 
-  /**
+    /**
+     *  @brief  PFParticleTrack class
+     */
+    class PFParticleTrack
+    {
+    public:
+
+        /**
+         *  @brief  Constructor
+         *
+         *  @param  SpacePointVector
+         */
+        PFParticleTrack(const art::Ptr<recob::Track> track);
+
+        /**
+         *  @brief  Destructor
+         */
+        ~PFParticleTrack();
+
+        /**
+         *  @brief  Return vertex position 
+         */
+        pandora::CartesianVector GetInnerPosition() const;
+
+        /**
+         *  @brief  Return vertex direction 
+         */
+        pandora::CartesianVector GetInnerDirection() const;
+
+        /**
+         *  @brief  Return end position
+         */
+        pandora::CartesianVector GetOuterPosition()  const;
+
+        /**
+         *  @brief  Return end direction
+         */
+        pandora::CartesianVector GetOuterDirection() const;
+
+    private:
+
+        pandora::CartesianVector       m_innerPosition;    ///<
+        pandora::CartesianVector       m_innerDirection;   ///<
+        pandora::CartesianVector       m_outerPosition;    ///<
+        pandora::CartesianVector       m_outerDirection;   ///<
+    };
+
+    /**
      *  @brief  ParticleAssociation class
      */
     class ParticleAssociation
@@ -105,11 +155,13 @@ protected:
     typedef std::map<const art::Ptr<recob::PFParticle>, ParticleAssociation> ParticleAssociationMap;
     typedef std::map<const art::Ptr<recob::PFParticle>, ParticleAssociationMap> ParticleAssociationMatrix;
 
-    typedef std::map< art::Ptr<recob::PFParticle>, const PFParticleSeed > PFParticleSeedMap;
+    typedef std::map< art::Ptr<recob::PFParticle>, const PFParticleTrack > PFParticleTrackMap;
     typedef std::map< art::Ptr<recob::PFParticle>, const unsigned int >   PFParticleVolumeMap;
 
     typedef std::set< art::Ptr<recob::PFParticle> >                       PFParticleList;
     typedef std::map< art::Ptr<recob::PFParticle>, PFParticleList >       PFParticleMergeMap;
+
+    typedef std::map< art::Ptr<recob::PFParticle>, std::vector<pandora::TrackState> > PFParticleTrajectoryMap;
 
     /**
      *  @brief Configure this module
@@ -128,12 +180,17 @@ protected:
      *  
      *  @param evt  the ART event
      *  @param particleMap  mapping between the old PFParticles and their particle ID codes
-     *  @param particleMerges  map of PFParticles to be merged together in the new PFParticle output
+     *  @param particleMerges  map of PFParticles to be merged together in new PFParticle output
+     *  @param particlesTrajectories  map of Trajectory Points to be merged together in new PFParticle output 
+     *  @param particlesToVertices  mapping between old PFParticles to their vertices
      *  @param particlesToClusters  mapping between old PFParticles and their clusters
      *  @param particlesToSpacePoints  mapping between old PFParticles and their space points
+     *  @param particlesToHits  mapping between old PFParticles and their hits
      */
-    void ProduceArtOutput(art::Event &evt, const PFParticleMap &particleMap, const PFParticleMergeMap &particleMerges, 
-        const PFParticlesToClusters &particlesToClusters, const PFParticlesToSpacePoints &particlesToSpacePoints);
+    void ProduceArtOutput(art::Event &evt, const PFParticleMap &particleMap, const PFParticleMergeMap &particleMerges,
+	const PFParticleTrajectoryMap &particleTrajectories, const PFParticlesToVertices &particlesToVertices,
+        const PFParticlesToClusters &particlesToClusters, const PFParticlesToSpacePoints &particlesToSpacePoints, 
+        const PFParticlesToHits &particlesToHits);
     
     /**
      *  @brief Get drift volume ID code from cryostat and TPC number
@@ -144,34 +201,40 @@ protected:
     virtual unsigned int GetVolumeID(const unsigned int cstat, const unsigned int tpc) const = 0;
 
     /**
-     *  @brief  Get drift volume ID code for a set of space points
+     *  @brief  Get drift volume ID code for a set of hts
      *  
-     *  @param spacePoints  the input vector of space points
-     *  @param spacePointsToHits  mapping between space points and 2D hits (which hold the wire ID)
+     *  @param hitVector  the input vector of hits
      */
-    unsigned int GetVolumeID(const SpacePointVector &spacePoints, const SpacePointsToHits &spacePointsToHits) const;
+    unsigned int GetVolumeID(const HitVector &hitVector) const;
+
+    /**
+     *  @brief  Get drift volume center for a set of hits
+     *  
+     *  @param hitVector  the input vector of hits
+     */
+    TVector3 GetVolumeCenter(const HitVector &hitVector) const;
 
     /**
      *  @brief Match PFParticles and populate the matrix of particle associations
      *  
      *  @param particleVector  the input vector of PFParticles 
      *  @param particleVolumeMap  mapping between PFParticles and their drift volume ID codes
-     *  @param particleSeedMap  mapping betwen PFParticles and their particle seed objects
+     *  @param particleTrackMap  mapping betwen PFParticles and their particle track objects
      *  @param associationMatrix  matrix of associations between pairs of PFParticles
      */
     void CreateParticleMatches(const PFParticleVector &particleVector, const PFParticleVolumeMap &particleVolumeMap,
-        const PFParticleSeedMap &particleSeedMap, ParticleAssociationMatrix &associationMatrix) const;
+        const PFParticleTrackMap &particleTrackMap, ParticleAssociationMatrix &associationMatrix) const;
 
     /**
      *  @brief Match PFParticles and populate the matrix of particle associations
      *  
      *  @param particle1  the first PFParticle
      *  @param particle2  the second PFParticle
-     *  @param particleSeedMap  the mapping between PFParticles and their particle seed objects
+     *  @param particleTrackMap  the mapping between PFParticles and their particle track objects
      *  @param particleAssociationMatrix  matrix of associations between pairs of PFParticles
      */
     void CreateParticleMatches(const art::Ptr<recob::PFParticle> particle1, const art::Ptr<recob::PFParticle> particle2,
-        const PFParticleSeedMap &particleSeedMap, ParticleAssociationMatrix &particleAssociationMatrix) const;
+        const PFParticleTrackMap &particleTrackMap, ParticleAssociationMatrix &particleAssociationMatrix) const;
 
     /**
      *  @brief Select PFParticle associations that will become merges
@@ -187,9 +250,9 @@ protected:
      *  @brief Write the selected particles matches to a ROOT file
      *
      *  @param particleMergeMap  mapping between matched particles
-     *  @param particleSeedMap  mapping between particles and particle seeds
+     *  @param particleTrackMap  mapping between particles and particle tracks
      */
-    void WriteParticleMatches(const PFParticleMergeMap &particleMergeMap, const PFParticleSeedMap &particleSeedMap);
+    void WriteParticleMatches(const PFParticleMergeMap &particleMergeMap, const PFParticleTrackMap &particleTrackMap);
 
     /**
      *  @brief Collate the PFParticle merges
@@ -201,27 +264,37 @@ protected:
     void SelectParticleMerges(const PFParticleVector &particleVector, const PFParticleMergeMap &inputMergeMap,
         PFParticleMergeMap &outputMergeMap) const;
 
+    /*
+     *  @brief Order the PFParticle merges
+     *
+     *  @param particleMerges  the collated map of PFParticle merges
+     *  @param particlesToTracks  the mapping between PFParticles and their tracks
+     *  @param particlesToHits  the mapping between PFParticles and their hits
+     */
+    void OrderParticleMerges(const PFParticleMergeMap &particleMerges, const PFParticlesToTracks &particlesToTracks, 
+        const PFParticlesToHits &particlesToHits, PFParticleTrajectoryMap &particleTrajectories) const;
+
     /**
      *  @brief Collect connected sets of PFParticle merges from a map of associations
      *
-     *  @param seedParticle  the first PFParticle in the set
+     *  @param trackParticle  the first PFParticle in the set
      *  @param currentParticle  the current PFParticle in the set
      *  @param particleMergeMap  the input map of PFParticle associations
      *  @param vetoList  the list of PFParticles already collected
      *  @param associatedParticleList  the running list of PFParticles associated to the first PFParticle via the association map
      */
-    void CollectAssociatedParticles(art::Ptr<recob::PFParticle> seedParticle, art::Ptr<recob::PFParticle> currentParticle, 
+    void CollectAssociatedParticles(art::Ptr<recob::PFParticle> trackParticle, art::Ptr<recob::PFParticle> currentParticle, 
         const PFParticleMergeMap &particleMergeMap, const PFParticleList &vetoList, PFParticleList &associatedParticleList) const;
 
     /**
-     *  @brief Get closest pair of vertices for two seed particles
+     *  @brief Get closest pair of vertices for two track particles
      *
-     *  @param seed1  the first seed particle
-     *  @param seed2  the second seed particle
-     *  @param vertexType1  the closest vertex from the first seed particle
-     *  @param vertexType2  the closest vertex from the second seed particle
+     *  @param track1  the first track particle
+     *  @param track2  the second track particle
+     *  @param vertexType1  the closest vertex from the first track particle
+     *  @param vertexType2  the closest vertex from the second track particle
      */
-    void GetClosestVertices(const PFParticleSeed& seed1, const PFParticleSeed &seed2, 
+    void GetClosestVertices(const PFParticleTrack& track1, const PFParticleTrack &track2, 
         ParticleAssociation::VertexType &vertexType1, ParticleAssociation::VertexType &vertexType2) const; 
 
     /**
@@ -274,7 +347,9 @@ protected:
 
     bool          m_enableMonitoring;                 ///<
     std::string   m_particleLabel;                    ///<
+    std::string   m_trackLabel;                       ///<
 
+    bool          m_enableStitching;                  ///<
     bool          m_useXcoordinate;                   ///<
     float         m_minCosRelativeAngle;              ///<
     float         m_maxLongitudinalDisplacementX;     ///<

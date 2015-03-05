@@ -54,12 +54,14 @@ LArPandoraParticleCreator::LArPandoraParticleCreator(fhicl::ParameterSet const &
     {
         produces< std::vector<recob::Track> >(); 
         produces< art::Assns<recob::PFParticle, recob::Track> >();
+        produces< art::Assns<recob::Track, recob::Hit> >();
     }
 
     if (m_buildShowers)
     {
         produces< std::vector<recob::Shower> >(); 
         produces< art::Assns<recob::PFParticle, recob::Shower> >();
+        produces< art::Assns<recob::Shower, recob::Hit> >();
     }
 }
 
@@ -234,6 +236,8 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> >      outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Shower> >     outputParticlesToShowers( new art::Assns<recob::PFParticle, recob::Shower> );
+    std::unique_ptr< art::Assns<recob::Track, recob::Hit> >             outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::Shower, recob::Hit> >            outputShowersToHits( new art::Assns<recob::Shower, recob::Hit> );
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
 
@@ -402,7 +406,8 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
         // Build 2D Clusters   
         pandora::ClusterVector pandoraClusterVector(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
         std::sort(pandoraClusterVector.begin(), pandoraClusterVector.end(), lar_content::LArClusterHelper::SortByNHits);
- 
+        HitVector pfoHits; // select all hits from this Pfo
+
         for (pandora::ClusterVector::const_iterator cIter = pandoraClusterVector.begin(), cIterEnd = pandoraClusterVector.end(); cIter != cIterEnd; ++cIter)
         {
             const pandora::Cluster *const pCluster = *cIter;
@@ -416,8 +421,8 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             pandora::CaloHitVector pandoraHitVector2D(pandoraHitList2D.begin(), pandoraHitList2D.end());
             std::sort(pandoraHitVector2D.begin(), pandoraHitVector2D.end(), lar_content::LArClusterHelper::SortByPosition);
 
-            HitList  hitList;
-            HitArray hitArray;
+            HitArray  hitArray;      // sort hits by drift volume
+            HitList   isolatedHits;  // select isolated hits
 
             for (pandora::CaloHitVector::const_iterator hIter = pandoraHitVector2D.begin(), hIterEnd = pandoraHitVector2D.end(); hIter != hIterEnd; ++hIter)
             {
@@ -438,8 +443,9 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
 
                 hitArray[volID].push_back(hit);
 
+                pfoHits.push_back(hit);
                 if (pCaloHit->IsIsolated())
-                    hitList.insert(hit);
+                    isolatedHits.insert(hit);
             }
 
             if (hitArray.empty())
@@ -447,16 +453,16 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
 
             for (HitArray::const_iterator hIter = hitArray.begin(), hIterEnd = hitArray.end(); hIter != hIterEnd; ++hIter)
             {
-                const HitVector hitVector(hIter->second);
+                const HitVector clusterHits(hIter->second);
                 outputClusters->emplace_back(
-                  LArPandoraHelper::BuildCluster(clusterCounter++, hitVector, hitList, ClusterParamAlgo)
-                  ); 
+                    LArPandoraHelper::BuildCluster(clusterCounter++, clusterHits, isolatedHits, ClusterParamAlgo)
+                ); 
 
-                util::CreateAssn(*this, evt, *(outputClusters.get()), hitVector, *(outputClustersToHits.get()));
+                util::CreateAssn(*this, evt, *(outputClusters.get()), clusterHits, *(outputClustersToHits.get()));
                 util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),
                     outputClusters->size() - 1, outputClusters->size());
             }
-        }  
+        }
 
         // Associate Vertex and Build Seeds (and Tracks)
         if (!pPfo->GetVertexList().empty())
@@ -498,6 +504,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                         recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, pPfo)); 
                         outputTracks->push_back(newTrack);
 
+                        util::CreateAssn(*this, evt, *(outputTracks.get()), pfoHits, *(outputTracksToHits.get()));
                         util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
                             outputTracks->size() - 1, outputTracks->size());
                     }
@@ -531,25 +538,26 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
     evt.put(std::move(outputSeeds));
     evt.put(std::move(outputVertices));
 
-    if (m_buildTracks)
-        evt.put(std::move(outputTracks));
-
-    if (m_buildShowers)
-        evt.put(std::move(outputShowers));
-
     evt.put(std::move(outputParticlesToSpacePoints));
     evt.put(std::move(outputParticlesToClusters));
     evt.put(std::move(outputParticlesToSeeds));
     evt.put(std::move(outputParticlesToVertices));
-
-    if (m_buildTracks)
-        evt.put(std::move(outputParticlesToTracks));
-
-    if (m_buildShowers)
-        evt.put(std::move(outputParticlesToShowers));
-
     evt.put(std::move(outputSpacePointsToHits));
     evt.put(std::move(outputClustersToHits));
+
+    if (m_buildTracks)
+    {
+        evt.put(std::move(outputTracks));
+        evt.put(std::move(outputParticlesToTracks));
+        evt.put(std::move(outputTracksToHits));
+    }
+
+    if (m_buildShowers)
+    {
+        evt.put(std::move(outputShowers));
+        evt.put(std::move(outputParticlesToShowers));
+        evt.put(std::move(outputShowersToHits));
+    }
 }
 
 } // namespace lar_pandora

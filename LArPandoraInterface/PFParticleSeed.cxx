@@ -4,120 +4,6 @@
 
 namespace lar_pandora {
 
-PFParticleTrajectoryPoint::PFParticleTrajectoryPoint(const pandora::CartesianVector &position, const pandora::CartesianVector &direction,
-    const float displacement) :
-    m_position(position), m_direction(direction), m_displacement(displacement)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-PFParticleSeed::PFParticleSeed(const SpacePointVector &spacepoints) : 
-    m_isInitialized(false), 
-    m_innerPosition(0.f, 0.f, 0.f),
-    m_innerDirection(0.f, 0.f, 0.f),
-    m_outerPosition(0.f, 0.f, 0.f),
-    m_outerDirection(0.f, 0.f, 0.f)
-{
-    pandora::CartesianPointList pointList;
-    PFParticleFitter::BuildPointList(spacepoints, pointList);
-    this->Initialize(pointList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-PFParticleSeed::PFParticleSeed(const pandora::CartesianPointList &pointList) : 
-    m_isInitialized(false), 
-    m_innerPosition(0.f, 0.f, 0.f),
-    m_innerDirection(0.f, 0.f, 0.f),
-    m_outerPosition(0.f, 0.f, 0.f),
-    m_outerDirection(0.f, 0.f, 0.f)
-{
-    this->Initialize(pointList);
-}
-   
-//------------------------------------------------------------------------------------------------------------------------------------------ 
-
-void PFParticleSeed::Initialize(const pandora::CartesianPointList &pointList)
-{
-    try
-    {
-        PFParticleFitter::GetExtremalCoordinates(pointList, m_innerPosition, m_outerPosition);
-
-        pandora::CartesianVector axisDirection((m_outerPosition - m_innerPosition).GetUnitVector());
-        pandora::CartesianVector innerDirection(0.f, 0.f, 0.f);
-        pandora::CartesianVector outerDirection(0.f, 0.f, 0.f);
-
-        PFParticleFitter::FitPoints(pointList, m_innerPosition, axisDirection, innerDirection);
-        PFParticleFitter::FitPoints(pointList, m_outerPosition, axisDirection, outerDirection);
-
-        m_innerDirection = (innerDirection.GetDotProduct(axisDirection) > 0.f ? innerDirection : innerDirection * -1.f);
-        m_outerDirection = (outerDirection.GetDotProduct(axisDirection) < 0.f ? outerDirection : outerDirection * -1.f);
-        m_isInitialized = true;
-    }
-    catch (pandora::StatusCodeException& )
-    {  
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-PFParticleSeed::~PFParticleSeed()
-{
-
-}
-  
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool PFParticleSeed::IsInitialized() const
-{
-    return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-    
-pandora::CartesianVector PFParticleSeed::GetInnerPosition() const 
-{ 
-    if (m_isInitialized)
-        return m_innerPosition;  
-
-    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::CartesianVector PFParticleSeed::GetInnerDirection() const 
-{ 
-    if (m_isInitialized)
-        return m_innerDirection; 
-
-    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::CartesianVector PFParticleSeed::GetOuterPosition() const 
-{ 
-    if (m_isInitialized)
-        return m_outerPosition;  
-
-    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::CartesianVector PFParticleSeed::GetOuterDirection() const 
-{ 
-    if (m_isInitialized)
-        return m_outerDirection; 
-
-    throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void PFParticleFitter::BuildPointList(const SpacePointVector &spacepoints, pandora::CartesianPointList &pointList)
 {
     for (SpacePointVector::const_iterator iter = spacepoints.begin(), iterEnd = spacepoints.end(); iter != iterEnd; ++iter)
@@ -125,38 +11,6 @@ void PFParticleFitter::BuildPointList(const SpacePointVector &spacepoints, pando
         const art::Ptr<recob::SpacePoint> point = *iter; 
         pointList.push_back(pandora::CartesianVector(point->XYZ()[0], point->XYZ()[1], point->XYZ()[2]));
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PFParticleFitter::BuildTrajectoryPointList(const SpacePointVector &spacepoints, PFParticleTrajectoryPointList &trajectoryPointList,
-    const bool isCosmic)
-{
-    pandora::CartesianPointList pointList;
-    PFParticleFitter::BuildPointList(spacepoints, pointList);
-
-    if (pointList.size() > 1) // need at least two points for a trajectory
-    {
-        pandora::CartesianVector innerPosition(0.f, 0.f, 0.f);
-        pandora::CartesianVector outerPosition(0.f, 0.f, 0.f);
-        PFParticleFitter::GetExtremalCoordinates(pointList, innerPosition, outerPosition);
-
-        const bool switchEnds(isCosmic && (outerPosition.GetY() > innerPosition.GetY()));
-        const pandora::CartesianVector vtxPosition(switchEnds ? outerPosition : innerPosition);
-        const pandora::CartesianVector endPosition(switchEnds ? innerPosition : outerPosition);
-        const pandora::CartesianVector vtxDirection((endPosition - vtxPosition).GetUnitVector());
-
-        // TODO: Fit the points here
-
-        for (pandora::CartesianPointList::const_iterator iter = pointList.begin(), iterEnd = pointList.end(); iter != iterEnd; ++iter)
-        {
-            const pandora::CartesianVector &thisPosition = *iter;
-            const float thisDisplacement(vtxDirection.GetDotProduct(thisPosition - vtxPosition));
-            trajectoryPointList.push_back(PFParticleTrajectoryPoint(thisPosition, vtxDirection, thisDisplacement));
-        }
-    }
-
-    std::sort(trajectoryPointList.begin(), trajectoryPointList.end());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -238,23 +92,17 @@ void PFParticleFitter::GetExtremalCoordinates(const pandora::CartesianPointList 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleFitter::FitPoints(const pandora::CartesianPointList &pointList, const pandora::CartesianVector &vertexPosition,
-    const pandora::CartesianVector &vertexDirection, pandora::CartesianVector &fittedDirection)
+void PFParticleFitter::FitPoints(const pandora::CartesianPointList &pointList, const pandora::CartesianVector &axisDirection, 
+    pandora::CartesianVector &fittedDirection)
 {
     static const float m_cellSize(0.5f);
-    static const float m_maxDisplacement(10.f);
 
     pandora::ClusterFitPointList fitPointList;
 
     for (pandora::CartesianPointList::const_iterator iter = pointList.begin(), iterEnd = pointList.end(); iter != iterEnd; ++iter)
     {
         const pandora::CartesianVector &thisPosition = *iter;
-        const float thisDisplacement(vertexDirection.GetDotProduct(thisPosition - vertexPosition));
-
-        if (thisDisplacement > m_maxDisplacement)
-            continue;
-
-        fitPointList.push_back(pandora::ClusterFitPoint(thisPosition, vertexDirection, m_cellSize, 1.f, 0));
+        fitPointList.push_back(pandora::ClusterFitPoint(thisPosition, axisDirection, m_cellSize, 1.f, 0));
     }
          
     pandora::ClusterFitResult fitResult;   
@@ -264,6 +112,60 @@ void PFParticleFitter::FitPoints(const pandora::CartesianPointList &pointList, c
         throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
 
     fittedDirection = fitResult.GetDirection();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleFitter::GetLinearTrajectory(const SpacePointVector &spacepoints, std::vector<pandora::TrackState> &trajectoryPoints,
+    const bool isCosmic)
+{
+    try
+    {
+        // Need at least two points for a linear fit 
+        if (spacepoints.size() < 2)
+            throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
+
+        // Convert space points into cartesian vector points
+        pandora::CartesianPointList pointList;
+        PFParticleFitter::BuildPointList(spacepoints, pointList);
+
+        // Find inner and outer positions
+        pandora::CartesianVector innerPosition(0.f, 0.f, 0.f);
+        pandora::CartesianVector outerPosition(0.f, 0.f, 0.f);
+        PFParticleFitter::GetExtremalCoordinates(pointList, innerPosition, outerPosition);
+        
+        // Choose vertex direction
+        const bool switchEnds(isCosmic && (outerPosition.GetY() > innerPosition.GetY()));
+        const pandora::CartesianVector vtxPosition(switchEnds ? outerPosition : innerPosition);
+
+        // Perform linear regression and choose vertex direction
+        const pandora::CartesianVector seedDirection((outerPosition - innerPosition).GetUnitVector());
+        pandora::CartesianVector axisDirection(0.f, 0.f, 0.f);        
+        PFParticleFitter::FitPoints(pointList, seedDirection, axisDirection);
+
+        const float firstCorrection((seedDirection.GetDotProduct(axisDirection) < 0.f) ? -1.f : +1.f);
+        const float secondCorrection(switchEnds ? -1.f : +1.f);
+        const pandora::CartesianVector vtxDirection(axisDirection * firstCorrection * secondCorrection);
+
+        // Create ordered trajectory list
+        typedef std::map< const float, const pandora::TrackState > ThreeDTrajectoryMap;
+        ThreeDTrajectoryMap trajectoryMap;
+
+        for (pandora::CartesianPointList::const_iterator iter = pointList.begin(), iterEnd = pointList.end(); iter != iterEnd; ++iter)
+        {
+            const pandora::CartesianVector &thisPosition = *iter;
+            const float displacement(vtxDirection.GetDotProduct(thisPosition - vtxPosition));    
+            trajectoryMap.insert(std::pair<const float, const pandora::TrackState>(displacement, pandora::TrackState(thisPosition, vtxDirection)));
+	}
+     
+        for (ThreeDTrajectoryMap::const_iterator tIter = trajectoryMap.begin(), tIterEnd = trajectoryMap.end(); tIter != tIterEnd; ++tIter)
+	{
+            trajectoryPoints.push_back(tIter->second);
+	}
+    }
+    catch (pandora::StatusCodeException& )
+    {  
+    }
 }
 
 } // namespace lar_pandora
