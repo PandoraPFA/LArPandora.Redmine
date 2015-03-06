@@ -8,7 +8,7 @@
 #ifndef TRANSVERSE_TRACK_HITS_BASE_TOOL_H
 #define TRANSVERSE_TRACK_HITS_BASE_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/TrackHitsBaseTool.h"
+#include "LArThreeDReco/LArHitCreation/TrackHitsBaseTool.h"
 
 namespace lar_content
 {

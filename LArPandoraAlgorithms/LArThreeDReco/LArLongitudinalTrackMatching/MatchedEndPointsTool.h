@@ -8,7 +8,7 @@
 #ifndef MATCHED_END_POINTS_TOOL_H
 #define MATCHED_END_POINTS_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArLongitudinalTrackMatching/ThreeDLongitudinalTracksAlgorithm.h"
+#include "LArThreeDReco/LArLongitudinalTrackMatching/ThreeDLongitudinalTracksAlgorithm.h"
 
 namespace lar_content
 {

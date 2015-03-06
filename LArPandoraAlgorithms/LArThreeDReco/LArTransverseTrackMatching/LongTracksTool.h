@@ -8,7 +8,7 @@
 #ifndef LONG_TRACKS_TOOL_H
 #define LONG_TRACKS_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
+#include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
 namespace lar_content
 {

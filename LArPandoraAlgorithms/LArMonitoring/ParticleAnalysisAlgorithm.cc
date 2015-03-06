@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArPfoHelper.h"
+#include "LArHelpers/LArPfoHelper.h"
 
 #include "LArMonitoring/ParticleAnalysisAlgorithm.h"
 

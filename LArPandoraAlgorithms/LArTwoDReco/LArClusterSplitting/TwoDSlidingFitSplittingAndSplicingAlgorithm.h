@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
 namespace lar_content
 {

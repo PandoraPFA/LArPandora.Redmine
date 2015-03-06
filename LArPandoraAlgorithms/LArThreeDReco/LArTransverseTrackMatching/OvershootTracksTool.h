@@ -8,7 +8,7 @@
 #ifndef OVERSHOOT_TRACKS_TOOL_H
 #define OVERSHOOT_TRACKS_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/ThreeDKinkBaseTool.h"
+#include "LArThreeDReco/LArTransverseTrackMatching/ThreeDKinkBaseTool.h"
 
 namespace lar_content
 {

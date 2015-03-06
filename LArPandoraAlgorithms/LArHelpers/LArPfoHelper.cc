@@ -6,10 +6,10 @@
  *  $Log: $
  */
 
-#include "LArPandoraAlgorithms/LArHelpers/LArPfoHelper.h"
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArPfoHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArThreeDSlidingFitResult.h"
+#include "LArObjects/LArThreeDSlidingFitResult.h"
 
 #include <algorithm>
 #include <cmath>

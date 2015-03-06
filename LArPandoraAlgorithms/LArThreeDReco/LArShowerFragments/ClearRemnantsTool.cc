@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArShowerFragments/ClearRemnantsTool.h"
+#include "LArThreeDReco/LArShowerFragments/ClearRemnantsTool.h"
 
 using namespace pandora;
 

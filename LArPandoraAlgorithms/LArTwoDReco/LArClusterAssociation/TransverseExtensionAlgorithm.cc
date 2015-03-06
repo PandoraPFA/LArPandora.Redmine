@@ -8,10 +8,10 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
-#include "LArPandoraAlgorithms/LArHelpers/LArPointingClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArPointingClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/TransverseExtensionAlgorithm.h"
+#include "LArTwoDReco/LArClusterAssociation/TransverseExtensionAlgorithm.h"
 
 using namespace pandora;
 

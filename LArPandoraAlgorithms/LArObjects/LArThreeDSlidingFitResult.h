@@ -10,7 +10,7 @@
 
 #include "Api/PandoraApi.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingFitResult.h"
+#include "LArObjects/LArTwoDSlidingFitResult.h"
 
 namespace lar_content
 {

@@ -8,9 +8,9 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArEventBuilding/NeutrinoEventCreationAlgorithm.h"
+#include "LArThreeDReco/LArEventBuilding/NeutrinoEventCreationAlgorithm.h"
 
 using namespace pandora;
 

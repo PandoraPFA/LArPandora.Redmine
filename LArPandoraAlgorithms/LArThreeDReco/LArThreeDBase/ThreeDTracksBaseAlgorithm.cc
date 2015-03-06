@@ -8,13 +8,13 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
-#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
-#include "LArPandoraAlgorithms/LArObjects/LArTrackOverlapResult.h"
+#include "LArObjects/LArPointingCluster.h"
+#include "LArObjects/LArTrackOverlapResult.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArThreeDBase/ThreeDTracksBaseAlgorithm.h"
+#include "LArThreeDReco/LArThreeDBase/ThreeDTracksBaseAlgorithm.h"
 
 using namespace pandora;
 

@@ -8,10 +8,10 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
-#include "LArPandoraAlgorithms/LArHelpers/LArPointingClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArPointingClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArTwoDReco/LArCosmicRay/CosmicRayExtensionAlgorithm.h"
+#include "LArTwoDReco/LArCosmicRay/CosmicRayExtensionAlgorithm.h"
 
 using namespace pandora;
 

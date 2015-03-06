@@ -12,7 +12,7 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArOverlapTensor.h"
+#include "LArObjects/LArOverlapTensor.h"
 
 namespace lar_content
 {

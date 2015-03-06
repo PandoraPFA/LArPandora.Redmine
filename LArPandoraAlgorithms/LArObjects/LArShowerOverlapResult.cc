@@ -10,7 +10,7 @@
 
 #include "Pandora/PandoraInternal.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArShowerOverlapResult.h"
+#include "LArObjects/LArShowerOverlapResult.h"
 
 using namespace pandora;
 

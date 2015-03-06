@@ -8,9 +8,9 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/LongitudinalAssociationAlgorithm.h"
+#include "LArTwoDReco/LArClusterAssociation/LongitudinalAssociationAlgorithm.h"
 
 using namespace pandora;
 

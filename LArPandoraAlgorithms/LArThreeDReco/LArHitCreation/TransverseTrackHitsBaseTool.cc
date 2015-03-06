@@ -8,10 +8,10 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/ThreeDHitCreationAlgorithm.h"
-#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/TransverseTrackHitsBaseTool.h"
+#include "LArThreeDReco/LArHitCreation/ThreeDHitCreationAlgorithm.h"
+#include "LArThreeDReco/LArHitCreation/TransverseTrackHitsBaseTool.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
 
 using namespace pandora;
 

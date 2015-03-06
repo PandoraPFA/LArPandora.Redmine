@@ -8,13 +8,13 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArOverlapTensor.h"
-#include "LArPandoraAlgorithms/LArObjects/LArShowerOverlapResult.h"
-#include "LArPandoraAlgorithms/LArObjects/LArTrackOverlapResult.h"
+#include "LArObjects/LArOverlapTensor.h"
+#include "LArObjects/LArShowerOverlapResult.h"
+#include "LArObjects/LArTrackOverlapResult.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArThreeDBase/ThreeDBaseAlgorithm.h"
+#include "LArThreeDReco/LArThreeDBase/ThreeDBaseAlgorithm.h"
 
 using namespace pandora;
 

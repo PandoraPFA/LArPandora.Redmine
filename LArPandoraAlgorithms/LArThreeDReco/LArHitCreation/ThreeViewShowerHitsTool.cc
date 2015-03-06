@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/ThreeViewShowerHitsTool.h"
+#include "LArThreeDReco/LArHitCreation/ThreeViewShowerHitsTool.h"
 
 using namespace pandora;
 

@@ -8,10 +8,10 @@
 
 #include "Managers/PluginManager.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
+#include "LArHelpers/LArGeometryHelper.h"
 
-#include "LArPandoraAlgorithms/LArPlugins/LArPseudoLayerPlugin.h"
-#include "LArPandoraAlgorithms/LArPlugins/LArTransformationPlugin.h"
+#include "LArPlugins/LArPseudoLayerPlugin.h"
+#include "LArPlugins/LArTransformationPlugin.h"
 
 using namespace pandora;
 

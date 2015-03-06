@@ -10,7 +10,7 @@
 
 #include "Objects/Cluster.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
+#include "LArObjects/LArPointingCluster.h"
 
 namespace lar_content
 {

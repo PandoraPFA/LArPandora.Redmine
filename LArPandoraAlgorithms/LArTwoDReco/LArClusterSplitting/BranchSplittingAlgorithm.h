@@ -8,7 +8,7 @@
 #ifndef LAR_BRANCH_SPLITTING_ALGORITHM_H
 #define LAR_BRANCH_SPLITTING_ALGORITHM_H 1
 
-#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAndSplicingAlgorithm.h"
+#include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAndSplicingAlgorithm.h"
 
 namespace lar_content
 {

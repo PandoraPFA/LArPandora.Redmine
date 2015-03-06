@@ -10,10 +10,10 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArPandoraAlgorithms/LArObjects/LArShowerOverlapResult.h"
-#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingShowerFitResult.h"
+#include "LArObjects/LArShowerOverlapResult.h"
+#include "LArObjects/LArTwoDSlidingShowerFitResult.h"
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArThreeDBase/ThreeDBaseAlgorithm.h"
+#include "LArThreeDReco/LArThreeDBase/ThreeDBaseAlgorithm.h"
 
 namespace lar_content
 {

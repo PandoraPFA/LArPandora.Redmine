@@ -8,7 +8,7 @@
 #ifndef UNDERSHOOT_TRACKS_TOOL_H
 #define UNDERSHOOT_TRACKS_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/ThreeDKinkBaseTool.h"
+#include "LArThreeDReco/LArTransverseTrackMatching/ThreeDKinkBaseTool.h"
 
 namespace lar_content
 {

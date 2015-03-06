@@ -10,7 +10,7 @@
 
 #include "LArCheating/CheatingPfoCreationAlgorithm.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
 using namespace pandora;
 

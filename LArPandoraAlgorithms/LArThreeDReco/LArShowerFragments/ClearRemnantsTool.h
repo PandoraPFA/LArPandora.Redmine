@@ -8,7 +8,7 @@
 #ifndef CLEAR_REMNANTS_TOOL_H
 #define CLEAR_REMNANTS_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArShowerFragments/ThreeDRemnantsAlgorithm.h"
+#include "LArThreeDReco/LArShowerFragments/ThreeDRemnantsAlgorithm.h"
 
 namespace lar_content
 {

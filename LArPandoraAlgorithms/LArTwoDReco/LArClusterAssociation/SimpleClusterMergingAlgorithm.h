@@ -10,7 +10,7 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/ClusterMergingAlgorithm.h"
+#include "LArTwoDReco/LArClusterAssociation/ClusterMergingAlgorithm.h"
 
 namespace lar_content
 {

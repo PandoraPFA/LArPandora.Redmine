@@ -8,9 +8,9 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
 
-#include "LArPandoraAlgorithms/LArTwoDReco/LArSeedFinding/SeedGrowingAlgorithm.h"
+#include "LArTwoDReco/LArSeedFinding/SeedGrowingAlgorithm.h"
 
 using namespace pandora;
 

@@ -8,7 +8,7 @@
 #ifndef CLEAR_LONGITUDINAL_TRACK_HITS_TOOL_H
 #define CLEAR_LONGITUDINAL_TRACK_HITS_TOOL_H 1
 
-#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/LongitudinalTrackHitsBaseTool.h"
+#include "LArThreeDReco/LArHitCreation/LongitudinalTrackHitsBaseTool.h"
 
 namespace lar_content
 {

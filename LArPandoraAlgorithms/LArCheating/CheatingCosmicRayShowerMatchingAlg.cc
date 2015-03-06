@@ -8,9 +8,9 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
-#include "LArPandoraAlgorithms/LArHelpers/LArMCParticleHelper.h"
-#include "LArPandoraAlgorithms/LArHelpers/LArPfoHelper.h"
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArMCParticleHelper.h"
+#include "LArHelpers/LArPfoHelper.h"
 
 #include "LArCheating/CheatingCosmicRayShowerMatchingAlg.h"
 
