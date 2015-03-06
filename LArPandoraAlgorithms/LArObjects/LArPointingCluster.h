@@ -8,8 +8,8 @@
 #ifndef LAR_POINTING_CLUSTER_H
 #define LAR_POINTING_CLUSTER_H 1
 
-#include "LArObjects/LArTwoDSlidingFitResult.h"
-#include "LArObjects/LArThreeDSlidingFitResult.h"
+#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingFitResult.h"
+#include "LArPandoraAlgorithms/LArObjects/LArThreeDSlidingFitResult.h"
 
 namespace lar_content
 {

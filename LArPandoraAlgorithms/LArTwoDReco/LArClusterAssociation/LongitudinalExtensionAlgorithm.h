@@ -8,9 +8,9 @@
 #ifndef LAR_LONGITUDINAL_EXTENSION_ALGORITHM_H
 #define LAR_LONGITUDINAL_EXTENSION_ALGORITHM_H 1
 
-#include "LArObjects/LArPointingCluster.h"
+#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
 
-#include "LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
 
 namespace lar_content
 {

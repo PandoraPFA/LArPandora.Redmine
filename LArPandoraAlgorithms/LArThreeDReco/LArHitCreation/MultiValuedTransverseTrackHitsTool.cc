@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArThreeDReco/LArHitCreation/MultiValuedTransverseTrackHitsTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/MultiValuedTransverseTrackHitsTool.h"
 
 using namespace pandora;
 

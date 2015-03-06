@@ -8,10 +8,10 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArGeometryHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
 
-#include "LArThreeDReco/LArTrackFragments/ThreeDTrackFragmentsAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArTrackFragments/ThreeDTrackFragmentsAlgorithm.h"
 
 using namespace pandora;
 

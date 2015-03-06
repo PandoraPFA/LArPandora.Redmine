@@ -11,7 +11,7 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/StatusCodes.h"
 
-#include "LArObjects/LArXOverlap.h"
+#include "LArPandoraAlgorithms/LArObjects/LArXOverlap.h"
 
 #include <cmath>
 #include <vector>

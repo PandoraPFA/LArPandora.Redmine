@@ -6,8 +6,8 @@
  *  $Log: $
  */
 
-#include "LArObjects/LArPointingCluster.h"
-#include "LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
 
 using namespace pandora;
 

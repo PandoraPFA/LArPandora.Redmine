@@ -8,14 +8,14 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArGeometryHelper.h"
-#include "LArHelpers/LArPointingClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArPointingClusterHelper.h"
 
-#include "LArObjects/LArPointingCluster.h"
+#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
 
-#include "LArThreeDReco/LArTransverseTrackMatching/LongTracksTool.h"
-#include "LArThreeDReco/LArTransverseTrackMatching/MissingTrackSegmentTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/LongTracksTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/MissingTrackSegmentTool.h"
 
 using namespace pandora;
 

@@ -7,7 +7,7 @@
  */
 
 #include "Pandora/AlgorithmHeaders.h"
-#include "LArThreeDReco/LArTransverseTrackMatching/ClearTracksTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/ClearTracksTool.h"
 
 using namespace pandora;
 

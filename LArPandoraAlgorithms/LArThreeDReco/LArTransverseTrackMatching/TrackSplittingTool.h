@@ -8,7 +8,7 @@
 #ifndef TRACK_SPLITTING_TOOL_H
 #define TRACK_SPLITTING_TOOL_H 1
 
-#include "LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArTransverseTrackMatching/ThreeDTransverseTracksAlgorithm.h"
 
 namespace lar_content
 {

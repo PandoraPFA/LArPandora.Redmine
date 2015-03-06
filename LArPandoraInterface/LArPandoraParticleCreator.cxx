@@ -19,8 +19,8 @@
 
 // Local includes (LArPandoraAlgorithms)
 #include "LArContent.h"
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArPfoHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArPfoHelper.h"
 
 // Local includes (LArPandoraInterface)
 #include "LArPandoraParticleCreator.h"

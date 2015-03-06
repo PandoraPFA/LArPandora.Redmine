@@ -8,9 +8,9 @@
 #ifndef TRACK_HITS_BASE_TOOL_H
 #define TRACK_HITS_BASE_TOOL_H 1
 
-#include "LArObjects/LArTwoDSlidingFitResult.h"
+#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingFitResult.h"
 
-#include "LArThreeDReco/LArHitCreation/HitCreationBaseTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/HitCreationBaseTool.h"
 
 namespace lar_content
 {

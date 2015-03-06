@@ -8,7 +8,7 @@
 #ifndef LAR_VERTEX_SPLITTING_ALGORITHM_H
 #define LAR_VERTEX_SPLITTING_ALGORITHM_H 1
 
-#include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterSplitting/TwoDSlidingFitSplittingAlgorithm.h"
 
 #include "Pandora/Algorithm.h"
 

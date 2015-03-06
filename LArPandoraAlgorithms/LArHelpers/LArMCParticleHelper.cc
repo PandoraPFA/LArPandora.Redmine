@@ -10,7 +10,7 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 
-#include "LArHelpers/LArMCParticleHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArMCParticleHelper.h"
 
 #include <cstdlib>
 

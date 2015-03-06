@@ -8,7 +8,7 @@
 #ifndef LAR_CLUSTER_EXTENSION_ALGORITHM_H
 #define LAR_CLUSTER_EXTENSION_ALGORITHM_H 1
 
-#include "LArTwoDReco/LArClusterAssociation/ClusterMergingAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/ClusterMergingAlgorithm.h"
 
 namespace lar_content
 {

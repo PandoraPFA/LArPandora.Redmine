@@ -10,9 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArObjects/LArTwoDSlidingShowerFitResult.h"
+#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingShowerFitResult.h"
 
-#include "LArTwoDReco/LArClusterMopUp/ClusterMopUpAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterMopUp/ClusterMopUpAlgorithm.h"
 
 namespace lar_content
 {

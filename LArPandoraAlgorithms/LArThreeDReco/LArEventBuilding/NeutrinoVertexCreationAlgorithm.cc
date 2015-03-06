@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArThreeDReco/LArEventBuilding/NeutrinoVertexCreationAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArEventBuilding/NeutrinoVertexCreationAlgorithm.h"
 
 using namespace pandora;
 

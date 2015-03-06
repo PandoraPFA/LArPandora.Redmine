@@ -10,9 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArObjects/LArPointingCluster.h"
+#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
 
-#include "LArTwoDReco/LArSeedFinding/SeedGrowingAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArSeedFinding/SeedGrowingAlgorithm.h"
 
 namespace lar_content
 {

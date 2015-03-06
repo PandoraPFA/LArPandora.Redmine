@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArTwoDReco/LArClusterCreation/SimpleClusterCreationAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterCreation/SimpleClusterCreationAlgorithm.h"
 
 using namespace pandora;
 

@@ -8,11 +8,11 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArGeometryHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
 
-#include "LArObjects/LArTwoDSlidingShowerFitResult.h"
+#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingShowerFitResult.h"
 
-#include "LArTwoDReco/LArSeedFinding/ClusterCharacterisationAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArSeedFinding/ClusterCharacterisationAlgorithm.h"
 
 using namespace pandora;
 

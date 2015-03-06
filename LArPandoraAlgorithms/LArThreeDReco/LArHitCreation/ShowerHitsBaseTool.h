@@ -8,7 +8,7 @@
 #ifndef SHOWER_HITS_BASE_TOOL_H
 #define SHOWER_HITS_BASE_TOOL_H 1
 
-#include "LArThreeDReco/LArHitCreation/HitCreationBaseTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/HitCreationBaseTool.h"
 
 namespace lar_content
 {

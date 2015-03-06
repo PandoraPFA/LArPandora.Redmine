@@ -8,9 +8,9 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArPointingClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArPointingClusterHelper.h"
 
-#include "LArTwoDReco/LArClusterSplitting/DeltaRaySplittingAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterSplitting/DeltaRaySplittingAlgorithm.h"
 
 using namespace pandora;
 

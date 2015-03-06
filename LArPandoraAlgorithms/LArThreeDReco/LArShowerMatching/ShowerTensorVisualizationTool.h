@@ -8,7 +8,7 @@
 #ifndef SHOWER_TENSOR_VISUALIZATION_TOOL_H
 #define SHOWER_TENSOR_VISUALIZATION_TOOL_H 1
 
-#include "LArThreeDReco/LArShowerMatching/ThreeDShowersAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArShowerMatching/ThreeDShowersAlgorithm.h"
 
 namespace lar_content
 {

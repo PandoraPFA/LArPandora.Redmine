@@ -8,9 +8,9 @@
 #ifndef LAR_TRACK_CONSOLIDATION_ALGORITHM_H
 #define LAR_TRACK_CONSOLIDATION_ALGORITHM_H 1
 
-#include "LArTwoDReco/LArClusterSplitting/TwoDSlidingFitConsolidationAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterSplitting/TwoDSlidingFitConsolidationAlgorithm.h"
 
-#include "LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
 
 namespace lar_content
 {

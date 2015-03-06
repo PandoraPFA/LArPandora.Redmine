@@ -10,9 +10,9 @@
 
 #include "Pandora/Algorithm.h"
 
-#include "LArObjects/LArPointingCluster.h"
+#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
 
-#include "LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/ClusterExtensionAlgorithm.h"
 
 namespace lar_content
 {

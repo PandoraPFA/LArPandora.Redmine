@@ -8,7 +8,7 @@
 #ifndef CLEAR_SHOWERS_TOOL_H
 #define CLEAR_SHOWERS_TOOL_H 1
 
-#include "LArThreeDReco/LArShowerMatching/ThreeDShowersAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArShowerMatching/ThreeDShowersAlgorithm.h"
 
 namespace lar_content
 {

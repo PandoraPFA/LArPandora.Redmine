@@ -6,7 +6,7 @@
  *  $Log: $
  */
 
-#include "LArPlugins/LArTransformationPlugin.h"
+#include "LArPandoraAlgorithms/LArPlugins/LArTransformationPlugin.h"
 
 namespace lar_content
 {

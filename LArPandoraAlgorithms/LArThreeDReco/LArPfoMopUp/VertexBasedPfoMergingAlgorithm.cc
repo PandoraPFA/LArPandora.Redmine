@@ -8,14 +8,14 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArGeometryHelper.h"
-#include "LArHelpers/LArPointingClusterHelper.h"
-#include "LArHelpers/LArVertexHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArPointingClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArVertexHelper.h"
 
-#include "LArObjects/LArPointingCluster.h"
+#include "LArPandoraAlgorithms/LArObjects/LArPointingCluster.h"
 
-#include "LArThreeDReco/LArPfoMopUp/VertexBasedPfoMergingAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArPfoMopUp/VertexBasedPfoMergingAlgorithm.h"
 
 using namespace pandora;
 

@@ -12,7 +12,7 @@
 
 #include "Helpers/ClusterFitHelper.h"
 
-#include "LArTwoDReco/LArClusterAssociation/ClusterAssociationAlgorithm.h"
+#include "LArPandoraAlgorithms/LArTwoDReco/LArClusterAssociation/ClusterAssociationAlgorithm.h"
 
 namespace lar_content
 {

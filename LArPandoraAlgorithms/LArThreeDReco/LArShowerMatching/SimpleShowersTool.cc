@@ -8,7 +8,7 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArThreeDReco/LArShowerMatching/SimpleShowersTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArShowerMatching/SimpleShowersTool.h"
 
 using namespace pandora;
 

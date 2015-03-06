@@ -8,7 +8,7 @@
 #ifndef LAR_CANDIDATE_VERTEX_CREATION_ALGORITHM_H
 #define LAR_CANDIDATE_VERTEX_CREATION_ALGORITHM_H 1
 
-#include "LArObjects/LArTwoDSlidingFitResult.h"
+#include "LArPandoraAlgorithms/LArObjects/LArTwoDSlidingFitResult.h"
 
 #include "Pandora/Algorithm.h"
 

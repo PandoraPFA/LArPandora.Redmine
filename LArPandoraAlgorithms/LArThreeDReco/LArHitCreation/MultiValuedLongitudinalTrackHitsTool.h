@@ -8,7 +8,7 @@
 #ifndef MULTI_VALUED_LONGITUDINAL_TRACK_HITS_TOOL_H
 #define MULTI_VALUED_LONGITUDINAL_TRACK_HITS_TOOL_H 1
 
-#include "LArThreeDReco/LArHitCreation/LongitudinalTrackHitsBaseTool.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArHitCreation/LongitudinalTrackHitsBaseTool.h"
 
 namespace lar_content
 {

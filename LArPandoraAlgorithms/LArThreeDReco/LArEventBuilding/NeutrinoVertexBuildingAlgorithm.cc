@@ -8,11 +8,11 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
-#include "LArHelpers/LArGeometryHelper.h"
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArPfoHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArGeometryHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArClusterHelper.h"
+#include "LArPandoraAlgorithms/LArHelpers/LArPfoHelper.h"
 
-#include "LArThreeDReco/LArEventBuilding/NeutrinoVertexBuildingAlgorithm.h"
+#include "LArPandoraAlgorithms/LArThreeDReco/LArEventBuilding/NeutrinoVertexBuildingAlgorithm.h"
 
 using namespace pandora;
 
