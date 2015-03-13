@@ -4,13 +4,10 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 include_directories( $ENV{PANDORA_INC} )
-include_directories( $ENV{PANDORA_FQ_DIR}/PandoraSDK/include )
-include_directories( $ENV{PANDORA_FQ_DIR}/PandoraMonitoring/include )
 
 art_make( BASENAME_ONLY
           LIBRARY_NAME  LArPandoraInterface
-          LIB_LIBRARIES LArPandoraAlgorithms
-                        DetectorProperties_service
+          LIB_LIBRARIES DetectorProperties_service
                         LArProperties_service
                         Geometry
                         Geometry_service
@@ -24,6 +21,7 @@ art_make( BASENAME_ONLY
                         ClusterFinder
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
+                        ${LARCONTENT}
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

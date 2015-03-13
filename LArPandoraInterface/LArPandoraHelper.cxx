@@ -19,14 +19,12 @@
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/TrackState.h"
 #include "Objects/Vertex.h"
-
-// Local includes (LArPandoraAlgorithms)
 #include "LArHelpers/LArClusterHelper.h"
 #include "LArHelpers/LArPfoHelper.h"
 
-// Local includes (LArPandoraInterface)
-#include "LArPandoraHelper.h"
-#include "PFParticleSeed.h"
+// Local LArrPandora includes
+#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "LArPandoraInterface/PFParticleSeed.h"
 
 // System includes
 #include <limits>

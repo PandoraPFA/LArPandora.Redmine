@@ -12,8 +12,8 @@
 // ROOT includes
 #include "TTree.h"
 
-// Local includes
-#include "LArPandoraCollector.h"
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // std includes
 #include <string>

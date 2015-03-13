@@ -5,20 +5,23 @@
  *
  */
 
-#include "LArPandoraCollector.h"
-
+// Framework includes
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
+// LArSoft includes
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "Geometry/Geometry.h"
 #include "Utilities/TimeService.h"
 
+// Pandora includes
 #include "Objects/ParticleFlowObject.h"
+
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 #include <limits>
 #include <iostream>

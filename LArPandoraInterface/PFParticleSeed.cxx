@@ -1,4 +1,4 @@
-#include "PFParticleSeed.h"
+#include "LArPandoraInterface/PFParticleSeed.h"
 
 #include <limits>
 

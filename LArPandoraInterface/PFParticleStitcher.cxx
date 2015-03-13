@@ -18,8 +18,8 @@
 #include "RecoBase/PFParticle.h"
 
 // Local includes 
-#include "PFParticleStitcher.h"
-#include "LArPandoraHelper.h"
+#include "LArPandoraInterface/PFParticleStitcher.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 // System includes
 #include <iostream>

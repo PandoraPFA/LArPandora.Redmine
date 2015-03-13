@@ -12,8 +12,8 @@
 #include "TTree.h"
 #include "TVector3.h"
 
-// Local includes
-#include "LArPandoraCollector.h"
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // std includes
 #include <string>
