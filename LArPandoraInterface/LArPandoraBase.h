@@ -11,11 +11,11 @@
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
 
-// Local includes
-#include "LArPandoraCollector.h"
-
 // Pandora includes
 #include "Api/PandoraApi.h"
+
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // std includes
 #include <string>

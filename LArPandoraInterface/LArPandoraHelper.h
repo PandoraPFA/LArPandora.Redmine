@@ -7,19 +7,22 @@
 #ifndef LAR_PANDORA_HELPER_H
 #define LAR_PANDORA_HELPER_H
 
-#include <vector>
-#include <set>
-
+// Framework includes
 #include "art/Persistency/Common/Ptr.h" 
 
+// LArSoft includes
 #include "RecoBase/Track.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/SpacePoint.h"
 #include "RecoBase/Hit.h"
 #include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
+// Pandora includes
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/TrackState.h"
+
+#include <vector>
+#include <set>
 
 namespace lar_pandora
 {

@@ -21,12 +21,10 @@
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
-
-// Local includes (LArPandoraAlgorithms)
 #include "LArContent.h"
 
-// Local includes (LArPandoraInterface)
-#include "LArPandoraBase.h"
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraBase.h"
 
 // System includes
 #include <iostream>

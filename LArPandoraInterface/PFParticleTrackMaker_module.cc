@@ -66,16 +66,16 @@ DEFINE_ART_MODULE(PFParticleTrackMaker)
 // Framework includes
 #include "cetlib/exception.h"
 
-// Local includes
-#include "LArPandoraCollector.h"
-#include "LArPandoraHelper.h"
-
 // LArSoft includes
 #include "Utilities/AssociationUtil.h"
 #include "Geometry/Geometry.h"
 #include "RecoBase/PFParticle.h"
 #include "RecoBase/Track.h"
 #include "RecoBase/Hit.h"
+
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 namespace lar_pandora {
 

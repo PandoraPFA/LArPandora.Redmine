@@ -56,13 +56,11 @@ include(ArtDictionary)
 include(ArtMake)
 include(BuildPlugins)
 
-include_directories(LArPandoraAlgorithms)
 cet_find_library( PANDORASDK NAMES PandoraSDK PATHS ENV PANDORA_LIB )
 cet_find_library( PANDORAMONITORING NAMES PandoraMonitoring PATHS ENV PANDORA_LIB )
-
+cet_find_library( LARCONTENT NAMES LArContent PATHS ENV PANDORA_LIB )
 
 # source
-add_subdirectory(LArPandoraAlgorithms)
 add_subdirectory(LArPandoraInterface)
 
 # ups - table and config files

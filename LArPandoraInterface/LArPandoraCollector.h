@@ -7,8 +7,10 @@
 #ifndef LAR_PANDORA_COLLECTOR_H
 #define LAR_PANDORA_COLLECTOR_H
 
+// Framework includes
 #include "art/Framework/Principal/Event.h"
 
+// LArSoft includes
 #include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/SpacePoint.h"

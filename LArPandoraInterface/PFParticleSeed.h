@@ -7,13 +7,13 @@
 #ifndef PFPARTICLE_SEED_H
 #define PFPARTICLE_SEED_H 1
 
-// Local includes
-#include "LArPandoraCollector.h"
-
 // Pandora includes
 #include "Helpers/ClusterFitHelper.h"
 #include "Objects/CartesianVector.h"
 #include "Objects/TrackState.h"
+
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // ROOT includes
 #include "TVector3.h"

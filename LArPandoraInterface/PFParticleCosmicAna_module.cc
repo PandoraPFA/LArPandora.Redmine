@@ -102,7 +102,7 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
 #include "AnalysisBase/CosmicTag.h"
 
 // Local includes
-#include "LArPandoraCollector.h"
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // std includes
 #include <iostream>
