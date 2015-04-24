@@ -8,6 +8,7 @@
 #ifndef MICRO_BOONE_PSEUDO_LAYER_PLUGIN_H
 #define MICRO_BOONE_PSEUDO_LAYER_PLUGIN_H 1
 
+// Pandora includes
 #include "LArPlugins/LArPseudoLayerPlugin.h"
 
 namespace lar_pandora

@@ -10,12 +10,12 @@
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
 
-// Local includes
-#include "LArPandoraCollector.h"
-
 // Pandora includes
 #include "Objects/CartesianVector.h"
 #include "Objects/TrackState.h"
+
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // ROOT includes
 #include "TTree.h"

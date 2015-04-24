@@ -16,15 +16,13 @@
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/Vertex.h"
-
-// Local includes (LArPandoraAlgorithms)
 #include "LArContent.h"
 #include "LArHelpers/LArClusterHelper.h"
 #include "LArHelpers/LArPfoHelper.h"
 
-// Local includes (LArPandoraInterface)
-#include "LArPandoraParticleCreator.h"
-#include "LArPandoraHelper.h"
+// Local LArPandora includes
+#include "LArPandoraInterface/LArPandoraParticleCreator.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 // System includes
 #include <iostream>
@@ -279,7 +277,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
             if(pPfo->GetVertexList().size() != 1)
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            pandora::Vertex *pVertex = *(pPfo->GetVertexList().begin());
+            const pandora::Vertex *const pVertex = *(pPfo->GetVertexList().begin());
 
             if (vertexMap.end() != vertexMap.find(pVertex))
                 continue;
