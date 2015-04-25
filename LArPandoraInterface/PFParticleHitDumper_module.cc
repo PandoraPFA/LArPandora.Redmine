@@ -359,7 +359,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
 
             std::cout << "    PFPARTICLE [" << m_particle << "] (" << track->NumberTrajectoryPoints() << " Trajectory Points)" << std::endl;
 
-	    for (unsigned p = 0; p < track->NumberTrajectoryPoints(); ++p)
+	    for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
             {
 	        const TVector3 position(track->LocationAtPoint(p));
                 m_x = position.x();
