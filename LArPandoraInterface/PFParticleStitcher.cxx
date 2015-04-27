@@ -1025,9 +1025,9 @@ void PFParticleStitcher::OrderParticleMerges(const PFParticleMergeMap &particleM
             // Fill vector of TrackState objects
 	    std::vector<pandora::TrackState> trackStateVector;
 
-            for (unsigned p = 0; p < track->NumberTrajectoryPoints(); ++p)
+            for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
 	    {
-	        const unsigned pEntry(isForward ? p : track->NumberTrajectoryPoints() - p);
+	        const unsigned int pEntry(isForward ? p : track->NumberTrajectoryPoints() - 1 - p);
                 const TVector3 position(track->LocationAtPoint(pEntry));
                 const TVector3 direction(propagation * track->DirectionAtPoint(pEntry));
 
