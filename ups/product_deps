@@ -4,6 +4,7 @@ parent	larpandora	v04_04_16
 defaultqual	e7
 #
 fcldir product_dir job
+fwdir  product_dir scripts
 #
 product         version
 larsim          v04_08_03
@@ -24,11 +25,6 @@ e7:noifdh:debug	e7:noifdh:debug	e7:noifdh:debug	nu:e7:debug	-nq-
 e7:noifdh:opt	e7:noifdh:opt	e7:noifdh:opt	nu:e7:opt	-nq-
 e7:noifdh:prof	e7:noifdh:prof	e7:noifdh:prof	nu:e7:prof	-nq-
 end_qualifier_list
-
-# table fragment to set FW_SEARCH_PATH 
-table_fragment_begin
-    pathPrepend(FW_SEARCH_PATH, ${UPS_PROD_DIR}/scripts)
-table_fragment_end
 
 # Preserve tabs and formatting in emacs and vi / vim:
 
