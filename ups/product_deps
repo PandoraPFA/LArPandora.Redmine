@@ -3,8 +3,8 @@
 parent	larpandora	v04_04_17
 defaultqual	e7
 #
-fcldir product_dir job
-fwdir  product_dir scripts
+fcldir  product_dir job
+gdmldir product_dir scripts
 #
 product         version
 larsim          v04_08_04
