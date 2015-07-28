@@ -24,6 +24,8 @@
 #include "SimulationBase/MCParticle.h"
 #include "SimulationBase/MCTruth.h"
 #include "Simulation/SimChannel.h"
+ 
+#include "AnalysisBase/CosmicTag.h"
 
 namespace lar_pandora 
 {
@@ -42,6 +44,7 @@ typedef std::vector< art::Ptr<simb::MCTruth> >      MCTruthVector;
 typedef std::vector< art::Ptr<simb::MCParticle> >   MCParticleVector;
 typedef std::vector< art::Ptr<sim::SimChannel> >    SimChannelVector;
 typedef std::vector< sim::TrackIDE >                TrackIDEVector;
+typedef std::vector< art::Ptr<anab::CosmicTag> >    CosmicTagVector;
 
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ShowerVector >                 PFParticlesToShowers;
@@ -61,6 +64,7 @@ typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<recob::SpacePoint> >  Hi
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<recob::PFParticle> >  HitsToPFParticles;
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCParticle> >   HitsToMCParticles;
 typedef std::map< art::Ptr<recob::Hit>,        TrackIDEVector >               HitsToTrackIDEs;
+typedef std::map< art::Ptr<recob::Track>,      CosmicTagVector >              TracksToCosmicTags;
 
 typedef std::map< int, art::Ptr<recob::PFParticle> >  PFParticleMap;
 typedef std::map< int, art::Ptr<recob::Cluster> >     ClusterMap;
@@ -259,6 +263,17 @@ public:
     static void BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_mid,
         PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters,
         const bool useClusters = true);
+
+    /**
+     *  @brief Collect a vector of cosmic tags from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the cosmic tag information in the event
+     *  @param cosmicTagVector output vector of CosmicTag objects
+     *  @param tracksToCosmicTags output map from tracks to cosmic tags
+     */
+    static void CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector, 
+        TracksToCosmicTags &tracksToCosmicTags);
 
     /**
      *  @brief Collect a vector of SimChannel objects from the ART event record

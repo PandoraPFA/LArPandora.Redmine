@@ -543,6 +543,27 @@ void LArPandoraCollector::SelectFinalStatePFParticles(const PFParticleVector &in
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraCollector::CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector, 
+    TracksToCosmicTags &tracksToCosmicTags)
+{
+    art::Handle< std::vector<anab::CosmicTag> > theCosmicTags;
+    evt.getByLabel(label, theCosmicTags); // Note: in general, there could be many tagging algorithms
+
+    if (theCosmicTags.isValid())
+    {
+        art::FindOneP<recob::Track> theCosmicAssns(theCosmicTags, evt, label);
+        for (unsigned int i = 0; i < theCosmicTags->size(); ++i)
+        {
+            const art::Ptr<anab::CosmicTag> cosmicTag(theCosmicTags, i);
+            const art::Ptr<recob::Track> track = theCosmicAssns.at(i);
+            tracksToCosmicTags[track].push_back(cosmicTag);
+            cosmicTagVector.push_back(cosmicTag);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraCollector::CollectSimChannels(const art::Event &evt, const std::string label, SimChannelVector &simChannelVector)
 {
     if (evt.isRealData())

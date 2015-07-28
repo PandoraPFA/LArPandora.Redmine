@@ -499,7 +499,7 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
                 {
                     try
                     {
-                        recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter++, pPfo)); 
+                        recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter, pPfo)); trackCounter++;
                         outputTracks->push_back(newTrack);
 
                         util::CreateAssn(*this, evt, *(outputTracks.get()), pfoHits, *(outputTracksToHits.get()));
