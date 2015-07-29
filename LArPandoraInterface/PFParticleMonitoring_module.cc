@@ -48,6 +48,9 @@ public:
 
 private:
 
+    typedef std::set< art::Ptr<recob::PFParticle> > PFParticleSet;
+    typedef std::set< art::Ptr<simb::MCParticle> > MCParticleSet;
+    
     /**
      *  @brief Performing matching between true and reconstructed particles
      *
@@ -58,6 +61,19 @@ private:
      */
      void GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles,
          MCParticlesToPFParticles &matchedParticles, MCParticlesToHits &matchedHits) const;
+
+    /**
+     *  @brief Performing matching between true and reconstructed particles
+     *
+     *  @param recoParticlesToHits the mapping from reconstructed particles to hits
+     *  @param trueHitsToParticles the mapping from hits to true particles
+     *  @param matchedParticles the output matches between reconstructed and true particles
+     *  @param matchedHits the output matches between reconstructed particles and hits
+     *  @param recoVeto the veto list for reconstructed particles
+     *  @param trueVeto the veto list for true particles
+     */
+     void GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles,
+         MCParticlesToPFParticles &matchedParticles, MCParticlesToHits &matchedHits, PFParticleSet &recoVeto, MCParticleSet &trueVeto) const;
 
     /**
      *  @brief Build particle maps for reconstructed particles
@@ -163,6 +179,8 @@ private:
      int          m_nMatchedHitsV;          ///<
      int          m_nMatchedHitsW;          ///<
 
+     int          m_nAvailableHits;         ///<
+
      double       m_spacepointsMinX;        ///<
      double       m_spacepointsMaxX;        ///<
      
@@ -174,6 +192,8 @@ private:
 
      bool         m_useDaughterPFParticles; ///<
      bool         m_useDaughterMCParticles; ///<
+     bool         m_recursiveMatching;      ///<
+     bool         m_printDebug;             ///< switch for print statements (TODO: use message service!)
 };
 
 DEFINE_ART_MODULE(PFParticleMonitoring)
@@ -246,6 +266,8 @@ void PFParticleMonitoring::reconfigure(fhicl::ParameterSet const &pset)
 
     m_useDaughterPFParticles = pset.get<bool>("UseDaughterPFParticles",false);
     m_useDaughterMCParticles = pset.get<bool>("UseDaughterMCParticles",true);
+    m_recursiveMatching = pset.get<bool>("RecursiveMatching",false);
+    m_printDebug = pset.get<bool>("PrintDebug",false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -308,6 +330,7 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("nMatchedHitsU", &m_nMatchedHitsU, "nMatchedHitsU/I");
     m_pRecoTree->Branch("nMatchedHitsV", &m_nMatchedHitsV, "nMatchedHitsV/I");
     m_pRecoTree->Branch("nMatchedHitsW", &m_nMatchedHitsW, "nMatchedHitsW/I");
+    m_pRecoTree->Branch("nAvailableHits", &m_nAvailableHits, "nAvailableHits/I");
     m_pRecoTree->Branch("spacepointsMinX", &m_spacepointsMinX, "spacepointsMinX/D");
     m_pRecoTree->Branch("spacepointsMaxX", &m_spacepointsMaxX, "spacepointsMaxX/D");
 }
@@ -322,7 +345,8 @@ void PFParticleMonitoring::endJob()
 
 void PFParticleMonitoring::analyze(const art::Event &evt)
 {
-    std::cout << " *** PFParticleMonitoring::analyze(...) *** " << std::endl;
+    if (m_printDebug)
+        std::cout << " *** PFParticleMonitoring::analyze(...) *** " << std::endl;
 
     m_run = evt.run();
     m_event = evt.id().event();
@@ -380,13 +404,16 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_nMatchedHitsU = 0;
     m_nMatchedHitsV = 0;
     m_nMatchedHitsW = 0;
+    m_nAvailableHits = 0;
 
     m_spacepointsMinX = 0.0;
     m_spacepointsMaxX = 0.0;
     
-    std::cout << "  Run: " << m_run << std::endl;
-    std::cout << "  Event: " << m_event << std::endl;
-
+    if (m_printDebug)
+    {
+        std::cout << "  Run: " << m_run << std::endl;
+        std::cout << "  Event: " << m_event << std::endl;
+    }
 
     // Collect SpacePoints and SpacePoint <-> Hit Associations
     // =======================================================
@@ -395,7 +422,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     HitsToSpacePoints hitsToSpacePoints;
     LArPandoraCollector::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits, hitsToSpacePoints);
 
-    std::cout << "  SpacePoints: " << spacePointVector.size() << std::endl;
+    if (m_printDebug)
+        std::cout << "  SpacePoints: " << spacePointVector.size() << std::endl;
 
     // Collect Tracks and PFParticle <-> Track Associations
     // ====================================================
@@ -403,7 +431,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     PFParticlesToTracks recoParticlesToTracks;
     LArPandoraCollector::CollectTracks(evt, m_trackLabel, recoTrackVector, recoParticlesToTracks);
     
-    std::cout << "  Tracks: " << recoTrackVector.size() << std::endl;
+    if (m_printDebug)
+        std::cout << "  Tracks: " << recoTrackVector.size() << std::endl;
 
     // Collect Vertices and PFParticle <-> Vertex Associations
     // =======================================================
@@ -411,7 +440,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     PFParticlesToVertices recoParticlesToVertices;
     LArPandoraCollector::CollectVertices(evt, m_particleLabel, recoVertexVector, recoParticlesToVertices);
 
-    std::cout << "  Vertices: " << recoVertexVector.size() << std::endl;
+    if (m_printDebug)
+        std::cout << "  Vertices: " << recoVertexVector.size() << std::endl;
 
     // Match Reco Particles to Hits
     // ============================
@@ -423,7 +453,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, recoParticlesToHits, recoHitsToParticles,
         (m_useDaughterPFParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kIgnoreDaughters));
 
-    std::cout << "  PFParticles: " << recoParticleVector.size() << std::endl;
+    if (m_printDebug)
+        std::cout << "  PFParticles: " << recoParticleVector.size() << std::endl;
 
     // Match True Particles to Hits
     // ============================
@@ -438,7 +469,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     LArPandoraCollector::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
         (m_useDaughterMCParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kIgnoreDaughters));
 
-    std::cout << "  MCParticles: " << trueParticlesToHits.size() << std::endl;
+    if (m_printDebug)
+        std::cout << "  MCParticles: " << trueParticlesToHits.size() << std::endl;
 
     if (trueParticlesToHits.empty())
     {
@@ -543,6 +575,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_nMatchedHitsU = 0;
         m_nMatchedHitsV = 0;
         m_nMatchedHitsW = 0;
+        
+        m_nAvailableHits = 0;
  
         m_spacepointsMinX = 0.0;
         m_spacepointsMaxX = 0.0;
@@ -624,6 +658,12 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 	    }
 	}
   
+        // Count number of available hits
+        for (HitVector::const_iterator hIter = trueHitVector.begin(), hIterEnd = trueHitVector.end(); hIter != hIterEnd; ++hIter)
+	{            
+	    if (recoHitsToParticles.find(*hIter) == recoHitsToParticles.end())
+                ++m_nAvailableHits;
+	}
 
         // Match true and reconstructed hits
         m_nMCHits = trueHitVector.size();
@@ -666,7 +706,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                 const VertexVector &vertexVector = pIter4->second;
                 if (!vertexVector.empty())
                 {
-                    if (vertexVector.size() !=1 )
+                    if (vertexVector.size() !=1 && m_printDebug)
                         std::cout << " Warning: Found particle with more than one associated vertex " << std::endl;
 
                     const art::Ptr<recob::Vertex> recoVertex = *(vertexVector.begin());
@@ -686,7 +726,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                 const TrackVector &trackVector = pIter5->second;
                 if (!trackVector.empty())
                 {
-                    if (trackVector.size() !=1 )
+                    if (trackVector.size() !=1 && m_printDebug)
                         std::cout << " Warning: Found particle with more than one associated track " << std::endl;
 	        
                     const art::Ptr<recob::Track> recoTrack = *(trackVector.begin());
@@ -712,9 +752,11 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_purity = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nPfoHits));
         m_completeness = ((m_nPfoHits == 0) ? 0.0 : static_cast<double>(m_nMatchedHits) / static_cast<double>(m_nMCHits));
 
-        std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId()
-                  << ", trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg
-                  << ", mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits << std::endl;
+        if (m_printDebug)
+          std::cout << "    MCParticle [" << m_index << "] trueId=" << trueParticle->TrackId()
+                    << ", trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg
+                    << ", mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits 
+                    << ", availableHits=" << m_nAvailableHits << std::endl;
 
         m_pRecoTree->Fill();
         ++m_index; // Increment index number
@@ -726,10 +768,25 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles,
     MCParticlesToPFParticles &matchedParticles, MCParticlesToHits &matchedHits) const
 {
+    PFParticleSet recoVeto; MCParticleSet trueVeto;
+
+    this->GetRecoToTrueMatches(recoParticlesToHits, trueHitsToParticles, matchedParticles, matchedHits, recoVeto, trueVeto);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const HitsToMCParticles &trueHitsToParticles,
+    MCParticlesToPFParticles &matchedParticles, MCParticlesToHits &matchedHits, PFParticleSet &vetoReco, MCParticleSet &vetoTrue) const
+{
+    bool foundMatches(false);
+
     for (PFParticlesToHits::const_iterator iter1 = recoParticlesToHits.begin(), iterEnd1 = recoParticlesToHits.end();
         iter1 != iterEnd1; ++iter1)
     {
         const art::Ptr<recob::PFParticle> recoParticle = iter1->first;
+        if (vetoReco.count(recoParticle) > 0)
+	    continue;
+
         const HitVector &hitVector = iter1->second;
 
         MCParticlesToHits truthContributionMap;
@@ -743,7 +800,9 @@ void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoPar
                 continue;
 
             const art::Ptr<simb::MCParticle> trueParticle = iter3->second;
-
+            if (vetoTrue.count(trueParticle) > 0)
+	        continue;
+	    
             truthContributionMap[trueParticle].push_back(hit);
         }
 
@@ -768,9 +827,23 @@ void PFParticleMonitoring::GetRecoToTrueMatches(const PFParticlesToHits &recoPar
             {
                 matchedParticles[trueParticle] = recoParticle;
                 matchedHits[trueParticle] = mIter->second;
+                foundMatches = true;
             }
         }
     }
+
+    if (!foundMatches)
+        return;
+
+    for (MCParticlesToPFParticles::const_iterator pIter = matchedParticles.begin(), pIterEnd = matchedParticles.end(); 
+        pIter != pIterEnd; ++pIter)
+    {
+        vetoTrue.insert(pIter->first);
+        vetoReco.insert(pIter->second);
+    }
+ 
+    if (m_recursiveMatching)
+        this->GetRecoToTrueMatches(recoParticlesToHits, trueHitsToParticles, matchedParticles, matchedHits, vetoReco, vetoTrue);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

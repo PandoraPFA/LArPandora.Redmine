@@ -115,6 +115,7 @@ private:
      std::string  m_trackLabel;      ///<
 
      bool         m_storeWires;      ///<
+     bool         m_printDebug;      ///< switch for print statements (TODO: use message service!)
 };
 
 DEFINE_ART_MODULE(PFParticleHitDumper)
@@ -185,6 +186,7 @@ void PFParticleHitDumper::reconfigure(fhicl::ParameterSet const &pset)
     m_spacepointLabel = pset.get<std::string>("SpacePointModule", "pandora");
     m_hitfinderLabel  = pset.get<std::string>("HitFinderModule", "gaushit");
     m_calwireLabel    = pset.get<std::string>("CalWireModule", "caldata");
+    m_printDebug      = pset.get<bool>("PrintDebug",false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -251,7 +253,8 @@ void PFParticleHitDumper::endJob()
 
 void PFParticleHitDumper::analyze(const art::Event &evt)
 {
-    std::cout << " *** PFParticleHitDumper::analyze(...) *** " << std::endl;
+    if (m_printDebug)
+        std::cout << " *** PFParticleHitDumper::analyze(...) *** " << std::endl;
 
     m_run = evt.run();
     m_event = evt.id().event();
@@ -270,9 +273,11 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     m_w = 0.0;
     m_q = 0.0;
 
-    std::cout << "  Run: " << m_run << std::endl;
-    std::cout << "  Event: " << m_event << std::endl; 
-
+    if (m_printDebug)
+    {
+        std::cout << "  Run: " << m_run << std::endl;
+        std::cout << "  Event: " << m_event << std::endl; 
+    }
 
     // Need DetectorProperties service to convert from ticks to X
     art::ServiceHandle<util::DetectorProperties> theDetector;
@@ -303,26 +308,31 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     if (m_storeWires)
         LArPandoraCollector::CollectWires(evt, m_calwireLabel, wireVector);
 
-    std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
+    if (m_printDebug)
+        std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
    
     // Loop over Tracks (Fill 3D Track Tree)
     // =====================================
-    std::cout << "   PFParticleHitDumper::FillRecoTracks(...) " << std::endl;
+    if (m_printDebug)
+        std::cout << "   PFParticleHitDumper::FillRecoTracks(...) " << std::endl;
     this->FillRecoTracks(particlesToTracks);
 
     // Loop over PFParticles (Fill 3D Reco Tree)
     // =========================================
-    std::cout << "   PFParticleHitDumper::FillReco3D(...) " << std::endl;
+    if (m_printDebug)
+        std::cout << "   PFParticleHitDumper::FillReco3D(...) " << std::endl;
     this->FillReco3D(particleVector, particlesToSpacePoints, spacePointsToHits);
 
     // Loop over Hits (Fill 2D Reco Tree)
     // ==================================
-    std::cout << "   PFParticleHitDumper::FillReco2D(...) " << std::endl;
+    if (m_printDebug)
+        std::cout << "   PFParticleHitDumper::FillReco2D(...) " << std::endl;
     this->FillReco2D(hitVector, hitsToParticles);
 
     // Loop over Wires (Fill Reco Wire Tree)
     // =====================================
-    std::cout << "   PFParticleHitDumper::FillRecoWires(...) " << std::endl;
+    if (m_printDebug)
+        std::cout << "   PFParticleHitDumper::FillRecoWires(...) " << std::endl;
     this->FillRecoWires(wireVector);
 }
 
@@ -352,12 +362,13 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
 
         if (!trackVector.empty())
         {
-            if (trackVector.size() !=1 )
+            if (trackVector.size() !=1 && m_printDebug)
                 std::cout << " Warning: Found particle with more than one associated track " << std::endl;
 	        
             const art::Ptr<recob::Track> track = *(trackVector.begin());
 
-            std::cout << "    PFPARTICLE [" << m_particle << "] (" << track->NumberTrajectoryPoints() << " Trajectory Points)" << std::endl;
+            if (m_printDebug)
+                std::cout << "    PFPARTICLE [" << m_particle << "] (" << track->NumberTrajectoryPoints() << " Trajectory Points)" << std::endl;
 
 	    for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
             {
@@ -428,7 +439,8 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
                 m_primary = 1;
         }
 
-        std::cout << "    PFPARTICLE [" << m_particle << "] [Primary=" << m_primary << "] (" << spacepoints.size() << " Space Points)" << std::endl;
+        if (m_printDebug)
+            std::cout << "    PFPARTICLE [" << m_particle << "] [Primary=" << m_primary << "] (" << spacepoints.size() << " Space Points)" << std::endl;
 
         for (unsigned int j=0; j<spacepoints.size(); ++j)
         {
@@ -532,7 +544,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
         const std::vector<float> &signals(wire->Signal());
         const std::vector<geo::WireID> wireIds = theGeometry->ChannelToWire(wire->Channel());
 
-        if ((signalCounter++) < 10)
+        if ((signalCounter++) < 10 && m_printDebug)
           std::cout << "    numWires=" << wireVector.size() << " numSignals=" << signals.size() << std::endl;
 
         double time(0.0);

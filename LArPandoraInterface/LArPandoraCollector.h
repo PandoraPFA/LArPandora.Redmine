@@ -71,6 +71,7 @@ typedef std::map< int, art::Ptr<recob::Cluster> >     ClusterMap;
 typedef std::map< int, art::Ptr<recob::SpacePoint> >  SpacePointMap;
 typedef std::map< int, art::Ptr<recob::Hit> >         HitMap;
 typedef std::map< int, art::Ptr<simb::MCParticle> >   MCParticleMap;
+typedef std::map< int, art::Ptr<sim::SimChannel> >    SimChannelMap;
 
 class LArPandoraCollector 
 {

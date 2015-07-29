@@ -104,6 +104,7 @@ private:
      std::string  m_spacepointLabel;       ///< 
      std::string  m_particleLabel;         ///<
      std::string  m_trackLabel;            ///<
+     bool         m_printDebug;            ///< switch for print statements (TODO: use message service!)
 };
 
 DEFINE_ART_MODULE(PFParticleAnalysis)
@@ -153,6 +154,7 @@ void PFParticleAnalysis::reconfigure(fhicl::ParameterSet const &pset)
     m_spacepointLabel = pset.get<std::string>("SpacePointModule", "pandora");
     m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
     m_trackLabel = pset.get<std::string>("TrackModule","pandora");
+    m_printDebug = pset.get<bool>("PrintDebug",false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,7 +217,8 @@ void PFParticleAnalysis::endJob()
 
 void PFParticleAnalysis::analyze(const art::Event &evt)
 {
-    std::cout << " *** PFParticleAnalysis::analyze(...) *** " << std::endl;
+    if (m_printDebug)
+        std::cout << " *** PFParticleAnalysis::analyze(...) *** " << std::endl;
 
     m_run = evt.run();
     m_event = evt.id().event();
@@ -260,8 +263,11 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_trklength = 0.0;
     m_trkstraightlength = 0.0;
 
-    std::cout << "  Run: " << m_run << std::endl;
-    std::cout << "  Event: " << m_event << std::endl; 
+    if (m_printDebug)
+    {
+        std::cout << "  Run: " << m_run << std::endl;
+        std::cout << "  Event: " << m_event << std::endl; 
+    }
 
     // Get the reconstructed PFParticles
     // =================================
@@ -277,7 +283,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles2, particlesToSpacePoints);
     LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
 
-    std::cout << "  PFParticles: " << particleVector.size() << std::endl;
+    if (m_printDebug)
+        std::cout << "  PFParticles: " << particleVector.size() << std::endl;
 
     if (particleVector.empty())
     {
@@ -379,7 +386,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             const VertexVector &vertexVector = vIter->second;
             if (!vertexVector.empty())
             {
-                if (vertexVector.size() !=1 )
+                if (vertexVector.size() !=1 && m_printDebug)
                     std::cout << " Warning: Found particle with more than one associated vertex " << std::endl;
 
                 const art::Ptr<recob::Vertex> vertex = *(vertexVector.begin());
@@ -400,8 +407,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             const SeedVector &seedVector = sIter->second;
             if (!seedVector.empty())
             {
-                if (seedVector.size() !=1 )
-                  std::cout << " Warning: Found particle with more than one associated seed " << std::endl;
+                if (seedVector.size() !=1 && m_printDebug)
+                    std::cout << " Warning: Found particle with more than one associated seed " << std::endl;
 
                 const art::Ptr<recob::Seed> seed = *(seedVector.begin());
                 double pxpypz[3] = {0.0, 0.0, 0.0} ;
@@ -422,8 +429,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             const TrackVector &trackVector = tIter->second;
             if (!trackVector.empty())
             {
-                if (trackVector.size() !=1 )
-                  std::cout << " Warning: Found particle with more than one associated track " << std::endl;
+                if (trackVector.size() !=1 && m_printDebug)
+                    std::cout << " Warning: Found particle with more than one associated track " << std::endl;
  
                 const art::Ptr<recob::Track> track = *(trackVector.begin());
                 const TVector3 &trackVtxPosition = track->Vertex();
@@ -455,11 +462,12 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             }
         }
 
-        std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
-                  << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
-                  << " (Self=" << m_self << ", Parent=" << m_parent << ")"
-                  << " (Vertex=" << m_vertex << ", Seed=" << (m_pfoptot > 0) << ", Track=" << m_track
-                  << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ", Hits=" << m_hits << ") " << std::endl;
+        if (m_printDebug)
+            std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
+                      << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
+                      << " (Self=" << m_self << ", Parent=" << m_parent << ")"
+                      << " (Vertex=" << m_vertex << ", Seed=" << (m_pfoptot > 0) << ", Track=" << m_track
+                      << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ", Hits=" << m_hits << ") " << std::endl;
 
         m_pRecoTree->Fill();
     }

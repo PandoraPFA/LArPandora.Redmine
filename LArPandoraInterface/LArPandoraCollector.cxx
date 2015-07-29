@@ -654,25 +654,28 @@ void LArPandoraCollector::CollectMCParticles(const art::Event &evt, const std::s
 void LArPandoraCollector::BuildMCParticleHitMaps(const HitVector &hitVector, const SimChannelVector &simChannelVector, 
     HitsToTrackIDEs &hitsToTrackIDEs)
 {
-    art::ServiceHandle<geo::Geometry> geom;
     art::ServiceHandle<util::TimeService> ts;
 
-    SimChannelVector sortedSimChannelVector(geom->Nchannels());
+    SimChannelMap simChannelMap;
 
     for (SimChannelVector::const_iterator iter = simChannelVector.begin(), iterEnd = simChannelVector.end(); iter != iterEnd; ++iter)
     {
         const art::Ptr<sim::SimChannel> simChannel = *iter;
-        sortedSimChannelVector.at(simChannel->Channel()) = simChannel;
+        simChannelMap.insert(SimChannelMap::value_type(simChannel->Channel(), simChannel));
     }
 
     for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
         const art::Ptr<recob::Hit> hit = *iter;
         
+	SimChannelMap::const_iterator sIter = simChannelMap.find(hit->Channel());
+        if (simChannelMap.end() == sIter)
+	    continue; // Hit has no truth information [continue]
+
+        const art::Ptr<sim::SimChannel> simChannel = sIter->second;
         const raw::TDCtick_t start_tdc(ts->TPCTick2TDC(hit->PeakTimeMinusRMS()));
         const raw::TDCtick_t end_tdc(ts->TPCTick2TDC(hit->PeakTimePlusRMS()));
-
-        const TrackIDEVector trackCollection(sortedSimChannelVector.at(hit->Channel())->TrackIDEs(start_tdc, end_tdc));
+        const TrackIDEVector trackCollection(simChannel->TrackIDEs(start_tdc, end_tdc));
 
         if (trackCollection.empty())
             continue; // Hit has no truth information [continue]
