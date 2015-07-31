@@ -368,6 +368,16 @@ public:
     static art::Ptr<simb::MCParticle> GetParentMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> daughterParticle);
 
     /**
+     *  @brief Return the primary final-state particle by navigating up the chain of parent/daughter associations
+     *
+     *  @param particleMap the mapping between true particle and true track ID
+     *  @param daughterParticle the input daughter particle
+     *
+     *  @return the output primry final-state particle
+     */
+    static art::Ptr<simb::MCParticle> GetPrimaryMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> daughterParticle);
+
+    /**
      *  @brief Return the primary track associated with a PFParticle
      *
      *  @param particlesToTracks the mapping between particles and tracks
@@ -421,6 +431,16 @@ public:
      *  @return true/false
      */
     static bool IsShower(const art::Ptr<recob::PFParticle> particle);
+
+    /**
+     *  @brief  Determine whether a particle is visible (i.e. long-lived charged particle)
+     *
+     *  @param  particle the input mc particle
+     *
+     *  @return true/false
+     */
+    static bool IsVisible(const art::Ptr<simb::MCParticle> particle);
+
 };
 
 } // namespace lar_pandora

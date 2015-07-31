@@ -734,15 +734,24 @@ void LArPandoraCollector::BuildMCParticleHitMaps(const HitsToTrackIDEs &hitsToTr
             if (particleMap.end() == iter3)
                 throw cet::exception("LArPandora") << " PandoraCollector::BuildMCParticleHitMaps --- Found a track ID without an MC Particle ";
 
-            const art::Ptr<simb::MCParticle> thisParticle = iter3->second;
-            const art::Ptr<simb::MCParticle> particle((kAddDaughters == daughterMode) ? 
-                LArPandoraCollector::GetParentMCParticle(particleMap, thisParticle) : thisParticle);
+            try
+	    {   
+                const art::Ptr<simb::MCParticle> thisParticle = iter3->second;
+                const art::Ptr<simb::MCParticle> primaryParticle(LArPandoraCollector::GetPrimaryMCParticle(particleMap, thisParticle));
+                const art::Ptr<simb::MCParticle> selectedParticle((kAddDaughters == daughterMode) ? primaryParticle : thisParticle);
 
-            if ((kIgnoreDaughters == daughterMode) && !(particleMap.end() == particleMap.find(particle->Mother())))
-                continue;
+                if ((kIgnoreDaughters == daughterMode) && (selectedParticle != primaryParticle))
+                    continue;
 
-            particlesToHits[particle].push_back(hit);
-            hitsToParticles[hit] = particle;
+                if (!(LArPandoraCollector::IsVisible(selectedParticle)))
+		    continue;
+
+                particlesToHits[selectedParticle].push_back(hit);
+                hitsToParticles[hit] = selectedParticle;
+	    }
+            catch (cet::exception &e)
+            {
+	    }
         }
     }
 }
@@ -827,6 +836,38 @@ art::Ptr<simb::MCParticle> LArPandoraCollector::GetParentMCParticle(const MCPart
     return outputParticle;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<simb::MCParticle> LArPandoraCollector::GetPrimaryMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> inputParticle)
+{
+    // Navigate upward through MC daughter/parent links - collect this particle and all its parents
+    MCParticleVector mcVector;
+
+    int trackID(inputParticle->TrackId());
+   
+    while(1)
+    {
+        MCParticleMap::const_iterator pIter = particleMap.find(trackID); 
+        if (particleMap.end() == pIter)
+            break; // Can't find MC Particle for this track ID [break]
+
+        const art::Ptr<simb::MCParticle> particle = pIter->second;
+        mcVector.push_back(particle);
+
+        trackID = particle->Mother();
+    }
+
+    // Navigate downward through MC parent/daughter links - return the first long-lived charged particle
+    for (MCParticleVector::const_reverse_iterator iter = mcVector.rbegin(), iterEnd = mcVector.rend(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<simb::MCParticle> nextParticle = *iter;
+        
+        if (LArPandoraCollector::IsVisible(nextParticle))
+            return nextParticle;
+    }
+
+    throw cet::exception("LArPandora"); // need to catch this exception
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -920,5 +961,25 @@ bool LArPandoraCollector::IsShower(const art::Ptr<recob::PFParticle> particle)
     // electron, photon (use Pandora PDG tables)
     return ((pandora::E_MINUS == std::abs(pdg)) || (pandora::PHOTON == std::abs(pdg)));
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraCollector::IsVisible(const art::Ptr<simb::MCParticle> particle)
+{
+    // Include long-lived charged particles
+    const int pdg(particle->PdgCode());
+
+    if ((pandora::E_MINUS == std::abs(pdg)) || (pandora::MU_MINUS == std::abs(pdg)) || (pandora::PROTON == std::abs(pdg)) || 
+        (pandora::PI_PLUS == std::abs(pdg)) || (pandora::K_PLUS == std::abs(pdg)) || 
+        (pandora::SIGMA_MINUS == std::abs(pdg)) || (pandora::SIGMA_PLUS == std::abs(pdg)) || (pandora::HYPERON_MINUS == std::abs(pdg)) || 
+        (pandora::PHOTON == std::abs(pdg)) || (pandora::NEUTRON == std::abs(pdg)))
+        return true;
+
+    // TODO: What about ions, neutrons, photons? (Have included neutrons and photons for now)
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 } // namespace lar_pandora
