@@ -20,6 +20,7 @@
 #include "RecoBase/PFParticle.h"
 
 // Pandora includes
+#include "LArObjects/LArMCParticle.h"
 #include "Objects/ParticleFlowObject.h"
 #include "LArContent.h"
 
@@ -180,9 +181,10 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
         PandoraApi::CaloHit::Parameters caloHitParameters;
         caloHitParameters.m_expectedDirection = pandora::CartesianVector(0., 0., 1.);
         caloHitParameters.m_cellNormalVector = pandora::CartesianVector(0., 0., 1.);
-        caloHitParameters.m_cellSizeU = m_dx_cm;
-        caloHitParameters.m_cellSizeV = (m_useHitWidths ? dxpos_cm : m_dx_cm);
+        caloHitParameters.m_cellSize0 = m_dx_cm;
+        caloHitParameters.m_cellSize1 = (m_useHitWidths ? dxpos_cm : m_dx_cm);
         caloHitParameters.m_cellThickness = wire_pitch_cm;
+        caloHitParameters.m_cellGeometry = pandora::RECTANGULAR;
         caloHitParameters.m_time = 0.;
         caloHitParameters.m_nCellRadiationLengths = m_dx_cm / m_rad_cm;
         caloHitParameters.m_nCellInteractionLengths = m_dx_cm / m_int_cm;
@@ -298,9 +300,10 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
         caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, ypos_cm, zpos_cm);
         caloHitParameters.m_cellNormalVector = pandora::CartesianVector(0., 0., 1.);
         caloHitParameters.m_expectedDirection = pandora::CartesianVector(0., 0., 1.);
-        caloHitParameters.m_cellSizeU = m_dx_cm;
-        caloHitParameters.m_cellSizeV = m_dx_cm;
+        caloHitParameters.m_cellSize0 = m_dx_cm;
+        caloHitParameters.m_cellSize1 = m_dx_cm;
         caloHitParameters.m_cellThickness = wire_pitch_cm;
+        caloHitParameters.m_cellGeometry = pandora::RECTANGULAR;
         caloHitParameters.m_time = 0.;
         caloHitParameters.m_nCellRadiationLengths = m_dx_cm / m_rad_cm;
         caloHitParameters.m_nCellInteractionLengths = m_dx_cm / m_int_cm;
@@ -369,6 +372,8 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
     // Loop over MC truth objects
     int neutrinoCounter(0);
 
+    lar_content::LArMCParticleFactory mcParticleFactory;
+
     for (MCTruthToMCParticles::const_iterator iter1 = truthToParticleMap.begin(), iterEnd1 = truthToParticleMap.end(); iter1 != iterEnd1; ++iter1)
     {
         const art::Ptr<simb::MCTruth> truth = iter1->first;
@@ -384,7 +389,8 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
             const int neutrinoID(neutrinoCounter + 4 * m_uidOffset);
 
             // Create Pandora 3D MC Particle
-            PandoraApi::MCParticle::Parameters mcParticleParameters;
+            lar_content::LArMCParticleParameters mcParticleParameters;
+            mcParticleParameters.m_nuanceCode = neutrino.InteractionType();
             mcParticleParameters.m_energy = neutrino.Nu().E();
             mcParticleParameters.m_momentum = pandora::CartesianVector(neutrino.Nu().Px(), neutrino.Nu().Py(), neutrino.Nu().Pz());
             mcParticleParameters.m_vertex = pandora::CartesianVector(neutrino.Nu().Vx(), neutrino.Nu().Vy(), neutrino.Nu().Vz());
@@ -397,7 +403,7 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
                 pIter != pIterEnd; ++pIter)
             {
                 const pandora::Pandora *const pPandora = pIter->second;
-                PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters));
+                PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters, mcParticleFactory));
             }
 
             // Loop over associated particles
@@ -472,7 +478,8 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
             const float E(particle->E(firstT));
 
             // Create 3D Pandora MC Particle
-            PandoraApi::MCParticle::Parameters mcParticleParameters;
+            lar_content::LArMCParticleParameters mcParticleParameters;
+            mcParticleParameters.m_nuanceCode = 0;
             mcParticleParameters.m_energy = E;
             mcParticleParameters.m_particleId = particle->PdgCode();
             mcParticleParameters.m_momentum = pandora::CartesianVector(pX, pY, pZ);
@@ -480,7 +487,7 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
             mcParticleParameters.m_endpoint = pandora::CartesianVector(endX, endY, endZ);
             mcParticleParameters.m_mcParticleType = pandora::MC_3D;
             mcParticleParameters.m_pParentAddress = (void*)((intptr_t)particle->TrackId());
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters));
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters, mcParticleFactory));
 
             // Create Mother/Daughter Links between 3D MC Particles
             const int id_mother(particle->Mother());
@@ -499,6 +506,8 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
 
 void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVector) const
 {
+    lar_content::LArMCParticleFactory mcParticleFactory;
+
     for (MCParticleVector::const_iterator iter = particleVector.begin(), iterEnd = particleVector.end(); iter != iterEnd; ++iter)
     {
         const art::Ptr<simb::MCParticle> particle = *iter;
@@ -558,7 +567,8 @@ void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVe
             const float endX0(this->GetTrueX0(particle, lastT));
 
             // Create 2D Pandora MC Particles for each view
-            PandoraApi::MCParticle::Parameters mcParticleParameters;
+            lar_content::LArMCParticleParameters mcParticleParameters;
+            mcParticleParameters.m_nuanceCode = 0;
             mcParticleParameters.m_energy = E;
             mcParticleParameters.m_particleId = particle->PdgCode();
 
@@ -571,7 +581,7 @@ void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVe
                 lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(endY, endZ));
             mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_U;
             mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 1 * m_uidOffset));
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters));
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters, mcParticleFactory));
 
             // Create V projection
             mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f,
@@ -582,7 +592,7 @@ void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVe
                 lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(endY, endZ));
             mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_V;
             mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 2 * m_uidOffset));
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters));
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters, mcParticleFactory));
 
             // Create W projection
             mcParticleParameters.m_momentum = pandora::CartesianVector(pX, 0.f, pZ);
@@ -590,7 +600,7 @@ void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVe
             mcParticleParameters.m_endpoint = pandora::CartesianVector(endX + endX0,  0.f, endZ);
             mcParticleParameters.m_mcParticleType = pandora::MC_VIEW_W;
             mcParticleParameters.m_pParentAddress = (void*)((intptr_t)(particle->TrackId() + 3 * m_uidOffset));
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters));
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*pPandora, mcParticleParameters, mcParticleFactory));
         }
     }
 }

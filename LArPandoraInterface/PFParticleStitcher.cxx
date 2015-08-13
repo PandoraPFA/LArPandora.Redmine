@@ -61,9 +61,11 @@ void PFParticleStitcher::reconfigure(fhicl::ParameterSet const &pset)
 
     m_enableStitching = pset.get<bool>("EnableStitching", true);
     m_useXcoordinate = pset.get<bool>("UseXCoordinate", true);
-    m_minCosRelativeAngle = pset.get<float>("MaxCosRelativeAngle", 0.966);
+    m_minCosRelativeAngle = pset.get<float>("MinCosRelativeAngle", 0.966);
     m_maxLongitudinalDisplacementX = pset.get<float>("MaxLongitudinalDisplacementX", 15.f);
     m_maxTransverseDisplacement = pset.get<float>("MaxTransverseDisplacement", 5.f);
+    m_relaxCosRelativeAngle = pset.get<float>("RelaxCosRelativeAngle", 0.906);
+    m_relaxTransverseDisplacement = pset.get<float>("RelaxTransverseDisplacement", 2.5f);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -543,7 +545,7 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 
         if (particleTrajectories.end() != iter6)
 	{
-	    const std::vector<pandora::TrackState> &trackStateVector = iter6->second;
+	    const lar_content::LArTrackStateVector &trackStateVector = iter6->second;
 
             if (trackStateVector.empty())
                 throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- Found a track without any trajectory points";
@@ -557,9 +559,9 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
 	        outputTracks->size() - 1, outputTracks->size());
 
             // Build seed
-            const pandora::TrackState &trackState = trackStateVector.front();
+            const lar_content::LArTrackState &trackState = trackStateVector.front();
             const pandora::CartesianVector &vtxPos = trackState.GetPosition();
-            const pandora::CartesianVector &vtxDir = trackState.GetMomentum().GetUnitVector();
+            const pandora::CartesianVector &vtxDir = trackState.GetDirection();
 
             double pos[3]     = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
             double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
@@ -763,7 +765,7 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
     // Relative Angles
     const float cosRelativeAngle(-dir1.GetDotProduct(dir2));
 
-    if (cosRelativeAngle < m_minCosRelativeAngle)
+    if (cosRelativeAngle < m_relaxCosRelativeAngle)
         return;
 
     // Impact Parameters
@@ -807,8 +809,15 @@ void PFParticleStitcher::CreateParticleMatches(const art::Ptr<recob::PFParticle>
     {
     }
 
-    if (rL1 < -1.f || rL1 > rCutL1 || rL2 < -1.f || rL2 > rCutL2 ||
-        rT1 > m_maxTransverseDisplacement || rT2 > m_maxTransverseDisplacement)
+    // Cut on longitudinal displacement
+    if (rL1 < -1.f || rL1 > rCutL1 || rL2 < -1.f || rL2 > rCutL2)
+        return;
+
+    // Cut on transverse displacement and relative angle
+    const bool minPass(std::min(rT1, rT2) < m_relaxTransverseDisplacement && cosRelativeAngle > m_relaxCosRelativeAngle);
+    const bool maxPass(std::max(rT1, rT2) < m_maxTransverseDisplacement && cosRelativeAngle > m_minCosRelativeAngle);
+
+    if (!minPass && !maxPass)
         return;
 
     // Store Association 
@@ -973,7 +982,7 @@ void PFParticleStitcher::OrderParticleMerges(const PFParticleMergeMap &particleM
     const PFParticlesToHits &particlesToHits, PFParticleTrajectoryMap &particleTrajectories) const
 {
     // Create typedef for track trajectory
-    typedef std::map< const float, std::vector<pandora::TrackState> > TrackTrajectoryMap;
+    typedef std::map< const float, lar_content::LArTrackStateVector > TrackTrajectoryMap;
 
     // Loop over top-level particles 
     for (PFParticleMergeMap::const_iterator iter = particleMerges.begin(), iterEnd = particleMerges.end(); iter != iterEnd; ++iter)    
@@ -1021,9 +1030,10 @@ void PFParticleStitcher::OrderParticleMerges(const PFParticleMergeMap &particleM
             const bool isForward(trackDirection.Dot(track->End() - track->Vertex()) > 0.0);
             const float displacement(trackDirection.Dot(detectorPosition));
             const float propagation(isForward ? +1.0 : -1.0);
+            const float dQdxEpsilon(std::numeric_limits<float>::epsilon());
 
             // Fill vector of TrackState objects
-	    std::vector<pandora::TrackState> trackStateVector;
+	    lar_content::LArTrackStateVector trackStateVector;
 
             for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
 	    {
@@ -1031,9 +1041,17 @@ void PFParticleStitcher::OrderParticleMerges(const PFParticleMergeMap &particleM
                 const TVector3 position(track->LocationAtPoint(pEntry));
                 const TVector3 direction(propagation * track->DirectionAtPoint(pEntry));
 
-                trackStateVector.push_back(pandora::TrackState(
+                const float dQdxU(track->DQdxAtPoint(pEntry, geo::kU));
+                const float dQdxV(track->DQdxAtPoint(pEntry, geo::kV));
+                const float dQdxW(track->DQdxAtPoint(pEntry, geo::kW));
+
+                const pandora::HitType hitType((dQdxU > dQdxEpsilon) ? pandora::TPC_VIEW_U : (dQdxV > dQdxEpsilon) ? pandora::TPC_VIEW_V : pandora::TPC_VIEW_W);
+                const float dQdx((pandora::TPC_VIEW_U == hitType) ? dQdxU : (pandora::TPC_VIEW_V == hitType) ? dQdxV : dQdxW);
+
+                trackStateVector.push_back(lar_content::LArTrackState(
 		    pandora::CartesianVector(position.x(), position.y(), position.z()), 
-		    pandora::CartesianVector(direction.x(), direction.y(), direction.z())));
+		    pandora::CartesianVector(direction.x(), direction.y(), direction.z()),
+                    hitType, dQdx, 1.f));
 	    }
 
             trajectoryMap.insert(TrackTrajectoryMap::value_type(displacement, trackStateVector));
@@ -1042,7 +1060,7 @@ void PFParticleStitcher::OrderParticleMerges(const PFParticleMergeMap &particleM
         // Third loop: concatenate trajectory points
         for (TrackTrajectoryMap::const_iterator tIter1 = trajectoryMap.begin(), tIterEnd1 = trajectoryMap.end(); tIter1 != tIterEnd1; ++tIter1)
 	{
-            for (std::vector<pandora::TrackState>::const_iterator tIter2 = tIter1->second.begin(), tIterEnd2 = tIter1->second.end();
+            for (lar_content::LArTrackStateVector::const_iterator tIter2 = tIter1->second.begin(), tIterEnd2 = tIter1->second.end();
 		 tIter2 != tIterEnd2; ++tIter2)
 	    {
                 particleTrajectories[primaryParticle].push_back(*tIter2);

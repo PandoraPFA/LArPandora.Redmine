@@ -18,6 +18,7 @@
 #include "Utilities/TimeService.h"
 
 // Pandora includes
+#include "Pandora/PdgTable.h"
 #include "Objects/ParticleFlowObject.h"
 
 // Local LArPandora includes

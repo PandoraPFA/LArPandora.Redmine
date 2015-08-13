@@ -12,7 +12,7 @@
 
 // Pandora includes
 #include "Objects/CartesianVector.h"
-#include "Objects/TrackState.h"
+#include "LArObjects/LArTrackPfo.h"
 
 // Local LArPandora includes
 #include "LArPandoraInterface/LArPandoraCollector.h"
@@ -161,7 +161,7 @@ protected:
     typedef std::set< art::Ptr<recob::PFParticle> >                       PFParticleList;
     typedef std::map< art::Ptr<recob::PFParticle>, PFParticleList >       PFParticleMergeMap;
 
-    typedef std::map< art::Ptr<recob::PFParticle>, std::vector<pandora::TrackState> > PFParticleTrajectoryMap;
+    typedef std::map< art::Ptr<recob::PFParticle>, lar_content::LArTrackStateVector > PFParticleTrajectoryMap;
 
     /**
      *  @brief Configure this module
@@ -264,7 +264,7 @@ protected:
     void SelectParticleMerges(const PFParticleVector &particleVector, const PFParticleMergeMap &inputMergeMap,
         PFParticleMergeMap &outputMergeMap) const;
 
-    /*
+    /**
      *  @brief Order the PFParticle merges
      *
      *  @param particleMerges  the collated map of PFParticle merges
@@ -354,6 +354,8 @@ protected:
     float         m_minCosRelativeAngle;              ///<
     float         m_maxLongitudinalDisplacementX;     ///<
     float         m_maxTransverseDisplacement;        ///<
+    float         m_relaxCosRelativeAngle;            ///<
+    float         m_relaxTransverseDisplacement;      ///<
 
     TTree        *m_pRecoTree;                        ///<
     int           m_run;                              ///<
