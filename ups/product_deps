@@ -7,8 +7,8 @@ fcldir  product_dir job
 gdmldir product_dir scripts
 #
 product         version
-larsim          v04_08_04
-larreco         v04_13_00
+larsim          v04_09_01
+larreco         v04_14_01
 pandora         v01_01_00b
 gcc             v4_9_2
 
