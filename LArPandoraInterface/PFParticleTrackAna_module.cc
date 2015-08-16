@@ -135,9 +135,6 @@ void PFParticleTrackAna::reconfigure(fhicl::ParameterSet const &pset)
 
 void PFParticleTrackAna::beginJob()
 {
-    //mf::LogDebug("LArPandora") 
-    std::cout << " *** PFParticleTrackAna::beginJob() *** " << std::endl; 
-
     // 
     art::ServiceHandle<art::TFileService> tfs;
  
@@ -171,7 +168,7 @@ void PFParticleTrackAna::endJob()
 
 void PFParticleTrackAna::analyze(const art::Event &evt)
 {
-    std::cout << " *** PFParticleTrackAna::analyze(...) *** " << std::endl;
+    std::cout <<  " *** PFParticleTrackAna::analyze(...) *** " << std::endl;
 
     m_run = evt.run();
     m_event = evt.id().event();
@@ -262,7 +259,11 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
             const double adc2e(m_isCheated ? adc2eCheat : (geo::kU == m_plane) ? adc2eU : (geo::kV == m_plane) ? adc2eV : adc2eW);
 
             m_dQdx = ((geo::kU == m_plane) ? dQdxU : (geo::kV == m_plane) ? dQdxV : dQdxW);
+
+            // TODO: Need to include T0 information (currently assume T0 = 0)
+
             m_dNdx = ((m_dQdx / adc2e) * exp((m_x / theDetector->GetXTicksCoefficient()) * theDetector->SamplingRate() * 1.e-3 / tau));
+
             m_dEdx = (m_useModBox ? theLiquidArgon->ModBoxCorrection(m_dNdx) : theLiquidArgon->BirksCorrection(m_dNdx));
 
             m_pCaloTree->Fill();

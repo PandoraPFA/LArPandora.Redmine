@@ -10,7 +10,7 @@ microboone_pandora:
   EnableProduction:      true
   EnableMonitoring:      false
   UseHitWidths:          true
-  BuildTracks:           false
+  BuildTracks:           true
   BuildShowers:          false
 }
 
