@@ -138,6 +138,7 @@ private:
      int          m_pfoNuPdg;               ///<
      int          m_pfoIsPrimary;           ///<
 
+     int          m_pfoTrack;               ///<
      int          m_pfoVertex;              ///<
      double       m_pfoVtxX;                ///<
      double       m_pfoVtxY;                ///<
@@ -305,6 +306,7 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("pfoPdg", &m_pfoPdg, "pfoPdg/I");
     m_pRecoTree->Branch("pfoNuPdg", &m_pfoNuPdg, "pfoNuPdg/I");
     m_pRecoTree->Branch("pfoIsPrimary", &m_pfoIsPrimary, "pfoIsPrimary/I");
+    m_pRecoTree->Branch("pfoTrack", &m_pfoTrack, "pfoTrack/I");
     m_pRecoTree->Branch("pfoVertex", &m_pfoVertex, "pfoVertex/I");
     m_pRecoTree->Branch("pfoVtxX", &m_pfoVtxX, "pfoVtxX/D");
     m_pRecoTree->Branch("pfoVtxY", &m_pfoVtxY, "pfoVtxY/D");
@@ -381,7 +383,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_pfoPdg = 0;
     m_pfoNuPdg = 0;
     m_pfoIsPrimary = 0;
-
+    m_pfoTrack = 0;
     m_pfoVertex = 0;
     m_pfoVtxX = 0.0;
     m_pfoVtxY = 0.0;
@@ -570,7 +572,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_pfoPdg = 0;
         m_pfoNuPdg = 0;
         m_pfoIsPrimary = 0;
-
+        m_pfoTrack = 0;
         m_pfoVertex = 0;
         m_pfoVtxX = 0.0;
         m_pfoVtxY = 0.0;
@@ -788,6 +790,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                     const TVector3 &endPosition = recoTrack->End();
                     const TVector3 &vtxDirection = recoTrack->VertexDirection();
 
+                    m_pfoTrack = 1;
                     m_pfoVtxX = vtxPosition.x();
                     m_pfoVtxY = vtxPosition.y();
                     m_pfoVtxZ = vtxPosition.z();

@@ -19,12 +19,9 @@
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/TrackState.h"
 #include "Objects/Vertex.h"
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArPfoHelper.h"
 
 // Local LArrPandora includes
 #include "LArPandoraInterface/LArPandoraHelper.h"
-#include "LArPandoraInterface/PFParticleSeed.h"
 
 // System includes
 #include <limits>
@@ -127,47 +124,19 @@ recob::Track LArPandoraHelper::BuildTrack(const int id, const pandora::ParticleF
 {
     mf::LogDebug("LArPandora") << "   Building Track [" << id << "], PdgCode = " << pPfo->GetParticleId() << std::endl;
 
-    // Use sliding fits to calculate 3D trajectory points
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    const float layerPitch((theGeometry->WirePitch(geo::kU) + theGeometry->WirePitch(geo::kV) + theGeometry->WirePitch(geo::kW))/3.f);
-    const unsigned int layerWindow(20);
-
-    std::vector<pandora::TrackState> trackStateVector;
-
-    try
-    {
-        lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, layerWindow, layerPitch, trackStateVector);
-    }
-    catch (pandora::StatusCodeException &statusCodeException)
-    {
-    }
+    const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
+        
+    if (NULL == pLArTrackPfo)
+        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- input pfo was not track-like ";
+        
+    const lar_content::LArTrackStateVector &trackStateVector =  pLArTrackPfo->m_trackStateVector;
 
     return BuildTrack(id, trackStateVector);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<art::Ptr<recob::SpacePoint>> &spacepoints, const bool isCosmic)
-{
-    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of Space Points = " << spacepoints.size() << std::endl;
-
-    // Use linear regression to calculate 3D trajectory points
-    std::vector<pandora::TrackState> trackStateVector;
-
-    try
-    {
-        PFParticleFitter::GetLinearTrajectory(spacepoints, trackStateVector, isCosmic);
-    }
-    catch (pandora::StatusCodeException &statusCodeException)
-    {
-    }
-
-    return BuildTrack(id, trackStateVector);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<pandora::TrackState> &trackStateVector)
+recob::Track LArPandoraHelper::BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector)
 {
     mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of trajectory points = " << trackStateVector.size() << std::endl;
 
@@ -177,22 +146,29 @@ recob::Track LArPandoraHelper::BuildTrack(const int id, const std::vector<pandor
     // Fill list of track properties
     std::vector<TVector3>               xyz;
     std::vector<TVector3>               pxpypz;
-    std::vector< std::vector <double> > dQdx = std::vector< std::vector<double> >(0);
-    std::vector<double>                 fitMomentum = std::vector<double>(2, util::kBogusD);
+    std::vector< std::vector<double> >  dQdx(3);
+    std::vector<double>                 momentum = std::vector<double>(2, util::kBogusD);
 
     // Loop over trajectory points
-    for (std::vector<pandora::TrackState>::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
+    for (lar_content::LArTrackStateVector::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
         tIter != tIterEnd; ++tIter)
     {
-        const pandora::TrackState &nextPoint = *tIter;
-        const pandora::CartesianVector position(nextPoint.GetPosition());
-        const pandora::CartesianVector direction(nextPoint.GetMomentum().GetUnitVector());
-        xyz.push_back(TVector3(position.GetX(), position.GetY(), position.GetZ()));
-        pxpypz.push_back(TVector3(direction.GetX(), direction.GetY(), direction.GetZ()));
+        const lar_content::LArTrackState &nextPoint = *tIter;
+
+        if (nextPoint.GetdQdL() < std::numeric_limits<float>::epsilon())
+            continue;
+
+        const float dQdxU((pandora::TPC_VIEW_U == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
+        const float dQdxV((pandora::TPC_VIEW_V == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
+        const float dQdxW((pandora::TPC_VIEW_W == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
+
+	xyz.push_back(TVector3(nextPoint.GetPosition().GetX(), nextPoint.GetPosition().GetY(), nextPoint.GetPosition().GetZ()));
+        pxpypz.push_back(TVector3(nextPoint.GetDirection().GetX(), nextPoint.GetDirection().GetY(), nextPoint.GetDirection().GetZ()));
+        dQdx.at(geo::kU).push_back(dQdxU); dQdx.at(geo::kV).push_back(dQdxV); dQdx.at(geo::kW).push_back(dQdxW);
     }
 
     // Return a new recob::Track object (of the Bezier variety)
-    return recob::Track(xyz, pxpypz, dQdx, fitMomentum, id);
+    return recob::Track(xyz, pxpypz, dQdx, momentum, id);
 }
 
 } // namespace lar_pandora

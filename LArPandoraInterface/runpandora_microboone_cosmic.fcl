@@ -35,13 +35,14 @@ physics:
     pandorana: {module_type: PFParticleAnalysis}
     pandorahits: {module_type: PFParticleHitDumper}
     pandoramonitoring:  {module_type: PFParticleMonitoring}
+    pandoratracks: {module_type: PFParticleTrackAna}
   }
 
   ### Set up a chain of Producer modules
   reco: [ pandora ]
 
   ### Set up a chain of Analyzer modules
-  ana: [ pandorana, pandorahits, pandoramonitoring ]
+  ana: [ pandorana, pandorahits, pandoratracks, pandoramonitoring ]
 
   ### Set up the trigger paths (these are the modules that modify the event)
   trigger_paths: [ reco ] 
@@ -58,8 +59,15 @@ physics.analyzers.pandoramonitoring.UseDaughterPFParticles:  true
 physics.analyzers.pandoramonitoring.HitFinderModule: "gaushit"
 physics.analyzers.pandoramonitoring.SpacePointModule: "pandora"
 physics.analyzers.pandoramonitoring.PFParticleModule: "pandora"
+physics.analyzers.pandoramonitoring.TrackModule: "pandora"
+physics.analyzers.pandoramonitoring.PrintDebug: true
+physics.analyzers.pandoramonitoring.RecursiveMatching: true
 physics.analyzers.pandorahits.HitFinderModule: "gaushit"
 physics.analyzers.pandorahits.SpacePointModule: "pandora"
 physics.analyzers.pandorahits.PFParticleModule: "pandora"
+physics.analyzers.pandorahits.TrackModule: "pandora"
 physics.analyzers.pandorana.SpacePointModule: "pandora"
 physics.analyzers.pandorana.PFParticleModule: "pandora"
+physics.analyzers.pandorana.TrackModule: "pandora"
+physics.analyzers.pandorana.PrintDebug: true
+physics.analyzers.pandoratracks.TrackModule: "pandora"

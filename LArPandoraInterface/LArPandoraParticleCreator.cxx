@@ -32,8 +32,8 @@ namespace lar_pandora {
 
 LArPandoraParticleCreator::LArPandoraParticleCreator(fhicl::ParameterSet const &pset) : LArPandoraBase(pset)
 {
-    m_buildTracks = pset.get<bool>("BuildTracks", false);
-    m_buildShowers = pset.get<bool>("BuildShowers", false);
+    m_buildTracks = pset.get<bool>("BuildTracks", true);
+    m_buildShowers = pset.get<bool>("BuildShowers", true);
 
     produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
