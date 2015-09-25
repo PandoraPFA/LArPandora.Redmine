@@ -47,7 +47,7 @@ find_ups_product( larsim v1_00_00 )
 find_ups_product( larreco v1_00_00 )
 find_ups_product( nutools v0_00_00 )
 find_ups_product( art v1_09_00 )
-find_ups_product( pandora v00_17 )
+find_ups_product( pandora v02_00_00 )
 find_ups_product( cetbuildtools v4_09_00 )
 find_ups_product( postgresql v9_1_5 )
 
