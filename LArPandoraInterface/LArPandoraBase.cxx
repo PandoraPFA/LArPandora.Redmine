@@ -8,9 +8,8 @@
 #include "Geometry/PlaneGeo.h"
 #include "Geometry/WireGeo.h"
 
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
+#include "Utilities/DetectorPropertiesService.h"
+#include "Utilities/DetectorClocksService.h"
 
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "SimulationBase/MCTruth.h"
@@ -128,7 +127,7 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
 
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
+    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
 
     // Loop over ART hits
     int hitCounter(0);
@@ -266,8 +265,7 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
 
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
-    art::ServiceHandle<util::LArProperties> theLiquidArgon;
+    //    art::ServiceHandle<util::DetectorProperties> theDetector;
 
     // Loop over ART SpacePoints
     int spacePointCounter(m_uidOffset);
@@ -806,8 +804,8 @@ void LArPandoraBase::GetTrueStartAndEndPoints(const unsigned int cstat, const un
 float LArPandoraBase::GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nt) const
 {
     art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::TimeService> theTime;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
+    const dataprov::DetectorClocks* theTime = art::ServiceHandle<util::DetectorClocksService>()->getDetectorClocks();
+    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
 
     unsigned int which_tpc(0);
     unsigned int which_cstat(0);
@@ -831,14 +829,13 @@ double LArPandoraBase::GetMips(const double hit_Charge, const geo::View_t hit_Vi
 {  
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
-    art::ServiceHandle<util::LArProperties> theLiquidArgon;
+    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
 
     // TODO: Check if this procedure is correct
     const double dQdX(hit_Charge / (theGeometry->WirePitch(hit_View))); // ADC/cm
     const double dQdX_e(dQdX / (theDetector->ElectronsToADC() * m_recombination_factor)); // e/cm
 
-    double dEdX(theLiquidArgon->BirksCorrection(dQdX_e));
+    double dEdX(theDetector->BirksCorrection(dQdX_e));
 
     if ((dEdX < 0) || (dEdX > m_dEdX_max))
         dEdX = m_dEdX_max;

@@ -98,8 +98,8 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "art/Framework/Core/FindOneP.h"
 
 // LArSoft includes
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
+#include "Utilities/LArPropertiesService.h"
 #include "Geometry/Geometry.h"
 
 // Local includes
@@ -200,8 +200,8 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
     std::cout << "  Tracks: " << trackVector.size() << std::endl;
 
     art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
-    art::ServiceHandle<util::LArProperties> theLiquidArgon; 
+    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    //   const dataprov::LArProperties* theLiquidArgon = art::ServiceHandle<util::LArPropertiesService>()->getLArProperties();
 
     ///// microboone_calorimetryalgmc.CalAreaConstants: [ 5.0142e-3, 5.1605e-3, 5.4354e-3 ]
     ///// lbne35t_calorimetryalgmc.CalAreaConstants: [ 5.1822e-3, 5.2682e-3, 5.3962e-3 ]
@@ -211,7 +211,7 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
     const double adc2eW(5.4e-3);
     const double adc2eCheat(theDetector->ElectronsToADC());
 
-    const double tau(theLiquidArgon->ElectronLifetime());
+    const double tau(theDetector->ElectronLifetime());
 
     m_ntracks = trackVector.size();
 
@@ -264,7 +264,7 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
 
             m_dNdx = ((m_dQdx / adc2e) * exp((m_x / theDetector->GetXTicksCoefficient()) * theDetector->SamplingRate() * 1.e-3 / tau));
 
-            m_dEdx = (m_useModBox ? theLiquidArgon->ModBoxCorrection(m_dNdx) : theLiquidArgon->BirksCorrection(m_dNdx));
+            m_dEdx = (m_useModBox ? theDetector->ModBoxCorrection(m_dNdx) : theDetector->BirksCorrection(m_dNdx));
 
             m_pCaloTree->Fill();
             ++m_index;

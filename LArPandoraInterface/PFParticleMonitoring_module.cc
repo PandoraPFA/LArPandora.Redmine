@@ -232,8 +232,6 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
 #include "Utilities/AssociationUtil.h"
 
 #include "SimulationBase/MCTruth.h"
