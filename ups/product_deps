@@ -9,7 +9,7 @@ gdmldir product_dir scripts
 product         version
 larsim          v04_11_00
 larreco         v04_17_02
-pandora         v02_01_00
+larpandoracontent         v02_03_00
 gcc             v4_9_2
 
 cetbuildtools	v4_13_00	-	only_for_build
@@ -17,7 +17,7 @@ end_product_list
 
   
 # e7  - with gcc 4.9.1 and -std=c++1y
-qualifier	larsim		larreco		pandora		gcc	notes
+qualifier	larsim		larreco		larpandoracontent		gcc	notes
 e7:debug	e7:debug	e7:debug	nu:e7:debug	-nq-
 e7:opt		e7:opt		e7:opt		nu:e7:opt	-nq-
 e7:prof		e7:prof		e7:prof		nu:e7:prof	-nq-

@@ -48,6 +48,7 @@ find_ups_product( larreco v1_00_00 )
 find_ups_product( nutools v0_00_00 )
 find_ups_product( art v1_09_00 )
 find_ups_product( pandora v02_00_00 )
+find_ups_product( larpandoracontent v02_00_00 )
 find_ups_product( cetbuildtools v4_09_00 )
 find_ups_product( postgresql v9_1_5 )
 
@@ -58,7 +59,7 @@ include(BuildPlugins)
 
 cet_find_library( PANDORASDK NAMES PandoraSDK PATHS ENV PANDORA_LIB )
 cet_find_library( PANDORAMONITORING NAMES PandoraMonitoring PATHS ENV PANDORA_LIB )
-cet_find_library( LARCONTENT NAMES LArContent PATHS ENV PANDORA_LIB )
+cet_find_library( LARCONTENT NAMES LArPandoraContent PATHS ENV LARPANDORACONTENT_LIB )
 
 # source
 add_subdirectory(LArPandoraInterface)
