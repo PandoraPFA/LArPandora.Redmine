@@ -1,29 +1,29 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	larpandora	v04_07_02
-defaultqual	e7
+parent	larpandora	v04_08_00
+defaultqual	e9
 #
 fcldir  product_dir job
 gdmldir product_dir scripts
 #
 product         version
-larsim          v04_12_01
-larreco         v04_19_01
-larpandoracontent         v02_03_00
-gcc             v4_9_2
+larsim          v04_13_00
+larreco         v04_20_00
+larpandoracontent         v02_03_00a
+gcc             v4_9_3
 
-cetbuildtools	v4_14_01	-	only_for_build
+cetbuildtools	v4_14_02	-	only_for_build
 end_product_list
 
   
-# e7  - with gcc 4.9.1 and -std=c++1y
+# e9  - with gcc 4.9.3 and -std=c++14
 qualifier	larsim		larreco		larpandoracontent		gcc	notes
-e7:debug	e7:debug	e7:debug	nu:e7:debug	-nq-
-e7:opt		e7:opt		e7:opt		nu:e7:opt	-nq-
-e7:prof		e7:prof		e7:prof		nu:e7:prof	-nq-
-e7:noifdh:debug	e7:noifdh:debug	e7:noifdh:debug	nu:e7:debug	-nq-
-e7:noifdh:opt	e7:noifdh:opt	e7:noifdh:opt	nu:e7:opt	-nq-
-e7:noifdh:prof	e7:noifdh:prof	e7:noifdh:prof	nu:e7:prof	-nq-
+e9:debug	e9:debug	e9:debug	nu:e9:debug	-nq-
+e9:opt		e9:opt		e9:opt		nu:e9:opt	-nq-
+e9:prof		e9:prof		e9:prof		nu:e9:prof	-nq-
+e9:noifdh:debug	e9:noifdh:debug	e9:noifdh:debug	nu:e9:debug	-nq-
+e9:noifdh:opt	e9:noifdh:opt	e9:noifdh:opt	nu:e9:opt	-nq-
+e9:noifdh:prof	e9:noifdh:prof	e9:noifdh:prof	nu:e9:prof	-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
