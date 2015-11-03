@@ -146,7 +146,7 @@ DEFINE_ART_MODULE(PFParticleHitDumper)
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "Utilities/IDetectorPropertiesService.h"
 #include "Utilities/AssociationUtil.h"
 
 #include "SimulationBase/MCTruth.h"
@@ -486,7 +486,7 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
     }
 
     // Need DetectorProperties service to convert from ticks to X
-    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    const dataprov::IDetectorProperties* theDetector = lar::providerFrom<util::IDetectorPropertiesService>();
     
     // Loop over 2D hits
     for (unsigned int i = 0; i<hitVector.size(); ++i)
@@ -531,7 +531,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
     art::ServiceHandle<geo::Geometry> theGeometry;
 
     // Need DetectorProperties service to convert from ticks to X    
-    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    const dataprov::IDetectorProperties* theDetector = lar::providerFrom<util::IDetectorPropertiesService>();
     
     // Loop over wires
     int signalCounter(0);

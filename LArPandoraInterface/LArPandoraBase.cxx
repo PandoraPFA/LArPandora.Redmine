@@ -8,8 +8,8 @@
 #include "Geometry/PlaneGeo.h"
 #include "Geometry/WireGeo.h"
 
-#include "Utilities/DetectorPropertiesService.h"
-#include "Utilities/DetectorClocksService.h"
+#include "Utilities/IDetectorPropertiesService.h"
+#include "Utilities/IDetectorClocksService.h"
 
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "SimulationBase/MCTruth.h"
@@ -127,7 +127,7 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
 
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
-    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    const dataprov::IDetectorProperties* theDetector = lar::providerFrom<util::IDetectorPropertiesService>();
 
     // Loop over ART hits
     int hitCounter(0);
@@ -804,8 +804,8 @@ void LArPandoraBase::GetTrueStartAndEndPoints(const unsigned int cstat, const un
 float LArPandoraBase::GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nt) const
 {
     art::ServiceHandle<geo::Geometry> theGeometry;
-    const dataprov::DetectorClocks* theTime = art::ServiceHandle<util::DetectorClocksService>()->getDetectorClocks();
-    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    const dataprov::IDetectorClocks* theTime = lar::providerFrom<util::IDetectorClocksService>();
+    const dataprov::IDetectorProperties* theDetector = lar::providerFrom<util::IDetectorPropertiesService>();
 
     unsigned int which_tpc(0);
     unsigned int which_cstat(0);
@@ -829,7 +829,7 @@ double LArPandoraBase::GetMips(const double hit_Charge, const geo::View_t hit_Vi
 {  
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
-    const dataprov::DetectorProperties* theDetector = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    const dataprov::IDetectorProperties* theDetector = lar::providerFrom<util::IDetectorPropertiesService>();
 
     // TODO: Check if this procedure is correct
     const double dQdX(hit_Charge / (theGeometry->WirePitch(hit_View))); // ADC/cm
