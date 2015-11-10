@@ -15,7 +15,7 @@
 // LArSoft includes
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "Geometry/Geometry.h"
-#include "Utilities/IDetectorClocksService.h"
+#include "Utilities/DetectorClocksService.h"
 
 // Pandora includes
 #include "Pandora/PdgTable.h"
@@ -655,7 +655,7 @@ void LArPandoraCollector::CollectMCParticles(const art::Event &evt, const std::s
 void LArPandoraCollector::BuildMCParticleHitMaps(const HitVector &hitVector, const SimChannelVector &simChannelVector, 
     HitsToTrackIDEs &hitsToTrackIDEs)
 {
-  const dataprov::IDetectorClocks* ts = lar::providerFrom<util::IDetectorClocksService>();
+  const dataprov::DetectorClocks* ts = lar::providerFrom<util::DetectorClocksService>();
 
     SimChannelMap simChannelMap;
 

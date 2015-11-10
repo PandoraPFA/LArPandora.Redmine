@@ -7,11 +7,11 @@ include_directories( $ENV{PANDORA_INC} )
 
 art_make( BASENAME_ONLY
           LIBRARY_NAME  LArPandoraInterface
-          LIB_LIBRARIES DetectorPropertiesService_service
-                        LArPropertiesService_service
+          LIB_LIBRARIES DetectorPropertiesServiceStandard_service
+                        LArPropertiesServiceStandard_service
                         Geometry
                         Geometry_service
-			DetectorClocksService_service
+			DetectorClocksServiceStandard_service
                         Simulation
                         RawData
                         RecoBase

@@ -98,8 +98,8 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "art/Framework/Core/FindOneP.h"
 
 // LArSoft includes
-#include "Utilities/IDetectorPropertiesService.h"
-#include "Utilities/ILArPropertiesService.h"
+#include "Utilities/DetectorPropertiesService.h"
+#include "Utilities/LArPropertiesService.h"
 #include "Geometry/Geometry.h"
 
 // Local includes
@@ -200,8 +200,8 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
     std::cout << "  Tracks: " << trackVector.size() << std::endl;
 
     art::ServiceHandle<geo::Geometry> theGeometry;
-    const dataprov::IDetectorProperties* theDetector = lar::providerFrom<util::IDetectorPropertiesService>();
-    //   const dataprov::ILArProperties* theLiquidArgon = lar::providerFrom<util::ILArPropertiesService>();
+    const dataprov::DetectorProperties* theDetector = lar::providerFrom<util::DetectorPropertiesService>();
+    //   const dataprov::LArProperties* theLiquidArgon = lar::providerFrom<util::LArPropertiesService>();
 
     ///// microboone_calorimetryalgmc.CalAreaConstants: [ 5.0142e-3, 5.1605e-3, 5.4354e-3 ]
     ///// lbne35t_calorimetryalgmc.CalAreaConstants: [ 5.1822e-3, 5.2682e-3, 5.3962e-3 ]
