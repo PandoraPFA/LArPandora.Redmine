@@ -265,7 +265,7 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
 
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
-    //    art::ServiceHandle<util::DetectorProperties> theDetector;
+    //    art::ServiceHandle<detinfo::DetectorPropertiesService> theDetector;
 
     // Loop over ART SpacePoints
     int spacePointCounter(m_uidOffset);

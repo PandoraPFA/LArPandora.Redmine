@@ -279,7 +279,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     }
 
     // Need DetectorProperties service to convert from ticks to X
-    //    art::ServiceHandle<util::DetectorProperties> theDetector;
+    //    art::ServiceHandle<detinfo::DetectorPropertiesService> theDetector;
 
     // Need geometry service to convert channel to wire ID
     art::ServiceHandle<geo::Geometry> theGeometry;
