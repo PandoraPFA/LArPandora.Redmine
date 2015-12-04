@@ -35,31 +35,34 @@ LArPandoraParticleCreator::LArPandoraParticleCreator(fhicl::ParameterSet const &
     m_buildTracks = pset.get<bool>("BuildTracks", true);
     m_buildShowers = pset.get<bool>("BuildShowers", true);
 
-    produces< std::vector<recob::PFParticle> >();
-    produces< std::vector<recob::SpacePoint> >();
-    produces< std::vector<recob::Cluster> >(); 
-    produces< std::vector<recob::Seed> >();
-    produces< std::vector<recob::Vertex> >();
-
-    produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
-    produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-    produces< art::Assns<recob::PFParticle, recob::Seed> >();
-    produces< art::Assns<recob::PFParticle, recob::Vertex> >();
-    produces< art::Assns<recob::SpacePoint, recob::Hit> >();
-    produces< art::Assns<recob::Cluster, recob::Hit> >();
-
-    if (m_buildTracks)
+    if (m_enableProduction)
     {
-        produces< std::vector<recob::Track> >(); 
-        produces< art::Assns<recob::PFParticle, recob::Track> >();
-        produces< art::Assns<recob::Track, recob::Hit> >();
-    }
+        produces< std::vector<recob::PFParticle> >();
+        produces< std::vector<recob::SpacePoint> >();
+        produces< std::vector<recob::Cluster> >(); 
+        produces< std::vector<recob::Seed> >();
+        produces< std::vector<recob::Vertex> >();
 
-    if (m_buildShowers)
-    {
-        produces< std::vector<recob::Shower> >(); 
-        produces< art::Assns<recob::PFParticle, recob::Shower> >();
-        produces< art::Assns<recob::Shower, recob::Hit> >();
+        produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
+        produces< art::Assns<recob::PFParticle, recob::Cluster> >();
+        produces< art::Assns<recob::PFParticle, recob::Seed> >();
+        produces< art::Assns<recob::PFParticle, recob::Vertex> >();
+        produces< art::Assns<recob::SpacePoint, recob::Hit> >();
+        produces< art::Assns<recob::Cluster, recob::Hit> >();
+
+        if (m_buildTracks)
+        {
+            produces< std::vector<recob::Track> >(); 
+            produces< art::Assns<recob::PFParticle, recob::Track> >();
+            produces< art::Assns<recob::Track, recob::Hit> >();
+        }
+
+        if (m_buildShowers)
+        {
+            produces< std::vector<recob::Shower> >(); 
+            produces< art::Assns<recob::PFParticle, recob::Shower> >();
+            produces< art::Assns<recob::Shower, recob::Hit> >();
+        }
     }
 }
 
