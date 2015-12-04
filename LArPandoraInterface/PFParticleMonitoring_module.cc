@@ -494,10 +494,13 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     MCParticlesToHits trueParticlesToHits;
     HitsToMCParticles trueHitsToParticles;
 
-    LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, trueParticleVector);
-    LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
-    LArPandoraCollector::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
-        (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kUseDaughters) : LArPandoraCollector::kIgnoreDaughters)); 
+    if (!evt.isRealData())
+    {
+        LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, trueParticleVector);
+        LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
+        LArPandoraCollector::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
+            (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kUseDaughters) : LArPandoraCollector::kIgnoreDaughters));
+    }
 
     if (m_printDebug)
         std::cout << "  MCParticles: " << trueParticlesToHits.size() << std::endl;
