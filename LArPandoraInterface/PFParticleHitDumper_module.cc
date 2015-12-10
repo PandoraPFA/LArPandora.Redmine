@@ -86,6 +86,26 @@ private:
      *  @param wireID the input wire ID
      */
      double GetUVW(const geo::WireID &wireID) const;
+  
+    /**
+     *  @brief Convert from (Y,Z) to U coordinate
+     *
+     *  @param cstat the cryostat
+     *  @param tpc the tpc
+     *  @param y the y coordinate 
+     *  @param z the z coordinate
+     */
+     double YZtoU(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const;
+
+    /**
+     *  @brief Convert from (Y,Z) to V coordinate
+     *
+     *  @param cstat the crystat
+     *  @param tpc the tpc
+     *  @param y the y coordinate
+     *  @param z the z coordinate
+     */
+     double YZtoV(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const;
 
      TTree       *m_pRecoTracks;     ///<
      TTree       *m_pReco3D;         ///< 
@@ -96,12 +116,15 @@ private:
      int          m_event;           ///< 
      int          m_particle;        ///<
      int          m_primary;         ///<
+     int          m_pdgcode;         ///<
      
      int          m_cstat;           ///<
      int          m_tpc;             ///<
      int          m_plane;           ///<
      int          m_wire;            ///<
 
+     double       m_u;               ///<
+     double       m_v;               ///<
      double       m_w;               ///<
      double       m_x;               ///<
      double       m_y;               ///<
@@ -211,17 +234,21 @@ void PFParticleHitDumper::beginJob()
     m_pReco3D->Branch("event", &m_event,"event/I");
     m_pReco3D->Branch("particle", &m_particle, "particle/I");
     m_pReco3D->Branch("primary", &m_primary, "primary/I");
+    m_pReco3D->Branch("pdgcode", &m_pdgcode, "pdgcode/I");
     m_pReco3D->Branch("cstat", &m_cstat, "cstat/I");
     m_pReco3D->Branch("tpc", &m_tpc, "tpc/I");
     m_pReco3D->Branch("plane", &m_plane, "plane/I");
     m_pReco3D->Branch("x", &m_x, "x/D");
     m_pReco3D->Branch("y", &m_y, "y/D");
+    m_pReco3D->Branch("u", &m_u, "u/D");
+    m_pReco3D->Branch("v", &m_v, "v/D");
     m_pReco3D->Branch("z", &m_z, "z/D");
 
     m_pReco2D = tfs->make<TTree>("pandora2D", "LAr Reco 2D");
     m_pReco2D->Branch("run", &m_run,"run/I");
     m_pReco2D->Branch("event", &m_event,"event/I");
     m_pReco2D->Branch("particle", &m_particle, "particle/I");
+    m_pReco2D->Branch("pdgcode", &m_pdgcode, "pdgcode/I");
     m_pReco2D->Branch("cstat", &m_cstat, "cstat/I");
     m_pReco2D->Branch("tpc", &m_tpc, "tpc/I");
     m_pReco2D->Branch("plane", &m_plane, "plane/I");
@@ -240,7 +267,6 @@ void PFParticleHitDumper::beginJob()
     m_pRecoWire->Branch("x", &m_x, "x/D");
     m_pRecoWire->Branch("w", &m_w, "w/D");
     m_pRecoWire->Branch("q", &m_q, "q/D");
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -261,6 +287,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 
     m_particle = -1;
     m_primary = 0;
+    m_pdgcode = 0;
      
     m_cstat = 0;
     m_tpc = 0;
@@ -269,6 +296,8 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 
     m_x = 0.0;
     m_y = 0.0;
+    m_u = 0.0;
+    m_v = 0.0;
     m_z = 0.0;
     m_w = 0.0;
     m_q = 0.0;
@@ -362,7 +391,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
 
         if (!trackVector.empty())
         {
-            if (trackVector.size() !=1 && m_printDebug)
+            if (trackVector.size() != 1 && m_printDebug)
                 std::cout << " Warning: Found particle with more than one associated track " << std::endl;
 	        
             const art::Ptr<recob::Track> track = *(trackVector.begin());
@@ -391,10 +420,13 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
     // Initialise variables
     m_particle = -1;
     m_primary = 0;
+    m_pdgcode = 0;
     m_cstat = 0;
     m_tpc = 0;
     m_plane = 0;
     m_x = 0.0;
+    m_u = 0.0;
+    m_v = 0.0;
     m_y = 0.0;
     m_z = 0.0;
 
@@ -421,6 +453,7 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
         const SpacePointVector &spacepoints = iter1->second;
 
         m_particle = particle->Self();
+        m_pdgcode = particle->PdgCode();
         m_primary = 0;
 
         if (particle->IsPrimary())
@@ -461,6 +494,9 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
             m_tpc   = wireID.TPC;
             m_plane = wireID.Plane;
 
+            m_u = this->YZtoU(m_cstat, m_tpc, m_y, m_z);
+            m_v = this->YZtoV(m_cstat, m_tpc, m_y, m_z);
+
             m_pReco3D->Fill();
         }
     }
@@ -472,6 +508,7 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
 { 
     // Initialise variables
     m_particle = -1;
+    m_pdgcode = 0;
     m_cstat = 0;
     m_tpc = 0;
     m_plane = 0;
@@ -495,12 +532,14 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
         const art::Ptr<recob::Hit> hit = hitVector.at(i);
 
         m_particle = -1;
+        m_pdgcode = 0;
 
         HitsToPFParticles::const_iterator pIter = hitsToParticles.find(hit);
         if (hitsToParticles.end() != pIter)
         {
             const art::Ptr<recob::PFParticle> particle = pIter->second;
             m_particle = particle->Self();
+            m_pdgcode = particle->PdgCode();
         }
                 
         const geo::WireID &wireID(hit->WireID());
@@ -599,9 +638,31 @@ double PFParticleHitDumper::GetUVW(const geo::WireID &wireID) const
 
     const double ry(ay - (ay * ny + az * nz) * ny / N2);
     const double rz(az - (ay * ny + az * nz) * nz / N2);
-    const double sign((rz >0.0) ? +1.0 : -1.0);
+    const double sign((rz > 0.0) ? +1.0 : -1.0);
 
     return sign * std::sqrt(ry * ry + rz * rz);
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+double PFParticleHitDumper::YZtoU(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const
+{
+    // TODO: Check that this stills works in DUNE
+    art::ServiceHandle<geo::Geometry> theGeometry;
+    const double m_theta(theGeometry->WireAngleToVertical(geo::kU, tpc, cstat));
+    return z * std::sin(m_theta) - y * std::cos(m_theta);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+double PFParticleHitDumper::YZtoV(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const
+{
+    // TODO; Check that this still works in DUNE
+    art::ServiceHandle<geo::Geometry> theGeometry;
+    const double m_theta(theGeometry->WireAngleToVertical(geo::kV, tpc, cstat));
+    return z * std::sin(m_theta) - y * std::cos(m_theta);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 } //namespace lar_pandora
