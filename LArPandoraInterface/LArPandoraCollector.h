@@ -57,12 +57,15 @@ typedef std::map< art::Ptr<recob::Track>,      HitVector >                    Tr
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
 typedef std::map< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit> >         SpacePointsToHits;
 typedef std::map< art::Ptr<simb::MCTruth>,     MCParticleVector >             MCTruthToMCParticles;
+typedef std::map< art::Ptr<simb::MCTruth>,     HitVector >                    MCTruthToHits;
+typedef std::map< art::Ptr<simb::MCTruth>,     art::Ptr<recob::PFParticle> >  MCTruthToPFParticles;
 typedef std::map< art::Ptr<simb::MCParticle>,  art::Ptr<simb::MCTruth> >      MCParticlesToMCTruth;
 typedef std::map< art::Ptr<simb::MCParticle>,  HitVector >                    MCParticlesToHits;
 typedef std::map< art::Ptr<simb::MCParticle>,  art::Ptr<recob::PFParticle> >  MCParticlesToPFParticles;
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<recob::SpacePoint> >  HitsToSpacePoints;
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<recob::PFParticle> >  HitsToPFParticles;
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCParticle> >   HitsToMCParticles;
+typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCTruth> >      HitsToMCTruth;
 typedef std::map< art::Ptr<recob::Hit>,        TrackIDEVector >               HitsToTrackIDEs;
 typedef std::map< art::Ptr<recob::Track>,      CosmicTagVector >              TracksToCosmicTags;
 
@@ -340,6 +343,14 @@ public:
         MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters);
 
     /**
+     *  @brief Select reconstructed neutrino particles from a list of all reconstructed particles
+     *
+     *  @param inputParticles the input vector of all particles (it has to be all of them!)
+     *  @param outputParticles the output vector of final-state particles
+     */
+    static void SelectNeutrinoPFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);    
+
+    /**
      *  @brief Select final-state reconstructed particles from a list of all reconstructed particles
      *
      *  @param inputParticles the input vector of all particles (it has to be all of them!)
@@ -348,34 +359,44 @@ public:
     static void SelectFinalStatePFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);    
 
     /**
-     *  @brief Return the parent final-state particle by navigating up the chain of parent/daughter associations
+     *  @brief Return the top-level parent particle by navigating up the chain of parent/daughter associations
      *
      *  @param particleMap the mapping between reconstructed particle and particle ID
-     *  @param daughterParticle the input daughter particle
+     *  @param daughterParticle the input PF particle
      *
-     *  @return the output parent final-state particle
+     *  @return the top-level parent particle
      */
     static art::Ptr<recob::PFParticle> GetParentPFParticle(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> daughterParticle);
 
     /**
-     *  @brief Return the parent final-state particle by navigating up the chain of parent/daughter associations
+     *  @brief Return the final-state parent particle by navigating up the chain of parent/daughter associations
+     *
+     *  @param particleMap the mapping between reconstructed particle and particle ID
+     *  @param daughterParticle the input PF particle
+     *
+     *  @return the final-state parent particle
+     */
+    static art::Ptr<recob::PFParticle> GetFinalStatePFParticle(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> daughterParticle);
+
+    /**
+     *  @brief Return the top-level parent particle by navigating up the chain of parent/daughter associations
      *
      *  @param particleMap the mapping between true particle and true track ID
-     *  @param daughterParticle the input daughter particle
+     *  @param daughterParticle the input MC particle
      *
-     *  @return the output parent final-state particle
+     *  @return the top-level parent particle
      */
     static art::Ptr<simb::MCParticle> GetParentMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> daughterParticle);
 
     /**
-     *  @brief Return the primary final-state particle by navigating up the chain of parent/daughter associations
+     *  @brief Return the final-state parent particle by navigating up the chain of parent/daughter associations
      *
      *  @param particleMap the mapping between true particle and true track ID
-     *  @param daughterParticle the input daughter particle
+     *  @param daughterParticle the input MC particle
      *
-     *  @return the output primry final-state particle
+     *  @return the final-state parent particle
      */
-    static art::Ptr<simb::MCParticle> GetPrimaryMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> daughterParticle);
+    static art::Ptr<simb::MCParticle> GetFinalStateMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> daughterParticle);
 
     /**
      *  @brief Return the primary track associated with a PFParticle
@@ -384,6 +405,16 @@ public:
      *  @param particle  the input particle
      */
     static art::Ptr<recob::Track> GetPrimaryTrack(const PFParticlesToTracks &particlesToTracks, const art::Ptr<recob::PFParticle> particle);
+
+    /**
+     *  @brief Return the generation of this particle (first generation if primary)
+     *
+     *  @param particleMap the mapping between reconstructed particle and particle ID
+     *  @param daughterParticle the input daughter particle
+     *
+     *  @return the nth generation in the particle hierarchy
+     */
+    static int GetGeneration(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> daughterParticle);
 
     /**
      *  @brief Return the parent neutrino PDG code (or zero for cosmics) for a given reconstructed particle

@@ -67,6 +67,7 @@ private:
      int          m_primary;               ///<
      int          m_parent;                ///<
      int          m_daughters;             ///<
+     int          m_generation;            ///<
      int          m_neutrino;              ///<
      int          m_finalstate;            ///<
      int          m_vertex;                ///<
@@ -176,6 +177,7 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("primary", &m_primary, "primary/I");
     m_pRecoTree->Branch("parent", &m_parent, "parent/I");  
     m_pRecoTree->Branch("daughters", &m_daughters, "daughters/I"); 
+    m_pRecoTree->Branch("generation", &m_generation, "generation/I"); 
     m_pRecoTree->Branch("neutrino", &m_neutrino, "neutrino/I");  
     m_pRecoTree->Branch("finalstate", &m_finalstate, "finalstate/I"); 
     m_pRecoTree->Branch("vertex", &m_vertex, "vertex/I"); 
@@ -231,6 +233,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_primary = 0;
     m_parent = 0;
     m_daughters = 0;
+    m_generation = 0;
     m_neutrino = 0;
     m_finalstate = 0;
     m_vertex = 0;
@@ -333,6 +336,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_primary = particle->IsPrimary();
         m_parent = (particle->IsPrimary() ? -1 : particle->Parent());
         m_daughters = particle->NumDaughters();
+        m_generation = LArPandoraCollector::GetGeneration(particleMap, particle);
         m_neutrino = LArPandoraCollector::GetParentNeutrino(particleMap, particle);
         m_finalstate = LArPandoraCollector::IsFinalState(particleMap, particle);
         m_vertex = 0;

@@ -411,7 +411,7 @@ void LArPandoraCollector::BuildPFParticleHitMaps(const PFParticleVector &particl
     {
         const art::Ptr<recob::PFParticle> thisParticle = iter1->first;
         const art::Ptr<recob::PFParticle> particle((kAddDaughters == daughterMode) ? 
-            LArPandoraCollector::GetParentPFParticle(particleMap, thisParticle) : thisParticle);
+            LArPandoraCollector::GetFinalStatePFParticle(particleMap, thisParticle) : thisParticle);
 
         if ((kIgnoreDaughters == daughterMode) && !LArPandoraCollector::IsFinalState(particleMap, particle))
             continue;
@@ -455,7 +455,7 @@ void LArPandoraCollector::BuildPFParticleHitMaps(const PFParticleVector &particl
     {
         const art::Ptr<recob::PFParticle> thisParticle = iter1->first;
         const art::Ptr<recob::PFParticle> particle((kAddDaughters == daughterMode) ? 
-            LArPandoraCollector::GetParentPFParticle(particleMap, thisParticle) : thisParticle);
+            LArPandoraCollector::GetFinalStatePFParticle(particleMap, thisParticle) : thisParticle);
 
         if ((kIgnoreDaughters == daughterMode) && !LArPandoraCollector::IsFinalState(particleMap, particle))
             continue;
@@ -517,6 +517,19 @@ void LArPandoraCollector::BuildPFParticleHitMaps(const art::Event &evt, const st
         LArPandoraCollector::BuildPFParticleHitMaps(particleVector, particlesToSpacePoints, spacePointsToHits, 
             particlesToHits, hitsToParticles, daughterMode);   
   }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraCollector::SelectNeutrinoPFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles)
+{
+    for (PFParticleVector::const_iterator iter = inputParticles.begin(), iterEnd = inputParticles.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter;
+
+        if (LArPandoraCollector::IsNeutrino(particle))
+	    outputParticles.push_back(particle);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -738,7 +751,7 @@ void LArPandoraCollector::BuildMCParticleHitMaps(const HitsToTrackIDEs &hitsToTr
             try
 	    {   
                 const art::Ptr<simb::MCParticle> thisParticle = iter3->second;
-                const art::Ptr<simb::MCParticle> primaryParticle(LArPandoraCollector::GetPrimaryMCParticle(particleMap, thisParticle));
+                const art::Ptr<simb::MCParticle> primaryParticle(LArPandoraCollector::GetFinalStateMCParticle(particleMap, thisParticle));
                 const art::Ptr<simb::MCParticle> selectedParticle((kAddDaughters == daughterMode) ? primaryParticle : thisParticle);
 
                 if ((kIgnoreDaughters == daughterMode) && (selectedParticle != primaryParticle))
@@ -777,6 +790,38 @@ void LArPandoraCollector::BuildMCParticleHitMaps(const art::Event &evt, const st
 
 art::Ptr<recob::PFParticle> LArPandoraCollector::GetParentPFParticle(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> inputParticle)
 {
+    // Navigate upward through PFO daughter/parent links - return the top-level PF Particle
+    int primaryTrackID(inputParticle->Self());
+
+    if (!inputParticle->IsPrimary())
+    {
+        while(1)
+        {
+            PFParticleMap::const_iterator pIter1 = particleMap.find(primaryTrackID); 
+            if (particleMap.end() == pIter1)
+	        throw cet::exception("LArPandora") << " PandoraCollector::GetParentPFParticle --- Found a PFParticle without a particle ID ";
+
+            const art::Ptr<recob::PFParticle> primaryParticle = pIter1->second;
+            if (primaryParticle->IsPrimary())
+                break;
+
+            primaryTrackID = primaryParticle->Parent();
+        }
+    }
+
+    PFParticleMap::const_iterator pIter2 = particleMap.find(primaryTrackID);
+    if (particleMap.end() == pIter2)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetParentPFParticle --- Found a PFParticle without a particle ID ";
+
+    const art::Ptr<recob::PFParticle> outputParticle = pIter2->second;
+    return outputParticle;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<recob::PFParticle> LArPandoraCollector::GetFinalStatePFParticle(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> inputParticle)
+{
+    // Navigate upward through PFO daughter/parent links - return the top-level non-neutrino PF Particle
     int primaryTrackID(inputParticle->Self());
 
     if (!inputParticle->IsPrimary())
@@ -787,7 +832,7 @@ art::Ptr<recob::PFParticle> LArPandoraCollector::GetParentPFParticle(const PFPar
         {
             PFParticleMap::const_iterator pIter1 = particleMap.find(parentTrackID); 
             if (particleMap.end() == pIter1)
-                throw cet::exception("LArPandora") << " PandoraCollector::GetParentPFParticle --- Found a PFParticle with a particle ID ";
+                throw cet::exception("LArPandora") << " PandoraCollector::GetFinalStatePFParticle --- Found a PFParticle without a particle ID ";
 
             const art::Ptr<recob::PFParticle> parentParticle = pIter1->second;
             if (LArPandoraCollector::IsNeutrino(parentParticle))
@@ -804,7 +849,7 @@ art::Ptr<recob::PFParticle> LArPandoraCollector::GetParentPFParticle(const PFPar
 
     PFParticleMap::const_iterator pIter2 = particleMap.find(primaryTrackID);
     if (particleMap.end() == pIter2)
-        throw cet::exception("LArPandora") << " PandoraCollector::GetParentPFParticle --- Found a PFParticle without a particle ID ";
+        throw cet::exception("LArPandora") << " PandoraCollector::GetFinalStatePFParticle --- Found a PFParticle without a particle ID ";
 
     const art::Ptr<recob::PFParticle> outputParticle = pIter2->second;
     return outputParticle;
@@ -814,6 +859,7 @@ art::Ptr<recob::PFParticle> LArPandoraCollector::GetParentPFParticle(const PFPar
 
 art::Ptr<simb::MCParticle> LArPandoraCollector::GetParentMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> inputParticle)
 {
+    // Navigate upward through MC daughter/parent links - return the top-level MC particle
     int primaryTrackID(inputParticle->TrackId());
     int parentTrackID(inputParticle->Mother());
    
@@ -839,7 +885,7 @@ art::Ptr<simb::MCParticle> LArPandoraCollector::GetParentMCParticle(const MCPart
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-art::Ptr<simb::MCParticle> LArPandoraCollector::GetPrimaryMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> inputParticle)
+art::Ptr<simb::MCParticle> LArPandoraCollector::GetFinalStateMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> inputParticle)
 {
     // Navigate upward through MC daughter/parent links - collect this particle and all its parents
     MCParticleVector mcVector;
@@ -884,6 +930,32 @@ art::Ptr<recob::Track> LArPandoraCollector::GetPrimaryTrack(const PFParticlesToT
 
     const art::Ptr<recob::Track> primaryTrack = *(tIter->second.begin());
     return primaryTrack;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int LArPandoraCollector::GetGeneration(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> inputParticle)
+{
+    // Navigate upward through PFO daughter/parent links - return the top-level PF Particle
+    int nGenerations(0);
+    int primaryTrackID(inputParticle->Self());
+
+    while(1)
+    {
+        PFParticleMap::const_iterator pIter = particleMap.find(primaryTrackID); 
+        if (particleMap.end() == pIter)
+	    throw cet::exception("LArPandora") << " PandoraCollector::GetGeneration --- Found a PFParticle without a particle ID ";
+
+        ++nGenerations;
+
+        const art::Ptr<recob::PFParticle> primaryParticle = pIter->second;
+        if (primaryParticle->IsPrimary())
+            break;
+
+        primaryTrackID = primaryParticle->Parent();
+    }
+
+    return nGenerations;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
