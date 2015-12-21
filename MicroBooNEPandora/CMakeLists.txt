@@ -7,19 +7,10 @@ include_directories( $ENV{PANDORA_INC} )
 include_directories( $ENV{LARPANDORACONTENT_INC} )
 
 art_make( BASENAME_ONLY
-          LIBRARY_NAME  LArPandoraInterface
-          LIB_LIBRARIES DetectorProperties_service
-                        LArProperties_service
-                        Geometry
+          LIBRARY_NAME  MicroBooNEPandora
+          LIB_LIBRARIES Geometry
                         Geometry_service
-                        TimeService_service
                         Simulation
-                        RawData
-                        RecoBase
-                        Utilities
-                        ClusterRecoUtil
-                        RecoAlg
-                        ClusterFinder
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         ${LARCONTENT}
@@ -39,7 +30,8 @@ art_make( BASENAME_ONLY
 			${CETLIB}
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES LArPandoraInterface 
+          MODULE_LIBRARIES LArPandoraInterface
+                           MicroBooNEPandora
           )
 
 install_headers()

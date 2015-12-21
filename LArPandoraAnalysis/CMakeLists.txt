@@ -1,13 +1,8 @@
 
-# where should the scripts/..xml file be installed?  Perhaps in bin?
-
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-include_directories( $ENV{PANDORA_INC} )
-include_directories( $ENV{LARPANDORACONTENT_INC} )
-
 art_make( BASENAME_ONLY
-          LIBRARY_NAME  LArPandoraInterface
+          LIBRARY_NAME  LArPandoraAnalysis
           LIB_LIBRARIES DetectorProperties_service
                         LArProperties_service
                         Geometry
@@ -17,12 +12,6 @@ art_make( BASENAME_ONLY
                         RawData
                         RecoBase
                         Utilities
-                        ClusterRecoUtil
-                        RecoAlg
-                        ClusterFinder
-                        ${PANDORASDK}
-                        ${PANDORAMONITORING}
-                        ${LARCONTENT}
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
@@ -39,12 +28,10 @@ art_make( BASENAME_ONLY
 			${CETLIB}
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES LArPandoraInterface 
+           MODULE_LIBRARIES LArPandoraInterface
           )
 
 install_headers()
 install_fhicl()
 install_source()
-
-add_subdirectory(scripts)
 

@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/MicroBooNEPandora_module.cc
+ *  @file   larpandora/MicroBooNEPandora/MicroBooNEPandora_module.cc
  *
  *  @brief  Producer module for MicroBooNE
  *
@@ -59,8 +59,8 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 #include "LArContent.h"
 
 // Local includes
-#include "LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h"
-#include "LArPandoraInterface/MicroBooNETransformationPlugin.h"
+#include "MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h"
+#include "MicroBooNEPandora/MicroBooNETransformationPlugin.h"
 
 namespace lar_pandora {
 

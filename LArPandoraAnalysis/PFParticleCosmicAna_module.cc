@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleCosmicAna_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleCosmicAna_module.cc
  *
  *  @brief  Analysis module for created particles
  */

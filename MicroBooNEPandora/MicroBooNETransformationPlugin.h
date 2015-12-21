@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/MicroBooNETransformationPlugin.h
+ *  @file   larpandora/MicroBooNEPandora/MicroBooNETransformationPlugin.h
  *
  *  @brief  Header file for the MicroBooNE transformation plugin class.
  *

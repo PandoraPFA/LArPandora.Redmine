@@ -1,12 +1,12 @@
 /**
- *  @file   larpandora/LArPandoraInterface/MicroBooNETransformationPlugin.cxx
+ *  @file   larpandora/MicroBooNEPandora/MicroBooNETransformationPlugin.cxx
  *
  *  @brief  Implementation of the MicroBooNE transformation plugin class.
  *
  *  $Log: $
  */
 
-#include "LArPandoraInterface/MicroBooNETransformationPlugin.h"
+#include "MicroBooNEPandora/MicroBooNETransformationPlugin.h"
 
 #include <cmath>
 

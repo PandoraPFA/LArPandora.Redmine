@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleMonitoring_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleMonitoring_module.cc
  *
  *  @brief  Analysis module for created particles
  *
@@ -265,7 +265,7 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
 /**
- *  @file   LArPandora/PFParticleMonitoring.cxx
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleMonitoring.cxx
  *
  *  @brief  Implementation of the lar pandora analysis producer.
  *

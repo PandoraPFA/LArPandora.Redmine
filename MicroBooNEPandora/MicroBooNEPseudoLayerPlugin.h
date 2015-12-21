@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h
+ *  @file   larpandora/MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h
  *
  *  @brief  Header file for the MicroBooNE pseudo layer plugin class.
  *

@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleAnalysis_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleAnalysis_module.cc
  *
  *  @brief  Analysis module for created particles
  */
@@ -116,7 +116,7 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
 /**
- *  @file   LArPandora/PFParticleAnalysis.cxx
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleAnalysis.cxx
  * 
  *  @brief  Implementation of PFParticle analysis module
  * 

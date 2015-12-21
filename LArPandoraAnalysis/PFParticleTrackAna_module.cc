@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleTrackAna_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleTrackAna_module.cc
  *
  *  @brief  Analysis module for created particles
  */
@@ -79,7 +79,7 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
 /**
- *  @file   LArPandora/PFParticleTrackAna.cxx
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleTrackAna.cxx
  * 
  *  @brief  Implementation of PFParticle analysis module
  * 
@@ -103,7 +103,7 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "Geometry/Geometry.h"
 
 // Local includes
-#include "LArPandoraCollector.h"
+#include "LArPandoraInterface/LArPandoraCollector.h"
 
 // std includes
 #include <iostream>

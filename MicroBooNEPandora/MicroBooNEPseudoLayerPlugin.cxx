@@ -1,12 +1,12 @@
 /**
- *  @file   larpandora/LArPandoraInterface/MicroBooNEPseudoLayerPlugin.cxx
+ *  @file   larpandora/MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.cxx
  *
  *  @brief  Implementation of the MicroBooNE pseudo layer Plugin class.
  *
  *  $Log: $
  */
 
-#include "LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h"
+#include "MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h"
 
 namespace lar_pandora
 {

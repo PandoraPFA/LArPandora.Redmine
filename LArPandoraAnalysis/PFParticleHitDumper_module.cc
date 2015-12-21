@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleHitDumper_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleHitDumper_module.cc
  *
  *  @brief  Analysis module for created particles
  *
@@ -148,7 +148,7 @@ DEFINE_ART_MODULE(PFParticleHitDumper)
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
 /**
- *  @file   LArPandora/PFParticleHitDumper.cxx
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleHitDumper.cxx
  * 
  *  @brief  Implementation of the lar pandora analysis producer.
  * 
