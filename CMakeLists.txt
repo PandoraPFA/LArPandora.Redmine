@@ -64,6 +64,8 @@ cet_find_library( LARCONTENT NAMES LArPandoraContent PATHS ENV LARPANDORACONTENT
 
 # source
 add_subdirectory(LArPandoraInterface)
+add_subdirectory(LArPandoraAnalysis)
+add_subdirectory(MicroBooNEPandora)
 
 # ups - table and config files
 add_subdirectory(ups)
