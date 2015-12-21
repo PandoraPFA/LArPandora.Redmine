@@ -63,7 +63,7 @@ cet_find_library( PANDORAMONITORING NAMES PandoraMonitoring PATHS ENV PANDORA_LI
 cet_find_library( LARCONTENT NAMES LArPandoraContent PATHS ENV LARPANDORACONTENT_LIB )
 
 # source
-add_subdirectory(LArPandoraInterface)
+add_subdirectory(larpandora)
 
 # ups - table and config files
 add_subdirectory(ups)

@@ -10,10 +10,10 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
-#include "RecoAlg/ClusterParamsImportWrapper.h"
-#include "ClusterFinder/ClusterCreator.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
+#include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
+#include "larreco/ClusterFinder/ClusterCreator.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
@@ -21,7 +21,7 @@
 #include "Objects/Vertex.h"
 
 // Local LArrPandora includes
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 // System includes
 #include <limits>

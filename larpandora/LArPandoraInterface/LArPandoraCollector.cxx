@@ -13,16 +13,16 @@
 #include "art/Framework/Core/FindOneP.h"
 
 // LArSoft includes
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
-#include "Geometry/Geometry.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 // Pandora includes
 #include "Pandora/PdgTable.h"
 #include "Objects/ParticleFlowObject.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "larpandora/LArPandoraInterface/LArPandoraCollector.h"
 
 #include <limits>
 #include <iostream>

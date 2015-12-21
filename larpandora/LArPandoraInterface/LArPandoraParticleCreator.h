@@ -9,7 +9,7 @@
 #define LAR_PANDORA_PARTICLE_CREATOR_H 1
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraBase.h"
+#include "larpandora/LArPandoraInterface/LArPandoraBase.h"
 
 // ROOT includes
 #include "TTree.h"

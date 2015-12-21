@@ -3,20 +3,20 @@
 #include "cetlib/search_path.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/WireGeo.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/Geometry/WireGeo.h"
 
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
 #include "SimulationBase/MCTruth.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/PFParticle.h"
 
 // Pandora includes
 #include "LArObjects/LArMCParticle.h"
@@ -24,7 +24,7 @@
 #include "LArContent.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraBase.h"
+#include "larpandora/LArPandoraInterface/LArPandoraBase.h"
 
 // System includes
 #include <iostream>

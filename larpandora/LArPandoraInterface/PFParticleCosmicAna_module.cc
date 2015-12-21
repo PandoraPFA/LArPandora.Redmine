@@ -9,7 +9,7 @@
 #include "art/Framework/Core/EDAnalyzer.h"
 
 // Local includes
-#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "larpandora/LArPandoraInterface/LArPandoraCollector.h"
 
 // ROOT includes
 #include "TTree.h"
@@ -169,8 +169,8 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
 #include "art/Framework/Core/FindOneP.h"
 
 // LArSoft includes
-#include "AnalysisBase/CosmicTag.h"
-#include "Geometry/Geometry.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
+#include "larcore/Geometry/Geometry.h"
 
 
 // std includes

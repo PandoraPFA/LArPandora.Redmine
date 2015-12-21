@@ -11,11 +11,11 @@
 #include "art/Persistency/Common/Ptr.h" 
 
 // LArSoft includes
-#include "RecoBase/Track.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Hit.h"
-#include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Hit.h"
+#include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"

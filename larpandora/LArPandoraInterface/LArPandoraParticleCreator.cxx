@@ -3,15 +3,15 @@
 #include "cetlib/cpu_timer.h"
 
 // LArSoft includes
-#include "Utilities/AssociationUtil.h"
+#include "lardata/Utilities/AssociationUtil.h"
 #include "SimulationBase/MCTruth.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Vertex.h"
-#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 
 // Pandora includes
 #include "Objects/ParticleFlowObject.h"
@@ -21,8 +21,8 @@
 #include "LArHelpers/LArPfoHelper.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraParticleCreator.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraParticleCreator.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 // System includes
 #include <iostream>

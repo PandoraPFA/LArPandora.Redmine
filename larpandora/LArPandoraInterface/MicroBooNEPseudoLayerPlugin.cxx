@@ -6,7 +6,7 @@
  *  $Log: $
  */
 
-#include "LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h"
+#include "larpandora/LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h"
 
 namespace lar_pandora
 {

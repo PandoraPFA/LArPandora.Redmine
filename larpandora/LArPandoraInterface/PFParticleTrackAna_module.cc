@@ -98,9 +98,9 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "art/Framework/Core/FindOneP.h"
 
 // LArSoft includes
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
-#include "Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "larcore/Geometry/Geometry.h"
 
 // Local includes
 #include "LArPandoraCollector.h"

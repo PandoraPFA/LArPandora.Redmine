@@ -11,21 +11,21 @@
 #include "art/Framework/Principal/Event.h"
 
 // LArSoft includes
-#include "RecoBase/Wire.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Vertex.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/PFParticle.h"
 
 #include "SimulationBase/MCParticle.h"
 #include "SimulationBase/MCTruth.h"
-#include "Simulation/SimChannel.h"
+#include "larsim/Simulation/SimChannel.h"
  
-#include "AnalysisBase/CosmicTag.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
 
 namespace lar_pandora 
 {

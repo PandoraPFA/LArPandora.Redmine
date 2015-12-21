@@ -9,7 +9,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraParticleCreator.h"
+#include "larpandora/LArPandoraInterface/LArPandoraParticleCreator.h"
 
 // std includes
 #include <string>
@@ -53,14 +53,14 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 #include "cetlib/exception.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 
 // LArContent includes
 #include "LArContent.h"
 
 // Local includes
-#include "LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h"
-#include "LArPandoraInterface/MicroBooNETransformationPlugin.h"
+#include "larpandora/LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h"
+#include "larpandora/LArPandoraInterface/MicroBooNETransformationPlugin.h"
 
 namespace lar_pandora {
 

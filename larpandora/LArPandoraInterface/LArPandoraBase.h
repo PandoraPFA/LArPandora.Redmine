@@ -15,7 +15,7 @@
 #include "Api/PandoraApi.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "larpandora/LArPandoraInterface/LArPandoraCollector.h"
 
 // std includes
 #include <string>
