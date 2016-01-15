@@ -6,16 +6,16 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{PANDORA_INC} )
 
 art_make( 
-          LIBRARY_NAME  LArPandoraInterface
-          LIB_LIBRARIES Geometry
+          
+          LIB_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        Simulation
-                        RawData
-                        RecoBase
-                        Utilities
-                        ClusterRecoUtil
-                        RecoAlg
-                        ClusterFinder
+                        larsim_Simulation
+                        lardata_RawData
+                        lardata_RecoBase
+                        lardata_Utilities
+                        larreco_RecoAlg_ClusterRecoUtil
+                        larreco_RecoAlg
+                        larreco_ClusterFinder
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         ${LARCONTENT}
@@ -35,7 +35,7 @@ art_make(
 			${CETLIB}
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES LArPandoraInterface 
+          MODULE_LIBRARIES larpandora_LArPandoraInterface 
           )
 
 install_headers()
