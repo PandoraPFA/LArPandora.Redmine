@@ -10,14 +10,14 @@
     <MuonPlugin>LArMuonId</MuonPlugin>
 
     <!-- ALGORITHM SETTINGS -->
-    <!--algorithm type = "EventReading">
+    <!--algorithm type = "LArEventReading">
         <EventFileName>INPUT_XML_OR_PNDR_FILE</EventFileName>
         <ShouldReadEvents>true</ShouldReadEvents>
         <SkipToEvent>0</SkipToEvent>
     </algorithm-->
 
-     <algorithm type = "EventWriting">
-        <EventFileName>uBooNE_Events.pndr</EventFileName>
+     <algorithm type = "LArEventWriting">
+        <EventFileName>LArEvents.pndr</EventFileName>
         <ShouldWriteEvents>true</ShouldWriteEvents>
         <ShouldOverwriteEventFile>true</ShouldOverwriteEventFile>
         <ShouldWriteMCRelationships>true</ShouldWriteMCRelationships>

@@ -62,6 +62,7 @@ protected:
     int       m_run;                   ///<
     int       m_event;                 ///<
     int       m_hits;                  ///<
+    int       m_pandoraHits;           ///<
     float     m_collectionTime;        ///<
     float     m_inputTime;             ///<
     float     m_processTime;           ///<

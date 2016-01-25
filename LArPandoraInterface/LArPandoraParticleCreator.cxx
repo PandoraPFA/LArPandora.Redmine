@@ -173,6 +173,7 @@ void LArPandoraParticleCreator::produce(art::Event &evt)
         m_run   = evt.run();
         m_event = evt.id().event();
         m_hits = static_cast<int>(artHits.size());
+        m_pandoraHits = static_cast<int>(pandoraHits.size());
         m_pRecoTree->Fill();
     }
 
@@ -188,6 +189,7 @@ void LArPandoraParticleCreator::InitializeMonitoring()
     m_pRecoTree->Branch("run", &m_run, "run/I");
     m_pRecoTree->Branch("event", &m_event, "event/I");
     m_pRecoTree->Branch("hits", &m_hits, "hits/I");
+    m_pRecoTree->Branch("pandoraHits", &m_pandoraHits, "pandoraHits/I");
     m_pRecoTree->Branch("collectionTime", &m_collectionTime, "collectionTime/F");
     m_pRecoTree->Branch("inputTime", &m_inputTime, "inputTime/F");
     m_pRecoTree->Branch("processTime", &m_processTime, "processTime/F");
