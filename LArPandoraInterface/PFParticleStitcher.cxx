@@ -19,7 +19,7 @@
 
 // Local includes 
 #include "LArPandoraInterface/PFParticleStitcher.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "LArPandoraInterface/LArPandoraOutput.h"
 
 // System includes
 #include <iostream>

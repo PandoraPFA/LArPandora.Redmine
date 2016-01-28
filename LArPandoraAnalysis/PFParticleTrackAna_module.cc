@@ -103,7 +103,7 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "Geometry/Geometry.h"
 
 // Local includes
-#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 // std includes
 #include <iostream>

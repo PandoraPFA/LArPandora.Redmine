@@ -1,204 +1,33 @@
-// Framework includes
-#include "art/Framework/Services/Optional/TFileService.h"
-#include "cetlib/cpu_timer.h"
+/**
+ *  @file   larpandora/LArPandoraInterface/LArPandoraOutput.cxx
+ *
+ *  @brief  Helper functions for processing outputs from pandora
+ *
+ */
 
-// LArSoft includes
-#include "Utilities/AssociationUtil.h"
-#include "SimulationBase/MCTruth.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Vertex.h"
+#include "cetlib/exception.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
+
+#include "Geometry/Geometry.h"
 #include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
+#include "RecoAlg/ClusterParamsImportWrapper.h"
+#include "ClusterFinder/ClusterCreator.h"
 
-// Pandora includes
 #include "Objects/ParticleFlowObject.h"
+#include "Objects/TrackState.h"
 #include "Objects/Vertex.h"
-#include "LArContent.h"
-#include "LArHelpers/LArClusterHelper.h"
-#include "LArHelpers/LArPfoHelper.h"
 
-// Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraParticleCreator.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "LArPandoraInterface/LArPandoraOutput.h"
 
-// System includes
+#include <algorithm>
+#include <iterator>
 #include <iostream>
 #include <limits>
 
-namespace lar_pandora {
-
-LArPandoraParticleCreator::LArPandoraParticleCreator(fhicl::ParameterSet const &pset) : LArPandoraBase(pset)
+namespace lar_pandora
 {
-    m_buildTracks = pset.get<bool>("BuildTracks", true);
-    m_buildShowers = pset.get<bool>("BuildShowers", true);
 
-    if (m_enableProduction)
-    {
-        produces< std::vector<recob::PFParticle> >();
-        produces< std::vector<recob::SpacePoint> >();
-        produces< std::vector<recob::Cluster> >(); 
-        produces< std::vector<recob::Seed> >();
-        produces< std::vector<recob::Vertex> >();
-
-        produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
-        produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-        produces< art::Assns<recob::PFParticle, recob::Seed> >();
-        produces< art::Assns<recob::PFParticle, recob::Vertex> >();
-        produces< art::Assns<recob::SpacePoint, recob::Hit> >();
-        produces< art::Assns<recob::Cluster, recob::Hit> >();
-
-        if (m_buildTracks)
-        {
-            produces< std::vector<recob::Track> >(); 
-            produces< art::Assns<recob::PFParticle, recob::Track> >();
-            produces< art::Assns<recob::Track, recob::Hit> >();
-        }
-
-        if (m_buildShowers)
-        {
-            produces< std::vector<recob::Shower> >(); 
-            produces< art::Assns<recob::PFParticle, recob::Shower> >();
-            produces< art::Assns<recob::Shower, recob::Hit> >();
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-LArPandoraParticleCreator::~LArPandoraParticleCreator()
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraParticleCreator::beginJob()
-{
-    if (m_enableMonitoring)
-        this->InitializeMonitoring();
-
-    return LArPandoraBase::beginJob();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraParticleCreator::produce(art::Event &evt)
-{ 
-    mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
-
-    cet::cpu_timer theClock;
-
-    if (m_enableMonitoring)
-    {   
-        theClock.start();
-    }
-
-    // Collect ART objects
-    HitVector artHits;
-    SimChannelVector artSimChannels;
-    HitsToTrackIDEs artHitsToTrackIDEs;
-    MCParticleVector artMCParticleVector;
-    MCTruthToMCParticles artMCTruthToMCParticles;
-    MCParticlesToMCTruth artMCParticlesToMCTruth;
-
-    LArPandoraCollector::CollectHits(evt, m_hitfinderModuleLabel, artHits);
-
-    if (m_enableMCParticles && !evt.isRealData())
-    {
-        LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, artMCParticleVector);
-        LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        LArPandoraCollector::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
-        LArPandoraCollector::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
-    }
-
-    if (m_enableMonitoring)
-    { 
-        theClock.stop();
-        m_collectionTime = theClock.accumulated_real_time();
-        theClock.reset();
-        theClock.start();
-    }
-
-    // Create PANDORA objects
-    HitMap pandoraHits;
-
-    this->CreatePandoraHits2D(artHits, pandoraHits);
-
-    if (m_enableMCParticles && !evt.isRealData())
-    {
-        this->CreatePandoraParticles(artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        this->CreatePandoraParticles2D(artMCParticleVector);
-        this->CreatePandoraLinks2D(pandoraHits, artHitsToTrackIDEs);
-    }
-
-    if (m_enableMonitoring)
-    { 
-        theClock.stop();
-        m_inputTime = theClock.accumulated_real_time();
-        theClock.reset();
-        theClock.start();
-    }
-
-    // Run PANDORA algorithms
-    this->RunPandoraInstances();
-
-    if (m_enableMonitoring)
-    { 
-        theClock.stop();
-        m_processTime = theClock.accumulated_real_time(); 
-        theClock.reset();
-        theClock.start();
-    }
-
-    // Output ART objects and Reset PANDORA algorithms
-    if (m_enableProduction)
-    {
-        this->ProduceArtOutput(evt, pandoraHits);
-    }
-
-    this->ResetPandoraInstances();
-
-    if (m_enableMonitoring)
-    {   theClock.stop();
-        m_outputTime = theClock.accumulated_real_time(); 
-        theClock.reset();
-        theClock.start();
-    }
-
-    // Write out monitoring information
-    if (m_enableMonitoring)
-    {
-        m_run   = evt.run();
-        m_event = evt.id().event();
-        m_hits = static_cast<int>(artHits.size());
-        m_pandoraHits = static_cast<int>(pandoraHits.size());
-        m_pRecoTree->Fill();
-    }
-
-    mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraParticleCreator::InitializeMonitoring()
-{
-    art::ServiceHandle<art::TFileService> tfs;
-    m_pRecoTree = tfs->make<TTree>("monitoring", "LAr Reco");
-    m_pRecoTree->Branch("run", &m_run, "run/I");
-    m_pRecoTree->Branch("event", &m_event, "event/I");
-    m_pRecoTree->Branch("hits", &m_hits, "hits/I");
-    m_pRecoTree->Branch("pandoraHits", &m_pandoraHits, "pandoraHits/I");
-    m_pRecoTree->Branch("collectionTime", &m_collectionTime, "collectionTime/F");
-    m_pRecoTree->Branch("inputTime", &m_inputTime, "inputTime/F");
-    m_pRecoTree->Branch("processTime", &m_processTime, "processTime/F");
-    m_pRecoTree->Branch("outputTime", &m_outputTime, "outputTime/F");
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &hitMap) const
+void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtOutput() *** " << std::endl;
 
@@ -561,6 +390,145 @@ void LArPandoraParticleCreator::ProduceArtOutput(art::Event &evt, const HitMap &
         evt.put(std::move(outputParticlesToShowers));
         evt.put(std::move(outputShowersToHits));
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+ 
+recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hitVector, const HitList &hitList, cluster::ClusterParamsAlgBase &algo) 
+{
+    mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
+
+    if (hitVector.empty())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildCluster --- No input hits were provided ";
+
+    // Fill list of cluster properties
+    geo::View_t view(geo::kUnknown);
+    geo::PlaneID planeID;
+
+    double startWire(+std::numeric_limits<float>::max()), sigmaStartWire(0.0);
+    double startTime(+std::numeric_limits<float>::max()), sigmaStartTime(0.0);
+    double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
+    double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
+    
+    std::vector<recob::Hit const*> hits_for_params;
+    hits_for_params.reserve(hitVector.size());
+    
+    for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
+    {
+        art::Ptr<recob::Hit> const& hit = *iter;
+        
+        const double thisWire(hit->WireID().Wire);
+        const double thisWireSigma(0.5);
+        const double thisTime(hit->PeakTime());
+        const double thisTimeSigma(double(2.*hit->RMS()));
+        const geo::View_t thisView(hit->View());
+        const geo::PlaneID thisPlaneID(hit->WireID().planeID());
+
+        if (geo::kUnknown == view)
+        {
+            view = thisView;
+            planeID = thisPlaneID;
+        }
+
+        if (!(thisView == view && thisPlaneID == planeID))
+        {
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildCluster --- Input hits have inconsistent plane IDs ";
+        }
+        
+        hits_for_params.push_back(&*hit);
+        
+        if (hitList.count(hit))
+            continue;
+
+        if (thisWire < startWire || (thisWire == startWire && thisTime < startTime))
+        {
+            startWire = thisWire;
+            sigmaStartWire = thisWireSigma;
+            startTime = thisTime;
+            sigmaStartTime = thisTimeSigma;
+        }
+
+        if (thisWire > endWire || (thisWire == endWire && thisTime > endTime))
+        {
+            endWire = thisWire;
+            sigmaEndWire = thisWireSigma;
+            endTime = thisTime;
+            sigmaEndTime = thisTimeSigma;
+        }
+
+    }
+    
+    // feed the algorithm with all the cluster hits
+    algo.SetHits(hits_for_params);
+    
+    // create the recob::Cluster directly in the vector
+    return cluster::ClusterCreator(
+      algo,                  // algo
+      startWire,             // start_wire
+      sigmaStartWire,        // sigma_start_wire
+      startTime,             // start_tick
+      sigmaStartTime,        // sigma_start_tick
+      endWire,               // end_wire
+      sigmaEndWire,          // sigma_end_wire
+      endTime,               // end_tick
+      sigmaEndTime,          // sigma_end_tick
+      id,                    // ID
+      view,                  // view
+      planeID,               // plane
+      recob::Cluster::Sentry // sentry
+      ).move();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+ 
+recob::Track LArPandoraOutput::BuildTrack(const int id, const pandora::ParticleFlowObject *const pPfo)
+{
+    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], PdgCode = " << pPfo->GetParticleId() << std::endl;
+
+    const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
+        
+    if (NULL == pLArTrackPfo)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo was not track-like ";
+        
+    const lar_content::LArTrackStateVector &trackStateVector =  pLArTrackPfo->m_trackStateVector;
+    return BuildTrack(id, trackStateVector);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector)
+{
+    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of trajectory points = " << trackStateVector.size() << std::endl;
+
+    if (trackStateVector.empty())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- No input trajectory points were provided ";
+
+    // Fill list of track properties
+    std::vector<TVector3>               xyz;
+    std::vector<TVector3>               pxpypz;
+    std::vector< std::vector<double> >  dQdx(3);
+    std::vector<double>                 momentum = std::vector<double>(2, util::kBogusD);
+
+    // Loop over trajectory points
+    for (lar_content::LArTrackStateVector::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
+        tIter != tIterEnd; ++tIter)
+    {
+        const lar_content::LArTrackState &nextPoint = *tIter;
+
+        if (nextPoint.GetdQdL() < std::numeric_limits<float>::epsilon())
+            continue;
+
+        const float dQdxU((pandora::TPC_VIEW_U == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
+        const float dQdxV((pandora::TPC_VIEW_V == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
+        const float dQdxW((pandora::TPC_VIEW_W == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
+
+        xyz.push_back(TVector3(nextPoint.GetPosition().GetX(), nextPoint.GetPosition().GetY(), nextPoint.GetPosition().GetZ()));
+        pxpypz.push_back(TVector3(nextPoint.GetDirection().GetX(), nextPoint.GetDirection().GetY(), nextPoint.GetDirection().GetZ()));
+        dQdx.at(geo::kU).push_back(dQdxU); dQdx.at(geo::kV).push_back(dQdxV); dQdx.at(geo::kW).push_back(dQdxW);
+    }
+
+    // Return a new recob::Track object (of the Bezier variety)
+    return recob::Track(xyz, pxpypz, dQdx, momentum, id);
 }
 
 } // namespace lar_pandora

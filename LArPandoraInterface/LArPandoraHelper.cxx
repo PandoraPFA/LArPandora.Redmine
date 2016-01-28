@@ -5,170 +5,1049 @@
  *
  */
 
-// Framework includes
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "art/Framework/Principal/Handle.h"
+#include "art/Framework/Core/FindManyP.h"
+#include "art/Framework/Core/FindOneP.h"
 
-// LArSoft includes
+#include "SimpleTypesAndConstants/RawTypes.h"
 #include "Geometry/Geometry.h"
-#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
-#include "RecoAlg/ClusterParamsImportWrapper.h"
-#include "ClusterFinder/ClusterCreator.h"
+#include "Utilities/TimeService.h"
 
-// Pandora includes
+#include "Pandora/PdgTable.h"
 #include "Objects/ParticleFlowObject.h"
-#include "Objects/TrackState.h"
-#include "Objects/Vertex.h"
 
-// Local LArrPandora includes
 #include "LArPandoraInterface/LArPandoraHelper.h"
 
-// System includes
 #include <limits>
-#include <algorithm> // std::transform()
-#include <iterator> // std::back_inserter()
 #include <iostream>
 
-namespace lar_pandora {
-
-recob::Cluster LArPandoraHelper::BuildCluster(const int id, const std::vector<art::Ptr<recob::Hit>> &hitVector,
-    const std::set<art::Ptr<recob::Hit>> &hitList, cluster::ClusterParamsAlgBase& algo) 
+namespace lar_pandora
 {
-    mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
 
-    if (hitVector.empty())
-        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildCluster --- No input hits were provided ";
+void LArPandoraHelper::CollectWires(const art::Event &evt, const std::string label, WireVector &wireVector)
+{
+    art::Handle< std::vector<recob::Wire> > theWires;
+    evt.getByLabel(label, theWires);
 
-    // Fill list of cluster properties
-    geo::View_t view(geo::kUnknown);
-    geo::PlaneID planeID;
-
-    double startWire(+std::numeric_limits<float>::max()), sigmaStartWire(0.0);
-    double startTime(+std::numeric_limits<float>::max()), sigmaStartTime(0.0);
-    double endWire(-std::numeric_limits<float>::max()), sigmaEndWire(0.0);
-    double endTime(-std::numeric_limits<float>::max()), sigmaEndTime(0.0);
-    
-    std::vector<recob::Hit const*> hits_for_params;
-    hits_for_params.reserve(hitVector.size());
-    
-    for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
+    if (!theWires.isValid())
     {
-        art::Ptr<recob::Hit> const& hit = *iter;
-        
-        const double thisWire(hit->WireID().Wire);
-        const double thisWireSigma(0.5);
-        const double thisTime(hit->PeakTime());
-        const double thisTimeSigma(double(2.*hit->RMS()));
-        const geo::View_t thisView(hit->View());
-        const geo::PlaneID thisPlaneID(hit->WireID().planeID());
-
-        if (geo::kUnknown == view)
-        {
-            view = thisView;
-            planeID = thisPlaneID;
-        }
-
-        if (!(thisView == view && thisPlaneID == planeID))
-        {
-            throw cet::exception("LArPandora") << " LArPandoraHelper::BuildCluster --- Input hits have inconsistent plane IDs ";
-        }
-        
-        hits_for_params.push_back(&*hit);
-        
-        if (hitList.count(hit))
-            continue;
-
-        if (thisWire < startWire || (thisWire == startWire && thisTime < startTime))
-        {
-            startWire = thisWire;
-            sigmaStartWire = thisWireSigma;
-            startTime = thisTime;
-            sigmaStartTime = thisTimeSigma;
-        }
-
-        if (thisWire > endWire || (thisWire == endWire && thisTime > endTime))
-        {
-            endWire = thisWire;
-            sigmaEndWire = thisWireSigma;
-            endTime = thisTime;
-            sigmaEndTime = thisTimeSigma;
-        }
-
+        mf::LogDebug("LArPandora") << "  Failed to find wires... " << std::endl;
+        return;
     }
-    
-    // feed the algorithm with all the cluster hits
-    algo.SetHits(hits_for_params);
-    
-    // create the recob::Cluster directly in the vector
-    return cluster::ClusterCreator(
-      algo,                  // algo
-      startWire,             // start_wire
-      sigmaStartWire,        // sigma_start_wire
-      startTime,             // start_tick
-      sigmaStartTime,        // sigma_start_tick
-      endWire,               // end_wire
-      sigmaEndWire,          // sigma_end_wire
-      endTime,               // end_tick
-      sigmaEndTime,          // sigma_end_tick
-      id,                    // ID
-      view,                  // view
-      planeID,               // plane
-      recob::Cluster::Sentry // sentry
-      ).move();
-    
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theWires->size() << " Wires " << std::endl;
+    }
+
+    for (unsigned int i = 0; i < theWires->size(); ++i)
+    {
+        const art::Ptr<recob::Wire> wire(theWires, i);
+        wireVector.push_back(wire);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectHits(const art::Event &evt, const std::string label, HitVector &hitVector)
+{
+    art::Handle< std::vector<recob::Hit> > theHits;
+    evt.getByLabel(label, theHits);
+
+    if (!theHits.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find hits... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theHits->size() << " Hits " << std::endl;
+    }
+
+    for (unsigned int i = 0; i < theHits->size(); ++i)
+    {
+        const art::Ptr<recob::Hit> hit(theHits, i);
+        hitVector.push_back(hit);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector)
+{
+    art::Handle< std::vector<recob::PFParticle> > theParticles;
+    evt.getByLabel(label, theParticles);
+
+    if (!theParticles.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find particles... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " PFParticles " << std::endl;
+    }
+
+    for (unsigned int i = 0; i < theParticles->size(); ++i)
+    {
+        const art::Ptr<recob::PFParticle> particle(theParticles, i);
+        particleVector.push_back(particle);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
+    SpacePointsToHits &spacePointsToHits)
+{
+    HitsToSpacePoints hitsToSpacePoints;
+    return LArPandoraHelper::CollectSpacePoints(evt, label, spacePointVector, spacePointsToHits, hitsToSpacePoints);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
+    SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints)
+{
+    art::Handle< std::vector<recob::SpacePoint> > theSpacePoints;
+    evt.getByLabel(label, theSpacePoints);
  
-recob::Track LArPandoraHelper::BuildTrack(const int id, const pandora::ParticleFlowObject *const pPfo)
-{
-    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], PdgCode = " << pPfo->GetParticleId() << std::endl;
+    if (!theSpacePoints.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find spacepoints... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theSpacePoints->size() << " SpacePoints " << std::endl;
+    }
 
-    const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
-        
-    if (NULL == pLArTrackPfo)
-        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- input pfo was not track-like ";
-        
-    const lar_content::LArTrackStateVector &trackStateVector =  pLArTrackPfo->m_trackStateVector;
-
-    return BuildTrack(id, trackStateVector);
+    art::FindOneP<recob::Hit> theHitAssns(theSpacePoints, evt, label);
+    for (unsigned int i = 0; i < theSpacePoints->size(); ++i)
+    {
+        const art::Ptr<recob::SpacePoint> spacepoint(theSpacePoints, i);
+        spacePointVector.push_back(spacepoint);
+        const art::Ptr<recob::Hit> hit = theHitAssns.at(i);
+        spacePointsToHits[spacepoint] = hit;
+        hitsToSpacePoints[hit] = spacepoint;
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Track LArPandoraHelper::BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector)
+void LArPandoraHelper::CollectClusters(const art::Event &evt, const std::string label, ClusterVector &clusterVector, 
+    ClustersToHits &clustersToHits)
 {
-    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of trajectory points = " << trackStateVector.size() << std::endl;
-
-    if (trackStateVector.empty())
-        throw cet::exception("LArPandora") << " LArPandoraHelper::BuildTrack --- No input trajectory points were provided ";
-
-    // Fill list of track properties
-    std::vector<TVector3>               xyz;
-    std::vector<TVector3>               pxpypz;
-    std::vector< std::vector<double> >  dQdx(3);
-    std::vector<double>                 momentum = std::vector<double>(2, util::kBogusD);
-
-    // Loop over trajectory points
-    for (lar_content::LArTrackStateVector::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
-        tIter != tIterEnd; ++tIter)
+    art::Handle< std::vector<recob::Cluster> > theClusters;
+    evt.getByLabel(label, theClusters);
+ 
+    if (!theClusters.isValid())
     {
-        const lar_content::LArTrackState &nextPoint = *tIter;
-
-        if (nextPoint.GetdQdL() < std::numeric_limits<float>::epsilon())
-            continue;
-
-        const float dQdxU((pandora::TPC_VIEW_U == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
-        const float dQdxV((pandora::TPC_VIEW_V == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
-        const float dQdxW((pandora::TPC_VIEW_W == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
-
-	xyz.push_back(TVector3(nextPoint.GetPosition().GetX(), nextPoint.GetPosition().GetY(), nextPoint.GetPosition().GetZ()));
-        pxpypz.push_back(TVector3(nextPoint.GetDirection().GetX(), nextPoint.GetDirection().GetY(), nextPoint.GetDirection().GetZ()));
-        dQdx.at(geo::kU).push_back(dQdxU); dQdx.at(geo::kV).push_back(dQdxV); dQdx.at(geo::kW).push_back(dQdxW);
+        mf::LogDebug("LArPandora") << "  Failed to find clusters... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theClusters->size() << " Clusters " << std::endl;
     }
 
-    // Return a new recob::Track object (of the Bezier variety)
-    return recob::Track(xyz, pxpypz, dQdx, momentum, id);
+    art::FindManyP<recob::Hit> theHitAssns(theClusters, evt, label);
+    for (unsigned int i = 0; i < theClusters->size(); ++i)
+    {
+        const art::Ptr<recob::Cluster> cluster(theClusters, i);
+        clusterVector.push_back(cluster);
+
+        const std::vector< art::Ptr<recob::Hit> > hits = theHitAssns.at(i);
+        for (unsigned int j=0; j<hits.size(); ++j)
+        {
+            const art::Ptr<recob::Hit> hit = hits.at(j);
+            clustersToHits[cluster].push_back(hit);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
+    PFParticlesToSpacePoints &particlesToSpacePoints)
+{
+    art::Handle< std::vector<recob::PFParticle> > theParticles;
+    evt.getByLabel(label, theParticles);
+
+    if (!theParticles.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find particles... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " PFParticles " << std::endl;
+    }
+
+    art::FindManyP<recob::SpacePoint> theSpacePointAssns(theParticles, evt, label);
+    for (unsigned int i = 0; i < theParticles->size(); ++i)
+    {
+        const art::Ptr<recob::PFParticle> particle(theParticles, i);
+        particleVector.push_back(particle);
+
+        const std::vector< art::Ptr<recob::SpacePoint> > spacepoints = theSpacePointAssns.at(i);
+        for (unsigned int j=0; j<spacepoints.size(); ++j)
+        {
+            const art::Ptr<recob::SpacePoint> spacepoint = spacepoints.at(j);
+            particlesToSpacePoints[particle].push_back(spacepoint);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
+    PFParticlesToClusters &particlesToClusters)
+{
+    art::Handle< std::vector<recob::PFParticle> > theParticles;
+    evt.getByLabel(label, theParticles);
+
+    if (!theParticles.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find particles... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " PFParticles " << std::endl;
+    }
+
+    art::FindManyP<recob::Cluster> theClusterAssns(theParticles, evt, label);
+    for (unsigned int i = 0; i < theParticles->size(); ++i)
+    {
+        const art::Ptr<recob::PFParticle> particle(theParticles, i);
+        particleVector.push_back(particle);
+
+        const std::vector< art::Ptr<recob::Cluster> > clusters = theClusterAssns.at(i);
+        for (unsigned int j=0; j<clusters.size(); ++j)
+        {
+            const art::Ptr<recob::Cluster> cluster = clusters.at(j);
+            particlesToClusters[particle].push_back(cluster);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+    PFParticlesToShowers &particlesToShowers)
+{
+    art::Handle< std::vector<recob::Shower> > theShowers;
+    evt.getByLabel(label, theShowers);
+
+    if (!theShowers.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find showers... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theShowers->size() << " Showers " << std::endl;
+    }
+
+    art::FindOneP<recob::PFParticle> theParticleAssns(theShowers, evt, label);
+    for (unsigned int i = 0; i < theShowers->size(); ++i)
+    {
+        const art::Ptr<recob::Shower> shower(theShowers, i);
+        showerVector.push_back(shower);
+        const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
+        particlesToShowers[particle].push_back(shower);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+    PFParticlesToTracks &particlesToTracks)
+{
+    art::Handle< std::vector<recob::Track> > theTracks;
+    evt.getByLabel(label, theTracks);
+
+    if (!theTracks.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find tracks... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theTracks->size() << " Tracks " << std::endl;
+    }
+
+    art::FindOneP<recob::PFParticle> theParticleAssns(theTracks, evt, label);
+    for (unsigned int i = 0; i < theTracks->size(); ++i)
+    {
+        const art::Ptr<recob::Track> track(theTracks, i);
+        trackVector.push_back(track);
+        const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
+        particlesToTracks[particle].push_back(track);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector, TracksToHits &tracksToHits)
+{
+    art::Handle< std::vector<recob::Track> > theTracks;
+    evt.getByLabel(label, theTracks);
+
+    if (!theTracks.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find tracks... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theTracks->size() << " Tracks " << std::endl;
+    }
+
+    art::FindManyP<recob::Hit> theHitAssns(theTracks, evt, label);
+    for (unsigned int i = 0; i < theTracks->size(); ++i)
+    {
+        const art::Ptr<recob::Track> track(theTracks, i);
+        trackVector.push_back(track);
+
+        const std::vector< art::Ptr<recob::Hit> > hits = theHitAssns.at(i);
+        for (unsigned int j=0; j<hits.size(); ++j)
+        {
+            const art::Ptr<recob::Hit> hit = hits.at(j);          
+            tracksToHits[track].push_back(hit);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector, 
+    PFParticlesToSeeds &particlesToSeeds)
+{
+    art::Handle< std::vector<recob::Seed> > theSeeds;
+    evt.getByLabel(label, theSeeds);
+
+    if (!theSeeds.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find seeds... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theSeeds->size() << " Seeds " << std::endl;
+    }
+
+    art::FindManyP<recob::PFParticle> theSeedAssns(theSeeds, evt, label);
+    for (unsigned int i = 0; i < theSeeds->size(); ++i)
+    {
+        const art::Ptr<recob::Seed> seed(theSeeds, i);
+        seedVector.push_back(seed);
+
+        const std::vector< art::Ptr<recob::PFParticle> > particles = theSeedAssns.at(i);
+        for (unsigned int j=0; j<particles.size(); ++j)
+        {
+            const art::Ptr<recob::PFParticle> particle = particles.at(j);          
+            particlesToSeeds[particle].push_back(seed);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectVertices(const art::Event &evt, const std::string label, VertexVector &vertexVector,
+    PFParticlesToVertices &particlesToVertices)
+{
+    art::Handle< std::vector<recob::Vertex> > theVertices;
+    evt.getByLabel(label, theVertices);
+
+    if (!theVertices.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find vertices... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theVertices->size() << " Vertices " << std::endl;
+    }
+
+    art::FindManyP<recob::PFParticle> theVerticesAssns(theVertices, evt, label);
+    for (unsigned int i = 0; i < theVertices->size(); ++i)
+    {
+        const art::Ptr<recob::Vertex> vertex(theVertices, i);
+        vertexVector.push_back(vertex);
+
+        const std::vector< art::Ptr<recob::PFParticle> > particles = theVerticesAssns.at(i);
+        for (unsigned int j=0; j<particles.size(); ++j)
+        {
+            const art::Ptr<recob::PFParticle> particle = particles.at(j);          
+            particlesToVertices[particle].push_back(vertex);
+        }
+    } 
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildPFParticleHitMaps(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints, 
+    const SpacePointsToHits &spacePointsToHits, PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, 
+    const DaughterMode daughterMode)
+{ 
+    // Build mapping from particle to particle ID for parent/daughter navigation
+    PFParticleMap particleMap;
+
+    for (PFParticleVector::const_iterator iter1 = particleVector.begin(), iterEnd1 = particleVector.end(); iter1 != iterEnd1; ++iter1)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter1;
+        particleMap[particle->Self()] = particle;
+    }
+
+    // Loop over hits and build mapping between reconstructed final-state particles and reconstructed hits
+    for (PFParticlesToSpacePoints::const_iterator iter1 = particlesToSpacePoints.begin(), iterEnd1 = particlesToSpacePoints.end();
+        iter1 != iterEnd1; ++iter1)
+    {
+        const art::Ptr<recob::PFParticle> thisParticle = iter1->first;
+        const art::Ptr<recob::PFParticle> particle((kAddDaughters == daughterMode) ? 
+            LArPandoraHelper::GetFinalStatePFParticle(particleMap, thisParticle) : thisParticle);
+
+        if ((kIgnoreDaughters == daughterMode) && !LArPandoraHelper::IsFinalState(particleMap, particle))
+            continue;
+
+        const SpacePointVector &spacePointVector = iter1->second;
+
+        for (SpacePointVector::const_iterator iter2 = spacePointVector.begin(), iterEnd2 = spacePointVector.end(); iter2 != iterEnd2; ++iter2)
+        {
+            const art::Ptr<recob::SpacePoint> spacepoint = *iter2;
+
+            SpacePointsToHits::const_iterator iter3 = spacePointsToHits.find(spacepoint);
+            if (spacePointsToHits.end() == iter3)
+                throw cet::exception("LArPandora") << " PandoraCollector::BuildPFParticleHitMaps --- Found a space point without an associated hit ";
+
+            const art::Ptr<recob::Hit> hit = iter3->second;
+        
+            particlesToHits[particle].push_back(hit);
+            hitsToParticles[hit] = particle;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildPFParticleHitMaps(const PFParticleVector &particleVector, const PFParticlesToClusters &particlesToClusters, 
+    const ClustersToHits &clustersToHits, PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, 
+    const DaughterMode daughterMode)
+{ 
+    // Build mapping from particle to particle ID for parent/daughter navigation
+    PFParticleMap particleMap;
+
+    for (PFParticleVector::const_iterator iter1 = particleVector.begin(), iterEnd1 = particleVector.end(); iter1 != iterEnd1; ++iter1)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter1;
+        particleMap[particle->Self()] = particle;
+    }
+
+    // Loop over hits and build mapping between reconstructed final-state particles and reconstructed hits
+    for (PFParticlesToClusters::const_iterator iter1 = particlesToClusters.begin(), iterEnd1 = particlesToClusters.end();
+        iter1 != iterEnd1; ++iter1)
+    {
+        const art::Ptr<recob::PFParticle> thisParticle = iter1->first;
+        const art::Ptr<recob::PFParticle> particle((kAddDaughters == daughterMode) ? 
+            LArPandoraHelper::GetFinalStatePFParticle(particleMap, thisParticle) : thisParticle);
+
+        if ((kIgnoreDaughters == daughterMode) && !LArPandoraHelper::IsFinalState(particleMap, particle))
+            continue;
+
+        const ClusterVector &clusterVector = iter1->second;
+        for (ClusterVector::const_iterator iter2 = clusterVector.begin(), iterEnd2 = clusterVector.end(); iter2 != iterEnd2; ++iter2)
+        {
+            const art::Ptr<recob::Cluster> cluster = *iter2;
+
+            ClustersToHits::const_iterator iter3 = clustersToHits.find(cluster);
+            if (clustersToHits.end() == iter3)
+                throw cet::exception("LArPandora") << " PandoraCollector::BuildPFParticleHitMaps --- Found a space point without an associated hit ";
+
+            const HitVector &hitVector = iter3->second;
+            for (HitVector::const_iterator iter4 = hitVector.begin(), iterEnd4 = hitVector.end(); iter4 != iterEnd4; ++iter4)
+            { 
+                const art::Ptr<recob::Hit> hit = *iter4;
+        
+                particlesToHits[particle].push_back(hit);
+                hitsToParticles[hit] = particle;
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_middle,
+    PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode, const bool useClusters)
+{
+    // Use intermediate clusters
+    if (useClusters)
+    {    
+        PFParticleVector particleVector;
+        PFParticlesToClusters particlesToClusters;
+
+        ClusterVector clusterVector; 
+        ClustersToHits clustersToHits;
+
+        LArPandoraHelper::CollectPFParticles(evt, label_pfpart, particleVector, particlesToClusters);
+        LArPandoraHelper::CollectClusters(evt, label_middle, clusterVector, clustersToHits);
+
+        LArPandoraHelper::BuildPFParticleHitMaps(particleVector, particlesToClusters, clustersToHits, 
+            particlesToHits, hitsToParticles, daughterMode);
+    }
+
+    // Use intermediate space points
+    else
+    {
+        PFParticleVector particleVector;
+        PFParticlesToSpacePoints particlesToSpacePoints;
+
+        SpacePointVector spacePointVector; 
+        SpacePointsToHits spacePointsToHits;
+
+        LArPandoraHelper::CollectPFParticles(evt, label_pfpart, particleVector, particlesToSpacePoints);
+        LArPandoraHelper::CollectSpacePoints(evt, label_middle, spacePointVector, spacePointsToHits);
+
+        LArPandoraHelper::BuildPFParticleHitMaps(particleVector, particlesToSpacePoints, spacePointsToHits, 
+            particlesToHits, hitsToParticles, daughterMode);   
+  }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::SelectNeutrinoPFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles)
+{
+    for (PFParticleVector::const_iterator iter = inputParticles.begin(), iterEnd = inputParticles.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter;
+
+        if (LArPandoraHelper::IsNeutrino(particle))
+	    outputParticles.push_back(particle);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::SelectFinalStatePFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles)
+{
+    // Build mapping from particle to particle ID for parent/daughter navigation
+    PFParticleMap particleMap;
+
+    for (PFParticleVector::const_iterator iter = inputParticles.begin(), iterEnd = inputParticles.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter;
+        particleMap[particle->Self()] = particle;
+    }
+   
+    // Select final-state particles
+    for (PFParticleVector::const_iterator iter = inputParticles.begin(), iterEnd = inputParticles.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter;
+
+        if (LArPandoraHelper::IsFinalState(particleMap, particle))
+            outputParticles.push_back(particle);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector, 
+    TracksToCosmicTags &tracksToCosmicTags)
+{
+    art::Handle< std::vector<anab::CosmicTag> > theCosmicTags;
+    evt.getByLabel(label, theCosmicTags); // Note: in general, there could be many tagging algorithms
+
+    if (theCosmicTags.isValid())
+    {
+        art::FindOneP<recob::Track> theCosmicAssns(theCosmicTags, evt, label);
+        for (unsigned int i = 0; i < theCosmicTags->size(); ++i)
+        {
+            const art::Ptr<anab::CosmicTag> cosmicTag(theCosmicTags, i);
+            const art::Ptr<recob::Track> track = theCosmicAssns.at(i);
+            tracksToCosmicTags[track].push_back(cosmicTag);
+            cosmicTagVector.push_back(cosmicTag);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::string label, SimChannelVector &simChannelVector)
+{
+    if (evt.isRealData())
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectSimChannels --- Trying to access MC truth from real data ";
+
+    art::Handle< std::vector<sim::SimChannel> > theSimChannels;
+    evt.getByLabel(label, theSimChannels);
+    
+    if (!theSimChannels.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find sim channels... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theSimChannels->size() << " SimChannels " << std::endl;
+    }
+
+    for (unsigned int i = 0; i < theSimChannels->size(); ++i)
+    {
+        const art::Ptr<sim::SimChannel> channel(theSimChannels, i);
+        simChannelVector.push_back(channel);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string label, MCParticleVector &particleVector)
+{
+    if (evt.isRealData())
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+
+    art::Handle< std::vector<simb::MCParticle> > theParticles;
+    evt.getByLabel(label, theParticles);
+
+    if (!theParticles.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find MC particles... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " MC particles " << std::endl;
+    }
+
+    for (unsigned int i = 0; i < theParticles->size(); ++i)
+    {
+        const art::Ptr<simb::MCParticle> particle(theParticles, i);
+        particleVector.push_back(particle);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string label, MCTruthToMCParticles &truthToParticles,
+    MCParticlesToMCTruth &particlesToTruth)
+{
+    if (evt.isRealData())
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+
+    art::Handle< std::vector<simb::MCParticle> > theParticles;
+    evt.getByLabel(label, theParticles);
+
+    if (!theParticles.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find MC particles... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " MC particles " << std::endl;
+    }
+
+    art::FindOneP<simb::MCTruth> theTruthAssns(theParticles, evt, label);
+
+    for (unsigned int i = 0, iEnd = theParticles->size(); i < iEnd; ++i)
+    {
+        const art::Ptr<simb::MCParticle> particle(theParticles, i);
+        const art::Ptr<simb::MCTruth> truth(theTruthAssns.at(i));
+        truthToParticles[truth].push_back(particle);
+        particlesToTruth[particle] = truth;
+    }
+}
+ 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+
+void LArPandoraHelper::BuildMCParticleHitMaps(const HitVector &hitVector, const SimChannelVector &simChannelVector, 
+    HitsToTrackIDEs &hitsToTrackIDEs)
+{
+    art::ServiceHandle<util::TimeService> ts;
+
+    SimChannelMap simChannelMap;
+
+    for (SimChannelVector::const_iterator iter = simChannelVector.begin(), iterEnd = simChannelVector.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<sim::SimChannel> simChannel = *iter;
+        simChannelMap.insert(SimChannelMap::value_type(simChannel->Channel(), simChannel));
+    }
+
+    for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::Hit> hit = *iter;
+        
+	SimChannelMap::const_iterator sIter = simChannelMap.find(hit->Channel());
+        if (simChannelMap.end() == sIter)
+	    continue; // Hit has no truth information [continue]
+
+        const art::Ptr<sim::SimChannel> simChannel = sIter->second;
+        const raw::TDCtick_t start_tdc(ts->TPCTick2TDC(hit->PeakTimeMinusRMS()));
+        const raw::TDCtick_t end_tdc(ts->TPCTick2TDC(hit->PeakTimePlusRMS()));
+        const TrackIDEVector trackCollection(simChannel->TrackIDEs(start_tdc, end_tdc));
+
+        if (trackCollection.empty())
+            continue; // Hit has no truth information [continue]
+
+        for (unsigned int iTrack = 0, iTrackEnd = trackCollection.size(); iTrack < iTrackEnd; ++iTrack)
+        {
+            const sim::TrackIDE trackIDE = trackCollection.at(iTrack);
+            hitsToTrackIDEs[hit].push_back(trackIDE);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildMCParticleHitMaps(const HitsToTrackIDEs &hitsToTrackIDEs, const MCTruthToMCParticles &truthToParticles,
+    MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode)
+{
+    // Build mapping between particles and track IDs for parent/daughter navigation
+    MCParticleMap particleMap;
+
+    for (MCTruthToMCParticles::const_iterator iter1 = truthToParticles.begin(), iterEnd1 = truthToParticles.end(); iter1 != iterEnd1; ++iter1)
+    {
+        const MCParticleVector &particleVector = iter1->second;
+        for (MCParticleVector::const_iterator iter2 = particleVector.begin(), iterEnd2 = particleVector.end(); iter2 != iterEnd2; ++iter2)
+        {
+            const art::Ptr<simb::MCParticle> particle = *iter2;
+            particleMap[particle->TrackId()] = particle;
+        }
+    }
+
+    // Loop over hits and build mapping between reconstructed hits and true particles
+    for (HitsToTrackIDEs::const_iterator iter1 = hitsToTrackIDEs.begin(), iterEnd1 = hitsToTrackIDEs.end(); iter1 != iterEnd1; ++iter1)
+    {
+        const art::Ptr<recob::Hit> hit = iter1->first;
+        const TrackIDEVector &trackCollection = iter1->second;
+
+        int bestTrackID(-1);
+        float bestEnergyFrac(0.f);
+
+        for (TrackIDEVector::const_iterator iter2 = trackCollection.begin(), iterEnd2 = trackCollection.end(); iter2 != iterEnd2; ++iter2)
+        {
+            const sim::TrackIDE &trackIDE = *iter2;
+            const int trackID(std::abs(trackIDE.trackID)); // TODO: Find out why std::abs is needed
+            const float energyFrac(trackIDE.energyFrac);
+
+            if (energyFrac > bestEnergyFrac)
+            {
+                bestEnergyFrac = energyFrac;
+                bestTrackID = trackID;
+            }
+        }
+
+        if (bestTrackID >= 0)
+        {
+            MCParticleMap::const_iterator iter3 = particleMap.find(bestTrackID);
+            if (particleMap.end() == iter3)
+                throw cet::exception("LArPandora") << " PandoraCollector::BuildMCParticleHitMaps --- Found a track ID without an MC Particle ";
+
+            try
+	    {   
+                const art::Ptr<simb::MCParticle> thisParticle = iter3->second;
+                const art::Ptr<simb::MCParticle> primaryParticle(LArPandoraHelper::GetFinalStateMCParticle(particleMap, thisParticle));
+                const art::Ptr<simb::MCParticle> selectedParticle((kAddDaughters == daughterMode) ? primaryParticle : thisParticle);
+
+                if ((kIgnoreDaughters == daughterMode) && (selectedParticle != primaryParticle))
+                    continue;
+
+                if (!(LArPandoraHelper::IsVisible(selectedParticle)))
+		    continue;
+
+                particlesToHits[selectedParticle].push_back(hit);
+                hitsToParticles[hit] = selectedParticle;
+	    }
+            catch (cet::exception &e)
+            {
+	    }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::string label, const HitVector &hitVector, 
+    MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode)
+{
+    SimChannelVector simChannelVector;
+    MCTruthToMCParticles truthToParticles;
+    MCParticlesToMCTruth particlesToTruth;
+    HitsToTrackIDEs hitsToTrackIDEs;
+
+    LArPandoraHelper::CollectSimChannels(evt, label, simChannelVector);
+    LArPandoraHelper::CollectMCParticles(evt, label, truthToParticles, particlesToTruth);
+    LArPandoraHelper::BuildMCParticleHitMaps(hitVector, simChannelVector, hitsToTrackIDEs);
+    LArPandoraHelper::BuildMCParticleHitMaps(hitsToTrackIDEs, truthToParticles, particlesToHits, hitsToParticles, daughterMode);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<recob::PFParticle> LArPandoraHelper::GetParentPFParticle(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> inputParticle)
+{
+    // Navigate upward through PFO daughter/parent links - return the top-level PF Particle
+    int primaryTrackID(inputParticle->Self());
+
+    if (!inputParticle->IsPrimary())
+    {
+        while(1)
+        {
+            PFParticleMap::const_iterator pIter1 = particleMap.find(primaryTrackID); 
+            if (particleMap.end() == pIter1)
+	        throw cet::exception("LArPandora") << " PandoraCollector::GetParentPFParticle --- Found a PFParticle without a particle ID ";
+
+            const art::Ptr<recob::PFParticle> primaryParticle = pIter1->second;
+            if (primaryParticle->IsPrimary())
+                break;
+
+            primaryTrackID = primaryParticle->Parent();
+        }
+    }
+
+    PFParticleMap::const_iterator pIter2 = particleMap.find(primaryTrackID);
+    if (particleMap.end() == pIter2)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetParentPFParticle --- Found a PFParticle without a particle ID ";
+
+    const art::Ptr<recob::PFParticle> outputParticle = pIter2->second;
+    return outputParticle;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<recob::PFParticle> LArPandoraHelper::GetFinalStatePFParticle(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> inputParticle)
+{
+    // Navigate upward through PFO daughter/parent links - return the top-level non-neutrino PF Particle
+    int primaryTrackID(inputParticle->Self());
+
+    if (!inputParticle->IsPrimary())
+    {
+        int parentTrackID(inputParticle->Parent());
+
+        while(1)
+        {
+            PFParticleMap::const_iterator pIter1 = particleMap.find(parentTrackID); 
+            if (particleMap.end() == pIter1)
+                throw cet::exception("LArPandora") << " PandoraCollector::GetFinalStatePFParticle --- Found a PFParticle without a particle ID ";
+
+            const art::Ptr<recob::PFParticle> parentParticle = pIter1->second;
+            if (LArPandoraHelper::IsNeutrino(parentParticle))
+                break;
+
+            primaryTrackID = parentTrackID;
+
+            if (parentParticle->IsPrimary())
+                break;
+
+            parentTrackID = parentParticle->Parent();
+        }
+    }
+
+    PFParticleMap::const_iterator pIter2 = particleMap.find(primaryTrackID);
+    if (particleMap.end() == pIter2)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetFinalStatePFParticle --- Found a PFParticle without a particle ID ";
+
+    const art::Ptr<recob::PFParticle> outputParticle = pIter2->second;
+    return outputParticle;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<simb::MCParticle> LArPandoraHelper::GetParentMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> inputParticle)
+{
+    // Navigate upward through MC daughter/parent links - return the top-level MC particle
+    int primaryTrackID(inputParticle->TrackId());
+    int parentTrackID(inputParticle->Mother());
+   
+    while(1)
+    {
+        MCParticleMap::const_iterator pIter1 = particleMap.find(parentTrackID); 
+        if (particleMap.end() == pIter1)
+            break; // Can't find MC Particle for this track ID [break]
+
+        const art::Ptr<simb::MCParticle> particle = pIter1->second;
+
+        primaryTrackID = parentTrackID;
+        parentTrackID = particle->Mother();
+    }
+
+    MCParticleMap::const_iterator pIter2 = particleMap.find(primaryTrackID);
+    if (particleMap.end() == pIter2)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetParentMCParticle --- Found a track ID without a MC particle ";
+
+    const art::Ptr<simb::MCParticle> outputParticle = pIter2->second;
+    return outputParticle;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<simb::MCParticle> LArPandoraHelper::GetFinalStateMCParticle(const MCParticleMap &particleMap, const art::Ptr<simb::MCParticle> inputParticle)
+{
+    // Navigate upward through MC daughter/parent links - collect this particle and all its parents
+    MCParticleVector mcVector;
+
+    int trackID(inputParticle->TrackId());
+   
+    while(1)
+    {
+        MCParticleMap::const_iterator pIter = particleMap.find(trackID); 
+        if (particleMap.end() == pIter)
+            break; // Can't find MC Particle for this track ID [break]
+
+        const art::Ptr<simb::MCParticle> particle = pIter->second;
+        mcVector.push_back(particle);
+
+        trackID = particle->Mother();
+    }
+
+    // Navigate downward through MC parent/daughter links - return the first long-lived charged particle
+    for (MCParticleVector::const_reverse_iterator iter = mcVector.rbegin(), iterEnd = mcVector.rend(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<simb::MCParticle> nextParticle = *iter;
+        
+        if (LArPandoraHelper::IsVisible(nextParticle))
+            return nextParticle;
+    }
+
+    throw cet::exception("LArPandora"); // need to catch this exception
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<recob::Track> LArPandoraHelper::GetPrimaryTrack(const PFParticlesToTracks &particlesToTracks, const art::Ptr<recob::PFParticle> particle)
+{
+    PFParticlesToTracks::const_iterator tIter = particlesToTracks.find(particle);
+
+    if (particlesToTracks.end() == tIter || tIter->second.empty())
+        throw cet::exception("LArPandora") << " PandoraCollector::GetPrimaryTrack --- Failed to find associated track ";
+
+    if (tIter->second.size() != 1)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetPrimaryTrack --- Found more than one associated track ";
+
+    const art::Ptr<recob::Track> primaryTrack = *(tIter->second.begin());
+    return primaryTrack;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int LArPandoraHelper::GetGeneration(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> inputParticle)
+{
+    // Navigate upward through PFO daughter/parent links - return the top-level PF Particle
+    int nGenerations(0);
+    int primaryTrackID(inputParticle->Self());
+
+    while(1)
+    {
+        PFParticleMap::const_iterator pIter = particleMap.find(primaryTrackID); 
+        if (particleMap.end() == pIter)
+	    throw cet::exception("LArPandora") << " PandoraCollector::GetGeneration --- Found a PFParticle without a particle ID ";
+
+        ++nGenerations;
+
+        const art::Ptr<recob::PFParticle> primaryParticle = pIter->second;
+        if (primaryParticle->IsPrimary())
+            break;
+
+        primaryTrackID = primaryParticle->Parent();
+    }
+
+    return nGenerations;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int LArPandoraHelper::GetParentNeutrino(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> daughterParticle)
+{
+    art::Ptr<recob::PFParticle> parentParticle = LArPandoraHelper::GetParentPFParticle(particleMap, daughterParticle);
+
+    if (LArPandoraHelper::IsNeutrino(parentParticle))
+        return parentParticle->PdgCode();
+
+    if (parentParticle->IsPrimary())
+        return 0;
+
+    const int parentID(parentParticle->Parent());
+
+    PFParticleMap::const_iterator pIter = particleMap.find(parentID);
+    if (particleMap.end() == pIter)
+        throw cet::exception("LArPandora") << " PandoraCollector::GetParentNeutrino --- Found a PFParticle without a particle ID ";
+
+    const art::Ptr<recob::PFParticle> neutrinoParticle = pIter->second;
+    return neutrinoParticle->PdgCode();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraHelper::IsFinalState(const PFParticleMap &particleMap, const art::Ptr<recob::PFParticle> daughterParticle)
+{
+    if (LArPandoraHelper::IsNeutrino(daughterParticle))
+        return false;
+
+    if (daughterParticle->IsPrimary())
+        return true;
+
+    const int parentID(daughterParticle->Parent());
+
+    PFParticleMap::const_iterator pIter = particleMap.find(parentID);
+    if (particleMap.end() == pIter)
+        throw cet::exception("LArPandora") << " PandoraCollector::IsFinalState --- Found a PFParticle without a particle ID ";
+
+    const art::Ptr<recob::PFParticle> parentParticle = pIter->second;
+
+    if (LArPandoraHelper::IsNeutrino(parentParticle))
+        return true;
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraHelper::IsNeutrino(const art::Ptr<recob::PFParticle> particle)
+{
+    const int pdg(particle->PdgCode());
+
+    // electron, muon, tau (use Pandora PDG tables)
+    return ((pandora::NU_E == std::abs(pdg)) || (pandora::NU_MU == std::abs(pdg)) || (pandora::NU_TAU == std::abs(pdg)));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraHelper::IsTrack(const art::Ptr<recob::PFParticle> particle)
+{
+    const int pdg(particle->PdgCode());
+
+    // muon, pion, proton, kaon (use Pandora PDG tables)
+    return ((pandora::MU_MINUS == std::abs(pdg)) || (pandora::PI_PLUS == std::abs(pdg)) || (pandora::PROTON == std::abs(pdg)) || 
+        (pandora::K_PLUS == std::abs(pdg)));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraHelper::IsShower(const art::Ptr<recob::PFParticle> particle)
+{
+    const int pdg(particle->PdgCode());
+
+    // electron, photon (use Pandora PDG tables)
+    return ((pandora::E_MINUS == std::abs(pdg)) || (pandora::PHOTON == std::abs(pdg)));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraHelper::IsVisible(const art::Ptr<simb::MCParticle> particle)
+{
+    // Include long-lived charged particles
+    const int pdg(particle->PdgCode());
+
+    if ((pandora::E_MINUS == std::abs(pdg)) || (pandora::MU_MINUS == std::abs(pdg)) || (pandora::PROTON == std::abs(pdg)) || 
+        (pandora::PI_PLUS == std::abs(pdg)) || (pandora::K_PLUS == std::abs(pdg)) || 
+        (pandora::SIGMA_MINUS == std::abs(pdg)) || (pandora::SIGMA_PLUS == std::abs(pdg)) || (pandora::HYPERON_MINUS == std::abs(pdg)) || 
+        (pandora::PHOTON == std::abs(pdg)) || (pandora::NEUTRON == std::abs(pdg)))
+        return true;
+
+    // TODO: What about ions, neutrons, photons? (Have included neutrons and photons for now)
+
+    return false;
 }
 
 } // namespace lar_pandora

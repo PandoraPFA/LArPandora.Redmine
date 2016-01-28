@@ -9,7 +9,7 @@
 #include "art/Framework/Core/EDAnalyzer.h"
 
 // Local includes
-#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 // ROOT includes
 #include "TTree.h"

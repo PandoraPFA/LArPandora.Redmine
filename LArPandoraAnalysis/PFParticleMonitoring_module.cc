@@ -13,7 +13,7 @@
 #include "TTree.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraCollector.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 // std includes
 #include <string>

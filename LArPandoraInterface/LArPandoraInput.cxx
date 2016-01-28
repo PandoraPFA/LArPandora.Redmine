@@ -1,128 +1,13 @@
-// Framework includes
-#include "art/Framework/Services/Optional/TFileService.h"
-#include "cetlib/search_path.h"
+/**
+ *  @file   larpandora/LArPandoraInterface/LArPandoraInput.cxx
+ *
+ *  @brief  Helper functions for providing inputs to pandora
+ */
 
-// LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/WireGeo.h"
-
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::TDCtick_t
-#include "SimulationBase/MCTruth.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/PFParticle.h"
-
-// Pandora includes
-#include "LArObjects/LArMCParticle.h"
-#include "Objects/ParticleFlowObject.h"
-#include "LArContent.h"
-
-// Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraBase.h"
-
-// System includes
-#include <iostream>
-#include <limits>
-
-namespace lar_pandora {
-
-LArPandoraBase::LArPandoraBase(fhicl::ParameterSet const &pset) : art::EDProducer()
+namespace lar_pandora
 {
-    m_enableProduction = pset.get<bool>("EnableProduction", true);
-    m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
-    m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
 
-    m_configFile = pset.get<std::string>("ConfigFile");
-    m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
-    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel", "gaushit");
-    m_spacepointModuleLabel = pset.get<std::string>("SpacePointModuleLabel", "pandora");
-    m_pandoraModuleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
-
-    m_useHitWidths = pset.get<bool>("UseHitWidths", true);
-    m_uidOffset = pset.get<int>("UidOffset", 100000000); 
-
-    m_int_cm = pset.get<double>("InteractionLength", 84.0);
-    m_rad_cm = pset.get<double>("RadiationLength", 14.0);
-    m_dEdX_mip = pset.get<double>("dEdXmip", 2.0);
-    m_dEdX_max = pset.get<double>("dEdXmax", 25.0);
-    m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
-    m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
-
-    m_dx_cm = pset.get<double>("DefaultHitWidth", 0.5); 
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-LArPandoraBase::~LArPandoraBase()
-{
-    this->DeletePandoraInstances();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::beginJob()
-{
-    this->InitializePandora();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::InitializePandora()
-{
-    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...) *** " << std::endl;
-
-    // Find the Pandora settings file (must be within 'FW_SEARCH_PATH')
-    cet::search_path sp("FW_SEARCH_PATH");
-    std::string configFileName("");
-
-    mf::LogDebug("LArPandora") << "   Load Pandora settings: " << m_configFile << std::endl;
-    mf::LogDebug("LArPandora") << "   Search path: " << sp.to_string() << std::endl;
-
-    if (!sp.find_file(m_configFile, configFileName))
-    {
-        mf::LogError("LArPandora") << "   Failed to find: " << m_configFile << std::endl;
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_FOUND);
-    }
-    else
-    {
-        mf::LogDebug("LArPandora") << "   Found it: " <<  configFileName << std::endl;
-    }
-
-    // Create an instance of Pandora for each detector volume
-    this->CreatePandoraInstances();
-
-    if (m_pandoraInstanceMap.empty())
-    {
-        mf::LogError("LArPandora") << "   Failed to create pandora instances" << std::endl;
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-    }
-
-    // Configure the plugins for each instance of Pandora
-    this->ConfigurePandoraGeometry();
-
-    // Register the algorithms and read the settings
-    for (PandoraInstanceMap::const_iterator pIter = m_pandoraInstanceMap.begin(), pIterEnd = m_pandoraInstanceMap.end(); pIter != pIterEnd;
-        ++pIter)
-    {
-        const pandora::Pandora *pPandora = pIter->second;
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*pPandora));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, configFileName));
-    }
-
-    mf::LogDebug("LArPandora") << " *** LArPandora::InitializePandora(...)  Done! *** " << std::endl;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hitMap) const
+void LArPandoraInput::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hitMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraHits2D(...) *** " << std::endl;
 
@@ -138,7 +23,6 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
     for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
         const art::Ptr<recob::Hit> hit = *iter;
-
         const geo::WireID hit_WireID(hit->WireID());
         const geo::View_t hit_View(hit->View());
 
@@ -259,8 +143,8 @@ void LArPandoraBase::CreatePandoraHits2D(const HitVector &hitVector, HitMap &hit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVector, const SpacePointsToHits &spacePointsToHits,
-    SpacePointMap &spacePointMap) const
+void LArPandoraInput::CreatePandoraHits3D(const SpacePointVector &spacePointVector, const SpacePointsToHits &spacePointsToHits,
+    SpacePointMap &spacePointMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraHits3D(...) *** " << std::endl;
 
@@ -354,8 +238,7 @@ void LArPandoraBase::CreatePandoraHits3D(const SpacePointVector &spacePointVecto
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToParticleMap, 
-    const MCParticlesToMCTruth &particleToTruthMap) const
+void LArPandoraInput::CreatePandoraParticles(const MCTruthToMCParticles &truthToParticleMap, const MCParticlesToMCTruth &particleToTruthMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraParticles(...) *** " << std::endl;
 
@@ -504,7 +387,7 @@ void LArPandoraBase::CreatePandoraParticles(const MCTruthToMCParticles &truthToP
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVector) const
+void LArPandoraInput::CreatePandoraParticles2D(const MCParticleVector &particleVector)
 {
     lar_content::LArMCParticleFactory mcParticleFactory;
 
@@ -607,7 +490,7 @@ void LArPandoraBase::CreatePandoraParticles2D(const MCParticleVector &particleVe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraBase::CreatePandoraLinks2D(const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap) const
+void LArPandoraInput::CreatePandoraLinks2D(const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraLinks(...) *** " << std::endl;
 
@@ -658,194 +541,6 @@ void LArPandoraBase::CreatePandoraLinks2D(const HitMap &hitMap, const HitsToTrac
                 (void*)((intptr_t)hitID), (void*)((intptr_t)trackID), energyFrac));
         }
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::CreatePandoraInstances()
-{
-    mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraInstances() *** " << std::endl;
-
-    art::ServiceHandle<geo::Geometry> theGeometry;
-
-    for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat)
-    {
-        for (unsigned int itpc = 0; itpc < theGeometry->NTPC(icstat); ++itpc)
-        { 
-            mf::LogDebug("LArPandora") << "   Volume: [" << icstat<< "][" << itpc << "]" << std::endl;
-
-            try
-            {
-                const unsigned int volumeID(this->GetPandoraVolumeID(icstat, itpc));
-
-                if (m_pandoraInstanceMap.end() == m_pandoraInstanceMap.find(volumeID))
-                {
-                    mf::LogDebug("LArPandora") << "    Building Pandora instance for VolID: " << volumeID << std::endl;
-                    m_pandoraInstanceMap.insert(PandoraInstanceMap::value_type(volumeID, new pandora::Pandora()));
-                }
-            }
-            catch (pandora::StatusCodeException&)
-            {
-                mf::LogDebug("LArPandora") << "    No volume ID for this TPC..." << std::endl;
-            }
-        }
-    }
-
-    mf::LogDebug("LArPandora") << "   Number of Pandora Instances: " << m_pandoraInstanceMap.size() << std::endl;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::RunPandoraInstances() const
-{
-    mf::LogDebug("LArPandora") << " *** LArPandora::RunPandoraInstances() *** " << std::endl;
-
-    for (PandoraInstanceMap::const_iterator iter = m_pandoraInstanceMap.begin(), iterEnd = m_pandoraInstanceMap.end(); iter != iterEnd; ++iter)
-    {
-        const pandora::Pandora *const pPandora = iter->second;
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::ResetPandoraInstances() const
-{
-    mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandoraInstances() *** " << std::endl;
-
-    for (PandoraInstanceMap::const_iterator iter = m_pandoraInstanceMap.begin(), iterEnd = m_pandoraInstanceMap.end(); iter != iterEnd; ++iter)
-    {
-        const pandora::Pandora *const pPandora = iter->second;
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*pPandora));
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::DeletePandoraInstances()
-{
-    mf::LogDebug("LArPandora") << " *** LArPandora::DeletePandoraInstances() *** " << std::endl;
-
-    for (PandoraInstanceMap::const_iterator iter = m_pandoraInstanceMap.begin(), iterEnd = m_pandoraInstanceMap.end(); iter != iterEnd; ++iter)
-    {
-        const pandora::Pandora *const pPandora = iter->second;
-        delete pPandora;
-    }
-
-    m_pandoraInstanceMap.clear();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::GetTrueStartAndEndPoints(const unsigned int volumeID, const art::Ptr<simb::MCParticle> &particle,
-    int& firstT, int& lastT) const
-{
-    art::ServiceHandle<geo::Geometry> theGeometry;
-
-    firstT = -1;  lastT  = -1;
-
-    for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat)
-    {
-        for (unsigned int itpc = 0; itpc < theGeometry->NTPC(icstat); ++itpc)
-        {
-            try
-            {
-                if (this->GetPandoraVolumeID(icstat, itpc) != volumeID)
-                    continue;
-
-                int thisfirstT(-1), thislastT(-1);
-                this->GetTrueStartAndEndPoints(icstat, itpc, particle, thisfirstT, thislastT);
-
-                if (thisfirstT < 0)
-                    continue;
-
-                if (firstT < 0 || thisfirstT < firstT)
-                    firstT = thisfirstT;
-
-                if (lastT < 0 || thislastT > lastT)
-                    lastT = thislastT;
-            }
-            catch (pandora::StatusCodeException&)
-            {
-            }
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraBase::GetTrueStartAndEndPoints(const unsigned int cstat, const unsigned int tpc,
-    const art::Ptr<simb::MCParticle> &particle, int& startT, int& endT) const
-{
-    art::ServiceHandle<geo::Geometry> theGeometry;
-
-    bool foundStartPosition(false);
-
-    const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
-
-    for (int nt = 0; nt < numTrajectoryPoints; ++nt)
-    {
-        const double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
-        geo::TPCID tpcID = theGeometry->FindTPCAtPosition(pos);
-        if (!tpcID.isValid) continue;
-        
-        if (!(cstat == tpcID.Cryostat && tpc == tpcID.TPC))
-            continue;
-
-        endT = nt;
-        if (!foundStartPosition)
-        {
-            startT = endT;
-            foundStartPosition = true;
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float LArPandoraBase::GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nt) const
-{
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::TimeService> theTime;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
-
-    unsigned int which_tpc(0);
-    unsigned int which_cstat(0);
-
-    double pos[3] = {particle->Vx(nt), particle->Vy(nt), particle->Vz(nt)};
-    theGeometry->PositionToTPC(pos, which_tpc, which_cstat);
-
-    const float vtxT(particle->T(nt));
-    const float vtxTDC(theTime->TPCG4Time2Tick(vtxT));
-    const float vtxTDC0(theDetector->TriggerOffset());
-  
-    const geo::TPCGeo& theTpcGeom = theGeometry->Cryostat(which_cstat).TPC(which_tpc);
-    const float dir((theTpcGeom.DriftDirection() == geo::kNegX) ? +1.0 :-1.0);
-
-    return (dir * (vtxTDC - vtxTDC0) * theDetector->GetXTicksCoefficient());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-double LArPandoraBase::GetMips(const double hit_Charge, const geo::View_t hit_View) const
-{  
-    // Set up ART services
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    art::ServiceHandle<util::DetectorProperties> theDetector;
-    art::ServiceHandle<util::LArProperties> theLiquidArgon;
-
-    // TODO: Check if this procedure is correct
-    const double dQdX(hit_Charge / (theGeometry->WirePitch(hit_View))); // ADC/cm
-    const double dQdX_e(dQdX / (theDetector->ElectronsToADC() * m_recombination_factor)); // e/cm
-
-    double dEdX(theLiquidArgon->BirksCorrection(dQdX_e));
-
-    if ((dEdX < 0) || (dEdX > m_dEdX_max))
-        dEdX = m_dEdX_max;
-
-    const double mips(dEdX / m_dEdX_mip); 
-
-    return mips;
 }
 
 } // namespace lar_pandora
