@@ -81,10 +81,10 @@ private:
 
     double       m_dx_cm;                   ///<
     double       m_int_cm;                  ///<
-    double       m_rad_cm;                  ///< 
-    double       m_dEdX_max;                ///< 
-    double       m_dEdX_mip;                ///< 
-    double       m_mips_to_gev;             ///< 
+    double       m_rad_cm;                  ///<
+    double       m_dEdX_max;                ///<
+    double       m_dEdX_mip;                ///<
+    double       m_mips_to_gev;             ///<
     double       m_recombination_factor;    ///<
 
     bool         m_buildTracks;             ///<

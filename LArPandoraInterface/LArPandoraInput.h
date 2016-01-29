@@ -21,12 +21,14 @@ class LArPandoraInput
 {
 public:
     /**
-     *  @brief Create the Pandora 2D hits from the ART hits
+     *  @brief  Create the Pandora 2D hits from the ART hits
      *
-     *  @param hits  the input list of ART hits for this event
-     *  @param hitMap  mapping from Pandora hit addresses to ART hits
+     *  @param  producer the producer
+     *  @param  pPrimaryPandora the address of the primary pandora instance
+     *  @param  hits the input list of ART hits for this event
+     *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
      */
-    static void CreatePandoraHits2D(const HitVector &hitVector, HitMap &hitMap);
+    static void CreatePandoraHits2D(art::EDProducer &producer, const pandora::Pandora *const pPrimaryPandora, const HitVector &hitVector, IdToHitMap &idToHitMap);
 
     /**
      *  @brief Create the Pandora 3D hits from the ART space points
@@ -43,14 +45,14 @@ public:
      *  @param truthToParticles  mapping from MC truth to MC particles
      *  @param particlesToTruth  mapping from MC particles to MC truth
      */
-    static void CreatePandoraParticles(const MCTruthToMCParticles &truthToParticles, const MCParticlesToMCTruth &particlesToTruth);
+    static void CreatePandoraMCParticles(const MCTruthToMCParticles &truthToParticles, const MCParticlesToMCTruth &particlesToTruth);
 
     /**
      *  @brief Create 2D projections of the Pandora MC particles
      *
      *  @param particleVector  the input vector of MC particles
      */
-    static void CreatePandoraParticles2D(const MCParticleVector &particleVector);
+    static void CreatePandoraMCParticles2D(const MCParticleVector &particleVector);
 
     /**
      *  @brief Create links between the 2D hits and Pandora MC particles
@@ -58,8 +60,9 @@ public:
      *  @param hitMap  mapping from Pandora hit addresses to ART hits
      *  @param hitToParticleMap  mapping from each ART hit to its underlying G4 track ID
      */
-    static void CreatePandoraLinks2D(const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap);
+    static void CreatePandoraMCLinks2D(const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap);
 
+private:
     /**
      *  @brief Loop over MC trajectory points and identify start and end points within the detector
      *
@@ -70,7 +73,6 @@ public:
      */
     static void GetTrueStartAndEndPoints(const unsigned int volumeID, const art::Ptr<simb::MCParticle> &particle, int &startT, int &endT);
 
-private:
     /**
      *  @brief Loop over MC trajectory points and identify start and end points within a given cryostat and TPC
      *

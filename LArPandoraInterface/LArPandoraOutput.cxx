@@ -5,17 +5,30 @@
  *
  */
 
+#include "art/Framework/Core/EDProducer.h"
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include "ClusterFinder/ClusterCreator.h"
 #include "Geometry/Geometry.h"
 #include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 #include "RecoAlg/ClusterParamsImportWrapper.h"
-#include "ClusterFinder/ClusterCreator.h"
+#include "Utilities/AssociationUtil.h"
+
+#include "RecoBase/Hit.h"
+#include "RecoBase/PFParticle.h"
+#include "RecoBase/Seed.h"
+#include "RecoBase/Shower.h"
+#include "RecoBase/SpacePoint.h"
+#include "RecoBase/Vertex.h"
 
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/TrackState.h"
 #include "Objects/Vertex.h"
+
+#include "LArHelpers/LArClusterHelper.h"
+#include "LArHelpers/LArPfoHelper.h"
+#include "LArStitching/MultiPandoraApi.h"
 
 #include "LArPandoraInterface/LArPandoraOutput.h"
 
@@ -27,31 +40,24 @@
 namespace lar_pandora
 {
 
-void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
+void LArPandoraOutput::ProduceArtOutput(art::EDProducer &producer, art::Event &evt, const pandora::Pandora *const pPrimaryPandora, 
+    const IdToHitMap &idToHitMap, const bool buildTracks, const bool buildShowers)
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtOutput() *** " << std::endl;
 
-    // Concatenate output PANDORA particles
+    // TODO Configurable option to determine whether to provide pfos from daughter instances or just from primary instance
+    const PandoraInstanceList &pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(pPrimaryPandora));
     pandora::PfoList concatenatedPfoList;
 
-    for (PandoraInstanceMap::const_iterator pIter = m_pandoraInstanceMap.begin(), pIterEnd = m_pandoraInstanceMap.end(); pIter != pIterEnd;
-        ++pIter)
+    for (const pandora::Pandora *const pPandora : pandoraInstanceList)
     {
-        const pandora::Pandora *const pPandora = pIter->second;
-
-        // Get list of Pandora particles (ATTN: assume that all reco particles live in curent list)
-        const pandora::PfoList *pPfoList = NULL;
+        const pandora::PfoList *pPfoList(nullptr);
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPandora, pPfoList));
-
-        if (NULL == pPfoList)
-            continue;
-
         concatenatedPfoList.insert(pPfoList->begin(), pPfoList->end());
     }
 
     if (concatenatedPfoList.empty())
         mf::LogDebug("LArPandora") << "   Warning: No reconstructed particles for this event " << std::endl;
-
 
     // Set up ART outputs
     std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
@@ -213,9 +219,9 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
             const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
             const int hitID((int)(hitID_temp));
 
-            HitMap::const_iterator artIter = hitMap.find(hitID);
+            IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
 
-            if (hitMap.end() == artIter)
+            if (idToHitMap.end() == artIter)
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
             HitVector hitVector;
@@ -230,8 +236,8 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
             recob::SpacePoint newSpacePoint(xyz, dxdydz, chi2, spacePointCounter++);
             outputSpacePoints->push_back(newSpacePoint);
 
-            util::CreateAssn(*this, evt, *(outputSpacePoints.get()), hitVector, *(outputSpacePointsToHits.get()));
-            util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputSpacePoints.get()), *(outputParticlesToSpacePoints.get()),
+            util::CreateAssn(producer, evt, *(outputSpacePoints.get()), hitVector, *(outputSpacePointsToHits.get()));
+            util::CreateAssn(producer, evt, *(outputParticles.get()), *(outputSpacePoints.get()), *(outputParticlesToSpacePoints.get()),
                 outputSpacePoints->size() - 1, outputSpacePoints->size());
         }
 
@@ -264,9 +270,9 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
                 const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
                 const int hitID((int)(hitID_temp));
 
-                HitMap::const_iterator artIter = hitMap.find(hitID);
+                IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
 
-                if (hitMap.end() == artIter)
+                if (idToHitMap.end() == artIter)
                     throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
                 const art::Ptr<recob::Hit> hit = artIter->second;
@@ -287,11 +293,11 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
             {
                 const HitVector clusterHits(hIter->second);
                 outputClusters->emplace_back(
-                    LArPandoraHelper::BuildCluster(clusterCounter++, clusterHits, isolatedHits, ClusterParamAlgo)
+                    LArPandoraOutput::BuildCluster(clusterCounter++, clusterHits, isolatedHits, ClusterParamAlgo)
                 ); 
 
-                util::CreateAssn(*this, evt, *(outputClusters.get()), clusterHits, *(outputClustersToHits.get()));
-                util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),
+                util::CreateAssn(producer, evt, *(outputClusters.get()), clusterHits, *(outputClustersToHits.get()));
+                util::CreateAssn(producer, evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),
                     outputClusters->size() - 1, outputClusters->size());
             }
         }
@@ -314,7 +320,7 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
             double pos[3] = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
             double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
 
-            util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputVertices.get()), *(outputParticlesToVertices.get()),
+            util::CreateAssn(producer, evt, *(outputParticles.get()), *(outputVertices.get()), *(outputParticlesToVertices.get()),
                 vtxElement, vtxElement + 1);
 
             if (lar_content::LArPfoHelper::IsTrack(pPfo) && pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
@@ -326,18 +332,18 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
                 recob::Seed newSeed(pos, dir, posErr, dirErr);
                 outputSeeds->push_back(newSeed);
 
-                util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
+                util::CreateAssn(producer, evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
                     outputSeeds->size() - 1, outputSeeds->size());
 
-                if (m_buildTracks)
+                if (buildTracks)
                 {
                     try
                     {
-                        recob::Track newTrack(LArPandoraHelper::BuildTrack(trackCounter, pPfo)); trackCounter++;
+                        recob::Track newTrack(LArPandoraOutput::BuildTrack(trackCounter, pPfo)); trackCounter++;
                         outputTracks->push_back(newTrack);
 
-                        util::CreateAssn(*this, evt, *(outputTracks.get()), pfoHits, *(outputTracksToHits.get()));
-                        util::CreateAssn(*this, evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
+                        util::CreateAssn(producer, evt, *(outputTracks.get()), pfoHits, *(outputTracksToHits.get()));
+                        util::CreateAssn(producer, evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
                             outputTracks->size() - 1, outputTracks->size());
                     }
                     catch (cet::exception &e)
@@ -358,10 +364,10 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
     mf::LogDebug("LArPandora") << "   Number of new seeds: " << outputSeeds->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new vertices: " << outputVertices->size() << std::endl;
 
-    if (m_buildTracks)
+    if (buildTracks)
         mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;
 
-    if (m_buildShowers)
+    if (buildShowers)
         mf::LogDebug("LArPandora") << "   Number of new showers: " << outputShowers->size() << std::endl;
 
     evt.put(std::move(outputParticles));
@@ -377,14 +383,14 @@ void LArPandoraOutput::ProduceArtOutput(art::Event &evt, const HitMap &hitMap)
     evt.put(std::move(outputSpacePointsToHits));
     evt.put(std::move(outputClustersToHits));
 
-    if (m_buildTracks)
+    if (buildTracks)
     {
         evt.put(std::move(outputTracks));
         evt.put(std::move(outputParticlesToTracks));
         evt.put(std::move(outputTracksToHits));
     }
 
-    if (m_buildShowers)
+    if (buildShowers)
     {
         evt.put(std::move(outputShowers));
         evt.put(std::move(outputParticlesToShowers));
@@ -487,11 +493,10 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const pandora::ParticleF
 
     const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
         
-    if (NULL == pLArTrackPfo)
+    if (!pLArTrackPfo)
         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo was not track-like ";
         
-    const lar_content::LArTrackStateVector &trackStateVector =  pLArTrackPfo->m_trackStateVector;
-    return BuildTrack(id, trackStateVector);
+    return LArPandoraOutput::BuildTrack(id, pLArTrackPfo->m_trackStateVector);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

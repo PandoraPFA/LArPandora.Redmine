@@ -9,8 +9,7 @@
 
 #include "art/Framework/Core/EDProducer.h"
 
-#include "RecoBase/Hit.h"
-
+namespace recob {class Hit;}
 namespace pandora {class Pandora;}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,6 +37,14 @@ public:
      */
     virtual ~ILArPandora();
 
+    /**
+     *  @brief  Get the volume id number associated with the given cryostate and tpc numbers
+     * 
+     *  @param  cryostat the cryostat number
+     *  @param  tpc the tpc number
+     */
+    virtual int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc) = 0;
+
 protected:
     /**
      *  @brief  Create pandora instances
@@ -48,14 +55,6 @@ protected:
      *  @brief  Delete pandora instances
      */
     virtual void DeletePandoraInstances() = 0;
-
-    /**
-     *  @brief  Get the volume id number associated with the given cryostate and tpc numbers
-     * 
-     *  @param  cryostat the cryostat number
-     *  @param  tpc the tpc number
-     */
-    virtual int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc) = 0;
 
     /**
      *  @brief  Create pandora input hits, mc particles etc.
@@ -88,14 +87,14 @@ protected:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline ILArPandora::ILArPandora(fhicl::ParameterSet const &pset) :
+inline ILArPandora::ILArPandora(fhicl::ParameterSet const &/*pset*/) :
     m_pPrimaryPandora(nullptr)
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline ILArPandora()::~ILArPandora()
+inline ILArPandora::~ILArPandora()
 {
 }
 

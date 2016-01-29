@@ -5,20 +5,39 @@
  *
  */
 
+#include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
+
+#include "RecoBase/Hit.h"
+#include "RecoBase/Cluster.h"
+#include "RecoBase/PFParticle.h"
+#include "RecoBase/Seed.h"
+#include "RecoBase/Shower.h"
+#include "RecoBase/SpacePoint.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Vertex.h"
+
+#include "TTree.h"
 
 #include "Api/PandoraApi.h"
 
 #include "LArContent.h"
+#include "LArHelpers/LArPfoHelper.h"
+#include "LArStitching/MultiPandoraApi.h"
 
 #include "LArPandoraInterface/ILArPandora.h"
+#include "LArPandoraInterface/LArPandora.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "LArPandoraInterface/LArPandoraInput.h"
+#include "LArPandoraInterface/LArPandoraOutput.h"
 
 #include <iostream>
 
 namespace lar_pandora
 {
 
-LArPandora::LArPandora(fhicl::ParameterSet const &pset)
+LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
+    ILArPandora(pset)
 {
     m_enableProduction = pset.get<bool>("EnableProduction", true);
     m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
@@ -97,7 +116,7 @@ void LArPandora::beginJob()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraParticleCreator::produce(art::Event &evt)
+void LArPandora::produce(art::Event &evt)
 { 
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
 
@@ -179,7 +198,7 @@ void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHit
         theClock.start();
 
     if (m_enableProduction)
-        LArPandoraOutput::ProduceArtOutput(evt, idToHitMap);
+        LArPandoraOutput::ProduceArtOutput(*this, evt, m_pPrimaryPandora, idToHitMap, m_buildTracks, m_buildShowers);
 
     if (m_enableMonitoring)
     {
@@ -190,7 +209,7 @@ void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandora::RunPandoraInstances() const
+void LArPandora::RunPandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::RunPandoraInstances() *** " << std::endl;
     cet::cpu_timer theClock;
@@ -200,10 +219,10 @@ void LArPandora::RunPandoraInstances() const
 
     const PandoraInstanceList &pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
-    for (const Pandora *const pPandora : pandoraInstanceList)
+    for (const pandora::Pandora *const pPandora : pandoraInstanceList)
     {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, this->SetParticleX0Values(pPandora));        
+        this->SetParticleX0Values(pPandora);        
     }
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPrimaryPandora));
@@ -217,7 +236,7 @@ void LArPandora::RunPandoraInstances() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandora::ResetPandoraInstances() const
+void LArPandora::ResetPandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandoraInstances() *** " << std::endl;
     const PandoraInstanceList &pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
@@ -243,9 +262,9 @@ void LArPandora::DeletePandoraInstances()
 
 const pandora::Pandora *LArPandora::CreateNewPandora() const
 {
-    const Pandora *const pPandora = new Pandora();
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*pPandora));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
+    const pandora::Pandora *const pPandora = new pandora::Pandora();
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*pPandora));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
 
     return pPandora;
 }
@@ -256,7 +275,7 @@ void LArPandora::SetParticleX0Values(const pandora::Pandora *const pPandora) con
 {
     // ATTN Just a placeholder for a proper treatment
     const pandora::PfoList *pPfoList(nullptr);
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPandora, pPfoList));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPandora, pPfoList));
 
     pandora::PfoList connectedPfoList;
     lar_content::LArPfoHelper::GetAllConnectedPfos(*pPfoList, connectedPfoList);

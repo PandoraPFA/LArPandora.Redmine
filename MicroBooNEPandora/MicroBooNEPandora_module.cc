@@ -21,6 +21,14 @@ namespace lar_pandora
  */
 class MicroBooNEPandora : public LArPandora
 {
+public: 
+    /**
+     *  @brief  Constructor
+     *
+     *  @param  pset the parameter set
+     */
+    MicroBooNEPandora(fhicl::ParameterSet const &pset);
+
 private:
     void CreatePandoraInstances();
     int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc);
@@ -51,6 +59,13 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 
 namespace lar_pandora
 {
+
+MicroBooNEPandora::MicroBooNEPandora(fhicl::ParameterSet const &pset) :
+    LArPandora(pset)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 void MicroBooNEPandora::CreatePandoraInstances()
 {
