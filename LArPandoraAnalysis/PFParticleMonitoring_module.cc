@@ -5,17 +5,13 @@
  *
  */
 
-// Framework Includes
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-// ROOT includes
 #include "TTree.h"
 
-// Local LArPandora includes
 #include "LArPandoraInterface/LArPandoraHelper.h"
 
-// std includes
 #include <string>
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -272,7 +268,6 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
  *  $Log: $
  */
 
-// Framework includes
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
@@ -281,25 +276,22 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-// LArSoft includes
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
+#include "RecoBase/Hit.h"
+#include "RecoBase/Cluster.h"
+#include "RecoBase/PFParticle.h"
+#include "RecoBase/SpacePoint.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Vertex.h"
+#include "SimulationBase/MCTruth.h"
+#include "SimulationBase/MCParticle.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/AssociationUtil.h"
 
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
-
-#include "RecoBase/Hit.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Track.h"
-
-// std includes
 #include <iostream>
 
 namespace lar_pandora

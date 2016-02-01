@@ -9,24 +9,24 @@
 
 #include "art/Framework/Principal/Event.h"
 
-#include "RecoBase/Wire.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Vertex.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/PFParticle.h"
-
-#include "SimulationBase/MCParticle.h"
-#include "SimulationBase/MCTruth.h"
 #include "Simulation/SimChannel.h"
- 
-#include "AnalysisBase/CosmicTag.h"
+
+#include <map>
+#include <set>
+#include <vector>
+
+namespace anab {class CosmicTag;}
+namespace pandora {class ParticleFlowObject; class Vertex;}
+namespace recob {class Cluster; class Hit; class PFParticle; class Seed; class Shower; class SpacePoint; class Track; class Vertex; class Wire;}
+namespace sim {class SimChannel; class TrackIDE;}
+namespace simb {class MCParticle; class MCTruth;}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace lar_pandora 
 {
+
+typedef std::set< art::Ptr<recob::Hit> > HitList;
 
 typedef std::vector< art::Ptr<recob::Wire> >        WireVector;
 typedef std::vector< art::Ptr<recob::Hit> >         HitVector;
@@ -72,6 +72,10 @@ typedef std::map< int, art::Ptr<recob::SpacePoint> >  SpacePointMap;
 typedef std::map< int, art::Ptr<recob::Hit> >         HitMap;
 typedef std::map< int, art::Ptr<simb::MCParticle> >   MCParticleMap;
 typedef std::map< int, art::Ptr<sim::SimChannel> >    SimChannelMap;
+
+typedef std::map< const pandora::ParticleFlowObject*, size_t> ThreeDParticleMap;
+typedef std::map< const pandora::Vertex*, unsigned int> ThreeDVertexMap; 
+typedef std::map< int, HitVector > HitArray;
 
 /**
  *  @brief  LArPandoraHelper class

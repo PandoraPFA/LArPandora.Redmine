@@ -4,18 +4,14 @@
  *  @brief  Analysis module for created particles
  */
 
-// Framework Includes
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-// ROOT includes
 #include "TTree.h"
 #include "TVector3.h"
 
-// Local LArPandora includes
 #include "LArPandoraInterface/LArPandoraHelper.h"
 
-// std includes
 #include <string>
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +119,6 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
  *  $Log: $
  */
 
-// Framework includes
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
@@ -132,7 +127,11 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-// std includes
+#include "RecoBase/PFParticle.h"
+#include "RecoBase/Seed.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Vertex.h"
+
 #include <iostream>
 
 namespace lar_pandora

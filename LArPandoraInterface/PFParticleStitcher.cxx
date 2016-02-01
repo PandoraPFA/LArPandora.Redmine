@@ -556,7 +556,7 @@ void PFParticleStitcher::ProduceArtOutput(art::Event &evt, const PFParticleMap &
                 throw cet::exception("LArPandora") << " PFParticleStitcher::ProduceArtOutput --- Found a track without any trajectory points";
 
             // Build track
-            recob::Track newTrack(LArPandoraOutput::BuildTrack(trackCounter++, trackStateVector)); 
+            recob::Track newTrack(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector)); 
             outputTracks->push_back(newTrack);  
 
             util::CreateAssn(*this, evt, *(outputTracks.get()), hitVector, *(outputTracksToHits.get()));

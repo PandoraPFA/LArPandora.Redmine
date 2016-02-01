@@ -7,8 +7,6 @@
 #ifndef LAR_PANDORA_OUTPUT_H
 #define LAR_PANDORA_OUTPUT_H
 
-#include "art/Persistency/Common/Ptr.h" 
-
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Track.h"
 #include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
@@ -18,10 +16,7 @@
 #include "LArPandoraInterface/ILArPandora.h"
 #include "LArPandoraInterface/LArPandoraHelper.h"
 
-#include <vector>
-#include <set>
-
-namespace recob {class Hit;}
+namespace art {class EDProducer;}
 namespace pandora {class Pandora; class ParticleFlowObject;}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,23 +24,36 @@ namespace pandora {class Pandora; class ParticleFlowObject;}
 namespace lar_pandora
 {
 
-typedef std::set< art::Ptr<recob::Hit> > HitList;
-
 class LArPandoraOutput
 {
 public:
     /**
+     *  @brief  Settings class
+     */
+    class Settings
+    {
+    public:
+        /**
+         *  @brief  Default constructor
+         */
+        Settings();
+
+        const pandora::Pandora *m_pPrimaryPandora;              ///< 
+        art::EDProducer        *m_pProducer;                    ///< 
+        bool                    m_buildTracks;                  ///<
+        bool                    m_buildShowers;                 ///<
+        bool                    m_buildStitchedParticles;       ///<
+        bool                    m_buildSingleVolumeParticles;   ///<
+    };
+
+    /**
      *  @brief  Convert the Pandora PFOs into ART clusters and write into ART event
      *
-     *  @param  producer the producer
-     *  @param  evt the ART event
-     *  @param  pPrimaryPandora the address of the primary pandora instance
+     *  @param  settings the settings
      *  @param  idToHitMap the mapping from Pandora hit ID to ART hit
-     *  @param  buildTracks whether to build tracks
-     *  @param  buildShowers whether to build showers
+     *  @param  evt the ART event
      */
-    static void ProduceArtOutput(art::EDProducer &producer, art::Event &evt, const pandora::Pandora *const pPrimaryPandora,
-        const IdToHitMap &idToHitMap, const bool buildTracks, const bool buildShowers);
+    static void ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt);
 
     /**
      *  @brief Build a recob::Cluster object from an input vector of recob::Hit objects
@@ -72,9 +80,9 @@ public:
      *  @brief Merge a set of recob::Track objects
      *
      *  @param id the id code for the tracks
-     *  @param trackStateVector the vector of trajectory points for this track
+     *  @param pTrackStateVector the vector of trajectory points for this track
      */
-    static recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector);
+    static recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector *const pTrackStateVector);
 };
 
 } // namespace lar_pandora

@@ -9,6 +9,10 @@
 #define LAR_PANDORA_H 1
 
 #include "LArPandoraInterface/ILArPandora.h"
+#include "LArPandoraInterface/LArPandoraInput.h"
+#include "LArPandoraInterface/LArPandoraOutput.h"
+
+#include <string>
 
 class TTree;
 
@@ -64,42 +68,31 @@ protected:
      */
     void InitializeMonitoring();
 
-    bool         m_enableProduction;        ///<
-    bool         m_enableMCParticles;       ///<
-    bool         m_enableMonitoring;        ///<
-
-    std::string  m_configFile;              ///<
-    std::string  m_stitchingConfigFile;     ///<
-
-    std::string  m_geantModuleLabel;        ///<
-    std::string  m_hitfinderModuleLabel;    ///<
-    std::string  m_spacepointModuleLabel;   ///<
-    std::string  m_pandoraModuleLabel;      ///<
-
-    bool         m_useHitWidths;            ///<
-    int          m_uidOffset;               ///<
-
-    double       m_dx_cm;                   ///<
-    double       m_int_cm;                  ///<
-    double       m_rad_cm;                  ///<
-    double       m_dEdX_max;                ///<
-    double       m_dEdX_mip;                ///<
-    double       m_mips_to_gev;             ///<
-    double       m_recombination_factor;    ///<
-
-    bool         m_buildTracks;             ///<
-    bool         m_buildShowers;            ///<
+    std::string                 m_configFile;               ///<
+    std::string                 m_stitchingConfigFile;      ///<
 
 private:
-    TTree       *m_pRecoTree;               ///<
-    int          m_run;                     ///<
-    int          m_event;                   ///<
-    int          m_hits;                    ///<
-    int          m_pandoraHits;             ///<
-    float        m_collectionTime;          ///<
-    float        m_inputTime;               ///<
-    float        m_processTime;             ///<
-    float        m_outputTime;              ///<
+    LArPandoraInput::Settings   m_inputSettings;            ///< 
+    LArPandoraOutput::Settings  m_outputSettings;           ///<    
+
+    bool                        m_enableProduction;         ///<
+    bool                        m_enableMCParticles;        ///<
+    bool                        m_enableMonitoring;         ///<
+
+    std::string                 m_geantModuleLabel;         ///<
+    std::string                 m_hitfinderModuleLabel;     ///<
+    std::string                 m_spacepointModuleLabel;    ///<
+    std::string                 m_pandoraModuleLabel;       ///<
+
+    TTree                      *m_pRecoTree;                ///<
+    int                         m_run;                      ///<
+    int                         m_event;                    ///<
+    int                         m_hits;                     ///<
+    int                         m_pandoraHits;              ///<
+    float                       m_collectionTime;           ///<
+    float                       m_inputTime;                ///<
+    float                       m_processTime;              ///<
+    float                       m_outputTime;               ///<
 };
 
 } // namespace lar_pandora

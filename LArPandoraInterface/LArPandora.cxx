@@ -25,7 +25,6 @@
 #include "LArHelpers/LArPfoHelper.h"
 #include "LArStitching/MultiPandoraApi.h"
 
-#include "LArPandoraInterface/ILArPandora.h"
 #include "LArPandoraInterface/LArPandora.h"
 #include "LArPandoraInterface/LArPandoraHelper.h"
 #include "LArPandoraInterface/LArPandoraInput.h"
@@ -39,32 +38,34 @@ namespace lar_pandora
 LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     ILArPandora(pset)
 {
+    m_configFile = pset.get<std::string>("ConfigFile");
+    m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile");
+
+    m_inputSettings.m_pILArPandora = this;
+    m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
+    m_inputSettings.m_uidOffset = pset.get<int>("UidOffset", 100000000); 
+    m_inputSettings.m_dx_cm = pset.get<double>("DefaultHitWidth", 0.5);
+    m_inputSettings.m_int_cm = pset.get<double>("InteractionLength", 84.0);
+    m_inputSettings.m_rad_cm = pset.get<double>("RadiationLength", 14.0);
+    m_inputSettings.m_dEdX_max = pset.get<double>("dEdXmax", 25.0);
+    m_inputSettings.m_dEdX_mip = pset.get<double>("dEdXmip", 2.0);
+    m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
+    m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
+
+    m_outputSettings.m_pProducer = this;
+    m_outputSettings.m_buildTracks = pset.get<bool>("BuildTracks", true);
+    m_outputSettings.m_buildShowers = pset.get<bool>("BuildShowers", true);
+    m_outputSettings.m_buildStitchedParticles = pset.get<bool>("BuildStitchedParticles", false);
+    m_outputSettings.m_buildSingleVolumeParticles = pset.get<bool>("BuildSingleVolumeParticles", true);
+
     m_enableProduction = pset.get<bool>("EnableProduction", true);
     m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
     m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
-
-    m_configFile = pset.get<std::string>("ConfigFile");
-    m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile");
 
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
     m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel", "gaushit");
     m_spacepointModuleLabel = pset.get<std::string>("SpacePointModuleLabel", "pandora");
     m_pandoraModuleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
-
-    m_useHitWidths = pset.get<bool>("UseHitWidths", true);
-    m_uidOffset = pset.get<int>("UidOffset", 100000000); 
-
-    m_int_cm = pset.get<double>("InteractionLength", 84.0);
-    m_rad_cm = pset.get<double>("RadiationLength", 14.0);
-    m_dEdX_mip = pset.get<double>("dEdXmip", 2.0);
-    m_dEdX_max = pset.get<double>("dEdXmax", 25.0);
-    m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
-    m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
-
-    m_dx_cm = pset.get<double>("DefaultHitWidth", 0.5);
-
-    m_buildTracks = pset.get<bool>("BuildTracks", true);
-    m_buildShowers = pset.get<bool>("BuildShowers", true);
 
     if (m_enableProduction)
     {
@@ -81,14 +82,14 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
         produces< art::Assns<recob::SpacePoint, recob::Hit> >();
         produces< art::Assns<recob::Cluster, recob::Hit> >();
 
-        if (m_buildTracks)
+        if (m_outputSettings.m_buildTracks)
         {
             produces< std::vector<recob::Track> >(); 
             produces< art::Assns<recob::PFParticle, recob::Track> >();
             produces< art::Assns<recob::Track, recob::Hit> >();
         }
 
-        if (m_buildShowers)
+        if (m_outputSettings.m_buildShowers)
         {
             produces< std::vector<recob::Shower> >(); 
             produces< art::Assns<recob::PFParticle, recob::Shower> >();
@@ -112,6 +113,12 @@ void LArPandora::beginJob()
         this->InitializeMonitoring();
 
     this->CreatePandoraInstances();
+
+    if (!m_pPrimaryPandora)
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+
+    m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
+    m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -170,13 +177,13 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         theClock.start();
     }
 
-    LArPandoraInput::CreatePandoraHits2D(this, m_pPrimaryPandora, artHits, idToHitMap);
+    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, artHits, idToHitMap);
 
     if (m_enableMCParticles && !evt.isRealData())
     {
-        LArPandoraInput::CreatePandoraMCParticles(this, m_pPrimaryPandora, artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        LArPandoraInput::CreatePandoraMCParticles2D(this, m_pPrimaryPandora, artMCParticleVector);
-        LArPandoraInput::CreatePandoraMCLinks2D(this, m_pPrimaryPandora, idToHitMap, artHitsToTrackIDEs);
+        LArPandoraInput::CreatePandoraMCParticles(m_inputSettings, artMCTruthToMCParticles, artMCParticlesToMCTruth);
+        LArPandoraInput::CreatePandoraMCParticles2D(m_inputSettings, artMCParticleVector);
+        LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, idToHitMap, artHitsToTrackIDEs);
     }
 
     if (m_enableMonitoring)
@@ -198,7 +205,7 @@ void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHit
         theClock.start();
 
     if (m_enableProduction)
-        LArPandoraOutput::ProduceArtOutput(*this, evt, m_pPrimaryPandora, idToHitMap, m_buildTracks, m_buildShowers);
+        LArPandoraOutput::ProduceArtOutput(m_outputSettings, idToHitMap, evt);
 
     if (m_enableMonitoring)
     {

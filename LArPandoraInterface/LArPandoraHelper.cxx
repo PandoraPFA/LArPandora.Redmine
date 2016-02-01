@@ -11,12 +11,24 @@
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
-#include "SimpleTypesAndConstants/RawTypes.h"
+#include "AnalysisBase/CosmicTag.h"
 #include "Geometry/Geometry.h"
+#include "RecoBase/Hit.h"
+#include "RecoBase/Cluster.h"
+#include "RecoBase/PFParticle.h"
+#include "RecoBase/Seed.h"
+#include "RecoBase/Shower.h"
+#include "RecoBase/SpacePoint.h"
+#include "RecoBase/Track.h"
+#include "RecoBase/Vertex.h"
+#include "RecoBase/Wire.h"
+#include "SimulationBase/MCParticle.h"
+#include "SimulationBase/MCTruth.h"
+#include "SimpleTypesAndConstants/RawTypes.h"
 #include "Utilities/TimeService.h"
 
-#include "Pandora/PdgTable.h"
 #include "Objects/ParticleFlowObject.h"
+#include "Pandora/PdgTable.h"
 
 #include "LArPandoraInterface/LArPandoraHelper.h"
 

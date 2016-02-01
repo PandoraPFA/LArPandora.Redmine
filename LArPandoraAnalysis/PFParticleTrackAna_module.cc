@@ -4,14 +4,11 @@
  *  @brief  Analysis module for created particles
  */
 
-// Framework Includes
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-// ROOT includes
 #include "TTree.h"
 
-// std includes
 #include <string>
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,7 +83,6 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
  *  $Log: $
  */
 
-// Framework includes
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
@@ -97,15 +93,13 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
-// LArSoft includes
+#include "Geometry/Geometry.h"
+#include "RecoBase/Track.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/LArProperties.h"
-#include "Geometry/Geometry.h"
 
-// Local includes
 #include "LArPandoraInterface/LArPandoraHelper.h"
 
-// std includes
 #include <iostream>
 
 namespace lar_pandora

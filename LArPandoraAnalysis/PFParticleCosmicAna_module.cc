@@ -4,17 +4,13 @@
  *  @brief  Analysis module for created particles
  */
 
-// Framework Includes
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-// Local includes
 #include "LArPandoraInterface/LArPandoraHelper.h"
 
-// ROOT includes
 #include "TTree.h"
 
-// std includes
 #include <string>
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -157,7 +153,6 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
  *  $Log: $
  */
 
-// Framework includes
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
@@ -168,12 +163,12 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
-// LArSoft includes
 #include "AnalysisBase/CosmicTag.h"
 #include "Geometry/Geometry.h"
+#include "RecoBase/PFParticle.h"
+#include "RecoBase/Track.h"
+#include "SimulationBase/MCTruth.h"
 
-
-// std includes
 #include <iostream>
 
 namespace lar_pandora
