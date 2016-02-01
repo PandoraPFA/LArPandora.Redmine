@@ -17,7 +17,7 @@
     </algorithm-->
 
      <algorithm type = "LArEventWriting">
-        <EventFileName>LArEvents.pndr</EventFileName>
+        <EventFileName>Pandora_Events.pndr</EventFileName>
         <ShouldWriteEvents>true</ShouldWriteEvents>
         <ShouldOverwriteEventFile>true</ShouldOverwriteEventFile>
         <ShouldWriteMCRelationships>true</ShouldWriteMCRelationships>
