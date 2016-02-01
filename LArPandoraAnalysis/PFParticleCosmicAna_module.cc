@@ -296,10 +296,10 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
     MCParticlesToHits trueParticlesToHits;
     HitsToMCParticles trueHitsToParticles;
 
-    LArPandoraCollector::CollectHits(evt, m_hitfinderLabel, hitVector);
-    LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
-    LArPandoraCollector::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
-        (m_useDaughterMCParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kIgnoreDaughters));
+    LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
+    LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
+    LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
+        (m_useDaughterMCParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kIgnoreDaughters));
 
 
     // Collect Reco Particles
@@ -308,9 +308,9 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
     PFParticlesToHits recoParticlesToHits;
     HitsToPFParticles recoHitsToParticles;
 
-    LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
-    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_particleLabel, recoParticlesToHits, recoHitsToParticles, 
-        (m_useDaughterPFParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kIgnoreDaughters));
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_particleLabel, recoParticlesToHits, recoHitsToParticles, 
+        (m_useDaughterPFParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kIgnoreDaughters));
 
     std::cout << "  PFParticles: " << recoParticleVector.size() << std::endl;
 
@@ -319,14 +319,14 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
     // ===================
     TrackVector recoTrackVector;
     PFParticlesToTracks recoParticlesToTracks;
-    LArPandoraCollector::CollectTracks(evt, m_trackfitLabel, recoTrackVector, recoParticlesToTracks);
+    LArPandoraHelper::CollectTracks(evt, m_trackfitLabel, recoTrackVector, recoParticlesToTracks);
 
 
     // Collect Cosmic Tags
     // =====================
     CosmicTagVector recoCosmicTagVector;
     TracksToCosmicTags recoTracksToCosmicTags;
-    LArPandoraCollector::CollectCosmicTags(evt, m_cosmicLabel, recoCosmicTagVector, recoTracksToCosmicTags);
+    LArPandoraHelper::CollectCosmicTags(evt, m_cosmicLabel, recoCosmicTagVector, recoTracksToCosmicTags);
 
 
     // Analyse Reconstructed Particles
@@ -414,7 +414,7 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
         m_self            = recoParticle->Self();
         m_pdgCode         = recoParticle->PdgCode();
         m_isPrimary       = recoParticle->IsPrimary();
-        m_isTrackLike     = LArPandoraCollector::IsTrack(recoParticle);
+        m_isTrackLike     = LArPandoraHelper::IsTrack(recoParticle);
         m_cosmicScore     = this->GetCosmicScore(recoParticle, recoParticlesToTracks, recoTracksToCosmicTags);
 
         m_trackVtxX       = 0.f;

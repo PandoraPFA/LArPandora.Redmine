@@ -170,13 +170,13 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         theClock.start();
     }
 
-    LArPandoraInput::CreatePandoraHits2D(artHits, idToHitMap);
+    LArPandoraInput::CreatePandoraHits2D(this, m_pPrimaryPandora, artHits, idToHitMap);
 
     if (m_enableMCParticles && !evt.isRealData())
     {
-        LArPandoraInput::CreatePandoraMCParticles(artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        LArPandoraInput::CreatePandoraMCParticles2D(artMCParticleVector);
-        LArPandoraInput::CreatePandoraMCLinks2D(idToHitMap, artHitsToTrackIDEs);
+        LArPandoraInput::CreatePandoraMCParticles(this, m_pPrimaryPandora, artMCTruthToMCParticles, artMCParticlesToMCTruth);
+        LArPandoraInput::CreatePandoraMCParticles2D(this, m_pPrimaryPandora, artMCParticleVector);
+        LArPandoraInput::CreatePandoraMCLinks2D(this, m_pPrimaryPandora, idToHitMap, artHitsToTrackIDEs);
     }
 
     if (m_enableMonitoring)

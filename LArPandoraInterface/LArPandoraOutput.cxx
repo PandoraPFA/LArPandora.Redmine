@@ -43,12 +43,20 @@ namespace lar_pandora
 void LArPandoraOutput::ProduceArtOutput(art::EDProducer &producer, art::Event &evt, const pandora::Pandora *const pPrimaryPandora, 
     const IdToHitMap &idToHitMap, const bool buildTracks, const bool buildShowers)
 {
+const bool includeStitchingPandoraInstance(false); // TODO
+const bool includeDaughterPandoraInstances(true);
+
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtOutput() *** " << std::endl;
+    PandoraInstanceList pandoraInstanceList;
+    const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(pPrimaryPandora));
 
-    // TODO Configurable option to determine whether to provide pfos from daughter instances or just from primary instance
-    const PandoraInstanceList &pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(pPrimaryPandora));
+    if (includeStitchingPandoraInstance || daughterInstances.empty())
+        pandoraInstanceList.push_back(pPrimaryPandora);
+
+    if (includeDaughterPandoraInstances)
+        pandoraInstanceList.insert(pandoraInstanceList.end(), daughterInstances.begin(), daughterInstances.end());
+
     pandora::PfoList concatenatedPfoList;
-
     for (const pandora::Pandora *const pPandora : pandoraInstanceList)
     {
         const pandora::PfoList *pPfoList(nullptr);

@@ -328,14 +328,14 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     HitsToPFParticles        hitsToParticles;
     SpacePointsToHits        spacePointsToHits;
 
-    LArPandoraCollector::CollectHits(evt, m_hitfinderLabel, hitVector);
-    LArPandoraCollector::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits);
-    LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
-    LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector, particlesToSpacePoints);
-    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
+    LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
+    LArPandoraHelper::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits);
+    LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particleVector, particlesToSpacePoints);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
 
     if (m_storeWires)
-        LArPandoraCollector::CollectWires(evt, m_calwireLabel, wireVector);
+        LArPandoraHelper::CollectWires(evt, m_calwireLabel, wireVector);
 
     if (m_printDebug)
         std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
@@ -468,7 +468,7 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
                 throw cet::exception("LArPandora") << " PFParticleHitDumper::analyze --- Found particle with ID code";
 
             const art::Ptr<recob::PFParticle> particleParent = pIter->second;
-            if (LArPandoraCollector::IsNeutrino(particleParent))
+            if (LArPandoraHelper::IsNeutrino(particleParent))
                 m_primary = 1;
         }
 

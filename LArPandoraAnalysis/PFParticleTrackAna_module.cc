@@ -195,7 +195,7 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
 
     TrackVector trackVector;
     TracksToHits tracksToHits;
-    LArPandoraCollector::CollectTracks(evt, m_trackModuleLabel, trackVector, tracksToHits);
+    LArPandoraHelper::CollectTracks(evt, m_trackModuleLabel, trackVector, tracksToHits);
 
     std::cout << "  Tracks: " << trackVector.size() << std::endl;
 

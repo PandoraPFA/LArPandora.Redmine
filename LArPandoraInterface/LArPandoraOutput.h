@@ -16,6 +16,7 @@
 #include "LArObjects/LArTrackPfo.h"
 
 #include "LArPandoraInterface/ILArPandora.h"
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 #include <vector>
 #include <set>
@@ -28,7 +29,6 @@ namespace pandora {class Pandora; class ParticleFlowObject;}
 namespace lar_pandora
 {
 
-typedef std::vector< art::Ptr<recob::Hit> > HitVector;
 typedef std::set< art::Ptr<recob::Hit> > HitList;
 
 class LArPandoraOutput

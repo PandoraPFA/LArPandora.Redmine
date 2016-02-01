@@ -38,7 +38,7 @@ public:
     void beginJob();
     void produce(art::Event &evt);
 
-private:
+protected:
     void DeletePandoraInstances();
     void CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap);
     void ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap);
@@ -90,6 +90,7 @@ private:
     bool         m_buildTracks;             ///<
     bool         m_buildShowers;            ///<
 
+private:
     TTree       *m_pRecoTree;               ///<
     int          m_run;                     ///<
     int          m_event;                   ///<

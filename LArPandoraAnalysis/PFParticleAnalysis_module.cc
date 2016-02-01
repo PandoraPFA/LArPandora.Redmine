@@ -284,10 +284,10 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     PFParticlesToHits particlesToHits;
     HitsToPFParticles hitsToParticles;
 
-    LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particleVector);
-    LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles1, particlesToClusters);
-    LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, particles2, particlesToSpacePoints);
-    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particleVector);
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particles1, particlesToClusters);
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particles2, particlesToSpacePoints);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
 
     if (m_printDebug)
         std::cout << "  PFParticles: " << particleVector.size() << std::endl;
@@ -302,21 +302,21 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     // ==============================
     VertexVector vertexVector;
     PFParticlesToVertices particlesToVertices;
-    LArPandoraCollector::CollectVertices(evt, m_particleLabel, vertexVector, particlesToVertices);
+    LArPandoraHelper::CollectVertices(evt, m_particleLabel, vertexVector, particlesToVertices);
 
     // Get the reconstructed seeds
     // ===========================
     SeedVector seedVector;
     PFParticlesToSeeds particlesToSeeds;
-    LArPandoraCollector::CollectSeeds(evt, m_particleLabel, seedVector, particlesToSeeds);
+    LArPandoraHelper::CollectSeeds(evt, m_particleLabel, seedVector, particlesToSeeds);
 
     // Get the reconstructed tracks
     // ============================
     TrackVector trackVector, trackVector2;
     PFParticlesToTracks particlesToTracks;
     TracksToHits tracksToHits;
-    LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
-    LArPandoraCollector::CollectTracks(evt, m_trackLabel, trackVector2, tracksToHits);
+    LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
+    LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVector2, tracksToHits);
 
     // Build an indexed map of the PFParticles
     // =======================================
@@ -336,9 +336,9 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_primary = particle->IsPrimary();
         m_parent = (particle->IsPrimary() ? -1 : particle->Parent());
         m_daughters = particle->NumDaughters();
-        m_generation = LArPandoraCollector::GetGeneration(particleMap, particle);
-        m_neutrino = LArPandoraCollector::GetParentNeutrino(particleMap, particle);
-        m_finalstate = LArPandoraCollector::IsFinalState(particleMap, particle);
+        m_generation = LArPandoraHelper::GetGeneration(particleMap, particle);
+        m_neutrino = LArPandoraHelper::GetParentNeutrino(particleMap, particle);
+        m_finalstate = LArPandoraHelper::IsFinalState(particleMap, particle);
         m_vertex = 0;
         m_track = 0;
         m_trackid = -999;

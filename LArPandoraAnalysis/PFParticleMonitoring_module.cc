@@ -504,7 +504,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     // Collect Hits
     // ============
     HitVector hitVector;
-    LArPandoraCollector::CollectHits(evt, m_hitfinderLabel, hitVector);
+    LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
 
     if (m_printDebug)
         std::cout << "  Hits: " << hitVector.size() << std::endl;
@@ -514,7 +514,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     SpacePointVector spacePointVector;
     SpacePointsToHits spacePointsToHits;
     HitsToSpacePoints hitsToSpacePoints;
-    LArPandoraCollector::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits, hitsToSpacePoints);
+    LArPandoraHelper::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits, hitsToSpacePoints);
 
     if (m_printDebug)
         std::cout << "  SpacePoints: " << spacePointVector.size() << std::endl;
@@ -523,7 +523,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     // ====================================================
     TrackVector recoTrackVector;
     PFParticlesToTracks recoParticlesToTracks;
-    LArPandoraCollector::CollectTracks(evt, m_trackLabel, recoTrackVector, recoParticlesToTracks);
+    LArPandoraHelper::CollectTracks(evt, m_trackLabel, recoTrackVector, recoParticlesToTracks);
     
     if (m_printDebug)
         std::cout << "  Tracks: " << recoTrackVector.size() << std::endl;
@@ -532,7 +532,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     // =======================================================
     VertexVector recoVertexVector;
     PFParticlesToVertices recoParticlesToVertices;
-    LArPandoraCollector::CollectVertices(evt, m_particleLabel, recoVertexVector, recoParticlesToVertices);
+    LArPandoraHelper::CollectVertices(evt, m_particleLabel, recoVertexVector, recoParticlesToVertices);
 
     if (m_printDebug)
         std::cout << "  Vertices: " << recoVertexVector.size() << std::endl;
@@ -544,10 +544,10 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     PFParticlesToHits recoParticlesToHits;
     HitsToPFParticles recoHitsToParticles;
 
-    LArPandoraCollector::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
-    LArPandoraCollector::SelectNeutrinoPFParticles(recoParticleVector, recoNeutrinoVector);
-    LArPandoraCollector::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, recoParticlesToHits, recoHitsToParticles,
-        (m_useDaughterPFParticles ? (m_addDaughterPFParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kUseDaughters) : LArPandoraCollector::kIgnoreDaughters)); 
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
+    LArPandoraHelper::SelectNeutrinoPFParticles(recoParticleVector, recoNeutrinoVector);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, recoParticlesToHits, recoHitsToParticles,
+        (m_useDaughterPFParticles ? (m_addDaughterPFParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kUseDaughters) : LArPandoraHelper::kIgnoreDaughters)); 
 
     if (m_printDebug)
         std::cout << "  RecoNeutrinos: " << recoNeutrinoVector.size() << std::endl;
@@ -565,10 +565,10 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 
     if (!evt.isRealData())
     {
-        LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, trueParticleVector);
-        LArPandoraCollector::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
-        LArPandoraCollector::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
-            (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraCollector::kAddDaughters : LArPandoraCollector::kUseDaughters) : LArPandoraCollector::kIgnoreDaughters));
+        LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, trueParticleVector);
+        LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
+        LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
+            (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kUseDaughters) : LArPandoraHelper::kIgnoreDaughters));
     }
 
     if (m_printDebug)
@@ -601,11 +601,11 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     {
         const art::Ptr<recob::PFParticle> recoParticle = *iter;
 
-        if (LArPandoraCollector::IsNeutrino(recoParticle))
+        if (LArPandoraHelper::IsNeutrino(recoParticle))
         {
             m_nNeutrinoPfos++;
         }
-        else if (LArPandoraCollector::IsFinalState(recoParticleMap, recoParticle))
+        else if (LArPandoraHelper::IsFinalState(recoParticleMap, recoParticle))
         {
             m_nPrimaryPfos++;
         }
@@ -725,7 +725,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
             m_pfoIsNeutrino = 1;
             m_pfoIsPrimary = 0;
 
-            if (!LArPandoraCollector::IsNeutrino(recoParticle))
+            if (!LArPandoraHelper::IsNeutrino(recoParticle))
                 std::cout << " Warning: Found neutrino with an invalid PDG code " << std::endl;
 
             PFParticlesToHits::const_iterator pIter2 = recoNeutrinosToHits.find(recoParticle);
@@ -920,8 +920,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         // Get the true 'parent' and 'primary' particles
         try
         {
-            const art::Ptr<simb::MCParticle> parentParticle(LArPandoraCollector::GetParentMCParticle(trueParticleMap, trueParticle));
-            const art::Ptr<simb::MCParticle> primaryParticle(LArPandoraCollector::GetFinalStateMCParticle(trueParticleMap, trueParticle));
+            const art::Ptr<simb::MCParticle> parentParticle(LArPandoraHelper::GetParentMCParticle(trueParticleMap, trueParticle));
+            const art::Ptr<simb::MCParticle> primaryParticle(LArPandoraHelper::GetFinalStateMCParticle(trueParticleMap, trueParticle));
             m_mcParentPdg = ((parentParticle != trueParticle) ? parentParticle->PdgCode() : 0);
             m_mcPrimaryPdg = primaryParticle->PdgCode();
             m_mcIsPrimary = (primaryParticle == trueParticle);
@@ -975,13 +975,13 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         {
             const art::Ptr<recob::PFParticle> recoParticle = pIter1->second;
             m_pfoPdg = recoParticle->PdgCode();
-            m_pfoNuPdg = LArPandoraCollector::GetParentNeutrino(recoParticleMap, recoParticle);
-            m_pfoIsPrimary = LArPandoraCollector::IsFinalState(recoParticleMap, recoParticle);
+            m_pfoNuPdg = LArPandoraHelper::GetParentNeutrino(recoParticleMap, recoParticle);
+            m_pfoIsPrimary = LArPandoraHelper::IsFinalState(recoParticleMap, recoParticle);
 
-            const art::Ptr<recob::PFParticle> parentParticle = LArPandoraCollector::GetParentPFParticle(recoParticleMap, recoParticle);
+            const art::Ptr<recob::PFParticle> parentParticle = LArPandoraHelper::GetParentPFParticle(recoParticleMap, recoParticle);
             m_pfoParentPdg = parentParticle->PdgCode();
 
-            const art::Ptr<recob::PFParticle> primaryParticle = LArPandoraCollector::GetFinalStatePFParticle(recoParticleMap, recoParticle);
+            const art::Ptr<recob::PFParticle> primaryParticle = LArPandoraHelper::GetFinalStatePFParticle(recoParticleMap, recoParticle);
             m_pfoPrimaryPdg = primaryParticle->PdgCode();
 
             PFParticlesToHits::const_iterator pIter2 = recoParticlesToHits.find(recoParticle);
@@ -1107,9 +1107,9 @@ void PFParticleMonitoring::BuildRecoNeutrinoHitMaps(const PFParticleMap &recoPar
     for (PFParticleMap::const_iterator iter1 = recoParticleMap.begin(), iterEnd1 = recoParticleMap.end(); iter1 != iterEnd1; ++iter1)
     {
         const art::Ptr<recob::PFParticle> recoParticle = iter1->second; 
-        const art::Ptr<recob::PFParticle> recoNeutrino = LArPandoraCollector::GetParentPFParticle(recoParticleMap, recoParticle);
+        const art::Ptr<recob::PFParticle> recoNeutrino = LArPandoraHelper::GetParentPFParticle(recoParticleMap, recoParticle);
 
-        if (!LArPandoraCollector::IsNeutrino(recoNeutrino))
+        if (!LArPandoraHelper::IsNeutrino(recoNeutrino))
             continue;
 
         const PFParticlesToHits::const_iterator iter2 = recoParticlesToHits.find(recoParticle);

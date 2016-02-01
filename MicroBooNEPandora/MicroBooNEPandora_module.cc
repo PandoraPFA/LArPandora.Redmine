@@ -31,7 +31,7 @@ public:
 
 private:
     void CreatePandoraInstances();
-    int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc);
+    int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc) const;
 
     /**
      *  @brief  Create primary pandora instance
@@ -52,6 +52,8 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 
 #include "Geometry/Geometry.h"
 
+#include "Api/PandoraApi.h"
+
 #include "LArContent.h"
 
 #include "MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h"
@@ -63,6 +65,13 @@ namespace lar_pandora
 MicroBooNEPandora::MicroBooNEPandora(fhicl::ParameterSet const &pset) :
     LArPandora(pset)
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int MicroBooNEPandora::GetVolumeIdNumber(const unsigned int /*cryostat*/, const unsigned int /*tpc*/) const
+{
+    return 0;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,17 +104,10 @@ void MicroBooNEPandora::CreatePrimaryPandoraInstance(const std::string &configFi
 {
     m_pPrimaryPandora = this->CreateNewPandora();
     MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
-    MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "microboone", CartesianVector(0.f, 0.f, 0.f), true));
+    MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "microboone", pandora::CartesianVector(0.f, 0.f, 0.f), true));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora, new lar_pandora::MicroBooNEPseudoLayerPlugin));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*m_pPrimaryPandora, new lar_pandora::MicroBooNETransformationPlugin));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, configFileName));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-int MicroBooNEPandora::GetVolumeIdNumber(const unsigned int /*cryostat*/, const unsigned int /*tpc*/) const
-{
-    return 0;
 }
 
 } // namespace lar_pandora

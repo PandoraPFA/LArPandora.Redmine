@@ -43,7 +43,7 @@ public:
      *  @param  cryostat the cryostat number
      *  @param  tpc the tpc number
      */
-    virtual int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc) = 0;
+    virtual int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc) const = 0;
 
 protected:
     /**
