@@ -39,7 +39,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     ILArPandora(pset)
 {
     m_configFile = pset.get<std::string>("ConfigFile");
-    m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile");
+    m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "");
 
     m_inputSettings.m_pILArPandora = this;
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
