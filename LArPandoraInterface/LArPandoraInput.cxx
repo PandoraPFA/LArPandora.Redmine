@@ -52,8 +52,19 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const HitVec
     {
         const art::Ptr<recob::Hit> hit = *iter;
         const geo::WireID hit_WireID(hit->WireID());
-        const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(hit_WireID.Cryostat, hit_WireID.TPC));
-        const pandora::Pandora *const pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+        const pandora::Pandora *pPandora(nullptr);
+
+        try
+        {
+            const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(hit_WireID.Cryostat, hit_WireID.TPC));
+            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+        }
+        catch (pandora::StatusCodeException &)
+        {
+        }
+
+        if (!pPandora)
+            continue;
 
         const geo::View_t hit_View(hit->View());
         const double hit_Time(hit->PeakTime());
@@ -172,8 +183,19 @@ void LArPandoraInput::CreatePandoraHits3D(const Settings &settings, const SpaceP
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
         const art::Ptr<recob::Hit> hit = iter2->second;
-        const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(hit->WireID().Cryostat, hit->WireID().TPC));
-        const pandora::Pandora *const pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+        const pandora::Pandora *pPandora(nullptr);
+
+        try
+        {
+            const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(hit->WireID().Cryostat, hit->WireID().TPC));
+            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+        }
+        catch (pandora::StatusCodeException &)
+        {
+        }
+
+        if (!pPandora)
+            continue;
 
         const geo::View_t hit_View(hit->View());
         const double hit_Charge(hit->Integral());       
@@ -487,14 +509,22 @@ void LArPandoraInput::CreatePandoraMCLinks2D(const Settings &settings, const IdT
 
     for (IdToHitMap::const_iterator iterI = idToHitMap.begin(), iterEndI = idToHitMap.end(); iterI != iterEndI ; ++iterI)
     {        
-        // Get the ART hit
         const int hitID(iterI->first);
         const art::Ptr<recob::Hit> hit(iterI->second);
         const geo::WireID hit_WireID(hit->WireID());
+        const pandora::Pandora *pPandora(nullptr);
 
-        // Get the Pandora instance and Pandora hit
-        const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(hit_WireID.Cryostat, hit_WireID.TPC));
-        const pandora::Pandora *const pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+        try
+        {
+            const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(hit_WireID.Cryostat, hit_WireID.TPC));
+            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+        }
+        catch (pandora::StatusCodeException &)
+        {
+        }
+
+        if (!pPandora)
+            continue;
 
         // Get list of associated MC particles
         HitsToTrackIDEs::const_iterator iterJ = hitToParticleMap.find(hit);
