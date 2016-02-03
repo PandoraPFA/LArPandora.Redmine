@@ -39,7 +39,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     ILArPandora(pset)
 {
     m_configFile = pset.get<std::string>("ConfigFile");
-    m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "");
+    m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "No_File_Provided");
 
     m_inputSettings.m_pILArPandora = this;
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
@@ -58,6 +58,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_buildStitchedParticles = pset.get<bool>("BuildStitchedParticles", false);
     m_outputSettings.m_buildSingleVolumeParticles = pset.get<bool>("BuildSingleVolumeParticles", true);
 
+    m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", true);
     m_enableProduction = pset.get<bool>("EnableProduction", true);
     m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
     m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
@@ -224,15 +225,16 @@ void LArPandora::RunPandoraInstances()
     if (m_enableMonitoring)
         theClock.start();
 
-    const PandoraInstanceList &pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
+    const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
-    for (const pandora::Pandora *const pPandora : pandoraInstanceList)
+    for (const pandora::Pandora *const pPandora : daughterInstances)
     {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
         this->SetParticleX0Values(pPandora);        
     }
 
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPrimaryPandora));
+    if (m_runStitchingInstance || daughterInstances.empty())
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPrimaryPandora));
 
     if (m_enableMonitoring)
     { 
@@ -246,9 +248,9 @@ void LArPandora::RunPandoraInstances()
 void LArPandora::ResetPandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandoraInstances() *** " << std::endl;
-    const PandoraInstanceList &pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
+    const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
-    for (const pandora::Pandora *const pPandora : pandoraInstanceList)
+    for (const pandora::Pandora *const pPandora : daughterInstances)
     {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*pPandora));
         MultiPandoraApi::ClearParticleX0Map(pPandora);

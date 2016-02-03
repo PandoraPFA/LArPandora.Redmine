@@ -75,6 +75,7 @@ private:
     LArPandoraInput::Settings   m_inputSettings;            ///< 
     LArPandoraOutput::Settings  m_outputSettings;           ///<    
 
+    bool                        m_runStitchingInstance;     ///<
     bool                        m_enableProduction;         ///<
     bool                        m_enableMCParticles;        ///<
     bool                        m_enableMonitoring;         ///<
