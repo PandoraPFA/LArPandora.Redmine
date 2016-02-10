@@ -1,0 +1,5 @@
+
+add_subdirectory(MicroBooNEPandora)
+add_subdirectory(LArPandoraInterface)
+add_subdirectory(LArPandoraAnalysis)
+
