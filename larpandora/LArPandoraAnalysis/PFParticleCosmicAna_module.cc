@@ -7,7 +7,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include "TTree.h"
 
@@ -163,10 +163,10 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
-#include "AnalysisBase/CosmicTag.h"
-#include "Geometry/Geometry.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Track.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Track.h"
 #include "SimulationBase/MCTruth.h"
 
 #include <iostream>

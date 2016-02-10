@@ -4,32 +4,32 @@
  *  @brief  Helper functions for providing inputs to pandora
  */
 
-#include "Geometry/Geometry.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/WireGeo.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/Geometry/WireGeo.h"
 
-#include "RecoBase/Hit.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Vertex.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Vertex.h"
 
-#include "SimpleTypesAndConstants/RawTypes.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
 #include "SimulationBase/MCTruth.h"
 
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
+#include "lardata/Utilities/LArProperties.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/TimeService.h"
 
 #include "LArHelpers/LArGeometryHelper.h"
 #include "LArObjects/LArMCParticle.h"
 #include "LArStitching/MultiPandoraApi.h"
 #include "LArPlugins/LArTransformationPlugin.h"
 
-#include "LArPandoraInterface/ILArPandora.h"
-#include "LArPandoraInterface/LArPandoraInput.h"
+#include "larpandora/LArPandoraInterface/ILArPandora.h"
+#include "larpandora/LArPandoraInterface/LArPandoraInput.h"
 
 namespace lar_pandora
 {

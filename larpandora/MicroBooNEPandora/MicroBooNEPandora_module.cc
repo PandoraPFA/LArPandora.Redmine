@@ -9,7 +9,7 @@
 
 #include "LArStitching/MultiPandoraApi.h"
 
-#include "LArPandoraInterface/LArPandora.h"
+#include "larpandora/LArPandoraInterface/LArPandora.h"
 
 #include <string>
 
@@ -50,14 +50,14 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 
 #include "cetlib/exception.h"
 
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 
 #include "Api/PandoraApi.h"
 
 #include "LArContent.h"
 
-#include "MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h"
-#include "MicroBooNEPandora/MicroBooNETransformationPlugin.h"
+#include "larpandora/MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h"
+#include "larpandora/MicroBooNEPandora/MicroBooNETransformationPlugin.h"
 
 namespace lar_pandora
 {

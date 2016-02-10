@@ -93,12 +93,12 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "art/Framework/Core/FindManyP.h"
 #include "art/Framework/Core/FindOneP.h"
 
-#include "Geometry/Geometry.h"
-#include "RecoBase/Track.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/LArProperties.h"
 
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include <iostream>
 

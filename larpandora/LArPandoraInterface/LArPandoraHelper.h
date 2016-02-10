@@ -9,7 +9,7 @@
 
 #include "art/Framework/Principal/Event.h"
 
-#include "Simulation/SimChannel.h"
+#include "larsim/Simulation/SimChannel.h"
 
 #include <map>
 #include <set>

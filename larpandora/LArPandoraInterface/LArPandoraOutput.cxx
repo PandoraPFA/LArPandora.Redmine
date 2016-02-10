@@ -9,18 +9,18 @@
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "ClusterFinder/ClusterCreator.h"
-#include "Geometry/Geometry.h"
-#include "RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
-#include "RecoAlg/ClusterParamsImportWrapper.h"
-#include "Utilities/AssociationUtil.h"
+#include "larreco/ClusterFinder/ClusterCreator.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
+#include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
+#include "lardata/Utilities/AssociationUtil.h"
 
-#include "RecoBase/Hit.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Vertex.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Vertex.h"
 
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/TrackState.h"
@@ -30,7 +30,7 @@
 #include "LArHelpers/LArPfoHelper.h"
 #include "LArStitching/MultiPandoraApi.h"
 
-#include "LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 
 #include <algorithm>
 #include <iterator>

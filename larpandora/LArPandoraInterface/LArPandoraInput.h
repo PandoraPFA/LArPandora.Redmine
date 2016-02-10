@@ -7,8 +7,8 @@
 #ifndef LAR_PANDORA_INPUT_H
 #define LAR_PANDORA_INPUT_H 1
 
-#include "LArPandoraInterface/ILArPandora.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/ILArPandora.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 namespace lar_pandora
 {

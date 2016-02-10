@@ -8,24 +8,24 @@
 #include "cetlib/cpu_timer.h"
 #include "cetlib/exception.h"
 
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/TPCGeo.h"
-#include "Utilities/AssociationUtil.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "lardata/Utilities/AssociationUtil.h"
 #include "SimulationBase/MCTruth.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Vertex.h"
-#include "RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "lardata/RecoBase/PFParticle.h"
 
 #include "LArObjects/LArTrackPfo.h"
 
-#include "LArPandoraInterface/LArPandoraHelper.h"
-#include "LArPandoraInterface/LArPandoraOutput.h"
-#include "LArPandoraInterface/PFParticleStitcher.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraInterface/PFParticleStitcher.h"
 
 #include <iostream>
 #include <limits>

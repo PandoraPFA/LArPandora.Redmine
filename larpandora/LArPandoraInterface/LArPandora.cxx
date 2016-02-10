@@ -8,14 +8,14 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Vertex.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Vertex.h"
 
 #include "TTree.h"
 
@@ -25,10 +25,10 @@
 #include "LArHelpers/LArPfoHelper.h"
 #include "LArStitching/MultiPandoraApi.h"
 
-#include "LArPandoraInterface/LArPandora.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
-#include "LArPandoraInterface/LArPandoraInput.h"
-#include "LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraInterface/LArPandora.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraInput.h"
+#include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 
 #include <iostream>
 

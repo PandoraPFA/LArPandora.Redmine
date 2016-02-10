@@ -10,7 +10,7 @@
 #include "TTree.h"
 #include "TVector3.h"
 
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include <string>
 
@@ -127,10 +127,10 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Seed.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Vertex.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Vertex.h"
 
 #include <iostream>
 

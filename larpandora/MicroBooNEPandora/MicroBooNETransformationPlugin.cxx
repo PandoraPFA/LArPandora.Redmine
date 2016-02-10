@@ -6,7 +6,7 @@
  *  $Log: $
  */
 
-#include "MicroBooNEPandora/MicroBooNETransformationPlugin.h"
+#include "larpandora/MicroBooNEPandora/MicroBooNETransformationPlugin.h"
 
 #include <cmath>
 

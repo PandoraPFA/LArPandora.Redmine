@@ -15,7 +15,7 @@
 #include "LArObjects/LArTrackPfo.h"
 
 // Local LArPandora includes
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 // ROOT includes
 #include "TTree.h"

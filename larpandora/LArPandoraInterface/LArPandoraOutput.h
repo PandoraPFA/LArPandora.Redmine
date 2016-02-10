@@ -7,14 +7,14 @@
 #ifndef LAR_PANDORA_OUTPUT_H
 #define LAR_PANDORA_OUTPUT_H
 
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Track.h"
-#include "RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Track.h"
+#include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
 #include "LArObjects/LArTrackPfo.h"
 
-#include "LArPandoraInterface/ILArPandora.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/ILArPandora.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 namespace art {class EDProducer;}
 namespace pandora {class Pandora; class ParticleFlowObject;}

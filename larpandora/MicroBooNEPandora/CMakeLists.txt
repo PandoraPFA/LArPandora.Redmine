@@ -6,11 +6,11 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{PANDORA_INC} )
 include_directories( $ENV{LARPANDORACONTENT_INC} )
 
-art_make( BASENAME_ONLY
-          LIBRARY_NAME  MicroBooNEPandora
-          LIB_LIBRARIES Geometry
-                        Geometry_service
-                        Simulation
+art_make( 
+          
+          LIB_LIBRARIES larcore_Geometry
+                        larcore_Geometry_Geometry_service
+                        larsim_Simulation
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         ${LARCONTENT}
@@ -30,8 +30,8 @@ art_make( BASENAME_ONLY
 			${CETLIB}
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES LArPandoraInterface
-                           MicroBooNEPandora
+          MODULE_LIBRARIES larpandora_LArPandoraInterface
+                           larpandora_MicroBooNEPandora
           )
 
 install_headers()

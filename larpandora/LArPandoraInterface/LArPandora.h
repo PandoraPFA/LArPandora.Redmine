@@ -8,9 +8,9 @@
 #ifndef LAR_PANDORA_H
 #define LAR_PANDORA_H 1
 
-#include "LArPandoraInterface/ILArPandora.h"
-#include "LArPandoraInterface/LArPandoraInput.h"
-#include "LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraInterface/ILArPandora.h"
+#include "larpandora/LArPandoraInterface/LArPandoraInput.h"
+#include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 
 #include <string>
 
