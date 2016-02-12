@@ -8,11 +8,8 @@ include_directories( $ENV{LARPANDORACONTENT_INC} )
 
 art_make( 
           
-          LIB_LIBRARIES lardata_Utilities_DetectorProperties_service
-                        lardata_Utilities_LArProperties_service
-                        larcore_Geometry
+          LIB_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        lardata_Utilities_TimeService_service
                         larsim_Simulation
                         lardata_RawData
                         lardata_RecoBase

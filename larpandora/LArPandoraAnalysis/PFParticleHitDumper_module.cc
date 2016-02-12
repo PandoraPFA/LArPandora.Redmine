@@ -171,8 +171,8 @@ DEFINE_ART_MODULE(PFParticleHitDumper)
 #include "lardata/RecoBase/Wire.h"
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCParticle.h"
-#include "lardata/Utilities/LArProperties.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
 #include <iostream>
@@ -301,7 +301,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     }
 
     // Need DetectorProperties service to convert from ticks to X
-    art::ServiceHandle<util::DetectorProperties> theDetector;
+  //  auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Need geometry service to convert channel to wire ID
     art::ServiceHandle<geo::Geometry> theGeometry;
@@ -516,7 +516,7 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
     }
 
     // Need DetectorProperties service to convert from ticks to X
-    art::ServiceHandle<util::DetectorProperties> theDetector;
+    auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Loop over 2D hits
     for (unsigned int i = 0; i<hitVector.size(); ++i)
@@ -563,7 +563,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
     art::ServiceHandle<geo::Geometry> theGeometry;
 
     // Need DetectorProperties service to convert from ticks to X
-    art::ServiceHandle<util::DetectorProperties> theDetector;
+    auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Loop over wires
     int signalCounter(0);

@@ -25,7 +25,7 @@
 #include "SimulationBase/MCParticle.h"
 #include "SimulationBase/MCTruth.h"
 #include "larcore/SimpleTypesAndConstants/RawTypes.h"
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 #include "Objects/ParticleFlowObject.h"
 #include "Pandora/PdgTable.h"
@@ -677,7 +677,7 @@ void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::stri
 void LArPandoraHelper::BuildMCParticleHitMaps(const HitVector &hitVector, const SimChannelVector &simChannelVector, 
     HitsToTrackIDEs &hitsToTrackIDEs)
 {
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
     SimChannelMap simChannelMap;
 
