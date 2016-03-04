@@ -18,7 +18,6 @@
 // ROOT libraries
 #include "TROOT.h"
 #include "TApplication.h"
-#include "TRint.h"
 #include "TGClient.h"
 #include "TSystem.h"
 #include "TVirtualX.h"
@@ -89,10 +88,10 @@ namespace { // local namespace
       throw std::runtime_error("RootGraphicsEnabler: no ROOT global pointer"); 
     
     if (!app) {
-      if (out) (*out) << "  ==> create a TApplication (TRint)" << std::endl;
+      if (out) (*out) << "  ==> create a TApplication" << std::endl;
       int    argc = 0;
       char** argv = nullptr;
-      new TRint("TRintFromRootGraphicsEnabler", &argc, argv, 0, 0, kTRUE);
+      new TApplication("TApplicationFromRootGraphicsEnabler", &argc, argv);
     } // if no application
     
     if (out) (*out) << "  ==> set batch mode off (now it is " << (gROOT->IsBatch()? "on": "already off") << std::endl;

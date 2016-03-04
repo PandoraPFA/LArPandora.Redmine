@@ -13,7 +13,6 @@ art_make_library( LIBRARY_NAME larpandora_RootGraphicsEnabler
                   SOURCE RootGraphicsEnabler.cxx 
                   LIBRARIES
                     ${ROOT_CORE}
-                    ${ROOT_RINT}
                     ${ROOT_GX11}
                     ${ROOT_GUI}
                 )
