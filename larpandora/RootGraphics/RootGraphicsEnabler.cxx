@@ -34,7 +34,7 @@
 namespace { // local namespace
 
   /**
-   * This class implements a work around to initialize ROOT graphics system
+   * This class implements a work-around to initialize ROOT graphics system
    * before some other code messes with it (that is, we are the first ones
    * to mess with it, and of course we do it right(TM)).
    * To ensure this code is executed as soon as possible, it's bound to
@@ -44,8 +44,9 @@ namespace { // local namespace
    * as a library statically linked with this one is dynamically loaded.
    * 
    * The work around consists of making sure there is an active TApplication
-   * (probably eny will do), pulling ROOT out of batch mode, and creating
-   * ROOT's X11 graphics client (that, for example, TEve needs).
+   * (but not the ones that pull in an interactive prompt, e.g. TRint),
+   * pulling ROOT out of batch mode, and creating ROOT's X11 graphics client
+   * (that, for example, TEve needs).
    */
   struct RootGraphicsEnablerClass {
 
