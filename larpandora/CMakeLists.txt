@@ -2,3 +2,4 @@
 add_subdirectory(LArPandoraInterface)
 add_subdirectory(LArPandoraAnalysis)
 add_subdirectory(MicroBooNEPandora)
+add_subdirectory(RootGraphics)
