@@ -9,7 +9,7 @@ gdmldir product_dir scripts
 product         version
 larsim          v05_01_01
 larreco         v05_02_00
-larpandoracontent         v02_04_00
+larpandoracontent         v02_05_00
 gcc             v4_9_3
 
 cetbuildtools	v4_18_04	-	only_for_build
