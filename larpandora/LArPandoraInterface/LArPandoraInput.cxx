@@ -8,6 +8,7 @@
 #include "larcore/Geometry/TPCGeo.h"
 #include "larcore/Geometry/PlaneGeo.h"
 #include "larcore/Geometry/WireGeo.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
 
 #include "lardata/RecoBase/Hit.h"
 #include "lardata/RecoBase/PFParticle.h"
@@ -16,7 +17,9 @@
 #include "lardata/RecoBase/SpacePoint.h"
 #include "lardata/RecoBase/Vertex.h"
 
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
+
 #include "SimulationBase/MCTruth.h"
 
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
@@ -236,6 +239,96 @@ void LArPandoraInput::CreatePandoraHits3D(const Settings &settings, const SpaceP
         // Create the Pandora hit
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters));
     } 
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraInput::CreatePandoraLineGaps(const Settings &settings)
+{
+    mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraLineGaps(...) *** " << std::endl;
+
+    if (!settings.m_pPrimaryPandora || !settings.m_pILArPandora)
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+
+    art::ServiceHandle<geo::Geometry> theGeometry;
+    const lariov::ChannelStatusProvider &channelStatus(art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider());
+
+    for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat)
+    {
+        for (unsigned int itpc = 0; itpc < theGeometry->NTPC(icstat); ++itpc)
+        {
+            const geo::TPCGeo &TPC(theGeometry->TPC(itpc));
+            const pandora::Pandora *pPandora(nullptr);
+
+            try
+            {
+                const int volumeID(settings.m_pILArPandora->GetVolumeIdNumber(icstat, itpc));
+                pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+            }
+            catch (pandora::StatusCodeException &)
+            {
+            }
+
+            if (!pPandora)
+                continue;
+
+            for (unsigned int iplane = 0; iplane < TPC.Nplanes(); ++iplane)
+            {
+                const geo::PlaneGeo &plane(TPC.Plane(iplane));
+                const float halfWirePitch(0.5f * theGeometry->WirePitch(plane.View()));
+                const unsigned int nWires(theGeometry->Nwires(geo::PlaneID(icstat, itpc, plane.View())));
+
+                int firstBadWire(-1), lastBadWire(-1);
+
+                for (unsigned int iwire = 0; iwire < nWires; ++iwire)
+                {
+                    const raw::ChannelID_t channel(theGeometry->PlaneWireToChannel(plane.View(), iwire, itpc, icstat));
+                    const bool isBadChannel(channelStatus.IsBad(channel));
+                    const bool isLastWire(nWires == (iwire + 1));
+
+                    if (isBadChannel && (firstBadWire < 0))
+                        firstBadWire = iwire;
+
+                    if (isBadChannel || isLastWire)
+                        lastBadWire = iwire;
+
+                    if (isBadChannel && !isLastWire)
+                        continue;
+
+                    if ((firstBadWire < 0) || (lastBadWire < 0))
+                        continue;
+
+                    double firstXYZ[3], lastXYZ[3];
+                    theGeometry->Cryostat(icstat).TPC(itpc).Plane(iplane).Wire(firstBadWire).GetCenter(firstXYZ);
+                    theGeometry->Cryostat(icstat).TPC(itpc).Plane(iplane).Wire(lastBadWire).GetCenter(lastXYZ);
+
+                    PandoraApi::Geometry::LineGap::Parameters parameters;
+
+                    if (iplane == geo::kW)
+                    {
+                        parameters.m_hitType = pandora::TPC_VIEW_W;
+                        parameters.m_lineStartZ = firstXYZ[2] - halfWirePitch;
+                        parameters.m_lineEndZ = lastXYZ[2] + halfWirePitch;
+                    }
+                    else if (iplane == geo::kU)
+                    {
+                        parameters.m_hitType = pandora::TPC_VIEW_U;
+                        parameters.m_lineStartZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(firstXYZ[1], firstXYZ[2]) - halfWirePitch;
+                        parameters.m_lineEndZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(lastXYZ[1], lastXYZ[2]) + halfWirePitch;
+                    }
+                    else if (iplane == geo::kV)
+                    {
+                        parameters.m_hitType = pandora::TPC_VIEW_V;
+                        parameters.m_lineStartZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(firstXYZ[1], firstXYZ[2]) - halfWirePitch;
+                        parameters.m_lineEndZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(lastXYZ[1], lastXYZ[2]) + halfWirePitch;
+                    }
+
+                    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LineGap::Create(*pPandora, parameters));
+                    firstBadWire = -1; lastBadWire = -1;
+                }
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -60,6 +60,8 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 
     m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", true);
     m_enableProduction = pset.get<bool>("EnableProduction", true);
+    m_enableLineGaps = pset.get<bool>("EnableLineGaps", true);
+    m_lineGapsCreated = false;
     m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
     m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
 
@@ -148,6 +150,13 @@ void LArPandora::produce(art::Event &evt)
 
 void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
 {
+    // ATTN Should complete gap creation in begin job callback, but channel status service functionality unavailable at that point
+    if (!m_lineGapsCreated && m_enableLineGaps)
+    {
+        LArPandoraInput::CreatePandoraLineGaps(m_inputSettings);
+        m_lineGapsCreated = true;
+    }
+
     cet::cpu_timer theClock;
 
     if (m_enableMonitoring)
