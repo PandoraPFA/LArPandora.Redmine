@@ -1,14 +1,14 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	larpandora	v05_02_00
+parent	larpandora	v05_02_01
 defaultqual	e9
 #
 fcldir  product_dir job
 gdmldir product_dir scripts
 #
 product         version
-larsim          v05_01_02
-larreco         v05_02_01
+larsim          v05_02_00
+larreco         v05_03_00
 larpandoracontent         v02_05_00
 gcc             v4_9_3
 
