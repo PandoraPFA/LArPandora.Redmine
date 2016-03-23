@@ -77,6 +77,8 @@ private:
 
     bool                        m_runStitchingInstance;     ///<
     bool                        m_enableProduction;         ///<
+    bool                        m_enableLineGaps;           ///<
+    bool                        m_lineGapsCreated;          ///<
     bool                        m_enableMCParticles;        ///<
     bool                        m_enableMonitoring;         ///<
 
