@@ -1,7 +1,8 @@
 /**
  *  @file   larpandora/LArPandoraInterface/LArPandoraModule_module.cc
  *
- *  @brief  LArPandora producer module for MicroBooNE
+ *  @brief  A generic LArPandora ART Producer module intended to work on ALL LAr-TPC wire-readout experiments.
+ *          This single module is intended to take the place of the current suite of experiment-specific modules.
  *
  */
 
@@ -30,7 +31,7 @@ public:
     {
       public:
         /**
-         *  @brief  Default constructor
+         *  @brief  Constructor
          *
          *  @param  volumeID         unique ID number
          *  @param  isPositiveDrift  direction of drift 
@@ -52,26 +53,42 @@ public:
 	    const double centerX, const double centerY, const double centerZ, const double widthX, const double widthY, const double widthZ,
             const double sigmaUVZ);
 
-        const unsigned int  m_volumeID;
-        const bool          m_isPositiveDrift;
-        const double        m_wirePitchU;
-        const double        m_wirePitchV; 
-        const double        m_wirePitchW;
-        const double        m_wireAngleU;
-        const double        m_wireAngleV;
-        const double        m_centerX;
-        const double        m_centerY;
-        const double        m_centerZ;
-        const double        m_widthX;
-        const double        m_widthY;
-        const double        m_widthZ;
-        const double        m_sigmaUVZ;
+        unsigned int  get_volumeID() const         { return m_volumeID; }
+        bool          get_isPositiveDrift() const  { return m_isPositiveDrift; }
+        double        get_wirePitchU() const       { return m_wirePitchU; }
+        double        get_wirePitchV() const       { return m_wirePitchV; }
+        double        get_wirePitchW() const       { return m_wirePitchW; }
+        double        get_wireAngleU() const       { return m_wireAngleU; }
+        double        get_wireAngleV() const       { return m_wireAngleV; }
+        double        get_centerX() const          { return m_centerX; }
+        double        get_centerY() const          { return m_centerY; }
+        double        get_centerZ() const          { return m_centerZ; }
+        double        get_widthX() const           { return m_widthX; }
+        double        get_widthY() const           { return m_widthY; }
+        double        get_widthZ() const           { return m_widthZ; }
+        double        get_sigmaUVZ() const         { return m_sigmaUVZ; }
+
+      private:
+
+        unsigned int  m_volumeID;
+        bool          m_isPositiveDrift;
+        double        m_wirePitchU;
+        double        m_wirePitchV;
+        double        m_wirePitchW;
+        double        m_wireAngleU;
+        double        m_wireAngleV;
+        double        m_centerX;
+        double        m_centerY;
+        double        m_centerZ;
+        double        m_widthX;
+        double        m_widthY;
+        double        m_widthZ;
+        double        m_sigmaUVZ;
     };
 
     typedef std::vector<LArDriftVolume> LArDriftVolumeList;
     typedef std::map<unsigned int, LArDriftVolume> LArDriftVolumeMap;
     
-
     /**
      *  @brief  Constructor
      *
@@ -97,6 +114,11 @@ private:
     void LoadGeometry();
 
     /**
+     *  @brief  method to print the geometry information extracted from LArSoft
+     */
+    void PrintGeometry();
+
+    /**
      *  @brief  Create primary pandora instance
      *
      *  @param  configFileName the pandora settings config file name
@@ -110,17 +132,16 @@ private:
      */
     void CreateDaughterPandoraInstances(const std::string &configFileName);
 
-    LArDriftVolumeList  m_driftVolumeList;
-    LArDriftVolumeMap   m_driftVolumeMap;
+    LArDriftVolumeList  m_driftVolumeList;   // vector of drift volumes for this detector
+    LArDriftVolumeMap   m_driftVolumeMap;    // mapping from tpcID to driftVolumeID
  
-    bool     m_printDebug;       // Print manual debug messages
     double   m_maxDeltaTheta;    // Allowed variation in common wire angle within a drift volume
 
-    bool     m_useShortVolume;   // Historical DUNE 35t config parameter - use short drift volume
-    bool     m_useLongVolume;    // Historical DUNE 35t config parameter - use long drift volume
-
-    bool     m_useLeftVolume;    // Historical DUNE 4-APA config parameter - use left drift volume
-    bool     m_useRightVolume;   // Historical DUNE 4-APA config parameter - use right drift volume
+    bool     m_printGeometry;    // Print drift volume gemetry to screen
+    bool     m_useShortVolume;   // Historical DUNE 35t config parameter - use short drift volume (positive drift)
+    bool     m_useLongVolume;    // Historical DUNE 35t config parameter - use long drift volume (negative drift)
+    bool     m_useLeftVolume;    // Historical DUNE 4-APA config parameter - use left drift volume (negative drift)
+    bool     m_useRightVolume;   // Historical DUNE 4-APA config parameter - use right drift volume (positive drift)
 };
 
 DEFINE_ART_MODULE(LArPandoraModule)
@@ -146,12 +167,11 @@ namespace lar_pandora
 LArPandoraModule::LArPandoraModule(fhicl::ParameterSet const &pset) :
     LArPandora(pset)
 {
-    m_printDebug = false;
-    m_maxDeltaTheta = 0.01;
+    m_maxDeltaTheta = 0.01; // leave this hard-coded for now
 
+    m_printGeometry = pset.get<bool>("PrintGeometry", false);
     m_useShortVolume = pset.get<bool>("UseShortVolume", true);
     m_useLongVolume = pset.get<bool>("UseLongVolume", true);
-
     m_useLeftVolume = pset.get<bool>("UseLeftVolume", true);
     m_useRightVolume = pset.get<bool>("UseRightVolume", true);
 }
@@ -166,7 +186,7 @@ int LArPandoraModule::GetVolumeIdNumber(const unsigned int cryostat, const unsig
         throw cet::exception("LArPandora") << " Throwing exception - found a TPC that doesn't belong to a drift volume";
  
     const LArDriftVolume &driftVolume = iter->second;
-    return driftVolume.m_volumeID;
+    return driftVolume.get_volumeID();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -182,6 +202,8 @@ void LArPandoraModule::LoadGeometry()
 { 
     // This method will group TPCs into "drift volumes" (these are regions of the detector that share a common drift direction, 
     // common range of X coordinates, and common detector parameters such as wire pitch and wire angle).
+    //
+    // Note: thie method assumes that all two-wire detectors use the U and V views, and that the wires in the W view are always vertical
    
     mf::LogDebug("LArPandora") << " *** LArPandoraModule::LoadGeometry() *** " << std::endl;
 
@@ -190,11 +212,8 @@ void LArPandoraModule::LoadGeometry()
 
     typedef std::set<unsigned int> UIntSet;
 
-    // Loading Geometry Service
+    // Load Geometry Service
     art::ServiceHandle<geo::Geometry> theGeometry;
-
-    mf::LogDebug("LArPandora") << " Using Geometry: " << theGeometry->DetectorName() << std::endl;
-
     const unsigned int wirePlanes(theGeometry->MaxPlanes());
 
     const double wirePitchU(theGeometry->WirePitch(geo::kU));
@@ -206,7 +225,7 @@ void LArPandoraModule::LoadGeometry()
     {
         UIntSet cstatList;
 
-        // First loop over TPCs
+        // Loop over TPCs in in this cryostat
         for (unsigned int itpc1 = 0; itpc1 < theGeometry->NTPC(icstat); ++itpc1)
         {      
 	    if (cstatList.end() != cstatList.find(itpc1))
@@ -218,10 +237,10 @@ void LArPandoraModule::LoadGeometry()
 
             const double wireAngleU(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
 	    const double wireAngleV((0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat)) * -1.f);
-            const double wireAngleZ((wirePlanes > 2) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)) : 0.0);
+            const double wireAngleW((wirePlanes > 2) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)) : 0.0);
 
-            if (std::fabs(wireAngleZ) > m_maxDeltaTheta)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_INVALID_PARAMETER);
+            if (std::fabs(wireAngleW) > m_maxDeltaTheta)
+                throw cet::exception("LArPandora") << " Throwing exception - the W-wires are not vertical in this detector ";
 
             double localCoord1[3] = {0.,0.,0.};
             double worldCoord1[3] = {0.,0.,0.};
@@ -289,33 +308,8 @@ void LArPandoraModule::LoadGeometry()
 
             m_driftVolumeList.push_back(driftVolume);
             
-            if (m_printDebug)
-	    {
-	        std::cout << " *** New Drift Volume *** " << std::endl;
-	        std::cout << "  ID = " << driftVolume.m_volumeID << std::endl;
-                std::cout << "  isPositiveDrift = " <<driftVolume.m_isPositiveDrift << std::endl;
-                std::cout << "  m_wirePitchU = " << driftVolume.m_wirePitchU << std::endl;
-                std::cout << "  m_wirePitchV = " << driftVolume.m_wirePitchV << std::endl;
-                std::cout << "  m_wirePitchW = " << driftVolume.m_wirePitchW << std::endl;
-                std::cout << "  m_wireAngleU = " << driftVolume.m_wireAngleU << std::endl;
-                std::cout << "  m_wireAngleV = " << driftVolume.m_wireAngleV << std::endl;
-	        std::cout << "  m_centerX = " << driftVolume.m_centerX << std::endl;
-	        std::cout << "  m_centerY = " << driftVolume.m_centerY << std::endl;
-	        std::cout << "  m_centerZ = " << driftVolume.m_centerZ << std::endl;
-	        std::cout << "  m_widthX = " << driftVolume.m_widthX << std::endl;
-	        std::cout << "  m_widthY = " << driftVolume.m_widthY << std::endl;
-	        std::cout << "  m_widthZ = " << driftVolume.m_widthZ << std::endl;
-		std::cout << "  m_sigmaUVZ = " << driftVolume.m_sigmaUVZ << std::endl;
-		std::cout << "  TPC List: " << std::endl;
-            }
-
             for(UIntSet::const_iterator iter = tpcList.begin(), iterEnd = tpcList.end(); iter != iterEnd; ++iter)
-	    {
-                m_driftVolumeMap.insert(LArDriftVolumeMap::value_type(this->GetTpcIdNumber(icstat, *iter), driftVolume));
-
-                if (m_printDebug)
-		    std::cout << "   [" << icstat << "][" << *iter << "]" << std::endl;
-	    }
+	        m_driftVolumeMap.insert(LArDriftVolumeMap::value_type(this->GetTpcIdNumber(icstat, *iter), driftVolume));
 	}
     }
 
@@ -325,12 +319,67 @@ void LArPandoraModule::LoadGeometry()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraModule::PrintGeometry()
+{
+    // Useful for debugging (or reverse-engineering) a detector geometry
+    std::cout << " *** LArPandoraModule::PrintGeometry() *** " << std::endl;
+
+    art::ServiceHandle<geo::Geometry> theGeometry;
+    std::cout << "  DetectorName = " << theGeometry->DetectorName() << std::endl;
+
+    for (LArDriftVolumeList::const_iterator iter1 = m_driftVolumeList.begin(), iterEnd1 = m_driftVolumeList.end(); iter1 != iterEnd1; ++iter1)
+    {
+        const LArDriftVolume &driftVolume1 = *iter1;
+
+	std::cout << " *** DriftVolume *** " << std::endl;
+	std::cout << "  volumeID = " << driftVolume1.get_volumeID() << std::endl;
+	std::cout << "  isPositiveDrift = " << driftVolume1.get_isPositiveDrift() << std::endl;
+	std::cout << "  wirePitchU = " << driftVolume1.get_wirePitchU() << std::endl;
+	std::cout << "  wirePitchV = " << driftVolume1.get_wirePitchV() << std::endl;
+	std::cout << "  wirePitchW = " << driftVolume1.get_wirePitchW() << std::endl;
+	std::cout << "  wireAngleU = " << driftVolume1.get_wireAngleU() << std::endl;
+	std::cout << "  wireAngleV = " << driftVolume1.get_wireAngleV() << std::endl;
+	std::cout << "  centerX = " << driftVolume1.get_centerX() << std::endl;
+	std::cout << "  centerY = " << driftVolume1.get_centerY() << std::endl;
+	std::cout << "  centerZ = " << driftVolume1.get_centerZ() << std::endl;
+	std::cout << "  widthX = " << driftVolume1.get_widthX() << std::endl;
+	std::cout << "  widthY = " << driftVolume1.get_widthY() << std::endl;
+	std::cout << "  widthZ = " << driftVolume1.get_widthZ() << std::endl;
+	std::cout << "  sigmaUVZ = " << driftVolume1.get_sigmaUVZ() << std::endl;
+
+        std::cout << "  TPC LIST [cstat][tpc]: " << std::endl;
+
+        for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat)
+        {
+            for (unsigned int itpc = 0; itpc < theGeometry->NTPC(icstat); ++itpc)
+            {
+                LArDriftVolumeMap::const_iterator iter2 = m_driftVolumeMap.find(this->GetTpcIdNumber(icstat, itpc));
+
+                if (m_driftVolumeMap.end() == iter2)
+                    throw cet::exception("LArPandora") << " Throwing exception - found a TPC that doesn't belong to a drift volume";
+
+                const LArDriftVolume &driftVolume2 = iter2->second;
+
+                if (driftVolume1.get_volumeID() != driftVolume2.get_volumeID())
+		    continue;
+
+		std::cout << "   [" << icstat << "][" << itpc << "]" << std::endl;
+            }
+	}
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraModule::CreatePandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraModule::CreatePandoraInstances(...) [BEGIN] *** " << std::endl;
     
-    // Load geometry
+    // Load (and print) geometry
     this->LoadGeometry();
+
+    if (m_printGeometry)
+        this->PrintGeometry();
 
     // Ensure that xml configuration files are available
     const bool isMultiDrift(m_driftVolumeList.size() > 1);
@@ -370,28 +419,22 @@ void LArPandoraModule::CreatePrimaryPandoraInstance(const std::string &configFil
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraModule::CreatePrimaryPandoraInstance(...) *** " << std::endl;
 
-    const LArDriftVolume &driftVol = *(m_driftVolumeList.begin());
+    const LArDriftVolume &driftVolume = *(m_driftVolumeList.begin());
 
-    if (m_driftVolumeList.size() > 1)
-    {
-        m_pPrimaryPandora = this->CreateNewPandora();
-        MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, configFileName));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora,
-	    new lar_content::LArPseudoLayerPlugin(driftVol.m_wirePitchU, driftVol.m_wirePitchV, driftVol.m_wirePitchW)));
-    }
+    // Common settings if detector has single and multiple drift volumes
+    m_pPrimaryPandora = this->CreateNewPandora();
+    MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, configFileName));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora,
+        new lar_content::LArPseudoLayerPlugin(driftVolume.get_wirePitchU(), driftVolume.get_wirePitchV(), driftVolume.get_wirePitchW())));
 
-    else
+    // Additional settings if detector has just a single drift volume
+    if (1 == m_driftVolumeList.size())
     {
-        m_pPrimaryPandora = this->CreateNewPandora();
-        MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
-        MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "driftVolume",
-            pandora::CartesianVector(driftVol.m_centerX, driftVol.m_centerY, driftVol.m_centerZ), driftVol.m_isPositiveDrift));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora,
-	    new lar_content::LArPseudoLayerPlugin(driftVol.m_wirePitchU, driftVol.m_wirePitchV, driftVol.m_wirePitchW)));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*m_pPrimaryPandora,
-            new lar_content::LArRotationalTransformationPlugin(driftVol.m_wireAngleU, driftVol.m_wireAngleV, driftVol.m_sigmaUVZ)));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, configFileName));
+	    new lar_content::LArRotationalTransformationPlugin(driftVolume.get_wireAngleU(), driftVolume.get_wireAngleV(), driftVolume.get_sigmaUVZ())));
+        MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "driftVolume",
+	    pandora::CartesianVector(driftVolume.get_centerX(), driftVolume.get_centerY(), driftVolume.get_centerZ()), driftVolume.get_isPositiveDrift()));
     }
 }
 
@@ -406,29 +449,28 @@ void LArPandoraModule::CreateDaughterPandoraInstances(const std::string &configF
 
     for (LArDriftVolumeList::const_iterator iter = m_driftVolumeList.begin(), iterEnd = m_driftVolumeList.end(); iter != iterEnd; ++iter)
     {
-        const LArDriftVolume &driftVol = *iter;
+        const LArDriftVolume &driftVolume = *iter;
 
         // Check historical DUNE config parameters
         if ((2 == m_driftVolumeList.size()) &&
-            ((true == driftVol.m_isPositiveDrift && (false == m_useShortVolume || false == m_useRightVolume)) ||
-             (false == driftVol.m_isPositiveDrift && (false == m_useLongVolume || false == m_useLeftVolume))))
+            ((true == driftVolume.get_isPositiveDrift() && (false == m_useShortVolume || false == m_useRightVolume)) ||
+             (false == driftVolume.get_isPositiveDrift() && (false == m_useLongVolume || false == m_useLeftVolume))))
 	    continue;
 
-	mf::LogDebug("LArPandora") << " Creating Pandora Daughter Instance: [" << driftVol.m_volumeID << "]" << std::endl;
+	mf::LogDebug("LArPandora") << " Creating Pandora Daughter Instance: [" << driftVolume.get_volumeID() << "]" << std::endl;
 
-        const unsigned int volumeIdNumber(driftVol.m_volumeID);
         std::ostringstream volumeIdString("driftVolume_");
-        volumeIdString << volumeIdNumber;
+        volumeIdString << driftVolume.get_volumeID();
 
         const pandora::Pandora *const pPandora = this->CreateNewPandora();
         MultiPandoraApi::AddDaughterPandoraInstance(m_pPrimaryPandora, pPandora);
-        MultiPandoraApi::SetVolumeInfo(pPandora, new VolumeInfo(volumeIdNumber, volumeIdString.str(),
-            pandora::CartesianVector(driftVol.m_centerX, driftVol.m_centerY, driftVol.m_centerZ), driftVol.m_isPositiveDrift));
+        MultiPandoraApi::SetVolumeInfo(pPandora, new VolumeInfo(driftVolume.get_volumeID(), volumeIdString.str(),
+	    pandora::CartesianVector(driftVolume.get_centerX(), driftVolume.get_centerY(), driftVolume.get_centerZ()), driftVolume.get_isPositiveDrift()));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora,
-	    new lar_content::LArPseudoLayerPlugin(driftVol.m_wirePitchU, driftVol.m_wirePitchV, driftVol.m_wirePitchW)));
+	    new lar_content::LArPseudoLayerPlugin(driftVolume.get_wirePitchU(), driftVolume.get_wirePitchV(), driftVolume.get_wirePitchW())));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*pPandora,
-	    new lar_content::LArRotationalTransformationPlugin(driftVol.m_wireAngleU, driftVol.m_wireAngleV, driftVol.m_sigmaUVZ)));
+	    new lar_content::LArRotationalTransformationPlugin(driftVolume.get_wireAngleU(), driftVolume.get_wireAngleV(), driftVolume.get_sigmaUVZ())));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, configFileName));
     }
 }
