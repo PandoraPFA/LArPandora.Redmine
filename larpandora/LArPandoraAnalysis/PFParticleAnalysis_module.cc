@@ -70,6 +70,7 @@ private:
      int          m_track;                 ///<
      int          m_trackid;               ///<
 
+     int          m_seeds;                 ///<
      int          m_clusters;              ///<
      int          m_spacepoints;           ///<
      int          m_hits;                  ///<
@@ -182,6 +183,7 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("vertex", &m_vertex, "vertex/I"); 
     m_pRecoTree->Branch("track", &m_track, "track/I"); 
     m_pRecoTree->Branch("trackid", &m_trackid, "trackid/I"); 
+    m_pRecoTree->Branch("seeds", &m_seeds, "seeds/I");
     m_pRecoTree->Branch("clusters", &m_clusters, "clusters/I");
     m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I"); 
     m_pRecoTree->Branch("hits", &m_hits, "hits/I"); 
@@ -239,6 +241,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_track = 0;
     m_trackid = -999;
 
+    m_seeds = 0;
     m_clusters = 0;
     m_spacepoints = 0;
     m_hits = 0;
@@ -342,6 +345,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_track = 0;
         m_trackid = -999;
 
+        m_seeds = 0;
         m_clusters = 0;
         m_spacepoints = 0;
         m_hits = 0;
@@ -412,11 +416,10 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         if (particlesToSeeds.end() != sIter)
         {
             const SeedVector &seedVector = sIter->second;
+            m_seeds = seedVector.size();
+
             if (!seedVector.empty())
             {
-                if (seedVector.size() !=1 && m_printDebug)
-                    std::cout << " Warning: Found particle with more than one associated seed " << std::endl;
-
                 const art::Ptr<recob::Seed> seed = *(seedVector.begin());
                 double pxpypz[3] = {0.0, 0.0, 0.0} ;
                 double err[3] = {0.0, 0.0, 0.0} ;
@@ -473,7 +476,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
                       << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
                       << " (Self=" << m_self << ", Parent=" << m_parent << ")"
-                      << " (Vertex=" << m_vertex << ", Seed=" << (m_pfoptot > 0) << ", Track=" << m_track
+                      << " (Vertex=" << m_vertex << ", Seeds=" << m_seeds << ", Track=" << m_track
                       << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ", Hits=" << m_hits << ") " << std::endl;
 
         m_pRecoTree->Fill();

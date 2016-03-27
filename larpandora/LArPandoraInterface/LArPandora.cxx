@@ -82,6 +82,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
         produces< art::Assns<recob::PFParticle, recob::Vertex> >();
         produces< art::Assns<recob::SpacePoint, recob::Hit> >();
         produces< art::Assns<recob::Cluster, recob::Hit> >();
+        produces< art::Assns<recob::Seed, recob::Hit> >();
 
         if (m_outputSettings.m_buildTracks)
         {

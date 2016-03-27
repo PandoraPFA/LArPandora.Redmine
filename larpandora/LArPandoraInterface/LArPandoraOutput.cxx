@@ -86,6 +86,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     std::unique_ptr< art::Assns<recob::Shower, recob::Hit> >            outputShowersToHits( new art::Assns<recob::Shower, recob::Hit> );
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::Seed, recob::Hit> >              outputSeedsToHits( new art::Assns<recob::Seed, recob::Hit> );
 
     // prepare the algorithm to compute the cluster characteristics;
     // we use the "standard" one here; configuration would happen here,
@@ -217,26 +218,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
             const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentCaloHitAddress());
-            const void *const pHitAddress(pCaloHit2D->GetParentCaloHitAddress());
-            const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
-            const int hitID((int)(hitID_temp));
-
-            IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
-
-            if (idToHitMap.end() == artIter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
             HitVector hitVector;
-            const art::Ptr<recob::Hit> hit = artIter->second;
+            const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, pCaloHit2D);
             hitVector.push_back(hit);
 
-            const pandora::CartesianVector point(pCaloHit3D->GetPositionVector());
-            double xyz[3] = { point.GetX(), point.GetY(), point.GetZ() };
-            double dxdydz[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // TODO: Fill in errors
-            double chi2(0.0);
-
-            recob::SpacePoint newSpacePoint(xyz, dxdydz, chi2, spacePointCounter++);
-            outputSpacePoints->push_back(newSpacePoint);
+            outputSpacePoints->emplace_back(LArPandoraOutput::BuildSpacePoint(spacePointCounter++, pCaloHit3D));
 
             util::CreateAssn(*(settings.m_pProducer), evt, *(outputSpacePoints.get()), hitVector, *(outputSpacePointsToHits.get()));
             util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputSpacePoints.get()), *(outputParticlesToSpacePoints.get()),
@@ -266,25 +253,16 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
             for (pandora::CaloHitVector::const_iterator hIter = pandoraHitVector2D.begin(), hIterEnd = pandoraHitVector2D.end(); hIter != hIterEnd; ++hIter)
             {
-                const pandora::CaloHit *const pCaloHit = *hIter;
+                const pandora::CaloHit *const pCaloHit2D = *hIter;
+                const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, pCaloHit2D);
 
-                const void *const pHitAddress(pCaloHit->GetParentCaloHitAddress());
-                const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
-                const int hitID((int)(hitID_temp));
-
-                IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
-
-                if (idToHitMap.end() == artIter)
-                    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
-                const art::Ptr<recob::Hit> hit = artIter->second;
                 const geo::WireID wireID(hit->WireID());
                 const unsigned int volID(100000 * wireID.Cryostat + wireID.TPC);
 
                 hitArray[volID].push_back(hit);
 
                 pfoHits.push_back(hit);
-                if (pCaloHit->IsIsolated())
+                if (pCaloHit2D->IsIsolated())
                     isolatedHits.insert(hit);
             }
 
@@ -316,39 +294,53 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
             const unsigned int vtxElement(vIter->second);
 
-            const pandora::CartesianVector vtxPos(pVertex->GetPosition());
-            double pos[3] = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
-            double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
-
             util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputVertices.get()), *(outputParticlesToVertices.get()),
                 vtxElement, vtxElement + 1);
 
             if (lar_content::LArPfoHelper::IsTrack(pPfo) && pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
             {
-                const pandora::CartesianVector vtxDir(pPfo->GetMomentum().GetUnitVector()); 
-                double dir[3]     = { vtxDir.GetX(), vtxDir.GetY(), vtxDir.GetZ() };
-                double dirErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+                try
+		{
+                    const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
+        
+                    if (!pLArTrackPfo)
+                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSeeds --- input pfo was not track-like ";
+                
+                    const lar_content::LArTrackStateVector &trackStateVector = pLArTrackPfo->m_trackStateVector;
 
-                recob::Seed newSeed(pos, dir, posErr, dirErr);
-                outputSeeds->push_back(newSeed);
+                    if (trackStateVector.empty())
+                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- No input trajectory points were provided ";
 
-                util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
-                    outputSeeds->size() - 1, outputSeeds->size());
+                    //HitVector trackHits; 
 
-                if (settings.m_buildTracks)
-                {
-                    try
+                    for (lar_content::LArTrackStateVector::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
+                        tIter != tIterEnd; ++tIter)
+		    {
+                        const lar_content::LArTrackState &nextPoint = *tIter;
+  
+                        //HitVector seedHits;
+                        //const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, nextPoint.GetCaloHit());
+                        //seedHits.push_back(hit);
+                        //trackHits.push_back(hit);
+
+                        outputSeeds->emplace_back(LArPandoraOutput::BuildSeed(nextPoint));
+  
+                        //util::CreateAssn(*(settings.m_pProducer), evt, *(outputSeeds.get()), seedHits, *(outputSeedsToHits.get()));
+                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
+                            outputSeeds->size() - 1, outputSeeds->size());
+		    }
+	
+                    if (settings.m_buildTracks)
                     {
-                        recob::Track newTrack(LArPandoraOutput::BuildTrack(trackCounter, pPfo)); trackCounter++;
-                        outputTracks->push_back(newTrack);
+                        outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
 
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), pfoHits, *(outputTracksToHits.get()));
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
                             outputTracks->size() - 1, outputTracks->size());
                     }
-                    catch (cet::exception &e)
-                    {
-                    }
+		}
+                catch (cet::exception &e)
+                {
                 }
             }
         }
@@ -382,6 +374,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputParticlesToVertices));
     evt.put(std::move(outputSpacePointsToHits));
     evt.put(std::move(outputClustersToHits));
+    evt.put(std::move(outputSeedsToHits));
 
     if (settings.m_buildTracks)
     {
@@ -486,17 +479,15 @@ recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hit
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
- 
-recob::Track LArPandoraOutput::BuildTrack(const int id, const pandora::ParticleFlowObject *const pPfo)
-{
-    mf::LogDebug("LArPandora") << "   Building Track [" << id << "], PdgCode = " << pPfo->GetParticleId() << std::endl;
 
-    const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
-        
-    if (!pLArTrackPfo)
-        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo was not track-like ";
-        
-    return LArPandoraOutput::BuildTrack(id, &(pLArTrackPfo->m_trackStateVector));
+recob::Seed LArPandoraOutput::BuildSeed(const lar_content::LArTrackState &trackState)
+{
+    double pos[3]     = { trackState.GetPosition().GetX(), trackState.GetPosition().GetY(), trackState.GetPosition().GetZ() };
+    double dir[3]     = { trackState.GetDirection().GetX(), trackState.GetDirection().GetY(), trackState.GetDirection().GetZ() };
+    double posErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+    double dirErr[3]  = { 0.0, 0.0, 0.0 };  // TODO: Fill in errors
+
+    return recob::Seed(pos, dir, posErr, dirErr);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -534,6 +525,37 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
 
     // Return a new recob::Track object (of the Bezier variety)
     return recob::Track(xyz, pxpypz, dQdx, momentum, id);
+}
+  
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora::CaloHit *const pCaloHit)
+{
+    if (pandora::TPC_3D != pCaloHit->GetHitType())
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+
+    const pandora::CartesianVector point(pCaloHit->GetPositionVector());
+    double xyz[3] = { point.GetX(), point.GetY(), point.GetZ() };
+    double dxdydz[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // TODO: Fill in errors
+    double chi2(0.0);
+
+    return recob::SpacePoint(xyz, dxdydz, chi2, id);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit)
+{
+    const void *const pHitAddress(pCaloHit->GetParentCaloHitAddress());
+    const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
+    const int hitID((int)(hitID_temp));
+
+    IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
+
+    if (idToHitMap.end() == artIter)
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+
+    return artIter->second;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

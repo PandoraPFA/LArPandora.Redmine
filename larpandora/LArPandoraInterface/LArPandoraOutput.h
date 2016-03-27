@@ -69,20 +69,35 @@ public:
     static recob::Cluster BuildCluster(const int id, const HitVector &hitVector, const HitList &hitList, cluster::ClusterParamsAlgBase &algo);
 
     /**
-     *  @brief Build a recob::Track object from an input Pandora particle flow object
+     *  @brief Build a recob::Track object
      *
      *  @param id the id code for the track
-     *  @param pPfo the particle flow object
-     */
-    static recob::Track BuildTrack(const int id, const pandora::ParticleFlowObject *const pPfo);
-
-    /**
-     *  @brief Merge a set of recob::Track objects
-     *
-     *  @param id the id code for the tracks
      *  @param pTrackStateVector the vector of trajectory points for this track
      */
     static recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector *const pTrackStateVector);
+
+    /**
+     *  @brief Build a reco::Seed object
+     *
+     *  @param trackState the trajectory point for this seed
+     */
+    static recob::Seed BuildSeed(const lar_content::LArTrackState &trackState);
+
+    /**
+     *  @brief Build a recob::SpacePoint object
+     *
+     *  @param id the id code for the spacepoint
+     *  @param pCaloHit the input Pandora hit (3D)
+     */
+    static recob::SpacePoint BuildSpacePoint(const int id, const pandora::CaloHit *const pCaloHit);
+
+    /**
+     *  @brief Lookup ART hit from an input Pandora hit
+     *
+     *  @param idToHitMap the mapping between Pandora and ART hits
+     *  @param pCaloHit the input Pandora hit (2D)
+     */
+    static art::Ptr<recob::Hit> GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit);
 };
 
 } // namespace lar_pandora
