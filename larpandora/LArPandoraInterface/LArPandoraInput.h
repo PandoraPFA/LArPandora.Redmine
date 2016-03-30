@@ -64,6 +64,13 @@ public:
         const SpacePointsToHits &spacePointsToHits, SpacePointMap &spacePointMap);
 
     /**
+     *  @brief  Create pandora line gaps to cover any (continuous regions of) bad channels
+     *
+     *  @param  settings the settings
+     */
+    static void CreatePandoraLineGaps(const Settings &settings);
+
+    /**
      *  @brief  Create the Pandora MC particles from the MC particles
      *
      *  @param  settings the settings
