@@ -17,9 +17,9 @@ end_product_list
   
 # e9  - with gcc 4.9.3 and -std=c++14
 qualifier	larreco		larpandoracontent		gcc	notes
-e9:debug	e9:debug	e9:nu:r5:debug	-nq-
-e9:opt		e9:opt		e9:nu:r5:opt	-nq-
-e9:prof		e9:prof		e9:nu:r5:prof	-nq-
+e9:debug	e9:debug	e9:nu:r6:debug	-nq-
+e9:opt		e9:opt		e9:nu:r6:opt	-nq-
+e9:prof		e9:prof		e9:nu:r6:prof	-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
