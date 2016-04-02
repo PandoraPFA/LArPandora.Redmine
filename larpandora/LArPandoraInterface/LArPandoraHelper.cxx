@@ -368,6 +368,38 @@ void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string lab
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector, SeedsToHits &seedsToHits)
+{
+    art::Handle< std::vector<recob::Seed> > theSeeds;
+    evt.getByLabel(label, theSeeds);
+
+    if (!theSeeds.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find seeds... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theSeeds->size() << " Seeds " << std::endl;
+    }
+
+    art::FindManyP<recob::Hit> theHitAssns(theSeeds, evt, label);
+    for (unsigned int i = 0; i < theSeeds->size(); ++i)
+    {
+        const art::Ptr<recob::Seed> seed(theSeeds, i);
+        seedVector.push_back(seed);
+
+        const std::vector< art::Ptr<recob::Hit> > hits = theHitAssns.at(i);
+        for (unsigned int j=0; j<hits.size(); ++j)
+        {
+            const art::Ptr<recob::Hit> hit = hits.at(j);
+            seedsToHits[seed].push_back(hit);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraHelper::CollectVertices(const art::Event &evt, const std::string label, VertexVector &vertexVector,
     PFParticlesToVertices &particlesToVertices)
 {

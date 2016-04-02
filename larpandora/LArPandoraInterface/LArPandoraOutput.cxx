@@ -233,7 +233,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // Build 2D Clusters   
         pandora::ClusterVector pandoraClusterVector(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
         std::sort(pandoraClusterVector.begin(), pandoraClusterVector.end(), lar_content::LArClusterHelper::SortByNHits);
-        HitVector pfoHits; // select all hits from this Pfo
 
         for (pandora::ClusterVector::const_iterator cIter = pandoraClusterVector.begin(), cIterEnd = pandoraClusterVector.end(); cIter != cIterEnd; ++cIter)
         {
@@ -261,7 +260,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                 hitArray[volID].push_back(hit);
 
-                pfoHits.push_back(hit);
                 if (pCaloHit2D->IsIsolated())
                     isolatedHits.insert(hit);
             }
@@ -311,21 +309,21 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     if (trackStateVector.empty())
                         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- No input trajectory points were provided ";
 
-                    //HitVector trackHits; 
+                    HitVector trackHits;
 
                     for (lar_content::LArTrackStateVector::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
                         tIter != tIterEnd; ++tIter)
 		    {
                         const lar_content::LArTrackState &nextPoint = *tIter;
   
-                        //HitVector seedHits;
-                        //const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, nextPoint.GetCaloHit());
-                        //seedHits.push_back(hit);
-                        //trackHits.push_back(hit);
+                        HitVector seedHits;
+                        const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, nextPoint.GetCaloHit());
+                        seedHits.push_back(hit);
+                        trackHits.push_back(hit);
 
                         outputSeeds->emplace_back(LArPandoraOutput::BuildSeed(nextPoint));
   
-                        //util::CreateAssn(*(settings.m_pProducer), evt, *(outputSeeds.get()), seedHits, *(outputSeedsToHits.get()));
+                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputSeeds.get()), seedHits, *(outputSeedsToHits.get()));
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
                             outputSeeds->size() - 1, outputSeeds->size());
 		    }
@@ -334,7 +332,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     {
                         outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
 
-                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), pfoHits, *(outputTracksToHits.get()));
+                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), trackHits, *(outputTracksToHits.get()));
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
                             outputTracks->size() - 1, outputTracks->size());
                     }

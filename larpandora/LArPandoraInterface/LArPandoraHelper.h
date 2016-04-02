@@ -52,6 +52,7 @@ typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PF
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
 typedef std::map< art::Ptr<recob::Track>,      HitVector >                    TracksToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
+typedef std::map< art::Ptr<recob::Seed>,       HitVector >                    SeedsToHits;
 typedef std::map< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit> >         SpacePointsToHits;
 typedef std::map< art::Ptr<simb::MCTruth>,     MCParticleVector >             MCTruthToMCParticles;
 typedef std::map< art::Ptr<simb::MCTruth>,     HitVector >                    MCTruthToHits;
@@ -219,6 +220,17 @@ public:
      */
     static void CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
         PFParticlesToSeeds &particlesToSeeds);
+
+    /**
+     *  @brief Collect the reconstructed Seeds and associated Hits from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param seedVector the output vector of Seed objects
+     *  @param seedsToHits the output map from Seed to Hit objects
+     */
+    static void CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
+        SeedsToHits &seedsToHits);
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated Vertices from the ART event record
