@@ -76,6 +76,7 @@ private:
      int          m_hits;                  ///<
      int          m_trajectorypoints;      ///<
      int          m_trackhits;             ///<
+     int          m_seedhits;              ///<
 
      double       m_pfovtxx;               ///< 
      double       m_pfovtxy;               ///<
@@ -189,6 +190,7 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("hits", &m_hits, "hits/I"); 
     m_pRecoTree->Branch("trackhits", &m_trackhits, "trackhits/I");
     m_pRecoTree->Branch("trajectorypoints", &m_trajectorypoints, "trajectorypoints/I");
+    m_pRecoTree->Branch("seedhits", &m_seedhits, "seedhits/I");
     m_pRecoTree->Branch("pfovtxx", &m_pfovtxx, "pfovtxx/D");
     m_pRecoTree->Branch("pfovtxy", &m_pfovtxy, "pfovtxy/D");
     m_pRecoTree->Branch("pfovtxz", &m_pfovtxz, "pfovtxz/D");
@@ -247,6 +249,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_hits = 0;
     m_trajectorypoints = 0;
     m_trackhits = 0;
+    m_seedhits = 0;
       
     m_pfovtxx = 0.0;
     m_pfovtxy = 0.0;
@@ -308,9 +311,11 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
 
     // Get the reconstructed seeds
     // ===========================
-    SeedVector seedVector;
+    SeedVector seedVector, seedVector2;
     PFParticlesToSeeds particlesToSeeds;
+    SeedsToHits seedsToHits;
     LArPandoraHelper::CollectSeeds(evt, m_particleLabel, seedVector, particlesToSeeds);
+    LArPandoraHelper::CollectSeeds(evt, m_particleLabel, seedVector2, seedsToHits);
 
     // Get the reconstructed tracks
     // ============================
@@ -351,6 +356,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_hits = 0;
         m_trajectorypoints = 0;
         m_trackhits = 0;
+        m_seedhits = 0;
       
         m_pfovtxx = 0.0;
         m_pfovtxy = 0.0;
@@ -411,7 +417,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             }
         }
 
-        // Particles <-> Seeds
+        // Particles <-> Seeds <-> Hits
         PFParticlesToSeeds::const_iterator sIter = particlesToSeeds.find(particle);
         if (particlesToSeeds.end() != sIter)
         {
@@ -420,19 +426,33 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
 
             if (!seedVector.empty())
             {
-                const art::Ptr<recob::Seed> seed = *(seedVector.begin());
+                const art::Ptr<recob::Seed> firstSeed = *(seedVector.begin());
                 double pxpypz[3] = {0.0, 0.0, 0.0} ;
                 double err[3] = {0.0, 0.0, 0.0} ;
-                seed->GetDirection(pxpypz, err);
+                firstSeed->GetDirection(pxpypz, err);
 
                 m_pfopx = pxpypz[0];
                 m_pfopy = pxpypz[1];
                 m_pfopz = pxpypz[2];
                 m_pfoptot = std::sqrt(m_pfopx * m_pfopx + m_pfopy * m_pfopy + m_pfopz * m_pfopz);
+
+                for (SeedVector::const_iterator sIter1 = seedVector.begin(), sIterEnd1 = seedVector.end(); sIter1 != sIterEnd1; ++sIter1)
+                {
+                    SeedsToHits::const_iterator sIter2 = seedsToHits.find(*sIter1);
+                    const HitVector &hitVector = sIter2->second;
+
+                    if (hitVector.empty() && m_printDebug)
+                        std::cout << " Warning: Found seed without an associated hit " << std::endl;
+
+                    if (hitVector.size() !=1 && m_printDebug)
+                        std::cout << " Warning: Found seed with more than one associated hit " << std::endl;
+
+                    m_seedhits += hitVector.size();
+                }
             }
         }
 
-        // Particles <-> Tracks
+        // Particles <-> Tracks <-> Hits
         PFParticlesToTracks::const_iterator tIter = particlesToTracks.find(particle);
         if (particlesToTracks.end() != tIter)
         {

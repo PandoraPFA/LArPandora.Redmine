@@ -306,21 +306,30 @@ void LArPandoraInput::CreatePandoraLineGaps(const Settings &settings)
 
                     if (iplane == geo::kW)
                     {
+                        const float firstW(firstXYZ[2]);
+                        const float lastW(lastXYZ[2]);
+
                         parameters.m_hitType = pandora::TPC_VIEW_W;
-                        parameters.m_lineStartZ = firstXYZ[2] - halfWirePitch;
-                        parameters.m_lineEndZ = lastXYZ[2] + halfWirePitch;
+                        parameters.m_lineStartZ = std::min(firstW, lastW) - halfWirePitch;
+                        parameters.m_lineEndZ = std::max(firstW, lastW) + halfWirePitch;
                     }
                     else if (iplane == geo::kU)
                     {
+                        const float firstU(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(firstXYZ[1], firstXYZ[2]));
+                        const float lastU(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(lastXYZ[1], lastXYZ[2]));
+
                         parameters.m_hitType = pandora::TPC_VIEW_U;
-                        parameters.m_lineStartZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(firstXYZ[1], firstXYZ[2]) - halfWirePitch;
-                        parameters.m_lineEndZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(lastXYZ[1], lastXYZ[2]) + halfWirePitch;
+                        parameters.m_lineStartZ = std::min(firstU, lastU) - halfWirePitch;
+                        parameters.m_lineEndZ = std::max(firstU, lastU) + halfWirePitch;
                     }
                     else if (iplane == geo::kV)
                     {
+                        const float firstV(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(firstXYZ[1], firstXYZ[2]));
+                        const float lastV(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(lastXYZ[1], lastXYZ[2]));
+
                         parameters.m_hitType = pandora::TPC_VIEW_V;
-                        parameters.m_lineStartZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(firstXYZ[1], firstXYZ[2]) - halfWirePitch;
-                        parameters.m_lineEndZ = lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(lastXYZ[1], lastXYZ[2]) + halfWirePitch;
+                        parameters.m_lineStartZ = std::min(firstV, lastV) - halfWirePitch;
+                        parameters.m_lineEndZ = std::max(firstV, lastV) + halfWirePitch;
                     }
 
                     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LineGap::Create(*pPandora, parameters));
