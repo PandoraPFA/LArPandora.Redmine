@@ -9,6 +9,7 @@ microboone_pandora:
   EnableMCParticles:     false
   EnableProduction:      true
   EnableMonitoring:      false
+  EnableLineGaps:        true
   UseHitWidths:          true
   BuildTracks:           true
   BuildShowers:          false
