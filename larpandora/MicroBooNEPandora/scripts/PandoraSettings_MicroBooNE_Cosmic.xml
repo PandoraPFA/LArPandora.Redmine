@@ -50,6 +50,8 @@
     <algorithm type = "LArLongitudinalAssociation"/>
     <algorithm type = "LArTransverseExtension"/>
     <algorithm type = "LArLongitudinalExtension"/>
+    <algorithm type = "LArCrossGapsAssociation"/>
+    <algorithm type = "LArCrossGapsExtension"/>
     <algorithm type = "LArBranchSplitting"><CosmicMode>true</CosmicMode></algorithm>
     <algorithm type = "LArDeltaRaySplitting"><CosmicMode>true</CosmicMode></algorithm>
     <algorithm type = "LArCrossedTrackSplitting"/>
@@ -74,6 +76,8 @@
     <algorithm type = "LArLongitudinalAssociation"/>
     <algorithm type = "LArTransverseExtension"/>
     <algorithm type = "LArLongitudinalExtension"/>
+    <algorithm type = "LArCrossGapsAssociation"/>
+    <algorithm type = "LArCrossGapsExtension"/>
     <algorithm type = "LArBranchSplitting"><CosmicMode>true</CosmicMode></algorithm>
     <algorithm type = "LArDeltaRaySplitting"><CosmicMode>true</CosmicMode></algorithm>
     <algorithm type = "LArCrossedTrackSplitting"/>
@@ -98,6 +102,8 @@
     <algorithm type = "LArLongitudinalAssociation"/>
     <algorithm type = "LArTransverseExtension"/>
     <algorithm type = "LArLongitudinalExtension"/>
+    <algorithm type = "LArCrossGapsAssociation"/>
+    <algorithm type = "LArCrossGapsExtension"/>
     <algorithm type = "LArBranchSplitting"><CosmicMode>true</CosmicMode></algorithm>
     <algorithm type = "LArDeltaRaySplitting"><CosmicMode>true</CosmicMode></algorithm>
     <algorithm type = "LArCrossedTrackSplitting"/>
@@ -149,6 +155,12 @@
         <algorithm type = "LArSimpleClusterCreation" description = "ClusterRebuilding"/>
     </algorithm>
     <algorithm type = "LArCosmicRayTrackMatching">
+        <InputClusterListNameU>ClustersU</InputClusterListNameU>
+        <InputClusterListNameV>ClustersV</InputClusterListNameV>
+        <InputClusterListNameW>ClustersW</InputClusterListNameW>
+        <OutputPfoListName>Particles3D</OutputPfoListName>
+    </algorithm>
+    <algorithm type = "LArCosmicRayTrackRecovery"> 
         <InputClusterListNameU>ClustersU</InputClusterListNameU>
         <InputClusterListNameV>ClustersV</InputClusterListNameV>
         <InputClusterListNameW>ClustersW</InputClusterListNameW>
