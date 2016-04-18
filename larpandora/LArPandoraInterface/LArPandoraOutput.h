@@ -60,13 +60,13 @@ public:
      *
      *  @param id the id code for the cluster
      *  @param hitVector the input vector of hits
-     *  @param hitList the input list of isolated hits
+     *  @param isolatedHits the input list of isolated hits
      *  @param algo Algorithm set to fill cluster members
      *  
      *  If you don't know which algorithm to pick, StandardClusterParamsAlg is a good default.
      *  The hits that are isolated (that is, present in isolatedHits) are not fed to the cluster parameter algorithms.
      */
-    static recob::Cluster BuildCluster(const int id, const HitVector &hitVector, const HitList &hitList, cluster::ClusterParamsAlgBase &algo);
+    static recob::Cluster BuildCluster(const int id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo);
 
     /**
      *  @brief Build a recob::Track object
