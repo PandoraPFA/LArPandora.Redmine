@@ -96,6 +96,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     // Obtain a sorted vector of all output Pfos and their daughters
     pandora::PfoList connectedPfoList;
     lar_content::LArPfoHelper::GetAllConnectedPfos(concatenatedPfoList, connectedPfoList);
+
     pandora::PfoVector pfoVector(connectedPfoList.begin(), connectedPfoList.end());
     std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
@@ -110,9 +111,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     ThreeDParticleMap particleMap;
     ThreeDVertexMap vertexMap;
 
-    for (pandora::PfoVector::iterator pIter = pfoVector.begin(), pIterEnd = pfoVector.end(); pIter != pIterEnd; ++pIter)
+    for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
     {
-        const pandora::ParticleFlowObject *const pPfo = *pIter;
         particleMap.insert( std::pair<const pandora::ParticleFlowObject*, size_t>(pPfo, particleCounter++) ); 
 
         if (!pPfo->GetVertexList().empty())
@@ -131,12 +131,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     }
 
     // Loop over Pandora vertices and build recob::Vertices
-    for (pandora::VertexVector::iterator vIter = vertexVector.begin(), vIterEnd = vertexVector.end(); vIter != vIterEnd; ++vIter)
+    for (const pandora::Vertex *const pVertex : vertexVector)
     {
-        const pandora::Vertex *const pVertex = *vIter;
-
-        ThreeDVertexMap::const_iterator wIter = vertexMap.find(pVertex);
-        if (vertexMap.end() == wIter)
+        ThreeDVertexMap::const_iterator iter = vertexMap.find(pVertex);
+        if (vertexMap.end() == iter)
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
         const pandora::CartesianVector vtxPos(pVertex->GetPosition());
@@ -147,16 +145,14 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     }
 
     // Loop over Pandora particles and build recob::PFParticles
-    for (pandora::PfoVector::iterator pIter = pfoVector.begin(), pIterEnd = pfoVector.end(); pIter != pIterEnd; ++pIter)
+    for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
     {
-        const pandora::ParticleFlowObject *const pPfo = *pIter;
-
         // Get Pfo ID
-        ThreeDParticleMap::const_iterator qIter = particleMap.find(pPfo);
-        if (particleMap.end() == qIter)
+        ThreeDParticleMap::const_iterator iter = particleMap.find(pPfo);
+        if (particleMap.end() == iter)
             throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-        const size_t pfoIdCode(qIter->second);
+        const size_t pfoIdCode(iter->second);
 
         // Get Pfo Parents
         size_t parentIdCode(recob::PFParticle::kPFParticlePrimary);
@@ -167,37 +163,26 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             if (parentList.size() != 1)
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            for (pandora::PfoList::const_iterator parentIter = parentList.begin(), parentIterEnd = parentList.end();
-                parentIter != parentIterEnd; ++parentIter)
-            {
-                const pandora::ParticleFlowObject *const pParentPfo = *parentIter;
+            ThreeDParticleMap::const_iterator parentIdIter = particleMap.find(*parentList.begin());
+            if (particleMap.end() == parentIdIter)
+                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-                ThreeDParticleMap::const_iterator parentIdIter = particleMap.find(pParentPfo);
-                if (particleMap.end() == parentIdIter)
-                    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
-                parentIdCode = parentIdIter->second;
-            }
+            parentIdCode = parentIdIter->second;
         }
 
         // Get Pfo Daughters
         std::vector<size_t> daughterIdCodes;
-        const pandora::PfoList &daughterList(pPfo->GetDaughterPfoList());
+        pandora::PfoVector daughterPfoVector(pPfo->GetDaughterPfoList().begin(), pPfo->GetDaughterPfoList().end());
+        std::sort(daughterPfoVector.begin(), daughterPfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
-        if (!daughterList.empty())
+        for (const pandora::ParticleFlowObject *const pDaughterPfo : daughterPfoVector)
         {
-            for (pandora::PfoList::const_iterator daughterIter = daughterList.begin(), daughterIterEnd = daughterList.end();
-                daughterIter != daughterIterEnd; ++daughterIter)
-            {
-                const pandora::ParticleFlowObject *const pDaughterPfo = *daughterIter;
+            ThreeDParticleMap::const_iterator daughterIdIter = particleMap.find(pDaughterPfo);
+            if (particleMap.end() == daughterIdIter)
+                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-                ThreeDParticleMap::const_iterator daughterIdIter = particleMap.find(pDaughterPfo);
-                if (particleMap.end() == daughterIdIter)
-                    throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
-
-                const size_t daughterIdCode(daughterIdIter->second);
-                daughterIdCodes.push_back(daughterIdCode);
-            }
+            const size_t daughterIdCode(daughterIdIter->second);
+            daughterIdCodes.push_back(daughterIdCode);
         }
 
         // Build Particle
@@ -207,13 +192,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // Build 3D Space Points 
         pandora::CaloHitList pandoraHitList3D;
         lar_content::LArPfoHelper::GetCaloHits(pPfo, pandora::TPC_3D, pandoraHitList3D);
+
         pandora::CaloHitVector pandoraHitVector3D(pandoraHitList3D.begin(), pandoraHitList3D.end());
-        std::sort(pandoraHitVector3D.begin(), pandoraHitVector3D.end(), lar_content::LArClusterHelper::SortByPosition);
+        std::sort(pandoraHitVector3D.begin(), pandoraHitVector3D.end(), lar_content::LArClusterHelper::SortHitsByPosition);
 
-        for (pandora::CaloHitVector::const_iterator hIter = pandoraHitVector3D.begin(), hIterEnd = pandoraHitVector3D.end(); hIter != hIterEnd; ++hIter)
+        for (const pandora::CaloHit *const pCaloHit3D : pandoraHitVector3D)
         {
-            const pandora::CaloHit *const pCaloHit3D = *hIter;
-
             if (pandora::TPC_3D != pCaloHit3D->GetHitType())
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
@@ -234,25 +218,23 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         pandora::ClusterVector pandoraClusterVector(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
         std::sort(pandoraClusterVector.begin(), pandoraClusterVector.end(), lar_content::LArClusterHelper::SortByNHits);
 
-        for (pandora::ClusterVector::const_iterator cIter = pandoraClusterVector.begin(), cIterEnd = pandoraClusterVector.end(); cIter != cIterEnd; ++cIter)
+        for (const pandora::Cluster *const pCluster : pandoraClusterVector)
         {
-            const pandora::Cluster *const pCluster = *cIter;
-
             if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
                 continue;
 
             pandora::CaloHitList pandoraHitList2D;
             pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList2D);
             pandoraHitList2D.insert(pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
+
             pandora::CaloHitVector pandoraHitVector2D(pandoraHitList2D.begin(), pandoraHitList2D.end());
-            std::sort(pandoraHitVector2D.begin(), pandoraHitVector2D.end(), lar_content::LArClusterHelper::SortByPosition);
+            std::sort(pandoraHitVector2D.begin(), pandoraHitVector2D.end(), lar_content::LArClusterHelper::SortHitsByPosition);
 
             HitArray  hitArray;      // sort hits by drift volume
             HitList   isolatedHits;  // select isolated hits
 
-            for (pandora::CaloHitVector::const_iterator hIter = pandoraHitVector2D.begin(), hIterEnd = pandoraHitVector2D.end(); hIter != hIterEnd; ++hIter)
+            for (const pandora::CaloHit *const pCaloHit2D : pandoraHitVector2D)
             {
-                const pandora::CaloHit *const pCaloHit2D = *hIter;
                 const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, pCaloHit2D);
 
                 const geo::WireID wireID(hit->WireID());
@@ -267,9 +249,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             if (hitArray.empty())
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            for (HitArray::const_iterator hIter = hitArray.begin(), hIterEnd = hitArray.end(); hIter != hIterEnd; ++hIter)
+            for (const HitArray::value_type &hitArrayEntry : hitArray)
             {
-                const HitVector clusterHits(hIter->second);
+                const HitVector &clusterHits(hitArrayEntry.second);
                 outputClusters->emplace_back(LArPandoraOutput::BuildCluster(clusterCounter++, clusterHits, isolatedHits, ClusterParamAlgo)); 
 
                 util::CreateAssn(*(settings.m_pProducer), evt, *(outputClusters.get()), clusterHits, *(outputClustersToHits.get()));
@@ -286,19 +268,18 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
             const pandora::Vertex *const pVertex = *(pPfo->GetVertexList().begin());
 
-            ThreeDVertexMap::const_iterator vIter = vertexMap.find(pVertex);
-            if (vertexMap.end() == vIter)
+            ThreeDVertexMap::const_iterator iter = vertexMap.find(pVertex);
+            if (vertexMap.end() == iter)
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            const unsigned int vtxElement(vIter->second);
-
+            const unsigned int vtxElement(iter->second);
             util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputVertices.get()), *(outputParticlesToVertices.get()),
                 vtxElement, vtxElement + 1);
 
             if (lar_content::LArPfoHelper::IsTrack(pPfo) && pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
             {
                 try
-		{
+                {
                     const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
         
                     if (!pLArTrackPfo)
@@ -311,11 +292,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                     HitVector trackHits;
 
-                    for (lar_content::LArTrackStateVector::const_iterator tIter = trackStateVector.begin(), tIterEnd = trackStateVector.end();
-                        tIter != tIterEnd; ++tIter)
-		    {
-                        const lar_content::LArTrackState &nextPoint = *tIter;
-  
+                    for (const lar_content::LArTrackState &nextPoint : trackStateVector)
+                    {
                         HitVector seedHits;
                         const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, nextPoint.GetCaloHit());
                         seedHits.push_back(hit);
@@ -326,8 +304,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputSeeds.get()), seedHits, *(outputSeedsToHits.get()));
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputSeeds.get()), *(outputParticlesToSeeds.get()),
                             outputSeeds->size() - 1, outputSeeds->size());
-		    }
-	
+                    }
+
                     if (settings.m_buildTracks)
                     {
                         outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
@@ -336,7 +314,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                         util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
                             outputTracks->size() - 1, outputTracks->size());
                     }
-		}
+                }
                 catch (cet::exception &e)
                 {
                 }
@@ -391,7 +369,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
 //------------------------------------------------------------------------------------------------------------------------------------------
  
-recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hitVector, const HitList &hitList, cluster::ClusterParamsAlgBase &algo) 
+recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo)
 {
     mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
 
@@ -409,11 +387,9 @@ recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hit
     
     std::vector<recob::Hit const*> hits_for_params;
     hits_for_params.reserve(hitVector.size());
-    
-    for (std::vector<art::Ptr<recob::Hit>>::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
+
+    for (const art::Ptr<recob::Hit> &hit : hitVector)
     {
-        art::Ptr<recob::Hit> const& hit = *iter;
-        
         const double thisWire(hit->WireID().Wire);
         const double thisWireSigma(0.5);
         const double thisTime(hit->PeakTime());
@@ -434,7 +410,7 @@ recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hit
         
         hits_for_params.push_back(&*hit);
         
-        if (hitList.count(hit))
+        if (isolatedHits.count(hit))
             continue;
 
         if (thisWire < startWire || (thisWire == startWire && thisTime < startTime))
@@ -504,11 +480,8 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
     std::vector<double>                 momentum = std::vector<double>(2, util::kBogusD);
 
     // Loop over trajectory points
-    for (lar_content::LArTrackStateVector::const_iterator tIter = pTrackStateVector->begin(), tIterEnd = pTrackStateVector->end();
-        tIter != tIterEnd; ++tIter)
+    for (const lar_content::LArTrackState &nextPoint : *pTrackStateVector)
     {
-        const lar_content::LArTrackState &nextPoint = *tIter;
-
         if (nextPoint.GetdQdL() < std::numeric_limits<float>::epsilon())
             continue;
 
@@ -545,7 +518,7 @@ recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora:
 art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit)
 {
     const void *const pHitAddress(pCaloHit->GetParentCaloHitAddress());
-    const intptr_t hitID_temp((intptr_t)(pHitAddress)); // TODO
+    const intptr_t hitID_temp((intptr_t)(pHitAddress));
     const int hitID((int)(hitID_temp));
 
     IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
