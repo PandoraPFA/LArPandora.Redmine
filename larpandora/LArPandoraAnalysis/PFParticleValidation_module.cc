@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleMonitoring_module.cc
+ *  @file   larpandora/LArPandoraInterface/PFParticleValidation_module.cc
  *
  *  @brief  Analysis module for created particles
  *
@@ -47,8 +47,121 @@ public:
      void reconfigure(fhicl::ParameterSet const &pset);
 
 private:
-    typedef std::map< art::Ptr<recob::PFParticle>, unsigned int > RecoParticleToNMatchedHits;
-    typedef std::map< art::Ptr<simb::MCParticle>,  RecoParticleToNMatchedHits > ParticleMatchingMap;
+    /**
+     *  @brief  SimpleThreeVector class, (re-invent wheel, but do so in order to cleans-up tree writing later on)
+     */
+    class SimpleThreeVector
+    {
+    public:
+        /**
+         *  @brief  Default constructor
+         */
+        SimpleThreeVector();
+
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  x the x value
+         *  @param  y the y value
+         *  @param  z the z value
+         */
+        SimpleThreeVector(const float x, const float y, const float z);
+
+        float   m_x;    ///< The x value
+        float   m_y;    ///< The y value
+        float   m_z;    ///< The z value
+    };
+
+    typedef std::vector<SimpleThreeVector> SimpleThreeVectorList;
+
+    /**
+     *  @brief SimpleMCPrimary class
+     */
+    class SimpleMCPrimary
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         */
+        SimpleMCPrimary();
+
+        /**
+         *  @brief  operator <
+         * 
+         *  @param  rhs object for comparison
+         * 
+         *  @return boolean
+         */
+        bool operator<(const SimpleMCPrimary &rhs) const;
+
+        int                                 m_id;                       ///< The unique identifier
+        int                                 m_pdgCode;                  ///< The pdg code
+        int                                 m_nMCHitsTotal;             ///< The total number of mc hits
+        int                                 m_nMCHitsU;                 ///< The number of u mc hits
+        int                                 m_nMCHitsV;                 ///< The number of v mc hits
+        int                                 m_nMCHitsW;                 ///< The number of w mc hits
+        float                               m_energy;                   ///< The energy
+        SimpleThreeVector                   m_momentum;                 ///< The momentum (presumably at the vertex)
+        SimpleThreeVector                   m_vertex;                   ///< The vertex
+        SimpleThreeVector                   m_endpoint;                 ///< The endpoint
+        int                                 m_nMatchedPfos;             ///< The number of matched pfos
+        const simb::MCParticle             *m_pAddress;                 ///< The address of the mc primary
+    };
+
+    typedef std::vector<SimpleMCPrimary> SimpleMCPrimaryList;
+
+    /**
+     *  @brief SimpleMatchedPfo class
+     */
+    class SimpleMatchedPfo
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         */
+        SimpleMatchedPfo();
+
+        int                                 m_id;                       ///< The unique identifier
+        int                                 m_parentId;                 ///< The unique identifier of the parent pfo (-1 if no parent set)
+        int                                 m_pdgCode;                  ///< The pdg code
+        int                                 m_nPfoHitsTotal;            ///< The total number of pfo hits
+        int                                 m_nPfoHitsU;                ///< The number of u pfo hits
+        int                                 m_nPfoHitsV;                ///< The number of v pfo hits
+        int                                 m_nPfoHitsW;                ///< The number of w pfo hits
+        int                                 m_nMatchedHitsTotal;        ///< The total number of matched hits
+        int                                 m_nMatchedHitsU;            ///< The number of u matched hits
+        int                                 m_nMatchedHitsV;            ///< The number of v matched hits
+        int                                 m_nMatchedHitsW;            ///< The number of w matched hits
+        SimpleThreeVector                   m_vertex;                   ///< The vertex (currently only filled for track pfos)
+        SimpleThreeVector                   m_endpoint;                 ///< The endpoint (currently only filled for track pfos)
+        SimpleThreeVector                   m_vertexDirection;          ///< The vertex direction (currently only filled for track pfos)
+        SimpleThreeVector                   m_endDirection;             ///< The endpoint direction (currently only filled for track pfos)
+        const recob::PFParticle            *m_pAddress;                 ///< The address of the pf primary
+    };
+
+    typedef std::vector<SimpleMatchedPfo> SimpleMatchedPfoList;
+
+    /**
+     * @brief   MatchingDetails class
+     */
+    class MatchingDetails
+    {
+    public:
+        /**
+         *  @brief  Default constructor
+         */
+        MatchingDetails();
+
+        int                                 m_matchedPrimaryId;         ///< The total number of occurences
+        int                                 m_nMatchedHits;             ///< The number of times the primary has 0 pfo matches
+        float                               m_completeness;             ///< The completeness of the match
+    };
+
+    typedef std::map<int, MatchingDetails> MatchingDetailsMap;
+    typedef std::map<SimpleMCPrimary, SimpleMatchedPfoList> MCPrimaryMatchingMap;
+
+    typedef std::map< art::Ptr<recob::PFParticle>, HitVector > PFParticleToMatchedHits;
+    typedef std::map< art::Ptr<simb::MCParticle>,  PFParticleToMatchedHits > MCParticleMatchingMap;
 
     /**
      *  @brief Performing matching between true and reconstructed particles
@@ -56,15 +169,137 @@ private:
      *  @param recoParticlesToHits the mapping from reconstructed particles to hits
      *  @param trueParticlesToHits the mapping from true particles to hits
      *  @param hitsToTrueParticles the mapping from hits to true particles
-     *  @param particleMatching the output matches between all reconstructed and true particles
+     *  @param mcParticleMatchingMap the output matches between all reconstructed and true particles
      */
-    void GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const MCParticlesToHits &trueParticlesToHits,
-        const HitsToMCParticles &hitsToTrueParticles, ParticleMatchingMap &particleMatchingMap) const;
+    void GetMCParticleMatchingMap(const PFParticlesToHits &recoParticlesToHits, const MCParticlesToHits &trueParticlesToHits,
+        const HitsToMCParticles &hitsToTrueParticles, MCParticleMatchingMap &mcParticleMatchingMap) const;
 
-     std::string  m_hitfinderLabel;         ///<
-     std::string  m_clusterLabel;           ///<
-     std::string  m_particleLabel;          ///<
-     std::string  m_geantModuleLabel;       ///<
+    /**
+     *  @brief  Extract details of each mc primary (ordered by number of true hits)
+     * 
+     *  @param  mcParticlesToHits the mc primary to hits map
+     *  @param  hitsToMCParticles the hits to mc particles map
+     *  @param  mcParticleMatchingMap the mc to particle to pf particle matching map (to record number of matched pf particles)
+     *  @param  simpleMCPrimaryList to receive the populated simple mc primary list
+     */
+    void GetSimpleMCPrimaryList(const MCParticlesToHits &mcParticlesToHits, const HitsToMCParticles &hitsToMCParticles,
+        const MCParticleMatchingMap &mcParticleMatchingMap, SimpleMCPrimaryList &simpleMCPrimaryList) const;
+
+    /**
+     *  @brief  Obtain a sorted list of matched pfos for each mc primary
+     * 
+     *  @param  simpleMCPrimaryList the simple mc primary list
+     *  @param  mcToFullPfoMatchingMap the mc to full pfo matching map
+     *  @param  pfoToHitListMap the pfo to hit list map
+     *  @param  mcPrimaryMatchingMap to receive the populated mc primary matching map
+     */
+    void GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &simpleMCPrimaryList, const MCParticleMatchingMap &mcParticleMatchingMap,
+        const PFParticlesToHits &pfParticlesToHits, MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
+
+    /**
+     *  @brief  Print all the raw matching output to screen
+     * 
+     *  @param  mcNeutrinoVector the mc neutrino vector
+     *  @param  recoNeutrinoVector the reco neutrino vector
+     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
+     */
+    void PrintAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
+        const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
+
+    /**
+     *  @brief  Write all the raw matching output to a tree
+     * 
+     *  @param  mcNeutrinoVector the mc neutrino vector
+     *  @param  recoNeutrinoVector the reco neutrino vector
+     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
+     */
+    void WriteAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
+        const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
+
+    /**
+     *  @brief  Apply a well-defined matching procedure to the comprehensive matches in the provided mc primary matching map
+     * 
+     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
+     *  @param  matchingDetailsMap the matching details map, to be populated
+     */
+    void PerformMatching(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, MatchingDetailsMap &matchingDetailsMap) const;
+
+    typedef std::set<int> IntSet;
+
+    /**
+     *  @brief  Get the strongest pfo match (most matched hits) between an available mc primary and an available pfo
+     * 
+     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
+     *  @param  usedMCIds the list of mc primary ids with an existing match
+     *  @param  usedPfoIds the list of pfo ids with an existing match
+     *  @param  matchingDetailsMap the matching details map, to be populated
+     */
+    bool GetStrongestPfoMatch(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, IntSet &usedMCIds, IntSet &usedPfoIds, MatchingDetailsMap &matchingDetailsMap) const;
+
+    /**
+     *  @brief  Get the best matches for any pfos left-over after the strong matching procedure
+     * 
+     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
+     *  @param  usedPfoIds the list of pfo ids with an existing match
+     *  @param  matchingDetailsMap the matching details map, to be populated
+     */
+    void GetRemainingPfoMatches(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, const IntSet &usedPfoIds, MatchingDetailsMap &matchingDetailsMap) const;
+
+    /**
+     *  @brief  Print the results of the matching procedure
+     * 
+     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
+     *  @param  matchingDetailsMap the matching details map
+     */
+    void PrintMatchingOutput(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, const MatchingDetailsMap &matchingDetailsMap) const;
+
+    /**
+     *  @brief  Count the number of hits, in a provided vector, of a specified view
+     *
+     *  @param  view the view
+     *  @param  hitVector the hit vector
+     *
+     *  @return the number of hits of the specified view
+     */
+    unsigned int CountHitsByType(const geo::View_t view, const HitVector &hitVector) const;
+
+    /**
+     *  @brief  Sort simple mc primaries by number of mc hits
+     * 
+     *  @param  lhs the left-hand side
+     *  @param  rhs the right-hand side
+     * 
+     *  @return boolean
+     */
+    static bool SortSimpleMCPrimaries(const SimpleMCPrimary &lhs, const SimpleMCPrimary &rhs);
+
+    /**
+     *  @brief  Sort simple matched pfos by number of matched hits
+     * 
+     *  @param  lhs the left-hand side
+     *  @param  rhs the right-hand side
+     * 
+     *  @return boolean
+     */
+    static bool SortSimpleMatchedPfos(const SimpleMatchedPfo &lhs, const SimpleMatchedPfo &rhs);
+
+    std::string         m_hitfinderLabel;           ///< The name/label of the hit producer module
+    std::string         m_clusterLabel;             ///< The name/label of the cluster producer module
+    std::string         m_particleLabel;            ///< The name/label of the particle producer module
+    std::string         m_geantModuleLabel;         ///< The name/label of the geant module
+
+    bool                m_printAllToScreen;         ///< Whether to print all/raw matching details to screen
+    bool                m_printMatchingToScreen;    ///< Whether to print matching output to screen
+    bool                m_writeToTree;              ///< Whether to write all/raw matching details to tree
+
+    int                 m_matchingMinPrimaryHits;   ///< The minimum number of mc primary hits used in matching scheme
+    int                 m_matchingMinSharedHits;    ///< The minimum number of shared hits used in matching scheme
+
+    int                 m_eventNumber;              ///< The event number
+    int                 m_runNumber;                ///< The run number
+    int                 m_subRunNumber;             ///< The sub run number
+
+    TTree              *m_pTTree;                   ///< Address of the root tree
 };
 
 DEFINE_ART_MODULE(PFParticleValidation)
@@ -133,13 +368,19 @@ void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
     m_clusterLabel = pset.get<std::string>("ClusterModule","pandora");
     m_hitfinderLabel = pset.get<std::string>("HitFinderModule","gaushit");
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
+    m_printAllToScreen = pset.get<bool>("PrintAllToScreen", true);
+    m_printMatchingToScreen = pset.get<bool>("PrintMatchingToScreen", true);
+    m_writeToTree = pset.get<bool>("WriteToTree", true);
+    m_matchingMinPrimaryHits = pset.get<int>("MatchingMinPrimaryHits", 15);
+    m_matchingMinSharedHits = pset.get<int>("MatchingMinSharedHits", 5);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleValidation::beginJob()
 {
-    mf::LogDebug("LArPandora") << " *** PFParticleValidation::beginJob() *** " << std::endl;
+    art::ServiceHandle<art::TFileService> tfs;
+    m_pTTree = tfs->make<TTree>("Validation", "PFParticleValidation");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,67 +393,657 @@ void PFParticleValidation::endJob()
 
 void PFParticleValidation::analyze(const art::Event &evt)
 {
-    // Collect Hits
+    m_eventNumber = evt.event();
+    m_runNumber = evt.run();
+    m_subRunNumber = evt.subRun();
+
+    // 
     HitVector hitVector;
     LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
 
-    // Collect PFParticles and match Reco Particles to Hits
-    PFParticlesToHits recoParticlesToHits;
-    HitsToPFParticles recoHitsToParticles;
-    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_clusterLabel, recoParticlesToHits, recoHitsToParticles, LArPandoraHelper::kAddDaughters);
+    PFParticlesToHits pfParticlesToHits;
+    HitsToPFParticles hitsToPfParticles;
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_clusterLabel, pfParticlesToHits, hitsToPfParticles, LArPandoraHelper::kAddDaughters);
 
-    // Collect MCParticles and match True Particles to Hits
-    MCParticlesToHits trueParticlesToHits;
-    HitsToMCParticles hitsToTrueParticles;
-    LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, hitsToTrueParticles, LArPandoraHelper::kAddDaughters);
+    MCParticlesToHits mcParticlesToHits;
+    HitsToMCParticles hitsToMCParticles;
+    LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
 
-    // Match Reco Particles to True Particles
-    ParticleMatchingMap particleMatchingMap;
-    this->GetRecoToTrueMatches(recoParticlesToHits, trueParticlesToHits, hitsToTrueParticles, particleMatchingMap);
+    MCParticleMatchingMap mcParticleMatchingMap;
+    this->GetMCParticleMatchingMap(pfParticlesToHits, mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap);
 
-    for (const ParticleMatchingMap::value_type &trueToRecoEntry : particleMatchingMap)
+    // 
+    SimpleMCPrimaryList simpleMCPrimaryList;
+    this->GetSimpleMCPrimaryList(mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap, simpleMCPrimaryList);
+
+    //
+    MCPrimaryMatchingMap mcPrimaryMatchingMap;
+    this->GetMCPrimaryMatchingMap(simpleMCPrimaryList, mcParticleMatchingMap, pfParticlesToHits, mcPrimaryMatchingMap);
+
+    //
+    MCTruthVector mcNeutrinoVector;
+    
+
+    PFParticleVector recoNeutrinoVector;
+    
+
+    // 
+    if (m_printAllToScreen)
+        this->PrintAllOutput(mcNeutrinoVector, recoNeutrinoVector, mcPrimaryMatchingMap);
+
+    if (m_writeToTree)
+        this->WriteAllOutput(mcNeutrinoVector, recoNeutrinoVector, mcPrimaryMatchingMap);
+
+    if (m_printMatchingToScreen)
     {
-        std::cout << "MCPDG " << trueToRecoEntry.first->PdgCode()
-                  << ", #MCHits " << trueParticlesToHits.at(trueToRecoEntry.first).size() <<  std::endl;
-
-        for (const RecoParticleToNMatchedHits::value_type &recoToNMatchedHitsEntry : trueToRecoEntry.second)
-        {
-            std::cout << "--RecoPDG " << recoToNMatchedHitsEntry.first->PdgCode()
-                      << ", #PfoHits " << recoParticlesToHits.at(recoToNMatchedHitsEntry.first).size()
-                      << ", #MatchedHits " << recoToNMatchedHitsEntry.second << std::endl;
-        }
+        MatchingDetailsMap matchingDetailsMap;
+        this->PerformMatching(mcPrimaryMatchingMap, matchingDetailsMap);
+        this->PrintMatchingOutput(mcPrimaryMatchingMap, matchingDetailsMap);
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleValidation::GetRecoToTrueMatches(const PFParticlesToHits &recoParticlesToHits, const MCParticlesToHits &trueParticlesToHits,
-    const HitsToMCParticles &hitsToTrueParticles, ParticleMatchingMap &particleMatchingMap) const
+void PFParticleValidation::GetMCParticleMatchingMap(const PFParticlesToHits &pfParticlesToHits, const MCParticlesToHits &mcParticlesToHits,
+    const HitsToMCParticles &hitsToMCParticles, MCParticleMatchingMap &mcParticleMatchingMap) const
 {
     // Create a placeholder entry for all mc particles with >0 hits
-    for (const MCParticlesToHits::value_type &trueParticleToHitsEntry : trueParticlesToHits)
+    for (const MCParticlesToHits::value_type &mcParticleToHitsEntry : mcParticlesToHits)
     {
-        if (!trueParticleToHitsEntry.second.empty())
-            (void) particleMatchingMap.insert(ParticleMatchingMap::value_type(trueParticleToHitsEntry.first, RecoParticleToNMatchedHits()));
+        if (!mcParticleToHitsEntry.second.empty())
+            (void) mcParticleMatchingMap.insert(MCParticleMatchingMap::value_type(mcParticleToHitsEntry.first, PFParticleToMatchedHits()));
     }
 
     // Store true to reco matching details
-    for (const PFParticlesToHits::value_type &recoParticleToHits : recoParticlesToHits)
+    for (const PFParticlesToHits::value_type &recoParticleToHits : pfParticlesToHits)
     {
         const art::Ptr<recob::PFParticle> pRecoParticle(recoParticleToHits.first);
         const HitVector &hitVector(recoParticleToHits.second);
 
         for (const art::Ptr<recob::Hit> pHit : hitVector)
         {
-            HitsToMCParticles::const_iterator trueParticleIter = hitsToTrueParticles.find(pHit);
+            HitsToMCParticles::const_iterator mcParticleIter = hitsToMCParticles.find(pHit);
 
-            if (hitsToTrueParticles.end() == trueParticleIter)
+            if (hitsToMCParticles.end() == mcParticleIter)
                 continue;
 
-            const art::Ptr<simb::MCParticle> pTrueParticle = trueParticleIter->second;    
-            particleMatchingMap[pTrueParticle][pRecoParticle]++;
+            const art::Ptr<simb::MCParticle> pTrueParticle = mcParticleIter->second;    
+            mcParticleMatchingMap[pTrueParticle][pRecoParticle].push_back(pHit);
         }
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::GetSimpleMCPrimaryList(const MCParticlesToHits &mcParticlesToHits, const HitsToMCParticles &hitsToMCParticles,
+    const MCParticleMatchingMap &mcParticleMatchingMap, SimpleMCPrimaryList &simpleMCPrimaryList) const
+{
+    for (const MCParticlesToHits::value_type &mapEntry : mcParticlesToHits)
+    {
+        const art::Ptr<simb::MCParticle> pMCPrimary(mapEntry.first);
+
+        //if (m_neutrinoInducedOnly && !LArMCParticleHelper::IsNeutrinoInduced(pMCPrimary)) // TODO
+        //    continue;
+
+        SimpleMCPrimary simpleMCPrimary;
+        // ATTN simpleMCPrimary.m_id assigned later, after sorting
+        simpleMCPrimary.m_pAddress = pMCPrimary.get();
+        simpleMCPrimary.m_pdgCode = pMCPrimary->PdgCode();
+        simpleMCPrimary.m_energy = pMCPrimary->E();
+        //simpleMCPrimary.m_momentum = pMCPrimary->GetMomentum(); // TODO
+        //simpleMCPrimary.m_vertex = pMCPrimary->GetVertex(); // TODO
+        //simpleMCPrimary.m_endpoint = pMCPrimary->GetEndpoint(); // TODO
+
+        MCParticlesToHits::const_iterator trueHitsIter = mcParticlesToHits.find(pMCPrimary);
+
+        if (mcParticlesToHits.end() != trueHitsIter)
+        {
+            const HitVector &hitVector(trueHitsIter->second);
+            simpleMCPrimary.m_nMCHitsTotal = hitVector.size();
+            simpleMCPrimary.m_nMCHitsU = this->CountHitsByType(geo::kU, hitVector);
+            simpleMCPrimary.m_nMCHitsV = this->CountHitsByType(geo::kV, hitVector);
+            simpleMCPrimary.m_nMCHitsW = this->CountHitsByType(geo::kW, hitVector);
+        }
+
+        MCParticleMatchingMap::const_iterator matchedPfoIter = mcParticleMatchingMap.find(pMCPrimary);
+
+        if (mcParticleMatchingMap.end() != matchedPfoIter)
+            simpleMCPrimary.m_nMatchedPfos = matchedPfoIter->second.size();
+
+        simpleMCPrimaryList.push_back(simpleMCPrimary);
+    }
+
+    std::sort(simpleMCPrimaryList.begin(), simpleMCPrimaryList.end(), PFParticleValidation::SortSimpleMCPrimaries);
+
+    int mcPrimaryId(0);
+    for (SimpleMCPrimary &simpleMCPrimary : simpleMCPrimaryList)
+        simpleMCPrimary.m_id = mcPrimaryId++;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &simpleMCPrimaryList, const MCParticleMatchingMap &mcParticleMatchingMap,
+    const PFParticlesToHits &pfParticlesToHits, MCPrimaryMatchingMap &mcPrimaryMatchingMap) const
+{
+    for (const SimpleMCPrimary &simpleMCPrimary : simpleMCPrimaryList)
+    {
+        // First loop over unordered list of matched pfos
+        SimpleMatchedPfoList simpleMatchedPfoList;
+        MCParticleMatchingMap::const_iterator matchedPfoIter = mcParticleMatchingMap.end();
+
+        for (MCParticleMatchingMap::const_iterator iter = mcParticleMatchingMap.begin(), iterEnd = mcParticleMatchingMap.end(); iter != iterEnd; ++iter) // Nasty workaround I // TODO
+        {
+            if (simpleMCPrimary.m_pAddress == iter->first.get())
+            {
+                matchedPfoIter = iter;
+                break;
+            };
+        }
+
+        if (mcParticleMatchingMap.end() != matchedPfoIter)
+        {
+            for (const PFParticleToMatchedHits::value_type contribution : matchedPfoIter->second)
+            {
+                const art::Ptr<recob::PFParticle> pMatchedPfo(contribution.first);
+                const HitVector &matchedHitVector(contribution.second);
+
+                SimpleMatchedPfo simpleMatchedPfo;
+                simpleMatchedPfo.m_pAddress = pMatchedPfo.get();
+                simpleMatchedPfo.m_id = pMatchedPfo->Self();
+
+                // ATTN Assume pfos have either zero or one parents. Ignore parent neutrino.
+                PFParticlesToHits::const_iterator parentPfoIter = pfParticlesToHits.end();
+
+                for (PFParticlesToHits::const_iterator iter = pfParticlesToHits.begin(), iterEnd = pfParticlesToHits.end(); iter != iterEnd; ++iter) // Nasty workaround II, bad place for another loop // TODO
+                {
+                    if (pMatchedPfo->Parent() == iter->first->Self())
+                    {
+                        parentPfoIter = iter;
+                        break;
+                    };
+                }
+
+                if ((pfParticlesToHits.end() != parentPfoIter) && !LArPandoraHelper::IsNeutrino(parentPfoIter->first))
+                    simpleMatchedPfo.m_parentId = parentPfoIter->first->Self();
+
+                simpleMatchedPfo.m_pdgCode = pMatchedPfo->PdgCode();
+                simpleMatchedPfo.m_nMatchedHitsTotal = matchedHitVector.size();
+                simpleMatchedPfo.m_nMatchedHitsU = this->CountHitsByType(geo::kU, matchedHitVector);
+                simpleMatchedPfo.m_nMatchedHitsV = this->CountHitsByType(geo::kV, matchedHitVector);
+                simpleMatchedPfo.m_nMatchedHitsW = this->CountHitsByType(geo::kW, matchedHitVector);
+
+                PFParticlesToHits::const_iterator pfoHitsIter = pfParticlesToHits.find(pMatchedPfo);
+
+                if (pfParticlesToHits.end() == pfoHitsIter)
+                    throw cet::exception("LArPandora") << " PFParticleValidation::analyze --- Presence of PFParticle in map mandatory.";
+
+                const HitVector &pfoHitVector(pfoHitsIter->second);
+
+                simpleMatchedPfo.m_nPfoHitsTotal = pfoHitVector.size();
+                simpleMatchedPfo.m_nPfoHitsU = this->CountHitsByType(geo::kU, pfoHitVector);
+                simpleMatchedPfo.m_nPfoHitsV = this->CountHitsByType(geo::kV, pfoHitVector);
+                simpleMatchedPfo.m_nPfoHitsW = this->CountHitsByType(geo::kW, pfoHitVector);
+
+                // ATTN vertex and end positions/directions currently only filled for track pfos
+                //const LArTrackPfo *const pLArTrackPfo = dynamic_cast<const LArTrackPfo*>(pMatchedPfo); //TODO
+
+//                if (pLArTrackPfo) // TODO
+//                {
+//                    simpleMatchedPfo.m_vertex = pLArTrackPfo->GetVertexPosition();
+//                    simpleMatchedPfo.m_endpoint = pLArTrackPfo->GetEndPosition();
+//                    simpleMatchedPfo.m_vertexDirection = pLArTrackPfo->GetVertexDirection();
+//                    simpleMatchedPfo.m_endDirection = pLArTrackPfo->GetEndDirection();
+//                }
+
+                simpleMatchedPfoList.push_back(simpleMatchedPfo);
+            }
+        }
+
+        // Store the ordered vectors of matched pfo details
+        std::sort(simpleMatchedPfoList.begin(), simpleMatchedPfoList.end(), PFParticleValidation::SortSimpleMatchedPfos);
+
+        if (!mcPrimaryMatchingMap.insert(MCPrimaryMatchingMap::value_type(simpleMCPrimary, simpleMatchedPfoList)).second)
+            throw cet::exception("LArPandora") << " PFParticleValidation::analyze --- Double-counting MC primaries.";
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::PrintAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
+    const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const
+{
+    std::cout << "---RAW-MATCHING-OUTPUT--------------------------------------------------------------------------" << std::endl;
+
+    for (const art::Ptr<simb::MCTruth> pMCNeutrino : mcNeutrinoVector)
+    {
+        std::cout << "MCNeutrino, PDG " << pMCNeutrino->GetNeutrino().Nu().PdgCode() << ", Nuance " << pMCNeutrino->GetNeutrino().InteractionType() << std::endl;
+    }
+
+    for (const art::Ptr<recob::PFParticle> pPfo : recoNeutrinoVector)
+    {
+        std::cout << "RecoNeutrino, PDG " << pPfo->PdgCode() << std::endl;
+
+        //if ((1 == pPfo->GetVertexList().size()) && (1 == mcNeutrinoVector.size())) // TODO
+        //    std::cout << "VtxOffset" << ((*(pPfo->GetVertexList().begin()))->GetPosition() - mcNeutrinoVector.front()->GetEndpoint()) << std::endl;
+    }
+
+    for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
+    {
+        const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
+
+        std::cout << std::endl << "Primary " << simpleMCPrimary.m_id << ", PDG " << simpleMCPrimary.m_pdgCode << ", nMCHits " << simpleMCPrimary.m_nMCHitsTotal
+            << " (" << simpleMCPrimary.m_nMCHitsU << ", " << simpleMCPrimary.m_nMCHitsV << ", " << simpleMCPrimary.m_nMCHitsW << ")" << std::endl;
+
+        for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
+        {
+            std::cout << "-MatchedPfo " << simpleMatchedPfo.m_id;
+
+            if (simpleMatchedPfo.m_parentId >= 0)
+                std::cout << ", ParentPfo " << simpleMatchedPfo.m_parentId;
+
+            std::cout << ", PDG " << simpleMatchedPfo.m_pdgCode << ", nMatchedHits " << simpleMatchedPfo.m_nMatchedHitsTotal
+                << " (" << simpleMatchedPfo.m_nMatchedHitsU << ", " << simpleMatchedPfo.m_nMatchedHitsV << ", " << simpleMatchedPfo.m_nMatchedHitsW << ")"
+                << ", nPfoHits " << simpleMatchedPfo.m_nPfoHitsTotal << " (" << simpleMatchedPfo.m_nPfoHitsU << ", " << simpleMatchedPfo.m_nPfoHitsV << ", "
+                << simpleMatchedPfo.m_nPfoHitsW << ")" << std::endl;
+        }
+    }
+
+    std::cout << "------------------------------------------------------------------------------------------------" << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::WriteAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
+    const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const
+{
+    int mcNeutrinoNuance(-1), mcNeutrinoPdg(0), recoNeutrinoPdg(0);
+    float mcNeutrinoVtxX(-1.f), mcNeutrinoVtxY(-1.f), mcNeutrinoVtxZ(-1.f);
+    float recoNeutrinoVtxX(-1.f), recoNeutrinoVtxY(-1.f), recoNeutrinoVtxZ(-1.f);
+    float mcNeutrinoE(0.f), mcNeutrinoPX(0.f), mcNeutrinoPY(0.f), mcNeutrinoPZ(0.f);
+    int nMCNeutrinos(mcNeutrinoVector.size()), nRecoNeutrinos(recoNeutrinoVector.size()), nMCPrimaries(mcPrimaryMatchingMap.size());
+    int runNumber(m_runNumber), eventNumber(m_eventNumber); // Working around ROOT const-correctness problems!
+
+    if (!mcNeutrinoVector.empty())
+    {
+        const art::Ptr<simb::MCTruth> pMCNeutrino = mcNeutrinoVector.front();
+
+        mcNeutrinoPdg = pMCNeutrino->GetNeutrino().Nu().PdgCode();
+        mcNeutrinoVtxX = -999.f;//pMCNeutrino->GetEndpoint().GetX(); // TODO
+        mcNeutrinoVtxY = -999.f;//pMCNeutrino->GetEndpoint().GetY(); // TODO
+        mcNeutrinoVtxZ = -999.f;//pMCNeutrino->GetEndpoint().GetZ(); // TODO
+
+        mcNeutrinoE = -999.f; // pMCNeutrino->GetNeutrino().Nu().E(); // TODO
+        mcNeutrinoPX = -999.f;//pMCNeutrino->GetNeutrino().Nu().PX(); // TODO
+        mcNeutrinoPY = -999.f;//pMCNeutrino->GetNeutrino().Nu().PY(); // TODO
+        mcNeutrinoPZ = -999.f;//pMCNeutrino->GetNeutrino().Nu().PZ(); // TODO
+
+        mcNeutrinoNuance = pMCNeutrino->GetNeutrino().InteractionType();
+    }
+
+    if (!recoNeutrinoVector.empty())
+    {
+        const art::Ptr<recob::PFParticle> pPfo = recoNeutrinoVector.front();
+
+        recoNeutrinoPdg = pPfo->PdgCode();
+        //const Vertex *const pVertex(pPfo->GetVertexList().empty() ? NULL : *(pPfo->GetVertexList().begin())); // TODO
+        recoNeutrinoVtxX = -999.f;//pVertex->GetPosition().GetX(); // TODO
+        recoNeutrinoVtxY = -999.f;//pVertex->GetPosition().GetY(); // TODO
+        recoNeutrinoVtxZ = -999.f;//pVertex->GetPosition().GetZ(); // TODO
+    }
+
+    m_pTTree->Branch("fileIdentifier", &runNumber, "fileIdentifier/I");
+    m_pTTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+    m_pTTree->Branch("nMCNeutrinos", &nMCNeutrinos, "nMCNeutrinos/I");
+    m_pTTree->Branch("mcNeutrinoPdg", &mcNeutrinoPdg, "mcNeutrinoPdg/I");
+    m_pTTree->Branch("mcNeutrinoNuance", &mcNeutrinoNuance, "mcNeutrinoNuance/I");
+    m_pTTree->Branch("nRecoNeutrinos", &nRecoNeutrinos, "nRecoNeutrinos/I");
+    m_pTTree->Branch("recoNeutrinoPdg", &recoNeutrinoPdg, "recoNeutrinoPdg/I");
+    m_pTTree->Branch("mcNeutrinoVtxX", &mcNeutrinoVtxX, "mcNeutrinoVtxX/F");
+    m_pTTree->Branch("mcNeutrinoVtxY", &mcNeutrinoVtxY, "mcNeutrinoVtxY/F");
+    m_pTTree->Branch("mcNeutrinoVtxZ", &mcNeutrinoVtxZ, "mcNeutrinoVtxZ/F");
+    m_pTTree->Branch("mcNeutrinoE", &mcNeutrinoE, "mcNeutrinoE/F");
+    m_pTTree->Branch("mcNeutrinoPX", &mcNeutrinoPX, "mcNeutrinoPX/F");
+    m_pTTree->Branch("mcNeutrinoPY", &mcNeutrinoPY, "mcNeutrinoPY/F");
+    m_pTTree->Branch("mcNeutrinoPZ", &mcNeutrinoPZ, "mcNeutrinoPZ/F");
+    m_pTTree->Branch("recoNeutrinoVtxX", &recoNeutrinoVtxX, "recoNeutrinoVtxX/F");
+    m_pTTree->Branch("recoNeutrinoVtxY", &recoNeutrinoVtxY, "recoNeutrinoVtxY/F");
+    m_pTTree->Branch("recoNeutrinoVtxZ", &recoNeutrinoVtxZ, "recoNeutrinoVtxZ/F");
+    m_pTTree->Branch("nMCPrimaries", &nMCPrimaries, "nMCPrimaries/I");
+
+    for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
+    {
+        SimpleMCPrimary &simpleMCPrimary(const_cast<SimpleMCPrimary &>(mapValue.first)); // Working around ROOT const-correctness problems!
+
+        m_pTTree->Branch("mcPrimaryId", &simpleMCPrimary.m_id, "mcPrimaryId/I");
+        m_pTTree->Branch("mcPrimaryPdg", &simpleMCPrimary.m_pdgCode, "mcPrimaryPdg/I");
+        m_pTTree->Branch("mcPrimaryNHitsTotal", &simpleMCPrimary.m_nMCHitsTotal, "mcPrimaryNHitsTotal/I");
+        m_pTTree->Branch("mcPrimaryNHitsU", &simpleMCPrimary.m_nMCHitsU, "mcPrimaryNHitsU/I");
+        m_pTTree->Branch("mcPrimaryNHitsV", &simpleMCPrimary.m_nMCHitsV, "mcPrimaryNHitsV/I");
+        m_pTTree->Branch("mcPrimaryNHitsW", &simpleMCPrimary.m_nMCHitsW, "mcPrimaryNHitsW/I");
+
+        m_pTTree->Branch("mcPrimaryE", &simpleMCPrimary.m_energy, "mcPrimaryE/F");
+        m_pTTree->Branch("mcPrimaryPX", &simpleMCPrimary.m_momentum.m_x, "mcPrimaryPX/F");
+        m_pTTree->Branch("mcPrimaryPY", &simpleMCPrimary.m_momentum.m_y, "mcPrimaryPY/F");
+        m_pTTree->Branch("mcPrimaryPZ", &simpleMCPrimary.m_momentum.m_z, "mcPrimaryPZ/F");
+        m_pTTree->Branch("mcPrimaryVtxX", &simpleMCPrimary.m_vertex.m_x, "mcPrimaryVtxX/F");
+        m_pTTree->Branch("mcPrimaryVtxY", &simpleMCPrimary.m_vertex.m_y, "mcPrimaryVtxY/F");
+        m_pTTree->Branch("mcPrimaryVtxZ", &simpleMCPrimary.m_vertex.m_z, "mcPrimaryVtxZ/F");
+        m_pTTree->Branch("mcPrimaryEndX", &simpleMCPrimary.m_endpoint.m_x, "mcPrimaryEndX/F");
+        m_pTTree->Branch("mcPrimaryEndY", &simpleMCPrimary.m_endpoint.m_y, "mcPrimaryEndY/F");
+        m_pTTree->Branch("mcPrimaryEndZ", &simpleMCPrimary.m_endpoint.m_z, "mcPrimaryEndZ/F");
+
+        const int mcPrimaryNMatchedPfos(mapValue.second.size());
+         m_pTTree->Branch("mcPrimaryNMatchedPfos", mcPrimaryNMatchedPfos, "mcPrimaryNMatchedPfos/I");
+
+        std::vector<int> pfoIdVector, pfoParentIdVector, pfoPdgVector, pfoNHitsTotalVector, pfoNHitsUVector, pfoNHitsVVector, pfoNHitsWVector,
+            pfoNMatchedHitsTotalVector, pfoNMatchedHitsUVector, pfoNMatchedHitsVVector, pfoNMatchedHitsWVector;
+        std::vector<float> pfoVtxXVector, pfoVtxYVector, pfoVtxZVector, pfoEndXVector, pfoEndYVector, pfoEndZVector,
+            pfoVtxDirXVector, pfoVtxDirYVector, pfoVtxDirZVector, pfoEndDirXVector, pfoEndDirYVector, pfoEndDirZVector;
+
+        for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
+        {
+            pfoIdVector.push_back(simpleMatchedPfo.m_id);
+            pfoParentIdVector.push_back(simpleMatchedPfo.m_parentId);
+            pfoPdgVector.push_back(simpleMatchedPfo.m_pdgCode);
+            pfoNHitsTotalVector.push_back(simpleMatchedPfo.m_nPfoHitsTotal);
+            pfoNHitsUVector.push_back(simpleMatchedPfo.m_nPfoHitsU);
+            pfoNHitsVVector.push_back(simpleMatchedPfo.m_nPfoHitsV);
+            pfoNHitsWVector.push_back(simpleMatchedPfo.m_nPfoHitsW);
+            pfoNMatchedHitsTotalVector.push_back(simpleMatchedPfo.m_nMatchedHitsTotal);
+            pfoNMatchedHitsUVector.push_back(simpleMatchedPfo.m_nMatchedHitsU);
+            pfoNMatchedHitsVVector.push_back(simpleMatchedPfo.m_nMatchedHitsV);
+            pfoNMatchedHitsWVector.push_back(simpleMatchedPfo.m_nMatchedHitsW);
+
+            pfoVtxXVector.push_back(simpleMatchedPfo.m_vertex.m_x);
+            pfoVtxYVector.push_back(simpleMatchedPfo.m_vertex.m_y);
+            pfoVtxZVector.push_back(simpleMatchedPfo.m_vertex.m_z);
+            pfoEndXVector.push_back(simpleMatchedPfo.m_endpoint.m_x);
+            pfoEndYVector.push_back(simpleMatchedPfo.m_endpoint.m_y);
+            pfoEndZVector.push_back(simpleMatchedPfo.m_endpoint.m_z);
+            pfoVtxDirXVector.push_back(simpleMatchedPfo.m_vertexDirection.m_x);
+            pfoVtxDirYVector.push_back(simpleMatchedPfo.m_vertexDirection.m_y);
+            pfoVtxDirZVector.push_back(simpleMatchedPfo.m_vertexDirection.m_z);
+            pfoEndDirXVector.push_back(simpleMatchedPfo.m_endDirection.m_x);
+            pfoEndDirYVector.push_back(simpleMatchedPfo.m_endDirection.m_y);
+            pfoEndDirZVector.push_back(simpleMatchedPfo.m_endDirection.m_z);
+        }
+
+        m_pTTree->Branch("matchedPfoId", &pfoIdVector);
+        m_pTTree->Branch("matchedPfoParentId", &pfoParentIdVector);
+        m_pTTree->Branch("matchedPfoPdg", &pfoPdgVector);
+        m_pTTree->Branch("matchedPfoNHitsTotal", &pfoNHitsTotalVector);
+        m_pTTree->Branch("matchedPfoNHitsU", &pfoNHitsUVector);
+        m_pTTree->Branch("matchedPfoNHitsV", &pfoNHitsVVector);
+        m_pTTree->Branch("matchedPfoNHitsW", &pfoNHitsWVector);
+        m_pTTree->Branch("matchedPfoNMatchedHitsTotal", &pfoNMatchedHitsTotalVector);
+        m_pTTree->Branch("matchedPfoNMatchedHitsU", &pfoNMatchedHitsUVector);
+        m_pTTree->Branch("matchedPfoNMatchedHitsV", &pfoNMatchedHitsVVector);
+        m_pTTree->Branch("matchedPfoNMatchedHitsW", &pfoNMatchedHitsWVector);
+
+        m_pTTree->Branch("matchedPfoVtxX", &pfoVtxXVector);
+        m_pTTree->Branch("matchedPfoVtxY", &pfoVtxYVector);
+        m_pTTree->Branch("matchedPfoVtxZ", &pfoVtxZVector);
+        m_pTTree->Branch("matchedPfoEndX", &pfoEndXVector);
+        m_pTTree->Branch("matchedPfoEndY", &pfoEndYVector);
+        m_pTTree->Branch("matchedPfoEndZ", &pfoEndZVector);
+        m_pTTree->Branch("matchedPfoVtxDirX", &pfoVtxDirXVector);
+        m_pTTree->Branch("matchedPfoVtxDirY", &pfoVtxDirYVector);
+        m_pTTree->Branch("matchedPfoVtxDirZ", &pfoVtxDirZVector);
+        m_pTTree->Branch("matchedPfoEndDirX", &pfoEndDirXVector);
+        m_pTTree->Branch("matchedPfoEndDirY", &pfoEndDirYVector);
+        m_pTTree->Branch("matchedPfoEndDirZ", &pfoEndDirZVector);
+
+        m_pTTree->Fill();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::PerformMatching(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, MatchingDetailsMap &matchingDetailsMap) const
+{
+    // Get best matches, one-by-one, until no more strong matches possible
+    IntSet usedMCIds, usedPfoIds;
+    while (GetStrongestPfoMatch(mcPrimaryMatchingMap, usedMCIds, usedPfoIds, matchingDetailsMap)) {}
+
+    // Assign any remaining pfos to primaries, based on number of matched hits
+    GetRemainingPfoMatches(mcPrimaryMatchingMap, usedPfoIds, matchingDetailsMap);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::GetStrongestPfoMatch(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, IntSet &usedMCIds, IntSet &usedPfoIds,
+    MatchingDetailsMap &matchingDetailsMap) const
+{
+    int bestPfoMatchId(-1);
+    MatchingDetails bestMatchingDetails;
+
+    for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
+    {
+        const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
+
+        if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+            continue;
+
+        if (usedMCIds.count(simpleMCPrimary.m_id))
+            continue;
+
+        for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
+        {
+            if (usedPfoIds.count(simpleMatchedPfo.m_id) || (simpleMatchedPfo.m_nMatchedHitsTotal < m_matchingMinSharedHits))
+                continue;
+
+            if (simpleMatchedPfo.m_nMatchedHitsTotal > bestMatchingDetails.m_nMatchedHits)
+            {
+                bestPfoMatchId = simpleMatchedPfo.m_id;
+                bestMatchingDetails.m_matchedPrimaryId = simpleMCPrimary.m_id;
+                bestMatchingDetails.m_nMatchedHits = simpleMatchedPfo.m_nMatchedHitsTotal;
+                bestMatchingDetails.m_completeness = static_cast<float>(simpleMatchedPfo.m_nMatchedHitsTotal) / static_cast<float>(simpleMCPrimary.m_nMCHitsTotal);
+            }
+        }
+    }
+
+    if (bestPfoMatchId > -1)
+    {
+        matchingDetailsMap[bestPfoMatchId] = bestMatchingDetails;
+        usedMCIds.insert(bestMatchingDetails.m_matchedPrimaryId);
+        usedPfoIds.insert(bestPfoMatchId);
+        return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::GetRemainingPfoMatches(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, const IntSet &usedPfoIds,
+    MatchingDetailsMap &matchingDetailsMap) const
+{
+    for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
+    {
+        const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
+
+        if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+            continue;
+
+        for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
+        {
+            if (usedPfoIds.count(simpleMatchedPfo.m_id) || (simpleMatchedPfo.m_nMatchedHitsTotal < m_matchingMinSharedHits))
+                continue;
+
+            MatchingDetails &matchingDetails(matchingDetailsMap[simpleMatchedPfo.m_id]);
+
+            if (simpleMatchedPfo.m_nMatchedHitsTotal > matchingDetails.m_nMatchedHits)
+            {
+                matchingDetails.m_matchedPrimaryId = simpleMCPrimary.m_id;
+                matchingDetails.m_nMatchedHits = simpleMatchedPfo.m_nMatchedHitsTotal;
+                matchingDetails.m_completeness = static_cast<float>(simpleMatchedPfo.m_nMatchedHitsTotal) / static_cast<float>(simpleMCPrimary.m_nMCHitsTotal);
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::PrintMatchingOutput(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, const MatchingDetailsMap &matchingDetailsMap) const
+{
+    std::cout << "---PROCESSED-MATCHING-OUTPUT--------------------------------------------------------------------" << std::endl;
+    bool isCorrect(true), isCalculable(false);
+
+    for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
+    {
+        const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
+
+        if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+            continue;
+
+        std::cout << std::endl << "Primary " << simpleMCPrimary.m_id << ", PDG " << simpleMCPrimary.m_pdgCode << ", nMCHits " << simpleMCPrimary.m_nMCHitsTotal
+            << " (" << simpleMCPrimary.m_nMCHitsU << ", " << simpleMCPrimary.m_nMCHitsV << ", " << simpleMCPrimary.m_nMCHitsW << ")" << std::endl;
+
+        isCalculable = true;
+        unsigned int nMatches(0);
+
+        for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
+        {
+            if (matchingDetailsMap.count(simpleMatchedPfo.m_id) && (simpleMCPrimary.m_id == matchingDetailsMap.at(simpleMatchedPfo.m_id).m_matchedPrimaryId))
+            {
+                std::cout << "-MatchedPfo " << simpleMatchedPfo.m_id;
+                ++nMatches;
+
+                if (simpleMatchedPfo.m_parentId >= 0)
+                    std::cout << ", ParentPfo " << simpleMatchedPfo.m_parentId;
+
+                std::cout << ", PDG " << simpleMatchedPfo.m_pdgCode << ", nMatchedHits " << simpleMatchedPfo.m_nMatchedHitsTotal
+                    << " (" << simpleMatchedPfo.m_nMatchedHitsU << ", " << simpleMatchedPfo.m_nMatchedHitsV << ", " << simpleMatchedPfo.m_nMatchedHitsW << ")"
+                    << ", nPfoHits " << simpleMatchedPfo.m_nPfoHitsTotal << " (" << simpleMatchedPfo.m_nPfoHitsU << ", " << simpleMatchedPfo.m_nPfoHitsV << ", "
+                    << simpleMatchedPfo.m_nPfoHitsW << ")" << std::endl;
+            }
+        }
+
+        if (1 != nMatches)
+            isCorrect = false;
+    }
+
+    std::cout << std::endl << "Is correct? " << (isCorrect && isCalculable) << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------------" << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int PFParticleValidation::CountHitsByType(const geo::View_t view, const HitVector &hitVector) const
+{
+    unsigned int nHitsOfSpecifiedType(0);
+
+    for (const art::Ptr<recob::Hit> pHit : hitVector)
+    {
+        if (view == pHit->View())
+            ++nHitsOfSpecifiedType;
+    }
+
+    return nHitsOfSpecifiedType;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::SortSimpleMCPrimaries(const SimpleMCPrimary &lhs, const SimpleMCPrimary &rhs)
+{
+    if (lhs.m_nMCHitsTotal != rhs.m_nMCHitsTotal)
+        return (lhs.m_nMCHitsTotal > rhs.m_nMCHitsTotal);
+
+    return (lhs.m_energy > rhs.m_energy);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::SortSimpleMatchedPfos(const SimpleMatchedPfo &lhs, const SimpleMatchedPfo &rhs)
+{
+    if (lhs.m_nMatchedHitsTotal != rhs.m_nMatchedHitsTotal)
+        return (lhs.m_nMatchedHitsTotal > rhs.m_nMatchedHitsTotal);
+
+    if (lhs.m_nPfoHitsTotal != rhs.m_nPfoHitsTotal)
+        return (lhs.m_nPfoHitsTotal > rhs.m_nPfoHitsTotal);
+
+    return (lhs.m_id < rhs.m_id);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleValidation::SimpleThreeVector::SimpleThreeVector() :
+    m_x(-std::numeric_limits<float>::max()),
+    m_y(-std::numeric_limits<float>::max()),
+    m_z(-std::numeric_limits<float>::max())
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleValidation::SimpleThreeVector::SimpleThreeVector(const float x, const float y, const float z) :
+    m_x(x),
+    m_y(y),
+    m_z(z)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleValidation::SimpleMCPrimary::SimpleMCPrimary() :
+    m_id(-1),
+    m_pdgCode(0),
+    m_nMCHitsTotal(0),  
+    m_nMCHitsU(0),
+    m_nMCHitsV(0),
+    m_nMCHitsW(0),
+    m_energy(0.f),
+    m_momentum(0.f, 0.f, 0.f),
+    m_vertex(-1.f, -1.f, -1.f),
+    m_endpoint(-1.f, -1.f, -1.f),
+    m_nMatchedPfos(0),
+    m_pAddress(nullptr)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::SimpleMCPrimary::operator<(const SimpleMCPrimary &rhs) const
+{
+    if (this == &rhs)
+        return false;
+
+    return (m_id < rhs.m_id);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleValidation::SimpleMatchedPfo::SimpleMatchedPfo() :
+    m_id(-1),
+    m_parentId(-1),
+    m_pdgCode(0), 
+    m_nPfoHitsTotal(0),
+    m_nPfoHitsU(0),
+    m_nPfoHitsV(0),
+    m_nPfoHitsW(0),
+    m_nMatchedHitsTotal(0),
+    m_nMatchedHitsU(0),
+    m_nMatchedHitsV(0),
+    m_nMatchedHitsW(0),
+    m_vertex(0.f, 0.f, 0.f),
+    m_endpoint(0.f, 0.f, 0.f),
+    m_vertexDirection(0.f, 0.f, 0.f),
+    m_endDirection(0.f, 0.f, 0.f),
+    m_pAddress(nullptr)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PFParticleValidation::MatchingDetails::MatchingDetails() :
+    m_matchedPrimaryId(-1),
+    m_nMatchedHits(0),
+    m_completeness(0.f)
+{
 }
 
 } //namespace lar_pandora
