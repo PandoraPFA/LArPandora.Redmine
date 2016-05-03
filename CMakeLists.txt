@@ -1,8 +1,8 @@
 # ======================================================================
-#  larana main build file
+#  larpandora main build file
 #
 #  cd .../path/to/build/directory
-#  source .../path/to/larana/ups/setup_for_development <-d|-p>
+#  source .../path/to/larpandora/ups/setup_for_development <-d|-p>
 #  cmake [-DCMAKE_INSTALL_PREFIX=/install/path]
 #        -DCMAKE_BUILD_TYPE=$CETPKG_TYPE
 #        $CETPKG_SOURCE
@@ -60,7 +60,20 @@ include(BuildPlugins)
 
 cet_find_library( PANDORASDK NAMES PandoraSDK PATHS ENV PANDORA_LIB )
 cet_find_library( PANDORAMONITORING NAMES PandoraMonitoring PATHS ENV PANDORA_LIB )
-cet_find_library( LARCONTENT NAMES LArPandoraContent PATHS ENV LARPANDORACONTENT_LIB )
+
+# find larpandoracontent headers if building at the same time
+set( check_include_dir $ENV{LARPANDORACONTENT_INC} )
+if( ${check_include_dir} )
+  #message(STATUS "larpandora: have LARPANDORACONTENT_INC: $ENV{LARPANDORACONTENT_INC}")
+else()
+  message(STATUS "larpandora: checking for MRB_BUILDDIR")
+  set( mrb_build_dir $ENV{MRB_BUILDDIR} )
+  if( mrb_build_dir )
+    include_directories( ${mrb_build_dir}/larpandoracontent/include )
+  else()
+    message(FATAL_ERROR "LARPANDORACONTENT_INC is undefined, please setup larpandoracontent")
+  endif()
+endif()
 
 # source
 add_subdirectory(larpandora)
