@@ -62,9 +62,8 @@ cet_find_library( PANDORASDK NAMES PandoraSDK PATHS ENV PANDORA_LIB )
 cet_find_library( PANDORAMONITORING NAMES PandoraMonitoring PATHS ENV PANDORA_LIB )
 
 # find larpandoracontent headers if building at the same time
-set( check_include_dir $ENV{LARPANDORACONTENT_INC} )
-if( ${check_include_dir} )
-  #message(STATUS "larpandora: have LARPANDORACONTENT_INC: $ENV{LARPANDORACONTENT_INC}")
+if( LARPANDORACONTENT_INC )
+  #message(STATUS "larpandora: found LARPANDORACONTENT_INC: $ENV{LARPANDORACONTENT_INC}")
 else()
   message(STATUS "larpandora: checking for MRB_BUILDDIR")
   set( mrb_build_dir $ENV{MRB_BUILDDIR} )
