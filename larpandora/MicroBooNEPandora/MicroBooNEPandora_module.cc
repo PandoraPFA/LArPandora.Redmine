@@ -7,7 +7,7 @@
 
 #include "art/Framework/Core/ModuleMacros.h"
 
-#include "LArStitching/MultiPandoraApi.h"
+#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandora.h"
 
@@ -54,7 +54,7 @@ DEFINE_ART_MODULE(MicroBooNEPandora)
 
 #include "Api/PandoraApi.h"
 
-#include "LArContent.h"
+#include "larpandoracontent/LArContent.h"
 
 #include "larpandora/MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h"
 #include "larpandora/MicroBooNEPandora/MicroBooNETransformationPlugin.h"

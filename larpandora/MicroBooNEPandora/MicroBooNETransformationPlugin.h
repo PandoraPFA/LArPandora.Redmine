@@ -9,7 +9,7 @@
 #define MICRO_BOONE_TRANSFORMATION_PLUGIN_H 1
 
 // Pandora includes
-#include "LArPlugins/LArRotationalTransformationPlugin.h"
+#include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
 
 namespace lar_pandora
 {

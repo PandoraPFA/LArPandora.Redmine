@@ -8,7 +8,7 @@
 
 #include "art/Framework/Core/ModuleMacros.h"
 
-#include "LArStitching/MultiPandoraApi.h"
+#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
@@ -86,9 +86,9 @@ DEFINE_ART_MODULE(StandardPandora)
 
 #include "Api/PandoraApi.h"
 
-#include "LArContent.h"
-#include "LArPlugins/LArPseudoLayerPlugin.h"
-#include "LArPlugins/LArRotationalTransformationPlugin.h"
+#include "larpandoracontent/LArContent.h"
+#include "larpandoracontent/LArPlugins/LArPseudoLayerPlugin.h"
+#include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
 
 namespace lar_pandora
 {

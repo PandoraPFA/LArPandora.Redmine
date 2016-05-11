@@ -8,7 +8,7 @@ gdmldir product_dir scripts
 #
 product         version
 larreco         v05_11_00
-larpandoracontent         v02_07_02
+larpandoracontent         v02_07_03
 gcc             v4_9_3
 
 cetbuildtools	v4_19_04	-	only_for_build
@@ -17,9 +17,9 @@ end_product_list
   
 # e9  - with gcc 4.9.3 and -std=c++14
 qualifier	larreco		larpandoracontent	gcc	notes
-e9:debug	e9:debug	e9:debug		-nq-
-e9:opt		e9:opt		e9:opt			-nq-
-e9:prof		e9:prof		e9:prof			-nq-
+e9:debug	e9:debug	e9:r5:debug		-nq-
+e9:opt		e9:opt		e9:r5:opt		-nq-
+e9:prof		e9:prof		e9:r5:prof		-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

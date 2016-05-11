@@ -21,7 +21,7 @@
 #include "lardata/RecoBase/Vertex.h"
 #include "lardata/RecoBase/PFParticle.h"
 
-#include "LArObjects/LArTrackPfo.h"
+#include "larpandoracontent/LArObjects/LArTrackPfo.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
