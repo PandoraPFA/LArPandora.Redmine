@@ -19,7 +19,7 @@ art_make(
                         larreco_ClusterFinder
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
-                        ${LARCONTENT}
+                        LArPandoraContent
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

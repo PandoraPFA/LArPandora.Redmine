@@ -11,7 +11,7 @@
 #include "lardata/RecoBase/Track.h"
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
-#include "LArObjects/LArTrackPfo.h"
+#include "larpandoracontent/LArObjects/LArTrackPfo.h"
 
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"

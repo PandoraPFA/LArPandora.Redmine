@@ -21,9 +21,9 @@
 
 #include "Api/PandoraApi.h"
 
-#include "LArContent.h"
-#include "LArHelpers/LArPfoHelper.h"
-#include "LArStitching/MultiPandoraApi.h"
+#include "larpandoracontent/LArContent.h"
+#include "larpandoracontent/LArHelpers/LArPfoHelper.h"
+#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
