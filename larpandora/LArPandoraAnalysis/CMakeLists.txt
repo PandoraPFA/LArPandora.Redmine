@@ -5,9 +5,9 @@ art_make(
           
           LIB_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        larsim_Simulation
-                        lardata_RawData
-                        lardata_RecoBase
+                        larsim_Simulation larsimobj_Simulation
+                        lardataobj_RawData
+                        lardataobj_RecoBase
                         lardata_Utilities
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}

@@ -10,9 +10,9 @@ art_make(
           
           LIB_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        larsim_Simulation
-                        lardata_RawData
-                        lardata_RecoBase
+                        larsim_Simulation larsimobj_Simulation
+                        lardataobj_RawData
+                        lardataobj_RecoBase
                         lardata_Utilities
                         larreco_RecoAlg_ClusterRecoUtil
                         larreco_RecoAlg

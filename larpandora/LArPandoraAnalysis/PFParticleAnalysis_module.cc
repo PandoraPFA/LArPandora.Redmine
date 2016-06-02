@@ -129,10 +129,10 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Seed.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Seed.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Vertex.h"
 
 #include <iostream>
 

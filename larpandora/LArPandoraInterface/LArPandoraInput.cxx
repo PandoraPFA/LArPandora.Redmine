@@ -10,12 +10,12 @@
 #include "larcore/Geometry/WireGeo.h"
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Seed.h"
-#include "lardata/RecoBase/Shower.h"
-#include "lardata/RecoBase/SpacePoint.h"
-#include "lardata/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Seed.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Vertex.h"
 
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"

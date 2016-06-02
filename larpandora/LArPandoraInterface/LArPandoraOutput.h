@@ -7,8 +7,8 @@
 #ifndef LAR_PANDORA_OUTPUT_H
 #define LAR_PANDORA_OUTPUT_H
 
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Track.h"
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
 #include "larpandoracontent/LArObjects/LArTrackPfo.h"

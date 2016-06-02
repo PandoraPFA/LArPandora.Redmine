@@ -94,7 +94,7 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "canvas/Persistency/Common/FindOneP.h"
 
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Track.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 

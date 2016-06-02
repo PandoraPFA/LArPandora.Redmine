@@ -10,7 +10,7 @@ art_make(
           
           LIB_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        larsim_Simulation
+                        larsim_Simulation larsimobj_Simulation
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         LArPandoraContent

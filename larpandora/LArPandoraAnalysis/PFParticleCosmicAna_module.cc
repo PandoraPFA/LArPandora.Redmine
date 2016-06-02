@@ -163,10 +163,10 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/FindOneP.h"
 
-#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Track.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 
 #include <iostream>
