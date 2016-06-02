@@ -8,8 +8,8 @@
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Core/FindManyP.h"
-#include "art/Framework/Core/FindOneP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
+#include "canvas/Persistency/Common/FindOneP.h"
 
 #include "lardata/AnalysisBase/CosmicTag.h"
 #include "larcore/Geometry/Geometry.h"
@@ -22,9 +22,9 @@
 #include "lardata/RecoBase/Track.h"
 #include "lardata/RecoBase/Vertex.h"
 #include "lardata/RecoBase/Wire.h"
-#include "SimulationBase/MCParticle.h"
-#include "SimulationBase/MCTruth.h"
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 #include "Objects/ParticleFlowObject.h"

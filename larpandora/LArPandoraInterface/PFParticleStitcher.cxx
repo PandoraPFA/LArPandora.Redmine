@@ -12,7 +12,7 @@
 #include "larcore/Geometry/CryostatGeo.h"
 #include "larcore/Geometry/TPCGeo.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 #include "lardata/RecoBase/Hit.h"
 #include "lardata/RecoBase/Cluster.h"
 #include "lardata/RecoBase/SpacePoint.h"

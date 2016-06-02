@@ -8,7 +8,7 @@
 #include "larcore/Geometry/TPCGeo.h"
 #include "larcore/Geometry/PlaneGeo.h"
 #include "larcore/Geometry/WireGeo.h"
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 
 #include "lardata/RecoBase/Hit.h"
 #include "lardata/RecoBase/PFParticle.h"
@@ -20,7 +20,7 @@
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
-#include "SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"

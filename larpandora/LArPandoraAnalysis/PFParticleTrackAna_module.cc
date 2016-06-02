@@ -90,8 +90,8 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "art/Framework/Core/FindManyP.h"
-#include "art/Framework/Core/FindOneP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
+#include "canvas/Persistency/Common/FindOneP.h"
 
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/RecoBase/Track.h"
