@@ -11,7 +11,7 @@ larreco         v06_00_00_rc4
 larpandoracontent         v06_00_00_rc4
 gcc             v4_9_3a
 
-cetbuildtools	v5_02_04	-	only_for_build
+cetbuildtools	v5_02_02	-	only_for_build
 end_product_list
 
   
