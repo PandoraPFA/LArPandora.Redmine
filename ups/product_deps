@@ -11,15 +11,15 @@ larreco         v06_00_00_rc4
 larpandoracontent         v06_00_00_rc4
 gcc             v4_9_3a
 
-cetbuildtools	v5_02_02	-	only_for_build
+cetbuildtools	v5_02_04	-	only_for_build
 end_product_list
 
   
 # e10  - with gcc 4.9.3 and -std=c++14
 qualifier	larreco		larpandoracontent	gcc	notes
-e10:debug	e10:debug	e10:r6:debug		-nq-
-e10:opt		e10:opt		e10:r6:opt		-nq-
-e10:prof	e10:prof	e10:r6:prof		-nq-
+e10:debug	e10:debug	e10:debug		-nq-
+e10:opt		e10:opt		e10:opt			-nq-
+e10:prof	e10:prof	e10:prof		-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
