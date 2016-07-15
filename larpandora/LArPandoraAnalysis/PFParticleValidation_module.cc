@@ -9,9 +9,6 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-// ROOT includes
-#include "TTree.h"
-
 // Local LArPandora includes
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
@@ -290,16 +287,9 @@ private:
 
     bool                m_printAllToScreen;         ///< Whether to print all/raw matching details to screen
     bool                m_printMatchingToScreen;    ///< Whether to print matching output to screen
-    bool                m_writeToTree;              ///< Whether to write all/raw matching details to tree
 
     int                 m_matchingMinPrimaryHits;   ///< The minimum number of mc primary hits used in matching scheme
     int                 m_matchingMinSharedHits;    ///< The minimum number of shared hits used in matching scheme
-
-    int                 m_eventNumber;              ///< The event number
-    int                 m_runNumber;                ///< The run number
-    int                 m_subRunNumber;             ///< The sub run number
-
-    TTree              *m_pTTree;                   ///< Address of the root tree
 };
 
 DEFINE_ART_MODULE(PFParticleValidation)
@@ -370,7 +360,6 @@ void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
     m_printAllToScreen = pset.get<bool>("PrintAllToScreen", true);
     m_printMatchingToScreen = pset.get<bool>("PrintMatchingToScreen", true);
-    m_writeToTree = pset.get<bool>("WriteToTree", true);
     m_matchingMinPrimaryHits = pset.get<int>("MatchingMinPrimaryHits", 15);
     m_matchingMinSharedHits = pset.get<int>("MatchingMinSharedHits", 5);
 }
@@ -379,8 +368,6 @@ void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
 
 void PFParticleValidation::beginJob()
 {
-    art::ServiceHandle<art::TFileService> tfs;
-    m_pTTree = tfs->make<TTree>("Validation", "PFParticleValidation");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -393,10 +380,6 @@ void PFParticleValidation::endJob()
 
 void PFParticleValidation::analyze(const art::Event &evt)
 {
-    m_eventNumber = evt.event();
-    m_runNumber = evt.run();
-    m_subRunNumber = evt.subRun();
-
     // 
     HitVector hitVector;
     LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
@@ -423,16 +406,11 @@ void PFParticleValidation::analyze(const art::Event &evt)
     //
     MCTruthVector mcNeutrinoVector;
     
-
     PFParticleVector recoNeutrinoVector;
-    
 
     // 
     if (m_printAllToScreen)
         this->PrintAllOutput(mcNeutrinoVector, recoNeutrinoVector, mcPrimaryMatchingMap);
-
-    if (m_writeToTree)
-        this->WriteAllOutput(mcNeutrinoVector, recoNeutrinoVector, mcPrimaryMatchingMap);
 
     if (m_printMatchingToScreen)
     {
@@ -649,152 +627,6 @@ void PFParticleValidation::PrintAllOutput(const MCTruthVector &mcNeutrinoVector,
     }
 
     std::cout << "------------------------------------------------------------------------------------------------" << std::endl;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PFParticleValidation::WriteAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
-    const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const
-{
-    int mcNeutrinoNuance(-1), mcNeutrinoPdg(0), recoNeutrinoPdg(0);
-    float mcNeutrinoVtxX(-1.f), mcNeutrinoVtxY(-1.f), mcNeutrinoVtxZ(-1.f);
-    float recoNeutrinoVtxX(-1.f), recoNeutrinoVtxY(-1.f), recoNeutrinoVtxZ(-1.f);
-    float mcNeutrinoE(0.f), mcNeutrinoPX(0.f), mcNeutrinoPY(0.f), mcNeutrinoPZ(0.f);
-    int nMCNeutrinos(mcNeutrinoVector.size()), nRecoNeutrinos(recoNeutrinoVector.size()), nMCPrimaries(mcPrimaryMatchingMap.size());
-    int runNumber(m_runNumber), eventNumber(m_eventNumber); // Working around ROOT const-correctness problems!
-
-    if (!mcNeutrinoVector.empty())
-    {
-        const art::Ptr<simb::MCTruth> pMCNeutrino = mcNeutrinoVector.front();
-
-        mcNeutrinoPdg = pMCNeutrino->GetNeutrino().Nu().PdgCode();
-        mcNeutrinoVtxX = -999.f;//pMCNeutrino->GetEndpoint().GetX(); // TODO
-        mcNeutrinoVtxY = -999.f;//pMCNeutrino->GetEndpoint().GetY(); // TODO
-        mcNeutrinoVtxZ = -999.f;//pMCNeutrino->GetEndpoint().GetZ(); // TODO
-
-        mcNeutrinoE = -999.f; // pMCNeutrino->GetNeutrino().Nu().E(); // TODO
-        mcNeutrinoPX = -999.f;//pMCNeutrino->GetNeutrino().Nu().PX(); // TODO
-        mcNeutrinoPY = -999.f;//pMCNeutrino->GetNeutrino().Nu().PY(); // TODO
-        mcNeutrinoPZ = -999.f;//pMCNeutrino->GetNeutrino().Nu().PZ(); // TODO
-
-        mcNeutrinoNuance = pMCNeutrino->GetNeutrino().InteractionType();
-    }
-
-    if (!recoNeutrinoVector.empty())
-    {
-        const art::Ptr<recob::PFParticle> pPfo = recoNeutrinoVector.front();
-
-        recoNeutrinoPdg = pPfo->PdgCode();
-        //const Vertex *const pVertex(pPfo->GetVertexList().empty() ? NULL : *(pPfo->GetVertexList().begin())); // TODO
-        recoNeutrinoVtxX = -999.f;//pVertex->GetPosition().GetX(); // TODO
-        recoNeutrinoVtxY = -999.f;//pVertex->GetPosition().GetY(); // TODO
-        recoNeutrinoVtxZ = -999.f;//pVertex->GetPosition().GetZ(); // TODO
-    }
-
-    m_pTTree->Branch("fileIdentifier", &runNumber, "fileIdentifier/I");
-    m_pTTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
-    m_pTTree->Branch("nMCNeutrinos", &nMCNeutrinos, "nMCNeutrinos/I");
-    m_pTTree->Branch("mcNeutrinoPdg", &mcNeutrinoPdg, "mcNeutrinoPdg/I");
-    m_pTTree->Branch("mcNeutrinoNuance", &mcNeutrinoNuance, "mcNeutrinoNuance/I");
-    m_pTTree->Branch("nRecoNeutrinos", &nRecoNeutrinos, "nRecoNeutrinos/I");
-    m_pTTree->Branch("recoNeutrinoPdg", &recoNeutrinoPdg, "recoNeutrinoPdg/I");
-    m_pTTree->Branch("mcNeutrinoVtxX", &mcNeutrinoVtxX, "mcNeutrinoVtxX/F");
-    m_pTTree->Branch("mcNeutrinoVtxY", &mcNeutrinoVtxY, "mcNeutrinoVtxY/F");
-    m_pTTree->Branch("mcNeutrinoVtxZ", &mcNeutrinoVtxZ, "mcNeutrinoVtxZ/F");
-    m_pTTree->Branch("mcNeutrinoE", &mcNeutrinoE, "mcNeutrinoE/F");
-    m_pTTree->Branch("mcNeutrinoPX", &mcNeutrinoPX, "mcNeutrinoPX/F");
-    m_pTTree->Branch("mcNeutrinoPY", &mcNeutrinoPY, "mcNeutrinoPY/F");
-    m_pTTree->Branch("mcNeutrinoPZ", &mcNeutrinoPZ, "mcNeutrinoPZ/F");
-    m_pTTree->Branch("recoNeutrinoVtxX", &recoNeutrinoVtxX, "recoNeutrinoVtxX/F");
-    m_pTTree->Branch("recoNeutrinoVtxY", &recoNeutrinoVtxY, "recoNeutrinoVtxY/F");
-    m_pTTree->Branch("recoNeutrinoVtxZ", &recoNeutrinoVtxZ, "recoNeutrinoVtxZ/F");
-    m_pTTree->Branch("nMCPrimaries", &nMCPrimaries, "nMCPrimaries/I");
-
-    for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
-    {
-        SimpleMCPrimary &simpleMCPrimary(const_cast<SimpleMCPrimary &>(mapValue.first)); // Working around ROOT const-correctness problems!
-
-        m_pTTree->Branch("mcPrimaryId", &simpleMCPrimary.m_id, "mcPrimaryId/I");
-        m_pTTree->Branch("mcPrimaryPdg", &simpleMCPrimary.m_pdgCode, "mcPrimaryPdg/I");
-        m_pTTree->Branch("mcPrimaryNHitsTotal", &simpleMCPrimary.m_nMCHitsTotal, "mcPrimaryNHitsTotal/I");
-        m_pTTree->Branch("mcPrimaryNHitsU", &simpleMCPrimary.m_nMCHitsU, "mcPrimaryNHitsU/I");
-        m_pTTree->Branch("mcPrimaryNHitsV", &simpleMCPrimary.m_nMCHitsV, "mcPrimaryNHitsV/I");
-        m_pTTree->Branch("mcPrimaryNHitsW", &simpleMCPrimary.m_nMCHitsW, "mcPrimaryNHitsW/I");
-
-        m_pTTree->Branch("mcPrimaryE", &simpleMCPrimary.m_energy, "mcPrimaryE/F");
-        m_pTTree->Branch("mcPrimaryPX", &simpleMCPrimary.m_momentum.m_x, "mcPrimaryPX/F");
-        m_pTTree->Branch("mcPrimaryPY", &simpleMCPrimary.m_momentum.m_y, "mcPrimaryPY/F");
-        m_pTTree->Branch("mcPrimaryPZ", &simpleMCPrimary.m_momentum.m_z, "mcPrimaryPZ/F");
-        m_pTTree->Branch("mcPrimaryVtxX", &simpleMCPrimary.m_vertex.m_x, "mcPrimaryVtxX/F");
-        m_pTTree->Branch("mcPrimaryVtxY", &simpleMCPrimary.m_vertex.m_y, "mcPrimaryVtxY/F");
-        m_pTTree->Branch("mcPrimaryVtxZ", &simpleMCPrimary.m_vertex.m_z, "mcPrimaryVtxZ/F");
-        m_pTTree->Branch("mcPrimaryEndX", &simpleMCPrimary.m_endpoint.m_x, "mcPrimaryEndX/F");
-        m_pTTree->Branch("mcPrimaryEndY", &simpleMCPrimary.m_endpoint.m_y, "mcPrimaryEndY/F");
-        m_pTTree->Branch("mcPrimaryEndZ", &simpleMCPrimary.m_endpoint.m_z, "mcPrimaryEndZ/F");
-
-        const int mcPrimaryNMatchedPfos(mapValue.second.size());
-         m_pTTree->Branch("mcPrimaryNMatchedPfos", mcPrimaryNMatchedPfos, "mcPrimaryNMatchedPfos/I");
-
-        std::vector<int> pfoIdVector, pfoParentIdVector, pfoPdgVector, pfoNHitsTotalVector, pfoNHitsUVector, pfoNHitsVVector, pfoNHitsWVector,
-            pfoNMatchedHitsTotalVector, pfoNMatchedHitsUVector, pfoNMatchedHitsVVector, pfoNMatchedHitsWVector;
-        std::vector<float> pfoVtxXVector, pfoVtxYVector, pfoVtxZVector, pfoEndXVector, pfoEndYVector, pfoEndZVector,
-            pfoVtxDirXVector, pfoVtxDirYVector, pfoVtxDirZVector, pfoEndDirXVector, pfoEndDirYVector, pfoEndDirZVector;
-
-        for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
-        {
-            pfoIdVector.push_back(simpleMatchedPfo.m_id);
-            pfoParentIdVector.push_back(simpleMatchedPfo.m_parentId);
-            pfoPdgVector.push_back(simpleMatchedPfo.m_pdgCode);
-            pfoNHitsTotalVector.push_back(simpleMatchedPfo.m_nPfoHitsTotal);
-            pfoNHitsUVector.push_back(simpleMatchedPfo.m_nPfoHitsU);
-            pfoNHitsVVector.push_back(simpleMatchedPfo.m_nPfoHitsV);
-            pfoNHitsWVector.push_back(simpleMatchedPfo.m_nPfoHitsW);
-            pfoNMatchedHitsTotalVector.push_back(simpleMatchedPfo.m_nMatchedHitsTotal);
-            pfoNMatchedHitsUVector.push_back(simpleMatchedPfo.m_nMatchedHitsU);
-            pfoNMatchedHitsVVector.push_back(simpleMatchedPfo.m_nMatchedHitsV);
-            pfoNMatchedHitsWVector.push_back(simpleMatchedPfo.m_nMatchedHitsW);
-
-            pfoVtxXVector.push_back(simpleMatchedPfo.m_vertex.m_x);
-            pfoVtxYVector.push_back(simpleMatchedPfo.m_vertex.m_y);
-            pfoVtxZVector.push_back(simpleMatchedPfo.m_vertex.m_z);
-            pfoEndXVector.push_back(simpleMatchedPfo.m_endpoint.m_x);
-            pfoEndYVector.push_back(simpleMatchedPfo.m_endpoint.m_y);
-            pfoEndZVector.push_back(simpleMatchedPfo.m_endpoint.m_z);
-            pfoVtxDirXVector.push_back(simpleMatchedPfo.m_vertexDirection.m_x);
-            pfoVtxDirYVector.push_back(simpleMatchedPfo.m_vertexDirection.m_y);
-            pfoVtxDirZVector.push_back(simpleMatchedPfo.m_vertexDirection.m_z);
-            pfoEndDirXVector.push_back(simpleMatchedPfo.m_endDirection.m_x);
-            pfoEndDirYVector.push_back(simpleMatchedPfo.m_endDirection.m_y);
-            pfoEndDirZVector.push_back(simpleMatchedPfo.m_endDirection.m_z);
-        }
-
-        m_pTTree->Branch("matchedPfoId", &pfoIdVector);
-        m_pTTree->Branch("matchedPfoParentId", &pfoParentIdVector);
-        m_pTTree->Branch("matchedPfoPdg", &pfoPdgVector);
-        m_pTTree->Branch("matchedPfoNHitsTotal", &pfoNHitsTotalVector);
-        m_pTTree->Branch("matchedPfoNHitsU", &pfoNHitsUVector);
-        m_pTTree->Branch("matchedPfoNHitsV", &pfoNHitsVVector);
-        m_pTTree->Branch("matchedPfoNHitsW", &pfoNHitsWVector);
-        m_pTTree->Branch("matchedPfoNMatchedHitsTotal", &pfoNMatchedHitsTotalVector);
-        m_pTTree->Branch("matchedPfoNMatchedHitsU", &pfoNMatchedHitsUVector);
-        m_pTTree->Branch("matchedPfoNMatchedHitsV", &pfoNMatchedHitsVVector);
-        m_pTTree->Branch("matchedPfoNMatchedHitsW", &pfoNMatchedHitsWVector);
-
-        m_pTTree->Branch("matchedPfoVtxX", &pfoVtxXVector);
-        m_pTTree->Branch("matchedPfoVtxY", &pfoVtxYVector);
-        m_pTTree->Branch("matchedPfoVtxZ", &pfoVtxZVector);
-        m_pTTree->Branch("matchedPfoEndX", &pfoEndXVector);
-        m_pTTree->Branch("matchedPfoEndY", &pfoEndYVector);
-        m_pTTree->Branch("matchedPfoEndZ", &pfoEndZVector);
-        m_pTTree->Branch("matchedPfoVtxDirX", &pfoVtxDirXVector);
-        m_pTTree->Branch("matchedPfoVtxDirY", &pfoVtxDirYVector);
-        m_pTTree->Branch("matchedPfoVtxDirZ", &pfoVtxDirZVector);
-        m_pTTree->Branch("matchedPfoEndDirX", &pfoEndDirXVector);
-        m_pTTree->Branch("matchedPfoEndDirY", &pfoEndDirYVector);
-        m_pTTree->Branch("matchedPfoEndDirZ", &pfoEndDirZVector);
-
-        m_pTTree->Fill();
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
