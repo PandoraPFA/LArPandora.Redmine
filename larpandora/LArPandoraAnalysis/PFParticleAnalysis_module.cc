@@ -439,15 +439,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 for (SeedVector::const_iterator sIter1 = seedVector.begin(), sIterEnd1 = seedVector.end(); sIter1 != sIterEnd1; ++sIter1)
                 {
                     SeedsToHits::const_iterator sIter2 = seedsToHits.find(*sIter1);
-                    const HitVector &hitVector = sIter2->second;
-
-                    if (hitVector.empty() && m_printDebug)
-                        std::cout << " Warning: Found seed without an associated hit " << std::endl;
-
-                    if (hitVector.size() !=1 && m_printDebug)
-                        std::cout << " Warning: Found seed with more than one associated hit " << std::endl;
-
-                    m_seedhits += hitVector.size();
+                    if (seedsToHits.end() != sIter2)
+                        ++m_seedhits;
                 }
             }
         }

@@ -52,7 +52,7 @@ typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PF
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
 typedef std::map< art::Ptr<recob::Track>,      HitVector >                    TracksToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
-typedef std::map< art::Ptr<recob::Seed>,       HitVector >                    SeedsToHits;
+typedef std::map< art::Ptr<recob::Seed>,       art::Ptr<recob::Hit> >         SeedsToHits;
 typedef std::map< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit> >         SpacePointsToHits;
 typedef std::map< art::Ptr<simb::MCTruth>,     MCParticleVector >             MCTruthToMCParticles;
 typedef std::map< art::Ptr<simb::MCTruth>,     HitVector >                    MCTruthToHits;

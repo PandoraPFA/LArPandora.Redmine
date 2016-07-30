@@ -383,18 +383,21 @@ void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string lab
         mf::LogDebug("LArPandora") << "  Found: " << theSeeds->size() << " Seeds " << std::endl;
     }
 
-    art::FindManyP<recob::Hit> theHitAssns(theSeeds, evt, label);
+    art::FindOneP<recob::Hit> theHitAssns(theSeeds, evt, label);
+
+    if (!theHitAssns.isValid())
+    {
+        std::cout << "  Failed to find seed associations... " << std::endl;
+        mf::LogDebug("LArPandora") << "  Failed to find seed associations... " << std::endl;
+        return;
+    }
+     
     for (unsigned int i = 0; i < theSeeds->size(); ++i)
     {
         const art::Ptr<recob::Seed> seed(theSeeds, i);
         seedVector.push_back(seed);
-
-        const std::vector< art::Ptr<recob::Hit> > hits = theHitAssns.at(i);
-        for (unsigned int j=0; j<hits.size(); ++j)
-        {
-            const art::Ptr<recob::Hit> hit = hits.at(j);
-            seedsToHits[seed].push_back(hit);
-        }
+        const art::Ptr<recob::Hit> hit = theHitAssns.at(i);
+        seedsToHits[seed] = hit;
     }
 }
 
