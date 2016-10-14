@@ -26,6 +26,8 @@
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
+#include "Api/PandoraApi.h"
+
 #include "larpandoracontent/LArHelpers/LArGeometryHelper.h"
 #include "larpandoracontent/LArObjects/LArMCParticle.h"
 #include "larpandoracontent/LArStitching/MultiPandoraApi.h"

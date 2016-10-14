@@ -22,6 +22,8 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Vertex.h"
 
+#include "Api/PandoraApi.h"
+
 #include "Objects/ParticleFlowObject.h"
 #include "Objects/TrackState.h"
 #include "Objects/Vertex.h"
@@ -61,7 +63,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     {
         const pandora::PfoList *pPfoList(nullptr);
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPandora, pPfoList));
-        concatenatedPfoList.insert(pPfoList->begin(), pPfoList->end());
+        concatenatedPfoList.insert(concatenatedPfoList.end(), pPfoList->begin(), pPfoList->end());
     }
 
     if (concatenatedPfoList.empty())
@@ -201,7 +203,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             if (pandora::TPC_3D != pCaloHit3D->GetHitType())
                 throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
 
-            const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentCaloHitAddress());
+            const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentAddress());
 
             HitVector hitVector;
             const art::Ptr<recob::Hit> hit = LArPandoraOutput::GetHit(idToHitMap, pCaloHit2D);
@@ -224,8 +226,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 continue;
 
             pandora::CaloHitList pandoraHitList2D;
-            pCluster->GetOrderedCaloHitList().GetCaloHitList(pandoraHitList2D);
-            pandoraHitList2D.insert(pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
+            pCluster->GetOrderedCaloHitList().FillCaloHitList(pandoraHitList2D);
+            pandoraHitList2D.insert(pandoraHitList2D.end(), pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
 
             pandora::CaloHitVector pandoraHitVector2D(pandoraHitList2D.begin(), pandoraHitList2D.end());
             std::sort(pandoraHitVector2D.begin(), pandoraHitVector2D.end(), lar_content::LArClusterHelper::SortHitsByPosition);
@@ -517,7 +519,7 @@ recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora:
 
 art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit)
 {
-    const void *const pHitAddress(pCaloHit->GetParentCaloHitAddress());
+    const void *const pHitAddress(pCaloHit->GetParentAddress());
     const intptr_t hitID_temp((intptr_t)(pHitAddress));
     const int hitID((int)(hitID_temp));
 
