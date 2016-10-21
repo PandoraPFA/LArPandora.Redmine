@@ -14,7 +14,7 @@ process_name: LArPandora
 services:
 {
   message:      @local::standard_debug
-  user:         @local::microboone_services
+                @table::microboone_services
 }
 
 

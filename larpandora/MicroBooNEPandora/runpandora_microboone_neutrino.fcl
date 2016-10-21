@@ -12,7 +12,7 @@ services:
 {
   TFileService: { fileName: "ntuple.root" }
   message:      @local::standard_debug
-  user:         @local::microboone_services
+                @table::microboone_services
 }
 
 ### Define input file format
