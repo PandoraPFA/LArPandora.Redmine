@@ -13,7 +13,7 @@
     <algorithm type = "LArStitching">
         <StitchingTools>
             <tool type = "LArStitchingObjectCreation"/>
-            <tool type = "LArStitchingPfoMerging"/>
+            <!--tool type = "LArStitchingPfoMerging"/-->
         </StitchingTools>
         <NewPfoListName>RecreatedPfos</NewPfoListName>
         <NewVertexListName>RecreatedVertices</NewVertexListName>
