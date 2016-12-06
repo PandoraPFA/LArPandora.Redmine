@@ -124,12 +124,12 @@ private:
     typedef std::map< art::Ptr<simb::MCParticle>,  PFParticleToMatchedHits > MCParticleMatchingMap;
 
     /**
-     *  @brief Performing matching between true and reconstructed particles
+     *  @brief  Performing matching between true and reconstructed particles
      *
-     *  @param recoParticlesToHits the mapping from reconstructed particles to hits
-     *  @param trueParticlesToHits the mapping from true particles to hits
-     *  @param hitsToTrueParticles the mapping from hits to true particles
-     *  @param mcParticleMatchingMap the output matches between all reconstructed and true particles
+     *  @param  recoParticlesToHits the mapping from reconstructed particles to hits
+     *  @param  trueParticlesToHits the mapping from true particles to hits
+     *  @param  hitsToTrueParticles the mapping from hits to true particles
+     *  @param  mcParticleMatchingMap the output matches between all reconstructed and true particles
      */
     void GetMCParticleMatchingMap(const PFParticlesToHits &recoParticlesToHits, const MCParticlesToHits &trueParticlesToHits,
         const HitsToMCParticles &hitsToTrueParticles, MCParticleMatchingMap &mcParticleMatchingMap) const;
@@ -137,12 +137,13 @@ private:
     /**
      *  @brief  Extract details of each mc primary (ordered by number of true hits)
      * 
+     *  @param  evt the event
      *  @param  mcParticlesToHits the mc primary to hits map
      *  @param  hitsToMCParticles the hits to mc particles map
      *  @param  mcParticleMatchingMap the mc to particle to pf particle matching map (to record number of matched pf particles)
      *  @param  simpleMCPrimaryList to receive the populated simple mc primary list
      */
-    void GetSimpleMCPrimaryList(const MCParticlesToHits &mcParticlesToHits, const HitsToMCParticles &hitsToMCParticles,
+    void GetSimpleMCPrimaryList(const art::Event &evt, const MCParticlesToHits &mcParticlesToHits, const HitsToMCParticles &hitsToMCParticles,
         const MCParticleMatchingMap &mcParticleMatchingMap, SimpleMCPrimaryList &simpleMCPrimaryList) const;
 
     /**
@@ -155,6 +156,16 @@ private:
      */
     void GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &simpleMCPrimaryList, const MCParticleMatchingMap &mcParticleMatchingMap,
         const PFParticlesToHits &pfParticlesToHits, MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
+
+    /**
+     *  @brief  Whether a mc particle is neutrino induced
+     * 
+     *  @param  pMCParticle address of the mc particle
+     *  @param  artMCParticlesToMCTruth the mapping from mc particles to mc truth
+     * 
+     *  @return boolean
+     */
+    bool IsNeutrinoInduced(const art::Ptr<simb::MCParticle> pMCParticle, const MCParticlesToMCTruth &artMCParticlesToMCTruth) const;
 
     /**
      *  @brief  Obtain a vector of mc truth
@@ -287,6 +298,8 @@ private:
     bool                m_printAllToScreen;             ///< Whether to print all/raw matching details to screen
     bool                m_printMatchingToScreen;        ///< Whether to print matching output to screen
 
+    bool                m_neutrinoInducedOnly;          ///< Whether to consider only mc particles that were neutrino induced
+
     int                 m_matchingMinPrimaryHits;       ///< The minimum number of good mc primary hits used in matching scheme
     int                 m_matchingMinHitsForGoodView;   ///< The minimum number of good mc primary hits in given view to declare view to be good
     int                 m_matchingMinPrimaryGoodViews;  ///< The minimum number of good views for a mc primary
@@ -356,6 +369,7 @@ void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
     m_printAllToScreen = pset.get<bool>("PrintAllToScreen", true);
     m_printMatchingToScreen = pset.get<bool>("PrintMatchingToScreen", true);
+    m_neutrinoInducedOnly = pset.get<bool>("NeutrinoInducedOnly", true);
     m_matchingMinPrimaryHits = pset.get<int>("MatchingMinPrimaryHits", 15);
     m_matchingMinHitsForGoodView = pset.get<int>("MatchingMinHitsForGoodView", 5);
     m_matchingMinPrimaryGoodViews = pset.get<int>("MatchingMinPrimaryGoodViews", 2);
@@ -396,7 +410,7 @@ void PFParticleValidation::analyze(const art::Event &evt)
     this->GetMCParticleMatchingMap(pfParticlesToHits, mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap);
 
     SimpleMCPrimaryList simpleMCPrimaryList;
-    this->GetSimpleMCPrimaryList(mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap, simpleMCPrimaryList);
+    this->GetSimpleMCPrimaryList(evt, mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap, simpleMCPrimaryList);
 
     MCPrimaryMatchingMap mcPrimaryMatchingMap;
     this->GetMCPrimaryMatchingMap(simpleMCPrimaryList, mcParticleMatchingMap, pfParticlesToHits, mcPrimaryMatchingMap);
@@ -451,15 +465,19 @@ void PFParticleValidation::GetMCParticleMatchingMap(const PFParticlesToHits &pfP
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleValidation::GetSimpleMCPrimaryList(const MCParticlesToHits &mcParticlesToHits, const HitsToMCParticles &hitsToMCParticles,
-    const MCParticleMatchingMap &mcParticleMatchingMap, SimpleMCPrimaryList &simpleMCPrimaryList) const
+void PFParticleValidation::GetSimpleMCPrimaryList(const art::Event &evt, const MCParticlesToHits &mcParticlesToHits,
+    const HitsToMCParticles &hitsToMCParticles, const MCParticleMatchingMap &mcParticleMatchingMap, SimpleMCPrimaryList &simpleMCPrimaryList) const
 {
+    MCTruthToMCParticles artMCTruthToMCParticles;
+    MCParticlesToMCTruth artMCParticlesToMCTruth;
+    LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
+
     for (const MCParticlesToHits::value_type &mapEntry : mcParticlesToHits)
     {
         const art::Ptr<simb::MCParticle> pMCPrimary(mapEntry.first);
 
-        //if (m_neutrinoInducedOnly && !LArMCParticleHelper::IsNeutrinoInduced(pMCPrimary)) // TODO
-        //    continue;
+        if (m_neutrinoInducedOnly && !this->IsNeutrinoInduced(pMCPrimary, artMCParticlesToMCTruth))
+            continue;
 
         SimpleMCPrimary simpleMCPrimary;
         // ATTN simpleMCPrimary.m_id assigned later, after sorting
@@ -495,6 +513,19 @@ void PFParticleValidation::GetSimpleMCPrimaryList(const MCParticlesToHits &mcPar
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool PFParticleValidation::IsNeutrinoInduced(const art::Ptr<simb::MCParticle> pMCParticle, const MCParticlesToMCTruth &artMCParticlesToMCTruth) const
+{
+    MCParticlesToMCTruth::const_iterator iter = artMCParticlesToMCTruth.find(pMCParticle);
+
+    if (artMCParticlesToMCTruth.end() == iter)
+        return false;
+
+    const art::Ptr<simb::MCTruth> pMCTruth = iter->second;
+    return (simb::kBeamNeutrino == pMCTruth->Origin());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &simpleMCPrimaryList, const MCParticleMatchingMap &mcParticleMatchingMap,
     const PFParticlesToHits &pfParticlesToHits, MCPrimaryMatchingMap &mcPrimaryMatchingMap) const
 {
@@ -516,7 +547,7 @@ void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &si
 
         if (mcParticleMatchingMap.end() != matchedPfoIter)
         {
-            for (const PFParticleToMatchedHits::value_type contribution : matchedPfoIter->second)
+            for (const PFParticleToMatchedHits::value_type &contribution : matchedPfoIter->second)
             {
                 const art::Ptr<recob::PFParticle> pMatchedPfo(contribution.first);
                 const HitVector &matchedHitVector(contribution.second);
