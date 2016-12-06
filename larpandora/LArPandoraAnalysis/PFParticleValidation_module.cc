@@ -5,14 +5,11 @@
  *
  */
 
-// Framework Includes
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
-// Local LArPandora includes
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
-// std includes
 #include <string>
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,33 +42,6 @@ public:
 
 private:
     /**
-     *  @brief  SimpleThreeVector class, (re-invent wheel, but do so in order to cleans-up tree writing later on)
-     */
-    class SimpleThreeVector
-    {
-    public:
-        /**
-         *  @brief  Default constructor
-         */
-        SimpleThreeVector();
-
-        /**
-         *  @brief  Constructor
-         * 
-         *  @param  x the x value
-         *  @param  y the y value
-         *  @param  z the z value
-         */
-        SimpleThreeVector(const float x, const float y, const float z);
-
-        float   m_x;    ///< The x value
-        float   m_y;    ///< The y value
-        float   m_z;    ///< The z value
-    };
-
-    typedef std::vector<SimpleThreeVector> SimpleThreeVectorList;
-
-    /**
      *  @brief SimpleMCPrimary class
      */
     class SimpleMCPrimary
@@ -98,9 +68,6 @@ private:
         int                                 m_nMCHitsV;                 ///< The number of v mc hits
         int                                 m_nMCHitsW;                 ///< The number of w mc hits
         float                               m_energy;                   ///< The energy
-        SimpleThreeVector                   m_momentum;                 ///< The momentum (presumably at the vertex)
-        SimpleThreeVector                   m_vertex;                   ///< The vertex
-        SimpleThreeVector                   m_endpoint;                 ///< The endpoint
         int                                 m_nMatchedPfos;             ///< The number of matched pfos
         const simb::MCParticle             *m_pAddress;                 ///< The address of the mc primary
     };
@@ -129,10 +96,6 @@ private:
         int                                 m_nMatchedHitsU;            ///< The number of u matched hits
         int                                 m_nMatchedHitsV;            ///< The number of v matched hits
         int                                 m_nMatchedHitsW;            ///< The number of w matched hits
-        SimpleThreeVector                   m_vertex;                   ///< The vertex (currently only filled for track pfos)
-        SimpleThreeVector                   m_endpoint;                 ///< The endpoint (currently only filled for track pfos)
-        SimpleThreeVector                   m_vertexDirection;          ///< The vertex direction (currently only filled for track pfos)
-        SimpleThreeVector                   m_endDirection;             ///< The endpoint direction (currently only filled for track pfos)
         const recob::PFParticle            *m_pAddress;                 ///< The address of the pf primary
     };
 
@@ -204,16 +167,6 @@ private:
         const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
 
     /**
-     *  @brief  Write all the raw matching output to a tree
-     * 
-     *  @param  mcNeutrinoVector the mc neutrino vector
-     *  @param  recoNeutrinoVector the reco neutrino vector
-     *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
-     */
-    void WriteAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
-        const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
-
-    /**
      *  @brief  Apply a well-defined matching procedure to the comprehensive matches in the provided mc primary matching map
      * 
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
@@ -251,6 +204,36 @@ private:
     void PrintMatchingOutput(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, const MatchingDetailsMap &matchingDetailsMap) const;
 
     /**
+     *  @brief  Whether a provided mc primary passes selection, based on number of "good" hits
+     * 
+     *  @param  simpleMCPrimary the simple mc primary
+     * 
+     *  @return boolean
+     */
+    bool IsGoodMCPrimary(const SimpleMCPrimary &simpleMCPrimary) const;
+
+    /**
+     *  @brief  Whether a provided mc primary has a match, of any quality (use simple matched pfo list and information in matching details map)
+     * 
+     *  @param  simpleMCPrimary the simple mc primary
+     *  @param  simpleMatchedPfoList the list of simple matched pfos
+     *  @param  matchingDetailsMap the matching details map
+     * 
+     *  @return boolean
+     */
+    bool HasMatch(const SimpleMCPrimary &simpleMCPrimary, const SimpleMatchedPfoList &simpleMatchedPfoList, const MatchingDetailsMap &matchingDetailsMap) const;
+
+    /**
+     *  @brief  Whether a provided mc primary and pfo are deemed to be a good match
+     * 
+     *  @param  simpleMCPrimary the simple mc primary
+     *  @param  simpleMatchedPfo the simple matched pfo
+     * 
+     *  @return boolean
+     */
+    bool IsGoodMatch(const SimpleMCPrimary &simpleMCPrimary, const SimpleMatchedPfo &simpleMatchedPfo) const;
+
+    /**
      *  @brief  Count the number of hits, in a provided vector, of a specified view
      *
      *  @param  view the view
@@ -280,16 +263,22 @@ private:
      */
     static bool SortSimpleMatchedPfos(const SimpleMatchedPfo &lhs, const SimpleMatchedPfo &rhs);
 
-    std::string         m_hitfinderLabel;           ///< The name/label of the hit producer module
-    std::string         m_clusterLabel;             ///< The name/label of the cluster producer module
-    std::string         m_particleLabel;            ///< The name/label of the particle producer module
-    std::string         m_geantModuleLabel;         ///< The name/label of the geant module
+    std::string         m_hitfinderLabel;               ///< The name/label of the hit producer module
+    std::string         m_clusterLabel;                 ///< The name/label of the cluster producer module
+    std::string         m_particleLabel;                ///< The name/label of the particle producer module
+    std::string         m_geantModuleLabel;             ///< The name/label of the geant module
 
-    bool                m_printAllToScreen;         ///< Whether to print all/raw matching details to screen
-    bool                m_printMatchingToScreen;    ///< Whether to print matching output to screen
+    bool                m_printAllToScreen;             ///< Whether to print all/raw matching details to screen
+    bool                m_printMatchingToScreen;        ///< Whether to print matching output to screen
 
-    int                 m_matchingMinPrimaryHits;   ///< The minimum number of mc primary hits used in matching scheme
-    int                 m_matchingMinSharedHits;    ///< The minimum number of shared hits used in matching scheme
+    int                 m_matchingMinPrimaryHits;       ///< The minimum number of good mc primary hits used in matching scheme
+    int                 m_matchingMinHitsForGoodView;   ///< The minimum number of good mc primary hits in given view to declare view to be good
+    int                 m_matchingMinPrimaryGoodViews;  ///< The minimum number of good views for a mc primary
+
+    bool                m_useSmallPrimaries;            ///< Whether to consider matches to mc primaries with fewer than m_matchingMinPrimaryHits
+    int                 m_matchingMinSharedHits;        ///< The minimum number of shared hits used in matching scheme
+    float               m_matchingMinCompleteness;      ///< The minimum particle completeness to declare a match
+    float               m_matchingMinPurity;            ///< The minimum particle purity to declare a match
 };
 
 DEFINE_ART_MODULE(PFParticleValidation)
@@ -307,33 +296,23 @@ DEFINE_ART_MODULE(PFParticleValidation)
  */
 
 // Framework includes
-#include "art/Framework/Principal/Event.h"
-#include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
+#include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Framework/Services/Optional/TFileDirectory.h"
+
+#include "fhiclcpp/ParameterSet.h"
+
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-// LArSoft includes
-#include "larcore/Geometry/Geometry.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
-#include "lardata/DetectorInfoServices/LArPropertiesService.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "lardata/Utilities/AssociationUtil.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Track.h"
 
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/SpacePoint.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Track.h"
-
-// std includes
 #include <iostream>
 
 namespace lar_pandora
@@ -354,14 +333,19 @@ PFParticleValidation::~PFParticleValidation()
 
 void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
 {
-    m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
-    m_clusterLabel = pset.get<std::string>("ClusterModule","pandora");
-    m_hitfinderLabel = pset.get<std::string>("HitFinderModule","gaushit");
+    m_particleLabel = pset.get<std::string>("PFParticleModule", "pandoraNu");
+    m_clusterLabel = pset.get<std::string>("ClusterModule", "pandoraNu");
+    m_hitfinderLabel = pset.get<std::string>("HitFinderModule", "gaushit");
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
     m_printAllToScreen = pset.get<bool>("PrintAllToScreen", true);
     m_printMatchingToScreen = pset.get<bool>("PrintMatchingToScreen", true);
     m_matchingMinPrimaryHits = pset.get<int>("MatchingMinPrimaryHits", 15);
+    m_matchingMinHitsForGoodView = pset.get<int>("MatchingMinHitsForGoodView", 5);
+    m_matchingMinPrimaryGoodViews = pset.get<int>("MatchingMinPrimaryGoodViews", 2);
+    m_useSmallPrimaries = pset.get<bool>("UseSmallPrimaries", true);
     m_matchingMinSharedHits = pset.get<int>("MatchingMinSharedHits", 5);
+    m_matchingMinCompleteness = pset.get<float>("MatchingMinCompleteness", 0.1f);
+    m_matchingMinPurity = pset.get<float>("MatchingMinPurity", 0.5f);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -380,7 +364,6 @@ void PFParticleValidation::endJob()
 
 void PFParticleValidation::analyze(const art::Event &evt)
 {
-    // 
     HitVector hitVector;
     LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
 
@@ -395,20 +378,15 @@ void PFParticleValidation::analyze(const art::Event &evt)
     MCParticleMatchingMap mcParticleMatchingMap;
     this->GetMCParticleMatchingMap(pfParticlesToHits, mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap);
 
-    // 
     SimpleMCPrimaryList simpleMCPrimaryList;
     this->GetSimpleMCPrimaryList(mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap, simpleMCPrimaryList);
 
-    //
     MCPrimaryMatchingMap mcPrimaryMatchingMap;
     this->GetMCPrimaryMatchingMap(simpleMCPrimaryList, mcParticleMatchingMap, pfParticlesToHits, mcPrimaryMatchingMap);
 
-    //
-    MCTruthVector mcNeutrinoVector;
-    
-    PFParticleVector recoNeutrinoVector;
+    MCTruthVector mcNeutrinoVector; // TODO
+    PFParticleVector recoNeutrinoVector; // TODO
 
-    // 
     if (m_printAllToScreen)
         this->PrintAllOutput(mcNeutrinoVector, recoNeutrinoVector, mcPrimaryMatchingMap);
 
@@ -468,9 +446,6 @@ void PFParticleValidation::GetSimpleMCPrimaryList(const MCParticlesToHits &mcPar
         simpleMCPrimary.m_pAddress = pMCPrimary.get();
         simpleMCPrimary.m_pdgCode = pMCPrimary->PdgCode();
         simpleMCPrimary.m_energy = pMCPrimary->E();
-        //simpleMCPrimary.m_momentum = pMCPrimary->GetMomentum(); // TODO
-        //simpleMCPrimary.m_vertex = pMCPrimary->GetVertex(); // TODO
-        //simpleMCPrimary.m_endpoint = pMCPrimary->GetEndpoint(); // TODO
 
         MCParticlesToHits::const_iterator trueHitsIter = mcParticlesToHits.find(pMCPrimary);
 
@@ -509,7 +484,8 @@ void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &si
         SimpleMatchedPfoList simpleMatchedPfoList;
         MCParticleMatchingMap::const_iterator matchedPfoIter = mcParticleMatchingMap.end();
 
-        for (MCParticleMatchingMap::const_iterator iter = mcParticleMatchingMap.begin(), iterEnd = mcParticleMatchingMap.end(); iter != iterEnd; ++iter) // Nasty workaround I // TODO
+        // ATTN Nasty workaround I
+        for (MCParticleMatchingMap::const_iterator iter = mcParticleMatchingMap.begin(), iterEnd = mcParticleMatchingMap.end(); iter != iterEnd; ++iter)
         {
             if (simpleMCPrimary.m_pAddress == iter->first.get())
             {
@@ -532,7 +508,8 @@ void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &si
                 // ATTN Assume pfos have either zero or one parents. Ignore parent neutrino.
                 PFParticlesToHits::const_iterator parentPfoIter = pfParticlesToHits.end();
 
-                for (PFParticlesToHits::const_iterator iter = pfParticlesToHits.begin(), iterEnd = pfParticlesToHits.end(); iter != iterEnd; ++iter) // Nasty workaround II, bad place for another loop // TODO
+                // ATTN Nasty workaround II, bad place for another loop.
+                for (PFParticlesToHits::const_iterator iter = pfParticlesToHits.begin(), iterEnd = pfParticlesToHits.end(); iter != iterEnd; ++iter)
                 {
                     if (pMatchedPfo->Parent() == iter->first->Self())
                     {
@@ -562,17 +539,6 @@ void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &si
                 simpleMatchedPfo.m_nPfoHitsV = this->CountHitsByType(geo::kV, pfoHitVector);
                 simpleMatchedPfo.m_nPfoHitsW = this->CountHitsByType(geo::kW, pfoHitVector);
 
-                // ATTN vertex and end positions/directions currently only filled for track pfos
-                //const LArTrackPfo *const pLArTrackPfo = dynamic_cast<const LArTrackPfo*>(pMatchedPfo); //TODO
-
-//                if (pLArTrackPfo) // TODO
-//                {
-//                    simpleMatchedPfo.m_vertex = pLArTrackPfo->GetVertexPosition();
-//                    simpleMatchedPfo.m_endpoint = pLArTrackPfo->GetEndPosition();
-//                    simpleMatchedPfo.m_vertexDirection = pLArTrackPfo->GetVertexDirection();
-//                    simpleMatchedPfo.m_endDirection = pLArTrackPfo->GetEndDirection();
-//                }
-
                 simpleMatchedPfoList.push_back(simpleMatchedPfo);
             }
         }
@@ -594,7 +560,7 @@ void PFParticleValidation::PrintAllOutput(const MCTruthVector &mcNeutrinoVector,
 
     for (const art::Ptr<simb::MCTruth> pMCNeutrino : mcNeutrinoVector)
     {
-        std::cout << "MCNeutrino, PDG " << pMCNeutrino->GetNeutrino().Nu().PdgCode() << ", Nuance " << pMCNeutrino->GetNeutrino().InteractionType() << std::endl;
+        std::cout << "MCNeutrino, PDG " << pMCNeutrino->GetNeutrino().Nu().PdgCode() << ", InteractionType " << pMCNeutrino->GetNeutrino().InteractionType() << std::endl;
     }
 
     for (const art::Ptr<recob::PFParticle> pPfo : recoNeutrinoVector)
@@ -653,7 +619,7 @@ bool PFParticleValidation::GetStrongestPfoMatch(const MCPrimaryMatchingMap &mcPr
     {
         const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
 
-        if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+        if (!m_useSmallPrimaries && !this->IsGoodMCPrimary(simpleMCPrimary))
             continue;
 
         if (usedMCIds.count(simpleMCPrimary.m_id))
@@ -661,7 +627,10 @@ bool PFParticleValidation::GetStrongestPfoMatch(const MCPrimaryMatchingMap &mcPr
 
         for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
         {
-            if (usedPfoIds.count(simpleMatchedPfo.m_id) || (simpleMatchedPfo.m_nMatchedHitsTotal < m_matchingMinSharedHits))
+            if (usedPfoIds.count(simpleMatchedPfo.m_id))
+                continue;
+
+            if (!this->IsGoodMatch(simpleMCPrimary, simpleMatchedPfo))
                 continue;
 
             if (simpleMatchedPfo.m_nMatchedHitsTotal > bestMatchingDetails.m_nMatchedHits)
@@ -694,12 +663,12 @@ void PFParticleValidation::GetRemainingPfoMatches(const MCPrimaryMatchingMap &mc
     {
         const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
 
-        if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+        if (!m_useSmallPrimaries && !this->IsGoodMCPrimary(simpleMCPrimary))
             continue;
 
         for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
         {
-            if (usedPfoIds.count(simpleMatchedPfo.m_id) || (simpleMatchedPfo.m_nMatchedHitsTotal < m_matchingMinSharedHits))
+            if (usedPfoIds.count(simpleMatchedPfo.m_id))
                 continue;
 
             MatchingDetails &matchingDetails(matchingDetailsMap[simpleMatchedPfo.m_id]);
@@ -719,44 +688,95 @@ void PFParticleValidation::GetRemainingPfoMatches(const MCPrimaryMatchingMap &mc
 void PFParticleValidation::PrintMatchingOutput(const MCPrimaryMatchingMap &mcPrimaryMatchingMap, const MatchingDetailsMap &matchingDetailsMap) const
 {
     std::cout << "---PROCESSED-MATCHING-OUTPUT--------------------------------------------------------------------" << std::endl;
+    std::cout << "MinPrimaryGoodHits " << m_matchingMinPrimaryHits << ", MinHitsForGoodView " << m_matchingMinHitsForGoodView << ", MinPrimaryGoodViews " << m_matchingMinPrimaryGoodViews << std::endl;
+    std::cout << "UseSmallPrimaries " << m_useSmallPrimaries << ", MinSharedHits " << m_matchingMinSharedHits << ", MinCompleteness " << m_matchingMinCompleteness << ", MinPurity " << m_matchingMinPurity << std::endl;
+
     bool isCorrect(true), isCalculable(false);
 
     for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
     {
         const SimpleMCPrimary &simpleMCPrimary(mapValue.first);
+        const bool hasMatch(this->HasMatch(simpleMCPrimary, mapValue.second, matchingDetailsMap));
+        const bool isTargetPrimary(this->IsGoodMCPrimary(simpleMCPrimary) && (2112 != simpleMCPrimary.m_pdgCode));
 
-        if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+        if (!hasMatch && !isTargetPrimary)
             continue;
 
-        std::cout << std::endl << "Primary " << simpleMCPrimary.m_id << ", PDG " << simpleMCPrimary.m_pdgCode << ", nMCHits " << simpleMCPrimary.m_nMCHitsTotal
-            << " (" << simpleMCPrimary.m_nMCHitsU << ", " << simpleMCPrimary.m_nMCHitsV << ", " << simpleMCPrimary.m_nMCHitsW << ")" << std::endl;
+        std::cout << std::endl << (!isTargetPrimary ? "(Non target) " : "")
+                  << "Primary " << simpleMCPrimary.m_id << ", PDG " << simpleMCPrimary.m_pdgCode << ", nMCHits " << simpleMCPrimary.m_nMCHitsTotal
+                  << " (" << simpleMCPrimary.m_nMCHitsU << ", " << simpleMCPrimary.m_nMCHitsV << ", " << simpleMCPrimary.m_nMCHitsW << ")" << std::endl;
 
-        isCalculable = true;
+        if (2112 != simpleMCPrimary.m_pdgCode)
+            isCalculable = true;
+
         unsigned int nMatches(0);
 
         for (const SimpleMatchedPfo &simpleMatchedPfo : mapValue.second)
         {
             if (matchingDetailsMap.count(simpleMatchedPfo.m_id) && (simpleMCPrimary.m_id == matchingDetailsMap.at(simpleMatchedPfo.m_id).m_matchedPrimaryId))
             {
-                std::cout << "-MatchedPfo " << simpleMatchedPfo.m_id;
-                ++nMatches;
+                const bool isGoodMatch(this->IsGoodMatch(simpleMCPrimary, simpleMatchedPfo));
 
-                if (simpleMatchedPfo.m_parentId >= 0)
-                    std::cout << ", ParentPfo " << simpleMatchedPfo.m_parentId;
+                if (isGoodMatch) ++nMatches;
+                std::cout << "-" << (!isGoodMatch ? "(Below threshold) " : "") << "MatchedPfo " << simpleMatchedPfo.m_id;
+
+                if (simpleMatchedPfo.m_parentId >= 0) std::cout << ", ParentPfo " << simpleMatchedPfo.m_parentId;
 
                 std::cout << ", PDG " << simpleMatchedPfo.m_pdgCode << ", nMatchedHits " << simpleMatchedPfo.m_nMatchedHitsTotal
-                    << " (" << simpleMatchedPfo.m_nMatchedHitsU << ", " << simpleMatchedPfo.m_nMatchedHitsV << ", " << simpleMatchedPfo.m_nMatchedHitsW << ")"
-                    << ", nPfoHits " << simpleMatchedPfo.m_nPfoHitsTotal << " (" << simpleMatchedPfo.m_nPfoHitsU << ", " << simpleMatchedPfo.m_nPfoHitsV << ", "
-                    << simpleMatchedPfo.m_nPfoHitsW << ")" << std::endl;
+                          << " (" << simpleMatchedPfo.m_nMatchedHitsU << ", " << simpleMatchedPfo.m_nMatchedHitsV << ", " << simpleMatchedPfo.m_nMatchedHitsW << ")"
+                          << ", nPfoHits " << simpleMatchedPfo.m_nPfoHitsTotal
+                          << " (" << simpleMatchedPfo.m_nPfoHitsU << ", " << simpleMatchedPfo.m_nPfoHitsV << ", " << simpleMatchedPfo.m_nPfoHitsW << ")" << std::endl;
             }
         }
 
-        if (1 != nMatches)
+        if (isTargetPrimary && (1 != nMatches))
             isCorrect = false;
     }
 
     std::cout << std::endl << "Is correct? " << (isCorrect && isCalculable) << std::endl;
     std::cout << "------------------------------------------------------------------------------------------------" << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::IsGoodMCPrimary(const SimpleMCPrimary &simpleMCPrimary) const
+{
+    if (simpleMCPrimary.m_nMCHitsTotal < m_matchingMinPrimaryHits)
+        return false;
+
+    int nGoodViews(0);
+    if (simpleMCPrimary.m_nMCHitsU >= m_matchingMinHitsForGoodView) ++nGoodViews;
+    if (simpleMCPrimary.m_nMCHitsV >= m_matchingMinHitsForGoodView) ++nGoodViews;
+    if (simpleMCPrimary.m_nMCHitsW >= m_matchingMinHitsForGoodView) ++nGoodViews;
+
+    if (nGoodViews < m_matchingMinPrimaryGoodViews)
+        return false;
+
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::HasMatch(const SimpleMCPrimary &simpleMCPrimary, const SimpleMatchedPfoList &simpleMatchedPfoList,
+    const MatchingDetailsMap &matchingDetailsMap) const
+{
+    for (const SimpleMatchedPfo &simpleMatchedPfo : simpleMatchedPfoList)
+    {
+        if (matchingDetailsMap.count(simpleMatchedPfo.m_id) && (simpleMCPrimary.m_id == matchingDetailsMap.at(simpleMatchedPfo.m_id).m_matchedPrimaryId))
+            return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PFParticleValidation::IsGoodMatch(const SimpleMCPrimary &simpleMCPrimary, const SimpleMatchedPfo &simpleMatchedPfo) const
+{
+    const float purity((simpleMatchedPfo.m_nPfoHitsTotal > 0) ? static_cast<float>(simpleMatchedPfo.m_nMatchedHitsTotal) / static_cast<float>(simpleMatchedPfo.m_nPfoHitsTotal) : 0.f);
+    const float completeness((simpleMCPrimary.m_nMCHitsTotal > 0) ? static_cast<float>(simpleMatchedPfo.m_nMatchedHitsTotal) / static_cast<float>(simpleMCPrimary.m_nMCHitsTotal) : 0.f);
+
+    return ((simpleMatchedPfo.m_nMatchedHitsTotal >= m_matchingMinSharedHits) && (purity >= m_matchingMinPurity) && (completeness >= m_matchingMinCompleteness));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -800,25 +820,6 @@ bool PFParticleValidation::SortSimpleMatchedPfos(const SimpleMatchedPfo &lhs, co
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PFParticleValidation::SimpleThreeVector::SimpleThreeVector() :
-    m_x(-std::numeric_limits<float>::max()),
-    m_y(-std::numeric_limits<float>::max()),
-    m_z(-std::numeric_limits<float>::max())
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-PFParticleValidation::SimpleThreeVector::SimpleThreeVector(const float x, const float y, const float z) :
-    m_x(x),
-    m_y(y),
-    m_z(z)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 PFParticleValidation::SimpleMCPrimary::SimpleMCPrimary() :
     m_id(-1),
     m_pdgCode(0),
@@ -827,9 +828,6 @@ PFParticleValidation::SimpleMCPrimary::SimpleMCPrimary() :
     m_nMCHitsV(0),
     m_nMCHitsW(0),
     m_energy(0.f),
-    m_momentum(0.f, 0.f, 0.f),
-    m_vertex(-1.f, -1.f, -1.f),
-    m_endpoint(-1.f, -1.f, -1.f),
     m_nMatchedPfos(0),
     m_pAddress(nullptr)
 {
@@ -860,10 +858,6 @@ PFParticleValidation::SimpleMatchedPfo::SimpleMatchedPfo() :
     m_nMatchedHitsU(0),
     m_nMatchedHitsV(0),
     m_nMatchedHitsW(0),
-    m_vertex(0.f, 0.f, 0.f),
-    m_endpoint(0.f, 0.f, 0.f),
-    m_vertexDirection(0.f, 0.f, 0.f),
-    m_endDirection(0.f, 0.f, 0.f),
     m_pAddress(nullptr)
 {
 }
