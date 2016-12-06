@@ -41,7 +41,7 @@
         <ClusterListNameV>ClustersV</ClusterListNameV>
         <ClusterListNameW>ClustersW</ClusterListNameW>
 
-        <ShouldPerformSlicing>true</ShouldPerformSlicing>
+        <ShouldPerformSlicing>false</ShouldPerformSlicing>
 
         <algorithm type = "LArTrackClusterCreation" description = "TwoDClustering"/>
 
@@ -233,6 +233,7 @@
                 <InputClusterListNames>ClustersU ClustersV ClustersW</InputClusterListNames>
                 <OutputVertexListName>CandidateVertices</OutputVertexListName>
                 <ReplaceCurrentVertexList>true</ReplaceCurrentVertexList>
+                <EnableCrossingCandidates>false</EnableCrossingCandidates>
             </algorithm>
             <algorithm type = "LArEnergyKickVertexSelection">
                 <InputCaloHitListNames>CaloHitListU CaloHitListV CaloHitListW</InputCaloHitListNames>
