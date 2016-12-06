@@ -157,13 +157,29 @@ private:
         const PFParticlesToHits &pfParticlesToHits, MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
 
     /**
+     *  @brief  Obtain a vector of mc truth
+     * 
+     *  @param  evt the event
+     *  @param  mcNeutrinoVector to receive the populated vector of mc truth
+     */
+    void GetMCTruth(const art::Event &evt, MCTruthVector &mcTruthVector) const;
+
+    /**
+     *  @brief  Obtain a vector of reco neutrinos
+     * 
+     *  @param  evt the event
+     *  @param  recoNeutrinoVector to receive the populated vector of reco neutrinos
+     */
+    void GetRecoNeutrinos(const art::Event &evt, PFParticleVector &recoNeutrinoVector) const;
+
+    /**
      *  @brief  Print all the raw matching output to screen
      * 
-     *  @param  mcNeutrinoVector the mc neutrino vector
+     *  @param  mcTruthVector the mc truth vector
      *  @param  recoNeutrinoVector the reco neutrino vector
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
      */
-    void PrintAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
+    void PrintAllOutput(const MCTruthVector &mcTruthVector, const PFParticleVector &recoNeutrinoVector,
         const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
 
     /**
@@ -313,6 +329,7 @@ DEFINE_ART_MODULE(PFParticleValidation)
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Track.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace lar_pandora
@@ -384,11 +401,14 @@ void PFParticleValidation::analyze(const art::Event &evt)
     MCPrimaryMatchingMap mcPrimaryMatchingMap;
     this->GetMCPrimaryMatchingMap(simpleMCPrimaryList, mcParticleMatchingMap, pfParticlesToHits, mcPrimaryMatchingMap);
 
-    MCTruthVector mcNeutrinoVector; // TODO
-    PFParticleVector recoNeutrinoVector; // TODO
+    MCTruthVector mcTruthVector;
+    this->GetMCTruth(evt, mcTruthVector);
+
+    PFParticleVector recoNeutrinoVector;
+    this->GetRecoNeutrinos(evt, recoNeutrinoVector);
 
     if (m_printAllToScreen)
-        this->PrintAllOutput(mcNeutrinoVector, recoNeutrinoVector, mcPrimaryMatchingMap);
+        this->PrintAllOutput(mcTruthVector, recoNeutrinoVector, mcPrimaryMatchingMap);
 
     if (m_printMatchingToScreen)
     {
@@ -553,22 +573,48 @@ void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &si
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PFParticleValidation::PrintAllOutput(const MCTruthVector &mcNeutrinoVector, const PFParticleVector &recoNeutrinoVector,
+void PFParticleValidation::GetMCTruth(const art::Event &evt, MCTruthVector &mcTruthVector) const
+{
+    MCTruthToMCParticles artMCTruthToMCParticles;
+    MCParticlesToMCTruth artMCParticlesToMCTruth;
+    LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
+
+    for (const auto &mapEntry : artMCTruthToMCParticles)
+    {
+        const art::Ptr<simb::MCTruth> truth = mapEntry.first;
+
+        if (!truth->NeutrinoSet())
+            continue;
+
+        if (mcTruthVector.end() == std::find(mcTruthVector.begin(), mcTruthVector.end(), truth))
+            mcTruthVector.push_back(truth);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::GetRecoNeutrinos(const art::Event &evt, PFParticleVector &recoNeutrinoVector) const
+{
+    PFParticleVector allPFParticles;
+    LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, allPFParticles);
+    LArPandoraHelper::SelectNeutrinoPFParticles(allPFParticles, recoNeutrinoVector);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleValidation::PrintAllOutput(const MCTruthVector &mcTruthVector, const PFParticleVector &recoNeutrinoVector,
     const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const
 {
     std::cout << "---RAW-MATCHING-OUTPUT--------------------------------------------------------------------------" << std::endl;
 
-    for (const art::Ptr<simb::MCTruth> pMCNeutrino : mcNeutrinoVector)
+    for (const art::Ptr<simb::MCTruth> pMCTruth : mcTruthVector)
     {
-        std::cout << "MCNeutrino, PDG " << pMCNeutrino->GetNeutrino().Nu().PdgCode() << ", InteractionType " << pMCNeutrino->GetNeutrino().InteractionType() << std::endl;
+        std::cout << "MCNeutrino, PDG " << pMCTruth->GetNeutrino().Nu().PdgCode() << ", InteractionType " << pMCTruth->GetNeutrino().InteractionType() << std::endl;
     }
 
     for (const art::Ptr<recob::PFParticle> pPfo : recoNeutrinoVector)
     {
-        std::cout << "RecoNeutrino, PDG " << pPfo->PdgCode() << std::endl;
-
-        //if ((1 == pPfo->GetVertexList().size()) && (1 == mcNeutrinoVector.size())) // TODO
-        //    std::cout << "VtxOffset" << ((*(pPfo->GetVertexList().begin()))->GetPosition() - mcNeutrinoVector.front()->GetEndpoint()) << std::endl;
+        std::cout << "RecoNeutrino, PDG " << pPfo->PdgCode() << ", nDaughters " << pPfo->NumDaughters() << std::endl;
     }
 
     for (const MCPrimaryMatchingMap::value_type &mapValue : mcPrimaryMatchingMap)
