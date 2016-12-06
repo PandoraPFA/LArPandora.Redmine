@@ -118,7 +118,7 @@ private:
     };
 
     typedef std::map<int, MatchingDetails> MatchingDetailsMap;
-    typedef std::map<SimpleMCPrimary, SimpleMatchedPfoList> MCPrimaryMatchingMap;
+    typedef std::map<SimpleMCPrimary, SimpleMatchedPfoList> MCPrimaryMatchingMap; // SimpleMCPrimary has a defined operator<
 
     typedef std::map< art::Ptr<recob::PFParticle>, HitVector > PFParticleToMatchedHits;
     typedef std::map< art::Ptr<simb::MCParticle>,  PFParticleToMatchedHits > MCParticleMatchingMap;
@@ -190,8 +190,7 @@ private:
      *  @param  recoNeutrinoVector the reco neutrino vector
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
      */
-    void PrintAllOutput(const MCTruthVector &mcTruthVector, const PFParticleVector &recoNeutrinoVector,
-        const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
+    void PrintAllOutput(const MCTruthVector &mcTruthVector, const PFParticleVector &recoNeutrinoVector, const MCPrimaryMatchingMap &mcPrimaryMatchingMap) const;
 
     /**
      *  @brief  Apply a well-defined matching procedure to the comprehensive matches in the provided mc primary matching map
@@ -315,7 +314,7 @@ DEFINE_ART_MODULE(PFParticleValidation)
 } // namespace lar_pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-// implementation follows
+
 /**
  *  @file   LArPandora/PFParticleValidation.cxx
  *
@@ -324,23 +323,15 @@ DEFINE_ART_MODULE(PFParticleValidation)
  *  $Log: $
  */
 
-// Framework includes
-#include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
 
 #include "fhiclcpp/ParameterSet.h"
-
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 
 #include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/PFParticle.h"
-#include "lardataobj/RecoBase/Track.h"
 
 #include <algorithm>
 #include <iostream>
@@ -348,7 +339,8 @@ DEFINE_ART_MODULE(PFParticleValidation)
 namespace lar_pandora
 {
 
-PFParticleValidation::PFParticleValidation(fhicl::ParameterSet const &pset) : art::EDAnalyzer(pset)
+PFParticleValidation::PFParticleValidation(fhicl::ParameterSet const &pset) :
+    art::EDAnalyzer(pset)
 {
     this->reconfigure(pset);
 }
@@ -531,7 +523,6 @@ void PFParticleValidation::GetMCPrimaryMatchingMap(const SimpleMCPrimaryList &si
 {
     for (const SimpleMCPrimary &simpleMCPrimary : simpleMCPrimaryList)
     {
-        // First loop over unordered list of matched pfos
         SimpleMatchedPfoList simpleMatchedPfoList;
         MCParticleMatchingMap::const_iterator matchedPfoIter = mcParticleMatchingMap.end();
 
