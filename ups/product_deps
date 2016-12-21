@@ -7,7 +7,7 @@ fcldir  product_dir job
 gdmldir product_dir scripts
 #
 product         version
-larreco         v06_13_01
+larreco         v06_14_00
 larpandoracontent         v03_01_01
 gcc             v4_9_3a
 
