@@ -274,7 +274,8 @@ void LArPandora::ResetPandoraInstances()
 void LArPandora::DeletePandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::DeletePandoraInstances() *** " << std::endl;
-    MultiPandoraApi::DeletePandoraInstances(m_pPrimaryPandora);
+    if (m_pPrimaryPandora)
+      MultiPandoraApi::DeletePandoraInstances(m_pPrimaryPandora);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
