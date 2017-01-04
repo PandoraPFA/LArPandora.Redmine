@@ -4,7 +4,7 @@ parent	larpandora	v06_04_02
 defaultqual	e10
 #
 fcldir  product_dir job
-gdmldir product_dir scripts
+fwdir   product_dir scripts
 #
 product         version
 larreco         v06_14_00

@@ -3,5 +3,5 @@
 # They need to be found via FW_SEARCH_PATH
 
 # install xml files
-install_gdml()
-
+file(GLOB xml_file *.xml)
+install_fw(LIST ${xml_file})
