@@ -72,8 +72,8 @@ public:
      */
     LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift,
         const double wirePitchU, const double wirePitchV, const double wirePitchW, const double wireAngleU, const double wireAngleV, 
-	const double centerX, const double centerY, const double centerZ, const double widthX, const double widthY, const double widthZ,
-	const double sigmaUVZ, const LArTpcVolumeList tpcVolumeList);
+        const double centerX, const double centerY, const double centerZ, const double widthX, const double widthY, const double widthZ,
+        const double sigmaUVZ, const LArTpcVolumeList tpcVolumeList);
 
     /**
      *  @brief Return unqiue ID

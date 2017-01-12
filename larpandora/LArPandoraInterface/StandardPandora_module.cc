@@ -2,13 +2,9 @@
  *  @file   larpandora/LArPandoraInterface/StandardPandora_module.cc
  *
  *  @brief  A generic LArPandora ART Producer module intended to work on ALL LAr-TPC wire-readout experiments.
- *          This single module is intended to take the place of the current suite of experiment-specific modules.
- *
  */
 
 #include "art/Framework/Core/ModuleMacros.h"
-
-#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
@@ -61,16 +57,18 @@ private:
      *
      *  @param  configFileName the pandora settings config file name
      */
-    void CreateDaughterPandoraInstances(const std::string &configFileName);
+    void CreateDaughterPandoraInstances(const std::string &configFileName) const;
 
-    LArDriftVolumeList  m_driftVolumeList;   // list of drift volumes for this geometry
-    LArDriftVolumeMap   m_driftVolumeMap;    // mapping from tpcVolumeID to driftVolumeID
+    LArDriftVolumeList  m_driftVolumeList;          ///< List of drift volumes for this geometry
+    LArDriftVolumeMap   m_driftVolumeMap;           ///< Mapping from tpcVolumeID to driftVolumeID
 
-    bool     m_printGeometry;
-    bool     m_useShortVolume;   // Historical DUNE 35t config parameter - use short drift volume (positive drift)
-    bool     m_useLongVolume;    // Historical DUNE 35t config parameter - use long drift volume (negative drift)
-    bool     m_useLeftVolume;    // Historical DUNE 4-APA config parameter - use left drift volume (negative drift)
-    bool     m_useRightVolume;   // Historical DUNE 4-APA config parameter - use right drift volume (positive drift)
+    bool                m_printGeometry;            ///< Whether to print collected geometry information
+    bool                m_uniqueInstanceSettings;   ///< Whether to enable unique configuration of each Pandora instance
+
+    bool                m_useShortVolume;           ///< Historical DUNE 35t config parameter - use short drift volume (positive drift)
+    bool                m_useLongVolume;            ///< Historical DUNE 35t config parameter - use long drift volume (negative drift)
+    bool                m_useLeftVolume;            ///< Historical DUNE 4-APA config parameter - use left drift volume (negative drift)
+    bool                m_useRightVolume;           ///< Historical DUNE 4-APA config parameter - use right drift volume (positive drift)
 };
 
 DEFINE_ART_MODULE(StandardPandora)
@@ -89,6 +87,9 @@ DEFINE_ART_MODULE(StandardPandora)
 #include "larpandoracontent/LArContent.h"
 #include "larpandoracontent/LArPlugins/LArPseudoLayerPlugin.h"
 #include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
+#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
+
+#include <iostream>
 
 namespace lar_pandora
 {
@@ -97,6 +98,7 @@ StandardPandora::StandardPandora(fhicl::ParameterSet const &pset) :
     LArPandora(pset)
 {
     m_printGeometry = pset.get<bool>("PrintGeometry", false);
+    m_uniqueInstanceSettings = pset.get<bool>("UniqueInstanceSettings", false);
     m_useShortVolume = pset.get<bool>("UseShortVolume", true);
     m_useLongVolume = pset.get<bool>("UseLongVolume", true);
     m_useLeftVolume = pset.get<bool>("UseLeftVolume", true);
@@ -112,8 +114,7 @@ int StandardPandora::GetVolumeIdNumber(const unsigned int cryostat, const unsign
     if (m_driftVolumeMap.end() == iter)
         throw cet::exception("LArPandora") << " Throwing exception - found a TPC that doesn't belong to a drift volume";
  
-    const LArDriftVolume &driftVolume = iter->second;
-    return driftVolume.GetVolumeID();
+    return iter->second.GetVolumeID();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -135,16 +136,12 @@ void StandardPandora::LoadGeometry()
     if (m_printGeometry)
         LArPandoraGeometry::PrintGeometry(m_driftVolumeList);
 
-    for (LArDriftVolumeList::const_iterator iter1 = m_driftVolumeList.begin(), iterEnd1 = m_driftVolumeList.end(); iter1 != iterEnd1; ++iter1)
+    for (const LArDriftVolume &driftVolume : m_driftVolumeList)
     {
-        const LArDriftVolume &driftVolume = *iter1;
-        const LArTpcVolumeList &tpcVolumeList = driftVolume.GetTpcVolumeList();
-
-        for (LArTpcVolumeList::const_iterator iter2 = tpcVolumeList.begin(), iterEnd2 = tpcVolumeList.end(); iter2 != iterEnd2; ++iter2)
-	{
-	    const LArTpcVolume &tpcVolume = *iter2;
-	    m_driftVolumeMap.insert(LArDriftVolumeMap::value_type(this->GetTpcIdNumber(tpcVolume.GetCryostat(), tpcVolume.GetTpc()), driftVolume));
-	}
+        for (const LArTpcVolume &tpcVolume : driftVolume.GetTpcVolumeList())
+        {
+            (void) m_driftVolumeMap.insert(LArDriftVolumeMap::value_type(this->GetTpcIdNumber(tpcVolume.GetCryostat(), tpcVolume.GetTpc()), driftVolume));
+        }
     }
 }
 
@@ -153,37 +150,19 @@ void StandardPandora::LoadGeometry()
 void StandardPandora::CreatePandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** StandardPandora::CreatePandoraInstances(...) [BEGIN] *** " << std::endl;
-    
-    // Load (and print) geometry
+
     this->LoadGeometry();
 
-    // Ensure that xml configuration files are available
-    const bool isMultiDrift(m_driftVolumeList.size() > 1);
-
-    cet::search_path sp("FW_SEARCH_PATH");
-    std::string stitchingConfigFileName, configFileName;
-
-    if (!sp.find_file(m_configFile, configFileName))
-    {
-        throw cet::exception("LArPandora") << " Failed to find xml configuration file " << m_configFile << " in FW seach path";
-    }
-
-    if (isMultiDrift && !sp.find_file(m_stitchingConfigFile, stitchingConfigFileName))
-    {
-        throw cet::exception("LArPandora") << " Failed to find xml configuration file " << m_stitchingConfigFile << " in FW search path";
-    }
-
     // For multiple drift volumes, create a Pandora instance for each drift volume and an additional instance for stitching drift volumes.
-    if (isMultiDrift)
-    {
-        this->CreatePrimaryPandoraInstance(stitchingConfigFileName);
-        this->CreateDaughterPandoraInstances(configFileName);
-    }
-
     // For single drift volumes, just create a single Pandora instance
+    if (m_driftVolumeList.size() > 1)
+    {
+        this->CreatePrimaryPandoraInstance(m_stitchingConfigFile);
+        this->CreateDaughterPandoraInstances(m_configFile);
+    }
     else
     {
-        this->CreatePrimaryPandoraInstance(configFileName);
+        this->CreatePrimaryPandoraInstance(m_configFile);
     }
 }
 
@@ -196,59 +175,80 @@ void StandardPandora::CreatePrimaryPandoraInstance(const std::string &configFile
     if (m_driftVolumeList.empty())
         throw cet::exception("LArPandora") << " Throwing exception - list of drift volumes is empty ";
 
-    const LArDriftVolume &driftVolume = *(m_driftVolumeList.begin());
+    cet::search_path sp("FW_SEARCH_PATH");
+    std::string fullConfigFileName;
 
-    // Common settings if detector has single and multiple drift volumes
+    if (!sp.find_file(configFileName, fullConfigFileName))
+        throw cet::exception("LArPandora") << " Failed to find xml configuration file " << configFileName << " in FW search path";
+
+    const LArDriftVolume &driftVolume(m_driftVolumeList.front());
+
     m_pPrimaryPandora = this->CreateNewPandora();
     MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, configFileName));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, fullConfigFileName));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora,
         new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
 
-    // Additional settings if detector has just a single drift volume
+    // If only single drift volume, primary pandora instance will do all pattern recognition, rather than perform a particle stitching role
     if (1 == m_driftVolumeList.size())
     {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*m_pPrimaryPandora,
-	    new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
+            new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
+
         MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "driftVolume",
-	    pandora::CartesianVector(driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ()), driftVolume.IsPositiveDrift()));
+            pandora::CartesianVector(driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ()), driftVolume.IsPositiveDrift()));
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFileName)
+void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFileName) const
 {
     mf::LogDebug("LArPandora") << " *** StandardPandora::CreateDaughterPandoraInstance(...) *** " << std::endl;
 
     if (!m_pPrimaryPandora)
         throw cet::exception("LArPandora") << " Throwing exception - trying to create daughter Pandora instances in absence of primary instance ";
 
-    for (LArDriftVolumeList::const_iterator iter = m_driftVolumeList.begin(), iterEnd = m_driftVolumeList.end(); iter != iterEnd; ++iter)
+    for (const LArDriftVolume &driftVolume : m_driftVolumeList)
     {
-        const LArDriftVolume &driftVolume = *iter;
-
         // Check historical DUNE config parameters
-        if ((2 == m_driftVolumeList.size()) &&
-            ((true == driftVolume.IsPositiveDrift() && (false == m_useShortVolume || false == m_useRightVolume)) ||
-             (false == driftVolume.IsPositiveDrift() && (false == m_useLongVolume || false == m_useLeftVolume))))
-	    continue;
+        if ((2 == m_driftVolumeList.size()) && (
+            (driftVolume.IsPositiveDrift() && (!m_useShortVolume || !m_useRightVolume)) ||
+            (!driftVolume.IsPositiveDrift() && (!m_useLongVolume || !m_useLeftVolume)) ))
+        {
+            continue;
+        }
 
-	mf::LogDebug("LArPandora") << " Creating Pandora Daughter Instance: [" << driftVolume.GetVolumeID() << "]" << std::endl;
+        mf::LogDebug("LArPandora") << " Creating Pandora Daughter Instance: [" << driftVolume.GetVolumeID() << "]" << std::endl;
 
-        std::ostringstream volumeIdString("driftVolume_");
+        std::ostringstream volumeIdString;
         volumeIdString << driftVolume.GetVolumeID();
 
         const pandora::Pandora *const pPandora = this->CreateNewPandora();
         MultiPandoraApi::AddDaughterPandoraInstance(m_pPrimaryPandora, pPandora);
-        MultiPandoraApi::SetVolumeInfo(pPandora, new VolumeInfo(driftVolume.GetVolumeID(), volumeIdString.str(),
-	    pandora::CartesianVector(driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ()), driftVolume.IsPositiveDrift()));
+        MultiPandoraApi::SetVolumeInfo(pPandora, new VolumeInfo(driftVolume.GetVolumeID(), "driftVolume_" + volumeIdString.str(),
+            pandora::CartesianVector(driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ()), driftVolume.IsPositiveDrift()));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora,
-	    new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
+            new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*pPandora,
-	    new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, configFileName));
+            new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
+
+        std::string thisConfigFileName(configFileName);
+
+        if (m_uniqueInstanceSettings)
+        {
+            const size_t insertPosition(thisConfigFileName.empty() ? 0 : thisConfigFileName.length() - std::string(".xml").length());
+            thisConfigFileName = thisConfigFileName.insert(insertPosition, volumeIdString.str());
+        }
+
+        cet::search_path sp("FW_SEARCH_PATH");
+        std::string thisFullConfigFileName;
+
+        if (!sp.find_file(thisConfigFileName, thisFullConfigFileName))
+            throw cet::exception("LArPandora") << " Failed to find xml configuration file " << thisConfigFileName << " in FW search path";
+
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, thisFullConfigFileName));
     }
 }
 
