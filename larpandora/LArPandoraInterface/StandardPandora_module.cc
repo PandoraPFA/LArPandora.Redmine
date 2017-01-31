@@ -64,6 +64,7 @@ private:
 
     bool                m_printGeometry;            ///< Whether to print collected geometry information
     bool                m_uniqueInstanceSettings;   ///< Whether to enable unique configuration of each Pandora instance
+    std::string         m_outputGeometryXmlFile;    ///< If provided, attempt to write collected geometry information to output xml file
 
     bool                m_useShortVolume;           ///< Historical DUNE 35t config parameter - use short drift volume (positive drift)
     bool                m_useLongVolume;            ///< Historical DUNE 35t config parameter - use long drift volume (negative drift)
@@ -99,6 +100,7 @@ StandardPandora::StandardPandora(fhicl::ParameterSet const &pset) :
 {
     m_printGeometry = pset.get<bool>("PrintGeometry", false);
     m_uniqueInstanceSettings = pset.get<bool>("UniqueInstanceSettings", false);
+    m_outputGeometryXmlFile = pset.get<std::string>("OutputGeometryXmlFile", "");
     m_useShortVolume = pset.get<bool>("UseShortVolume", true);
     m_useLongVolume = pset.get<bool>("UseLongVolume", true);
     m_useLeftVolume = pset.get<bool>("UseLeftVolume", true);
@@ -135,6 +137,9 @@ void StandardPandora::LoadGeometry()
  
     if (m_printGeometry)
         LArPandoraGeometry::PrintGeometry(m_driftVolumeList);
+
+    if (!m_outputGeometryXmlFile.empty())
+        LArPandoraGeometry::WriteGeometry(m_outputGeometryXmlFile, m_driftVolumeList);
 
     for (const LArDriftVolume &driftVolume : m_driftVolumeList)
     {
@@ -238,7 +243,7 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
 
         if (m_uniqueInstanceSettings)
         {
-            const size_t insertPosition(thisConfigFileName.empty() ? 0 : thisConfigFileName.length() - std::string(".xml").length());
+            const size_t insertPosition((thisConfigFileName.length() < 4) ? 0 : thisConfigFileName.length() - std::string(".xml").length());
             thisConfigFileName = thisConfigFileName.insert(insertPosition, volumeIdString.str());
         }
 

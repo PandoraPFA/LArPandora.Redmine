@@ -13,6 +13,9 @@
 
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 
+#include "Pandora/PandoraInternal.h" // For pandora::TypeToString
+#include "Xml/tinyxml.h"
+
 namespace lar_pandora
 {
 
@@ -23,7 +26,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
     // Note: we assume that all two-wire detectors use the U and V views, and that the wires in the W view are always vertical
 
     if (!driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - detector geoemetry has already been loaded ";
+        throw cet::exception("LArPandora") << " Throwing exception - detector geometry has already been loaded ";
 
     typedef std::set<unsigned int> UIntSet;
 
@@ -170,15 +173,64 @@ void LArPandoraGeometry::PrintGeometry(const LArDriftVolumeList &driftVolumeList
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraGeometry::WriteGeometry(const std::string &xmlFileName, const LArDriftVolumeList &driftVolumeList)
+{
+    pandora::TiXmlDocument xmlDocument;
+
+    for (const LArDriftVolume &driftVolume : driftVolumeList)
+    {
+        pandora::TiXmlElement *const pVolumeElement = new pandora::TiXmlElement("LArDriftVolume");
+        LArPandoraGeometry::WriteElement(pVolumeElement, "VolumeID", pandora::TypeToString(driftVolume.GetVolumeID()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "IsPositiveDrift", pandora::TypeToString(driftVolume.IsPositiveDrift()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WirePitchU", pandora::TypeToString(driftVolume.GetWirePitchU()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WirePitchV", pandora::TypeToString(driftVolume.GetWirePitchV()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WirePitchW", pandora::TypeToString(driftVolume.GetWirePitchW()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WireAngleU", pandora::TypeToString(driftVolume.GetWireAngleU()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WireAngleV", pandora::TypeToString(driftVolume.GetWireAngleV()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "CenterX", pandora::TypeToString(driftVolume.GetCenterX()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "CenterY", pandora::TypeToString(driftVolume.GetCenterY()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "CenterZ", pandora::TypeToString(driftVolume.GetCenterZ()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WidthX", pandora::TypeToString(driftVolume.GetWidthX()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WidthY", pandora::TypeToString(driftVolume.GetWidthY()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "WidthZ", pandora::TypeToString(driftVolume.GetWidthZ()));
+        LArPandoraGeometry::WriteElement(pVolumeElement, "SigmaUVZ", pandora::TypeToString(driftVolume.GetSigmaUVZ()));
+        xmlDocument.LinkEndChild(pVolumeElement);
+    }
+
+    xmlDocument.SaveFile(xmlFileName);
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift,
-        const double wirePitchU, const double wirePitchV, const double wirePitchW, const double wireAngleU, const double wireAngleV,
-        const double centerX, const double centerY, const double centerZ, const double widthX, const double widthY, const double widthZ,
-        const double sigmaUVZ, const LArTpcVolumeList tpcVolumeList) :
-    m_volumeID(volumeID), m_isPositiveDrift(isPositiveDrift), m_wirePitchU(wirePitchU), m_wirePitchV(wirePitchV), m_wirePitchW(wirePitchW),
-    m_wireAngleU(wireAngleU), m_wireAngleV(wireAngleV), m_centerX(centerX), m_centerY(centerY), m_centerZ(centerZ),
-    m_widthX(widthX), m_widthY(widthY), m_widthZ(widthZ), m_sigmaUVZ(sigmaUVZ), m_tpcVolumeList(tpcVolumeList)
+void LArPandoraGeometry::WriteElement(pandora::TiXmlElement *const pParentElement, const std::string &elementName, const std::string &elementValue)
+{
+    pandora::TiXmlElement *const pDaughterElement = new pandora::TiXmlElement(elementName);
+    pDaughterElement->LinkEndChild(new pandora::TiXmlText(elementValue));
+    pParentElement->LinkEndChild(pDaughterElement);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift, const double wirePitchU, const double wirePitchV,
+        const double wirePitchW, const double wireAngleU, const double wireAngleV, const double centerX, const double centerY, const double centerZ,
+        const double widthX, const double widthY, const double widthZ, const double sigmaUVZ, const LArTpcVolumeList tpcVolumeList) :
+    m_volumeID(volumeID),
+    m_isPositiveDrift(isPositiveDrift),
+    m_wirePitchU(wirePitchU),
+    m_wirePitchV(wirePitchV),
+    m_wirePitchW(wirePitchW),
+    m_wireAngleU(wireAngleU),
+    m_wireAngleV(wireAngleV),
+    m_centerX(centerX),
+    m_centerY(centerY),
+    m_centerZ(centerZ),
+    m_widthX(widthX),
+    m_widthY(widthY),
+    m_widthZ(widthZ),
+    m_sigmaUVZ(sigmaUVZ),
+    m_tpcVolumeList(tpcVolumeList)
 {
 }
 
