@@ -7,6 +7,10 @@
 #ifndef LAR_PANDORA_GEOMETRY_H
 #define LAR_PANDORA_GEOMETRY_H 1
 
+#include <string>
+
+namespace pandora { class TiXmlElement; }
+
 namespace lar_pandora
 {
 
@@ -35,7 +39,6 @@ public:
     unsigned int GetTpc() const;
 
 private:
-
     unsigned int  m_cryostat;
     unsigned int  m_tpc;
 };
@@ -72,8 +75,8 @@ public:
      */
     LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift,
         const double wirePitchU, const double wirePitchV, const double wirePitchW, const double wireAngleU, const double wireAngleV, 
-	const double centerX, const double centerY, const double centerZ, const double widthX, const double widthY, const double widthZ,
-	const double sigmaUVZ, const LArTpcVolumeList tpcVolumeList);
+        const double centerX, const double centerY, const double centerZ, const double widthX, const double widthY, const double widthZ,
+        const double sigmaUVZ, const LArTpcVolumeList tpcVolumeList);
 
     /**
      *  @brief Return unqiue ID
@@ -182,17 +185,38 @@ typedef std::map<unsigned int, LArDriftVolume> LArDriftVolumeMap;
 class LArPandoraGeometry
 {
 public:
-    
     /**
-     *  @brief This method will group TPCs into "drift volumes" (these are regions of the detector that share a common drift direction, 
-     *         common range of X coordinates, and common detector parameters such as wire pitch and wire angle).
+     *  @brief  This method will group TPCs into "drift volumes" (these are regions of the detector that share a common drift direction, 
+     *          common range of X coordinates, and common detector parameters such as wire pitch and wire angle).
+     * 
+     *  @param  driftVolumeList to receive the populated drift volume list
      */
     static void LoadGeometry(LArDriftVolumeList &driftVolumeList);
  
     /**
-     *  @brief Print out the list of drift volumes
+     *  @brief  Print out the list of drift volumes
+     * 
+     *  @param  driftVolumeList the drift volume list
      */
     static void PrintGeometry(const LArDriftVolumeList &driftVolumeList);
+
+    /**
+     *  @brief  Write out the list of drift volumes to xml file
+     * 
+     *  @param  xmlFileName the xml file name
+     *  @param  driftVolumeList the drift volume list
+     */
+    static void WriteGeometry(const std::string &xmlFileName, const LArDriftVolumeList &driftVolumeList);
+
+private:
+    /**
+     *  @brief  Write an element (converted to a string) under a parent xml element
+     * 
+     *  @param  pParentElement the parent xml element
+     *  @param  elementName the element xml name
+     *  @param  elementValue the element value, converted to a string
+     */
+    static void WriteElement(pandora::TiXmlElement *const pParentElement, const std::string &elementName, const std::string &elementValue);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -301,7 +325,6 @@ inline double LArDriftVolume::GetWidthY() const
 { 
     return m_widthY;
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
