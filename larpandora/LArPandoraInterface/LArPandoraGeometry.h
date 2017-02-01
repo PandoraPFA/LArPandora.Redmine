@@ -210,13 +210,13 @@ public:
 
 private:
     /**
-     *  @brief  Write an element (converted to a string) under a parent xml element
+     *  @brief  Write a double element, above standard precision (required for e.g. wire angle values), under a parent xml element
      * 
      *  @param  pParentElement the parent xml element
      *  @param  elementName the element xml name
-     *  @param  elementValue the element value, converted to a string
+     *  @param  value the element value
      */
-    static void WriteElement(pandora::TiXmlElement *const pParentElement, const std::string &elementName, const std::string &elementValue);
+    static void WritePrecisionElement(pandora::TiXmlElement *const pParentElement, const std::string &elementName, const double value);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

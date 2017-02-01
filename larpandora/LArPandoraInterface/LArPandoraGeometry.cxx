@@ -16,6 +16,9 @@
 #include "Pandora/PandoraInternal.h" // For pandora::TypeToString
 #include "Xml/tinyxml.h"
 
+#include <iomanip>
+#include <sstream>
+
 namespace lar_pandora
 {
 
@@ -181,20 +184,28 @@ void LArPandoraGeometry::WriteGeometry(const std::string &xmlFileName, const LAr
     for (const LArDriftVolume &driftVolume : driftVolumeList)
     {
         pandora::TiXmlElement *const pVolumeElement = new pandora::TiXmlElement("LArDriftVolume");
-        LArPandoraGeometry::WriteElement(pVolumeElement, "VolumeID", pandora::TypeToString(driftVolume.GetVolumeID()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "IsPositiveDrift", pandora::TypeToString(driftVolume.IsPositiveDrift()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WirePitchU", pandora::TypeToString(driftVolume.GetWirePitchU()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WirePitchV", pandora::TypeToString(driftVolume.GetWirePitchV()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WirePitchW", pandora::TypeToString(driftVolume.GetWirePitchW()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WireAngleU", pandora::TypeToString(driftVolume.GetWireAngleU()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WireAngleV", pandora::TypeToString(driftVolume.GetWireAngleV()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "CenterX", pandora::TypeToString(driftVolume.GetCenterX()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "CenterY", pandora::TypeToString(driftVolume.GetCenterY()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "CenterZ", pandora::TypeToString(driftVolume.GetCenterZ()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WidthX", pandora::TypeToString(driftVolume.GetWidthX()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WidthY", pandora::TypeToString(driftVolume.GetWidthY()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "WidthZ", pandora::TypeToString(driftVolume.GetWidthZ()));
-        LArPandoraGeometry::WriteElement(pVolumeElement, "SigmaUVZ", pandora::TypeToString(driftVolume.GetSigmaUVZ()));
+
+        pandora::TiXmlElement *const pVolumeIdElement = new pandora::TiXmlElement("VolumeID");
+        pVolumeIdElement->LinkEndChild(new pandora::TiXmlText(pandora::TypeToString(driftVolume.GetVolumeID())));
+        pVolumeElement->LinkEndChild(pVolumeIdElement);
+
+        pandora::TiXmlElement *const pDriftDirectionElement = new pandora::TiXmlElement("IsPositiveDrift");
+        pDriftDirectionElement->LinkEndChild(new pandora::TiXmlText(pandora::TypeToString(driftVolume.IsPositiveDrift())));
+        pVolumeElement->LinkEndChild(pDriftDirectionElement);
+
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WirePitchU", driftVolume.GetWirePitchU());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WirePitchV", driftVolume.GetWirePitchV());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WirePitchW", driftVolume.GetWirePitchW());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WireAngleU", driftVolume.GetWireAngleU());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WireAngleV", driftVolume.GetWireAngleV());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "CenterX", driftVolume.GetCenterX());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "CenterY", driftVolume.GetCenterY());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "CenterZ", driftVolume.GetCenterZ());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WidthX", driftVolume.GetWidthX());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WidthY", driftVolume.GetWidthY());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "WidthZ", driftVolume.GetWidthZ());
+        LArPandoraGeometry::WritePrecisionElement(pVolumeElement, "SigmaUVZ", driftVolume.GetSigmaUVZ());
+
         xmlDocument.LinkEndChild(pVolumeElement);
     }
 
@@ -203,10 +214,16 @@ void LArPandoraGeometry::WriteGeometry(const std::string &xmlFileName, const LAr
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraGeometry::WriteElement(pandora::TiXmlElement *const pParentElement, const std::string &elementName, const std::string &elementValue)
+void LArPandoraGeometry::WritePrecisionElement(pandora::TiXmlElement *const pParentElement, const std::string &elementName, const double value)
 {
+    const std::streamsize ss(std::cout.precision());
+    std::ostringstream oss;
+
+    if ((oss << std::setprecision(12) << value << std::setprecision(ss)).fail())
+        throw cet::exception("LArPandora") << "Could not write LArDriftVolumes to xml file, TypeToString failed.";
+
     pandora::TiXmlElement *const pDaughterElement = new pandora::TiXmlElement(elementName);
-    pDaughterElement->LinkEndChild(new pandora::TiXmlText(elementValue));
+    pDaughterElement->LinkEndChild(new pandora::TiXmlText(oss.str()));
     pParentElement->LinkEndChild(pDaughterElement);
 }
 
