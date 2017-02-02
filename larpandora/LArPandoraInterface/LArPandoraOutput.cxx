@@ -30,6 +30,7 @@
 
 #include "larpandoracontent/LArHelpers/LArClusterHelper.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
+#include "larpandoracontent/LArObjects/LArShowerPfo.h"
 #include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
@@ -285,7 +286,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
         
                     if (!pLArTrackPfo)
-                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSeeds --- input pfo was not track-like ";
+                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo was not track-like ";
                 
                     const lar_content::LArTrackStateVector &trackStateVector = pLArTrackPfo->m_trackStateVector;
 
@@ -321,11 +322,23 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 {
                 }
             }
-        }
+            else if (lar_content::LArPfoHelper::IsShower(pPfo))
+            {
+                try
+                {
+                    const lar_content::LArShowerPfo *const pLArShowerPfo = dynamic_cast<const lar_content::LArShowerPfo*>(pPfo);
 
-        //
-        // TODO: Build Showers here
-        //
+                    if (!pLArShowerPfo)
+                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildShower --- input pfo was not shower-like ";
+
+                    // TODO
+                    //std::cout << "LArShowerPfo received, direction " << pLArShowerPfo->GetShowerDirection() << std::endl;
+                }
+                catch (cet::exception &e)
+                {
+                }
+            }
+        }
     }
 
     mf::LogDebug("LArPandora") << "   Number of new particles: " << outputParticles->size() << std::endl;
