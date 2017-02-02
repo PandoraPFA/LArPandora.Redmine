@@ -30,6 +30,8 @@
 #include "larpandora/LArPandoraInterface/LArPandoraInput.h"
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 
+#include "larpandora/LArPandoraShowers/PCAShowerParticleBuildingAlgorithm.h"
+
 #include <iostream>
 
 namespace lar_pandora
@@ -285,6 +287,9 @@ const pandora::Pandora *LArPandora::CreateNewPandora() const
     const pandora::Pandora *const pPandora = new pandora::Pandora();
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*pPandora));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
+
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPandora,
+        "LArPCAShowerParticleBuilding", new lar_pandora_showers::PCAShowerParticleBuildingAlgorithm::Factory));
 
     return pPandora;
 }
