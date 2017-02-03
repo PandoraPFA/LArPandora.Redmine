@@ -14,6 +14,7 @@
 #include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 #include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
 #include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -146,7 +147,11 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         recob::Vertex newVertex(pos, vertexCounter++);
         outputVertices->push_back(newVertex);
     }
-
+    
+    
+    lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
+    lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
+    
     // Loop over Pandora particles and build recob::PFParticles
     for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
     {
@@ -331,8 +336,17 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     if (!pLArShowerPfo)
                         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildShower --- input pfo was not shower-like ";
 
-                    // TODO
-                    //std::cout << "LArShowerPfo received, direction " << pLArShowerPfo->GetShowerDirection() << std::endl;
+                    if ( settings.m_buildShowers )
+                    {
+                        outputShowers->emplace_back( LArPandoraOutput::BuildShower( pLArShowerPfo ) );
+
+                        // util::CreateAssn(*(settings.m_pProducer), evt, *(outputShowers.get()), , *(outputShowersToHits.get()));
+
+                        outputParticlesToShowers->addSingle(
+                          makePfoPtr(outputParticles->size() - 1),   // index of the PFO we just made
+                          makeShowerPtr(outputShowers->size() - 1)   // index of the shower we just made
+                          );
+                    }
                 }
                 catch (cet::exception &e)
                 {
@@ -513,6 +527,29 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
     return recob::Track(xyz, pxpypz, dQdx, momentum, id);
 }
   
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Shower LArPandoraOutput::BuildShower( const lar_content::LArShowerPfo *const pLArShowerPfo )
+{
+    const pandora::CartesianVector &showerLength( pLArShowerPfo->GetShowerLength() );
+    const pandora::CartesianVector &showerDirection( pLArShowerPfo->GetShowerDirection() );
+    const pandora::CartesianVector &showerVertex( pLArShowerPfo->GetShowerVertex() );
+    float Length = showerLength.GetX();
+    float OpeningAngle = pLArShowerPfo->GetShowerOpeningAngle();
+    TVector3 Direction( showerDirection.GetX(), showerDirection.GetY(), showerDirection.GetZ() );
+    TVector3 Vertex( showerVertex.GetX(), showerVertex.GetY(), showerVertex.GetZ() );
+    TVector3 DirectionErr;
+    TVector3 VertexErr;
+    std::vector< double >  TotalEnergy;
+    std::vector< double >  TotalEnergyErr;
+    std::vector< double >  dEdx;
+    std::vector< double >  dEdxErr;
+    int bestplane = 0;
+
+    return recob::Shower( Direction, DirectionErr, Vertex, VertexErr, TotalEnergy, TotalEnergyErr, dEdx, dEdxErr, bestplane, Length, OpeningAngle );
+    
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora::CaloHit *const pCaloHit)

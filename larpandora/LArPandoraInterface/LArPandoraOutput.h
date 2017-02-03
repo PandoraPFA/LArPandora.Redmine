@@ -13,6 +13,7 @@
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
 #include "larpandoracontent/LArObjects/LArTrackPfo.h" // For track state definitions
+#include "larpandoracontent/LArObjects/LArShowerPfo.h" // For shower parameters
 
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
@@ -76,6 +77,14 @@ public:
      *  @param pTrackStateVector the vector of trajectory points for this track
      */
     static recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector *const pTrackStateVector);
+
+    /**
+     *  @brief Build a recob::Shower object
+     *
+     *  @param pLArShowerPfo the object of the shower parameters filled in pandora
+     */
+    static recob::Shower BuildShower( const lar_content::LArShowerPfo *const pLArShowerPfo );
+
 
     /**
      *  @brief Build a reco::Seed object
