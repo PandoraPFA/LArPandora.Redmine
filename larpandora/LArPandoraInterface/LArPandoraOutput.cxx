@@ -30,7 +30,6 @@
 
 #include "larpandoracontent/LArHelpers/LArClusterHelper.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
-#include "larpandoracontent/LArObjects/LArShowerPfo.h"
 #include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
@@ -149,12 +148,11 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         recob::Vertex newVertex(pos, vertexCounter++);
         outputVertices->push_back(newVertex);
     }
-    
-    
+
     lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
     lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
     lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
-    
+
     // Loop over Pandora particles and build recob::PFParticles
     for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
     {
@@ -339,10 +337,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     if (!pLArShowerPfo)
                         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildShower --- input pfo was not shower-like ";
 
-                    if ( settings.m_buildShowers )
+                    if (settings.m_buildShowers)
                     {
-                        outputShowers->emplace_back( LArPandoraOutput::BuildShower( pLArShowerPfo ) );
-                        outputPCAxes->emplace_back( LArPandoraOutput::BuildShowerPCA( pLArShowerPfo ) );
+                        outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo));
+                        outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
 
                         // util::CreateAssn(*(settings.m_pProducer), evt, *(outputShowers.get()), , *(outputShowersToHits.get()));
 
@@ -350,8 +348,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                           makePfoPtr(outputParticles->size() - 1),   // index of the PFO we just made
                           makeShowerPtr(outputShowers->size() - 1)   // index of the shower we just made
                           );
-                        outputParticlesToPCAxes->addSingle( makePfoPtr( outputParticles->size() -1 ), makePCAxisPtr( outputPCAxes->size() -1 ) );
-                        outputShowersToPCAxes->addSingle( makeShowerPtr( outputShowers->size() -1 ), makePCAxisPtr( outputPCAxes->size() -1 ) );
+                        outputParticlesToPCAxes->addSingle(makePfoPtr(outputParticles->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
+                        outputShowersToPCAxes->addSingle(makeShowerPtr(outputShowers->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
                     }
                 }
                 catch (cet::exception &e)
@@ -540,62 +538,68 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
   
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Shower LArPandoraOutput::BuildShower( const lar_content::LArShowerPfo *const pLArShowerPfo )
+recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo)
 {
-    const pandora::CartesianVector &showerLength( pLArShowerPfo->GetShowerLength() );
-    const pandora::CartesianVector &showerDirection( pLArShowerPfo->GetShowerDirection() );
-    const pandora::CartesianVector &showerVertex( pLArShowerPfo->GetShowerVertex() );
-    float Length = showerLength.GetX();
-    float OpeningAngle = pLArShowerPfo->GetShowerOpeningAngle();
-    TVector3 Direction( showerDirection.GetX(), showerDirection.GetY(), showerDirection.GetZ() );
-    TVector3 Vertex( showerVertex.GetX(), showerVertex.GetY(), showerVertex.GetZ() );
-    TVector3 DirectionErr;
-    TVector3 VertexErr;
-    std::vector< double >  TotalEnergy;
-    std::vector< double >  TotalEnergyErr;
-    std::vector< double >  dEdx;
-    std::vector< double >  dEdxErr;
-    int bestplane = 0;
+    const pandora::CartesianVector &showerLength(pLArShowerPfo->GetShowerLength());
+    const pandora::CartesianVector &showerDirection(pLArShowerPfo->GetShowerDirection());
+    const pandora::CartesianVector &showerVertex(pLArShowerPfo->GetShowerVertex());
 
-    return recob::Shower( Direction, DirectionErr, Vertex, VertexErr, TotalEnergy, TotalEnergyErr, dEdx, dEdxErr, bestplane, Length, OpeningAngle );
-    
+    const float length(showerLength.GetX());
+    const float openingAngle(pLArShowerPfo->GetShowerOpeningAngle());
+    const TVector3 direction(showerDirection.GetX(), showerDirection.GetY(), showerDirection.GetZ());
+    const TVector3 vertex(showerVertex.GetX(), showerVertex.GetY(), showerVertex.GetZ());
+
+    // TODO
+    const TVector3 directionErr;
+    const TVector3 vertexErr;
+    const std::vector<double> totalEnergy;
+    const std::vector<double> totalEnergyErr;
+    const std::vector<double> dEdx;
+    const std::vector<double> dEdxErr;
+    const int bestplane(0);
+
+    return recob::Shower(direction, directionErr, vertex, vertexErr, totalEnergy, totalEnergyErr, dEdx, dEdxErr, bestplane, length, openingAngle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::PCAxis LArPandoraOutput::BuildShowerPCA( const lar_content::LArShowerPfo *const pLArShowerPfo )
+recob::PCAxis LArPandoraOutput::BuildShowerPCA(const lar_content::LArShowerPfo *const pLArShowerPfo)
 {
-    const pandora::CartesianVector &showerCentroid( pLArShowerPfo->GetShowerCentroid() );
-    const pandora::CartesianVector &showerDirection( pLArShowerPfo->GetShowerDirection() );
-    const pandora::CartesianVector &showerSecondaryVector( pLArShowerPfo->GetShowerSecondaryVector() );
-    const pandora::CartesianVector &showerTertiaryVector( pLArShowerPfo->GetShowerTertiaryVector() );
-    const pandora::CartesianVector &showerEigenValues( pLArShowerPfo->GetShowerEigenValues() );
+    const pandora::CartesianVector &showerCentroid(pLArShowerPfo->GetShowerCentroid());
+    const pandora::CartesianVector &showerDirection(pLArShowerPfo->GetShowerDirection());
+    const pandora::CartesianVector &showerSecondaryVector(pLArShowerPfo->GetShowerSecondaryVector());
+    const pandora::CartesianVector &showerTertiaryVector(pLArShowerPfo->GetShowerTertiaryVector());
+    const pandora::CartesianVector &showerEigenValues(pLArShowerPfo->GetShowerEigenValues());
 
-    bool         SvdOK = true;            ///< SVD Decomposition was successful
-    int          NumHitsUsed = 100;       ///< Number of hits in the decomposition, not yet ready
-    double       EigenValues[3] = { showerEigenValues.GetX(), showerEigenValues.GetY(), showerEigenValues.GetZ() };   ///< Eigen values from SVD decomposition
-    std::vector< std::vector< double > > EigenVecs;     ///< The three principle axes
-    std::vector< double > tempVec;
-    tempVec.emplace_back( showerDirection.GetX() );
-    tempVec.emplace_back( showerDirection.GetY() );
-    tempVec.emplace_back( showerDirection.GetZ() );
-    EigenVecs.emplace_back( tempVec );
+    const bool svdOK(true); ///< SVD Decomposition was successful
+    const double eigenValues[3] = {showerEigenValues.GetX(), showerEigenValues.GetY(), showerEigenValues.GetZ()}; ///< Eigen values from SVD decomposition
+    const double avePosition[3] = {showerCentroid.GetX(), showerCentroid.GetY(), showerCentroid.GetZ()}; ///< Average position of hits fed to PCA
+
+    std::vector< std::vector<double> > eigenVecs; ///< The three principle axes
+    std::vector<double> tempVec;
+    tempVec.emplace_back(showerDirection.GetX());
+    tempVec.emplace_back(showerDirection.GetY());
+    tempVec.emplace_back(showerDirection.GetZ());
+    eigenVecs.emplace_back(tempVec);
+
     tempVec.clear();
-    tempVec.emplace_back( showerSecondaryVector.GetX() );
-    tempVec.emplace_back( showerSecondaryVector.GetY() );
-    tempVec.emplace_back( showerSecondaryVector.GetZ() );
-    EigenVecs.emplace_back( tempVec );
+    tempVec.emplace_back(showerSecondaryVector.GetX());
+    tempVec.emplace_back(showerSecondaryVector.GetY());
+    tempVec.emplace_back(showerSecondaryVector.GetZ());
+    eigenVecs.emplace_back(tempVec);
+
     tempVec.clear();
-    tempVec.emplace_back( showerTertiaryVector.GetX() );
-    tempVec.emplace_back( showerTertiaryVector.GetY() );
-    tempVec.emplace_back( showerTertiaryVector.GetZ() );
-    EigenVecs.emplace_back( tempVec );
+    tempVec.emplace_back(showerTertiaryVector.GetX());
+    tempVec.emplace_back(showerTertiaryVector.GetY());
+    tempVec.emplace_back(showerTertiaryVector.GetZ());
+    eigenVecs.emplace_back(tempVec);
 
-    double       AvePosition[3] = { showerCentroid.GetX(), showerCentroid.GetY(), showerCentroid.GetZ() };   ///< Average position of hits fed to PCA
-    double       AveHitDoca = 0.;       ///< Average doca of hits used in PCA, not ready yet
-    size_t       ID = 0;                ///< axis ID, not ready yet
+    // TODO
+    const int numHitsUsed(100); ///< Number of hits in the decomposition, not yet ready
+    const double aveHitDoca(0.); ///< Average doca of hits used in PCA, not ready yet
+    const size_t iD(0); ///< Axis ID, not ready yet
 
-    return recob::PCAxis( SvdOK, NumHitsUsed, EigenValues, EigenVecs, AvePosition, AveHitDoca, ID );
+    return recob::PCAxis(svdOK, numHitsUsed, eigenValues, eigenVecs, avePosition, aveHitDoca, iD);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

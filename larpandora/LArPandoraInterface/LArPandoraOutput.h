@@ -85,14 +85,14 @@ public:
      *
      *  @param pLArShowerPfo the object of the shower parameters filled in pandora
      */
-    static recob::Shower BuildShower( const lar_content::LArShowerPfo *const pLArShowerPfo );
+    static recob::Shower BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo);
 
     /**
      *  @brief Build a recob::PCAxis object
      *
      *  @param pLArShowerPfo the object of the shower parameters filled in pandora
      */
-    static recob::PCAxis BuildShowerPCA( const lar_content::LArShowerPfo *const pLArShowerPfo );
+    static recob::PCAxis BuildShowerPCA(const lar_content::LArShowerPfo *const pLArShowerPfo);
 
     /**
      *  @brief Build a reco::Seed object
