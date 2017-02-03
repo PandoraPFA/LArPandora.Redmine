@@ -9,6 +9,8 @@
 
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/PCAxis.h"
 
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
@@ -85,6 +87,12 @@ public:
      */
     static recob::Shower BuildShower( const lar_content::LArShowerPfo *const pLArShowerPfo );
 
+    /**
+     *  @brief Build a recob::PCAxis object
+     *
+     *  @param pLArShowerPfo the object of the shower parameters filled in pandora
+     */
+    static recob::PCAxis BuildShowerPCA( const lar_content::LArShowerPfo *const pLArShowerPfo );
 
     /**
      *  @brief Build a reco::Seed object
