@@ -8,8 +8,9 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
-#include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/Shower.h"
@@ -97,9 +98,12 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 
         if (m_outputSettings.m_buildShowers)
         {
-            produces< std::vector<recob::Shower> >(); 
+            produces< std::vector<recob::Shower> >();
+            produces< std::vector<recob::PCAxis> >();
             produces< art::Assns<recob::PFParticle, recob::Shower> >();
+            produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
             produces< art::Assns<recob::Shower, recob::Hit> >();
+            produces< art::Assns<recob::Shower, recob::PCAxis> >();
         }
     }
 }
