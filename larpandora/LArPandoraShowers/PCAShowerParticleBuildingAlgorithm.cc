@@ -162,7 +162,10 @@ void PCAShowerParticleBuildingAlgorithm::RunPCA(const pandora::CaloHitList &thre
     }
 
     const double nThreeDHitsAsDouble(static_cast<double>(nThreeDHits));
-    centroid = CartesianVector(meanPosition[0] / nThreeDHitsAsDouble, meanPosition[1] / nThreeDHitsAsDouble, meanPosition[2] / nThreeDHitsAsDouble);
+    meanPosition[0] /= nThreeDHitsAsDouble;
+    meanPosition[1] /= nThreeDHitsAsDouble;
+    meanPosition[2] /= nThreeDHitsAsDouble;
+    centroid = CartesianVector(meanPosition[0], meanPosition[1], meanPosition[2]);
 
     // Define elements of our covariance matrix
     double xi2(0.);
