@@ -41,6 +41,7 @@ public:
         const pandora::Pandora *m_pPrimaryPandora;              ///< 
         art::EDProducer        *m_pProducer;                    ///< 
         bool                    m_buildTracks;                  ///<
+	unsigned int            m_minTrajectoryPoints;          ///<
         bool                    m_buildShowers;                 ///<
         bool                    m_buildStitchedParticles;       ///<
         bool                    m_buildSingleVolumeParticles;   ///<
