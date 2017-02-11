@@ -341,6 +341,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     {
                         outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo));
                         outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
+                        outputShowers->back().set_id(outputShowers->size()); // 1-based sequence
 
                         // util::CreateAssn(*(settings.m_pProducer), evt, *(outputShowers.get()), , *(outputShowersToHits.get()));
 
@@ -558,7 +559,7 @@ recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *con
     const std::vector<double> dEdxErr;
     const int bestplane(0);
 
-    return recob::Shower(direction, directionErr, vertex, vertexErr, totalEnergy, totalEnergyErr, dEdx, dEdxErr, bestplane, length, openingAngle);
+    return recob::Shower(direction, directionErr, vertex, vertexErr, totalEnergy, totalEnergyErr, dEdx, dEdxErr, bestplane, util::kBogusI, length, openingAngle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
