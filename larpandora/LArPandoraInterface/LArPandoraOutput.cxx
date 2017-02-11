@@ -330,35 +330,31 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             }
             else if (lar_content::LArPfoHelper::IsShower(pPfo))
             {
-                try
-                {
-                    const lar_content::LArShowerPfo *const pLArShowerPfo = dynamic_cast<const lar_content::LArShowerPfo*>(pPfo);
+                const lar_content::LArShowerPfo *const pLArShowerPfo = dynamic_cast<const lar_content::LArShowerPfo*>(pPfo);
 
-                    if (!pLArShowerPfo)
-                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildShower --- input pfo was not shower-like ";
-
-                    if (settings.m_buildShowers)
-                    {
-                        outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo));
-                        outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
-                        outputShowers->back().set_id(outputShowers->size()); // 1-based sequence
-
-                        // util::CreateAssn(*(settings.m_pProducer), evt, *(outputShowers.get()), , *(outputShowersToHits.get()));
-
-                        outputParticlesToShowers->addSingle(
-                          makePfoPtr(outputParticles->size() - 1),   // index of the PFO we just made
-                          makeShowerPtr(outputShowers->size() - 1)   // index of the shower we just made
-                          );
-                        outputParticlesToPCAxes->addSingle(makePfoPtr(outputParticles->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
-                        outputShowersToPCAxes->addSingle(makeShowerPtr(outputShowers->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
-                    }
+                if (!pLArShowerPfo) {
+                    mf::LogWarning("LArPandoraOutput") << " LArPandoraOutput::BuildShower --- input pfo was not shower-like ";
+                    continue;
                 }
-                catch (cet::exception &e)
-                {
-                }
+
+                if (!settings.m_buildShowers) continue;
+                
+                outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo));
+                outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
+                outputShowers->back().set_id(outputShowers->size()); // 1-based sequence
+
+                // util::CreateAssn(*(settings.m_pProducer), evt, *(outputShowers.get()), , *(outputShowersToHits.get()));
+
+                outputParticlesToShowers->addSingle(
+                    makePfoPtr(outputParticles->size() - 1),   // index of the PFO we just made
+                    makeShowerPtr(outputShowers->size() - 1)   // index of the shower we just made
+                    );
+                outputParticlesToPCAxes->addSingle(makePfoPtr(outputParticles->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
+                outputShowersToPCAxes->addSingle(makeShowerPtr(outputShowers->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
+                
             }
         }
-    }
+    } // for each reconstructed particle flow
 
     mf::LogDebug("LArPandora") << "   Number of new particles: " << outputParticles->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new clusters: " << outputClusters->size() << std::endl;
