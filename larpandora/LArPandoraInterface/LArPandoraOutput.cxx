@@ -308,7 +308,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                             outputSeeds->size() - 1, outputSeeds->size());
                     }
 
-                    if ((settings.m_buildTracks)&&(trackStateVector.size()>settings.m_minTrajectoryPoints))
+                    if ((settings.m_buildTracks)&&(trackStateVector.size()>=settings.m_minTrajectoryPoints))
                     {
                         outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
 
