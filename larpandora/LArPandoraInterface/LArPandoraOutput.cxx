@@ -308,13 +308,18 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                             outputSeeds->size() - 1, outputSeeds->size());
                     }
 
-                    if ((settings.m_buildTracks)&&(trackStateVector.size()>=settings.m_minTrajectoryPoints))
+                    if ((settings.m_buildTracks) && LArPandoraOutput::MinTrajectoryPoints(&trackStateVector, settings.m_minTrajectoryPoints))
+		      //		      if ((settings.m_buildTracks)&&(trackStateVector.size()>=settings.m_minTrajectoryPoints))
                     {
-                        outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
+		      std::cout << " ... building track with " << trackStateVector.size() << " points " << std::endl;
+		      
+		      outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
+		      
+		      std::cout << " track built! " << std::endl;
 
-                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), trackHits, *(outputTracksToHits.get()));
-                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),
-                            outputTracks->size() - 1, outputTracks->size());
+		      util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), trackHits, *(outputTracksToHits.get()));
+		      util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),outputTracks->size() - 1, outputTracks->size());
+				       
                     }
                 }
                 catch (cet::exception &e)
@@ -467,10 +472,29 @@ recob::Seed LArPandoraOutput::BuildSeed(const lar_content::LArTrackState &trackS
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+bool LArPandoraOutput::MinTrajectoryPoints(const lar_content::LArTrackStateVector *const pTrackStateVector, const unsigned int minTrajectoryPoints)
+{
+  
+  if(pTrackStateVector->size() < minTrajectoryPoints)
+    return false;
+  
+  unsigned int validPoints(0);
+  
+  for (const lar_content::LArTrackState &nextPoint : *pTrackStateVector)
+    {
+      if (nextPoint.GetdQdL() >= std::numeric_limits<float>::epsilon())
+	++validPoints;
+    }
+
+  return (validPoints >= minTrajectoryPoints);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTrackStateVector *const pTrackStateVector)
 {
     mf::LogDebug("LArPandora") << "   Building Track [" << id << "], Number of trajectory points = " << pTrackStateVector->size() << std::endl;
+    std::cout << "   Building Track [" << id << "], Number of trajectory points = " << pTrackStateVector->size() << std::endl;
 
     if (pTrackStateVector->empty())
         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- No input trajectory points were provided ";
@@ -484,8 +508,12 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
     // Loop over trajectory points
     for (const lar_content::LArTrackState &nextPoint : *pTrackStateVector)
     {
+      std::cout << " nextPoint.GetdQdL() = " << nextPoint.GetdQdL() << std::endl;
+
         if (nextPoint.GetdQdL() < std::numeric_limits<float>::epsilon())
             continue;
+	
+	std::cout << "  ... I add this point " << std::endl;
 
         const float dQdxU((pandora::TPC_VIEW_U == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
         const float dQdxV((pandora::TPC_VIEW_V == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);

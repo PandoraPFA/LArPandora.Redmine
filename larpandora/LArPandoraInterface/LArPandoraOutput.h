@@ -70,6 +70,13 @@ public:
     static recob::Cluster BuildCluster(const int id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo);
 
     /**
+     *  @brief Check (valid) trajectory points is at least the minimum
+     *
+     *  @param pTrackStateVector the vector of trajectory points for this track
+     */
+    static bool MinTrajectoryPoints(const lar_content::LArTrackStateVector *const pTrackStateVector, const unsigned int minTrajectoryPoints);
+
+    /**
      *  @brief Build a recob::Track object
      *
      *  @param id the id code for the track
