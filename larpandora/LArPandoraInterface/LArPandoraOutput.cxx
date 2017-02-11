@@ -572,24 +572,11 @@ recob::PCAxis LArPandoraOutput::BuildShowerPCA(const lar_content::LArShowerPfo *
     const double eigenValues[3] = {showerEigenValues.GetX(), showerEigenValues.GetY(), showerEigenValues.GetZ()}; ///< Eigen values from SVD decomposition
     const double avePosition[3] = {showerCentroid.GetX(), showerCentroid.GetY(), showerCentroid.GetZ()}; ///< Average position of hits fed to PCA
 
-    std::vector< std::vector<double> > eigenVecs; ///< The three principle axes
-    std::vector<double> tempVec;
-    tempVec.emplace_back(showerDirection.GetX());
-    tempVec.emplace_back(showerDirection.GetY());
-    tempVec.emplace_back(showerDirection.GetZ());
-    eigenVecs.emplace_back(tempVec);
-
-    tempVec.clear();
-    tempVec.emplace_back(showerSecondaryVector.GetX());
-    tempVec.emplace_back(showerSecondaryVector.GetY());
-    tempVec.emplace_back(showerSecondaryVector.GetZ());
-    eigenVecs.emplace_back(tempVec);
-
-    tempVec.clear();
-    tempVec.emplace_back(showerTertiaryVector.GetX());
-    tempVec.emplace_back(showerTertiaryVector.GetY());
-    tempVec.emplace_back(showerTertiaryVector.GetZ());
-    eigenVecs.emplace_back(tempVec);
+    std::vector< std::vector<double> > eigenVecs = { /// The three principle axes
+        { showerDirection.GetX(), showerDirection.GetY(), showerDirection.GetZ() },
+        { showerSecondaryVector.GetX(), showerSecondaryVector.GetY(), showerSecondaryVector.GetZ() },
+        { showerTertiaryVector.GetX(), showerTertiaryVector.GetY(), showerTertiaryVector.GetZ() }
+    };
 
     // TODO
     const int numHitsUsed(100); ///< Number of hits in the decomposition, not yet ready
