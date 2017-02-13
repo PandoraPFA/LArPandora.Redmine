@@ -310,12 +310,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                     if ((settings.m_buildTracks) && LArPandoraOutput::MinTrajectoryPoints(&trackStateVector, settings.m_minTrajectoryPoints))
                     {
-		      
-		      outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
+                      
+                      outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector));
 
-		      util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), trackHits, *(outputTracksToHits.get()));
-		      util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),outputTracks->size() - 1, outputTracks->size());
-				       
+                      util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), trackHits, *(outputTracksToHits.get()));
+                      util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()),outputTracks->size() - 1, outputTracks->size());
+                                       
                     }
                 }
                 catch (cet::exception &e)
@@ -479,7 +479,7 @@ bool LArPandoraOutput::MinTrajectoryPoints(const lar_content::LArTrackStateVecto
   for (const lar_content::LArTrackState &nextPoint : *pTrackStateVector)
     {
       if (nextPoint.GetdQdL() >= std::numeric_limits<float>::epsilon())
-	++validPoints;
+        ++validPoints;
     }
 
   return (validPoints >= minTrajectoryPoints);
@@ -506,7 +506,7 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
 
         if (nextPoint.GetdQdL() < std::numeric_limits<float>::epsilon())
             continue;
-	
+        
         const float dQdxU((pandora::TPC_VIEW_U == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
         const float dQdxV((pandora::TPC_VIEW_V == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
         const float dQdxW((pandora::TPC_VIEW_W == nextPoint.GetHitType()) ? nextPoint.GetdQdL() : 0.f);
