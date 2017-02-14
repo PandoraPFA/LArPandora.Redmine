@@ -581,7 +581,7 @@ recob::PCAxis LArPandoraOutput::BuildShowerPCA(const lar_content::LArShowerPfo *
     // TODO
     const int numHitsUsed(100); ///< Number of hits in the decomposition, not yet ready
     const double aveHitDoca(0.); ///< Average doca of hits used in PCA, not ready yet
-    const size_t iD(0); ///< Axis ID, not ready yet
+    const size_t iD(util::kBogusI); ///< Axis ID, not ready yet
 
     return recob::PCAxis(svdOK, numHitsUsed, eigenValues, eigenVecs, avePosition, aveHitDoca, iD);
 }
