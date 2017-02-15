@@ -14,11 +14,11 @@
 #include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 #include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
 #include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Seed.h"
-#include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Vertex.h"
 
@@ -77,6 +77,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     std::unique_ptr< std::vector<recob::Vertex> >     outputVertices( new std::vector<recob::Vertex> );
     std::unique_ptr< std::vector<recob::Track> >      outputTracks( new std::vector<recob::Track> );
     std::unique_ptr< std::vector<recob::Shower> >     outputShowers( new std::vector<recob::Shower> );
+    std::unique_ptr< std::vector<recob::PCAxis> >     outputPCAxes( new std::vector<recob::PCAxis> );
 
     std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
@@ -84,8 +85,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> >      outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Shower> >     outputParticlesToShowers( new art::Assns<recob::PFParticle, recob::Shower> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::PCAxis> >     outputParticlesToPCAxes( new art::Assns<recob::PFParticle, recob::PCAxis> );
     std::unique_ptr< art::Assns<recob::Track, recob::Hit> >             outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Shower, recob::Hit> >            outputShowersToHits( new art::Assns<recob::Shower, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::Shower, recob::PCAxis> >         outputShowersToPCAxes( new art::Assns<recob::Shower, recob::PCAxis> );
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Seed, recob::Hit> >              outputSeedsToHits( new art::Assns<recob::Seed, recob::Hit> );
@@ -145,6 +148,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         recob::Vertex newVertex(pos, vertexCounter++);
         outputVertices->push_back(newVertex);
     }
+
+    lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
+    lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
+    lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
 
     // Loop over Pandora particles and build recob::PFParticles
     for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
@@ -285,7 +292,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
         
                     if (!pLArTrackPfo)
-                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSeeds --- input pfo was not track-like ";
+                        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo was not track-like ";
                 
                     const lar_content::LArTrackStateVector &trackStateVector = pLArTrackPfo->m_trackStateVector;
 
@@ -322,12 +329,33 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 {
                 }
             }
-        }
+            else if (lar_content::LArPfoHelper::IsShower(pPfo))
+            {
+                const lar_content::LArShowerPfo *const pLArShowerPfo = dynamic_cast<const lar_content::LArShowerPfo*>(pPfo);
 
-        //
-        // TODO: Build Showers here
-        //
-    }
+                if (!pLArShowerPfo) {
+                    mf::LogWarning("LArPandoraOutput") << " LArPandoraOutput::BuildShower --- input pfo was not shower-like ";
+                    continue;
+                }
+
+                if (!settings.m_buildShowers) continue;
+                
+                outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo));
+                outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
+                outputShowers->back().set_id(outputShowers->size()); // 1-based sequence
+
+                // util::CreateAssn(*(settings.m_pProducer), evt, *(outputShowers.get()), , *(outputShowersToHits.get()));
+
+                outputParticlesToShowers->addSingle(
+                    makePfoPtr(outputParticles->size() - 1),   // index of the PFO we just made
+                    makeShowerPtr(outputShowers->size() - 1)   // index of the shower we just made
+                    );
+                outputParticlesToPCAxes->addSingle(makePfoPtr(outputParticles->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
+                outputShowersToPCAxes->addSingle(makeShowerPtr(outputShowers->size() - 1), makePCAxisPtr(outputPCAxes->size() - 1));
+                
+            }
+        }
+    } // for each reconstructed particle flow
 
     mf::LogDebug("LArPandora") << "   Number of new particles: " << outputParticles->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new clusters: " << outputClusters->size() << std::endl;
@@ -338,8 +366,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     if (settings.m_buildTracks)
         mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;
 
-    if (settings.m_buildShowers)
+    if (settings.m_buildShowers) {
         mf::LogDebug("LArPandora") << "   Number of new showers: " << outputShowers->size() << std::endl;
+        mf::LogDebug("LArPandora") << "   Number of new pcaxes:  " << outputPCAxes->size() << std::endl;
+    }
 
     evt.put(std::move(outputParticles));
     evt.put(std::move(outputSpacePoints));
@@ -367,6 +397,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         evt.put(std::move(outputShowers));
         evt.put(std::move(outputParticlesToShowers));
         evt.put(std::move(outputShowersToHits));
+        evt.put(std::move(outputPCAxes));
+        evt.put(std::move(outputParticlesToPCAxes));
+        evt.put(std::move(outputShowersToPCAxes));
     }
 }
 
@@ -520,6 +553,59 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
     return recob::Track(xyz, pxpypz, dQdx, momentum, id);
 }
   
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo)
+{
+    const pandora::CartesianVector &showerLength(pLArShowerPfo->GetShowerLength());
+    const pandora::CartesianVector &showerDirection(pLArShowerPfo->GetShowerDirection());
+    const pandora::CartesianVector &showerVertex(pLArShowerPfo->GetShowerVertex());
+
+    const float length(showerLength.GetX());
+    const float openingAngle(pLArShowerPfo->GetShowerOpeningAngle());
+    const TVector3 direction(showerDirection.GetX(), showerDirection.GetY(), showerDirection.GetZ());
+    const TVector3 vertex(showerVertex.GetX(), showerVertex.GetY(), showerVertex.GetZ());
+
+    // TODO
+    const TVector3 directionErr;
+    const TVector3 vertexErr;
+    const std::vector<double> totalEnergy;
+    const std::vector<double> totalEnergyErr;
+    const std::vector<double> dEdx;
+    const std::vector<double> dEdxErr;
+    const int bestplane(0);
+
+    return recob::Shower(direction, directionErr, vertex, vertexErr, totalEnergy, totalEnergyErr, dEdx, dEdxErr, bestplane, util::kBogusI, length, openingAngle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::PCAxis LArPandoraOutput::BuildShowerPCA(const lar_content::LArShowerPfo *const pLArShowerPfo)
+{
+    const pandora::CartesianVector &showerCentroid(pLArShowerPfo->GetShowerCentroid());
+    const pandora::CartesianVector &showerDirection(pLArShowerPfo->GetShowerDirection());
+    const pandora::CartesianVector &showerSecondaryVector(pLArShowerPfo->GetShowerSecondaryVector());
+    const pandora::CartesianVector &showerTertiaryVector(pLArShowerPfo->GetShowerTertiaryVector());
+    const pandora::CartesianVector &showerEigenValues(pLArShowerPfo->GetShowerEigenValues());
+
+    const bool svdOK(true); ///< SVD Decomposition was successful
+    const double eigenValues[3] = {showerEigenValues.GetX(), showerEigenValues.GetY(), showerEigenValues.GetZ()}; ///< Eigen values from SVD decomposition
+    const double avePosition[3] = {showerCentroid.GetX(), showerCentroid.GetY(), showerCentroid.GetZ()}; ///< Average position of hits fed to PCA
+
+    std::vector< std::vector<double> > eigenVecs = { /// The three principle axes
+        { showerDirection.GetX(), showerDirection.GetY(), showerDirection.GetZ() },
+        { showerSecondaryVector.GetX(), showerSecondaryVector.GetY(), showerSecondaryVector.GetZ() },
+        { showerTertiaryVector.GetX(), showerTertiaryVector.GetY(), showerTertiaryVector.GetZ() }
+    };
+
+    // TODO
+    const int numHitsUsed(100); ///< Number of hits in the decomposition, not yet ready
+    const double aveHitDoca(0.); ///< Average doca of hits used in PCA, not ready yet
+    const size_t iD(util::kBogusI); ///< Axis ID, not ready yet
+
+    return recob::PCAxis(svdOK, numHitsUsed, eigenValues, eigenVecs, avePosition, aveHitDoca, iD);
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora::CaloHit *const pCaloHit)
