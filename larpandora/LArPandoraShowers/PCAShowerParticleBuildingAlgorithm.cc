@@ -303,7 +303,7 @@ float PCAShowerParticleBuildingAlgorithm::OpeningAngle(const CartesianVector &pr
         return 0.f;
     }
 
-    return (2.f * std::atan(std::sqrt(eigenValues.GetY()) * sinTheta / std::sqrt(eigenValues.GetX())));
+    return std::atan(std::sqrt(eigenValues.GetY()) * sinTheta / std::sqrt(eigenValues.GetX()));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
