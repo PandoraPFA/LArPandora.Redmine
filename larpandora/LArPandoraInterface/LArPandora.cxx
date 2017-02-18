@@ -106,6 +106,10 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< art::Assns<recob::Shower, recob::PCAxis> >();
         }
     }
+   if (pset.has_key("ShowerEnergy")) {
+       fShowerEnergyAlg = std::make_ptr<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
+       m_outputSettings.m_showerEnergyAlg = fShowerEnergyAlg;
+   }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

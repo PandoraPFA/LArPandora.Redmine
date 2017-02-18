@@ -152,6 +152,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
     lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
     lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
+    lar::PtrMaker<recob::Cluster> makeClusterPtr(evt, *(settings.m_pProducer));
 
     // Loop over Pandora particles and build recob::PFParticles
     for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
@@ -226,6 +227,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // Build 2D Clusters   
         pandora::ClusterVector pandoraClusterVector(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
         std::sort(pandoraClusterVector.begin(), pandoraClusterVector.end(), lar_content::LArClusterHelper::SortByNHits);
+        int iClusterCounter = clusterCounter;
 
         for (const pandora::Cluster *const pCluster : pandoraClusterVector)
         {
@@ -339,8 +341,17 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 }
 
                 if (!settings.m_buildShowers) continue;
-                
-                outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo));
+
+                // Prepare the input clusters and the cluster-hit association for calculating shower energy
+                std::vector<art::Ptr<recob::Cluster>> clusters;
+                for ( int iCluster = iClusterCounter; iCluster < outputClusters.size(); ++iCluster )
+                    clusters.push_back(makeClusterPtr(iCluster));
+
+                // Calorimetry
+                if(settings.m_pfoEnergyAlg)
+                    std::vector<double> showerE = showerEnergy.CalculateEnergy(clusters, *outputClustersToHits);
+
+                outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo, showerE));
                 outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
                 outputShowers->back().set_id(outputShowers->size()); // 1-based sequence
 
@@ -555,7 +566,7 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
   
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo)
+recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo, const std::vector<double>& const totalEnergy)
 {
     const pandora::CartesianVector &showerLength(pLArShowerPfo->GetShowerLength());
     const pandora::CartesianVector &showerDirection(pLArShowerPfo->GetShowerDirection());
@@ -569,7 +580,6 @@ recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *con
     // TODO
     const TVector3 directionErr;
     const TVector3 vertexErr;
-    const std::vector<double> totalEnergy;
     const std::vector<double> totalEnergyErr;
     const std::vector<double> dEdx;
     const std::vector<double> dEdxErr;

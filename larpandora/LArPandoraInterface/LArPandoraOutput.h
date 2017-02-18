@@ -13,6 +13,7 @@
 #include "lardataobj/RecoBase/PCAxis.h"
 
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
+#include "larreco/Calorimetry/LinearEnergyAlg.h"
 
 #include "larpandoracontent/LArObjects/LArTrackPfo.h" // For track state definitions
 #include "larpandoracontent/LArObjects/LArShowerPfo.h" // For shower parameters
@@ -49,6 +50,7 @@ public:
         bool                    m_buildShowers;                 ///<
         bool                    m_buildStitchedParticles;       ///<
         bool                    m_buildSingleVolumeParticles;   ///<
+        calo::LinearEnergyAlg const* m_showerEnergyAlg;         ///<
     };
 
     /**
@@ -124,6 +126,7 @@ public:
      *  @param pCaloHit the input Pandora hit (2D)
      */
     static art::Ptr<recob::Hit> GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit);
+
 };
 
 } // namespace lar_pandora
