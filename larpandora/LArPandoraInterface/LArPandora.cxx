@@ -8,6 +8,10 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "larcore/Geometry/Geometry.h"
+
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PCAxis.h"
@@ -43,6 +47,13 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 {
     m_configFile = pset.get<std::string>("ConfigFile");
     m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "No_File_Provided");
+    
+    // prepare the optional cluster energy algorithm
+    if (pset.is_key_to_table("ShowerEnergy")) {
+      m_showerEnergyAlg
+        = std::make_unique<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
+    }
+    else mf::LogWarning("LArPandora") << "No shower energy calibration set up.";
 
     m_inputSettings.m_pILArPandora = this;
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
@@ -60,6 +71,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_buildShowers = pset.get<bool>("BuildShowers", true);
     m_outputSettings.m_buildStitchedParticles = pset.get<bool>("BuildStitchedParticles", false);
     m_outputSettings.m_buildSingleVolumeParticles = pset.get<bool>("BuildSingleVolumeParticles", true);
+    m_outputSettings.m_showerEnergyAlg = m_showerEnergyAlg.get(); // may be nullptr
 
     m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", true);
     m_enableProduction = pset.get<bool>("EnableProduction", true);
@@ -106,10 +118,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< art::Assns<recob::Shower, recob::PCAxis> >();
         }
     }
-   if (pset.has_key("ShowerEnergy")) {
-       fShowerEnergyAlg = std::make_ptr<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
-       m_outputSettings.m_showerEnergyAlg = fShowerEnergyAlg;
-   }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,7 +148,17 @@ void LArPandora::beginJob()
 void LArPandora::produce(art::Event &evt)
 { 
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
-
+    
+    // we set up the algorithm on each new event, in case the services have changed:
+    if (m_showerEnergyAlg) {
+      m_showerEnergyAlg->setup(
+        *(lar::providerFrom<detinfo::DetectorPropertiesService>()),
+        *(lar::providerFrom<detinfo::DetectorClocksService>()),
+        *(lar::providerFrom<geo::Geometry>())
+        );
+    } // if
+    
+    
     IdToHitMap idToHitMap;
     this->CreatePandoraInput(evt, idToHitMap);
     this->RunPandoraInstances();

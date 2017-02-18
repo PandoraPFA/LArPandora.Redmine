@@ -94,8 +94,9 @@ public:
      *  @brief Build a recob::Shower object
      *
      *  @param pLArShowerPfo the object of the shower parameters filled in pandora
+     *  @param totalEnergy calibrated energy for each cluster [GeV]
      */
-    static recob::Shower BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo);
+    static recob::Shower BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo, const std::vector<double>& totalEnergy);
 
     /**
      *  @brief Build a recob::PCAxis object

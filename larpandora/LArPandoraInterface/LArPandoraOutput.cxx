@@ -344,12 +344,14 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                 // Prepare the input clusters and the cluster-hit association for calculating shower energy
                 std::vector<art::Ptr<recob::Cluster>> clusters;
-                for ( int iCluster = iClusterCounter; iCluster < outputClusters.size(); ++iCluster )
+                for ( size_t iCluster = iClusterCounter; iCluster < outputClusters->size(); ++iCluster )
                     clusters.push_back(makeClusterPtr(iCluster));
 
-                // Calorimetry
-                if(settings.m_pfoEnergyAlg)
-                    std::vector<double> showerE = showerEnergy.CalculateEnergy(clusters, *outputClustersToHits);
+                // Calorimetry (if not requested, energy vector will stay empty)
+                std::vector<double> showerE;
+                if(settings.m_showerEnergyAlg) {
+                    showerE = settings.m_showerEnergyAlg->CalculateEnergy(clusters, *outputClustersToHits);
+                } // if calorimetry
 
                 outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo, showerE));
                 outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
@@ -566,7 +568,7 @@ recob::Track LArPandoraOutput::BuildTrack(const int id, const lar_content::LArTr
   
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo, const std::vector<double>& const totalEnergy)
+recob::Shower LArPandoraOutput::BuildShower(const lar_content::LArShowerPfo *const pLArShowerPfo, const std::vector<double>& totalEnergy)
 {
     const pandora::CartesianVector &showerLength(pLArShowerPfo->GetShowerLength());
     const pandora::CartesianVector &showerDirection(pLArShowerPfo->GetShowerDirection());
@@ -656,7 +658,8 @@ LArPandoraOutput::Settings::Settings() :
     m_minTrajectoryPoints(2),
     m_buildShowers(true),
     m_buildStitchedParticles(false),
-    m_buildSingleVolumeParticles(true)
+    m_buildSingleVolumeParticles(true),
+    m_showerEnergyAlg(nullptr)
 {
 }
 

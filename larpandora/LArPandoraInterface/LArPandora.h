@@ -11,8 +11,10 @@
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraInput.h"
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
+#include "larreco/Calorimetry/LinearEnergyAlg.h"
 
 #include <string>
+#include <memory> // std::unique_ptr<>
 
 class TTree;
 
@@ -75,6 +77,8 @@ private:
     LArPandoraInput::Settings   m_inputSettings;            ///< 
     LArPandoraOutput::Settings  m_outputSettings;           ///<    
 
+    std::unique_ptr<calo::LinearEnergyAlg> m_showerEnergyAlg;
+                                                            ///< Optional cluster energy algorithm.
     bool                        m_runStitchingInstance;     ///<
     bool                        m_enableProduction;         ///<
     bool                        m_enableLineGaps;           ///<
