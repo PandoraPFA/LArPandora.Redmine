@@ -10,7 +10,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larreco/ClusterFinder/ClusterCreator.h"
-#include "larcore/Geometry/Geometry.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::TPCID
 #include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 #include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
 #include "lardata/Utilities/AssociationUtil.h"
@@ -21,6 +21,7 @@
 #include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Vertex.h"
+#include "larcore/Geometry/Geometry.h"
 
 #include "Api/PandoraApi.h"
 
@@ -108,6 +109,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     int vertexCounter(0);
     int spacePointCounter(0);
     int clusterCounter(0);
+    size_t clusterHitAssnCounter(0);
     int trackCounter(0);
     size_t particleCounter(0);
 
@@ -134,7 +136,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             vertexMap.insert( std::pair<const pandora::Vertex*, unsigned int>(pVertex, vertexVector.size() - 1) ); 
         }
     }
-
+    
+    auto const& geom = lar::providerFrom<geo::Geometry>();
+    
     // Loop over Pandora vertices and build recob::Vertices
     for (const pandora::Vertex *const pVertex : vertexVector)
     {
@@ -228,6 +232,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         pandora::ClusterVector pandoraClusterVector(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
         std::sort(pandoraClusterVector.begin(), pandoraClusterVector.end(), lar_content::LArClusterHelper::SortByNHits);
         int iClusterCounter = clusterCounter;
+        size_t iClusterHitAssnCounter = clusterHitAssnCounter;
 
         for (const pandora::Cluster *const pCluster : pandoraClusterVector)
         {
@@ -264,10 +269,17 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             {
                 const HitVector &clusterHits(hitArrayEntry.second);
                 outputClusters->emplace_back(LArPandoraOutput::BuildCluster(clusterCounter++, clusterHits, isolatedHits, ClusterParamAlgo)); 
-
+                clusterHitAssnCounter += clusterHits.size();
+                
                 util::CreateAssn(*(settings.m_pProducer), evt, *(outputClusters.get()), clusterHits, *(outputClustersToHits.get()));
                 util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),
                     outputClusters->size() - 1, outputClusters->size());
+                
+                LOG_DEBUG("LArPandora") << "Stored cluster ID="
+                  << outputClusters->back().ID()
+                  << " (#" << (outputClusters->size() - 1)
+                  << ") with " << clusterHits.size() << " hits";
+
             }
         }
 
@@ -341,18 +353,97 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 }
 
                 if (!settings.m_buildShowers) continue;
-
-                // Prepare the input clusters and the cluster-hit association for calculating shower energy
-                std::vector<art::Ptr<recob::Cluster>> clusters;
-                for ( size_t iCluster = iClusterCounter; iCluster < outputClusters->size(); ++iCluster )
-                    clusters.push_back(makeClusterPtr(iCluster));
-
-                // Calorimetry (if not requested, energy vector will stay empty)
-                std::vector<double> showerE;
+                
+                // if this assertion fails, we have a shower with no associated clusters:
+                assert((size_t) iClusterCounter < outputClusters->size());
+                assert(iClusterHitAssnCounter < outputClustersToHits->size());
+                
+                std::vector<double> showerE; // empty if no energy algorithm was requested
                 if(settings.m_showerEnergyAlg) {
-                    showerE = settings.m_showerEnergyAlg->CalculateEnergy(clusters, *outputClustersToHits);
-                } // if calorimetry
-
+                    
+                    // we expect all the clusters to be within this TPC:
+                    geo::TPCID refTPC = (*outputClusters)[iClusterCounter].Plane();
+                    
+                    // prepare the energies vector with one entry per plane
+                    // (we get the total number of planes of the TPC  the cluster is in from geometry)
+                    // and initialize them to a ridiculously negative number to start with
+                    showerE.resize(
+                        geom->TPC(refTPC).Nplanes(),
+                        std::numeric_limits<double>::lowest()
+                        );
+                    
+                    size_t const nClusters = outputClusters->size() - iClusterCounter;
+                    LOG_DEBUG("LArPandora")
+                        << nClusters << " clusters for shower #" << outputShowers->size();
+                    if ( nClusters > showerE.size() ) {
+                        // not fun, but we push through
+                        mf::LogError("LArPandora") << nClusters << " clusters for "
+                            << showerE.size() << " wire planes!";
+                    }
+                    
+                    // go through the new clusters
+                    // iterator to the first association of an hit to a new cluster:
+                    auto beginHit = outputClustersToHits->begin() + iClusterHitAssnCounter;
+                    for ( size_t iCluster = iClusterCounter; iCluster < outputClusters->size(); ++iCluster ) {
+                        
+                        auto const& cluster = (*outputClusters)[iCluster];
+                        
+                        auto const clusterPlaneID = cluster.Plane();
+                        if (refTPC != clusterPlaneID) {
+                            throw cet::exception("LArPandora")
+                              << "Clusters for shower #" << outputShowers->size()
+                              << " are expected on TPC " << std::string(refTPC)
+                              << " but cluster ID=" << cluster.ID()
+                              << " is on plane " + std::string(clusterPlaneID)
+                              ;
+                        }
+                        
+                        //
+                        // collect back the hits associated to this cluster (via art pointer)
+                        //
+                        std::vector<art::Ptr<recob::Hit>> clusterHits;
+                        auto const clusterPtr = makeClusterPtr(iCluster);
+                        auto endHit = beginHit;
+                        while (endHit != outputClustersToHits->end()) {
+                            if (endHit->first != clusterPtr) break;
+                            clusterHits.push_back(endHit->second);
+                            ++endHit;
+                        } // while
+                        LOG_TRACE("LArPandora")
+                            << "  " << clusterHits.size() << " hits for cluster ID="
+                            << cluster.ID() << " (#" << iCluster << ")";
+                        if (clusterHits.empty()) {
+                            // this is likely an error in the logic of this algorithm
+                            throw cet::exception("LArPandora")
+                                << "LArPandoraOutput::ProduceArtOutput(): no hits associated with a cluster!?";
+                        }
+                        
+                        //
+                        // compute the energy
+                        //
+                        double const E = settings.m_showerEnergyAlg->CalculateClusterEnergy
+                            (cluster, clusterHits);
+                        beginHit = endHit; // next iteration, we start from here
+                        
+                        //
+                        // store the energy in the cell pertaining the cluster plane
+                        // 
+                        auto const planeNo = cluster.Plane().Plane;
+                        if (showerE[planeNo] >= 0.) {
+                            LOG_WARNING("LArPandora")
+                                << "Warning! two or more clusters share plane "
+                                << cluster.Plane() << "! (the last with energy " << E
+                                << ", the previous " << showerE[planeNo] << " GeV)";
+                        }
+                        showerE[planeNo] = E;
+                        LOG_TRACE("LArPandora") << "  cluster energy: " << E
+                          << " GeV (plane: " << cluster.Plane() << ")";
+                        
+                    } // for new clusters
+                    
+                } // if shower energy
+                
+                
                 outputShowers->emplace_back(LArPandoraOutput::BuildShower(pLArShowerPfo, showerE));
                 outputPCAxes->emplace_back(LArPandoraOutput::BuildShowerPCA(pLArShowerPfo));
                 outputShowers->back().set_id(outputShowers->size()); // 1-based sequence
