@@ -141,6 +141,15 @@ void LArPandora::beginJob()
 
     m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
+    
+    // Print the configuration of the algorithm at the beginning of the job;
+    // the algorithm does not need to be set up for this.
+    if (m_showerEnergyAlg) {
+      mf::LogInfo log("LArPandora");
+      log << "Energy shower settings: ";
+      m_showerEnergyAlg->DumpConfiguration(log, "  ", "");
+    }
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
