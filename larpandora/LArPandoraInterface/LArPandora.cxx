@@ -49,7 +49,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "No_File_Provided");
     
     // prepare the optional cluster energy algorithm
-    if (pset.is_key_to_table("ShowerEnergy")) {
+    if (pset.has_key("ShowerEnergy") && pset.is_key_to_table("ShowerEnergy")) {
       m_showerEnergyAlg
         = std::make_unique<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
     }
