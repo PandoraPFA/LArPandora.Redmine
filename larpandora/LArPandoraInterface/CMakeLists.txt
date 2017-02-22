@@ -12,6 +12,7 @@ art_make(
                         larreco_RecoAlg_ClusterRecoUtil
                         larreco_RecoAlg
                         larreco_ClusterFinder
+                        larreco_Calorimetry
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         LArPandoraContent
