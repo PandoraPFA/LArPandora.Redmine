@@ -12,7 +12,7 @@ larpandoracontent         v03_02_00
 eigen		v3_2_9a
 gcc             v4_9_3a
 
-cetbuildtools	v5_06_06	-	only_for_build
+cetbuildtools	v5_06_07	-	only_for_build
 end_product_list
 
   
