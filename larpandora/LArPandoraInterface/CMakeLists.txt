@@ -32,6 +32,7 @@ art_make(
                         ${FHICLCPP}
                         ${CETLIB}
                         ${Boost_SYSTEM_LIBRARY}
+                        ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
                         MODULE_LIBRARIES larpandora_LArPandoraInterface
           )
