@@ -21,6 +21,7 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/AnalysisBase/T0.h"
 
 #include "TTree.h"
 
@@ -47,17 +48,22 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 {
     m_configFile = pset.get<std::string>("ConfigFile");
     m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "No_File_Provided");
-    
+
     // prepare the optional cluster energy algorithm
-    if (pset.has_key("ShowerEnergy") && pset.is_key_to_table("ShowerEnergy")) {
-      m_showerEnergyAlg
-        = std::make_unique<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
+    if (pset.has_key("ShowerEnergy") && pset.is_key_to_table("ShowerEnergy"))
+    {
+        m_showerEnergyAlg = std::make_unique<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
     }
     else mf::LogWarning("LArPandora") << "No shower energy calibration set up.";
 
-    m_inputSettings.m_pILArPandora = this;
+    // Settings for LArPandoraGeometry
+    m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", false);  // Keep separate drift volumes but interchange U and V
+    m_geometrySettings.m_globalDriftVolume = pset.get<bool>("UseGlobalDriftVolume", false);  // Transform to a single global drift volume
+    m_geometrySettings.m_printGeometry = pset.get<bool>("PrintGeometry", false);
+
+    // Settings for LArPandoraInput
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
-    m_inputSettings.m_uidOffset = pset.get<int>("UidOffset", 100000000); 
+    m_inputSettings.m_uidOffset = pset.get<int>("UidOffset", 100000000);
     m_inputSettings.m_dx_cm = pset.get<double>("DefaultHitWidth", 0.5);
     m_inputSettings.m_int_cm = pset.get<double>("InteractionLength", 84.0);
     m_inputSettings.m_rad_cm = pset.get<double>("RadiationLength", 14.0);
@@ -65,31 +71,36 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_inputSettings.m_dEdX_mip = pset.get<double>("dEdXmip", 2.0);
     m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
+    m_inputSettings.m_globalViews = (m_geometrySettings.m_globalCoordinates || m_geometrySettings.m_globalDriftVolume);
+    m_inputSettings.m_truncateReadout = m_geometrySettings.m_globalDriftVolume;
 
+    // Settings for LArPandoraOutput
     m_outputSettings.m_pProducer = this;
     m_outputSettings.m_buildTracks = pset.get<bool>("BuildTracks", true);
     m_outputSettings.m_buildShowers = pset.get<bool>("BuildShowers", true);
     m_outputSettings.m_buildStitchedParticles = pset.get<bool>("BuildStitchedParticles", false);
-    m_outputSettings.m_buildSingleVolumeParticles = pset.get<bool>("BuildSingleVolumeParticles", true);
     m_outputSettings.m_showerEnergyAlg = m_showerEnergyAlg.get(); // may be nullptr
 
-    m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", true);
+    // Configuration for this module
+    m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", false);
     m_enableProduction = pset.get<bool>("EnableProduction", true);
-    m_enableLineGaps = pset.get<bool>("EnableLineGaps", true);
-    m_lineGapsCreated = false;
+    m_enableDetectorGaps = pset.get<bool>("EnableDetectorGaps", true);
     m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
     m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
 
+    // Input labels for this module
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
     m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel", "gaushit");
-    m_spacepointModuleLabel = pset.get<std::string>("SpacePointModuleLabel", "pandora");
     m_pandoraModuleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
+
+    // Status flags for this module
+    m_lineGapsCreated = false;
 
     if (m_enableProduction)
     {
         produces< std::vector<recob::PFParticle> >();
         produces< std::vector<recob::SpacePoint> >();
-        produces< std::vector<recob::Cluster> >(); 
+        produces< std::vector<recob::Cluster> >();
         produces< std::vector<recob::Seed> >();
         produces< std::vector<recob::Vertex> >();
 
@@ -103,9 +114,11 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 
         if (m_outputSettings.m_buildTracks)
         {
-            produces< std::vector<recob::Track> >(); 
+            produces< std::vector<recob::Track> >();
+            produces< std::vector<anab::T0> >();
             produces< art::Assns<recob::PFParticle, recob::Track> >();
             produces< art::Assns<recob::Track, recob::Hit> >();
+            produces< art::Assns<recob::Track, anab::T0> >();
         }
 
         if (m_outputSettings.m_buildShowers)
@@ -134,6 +147,9 @@ void LArPandora::beginJob()
     if (m_enableMonitoring)
         this->InitializeMonitoring();
 
+    // Load geometry and then create Pandora instances
+    LArPandoraGeometry::LoadGeometry(m_geometrySettings, m_driftVolumeList, m_driftVolumeMap);
+
     this->CreatePandoraInstances();
 
     if (!m_pPrimaryPandora)
@@ -141,7 +157,15 @@ void LArPandora::beginJob()
 
     m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
-    
+
+    // Load gaps associated with dead regions between drift volumes
+    if (m_enableDetectorGaps)
+    {
+        LArDetectorGapList listOfGaps;
+        LArPandoraGeometry::LoadDetectorGaps(m_geometrySettings, listOfGaps);
+        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, listOfGaps);
+    }
+
     // Print the configuration of the algorithm at the beginning of the job;
     // the algorithm does not need to be set up for this.
     if (m_showerEnergyAlg) {
@@ -149,15 +173,15 @@ void LArPandora::beginJob()
       log << "Energy shower settings: ";
       m_showerEnergyAlg->DumpConfiguration(log, "  ", "");
     }
-    
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::produce(art::Event &evt)
-{ 
+{
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
-    
+
     // we set up the algorithm on each new event, in case the services have changed:
     if (m_showerEnergyAlg) {
       m_showerEnergyAlg->setup(
@@ -166,12 +190,12 @@ void LArPandora::produce(art::Event &evt)
         *(lar::providerFrom<geo::Geometry>())
         );
     } // if
-    
-    
+
+
     IdToHitMap idToHitMap;
     this->CreatePandoraInput(evt, idToHitMap);
     this->RunPandoraInstances();
-    this->ProcessPandoraOutput(evt, idToHitMap);   
+    this->ProcessPandoraOutput(evt, idToHitMap);
     this->ResetPandoraInstances();
 
     if (m_enableMonitoring)
@@ -181,7 +205,7 @@ void LArPandora::produce(art::Event &evt)
         m_pRecoTree->Fill();
     }
 
-    mf::LogDebug("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "]  Done! *** " << std::endl;
+    mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] DONE! *** " << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,9 +213,9 @@ void LArPandora::produce(art::Event &evt)
 void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
 {
     // ATTN Should complete gap creation in begin job callback, but channel status service functionality unavailable at that point
-    if (!m_lineGapsCreated && m_enableLineGaps)
+    if (!m_lineGapsCreated && m_enableDetectorGaps)
     {
-        LArPandoraInput::CreatePandoraLineGaps(m_inputSettings);
+        LArPandoraInput::CreatePandoraReadoutGaps(m_inputSettings, m_driftVolumeMap);
         m_lineGapsCreated = true;
     }
 
@@ -218,24 +242,24 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
     }
 
     if (m_enableMonitoring)
-    { 
+    {
         theClock.stop();
         m_collectionTime = theClock.accumulated_real_time();
         theClock.reset();
         theClock.start();
     }
 
-    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, artHits, idToHitMap);
+    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, m_driftVolumeMap, artHits, idToHitMap);
 
     if (m_enableMCParticles && !evt.isRealData())
     {
-        LArPandoraInput::CreatePandoraMCParticles(m_inputSettings, artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        LArPandoraInput::CreatePandoraMCParticles2D(m_inputSettings, artMCParticleVector);
-        LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, idToHitMap, artHitsToTrackIDEs);
+        LArPandoraInput::CreatePandoraMCParticles(m_inputSettings, m_driftVolumeMap, artMCTruthToMCParticles, artMCParticlesToMCTruth);
+        LArPandoraInput::CreatePandoraMCParticles2D(m_inputSettings, m_driftVolumeMap, artMCParticleVector);
+        LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, m_driftVolumeMap, idToHitMap, artHitsToTrackIDEs);
     }
 
     if (m_enableMonitoring)
-    { 
+    {
         theClock.stop();
         m_inputTime = theClock.accumulated_real_time();
         m_hits = static_cast<int>(artHits.size());
@@ -258,7 +282,7 @@ void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHit
     if (m_enableMonitoring)
     {
         theClock.stop();
-        m_outputTime = theClock.accumulated_real_time(); 
+        m_outputTime = theClock.accumulated_real_time();
     }
 }
 
@@ -277,16 +301,16 @@ void LArPandora::RunPandoraInstances()
     for (const pandora::Pandora *const pPandora : daughterInstances)
     {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
-        this->SetParticleX0Values(pPandora);        
+        this->SetParticleX0Values(pPandora);
     }
 
     if (m_runStitchingInstance || daughterInstances.empty())
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPrimaryPandora));
 
     if (m_enableMonitoring)
-    { 
+    {
         theClock.stop();
-        m_processTime = theClock.accumulated_real_time(); 
+        m_processTime = theClock.accumulated_real_time();
     }
 }
 
@@ -295,6 +319,7 @@ void LArPandora::RunPandoraInstances()
 void LArPandora::ResetPandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::ResetPandoraInstances() *** " << std::endl;
+
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
     for (const pandora::Pandora *const pPandora : daughterInstances)
@@ -311,6 +336,7 @@ void LArPandora::ResetPandoraInstances()
 void LArPandora::DeletePandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::DeletePandoraInstances() *** " << std::endl;
+
     if (m_pPrimaryPandora)
       MultiPandoraApi::DeletePandoraInstances(m_pPrimaryPandora);
 }

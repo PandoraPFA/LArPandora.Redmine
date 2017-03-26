@@ -37,9 +37,6 @@ void PCAShowerParticleBuildingAlgorithm::CreatePfo(const ParticleFlowObject *con
 {
     try
     {
-        // Need an input vertex to provide a shower propagation direction
-        const Vertex *const pInputVertex = LArPfoHelper::GetVertex(pInputPfo);
-
         // In cosmic mode, build showers from all daughter pfos, otherwise require that pfo is shower-like
         if (m_cosmicMode)
         {
@@ -52,6 +49,28 @@ void PCAShowerParticleBuildingAlgorithm::CreatePfo(const ParticleFlowObject *con
                 return;
         }
 
+        // Need an input vertex to provide a shower propagation direction
+        const Vertex *const pInputVertex = LArPfoHelper::GetVertex(pInputPfo);
+
+        // Need the 3D clusters and hits to calculate PCA components
+        ClusterList threeDClusterList;
+        LArPfoHelper::GetThreeDClusterList(pInputPfo, threeDClusterList);
+
+        if (threeDClusterList.empty())
+            return;
+
+        CaloHitList threeDCaloHitList; // Might be able to get through LArPfoHelper instead
+        const Cluster *const pThreeDCluster(threeDClusterList.front());
+        pThreeDCluster->GetOrderedCaloHitList().FillCaloHitList(threeDCaloHitList);
+
+        if (threeDCaloHitList.empty())
+            return;
+
+        // Run the PCA analysis
+        EigenVectors eigenVecs;
+        CartesianVector centroid(0.f, 0.f, 0.f), eigenValues(0.f, 0.f, 0.f);
+        this->RunPCA(threeDCaloHitList, centroid, eigenValues, eigenVecs);
+
         // Build a new pfo
         LArShowerPfoFactory pfoFactory;
         LArShowerPfoParameters pfoParameters;
@@ -62,49 +81,19 @@ void PCAShowerParticleBuildingAlgorithm::CreatePfo(const ParticleFlowObject *con
         pfoParameters.m_momentum = pInputPfo->GetMomentum();
         pfoParameters.m_showerVertex = pInputVertex->GetPosition();
 
-        ClusterList threeDClusterList;
-        LArPfoHelper::GetThreeDClusterList(pInputPfo, threeDClusterList);
+        pfoParameters.m_showerCentroid = centroid;
+        pfoParameters.m_showerDirection = eigenVecs.at(0);
+        pfoParameters.m_showerSecondaryVector = eigenVecs.at(1);
+        pfoParameters.m_showerTertiaryVector = eigenVecs.at(2);
+        pfoParameters.m_showerEigenValues = eigenValues;
+        pfoParameters.m_showerLength = this->ShowerLength(pfoParameters.m_showerEigenValues.Get());
+        pfoParameters.m_showerOpeningAngle = this->OpeningAngle(pfoParameters.m_showerDirection.Get(),
+            pfoParameters.m_showerSecondaryVector.Get(), pfoParameters.m_showerEigenValues.Get());
 
-        if (!threeDClusterList.empty())
-        {
-            CaloHitList threeDCaloHitList; // Might be able to get through LArPfoHelper instead
-            const Cluster *const pThreeDCluster(threeDClusterList.front());
-            pThreeDCluster->GetOrderedCaloHitList().FillCaloHitList(threeDCaloHitList);
-
-            EigenVectors eigenVecs;
-            CartesianVector centroid(0.f, 0.f, 0.f), eigenValues(0.f, 0.f, 0.f);
-            this->RunPCA(threeDCaloHitList, centroid, eigenValues, eigenVecs);
-
-            try
-            {
-                pfoParameters.m_showerCentroid = centroid;
-                pfoParameters.m_showerDirection = eigenVecs.at(0);
-                pfoParameters.m_showerSecondaryVector = eigenVecs.at(1);
-                pfoParameters.m_showerTertiaryVector = eigenVecs.at(2);
-                pfoParameters.m_showerEigenValues = eigenValues;
-                pfoParameters.m_showerLength = this->ShowerLength(pfoParameters.m_showerEigenValues.Get());
-                pfoParameters.m_showerOpeningAngle = this->OpeningAngle(pfoParameters.m_showerDirection.Get(),
-                    pfoParameters.m_showerSecondaryVector.Get(), pfoParameters.m_showerEigenValues.Get());
-            }
-            catch (const StatusCodeException &statusCodeException)
-            {
-                if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
-                    throw statusCodeException;
-            }
-
-            try
-            {
-                const float layerPitch(LArGeometryHelper::GetWireZPitch(this->GetPandora()));
-                const ThreeDSlidingFitResult threeDFitResult(pThreeDCluster, m_layerFitHalfWindow, layerPitch);
-                pfoParameters.m_showerMinLayerPosition = threeDFitResult.GetGlobalMinLayerPosition();
-                pfoParameters.m_showerMaxLayerPosition = threeDFitResult.GetGlobalMaxLayerPosition();
-            }
-            catch (const StatusCodeException &statusCodeException)
-            {
-                if (STATUS_CODE_FAILURE == statusCodeException.GetStatusCode())
-                    throw statusCodeException;
-            }
-        }
+        const float layerPitch(LArGeometryHelper::GetWireZPitch(this->GetPandora()));
+        const ThreeDSlidingFitResult threeDFitResult(pThreeDCluster, m_layerFitHalfWindow, layerPitch);
+        pfoParameters.m_showerMinLayerPosition = threeDFitResult.GetGlobalMinLayerPosition();
+        pfoParameters.m_showerMaxLayerPosition = threeDFitResult.GetGlobalMaxLayerPosition();
 
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfoParameters, pOutputPfo,
             pfoFactory));

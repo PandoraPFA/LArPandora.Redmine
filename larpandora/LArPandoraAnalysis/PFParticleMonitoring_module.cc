@@ -235,15 +235,14 @@ private:
      int          m_nMatchedHitsV;          ///<
      int          m_nMatchedHitsW;          ///<
 
-     int          m_nAvailableHits;         ///<
+     int          m_nTrueWithoutRecoHits;   ///< True hits which don't belong to any reconstructed particle - "available"
+     int          m_nRecoWithoutTrueHits;   ///< Reconstructed hits which don't belong to any true particle - "missing"
 
      double       m_spacepointsMinX;        ///<
      double       m_spacepointsMaxX;        ///<
      
      std::string  m_hitfinderLabel;         ///<
-     std::string  m_spacepointLabel;        ///<
      std::string  m_particleLabel;          ///<
-     std::string  m_trackLabel;             ///<
      std::string  m_geantModuleLabel;       ///<
 
      bool         m_useDaughterPFParticles; ///<
@@ -312,9 +311,7 @@ PFParticleMonitoring::~PFParticleMonitoring()
 
 void PFParticleMonitoring::reconfigure(fhicl::ParameterSet const &pset)
 {
-    m_trackLabel = pset.get<std::string>("TrackModule","pandora");
     m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
-    m_spacepointLabel = pset.get<std::string>("SpacePointModule","pandora");
     m_hitfinderLabel = pset.get<std::string>("HitFinderModule","gaushit");
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
 
@@ -397,7 +394,8 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("nMatchedHitsU", &m_nMatchedHitsU, "nMatchedHitsU/I");
     m_pRecoTree->Branch("nMatchedHitsV", &m_nMatchedHitsV, "nMatchedHitsV/I");
     m_pRecoTree->Branch("nMatchedHitsW", &m_nMatchedHitsW, "nMatchedHitsW/I");
-    m_pRecoTree->Branch("nAvailableHits", &m_nAvailableHits, "nAvailableHits/I");
+    m_pRecoTree->Branch("nTrueWithoutRecoHits", &m_nTrueWithoutRecoHits, "nTrueWithoutRecoHits/I");
+    m_pRecoTree->Branch("nRecoWithoutTrueHits", &m_nRecoWithoutTrueHits, "nRecoWithoutTrueHits/I");
     m_pRecoTree->Branch("spacepointsMinX", &m_spacepointsMinX, "spacepointsMinX/D");
     m_pRecoTree->Branch("spacepointsMaxX", &m_spacepointsMaxX, "spacepointsMaxX/D");
 }
@@ -482,7 +480,9 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_nMatchedHitsU = 0;
     m_nMatchedHitsV = 0;
     m_nMatchedHitsW = 0;
-    m_nAvailableHits = 0;
+
+    m_nTrueWithoutRecoHits = 0;
+    m_nRecoWithoutTrueHits = 0;
 
     m_spacepointsMinX = 0.0;
     m_spacepointsMaxX = 0.0;
@@ -506,7 +506,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     SpacePointVector spacePointVector;
     SpacePointsToHits spacePointsToHits;
     HitsToSpacePoints hitsToSpacePoints;
-    LArPandoraHelper::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits, hitsToSpacePoints);
+    LArPandoraHelper::CollectSpacePoints(evt, m_particleLabel, spacePointVector, spacePointsToHits, hitsToSpacePoints);
 
     if (m_printDebug)
         std::cout << "  SpacePoints: " << spacePointVector.size() << std::endl;
@@ -515,7 +515,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     // ====================================================
     TrackVector recoTrackVector;
     PFParticlesToTracks recoParticlesToTracks;
-    LArPandoraHelper::CollectTracks(evt, m_trackLabel, recoTrackVector, recoParticlesToTracks);
+    LArPandoraHelper::CollectTracks(evt, m_particleLabel, recoTrackVector, recoParticlesToTracks);
     
     if (m_printDebug)
         std::cout << "  Tracks: " << recoTrackVector.size() << std::endl;
@@ -538,7 +538,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
 
     LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
     LArPandoraHelper::SelectNeutrinoPFParticles(recoParticleVector, recoNeutrinoVector);
-    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, recoParticlesToHits, recoHitsToParticles,
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, recoParticlesToHits, recoHitsToParticles,
         (m_useDaughterPFParticles ? (m_addDaughterPFParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kUseDaughters) : LArPandoraHelper::kIgnoreDaughters)); 
 
     if (m_printDebug)
@@ -692,7 +692,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_nMatchedHitsV = 0;
         m_nMatchedHitsW = 0;
 
-        m_nAvailableHits = 0;
+        m_nTrueWithoutRecoHits = 0;
+        m_nRecoWithoutTrueHits = 0;
 
         m_spacepointsMinX = 0.0;
         m_spacepointsMaxX = 0.0;
@@ -700,10 +701,10 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_completeness = 0.0;
         m_purity = 0.0;
 
-        for (HitVector::const_iterator hIter = trueHitVector.begin(), hIterEnd = trueHitVector.end(); hIter != hIterEnd; ++hIter)
+        for (HitVector::const_iterator hIter1 = trueHitVector.begin(), hIterEnd1 = trueHitVector.end(); hIter1 != hIterEnd1; ++hIter1)
         {
-            if (recoHitsToNeutrinos.find(*hIter) == recoHitsToNeutrinos.end())
-                ++m_nAvailableHits;
+            if (recoHitsToNeutrinos.find(*hIter1) == recoHitsToNeutrinos.end())
+                ++m_nTrueWithoutRecoHits;
         }
 
         MCTruthToPFParticles::const_iterator pIter1 = matchedNeutrinos.find(trueEvent);
@@ -724,6 +725,12 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
             if (recoParticlesToHits.end() != pIter2)
             {
                 const HitVector &recoHitVector = pIter2->second;
+
+                for (HitVector::const_iterator hIter2 = recoHitVector.begin(), hIterEnd2 = recoHitVector.end(); hIter2 != hIterEnd2; ++hIter2)
+                {
+                    if (trueHitsToNeutrinos.find(*hIter2) == trueHitsToNeutrinos.end())
+                        ++m_nRecoWithoutTrueHits;
+		}
 
                 MCTruthToHits::const_iterator pIter3 = matchedNeutrinoHits.find(trueEvent);
                 if (matchedNeutrinoHits.end() != pIter3)
@@ -770,7 +777,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
           std::cout << "    MCNeutrino [" << m_index << "]"
                     << "  trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg
                     << ", mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits
-                    << ", availableHits=" << m_nAvailableHits << std::endl;
+                    << ", availableHits=" << m_nTrueWithoutRecoHits << std::endl;
 
         m_pRecoTree->Fill();
         ++m_index; // Increment index number
@@ -853,7 +860,8 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_nMatchedHitsV = 0;
         m_nMatchedHitsW = 0;
         
-        m_nAvailableHits = 0;
+        m_nTrueWithoutRecoHits = 0;
+        m_nRecoWithoutTrueHits = 0;
  
         m_spacepointsMinX = 0.0;
         m_spacepointsMaxX = 0.0;
@@ -950,10 +958,10 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         }
   
         // Count number of available hits
-        for (HitVector::const_iterator hIter = trueHitVector.begin(), hIterEnd = trueHitVector.end(); hIter != hIterEnd; ++hIter)
+        for (HitVector::const_iterator hIter1 = trueHitVector.begin(), hIterEnd1 = trueHitVector.end(); hIter1 != hIterEnd1; ++hIter1)
         {
-            if (recoHitsToParticles.find(*hIter) == recoHitsToParticles.end())
-                ++m_nAvailableHits;
+            if (recoHitsToParticles.find(*hIter1) == recoHitsToParticles.end())
+                ++m_nTrueWithoutRecoHits;
         }
 
         // Match true and reconstructed hits
@@ -981,6 +989,12 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                 throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze --- Found a reco particle without any hits ";
 
             const HitVector &recoHitVector = pIter2->second;
+
+            for (HitVector::const_iterator hIter2 = recoHitVector.begin(), hIterEnd2 = recoHitVector.end(); hIter2 != hIterEnd2; ++hIter2)
+            {
+                if (trueHitsToParticles.find(*hIter2) == trueHitsToParticles.end())
+                    ++m_nRecoWithoutTrueHits;
+	    }
 
             MCParticlesToHits::const_iterator pIter3 = matchedParticleHits.find(trueParticle);
             if (matchedParticleHits.end() == pIter3)
@@ -1055,7 +1069,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
           std::cout << "    MCParticle [" << m_index << "]"
                     << "  trueNu=" << m_mcNuPdg << ", truePdg=" << m_mcPdg << ", recoNu=" << m_pfoNuPdg << ", recoPdg=" << m_pfoPdg
                     << ", mcHits=" << m_nMCHits << ", pfoHits=" << m_nPfoHits << ", matchedHits=" << m_nMatchedHits 
-                    << ", availableHits=" << m_nAvailableHits << std::endl;
+                    << ", availableHits=" << m_nTrueWithoutRecoHits << std::endl;
 
         m_pRecoTree->Fill();
         ++m_index; // Increment index number

@@ -11,6 +11,8 @@
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraInput.h"
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
+
 #include "larreco/Calorimetry/LinearEnergyAlg.h"
 
 #include <string>
@@ -70,25 +72,29 @@ protected:
      */
     void InitializeMonitoring();
 
+protected:
     std::string                 m_configFile;               ///<
     std::string                 m_stitchingConfigFile;      ///<
 
+    LArDriftVolumeList          m_driftVolumeList;          ///<
+    LArDriftVolumeMap           m_driftVolumeMap;           ///<
+
 private:
-    LArPandoraInput::Settings   m_inputSettings;            ///< 
-    LArPandoraOutput::Settings  m_outputSettings;           ///<    
+    LArPandoraInput::Settings    m_inputSettings;            ///<
+    LArPandoraOutput::Settings   m_outputSettings;           ///<
+    LArPandoraGeometry::Settings m_geometrySettings;         ///<
 
     std::unique_ptr<calo::LinearEnergyAlg> m_showerEnergyAlg;
                                                             ///< Optional cluster energy algorithm.
     bool                        m_runStitchingInstance;     ///<
     bool                        m_enableProduction;         ///<
-    bool                        m_enableLineGaps;           ///<
+    bool                        m_enableDetectorGaps;       ///<
     bool                        m_lineGapsCreated;          ///<
     bool                        m_enableMCParticles;        ///<
     bool                        m_enableMonitoring;         ///<
 
     std::string                 m_geantModuleLabel;         ///<
     std::string                 m_hitfinderModuleLabel;     ///<
-    std::string                 m_spacepointModuleLabel;    ///<
     std::string                 m_pandoraModuleLabel;       ///<
 
     TTree                      *m_pRecoTree;                ///<
