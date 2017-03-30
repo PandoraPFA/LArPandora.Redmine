@@ -52,10 +52,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtOutput() *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- primary Pandora instance does not exist ";
 
     if (!settings.m_pProducer)
-        throw cet::exception("LArPandora") << " Throwing exception - pointer to ART Producer module does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- pointer to ART Producer module does not exist ";
 
     PandoraInstanceList pandoraInstanceList;
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(settings.m_pPrimaryPandora));
@@ -138,7 +138,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         if (!pPfo->GetVertexList().empty())
         {
             if(pPfo->GetVertexList().size() != 1)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- this particle has multiple interaction vertices ";
 
             const pandora::Vertex *const pVertex = *(pPfo->GetVertexList().begin());
 
@@ -150,14 +150,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         }
     }
 
-    auto const& geom = lar::providerFrom<geo::Geometry>();
-
     // Loop over Pandora vertices and build recob::Vertices
     for (const pandora::Vertex *const pVertex : vertexVector)
     {
         ThreeDVertexMap::const_iterator iter = vertexMap.find(pVertex);
         if (vertexMap.end() == iter)
-            throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+            throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found an unassociated vertex ";
 
         const pandora::CartesianVector vtxPos(pVertex->GetPosition());
         double pos[3] = { vtxPos.GetX(), vtxPos.GetY(), vtxPos.GetZ() };
@@ -166,18 +164,13 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         outputVertices->push_back(newVertex);
     }
 
-    lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
-    lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
-    lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
-    lar::PtrMaker<recob::Cluster> makeClusterPtr(evt, *(settings.m_pProducer));
-
     // Loop over Pandora particles and build recob::PFParticles
     for (const pandora::ParticleFlowObject *const pPfo : pfoVector)
     {
         // Get Pfo ID
         ThreeDParticleMap::const_iterator iter = particleMap.find(pPfo);
         if (particleMap.end() == iter)
-            throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+            throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found an unassociated particle";
 
         const size_t pfoIdCode(iter->second);
 
@@ -188,11 +181,11 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         if (!parentList.empty())
         {
             if (parentList.size() != 1)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- this particle has multiple parent particles ";
 
             ThreeDParticleMap::const_iterator parentIdIter = particleMap.find(*parentList.begin());
             if (particleMap.end() == parentIdIter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found an unassociated particle ";
 
             parentIdCode = parentIdIter->second;
         }
@@ -206,7 +199,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         {
             ThreeDParticleMap::const_iterator daughterIdIter = particleMap.find(pDaughterPfo);
             if (particleMap.end() == daughterIdIter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found an unassociated particle ";
 
             const size_t daughterIdCode(daughterIdIter->second);
             daughterIdCodes.push_back(daughterIdCode);
@@ -256,7 +249,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             }
 
             if (hitArray.empty())
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found a cluster with no hits ";
 
             for (const HitArray::value_type &hitArrayEntry : hitArray)
             {
@@ -287,7 +280,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         for (const pandora::CaloHit *const pCaloHit3D : pandoraHitVector3D)
         {
             if (pandora::TPC_3D != pCaloHit3D->GetHitType())
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found a 2D hit in a 3D cluster";
 
             const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentAddress());
 
@@ -314,13 +307,13 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         if (!pPfo->GetVertexList().empty())
         {
             if(pPfo->GetVertexList().size() != 1)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- this particle has multiple interaction vertices ";
 
             const pandora::Vertex *const pVertex = *(pPfo->GetVertexList().begin());
 
             ThreeDVertexMap::const_iterator iter = vertexMap.find(pVertex);
             if (vertexMap.end() == iter)
-                throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+                throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- found an unassociated vertex ";
 
             const unsigned int vtxElement(iter->second);
             util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputVertices.get()), *(outputParticlesToVertices.get()),
@@ -333,7 +326,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                 if (!pLArTrackPfo)
                 {
-                    mf::LogDebug("LArPandoraOutput") << " LArPandoraOutput::BuildTrack --- input pfo is track-like but is not a LArTrackPfo ";
+                    mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo is track-like but is not a LArTrackPfo ";
                     continue;
                 }
 
@@ -341,7 +334,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                 if (trackStateVector.size() < settings.m_minTrajectoryPoints)
                 {
-                    mf::LogDebug("LArPandoraOutput") << " LArPandoraOutput::BuildTrack --- Insufficient input trajectory points to build track ";
+                    mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- Insufficient input trajectory points to build track ";
                     continue;
                 }
 
@@ -370,7 +363,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                 // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  track ID code;  T0 ID code]
                 // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
-                if (std::fabs(T0) > 0.0)
+                if (settings.m_buildStitchedParticles && std::fabs(T0) > 0.0)
                 {
                     outputT0s->emplace_back(anab::T0(T0, 3, outputTracks->back().ID(), t0Counter++));
                     util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), *(outputT0s.get()), *(outputTracksToT0s.get()), outputT0s->size() - 1, outputT0s->size());
@@ -384,7 +377,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
                 if (!pLArShowerPfo)
                 {
-                    mf::LogDebug("LArPandoraOutput") << " LArPandoraOutput::BuildShower --- input pfo is shower-like but is not a LArShowerPfo ";
+                    mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildShower --- input pfo is shower-like but is not a LArShowerPfo ";
                     continue;
                 }
 
@@ -392,6 +385,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     continue;
 
                 // TODO - If possible, we should try to move some of the shower-building code below into the BuildShower method
+                auto const& geom = lar::providerFrom<geo::Geometry>();
+
+                lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
+                lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
+                lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
+                lar::PtrMaker<recob::Cluster> makeClusterPtr(evt, *(settings.m_pProducer));
 
                 // if this assertion fails, we have a shower with no associated clusters:
                 assert((size_t) iClusterCounter < outputClusters->size());
@@ -454,7 +453,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                         if (clusterHits.empty()) {
                             // this is likely an error in the logic of this algorithm
                             throw cet::exception("LArPandora")
-                                << "LArPandoraOutput::ProduceArtOutput(): no hits associated with a cluster!?";
+                                << " LArPandoraOutput::ProduceArtOutput --- no hits associated with this cluster";
                         }
 
                         //
@@ -508,7 +507,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     if (settings.m_buildTracks)
     {
         mf::LogDebug("LArPandora") << "   Number of new tracks: " << outputTracks->size() << std::endl;
-        mf::LogDebug("LArPandora") << "   Number of new T0s: " << outputT0s->size() << std::endl;
+        if (settings.m_buildStitchedParticles)
+            mf::LogDebug("LArPandora") << "   Number of new T0s: " << outputT0s->size() << std::endl;
     }
 
     if (settings.m_buildShowers)
@@ -536,8 +536,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         evt.put(std::move(outputTracks));
         evt.put(std::move(outputParticlesToTracks));
         evt.put(std::move(outputTracksToHits));
-        evt.put(std::move(outputT0s));
-        evt.put(std::move(outputTracksToT0s));
+
+        if (settings.m_buildStitchedParticles)
+        {
+            evt.put(std::move(outputT0s));
+            evt.put(std::move(outputTracksToT0s));
+        }
     }
 
     if (settings.m_buildShowers)
@@ -746,7 +750,7 @@ recob::PCAxis LArPandoraOutput::BuildShowerPCA(const lar_content::LArShowerPfo *
 recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora::CaloHit *const pCaloHit)
 {
     if (pandora::TPC_3D != pCaloHit->GetHitType())
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSpacePoint --- trying to build a space point from a 2D hit";
 
     const pandora::CartesianVector point(pCaloHit->GetPositionVector());
     double xyz[3] = { point.GetX(), point.GetY(), point.GetZ() };
@@ -767,7 +771,7 @@ art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, cons
     IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
 
     if (idToHitMap.end() == artIter)
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+        throw cet::exception("LArPandora") << " LArPandoraOutput::GetHit --- found a Pandora hit without a parent ART hit ";
 
     return artIter->second;
 }

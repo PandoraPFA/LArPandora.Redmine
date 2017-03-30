@@ -44,7 +44,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraHits2D(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraHits2D --- primary Pandora instance does not exist ";
 
     // Set up ART services
     art::ServiceHandle<geo::Geometry> theGeometry;
@@ -151,21 +151,21 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
         else
         {
             mf::LogError("LArPandora") << " --- WARNING: UNKNOWN VIEW !!!  (View=" << hit_View << ")" << std::endl;
-            throw cet::exception("LArPandora") << " Throwing exception - this wire view not recognised! ";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraHits2D --- this wire view not recognised! ";
         }
 
         // Check for unphysical pulse heights
         if (std::isnan(mips))
         {
             mf::LogError("LArPandora") << " --- WARNING: UNPHYSICAL PULSEHEIGHT !!! (MIPs=" << mips << ")" << std::endl;
-            throw cet::exception("LArPandora") << " Throwing exception - this pulse height is unphysical! ";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraHits2D --- this pulse height is unphysical! ";
         }
 
         // Store the hit address
         if (hitCounter >= settings.m_uidOffset)
         {
             mf::LogError("LArPandora") << " --- WARNING: TOO MANY HITS !!! (hitCounter=" << hitCounter << ")" << std::endl;
-            throw cet::exception("LArPandora") << " Throwing exception - detected an excessive number of hits! (" << hitCounter << ") ";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraHits2D --- detected an excessive number of hits! (" << hitCounter << ") ";
         }
 
         idToHitMap[hitCounter] = hit;
@@ -182,7 +182,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraReadoutGaps(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraReadoutGaps --- primary Pandora instance does not exist ";
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     const lariov::ChannelStatusProvider &channelStatus(art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider());
@@ -283,7 +283,7 @@ void LArPandoraInput::CreatePandoraDetectorGaps(const Settings &settings, const 
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraDetectorGaps --- primary Pandora instance does not exist ";
 
     // TODO - Extend LineGap objects to cover these types of gaps! For now, just print them to screen...
 
@@ -303,7 +303,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const L
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCParticles(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles --- primary Pandora instance does not exist ";
 
     PandoraInstanceList pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(settings.m_pPrimaryPandora));
 
@@ -334,7 +334,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const L
             ++neutrinoCounter;
 
             if (neutrinoCounter >= settings.m_uidOffset)
-                throw cet::exception("LArPandora") << " Throwing exception - detected an excessive number of MC neutrinos (" << neutrinoCounter << ")";
+                throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles --- detected an excessive number of MC neutrinos (" << neutrinoCounter << ")";
 
             const int neutrinoID(neutrinoCounter + 4 * settings.m_uidOffset);
 
@@ -385,10 +385,10 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const L
         const art::Ptr<simb::MCParticle> particle = iterI->second;
 
         if (particle->TrackId() != iterI->first)
-            throw cet::exception("LArPandora") << " Throwing exception - MC truth information appears to be scrambled in this event";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles --- MC truth information appears to be scrambled in this event";
 
         if (particle->TrackId() >= settings.m_uidOffset)
-            throw cet::exception("LArPandora") << " Throwing exception - detected an excessive number of MC particles (" << particle->TrackId() << ")";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles --- detected an excessive number of MC particles (" << particle->TrackId() << ")";
 
         ++particleCounter;
 
@@ -462,7 +462,7 @@ void LArPandoraInput::CreatePandoraMCParticles2D(const Settings &settings, const
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCParticles2D(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles2D --- primary Pandora instance does not exist ";
 
     PandoraInstanceList pandoraInstanceList(MultiPandoraApi::GetDaughterPandoraInstanceList(settings.m_pPrimaryPandora));
 
@@ -476,7 +476,7 @@ void LArPandoraInput::CreatePandoraMCParticles2D(const Settings &settings, const
         const art::Ptr<simb::MCParticle> particle = *iter;
 
         if (particle->TrackId() >= settings.m_uidOffset)
-            throw cet::exception("LArPandora") << " Throwing exception - detected an excessive number of MC particles (" << particle->TrackId() << ")";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles2D --- detected an excessive number of MC particles (" << particle->TrackId() << ")";
 
         // Loop over drift volumes
         for (const pandora::Pandora *const pPandora : pandoraInstanceList)
@@ -589,7 +589,7 @@ void LArPandoraInput::CreatePandoraMCLinks2D(const Settings &settings, const LAr
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCLinks(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - primary Pandora instance does not exist ";
+        throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCLinks2D --- primary Pandora instance does not exist ";
 
     for (IdToHitMap::const_iterator iterI = idToHitMap.begin(), iterEndI = idToHitMap.end(); iterI != iterEndI ; ++iterI)
     {
@@ -619,7 +619,7 @@ void LArPandoraInput::CreatePandoraMCLinks2D(const Settings &settings, const LAr
         const TrackIDEVector &trackCollection = iterJ->second;
 
         if (trackCollection.size() == 0)
-            throw cet::exception("LArPandora") << " Throwing exception - found a hit without any associated MC truth information";
+            throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCLinks2D --- found a hit without any associated MC truth information";
 
         // Create links between hits and MC particles
         for (unsigned int k = 0; k < trackCollection.size(); ++k)

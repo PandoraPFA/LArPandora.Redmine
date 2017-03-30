@@ -19,7 +19,7 @@ namespace lar_pandora
  */
 class StandardPandora : public LArPandora
 {
-public: 
+public:
 
     /**
      *  @brief  Constructor
@@ -44,7 +44,7 @@ private:
      *  @param  configFileName the pandora settings config file name
      */
     void CreateDaughterPandoraInstances(const std::string &configFileName) const;
-   
+
     bool                m_uniqueInstanceSettings;   ///< Whether to enable unique configuration of each Pandora instance
     std::string         m_outputGeometryXmlFile;    ///< If provided, attempt to write collected geometry information to output xml file
 };
@@ -109,13 +109,13 @@ void StandardPandora::CreatePrimaryPandoraInstance(const std::string &configFile
     mf::LogDebug("LArPandora") << " *** StandardPandora::CreatePrimaryPandoraInstance(...) *** " << std::endl;
 
     if (m_driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - list of drift volumes is empty ";
+        throw cet::exception("LArPandora") << " StandardPandora::CreatePrimaryPandoraInstance --- list of drift volumes is empty ";
 
     cet::search_path sp("FW_SEARCH_PATH");
     std::string fullConfigFileName;
 
     if (!sp.find_file(configFileName, fullConfigFileName))
-        throw cet::exception("LArPandora") << " Failed to find xml configuration file " << configFileName << " in FW search path";
+        throw cet::exception("LArPandora") << " StandardPandora::CreatePrimaryPandoraInstance --- Failed to find xml configuration file " << configFileName << " in FW search path";
 
     const LArDriftVolume &driftVolume(m_driftVolumeList.front());
 
@@ -132,8 +132,8 @@ void StandardPandora::CreatePrimaryPandoraInstance(const std::string &configFile
             new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
 
         MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "driftVolume",
-            driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(), 
-	    driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
+            driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(),
+            driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
     }
 }
 
@@ -144,7 +144,7 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
     mf::LogDebug("LArPandora") << " *** StandardPandora::CreateDaughterPandoraInstance(...) *** " << std::endl;
 
     if (!m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " Throwing exception - trying to create daughter Pandora instances in absence of primary instance ";
+        throw cet::exception("LArPandora") << " StandardPandora::CreateDaughterPandoraInstances --- trying to create daughter Pandora instances in absence of primary instance ";
 
     for (const LArDriftVolume &driftVolume : m_driftVolumeList)
     {
@@ -156,7 +156,7 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
         const pandora::Pandora *const pPandora = this->CreateNewPandora();
         MultiPandoraApi::AddDaughterPandoraInstance(m_pPrimaryPandora, pPandora);
         MultiPandoraApi::SetVolumeInfo(pPandora, new VolumeInfo(driftVolume.GetVolumeID(), "driftVolume_" + volumeIdString.str(),
-            driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(), 
+            driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(),
             driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora,
@@ -176,7 +176,7 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
         std::string thisFullConfigFileName;
 
         if (!sp.find_file(thisConfigFileName, thisFullConfigFileName))
-            throw cet::exception("LArPandora") << " Failed to find xml configuration file " << thisConfigFileName << " in FW search path";
+            throw cet::exception("LArPandora") << "  StandardPandora::CreateDaughterPandoraInstances --- failed to find xml configuration file " << thisConfigFileName << " in FW search path";
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, thisFullConfigFileName));
     }

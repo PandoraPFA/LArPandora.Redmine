@@ -56,6 +56,18 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     }
     else mf::LogWarning("LArPandora") << "No shower energy calibration set up.";
 
+    // Configuration for this module
+    m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", false);
+    m_enableProduction = pset.get<bool>("EnableProduction", true);
+    m_enableDetectorGaps = pset.get<bool>("EnableLineGaps", true);
+    m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
+    m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
+
+    // Input labels for this module
+    m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
+    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel", "gaushit");
+    m_pandoraModuleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
+
     // Settings for LArPandoraGeometry
     m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", false);  // Keep separate drift volumes but interchange U and V
     m_geometrySettings.m_globalDriftVolume = pset.get<bool>("UseGlobalDriftVolume", false);  // Transform to a single global drift volume
@@ -78,20 +90,8 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_pProducer = this;
     m_outputSettings.m_buildTracks = pset.get<bool>("BuildTracks", true);
     m_outputSettings.m_buildShowers = pset.get<bool>("BuildShowers", true);
-    m_outputSettings.m_buildStitchedParticles = pset.get<bool>("BuildStitchedParticles", false);
+    m_outputSettings.m_buildStitchedParticles = (m_runStitchingInstance && pset.get<bool>("BuildStitchedParticles", false));
     m_outputSettings.m_showerEnergyAlg = m_showerEnergyAlg.get(); // may be nullptr
-
-    // Configuration for this module
-    m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", false);
-    m_enableProduction = pset.get<bool>("EnableProduction", true);
-    m_enableDetectorGaps = pset.get<bool>("EnableDetectorGaps", true);
-    m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
-    m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
-
-    // Input labels for this module
-    m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
-    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel", "gaushit");
-    m_pandoraModuleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
 
     // Status flags for this module
     m_lineGapsCreated = false;
@@ -115,10 +115,14 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
         if (m_outputSettings.m_buildTracks)
         {
             produces< std::vector<recob::Track> >();
-            produces< std::vector<anab::T0> >();
             produces< art::Assns<recob::PFParticle, recob::Track> >();
             produces< art::Assns<recob::Track, recob::Hit> >();
-            produces< art::Assns<recob::Track, anab::T0> >();
+
+            if (m_outputSettings.m_buildStitchedParticles)
+            {
+                produces< std::vector<anab::T0> >();
+                produces< art::Assns<recob::Track, anab::T0> >();
+            }
         }
 
         if (m_outputSettings.m_buildShowers)
@@ -153,7 +157,7 @@ void LArPandora::beginJob()
     this->CreatePandoraInstances();
 
     if (!m_pPrimaryPandora)
-        throw pandora::StatusCodeException(pandora::STATUS_CODE_FAILURE);
+        throw cet::exception("LArPandora") << " LArPandora::beginJob - failed to create primary Pandora instance " << std::endl;
 
     m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;

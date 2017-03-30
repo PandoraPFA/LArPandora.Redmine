@@ -26,7 +26,7 @@ void LArPandoraGeometry::LoadDetectorGaps(const Settings &settings, LArDetectorG
 {
     // Detector gaps can only be loaded once - throw an exception if the output lists are already filled
     if (!listOfGaps.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - the list of gaps already exists ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadDetectorGaps --- the list of gaps already exists ";
 
     // Only populate detector gaps when using global drift volume
     if (!settings.m_globalDriftVolume)
@@ -81,7 +81,7 @@ void LArPandoraGeometry::LoadGeometry(const Settings &settings, LArDriftVolumeLi
 {
     // Geometry can only be loaded once - throw an exception if the output lists are already filled
     if (!outputVolumeList.empty() || !outputVolumeMap.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - the list of drift volumes already exists ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- the list of drift volumes already exists ";
 
     // Global drift volume - use a global coordinate system and combine all drift volumes into a single global volume
     if (settings.m_globalDriftVolume)
@@ -197,12 +197,12 @@ void LArPandoraGeometry::WriteGeometry(const std::string &xmlFileName, const LAr
 int LArPandoraGeometry::GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc)
 {
     if (driftVolumeMap.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - detector geometry map is empty";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::GetVolumeID --- detector geometry map is empty";
 
     LArDriftVolumeMap::const_iterator iter = driftVolumeMap.find(LArPandoraGeometry::GetTpcID(cstat, tpc));
 
     if (driftVolumeMap.end() == iter)
-        throw cet::exception("LArPandora") << " Throwing exception - found a TPC that doesn't belong to a drift volume";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::GetVolumeID --- found a TPC that doesn't belong to a drift volume";
 
     return iter->second.GetVolumeID();
 }
@@ -227,7 +227,7 @@ geo::View_t LArPandoraGeometry::GetGlobalView(const unsigned int cstat, const un
     }
     else
     {
-        throw cet::exception("LArPandora") << " Throwing exception - found an unknown plane view (not U, V or W) ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::GetGlobalView --- found an unknown plane view (not U, V or W) ";
     }
 }
 
@@ -237,7 +237,7 @@ unsigned int LArPandoraGeometry::GetTpcID(const unsigned int cstat, const unsign
 {
     // We assume there will never be more than 10000 TPCs in a cryostat!
     if (tpc >= 10000)
-        throw cet::exception("LArPandora") << " Throwing exception - found a TPC with an ID greater than 10000 ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::GetTpcID --- found a TPC with an ID greater than 10000 ";
 
     return 10000 * cstat + tpc;
 }
@@ -272,7 +272,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
     //       An exception will be thrown if W wires are not vertical, indicating that LArPandoraGeometry should not be used.
 
     if (!driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - detector geometry has already been loaded ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- detector geometry has already been loaded ";
 
     typedef std::set<unsigned int> UIntSet;
 
@@ -306,7 +306,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
             const double wireAngleW((wirePlanes > 2) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)) : 0.0);
 
             if (std::fabs(wireAngleW) > maxDeltaTheta)
-                throw cet::exception("LArPandora") << " Throwing exception - the W-wires are not vertical in this detector ";
+                throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- the W-wires are not vertical in this detector ";
 
             double localCoord1[3] = {0.,0.,0.};
             double worldCoord1[3] = {0.,0.,0.};
@@ -383,7 +383,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
     }
 
     if (driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - failed to find any drift volumes in this detector geometry ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- failed to find any drift volumes in this detector geometry ";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -394,10 +394,10 @@ void LArPandoraGeometry::LoadGlobalParentGeometry(const LArDriftVolumeList &drif
     // along the X-axis, have parallel or near-parallel wire angles, and similar wire pitches
 
     if (!parentVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - parent geometry has already been loaded ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalParentGeometry --- parent geometry has already been loaded ";
 
     if (driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - detector geometry has not yet been loaded ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalParentGeometry --- detector geometry has not yet been loaded ";
 
     // Take most properties from first volume, then loop over all volumes
     const LArDriftVolume &frontVolume(driftVolumeList.front());
@@ -439,7 +439,7 @@ void LArPandoraGeometry::LoadGlobalParentGeometry(const LArDriftVolumeList &drif
         frontVolume.GetSigmaUVZ(), tpcVolumeList));
 
     if (parentVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - failed to create parent geometry list ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalParentGeometry --- failed to create parent geometry list ";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -452,10 +452,10 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
     // ATTN: we assume that the U and V planes have equal and opposite wire orientations
 
     if (!daughterVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - daughter geometry has already been loaded ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalDaughterGeometry --- daughter geometry has already been loaded ";
 
     if (driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - detector geometry has not yet been loaded ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalDaughterGeometry --- detector geometry has not yet been loaded ";
 
     // Create daughter drift volumes
     for (const LArDriftVolume &driftVolume : driftVolumeList)
@@ -475,7 +475,7 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
     }
 
     if (daughterVolumeList.empty())
-        throw cet::exception("LArPandora") << " Throwing exception - failed to create daughter geometry list ";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalDaughterGeometry --- failed to create daughter geometry list ";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -486,7 +486,7 @@ void LArPandoraGeometry::WritePrecisionElement(pandora::TiXmlElement *const pPar
     std::ostringstream oss;
 
     if ((oss << std::setprecision(12) << value << std::setprecision(ss)).fail())
-        throw cet::exception("LArPandora") << "Could not write LArDriftVolumes to xml file, TypeToString failed.";
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::WritePrecisionElement --- Could not write LArDriftVolumes to xml file, TypeToString failed.";
 
     pandora::TiXmlElement *const pDaughterElement = new pandora::TiXmlElement(elementName);
     pDaughterElement->LinkEndChild(new pandora::TiXmlText(oss.str()));
