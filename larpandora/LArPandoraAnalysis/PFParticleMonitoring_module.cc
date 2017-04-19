@@ -260,13 +260,6 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
-/**
- *  @file   larpandora/LArPandoraAnalysis/PFParticleMonitoring.cxx
- *
- *  @brief  Implementation of the lar pandora analysis producer.
- *
- *  $Log: $
- */
 
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"

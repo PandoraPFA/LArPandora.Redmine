@@ -75,13 +75,6 @@ DEFINE_ART_MODULE(PFParticleTrackAna)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
-/**
- *  @file   larpandora/LArPandoraAnalysis/PFParticleTrackAna.cxx
- * 
- *  @brief  Implementation of PFParticle analysis module
- * 
- *  $Log: $
- */
 
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
