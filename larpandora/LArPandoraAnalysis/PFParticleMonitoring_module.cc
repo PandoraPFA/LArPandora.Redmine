@@ -187,6 +187,7 @@ private:
      int          m_pfoPrimaryPdg;          ///<
      int          m_pfoIsNeutrino;          ///<
      int          m_pfoIsPrimary;           ///<
+     int          m_pfoIsStitched;          ///<
 
      int          m_pfoTrack;               ///<
      int          m_pfoVertex;              ///<
@@ -285,6 +286,7 @@ DEFINE_ART_MODULE(PFParticleMonitoring)
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/AnalysisBase/T0.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
@@ -354,6 +356,7 @@ void PFParticleMonitoring::beginJob()
     m_pRecoTree->Branch("pfoPrimaryPdg", &m_pfoPrimaryPdg, "pfoPrimaryPdg/I");
     m_pRecoTree->Branch("pfoIsNeutrino", &m_pfoIsNeutrino, "pfoIsNeutrino/I");
     m_pRecoTree->Branch("pfoIsPrimary", &m_pfoIsPrimary, "pfoIsPrimary/I");
+    m_pRecoTree->Branch("pfoIsStitched", &m_pfoIsStitched, "pfoIsStitched/I");
     m_pRecoTree->Branch("pfoTrack", &m_pfoTrack, "pfoTrack/I");
     m_pRecoTree->Branch("pfoVertex", &m_pfoVertex, "pfoVertex/I");
     m_pRecoTree->Branch("pfoVtxX", &m_pfoVtxX, "pfoVtxX/D");
@@ -437,6 +440,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     m_pfoPrimaryPdg = 0;
     m_pfoIsNeutrino = 0;
     m_pfoIsPrimary = 0;
+    m_pfoIsStitched = 0;
     m_pfoTrack = 0;
     m_pfoVertex = 0;
     m_pfoVtxX = 0.0;
@@ -516,6 +520,10 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
     TrackVector recoTrackVector;
     PFParticlesToTracks recoParticlesToTracks;
     LArPandoraHelper::CollectTracks(evt, m_particleLabel, recoTrackVector, recoParticlesToTracks);
+
+    T0Vector t0Vector;
+    TracksToT0s tracksToT0s;
+    LArPandoraHelper::CollectT0s(evt, m_particleLabel, t0Vector, tracksToT0s);
     
     if (m_printDebug)
         std::cout << "  Tracks: " << recoTrackVector.size() << std::endl;
@@ -668,6 +676,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_pfoPrimaryPdg = 0;
         m_pfoIsNeutrino = 0;
         m_pfoIsPrimary = 0;
+        m_pfoIsStitched = 0;
         m_pfoTrack = 0;
         m_pfoVertex = 0;
         m_pfoVtxX = 0.0;
@@ -814,6 +823,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         m_pfoPrimaryPdg = 0;
         m_pfoIsNeutrino = 0;
         m_pfoIsPrimary = 0;
+        m_pfoIsStitched = 0;
         m_pfoTrack = 0;
         m_pfoVertex = 0;
         m_pfoVtxX = 0.0;
@@ -1058,6 +1068,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                     m_pfoDirZ = vtxDirection.z();
                     m_pfoStraightLength = (endPosition - vtxPosition).Mag();
                     m_pfoLength = recoTrack->Length();
+                    m_pfoIsStitched = (tracksToT0s.end() != tracksToT0s.find(recoTrack));
                 }
             }
         }

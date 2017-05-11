@@ -336,7 +336,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const L
             if (neutrinoCounter >= settings.m_uidOffset)
                 throw cet::exception("LArPandora") << " LArPandoraInput::CreatePandoraMCParticles --- detected an excessive number of MC neutrinos (" << neutrinoCounter << ")";
 
-            const int neutrinoID(neutrinoCounter + 4 * settings.m_uidOffset);
+            const int neutrinoID(neutrinoCounter + 9 * settings.m_uidOffset);
 
             // Create Pandora 3D MC Particle
             lar_content::LArMCParticleParameters mcParticleParameters;
