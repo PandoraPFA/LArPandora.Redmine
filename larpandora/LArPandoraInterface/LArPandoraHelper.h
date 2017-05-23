@@ -15,7 +15,7 @@
 #include <set>
 #include <vector>
 
-namespace anab {class CosmicTag;}
+namespace anab {class CosmicTag; class T0; }
 namespace pandora {class ParticleFlowObject; class Vertex;}
 namespace recob {class Cluster; class Hit; class PFParticle; class Seed; class Shower; class SpacePoint; class Track; class Vertex; class Wire;}
 namespace sim {class SimChannel; class TrackIDE;}
@@ -23,7 +23,7 @@ namespace simb {class MCParticle; class MCTruth;}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-namespace lar_pandora 
+namespace lar_pandora
 {
 
 typedef std::set< art::Ptr<recob::Hit> > HitList;
@@ -42,6 +42,7 @@ typedef std::vector< art::Ptr<simb::MCParticle> >   MCParticleVector;
 typedef std::vector< art::Ptr<sim::SimChannel> >    SimChannelVector;
 typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 typedef std::vector< art::Ptr<anab::CosmicTag> >    CosmicTagVector;
+typedef std::vector< art::Ptr<anab::T0> >           T0Vector;
 
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ShowerVector >                 PFParticlesToShowers;
@@ -51,6 +52,7 @@ typedef std::map< art::Ptr<recob::PFParticle>, VertexVector >                 PF
 typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PFParticlesToSpacePoints;
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
 typedef std::map< art::Ptr<recob::Track>,      HitVector >                    TracksToHits;
+typedef std::map< art::Ptr<recob::Shower>,     HitVector >                    ShowersToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
 typedef std::map< art::Ptr<recob::Seed>,       art::Ptr<recob::Hit> >         SeedsToHits;
 typedef std::map< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit> >         SpacePointsToHits;
@@ -66,6 +68,7 @@ typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCParticle> >   Hi
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCTruth> >      HitsToMCTruth;
 typedef std::map< art::Ptr<recob::Hit>,        TrackIDEVector >               HitsToTrackIDEs;
 typedef std::map< art::Ptr<recob::Track>,      CosmicTagVector >              TracksToCosmicTags;
+typedef std::map< art::Ptr<recob::Track>,      art::Ptr<anab::T0> >           TracksToT0s;
 
 typedef std::map< int, art::Ptr<recob::PFParticle> >  PFParticleMap;
 typedef std::map< int, art::Ptr<recob::Cluster> >     ClusterMap;
@@ -75,19 +78,19 @@ typedef std::map< int, art::Ptr<simb::MCParticle> >   MCParticleMap;
 typedef std::map< int, art::Ptr<sim::SimChannel> >    SimChannelMap;
 
 typedef std::map< const pandora::ParticleFlowObject*, size_t> ThreeDParticleMap;
-typedef std::map< const pandora::Vertex*, unsigned int> ThreeDVertexMap; 
+typedef std::map< const pandora::Vertex*, unsigned int> ThreeDVertexMap;
 typedef std::map< int, HitVector > HitArray;
 
 /**
  *  @brief  LArPandoraHelper class
  */
-class LArPandoraHelper 
+class LArPandoraHelper
 {
 public:
     /**
      *  @brief  DaughterMode enumeration
      */
-    enum DaughterMode 
+    enum DaughterMode
     {
         kIgnoreDaughters = 0,    // Only use parent particles
         kUseDaughters = 1,       // Use both parent and daughter partcles
@@ -129,8 +132,8 @@ public:
      *  @param spacePointVector the output vector of SpacePoint objects
      *  @param spacePointsToHits the output map from SpacePoint to Hit objects
      */
-    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
-        SpacePointsToHits &spacePointsToHits);   
+    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector,
+        SpacePointsToHits &spacePointsToHits);
 
     /**
      *  @brief Collect the reconstructed SpacePoints and associated hits from the ART event record
@@ -141,8 +144,8 @@ public:
      *  @param spacePointsToHits the output map from SpacePoint to Hit objects
      *  @param hitsToSpacePoints the output map from Hit to SpacePoint objects
      */
-    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector, 
-        SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints);   
+    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector,
+        SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints);
 
     /**
      *  @brief Collect the reconstructed Clusters and associated hits from the ART event record
@@ -152,8 +155,8 @@ public:
      *  @param clusterVector the output vector of Cluster objects
      *  @param clustersToHits the output map from Cluster to Hit objects
      */
-    static void CollectClusters(const art::Event &evt, const std::string label, ClusterVector &clusterVector, 
-        ClustersToHits &clustersToHits);   
+    static void CollectClusters(const art::Event &evt, const std::string label, ClusterVector &clusterVector,
+        ClustersToHits &clustersToHits);
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated SpacePoints from the ART event record
@@ -164,7 +167,7 @@ public:
      *  @param particlesToSpacePoints the output map from PFParticle to SpacePoint objects
      */
     static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
-        PFParticlesToSpacePoints &particlesToSpacePoints);  
+        PFParticlesToSpacePoints &particlesToSpacePoints);
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated Clusters from the ART event record
@@ -186,7 +189,18 @@ public:
      *  @param particlesToShowers the output map from PFParticle to Shower objects
      */
     static void CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
-        PFParticlesToShowers &particlesToShowers);   
+        PFParticlesToShowers &particlesToShowers);
+
+    /**
+     *  @brief Collect the reconstructed Showers and associated Hits from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param showerVector the output vector of Shower objects
+     *  @param showersToHits the output map from Shower to Hit objects
+     */
+    static void CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+        ShowersToHits &showersToHits);
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated Tracks from the ART event record
@@ -197,7 +211,7 @@ public:
      *  @param particlesToTracks the output map from PFParticle to Track objects
      */
     static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
-        PFParticlesToTracks &particlesToTracks);   
+        PFParticlesToTracks &particlesToTracks);
 
     /**
      *  @brief Collect the reconstructed Tracks and associated Hits from the ART event record
@@ -253,9 +267,9 @@ public:
      *  @param hitsToParticles the output map from Hit to PFParticle objects
      *  @param daughterMode treatment of daughter particles in construction of maps
      */
-    static void BuildPFParticleHitMaps(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints, 
-        const SpacePointsToHits &spacePointsToHits, PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, 
-        const DaughterMode daughterMode = kUseDaughters);   
+    static void BuildPFParticleHitMaps(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints,
+        const SpacePointsToHits &spacePointsToHits, PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles,
+        const DaughterMode daughterMode = kUseDaughters);
 
     /**
      *  @brief Build mapping between PFParticles and Hits using PFParticle/Cluster/Hit maps
@@ -267,8 +281,8 @@ public:
      *  @param hitsToParticles the output map from Hit to PFParticle objects
      *  @param daughterMode treatment of daughter particles in construction of maps
      */
-    static void BuildPFParticleHitMaps(const PFParticleVector &particleVector, const PFParticlesToClusters &particlesToClusters, 
-        const ClustersToHits &clustersToHits, PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, 
+    static void BuildPFParticleHitMaps(const PFParticleVector &particleVector, const PFParticlesToClusters &particlesToClusters,
+        const ClustersToHits &clustersToHits, PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles,
         const DaughterMode daughterMode = kUseDaughters);
 
     /**
@@ -287,6 +301,20 @@ public:
         const bool useClusters = true);
 
     /**
+     *  @brief Build mapping between PFParticles and Hits starting from ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param particlesToHits output map from PFParticle to Hit objects
+     *  @param hitsToParticles output map from Hit to PFParticle objects
+     *  @param daughterMode treatment of daughter particles in construction of maps
+     *  @param useClusters choice of intermediate object (true for Clusters, false for SpacePoints)
+     */
+    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string label,
+        PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters,
+        const bool useClusters = true);
+
+    /**
      *  @brief Collect a vector of cosmic tags from the ART event record
      *
      *  @param evt the ART event record
@@ -294,8 +322,19 @@ public:
      *  @param cosmicTagVector output vector of CosmicTag objects
      *  @param tracksToCosmicTags output map from tracks to cosmic tags
      */
-    static void CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector, 
+    static void CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector,
         TracksToCosmicTags &tracksToCosmicTags);
+
+    /**
+     *  @brief Collect a vector of T0s from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the T0 information in the event
+     *  @param t0Vector output vector of T0 objects
+     *  @param tracksToT0s output map from tracks to T0s
+     */
+    static void CollectT0s(const art::Event &evt, const std::string label, T0Vector &t0Vector,
+        TracksToT0s &tracksToT0s);
 
     /**
      *  @brief Collect a vector of SimChannel objects from the ART event record
@@ -323,11 +362,11 @@ public:
      *  @param truthToParticles output map from MCTruth to MCParticle objects
      *  @param particlesToTruth output map from MCParticle to MCTruth objects
      */
-    static void CollectMCParticles(const art::Event &evt, const std::string label, MCTruthToMCParticles &truthToParticles, 
+    static void CollectMCParticles(const art::Event &evt, const std::string label, MCTruthToMCParticles &truthToParticles,
         MCParticlesToMCTruth &particlesToTruth);
 
     /**
-     *  @brief Collect the links from reconstructed hits to their true energy deposits 
+     *  @brief Collect the links from reconstructed hits to their true energy deposits
      *
      *  @param hitVector the input vector of reconstructed hits
      *  @param simChannelVector the input vector of SimChannels
@@ -357,7 +396,7 @@ public:
      *  @param hitsToParticles the output mapping between reconstructed hits and true particles
      *  @param daughterMode treatment of daughter particles in construction of maps
      */
-    static void BuildMCParticleHitMaps(const art::Event &evt, const std::string label, const HitVector &hitVector, 
+    static void BuildMCParticleHitMaps(const art::Event &evt, const std::string label, const HitVector &hitVector,
         MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters);
 
     /**
@@ -366,7 +405,7 @@ public:
      *  @param inputParticles the input vector of all particles (it has to be all of them!)
      *  @param outputParticles the output vector of final-state particles
      */
-    static void SelectNeutrinoPFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);    
+    static void SelectNeutrinoPFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);
 
     /**
      *  @brief Select final-state reconstructed particles from a list of all reconstructed particles
@@ -374,7 +413,7 @@ public:
      *  @param inputParticles the input vector of all particles (it has to be all of them!)
      *  @param outputParticles the output vector of final-state particles
      */
-    static void SelectFinalStatePFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);    
+    static void SelectFinalStatePFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);
 
     /**
      *  @brief Return the top-level parent particle by navigating up the chain of parent/daughter associations

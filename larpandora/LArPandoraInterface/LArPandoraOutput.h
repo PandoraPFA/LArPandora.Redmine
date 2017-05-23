@@ -43,13 +43,12 @@ public:
          */
         Settings();
 
-        const pandora::Pandora *m_pPrimaryPandora;              ///< 
-        art::EDProducer        *m_pProducer;                    ///< 
+        const pandora::Pandora *m_pPrimaryPandora;              ///<
+        art::EDProducer        *m_pProducer;                    ///<
         bool                    m_buildTracks;                  ///<
         unsigned int            m_minTrajectoryPoints;          ///<
         bool                    m_buildShowers;                 ///<
         bool                    m_buildStitchedParticles;       ///<
-        bool                    m_buildSingleVolumeParticles;   ///<
         calo::LinearEnergyAlg const* m_showerEnergyAlg;         ///<
     };
 
@@ -69,18 +68,11 @@ public:
      *  @param hitVector the input vector of hits
      *  @param isolatedHits the input list of isolated hits
      *  @param algo Algorithm set to fill cluster members
-     *  
+     *
      *  If you don't know which algorithm to pick, StandardClusterParamsAlg is a good default.
      *  The hits that are isolated (that is, present in isolatedHits) are not fed to the cluster parameter algorithms.
      */
     static recob::Cluster BuildCluster(const int id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo);
-
-    /**
-     *  @brief Check (valid) trajectory points is at least the minimum
-     *
-     *  @param pTrackStateVector the vector of trajectory points for this track
-     */
-    static bool MinTrajectoryPoints(const lar_content::LArTrackStateVector *const pTrackStateVector, const unsigned int minTrajectoryPoints);
 
     /**
      *  @brief Build a recob::Track object
@@ -88,7 +80,7 @@ public:
      *  @param id the id code for the track
      *  @param pTrackStateVector the vector of trajectory points for this track
      */
-    static recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector *const pTrackStateVector);
+    static recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector *const pTrackStateVectorr, const IdToHitMap &idToHitMap);
 
     /**
      *  @brief Build a recob::Shower object
@@ -127,6 +119,27 @@ public:
      *  @param pCaloHit the input Pandora hit (2D)
      */
     static art::Ptr<recob::Hit> GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit);
+
+    /**
+     *  @brief Convert X0 correction into T0 correction
+     *
+     *  @param hit the input ART hit
+     *  @param pCaloHit the output Pandora hit
+     *
+     *  @return T0 relative to input hit in nanoseconds
+     */
+    static double CalculateT0(const art::Ptr<recob::Hit> hit, const pandora::CaloHit *const pCaloHit);
+
+    /**
+     *  @brief Calculate dQ/dL based on an input hit
+     *
+     *  @param hit the input ART hit
+     *  @param trackPosition the local track position
+     *  @param trackDirection the local track direction
+     *
+     *  @return dQ/dL
+     */
+    static double CalculatedQdL(const art::Ptr<recob::Hit> hit, const TVector3 &trackPosition, const TVector3 &trackDirection);
 
 };
 

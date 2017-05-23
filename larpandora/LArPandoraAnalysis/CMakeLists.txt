@@ -8,6 +8,7 @@ art_make(
                         larsim_Simulation lardataobj_Simulation
                         lardataobj_RawData
                         lardataobj_RecoBase
+                        lardataobj_AnalysisBase
                         lardata_Utilities
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}

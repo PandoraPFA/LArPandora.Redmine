@@ -9,6 +9,7 @@
 
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 
 namespace lar_pandora
 {
@@ -30,8 +31,7 @@ public:
          */
         Settings();
 
-        const pandora::Pandora *m_pPrimaryPandora;          ///< 
-        const ILArPandora      *m_pILArPandora;             ///<
+        const pandora::Pandora *m_pPrimaryPandora;          ///<
         bool                    m_useHitWidths;             ///<
         int                     m_uidOffset;                ///<
         double                  m_dx_cm;                    ///<
@@ -41,74 +41,83 @@ public:
         double                  m_dEdX_mip;                 ///<
         double                  m_mips_to_gev;              ///<
         double                  m_recombination_factor;     ///<
+        bool                    m_globalViews;              ///<
+        bool                    m_truncateReadout;          ///<
     };
 
     /**
      *  @brief  Create the Pandora 2D hits from the ART hits
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the geometry mapping
      *  @param  hits the input list of ART hits for this event
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
      */
-    static void CreatePandoraHits2D(const Settings &settings, const HitVector &hitVector, IdToHitMap &idToHitMap);
-
-    /**
-     *  @brief  Create the Pandora 3D hits from the ART space points
-     *
-     *  @param  settings the settings
-     *  @param  spacepoints the input list of ART spacepoints for this event
-     *  @param  spacePointsToHits the mapping between ART space points and ART hits
-     *  @param  spacePointMap mapping from Pandora hit addresses to ART space points
-     */
-    static void CreatePandoraHits3D(const Settings &settings, const SpacePointVector &spacePointVector,
-        const SpacePointsToHits &spacePointsToHits, SpacePointMap &spacePointMap);
+    static void CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
+        const HitVector &hitVector, IdToHitMap &idToHitMap);
 
     /**
      *  @brief  Create pandora line gaps to cover any (continuous regions of) bad channels
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the geometry mapping
      */
-    static void CreatePandoraLineGaps(const Settings &settings);
+    static void CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap);
+
+    /**
+     *  @brief  Create pandora box gaps to cover dead regions between drift volumes
+     *
+     *  @param  settings the settings
+     *  @param  listOfGaps the list of gaps
+     */
+    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDetectorGapList &listOfGaps);
 
     /**
      *  @brief  Create the Pandora MC particles from the MC particles
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the geometry mapping
      *  @param  truthToParticles  mapping from MC truth to MC particles
      *  @param  particlesToTruth  mapping from MC particles to MC truth
      */
-    static void CreatePandoraMCParticles(const Settings &settings, const MCTruthToMCParticles &truthToParticles,
-        const MCParticlesToMCTruth &particlesToTruth);
+    static void CreatePandoraMCParticles(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
+        const MCTruthToMCParticles &truthToParticles, const MCParticlesToMCTruth &particlesToTruth);
 
     /**
      *  @brief  Create 2D projections of the Pandora MC particles
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the geometry mapping
      *  @param  particleVector the input vector of MC particles
      */
-    static void CreatePandoraMCParticles2D(const Settings &settings, const MCParticleVector &particleVector);
+    static void CreatePandoraMCParticles2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
+        const MCParticleVector &particleVector);
 
     /**
      *  @brief  Create links between the 2D hits and Pandora MC particles
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the geometry mapping
      *  @param  hitMap mapping from Pandora hit addresses to ART hits
      *  @param  hitToParticleMap mapping from each ART hit to its underlying G4 track ID
      */
-    static void CreatePandoraMCLinks2D(const Settings &settings, const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap);
+    static void CreatePandoraMCLinks2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
+        const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap);
 
 private:
     /**
      *  @brief  Loop over MC trajectory points and identify start and end points within the detector
      *
      *  @param  settings the settings
-     *  @param  volumeID the drift volume
+     *  @param  driftVolumeMap the geometry mapping
+     *  @param  volumeID the drift volume ID
      *  @param  particle the true particle
      *  @param  startT the first trajectory point in the detector
      *  @param  endT the last trajectory point in the detector
+     *  @param  nDrift the number of drift directions encountered on the trajectory
      */
-    static void GetTrueStartAndEndPoints(const Settings &settings, const int volumeID, const art::Ptr<simb::MCParticle> &particle,
-        int &startT, int &endT);
+    static void GetTrueStartAndEndPoints(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const int volumeID,
+        const art::Ptr<simb::MCParticle> &particle, int &startT, int &endT, int &nDrift);
 
     /**
      *  @brief  Loop over MC trajectory points and identify start and end points within a given cryostat and TPC
