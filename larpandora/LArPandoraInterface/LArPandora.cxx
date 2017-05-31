@@ -8,10 +8,13 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
+#include "lardata/ArtDataHelper/MVAReader.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
+
 #include "larcore/Geometry/Geometry.h"
 
+#include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PCAxis.h"
@@ -21,7 +24,6 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Vertex.h"
-#include "lardataobj/AnalysisBase/T0.h"
 
 #include "TTree.h"
 
@@ -35,8 +37,6 @@
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandora/LArPandoraInterface/LArPandoraInput.h"
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
-
-#include "larpandora/LArPandoraShowers/PCAShowerParticleBuildingAlgorithm.h"
 
 #include <iostream>
 
@@ -65,8 +65,8 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 
     // Input labels for this module
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
-    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel", "gaushit");
-    m_pandoraModuleLabel = pset.get<std::string>("PFParticleModuleLabel", "pandora");
+    m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel");
+    m_mvaModuleLabel = pset.get<std::string>("MVAModuleLabel");
 
     // Settings for LArPandoraGeometry
     m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", false);  // Keep separate drift volumes but interchange U and V
@@ -253,7 +253,20 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         theClock.start();
     }
 
-    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, m_driftVolumeMap, artHits, idToHitMap);
+    std::unique_ptr<anab::MVAReader<recob::Hit, 4> > pHitResults;
+
+    if (!m_mvaModuleLabel.empty())
+    {
+        pHitResults = anab::MVAReader<recob::Hit, 4>::create(evt, m_mvaModuleLabel);
+
+        if (!pHitResults)
+            mf::LogWarning("LArPandora") << "No MVA results available." << std::endl;
+
+        if (pHitResults && ((pHitResults->getIndex("em") < 0) || (pHitResults->getIndex("track") < 0) || (pHitResults->getIndex("michel") < 0) || (pHitResults->getIndex("none") < 0)))
+            throw cet::exception("LArPandora") << "MVA Data present, but no em/track/michel/none-labelled columns in MVA data products." << std::endl;
+    }
+
+    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, m_driftVolumeMap, artHits, idToHitMap, pHitResults);
 
     if (m_enableMCParticles && !evt.isRealData())
     {
@@ -352,9 +365,6 @@ const pandora::Pandora *LArPandora::CreateNewPandora() const
     const pandora::Pandora *const pPandora = new pandora::Pandora();
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterAlgorithms(*pPandora));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
-
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithmFactory(*pPandora,
-        "LArPCAShowerParticleBuilding", new lar_pandora_showers::PCAShowerParticleBuildingAlgorithm::Factory));
 
     return pPandora;
 }

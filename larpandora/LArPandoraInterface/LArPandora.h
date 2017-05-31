@@ -95,7 +95,7 @@ private:
 
     std::string                 m_geantModuleLabel;         ///<
     std::string                 m_hitfinderModuleLabel;     ///<
-    std::string                 m_pandoraModuleLabel;       ///<
+    std::string                 m_mvaModuleLabel;           ///<
 
     TTree                      *m_pRecoTree;                ///<
     int                         m_run;                      ///<

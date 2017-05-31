@@ -29,6 +29,7 @@
 #include "Api/PandoraApi.h"
 
 #include "larpandoracontent/LArHelpers/LArGeometryHelper.h"
+#include "larpandoracontent/LArObjects/LArCaloHit.h"
 #include "larpandoracontent/LArObjects/LArMCParticle.h"
 #include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 #include "larpandoracontent/LArPlugins/LArTransformationPlugin.h"
@@ -39,7 +40,8 @@
 namespace lar_pandora
 {
 
-void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const HitVector &hitVector, IdToHitMap &idToHitMap)
+void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const HitVector &hitVector, IdToHitMap &idToHitMap,
+    const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraHits2D(...) *** " << std::endl;
 
@@ -52,6 +54,8 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
 
     // Loop over ART hits
     int hitCounter(0);
+
+    lar_content::LArCaloHitFactory caloHitFactory;
 
     for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
     {
@@ -108,7 +112,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
         const double mips(LArPandoraInput::GetMips(settings, hit_Charge, hit_View));
 
         // Create Pandora CaloHit
-        PandoraApi::CaloHit::Parameters caloHitParameters;
+        lar_content::LArCaloHitParameters caloHitParameters;
         caloHitParameters.m_expectedDirection = pandora::CartesianVector(0., 0., 1.);
         caloHitParameters.m_cellNormalVector = pandora::CartesianVector(0., 0., 1.);
         caloHitParameters.m_cellSize0 = settings.m_dx_cm;
@@ -127,6 +131,21 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
         caloHitParameters.m_electromagneticEnergy = mips * settings.m_mips_to_gev;
         caloHitParameters.m_hadronicEnergy = mips * settings.m_mips_to_gev;
         caloHitParameters.m_pParentAddress = (void*)((intptr_t)(++hitCounter));
+
+        if (pHitResults)
+        {
+            const std::array<float, 4> mvaOutput(pHitResults->getOutput(hit));
+
+            const float showerWeight(mvaOutput.at(pHitResults->getIndex("em")));
+            const float trackWeight(mvaOutput.at(pHitResults->getIndex("track")));
+            const float otherWeight(mvaOutput.at(pHitResults->getIndex("none")));
+            const float weightSum(showerWeight + trackWeight + otherWeight);
+
+            caloHitParameters.m_showerProbability = (weightSum > std::numeric_limits<float>::epsilon()) ? showerWeight / weightSum : 0.f;
+            caloHitParameters.m_trackProbability = (weightSum > std::numeric_limits<float>::epsilon()) ? trackWeight / weightSum : 0.f;
+            caloHitParameters.m_otherProbability = (weightSum > std::numeric_limits<float>::epsilon()) ? otherWeight / weightSum : 0.f;
+            caloHitParameters.m_michelProbability = mvaOutput.at(pHitResults->getIndex("michel")); // ATTN Michel output currently independent
+        }
 
         const geo::View_t pandora_View(settings.m_globalViews ? LArPandoraGeometry::GetGlobalView(hit_WireID.Cryostat, hit_WireID.TPC, hit_View) : hit_View);
 
@@ -171,7 +190,14 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
         idToHitMap[hitCounter] = hit;
 
         // Create the Pandora hit
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters));
+        if (pHitResults)
+        {
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters, caloHitFactory));
+        }
+        else
+        {
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters));
+        }
     }
 }
 

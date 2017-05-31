@@ -9,6 +9,7 @@ art_make(
                         lardataobj_RawData
                         lardataobj_RecoBase
                         lardataobj_AnalysisBase
+                        lardata_ArtDataHelper
                         lardata_Utilities
                         larreco_RecoAlg_ClusterRecoUtil
                         larreco_RecoAlg
@@ -17,7 +18,6 @@ art_make(
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         LArPandoraContent
-                        larpandora_LArPandoraShowers
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
