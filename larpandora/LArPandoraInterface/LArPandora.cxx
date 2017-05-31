@@ -66,7 +66,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     // Input labels for this module
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
     m_hitfinderModuleLabel = pset.get<std::string>("HitFinderModuleLabel");
-    m_mvaModuleLabel = pset.get<std::string>("MVAModuleLabel");
+    m_mvaModuleLabel = pset.get<std::string>("MVAModuleLabel", "");
 
     // Settings for LArPandoraGeometry
     m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", false);  // Keep separate drift volumes but interchange U and V
