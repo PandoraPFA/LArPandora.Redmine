@@ -7,6 +7,8 @@
 #ifndef LAR_PANDORA_INPUT_H
 #define LAR_PANDORA_INPUT_H 1
 
+#include "lardata/ArtDataHelper/MVAReader.h"
+
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
@@ -52,9 +54,10 @@ public:
      *  @param  driftVolumeMap the geometry mapping
      *  @param  hits the input list of ART hits for this event
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
+     *  @param  pHitResults to provide MVA data for the hits
      */
     static void CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
-        const HitVector &hitVector, IdToHitMap &idToHitMap);
+        const HitVector &hitVector, IdToHitMap &idToHitMap, const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults);
 
     /**
      *  @brief  Create pandora line gaps to cover any (continuous regions of) bad channels
