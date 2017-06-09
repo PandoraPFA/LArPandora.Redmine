@@ -7,6 +7,7 @@
 
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
+#include "cetlib/cpu_timer.h"
 
 #include "lardata/ArtDataHelper/MVAReader.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
