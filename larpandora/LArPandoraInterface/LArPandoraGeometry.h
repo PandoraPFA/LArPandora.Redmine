@@ -258,9 +258,10 @@ public:
          */
         Settings();
 
-        bool m_globalCoordinates;        ///< Use global coordinate system
-        bool m_globalDriftVolume;        ///< Use global drift volume
-        bool m_printGeometry;            ///< Print geometry to screen
+        bool            m_globalCoordinates;        ///< Use global coordinate system
+        bool            m_globalDriftVolume;        ///< Use global drift volume
+        bool            m_printGeometry;            ///< Print geometry to screen
+        std::string     m_geometryXmlFileName;      ///< File to which to write compact geometry xml
     };
 
     /**

@@ -117,6 +117,9 @@ void LArPandoraGeometry::LoadGeometry(const Settings &settings, LArDriftVolumeLi
     // Print drift volumes for debugging
     if (settings.m_printGeometry)
         LArPandoraGeometry::PrintGeometry(settings, outputVolumeList);
+
+    if (!settings.m_geometryXmlFileName.empty())
+        LArPandoraGeometry::WriteGeometry(settings.m_geometryXmlFileName, outputVolumeList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
