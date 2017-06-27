@@ -73,6 +73,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", false);  // Keep separate drift volumes but interchange U and V
     m_geometrySettings.m_globalDriftVolume = pset.get<bool>("UseGlobalDriftVolume", false);  // Transform to a single global drift volume
     m_geometrySettings.m_printGeometry = pset.get<bool>("PrintGeometry", false);
+    m_geometrySettings.m_geometryXmlFileName = pset.get<std::string>("GeometryXmlFileName", "");
 
     // Settings for LArPandoraInput
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
