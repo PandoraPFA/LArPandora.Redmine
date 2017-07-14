@@ -1,25 +1,25 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
 parent	larpandora	v06_11_00
-defaultqual	e14
+defaultqual	e10
 #
 fcldir  product_dir job
 fwdir   product_dir scripts
 #
 product         version
-larreco         v06_29_00
-larpandoracontent         v03_06_00
-eigen		v3_3_3
+larreco         v06_20_00_03
+larpandoracontent         v03_07_02
+eigen		v3_2_9a
 
 cetbuildtools	v5_06_07	-	only_for_build
 end_product_list
 
   
-# e14  - with gcc 6.3.0 and -std=c++14
+# e10  - with gcc 6.3.0 and -std=c++14
 qualifier	larreco		larpandoracontent	eigen	notes
-e14:debug	e14:debug	e14:debug		-nq-
-e14:opt		e14:opt		e14:opt			-nq-
-e14:prof	e14:prof	e14:prof		-nq-
+e10:debug	e10:debug	e10:debug		-nq-
+e10:opt		e10:opt		e10:opt			-nq-
+e10:prof	e10:prof	e10:prof		-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

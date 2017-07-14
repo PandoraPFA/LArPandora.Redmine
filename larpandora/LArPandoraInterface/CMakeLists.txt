@@ -28,11 +28,13 @@ art_make(
                         art_Persistency_Common
                         art_Persistency_Provenance
                         art_Utilities
-                        canvas
+                        canvas_Persistency_Common
+                        canvas_Persistency_Provenance
+                        canvas_Utilities
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         ${FHICLCPP}
-                        cetlib cetlib_except
+                        cetlib
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
