@@ -145,13 +145,6 @@ DEFINE_ART_MODULE(PFParticleCosmicAna)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
-/**
- *  @file   LArPandora/PFParticleCosmicAna.cxx
- * 
- *  @brief  Implementation of PFParticle analysis module
- * 
- *  $Log: $
- */
 
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"

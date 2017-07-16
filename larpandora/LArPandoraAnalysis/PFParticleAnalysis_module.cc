@@ -69,6 +69,8 @@ private:
      int          m_vertex;                ///<
      int          m_track;                 ///<
      int          m_trackid;               ///<
+     int          m_shower;                ///<
+     int          m_showerid;              ///<
 
      int          m_seeds;                 ///<
      int          m_clusters;              ///<
@@ -76,15 +78,19 @@ private:
      int          m_hits;                  ///<
      int          m_trajectorypoints;      ///<
      int          m_trackhits;             ///<
+     int          m_showerhits;            ///<
      int          m_seedhits;              ///<
+
+     double       m_seedvtxx;               ///< 
+     double       m_seedvtxy;               ///<
+     double       m_seedvtxz;               ///<
+     double       m_seedvtxdirx;            ///< 
+     double       m_seedvtxdiry;            ///<
+     double       m_seedvtxdirz;            ///<
 
      double       m_pfovtxx;               ///< 
      double       m_pfovtxy;               ///<
      double       m_pfovtxz;               ///<
-     double       m_pfopx;                 ///< 
-     double       m_pfopy;                 ///<
-     double       m_pfopz;                 ///<
-     double       m_pfoptot;               ///<
 
      double       m_trkvtxx;               ///< 
      double       m_trkvtxy;               ///<
@@ -100,10 +106,20 @@ private:
      double       m_trkenddirz;            ///<
      double       m_trklength;             ///<
      double       m_trkstraightlength;     ///<
-  
-     std::string  m_spacepointLabel;       ///< 
+      
+     double       m_shwvtxx;               ///< 
+     double       m_shwvtxy;               ///<
+     double       m_shwvtxz;               ///<
+     double       m_shwvtxdirx;            ///< 
+     double       m_shwvtxdiry;            ///<
+     double       m_shwvtxdirz;            ///<
+     double       m_shwlength;             ///<
+     double       m_shwopenangle;          ///<
+     double       m_shwbestplane;          ///<
+
+     double       m_t0;                    ///<
+
      std::string  m_particleLabel;         ///<
-     std::string  m_trackLabel;            ///<
      bool         m_printDebug;            ///< switch for print statements (TODO: use message service!)
 };
 
@@ -113,13 +129,6 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
-/**
- *  @file   larpandora/LArPandoraAnalysis/PFParticleAnalysis.cxx
- * 
- *  @brief  Implementation of PFParticle analysis module
- * 
- *  $Log: $
- */
 
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -131,8 +140,11 @@ DEFINE_ART_MODULE(PFParticleAnalysis)
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Seed.h"
+#include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Vertex.h"
+
+#include "lardataobj/AnalysisBase/T0.h"
 
 #include <iostream>
 
@@ -154,9 +166,7 @@ PFParticleAnalysis::~PFParticleAnalysis()
 
 void PFParticleAnalysis::reconfigure(fhicl::ParameterSet const &pset)
 {
-    m_spacepointLabel = pset.get<std::string>("SpacePointModule", "pandora");
     m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
-    m_trackLabel = pset.get<std::string>("TrackModule","pandora");
     m_printDebug = pset.get<bool>("PrintDebug",false);
 }
 
@@ -184,20 +194,25 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("vertex", &m_vertex, "vertex/I"); 
     m_pRecoTree->Branch("track", &m_track, "track/I"); 
     m_pRecoTree->Branch("trackid", &m_trackid, "trackid/I"); 
+    m_pRecoTree->Branch("shower", &m_shower, "shower/I"); 
+    m_pRecoTree->Branch("showerid", &m_showerid, "showerid/I"); 
     m_pRecoTree->Branch("seeds", &m_seeds, "seeds/I");
     m_pRecoTree->Branch("clusters", &m_clusters, "clusters/I");
     m_pRecoTree->Branch("spacepoints", &m_spacepoints, "spacepoints/I"); 
     m_pRecoTree->Branch("hits", &m_hits, "hits/I"); 
     m_pRecoTree->Branch("trackhits", &m_trackhits, "trackhits/I");
     m_pRecoTree->Branch("trajectorypoints", &m_trajectorypoints, "trajectorypoints/I");
-    m_pRecoTree->Branch("seedhits", &m_seedhits, "seedhits/I");
+    m_pRecoTree->Branch("seedhits", &m_seedhits, "seedhits/I");   
+    m_pRecoTree->Branch("showerhits", &m_showerhits, "showerhits/I");  
+    m_pRecoTree->Branch("seedvtxx", &m_seedvtxx, "seedvtxx/D");
+    m_pRecoTree->Branch("seedvtxy", &m_seedvtxy, "seedvtxy/D");
+    m_pRecoTree->Branch("seedvtxz", &m_seedvtxz, "seedvtxz/D");
+    m_pRecoTree->Branch("seedvtxdirx", &m_seedvtxdirx, "seedvtxdirx/D");
+    m_pRecoTree->Branch("seedvtxdiry", &m_seedvtxdiry, "seedvtxdiry/D");
+    m_pRecoTree->Branch("seedvtxdirz", &m_seedvtxdirz, "seedvtxdirz/D");
     m_pRecoTree->Branch("pfovtxx", &m_pfovtxx, "pfovtxx/D");
     m_pRecoTree->Branch("pfovtxy", &m_pfovtxy, "pfovtxy/D");
     m_pRecoTree->Branch("pfovtxz", &m_pfovtxz, "pfovtxz/D");
-    m_pRecoTree->Branch("pfopx", &m_pfopx, "pfopx/D");
-    m_pRecoTree->Branch("pfopy", &m_pfopy, "pfopy/D");
-    m_pRecoTree->Branch("pfopz", &m_pfopz, "pfopz/D");
-    m_pRecoTree->Branch("pfoptot", &m_pfoptot, "pfoptot/D");
     m_pRecoTree->Branch("trkvtxx", &m_trkvtxx, "trkvtxx/D");
     m_pRecoTree->Branch("trkvtxy", &m_trkvtxy, "trkvtxy/D");
     m_pRecoTree->Branch("trkvtxz", &m_trkvtxz, "trkvtxz/D");
@@ -211,7 +226,17 @@ void PFParticleAnalysis::beginJob()
     m_pRecoTree->Branch("trkenddiry", &m_trkenddiry, "trkenddiry/D");
     m_pRecoTree->Branch("trkenddirz", &m_trkenddirz, "trkenddirz/D");
     m_pRecoTree->Branch("trklength", &m_trklength, "trklength/D");
-    m_pRecoTree->Branch("trkstraightlength", &m_trkstraightlength, "trkstraightlength/D");
+    m_pRecoTree->Branch("trkstraightlength", &m_trkstraightlength, "trkstraightlength/D");   
+    m_pRecoTree->Branch("shwvtxx", &m_shwvtxx, "shwvtxx/D");
+    m_pRecoTree->Branch("shwvtxy", &m_shwvtxy, "shwvtxy/D");
+    m_pRecoTree->Branch("shwvtxz", &m_shwvtxz, "shwvtxz/D");
+    m_pRecoTree->Branch("shwvtxdirx", &m_shwvtxdirx, "shwvtxdirx/D");
+    m_pRecoTree->Branch("shwvtxdiry", &m_shwvtxdiry, "shwvtxdiry/D");
+    m_pRecoTree->Branch("shwvtxdirz", &m_shwvtxdirz, "shwvtxdirz/D");    
+    m_pRecoTree->Branch("shwlength", &m_shwlength, "shwlength/D");
+    m_pRecoTree->Branch("shwopenangle", &m_shwopenangle, "shwopenangle/D");
+    m_pRecoTree->Branch("shwbestplane", &m_shwbestplane, "shwbestplane/D");
+    m_pRecoTree->Branch("t0", &m_t0, "t0/D");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -242,6 +267,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_vertex = 0;
     m_track = 0;
     m_trackid = -999;
+    m_shower = 0;
+    m_showerid = -999;
 
     m_seeds = 0;
     m_clusters = 0;
@@ -250,14 +277,18 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_trajectorypoints = 0;
     m_trackhits = 0;
     m_seedhits = 0;
+    m_showerhits = 0;
       
+    m_seedvtxx = 0.0;
+    m_seedvtxy = 0.0;
+    m_seedvtxz = 0.0;
+    m_seedvtxdirx = 0.0;
+    m_seedvtxdiry = 0.0;
+    m_seedvtxdirz = 0.0;
+
     m_pfovtxx = 0.0;
     m_pfovtxy = 0.0;
     m_pfovtxz = 0.0;
-    m_pfopx = 0.0;
-    m_pfopy = 0.0;
-    m_pfopz = 0.0;
-    m_pfoptot = 0.0;
 
     m_trkvtxx = 0.0;
     m_trkvtxy = 0.0;
@@ -273,6 +304,18 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     m_trkenddirz = 0.0;
     m_trklength = 0.0;
     m_trkstraightlength = 0.0;
+     
+    m_shwvtxx = 0.0;
+    m_shwvtxy = 0.0;
+    m_shwvtxz = 0.0;
+    m_shwvtxdirx = 0.0;
+    m_shwvtxdiry = 0.0;
+    m_shwvtxdirz = 0.0;
+    m_shwlength = 0.0;
+    m_shwopenangle = 0.0;
+    m_shwbestplane = 0.0;
+
+    m_t0 = 0;
 
     if (m_printDebug)
     {
@@ -292,7 +335,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particleVector);
     LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particles1, particlesToClusters);
     LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particles2, particlesToSpacePoints);
-    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, particlesToHits, hitsToParticles);
 
     if (m_printDebug)
         std::cout << "  PFParticles: " << particleVector.size() << std::endl;
@@ -322,8 +365,22 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
     TrackVector trackVector, trackVector2;
     PFParticlesToTracks particlesToTracks;
     TracksToHits tracksToHits;
-    LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
-    LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVector2, tracksToHits);
+    LArPandoraHelper::CollectTracks(evt, m_particleLabel, trackVector, particlesToTracks);
+    LArPandoraHelper::CollectTracks(evt, m_particleLabel, trackVector2, tracksToHits);    
+
+    // Get the reconstructed showers
+    // ============================
+    ShowerVector showerVector, showerVector2;
+    PFParticlesToShowers particlesToShowers;
+    ShowersToHits showersToHits;
+    LArPandoraHelper::CollectShowers(evt, m_particleLabel, showerVector, particlesToShowers);
+    LArPandoraHelper::CollectShowers(evt, m_particleLabel, showerVector2, showersToHits);
+
+    // Get the reconstructed T0 objects
+    // ================================
+    T0Vector t0Vector;
+    TracksToT0s tracksToT0s;
+    LArPandoraHelper::CollectT0s(evt, m_particleLabel, t0Vector, tracksToT0s);
 
     // Build an indexed map of the PFParticles
     // =======================================
@@ -349,6 +406,8 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_vertex = 0;
         m_track = 0;
         m_trackid = -999;
+        m_shower = 0;
+        m_showerid = -999;
 
         m_seeds = 0;
         m_clusters = 0;
@@ -357,14 +416,18 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_trajectorypoints = 0;
         m_trackhits = 0;
         m_seedhits = 0;
-      
+        m_showerhits = 0;
+              
+        m_seedvtxx = 0.0;
+        m_seedvtxy = 0.0;
+        m_seedvtxz = 0.0;
+        m_seedvtxdirx = 0.0;
+        m_seedvtxdiry = 0.0;
+        m_seedvtxdirz = 0.0;
+
         m_pfovtxx = 0.0;
         m_pfovtxy = 0.0;
         m_pfovtxz = 0.0;
-        m_pfopx = 0.0;
-        m_pfopy = 0.0;
-        m_pfopz = 0.0;
-        m_pfoptot = 0.0;
 
         m_trkvtxx = 0.0;
         m_trkvtxy = 0.0;
@@ -380,7 +443,19 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         m_trkenddirz = 0.0;
         m_trklength = 0.0;
         m_trkstraightlength = 0.0;
-	
+	      
+        m_shwvtxx = 0.0;
+        m_shwvtxy = 0.0;
+        m_shwvtxz = 0.0;
+        m_shwvtxdirx = 0.0;
+        m_shwvtxdiry = 0.0;
+        m_shwvtxdirz = 0.0;
+        m_shwlength = 0.0;
+        m_shwopenangle = 0.0;
+        m_shwbestplane = 0.0;
+
+        m_t0 = 0.0;
+
         // Particles <-> Clusters
         PFParticlesToClusters::const_iterator cIter = particlesToClusters.find(particle);
         if (particlesToClusters.end() != cIter)
@@ -410,7 +485,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 double xyz[3] = {0.0, 0.0, 0.0} ;
                 vertex->XYZ(xyz);
 
-                m_vertex = 1;
+                m_vertex  = 1;
                 m_pfovtxx = xyz[0];
                 m_pfovtxy = xyz[1];
                 m_pfovtxz = xyz[2];
@@ -418,38 +493,42 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
         }
 
         // Particles <-> Seeds <-> Hits
-        PFParticlesToSeeds::const_iterator sIter = particlesToSeeds.find(particle);
-        if (particlesToSeeds.end() != sIter)
+        PFParticlesToSeeds::const_iterator seedIter = particlesToSeeds.find(particle);
+        if (particlesToSeeds.end() != seedIter)
         {
-            const SeedVector &seedVector = sIter->second;
+            const SeedVector &seedVector = seedIter->second;
             m_seeds = seedVector.size();
 
             if (!seedVector.empty())
             {
                 const art::Ptr<recob::Seed> firstSeed = *(seedVector.begin());
+                double vxvyvz[3] = {0.0, 0.0, 0.0} ;
                 double pxpypz[3] = {0.0, 0.0, 0.0} ;
                 double err[3] = {0.0, 0.0, 0.0} ;
+                firstSeed->GetPoint(vxvyvz, err);
                 firstSeed->GetDirection(pxpypz, err);
 
-                m_pfopx = pxpypz[0];
-                m_pfopy = pxpypz[1];
-                m_pfopz = pxpypz[2];
-                m_pfoptot = std::sqrt(m_pfopx * m_pfopx + m_pfopy * m_pfopy + m_pfopz * m_pfopz);
+                m_seedvtxx = vxvyvz[0];
+                m_seedvtxy = vxvyvz[1];
+                m_seedvtxz = vxvyvz[2];
+                m_seedvtxdirx = pxpypz[0];
+                m_seedvtxdiry = pxpypz[1];
+                m_seedvtxdirz = pxpypz[2];
 
-                for (SeedVector::const_iterator sIter1 = seedVector.begin(), sIterEnd1 = seedVector.end(); sIter1 != sIterEnd1; ++sIter1)
+                for (SeedVector::const_iterator seedIter1 = seedVector.begin(), seedIterEnd1 = seedVector.end(); seedIter1 != seedIterEnd1; ++seedIter1)
                 {
-                    SeedsToHits::const_iterator sIter2 = seedsToHits.find(*sIter1);
-                    if (seedsToHits.end() != sIter2)
+                    SeedsToHits::const_iterator seedIter2 = seedsToHits.find(*seedIter1);
+                    if (seedsToHits.end() != seedIter2)
                         ++m_seedhits;
                 }
             }
         }
 
-        // Particles <-> Tracks <-> Hits
-        PFParticlesToTracks::const_iterator tIter = particlesToTracks.find(particle);
-        if (particlesToTracks.end() != tIter)
+        // Particles <-> Tracks <-> Hits, T0s
+        PFParticlesToTracks::const_iterator trkIter = particlesToTracks.find(particle);
+        if (particlesToTracks.end() != trkIter)
         {
-            const TrackVector &trackVector = tIter->second;
+            const TrackVector &trackVector = trkIter->second;
             if (!trackVector.empty())
             {
                 if (trackVector.size() !=1 && m_printDebug)
@@ -479,9 +558,50 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 m_trklength = track->Length();
                 m_trkstraightlength = (trackEndPosition - trackVtxPosition).Mag();
 
-                TracksToHits::const_iterator tIter2 = tracksToHits.find(track);
-                if (tracksToHits.end() != tIter2)
-		    m_trackhits = tIter2->second.size();
+	        TracksToT0s::const_iterator t0Iter = tracksToT0s.find(track);
+                if (tracksToT0s.end() != t0Iter)
+                {
+	            const art::Ptr<anab::T0> t0 = t0Iter->second;
+                    m_t0 = t0->Time();
+		}
+
+                TracksToHits::const_iterator trkIter2 = tracksToHits.find(track);
+                if (tracksToHits.end() != trkIter2)
+		    m_trackhits = trkIter2->second.size();
+            }
+        }
+
+        // Particles <-> Showers <-> Hits
+        PFParticlesToShowers::const_iterator shwIter = particlesToShowers.find(particle);
+        if (particlesToShowers.end() != shwIter)
+        {
+            const ShowerVector &showerVector = shwIter->second;
+            if (!showerVector.empty())
+            {
+                if (showerVector.size() !=1 && m_printDebug)
+                    std::cout << " Warning: Found particle with more than one associated shower " << std::endl;
+ 
+                const art::Ptr<recob::Shower> shower = *(showerVector.begin());
+                const TVector3 &showerVtxPosition = shower->ShowerStart();
+                const TVector3 &showerVtxDirection = shower->Direction();
+
+                m_shower = 1;
+                m_showerid = shower->ID();
+ 
+                m_shwvtxx = showerVtxPosition.x();
+                m_shwvtxy = showerVtxPosition.y();
+                m_shwvtxz = showerVtxPosition.z();
+                m_shwvtxdirx = showerVtxDirection.x();
+                m_shwvtxdiry = showerVtxDirection.y();
+                m_shwvtxdirz = showerVtxDirection.z();
+
+                m_shwlength = shower->Length();
+                m_shwopenangle = shower->OpenAngle();
+                m_shwbestplane = shower->best_plane();
+
+                ShowersToHits::const_iterator shwIter2 = showersToHits.find(shower);
+                if (showersToHits.end() != shwIter2)
+		    m_showerhits = shwIter2->second.size();
             }
         }
 
@@ -489,7 +609,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
             std::cout << "    PFParticle [" << n << "] Primary=" << m_primary << " FinalState=" << m_finalstate 
                       << " Pdg=" << m_pdgcode << " NuPdg=" << m_neutrino
                       << " (Self=" << m_self << ", Parent=" << m_parent << ")"
-                      << " (Vertex=" << m_vertex << ", Seeds=" << m_seeds << ", Track=" << m_track
+                      << " (Vertex=" << m_vertex << ", Seeds=" << m_seeds << ", Track=" << m_track << ", Shower=" << m_shower
                       << ", Clusters=" << m_clusters << ", SpacePoints=" << m_spacepoints << ", Hits=" << m_hits << ") " << std::endl;
 
         m_pRecoTree->Fill();

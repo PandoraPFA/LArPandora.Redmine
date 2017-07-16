@@ -37,14 +37,6 @@ public:
      */
     virtual ~ILArPandora();
 
-    /**
-     *  @brief  Get the volume id number associated with the given cryostate and tpc numbers
-     * 
-     *  @param  cryostat the cryostat number
-     *  @param  tpc the tpc number
-     */
-    virtual int GetVolumeIdNumber(const unsigned int cryostat, const unsigned int tpc) const = 0;
-
 protected:
     /**
      *  @brief  Create pandora instances
@@ -58,7 +50,7 @@ protected:
 
     /**
      *  @brief  Create pandora input hits, mc particles etc.
-     * 
+     *
      *  @param  evt the art event
      *  @param  idToHitMap to receive the populated pandora hit id to art hit map
      */
@@ -66,7 +58,7 @@ protected:
 
     /**
      *  @brief  Process pandora output particle flow objects
-     * 
+     *
      *  @param  evt the art event
      *  @param  idToHitMap the pandora hit id to art hit map
      */

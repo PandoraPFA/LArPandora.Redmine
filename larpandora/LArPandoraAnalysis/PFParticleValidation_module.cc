@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraInterface/PFParticleValidation_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/PFParticleValidation_module.cc
  *
  *  @brief  Analysis module for created particles
  *
@@ -315,13 +315,6 @@ DEFINE_ART_MODULE(PFParticleValidation)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-/**
- *  @file   LArPandora/PFParticleValidation.cxx
- *
- *  @brief  Implementation of the lar pandora analysis producer.
- *
- *  $Log: $
- */
 
 #include "art/Framework/Principal/Event.h"
 

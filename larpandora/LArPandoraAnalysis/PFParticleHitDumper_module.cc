@@ -143,13 +143,6 @@ DEFINE_ART_MODULE(PFParticleHitDumper)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
-/**
- *  @file   larpandora/LArPandoraAnalysis/PFParticleHitDumper.cxx
- * 
- *  @brief  Implementation of the lar pandora analysis producer.
- * 
- *  $Log: $
- */
 
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"

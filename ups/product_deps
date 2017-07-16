@@ -8,19 +8,18 @@ fwdir   product_dir scripts
 #
 product         version
 larreco         v06_20_00_03
-larpandoracontent         v03_02_00
+larpandoracontent         v03_07_02
 eigen		v3_2_9a
-gcc             v4_9_3a
 
 cetbuildtools	v5_06_07	-	only_for_build
 end_product_list
 
   
-# e10  - with gcc 4.9.3 and -std=c++14
-qualifier	larreco		larpandoracontent	eigen	gcc	notes
-e10:debug	e10:debug	e10:debug		-nq-	-nq-
-e10:opt		e10:opt		e10:opt			-nq-	-nq-
-e10:prof	e10:prof	e10:prof		-nq-	-nq-
+# e10  - with gcc 6.3.0 and -std=c++14
+qualifier	larreco		larpandoracontent	eigen	notes
+e10:debug	e10:debug	e10:debug		-nq-
+e10:opt		e10:opt		e10:opt			-nq-
+e10:prof	e10:prof	e10:prof		-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
