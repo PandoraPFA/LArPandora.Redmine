@@ -8,7 +8,7 @@ fwdir   product_dir scripts
 #
 product         version
 larreco         v06_20_00_03
-larpandoracontent         v03_07_02
+larpandoracontent         v03_07_02_e10
 eigen		v3_2_9a
 
 cetbuildtools	v5_06_07	-	only_for_build
