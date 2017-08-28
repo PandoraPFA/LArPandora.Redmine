@@ -14,7 +14,7 @@
 #include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 #include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -387,10 +387,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 // TODO - If possible, we should try to move some of the shower-building code below into the BuildShower method
                 auto const& geom = lar::providerFrom<geo::Geometry>();
 
-                lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
-                lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
-                lar::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
-                lar::PtrMaker<recob::Cluster> makeClusterPtr(evt, *(settings.m_pProducer));
+                art::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
+                art::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
+                art::PtrMaker<recob::PFParticle> makePfoPtr(evt, *(settings.m_pProducer));
+                art::PtrMaker<recob::Cluster> makeClusterPtr(evt, *(settings.m_pProducer));
 
                 // if this assertion fails, we have a shower with no associated clusters:
                 assert((size_t) iClusterCounter < outputClusters->size());
