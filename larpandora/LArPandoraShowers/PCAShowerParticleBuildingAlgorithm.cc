@@ -90,10 +90,10 @@ void PCAShowerParticleBuildingAlgorithm::CreatePfo(const ParticleFlowObject *con
         pfoParameters.m_showerOpeningAngle = this->OpeningAngle(pfoParameters.m_showerDirection.Get(),
             pfoParameters.m_showerSecondaryVector.Get(), pfoParameters.m_showerEigenValues.Get());
 
-        const float layerPitch(LArGeometryHelper::GetWireZPitch(this->GetPandora()));
-        const ThreeDSlidingFitResult threeDFitResult(pThreeDCluster, m_layerFitHalfWindow, layerPitch);
-        pfoParameters.m_showerMinLayerPosition = threeDFitResult.GetGlobalMinLayerPosition();
-        pfoParameters.m_showerMaxLayerPosition = threeDFitResult.GetGlobalMaxLayerPosition();
+//        const float layerPitch(LArGeometryHelper::GetWireZPitch(this->GetPandora()));
+//        const ThreeDSlidingFitResult threeDFitResult(pThreeDCluster, m_layerFitHalfWindow, layerPitch);
+//        pfoParameters.m_showerMinLayerPosition = threeDFitResult.GetGlobalMinLayerPosition();
+//        pfoParameters.m_showerMaxLayerPosition = threeDFitResult.GetGlobalMaxLayerPosition();
 
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfoParameters, pOutputPfo,
             pfoFactory));
