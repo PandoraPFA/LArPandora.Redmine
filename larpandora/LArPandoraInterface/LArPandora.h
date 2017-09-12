@@ -61,13 +61,6 @@ protected:
     const pandora::Pandora *CreateNewPandora() const;
 
     /**
-     *  @brief  Set x0 values for all pfos created by the specified pandora isntance
-     *
-     *  @param  pPandora the address of the relevant pandora instance
-     */
-    void SetParticleX0Values(const pandora::Pandora *const pPandora) const;
-
-    /**
      *  @brief Initialize the internal monitoring
      */
     void InitializeMonitoring();
