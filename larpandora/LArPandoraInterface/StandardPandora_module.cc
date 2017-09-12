@@ -45,8 +45,23 @@ private:
      */
     void CreateDaughterPandoraInstances(const std::string &configFileName) const;
 
-    bool                m_uniqueInstanceSettings;   ///< Whether to enable unique configuration of each Pandora instance
-    std::string         m_outputGeometryXmlFile;    ///< If provided, attempt to write collected geometry information to output xml file
+    /**
+     *  @brief  Pass external steering parameters, read from fhicl parameter set, to LArParent Pandora algorithm
+     * 
+     *  @param  pPandora the address of the relevant pandora instance
+     */
+    void ProvideExternalSteeringParameters(const pandora::Pandora *const pPandora) const;
+
+    bool                m_uniqueInstanceSettings;           ///< Whether to enable unique configuration of each Pandora instance
+    std::string         m_outputGeometryXmlFile;            ///< If provided, attempt to write collected geometry information to output xml file
+
+    bool                m_shouldRunAllHitsCosmicReco;       ///< Steering: whether to run all hits cosmic-ray reconstruction
+    bool                m_shouldRunCosmicHitRemoval;        ///< Steering: whether to remove hits from tagged cosmic-rays
+    bool                m_shouldRunSlicing;                 ///< Steering: whether to slice events into separate regions for processing
+    bool                m_shouldRunNeutrinoRecoOption;      ///< Steering: whether to run neutrino reconstruction for each slice
+    bool                m_shouldRunCosmicRecoOption;        ///< Steering: whether to run cosmic-ray reconstruction for each slice
+    bool                m_shouldIdentifyNeutrinoSlice;      ///< Steering: whether to identify most appropriate neutrino slice
+    bool                m_printOverallRecoStatus;           ///< Steering: whether to print current operation status messages
 };
 
 DEFINE_ART_MODULE(StandardPandora)
@@ -66,6 +81,7 @@ DEFINE_ART_MODULE(StandardPandora)
 #include "larpandoracontent/LArPlugins/LArPseudoLayerPlugin.h"
 #include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
 #include "larpandoracontent/LArStitching/MultiPandoraApi.h"
+#include "larpandoracontent/LArUtility/ParentAlgorithm.h"
 
 #include <iostream>
 
@@ -77,6 +93,14 @@ StandardPandora::StandardPandora(fhicl::ParameterSet const &pset) :
 {
     m_uniqueInstanceSettings = pset.get<bool>("UniqueInstanceSettings", false);
     m_outputGeometryXmlFile = pset.get<std::string>("OutputGeometryXmlFile", "");
+
+    m_shouldRunAllHitsCosmicReco = pset.get<bool>("ShouldRunAllHitsCosmicReco");
+    m_shouldRunCosmicHitRemoval = pset.get<bool>("ShouldRunCosmicHitRemoval");
+    m_shouldRunSlicing = pset.get<bool>("ShouldRunSlicing");
+    m_shouldRunNeutrinoRecoOption = pset.get<bool>("ShouldRunNeutrinoRecoOption");
+    m_shouldRunCosmicRecoOption = pset.get<bool>("ShouldRunCosmicRecoOption");
+    m_shouldIdentifyNeutrinoSlice = pset.get<bool>("ShouldIdentifyNeutrinoSlice");
+    m_printOverallRecoStatus = pset.get<bool>("PrintOverallRecoStatus", false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -121,7 +145,6 @@ void StandardPandora::CreatePrimaryPandoraInstance(const std::string &configFile
 
     m_pPrimaryPandora = this->CreateNewPandora();
     MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, fullConfigFileName));
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora,
         new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
 
@@ -134,7 +157,11 @@ void StandardPandora::CreatePrimaryPandoraInstance(const std::string &configFile
         MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "driftVolume",
             driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(),
             driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
+
+        this->ProvideExternalSteeringParameters(m_pPrimaryPandora);
     }
+
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, fullConfigFileName));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -159,6 +186,8 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
             driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(),
             driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
 
+        this->ProvideExternalSteeringParameters(pPandora);
+
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora,
             new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*pPandora,
@@ -180,6 +209,21 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
 
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*pPandora, thisFullConfigFileName));
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void StandardPandora::ProvideExternalSteeringParameters(const pandora::Pandora *const pPandora) const
+{
+    auto *const pEventSteeringParameters = new lar_content::ParentAlgorithm::ExternalSteeringParameters;
+    pEventSteeringParameters->m_shouldRunAllHitsCosmicReco = m_shouldRunAllHitsCosmicReco;
+    pEventSteeringParameters->m_shouldRunCosmicHitRemoval = m_shouldRunCosmicHitRemoval;
+    pEventSteeringParameters->m_shouldRunSlicing = m_shouldRunSlicing;
+    pEventSteeringParameters->m_shouldRunNeutrinoRecoOption = m_shouldRunNeutrinoRecoOption;
+    pEventSteeringParameters->m_shouldRunCosmicRecoOption = m_shouldRunCosmicRecoOption;
+    pEventSteeringParameters->m_shouldIdentifyNeutrinoSlice = m_shouldIdentifyNeutrinoSlice;
+    pEventSteeringParameters->m_printOverallRecoStatus = m_printOverallRecoStatus;
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, pandora::ExternallyConfiguredAlgorithm::SetExternalParameters(*pPandora, "LArParent", pEventSteeringParameters));
 }
 
 } // namespace lar_pandora

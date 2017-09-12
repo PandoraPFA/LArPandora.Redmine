@@ -318,10 +318,7 @@ void LArPandora::RunPandoraInstances()
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
     for (const pandora::Pandora *const pPandora : daughterInstances)
-    {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*pPandora));
-        this->SetParticleX0Values(pPandora);
-    }
 
     if (m_runStitchingInstance || daughterInstances.empty())
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPrimaryPandora));
@@ -369,21 +366,6 @@ const pandora::Pandora *LArPandora::CreateNewPandora() const
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
 
     return pPandora;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandora::SetParticleX0Values(const pandora::Pandora *const pPandora) const
-{
-    // ATTN Just a placeholder for a proper treatment
-    const pandora::PfoList *pPfoList(nullptr);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPandora, pPfoList));
-
-    pandora::PfoList connectedPfoList;
-    lar_content::LArPfoHelper::GetAllConnectedPfos(*pPfoList, connectedPfoList);
-
-    for (const pandora::ParticleFlowObject *const pPfo : connectedPfoList)
-        MultiPandoraApi::SetParticleX0(pPandora, pPfo, 0.f);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
