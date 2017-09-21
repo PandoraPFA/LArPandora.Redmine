@@ -197,7 +197,7 @@ void LArPandoraGeometry::WriteGeometry(const std::string &xmlFileName, const LAr
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-int LArPandoraGeometry::GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc)
+unsigned int LArPandoraGeometry::GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc)
 {
     if (driftVolumeMap.empty())
         throw cet::exception("LArPandora") << " LArPandoraGeometry::GetVolumeID --- detector geometry map is empty";

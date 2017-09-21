@@ -163,17 +163,16 @@ void LArPandora::beginJob()
     {
         LArDetectorGapList listOfGaps;
         LArPandoraGeometry::LoadDetectorGaps(m_geometrySettings, listOfGaps);
-        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, m_driftVolumeList, listOfGaps);
+        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, m_driftVolumeMap, listOfGaps);
     }
 
-    // Print the configuration of the algorithm at the beginning of the job;
-    // the algorithm does not need to be set up for this.
-    if (m_showerEnergyAlg) {
-      mf::LogInfo log("LArPandora");
-      log << "Energy shower settings: ";
-      m_showerEnergyAlg->DumpConfiguration(log, "  ", "");
+    // Print the configuration of the algorithm at the beginning of the job; the algorithm does not need to be set up for this.
+    if (m_showerEnergyAlg)
+    {
+        mf::LogInfo log("LArPandora");
+        log << "Energy shower settings: ";
+        m_showerEnergyAlg->DumpConfiguration(log, "  ", "");
     }
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -247,7 +246,6 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
     if (m_enableMCParticles && !evt.isRealData())
     {
         LArPandoraInput::CreatePandoraMCParticles(m_inputSettings, m_driftVolumeMap, artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        LArPandoraInput::CreatePandoraMCParticles2D(m_inputSettings, m_driftVolumeMap, artMCParticleVector);
         LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, m_driftVolumeMap, idToHitMap, artHitsToTrackIDEs);
     }
 }
@@ -284,10 +282,7 @@ void LArPandora::ResetPandoraInstances()
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
     for (const pandora::Pandora *const pPandora : daughterInstances)
-    {
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*pPandora));
-        MultiPandoraApi::ClearParticleX0Map(pPandora);
-    }
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(*m_pPrimaryPandora));
 }
