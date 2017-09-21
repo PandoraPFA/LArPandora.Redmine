@@ -135,31 +135,23 @@ void StandardPandora::CreatePrimaryPandoraInstance(const std::string &configFile
     if (m_driftVolumeList.empty())
         throw cet::exception("LArPandora") << " StandardPandora::CreatePrimaryPandoraInstance --- list of drift volumes is empty ";
 
+    m_pPrimaryPandora = this->CreateNewPandora();
+    MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
+
+    // If only single drift volume, primary pandora instance will do all pattern recognition, rather than perform a particle stitching role
+    if (1 == m_driftVolumeList.size())
+    {
+        this->ProvideExternalSteeringParameters(m_pPrimaryPandora);
+        MultiPandoraApi::SetVolumeId(m_pPrimaryPandora, 0);
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*m_pPrimaryPandora, new lar_content::LArPseudoLayerPlugin));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetLArTransformationPlugin(*m_pPrimaryPandora, new lar_content::LArRotationalTransformationPlugin));
+    }
+
     cet::search_path sp("FW_SEARCH_PATH");
     std::string fullConfigFileName;
 
     if (!sp.find_file(configFileName, fullConfigFileName))
         throw cet::exception("LArPandora") << " StandardPandora::CreatePrimaryPandoraInstance --- Failed to find xml configuration file " << configFileName << " in FW search path";
-
-    const LArDriftVolume &driftVolume(m_driftVolumeList.front());
-
-    m_pPrimaryPandora = this->CreateNewPandora();
-    MultiPandoraApi::AddPrimaryPandoraInstance(m_pPrimaryPandora);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*m_pPrimaryPandora,
-        new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
-
-    // If only single drift volume, primary pandora instance will do all pattern recognition, rather than perform a particle stitching role
-    if (1 == m_driftVolumeList.size())
-    {
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*m_pPrimaryPandora,
-            new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
-
-        MultiPandoraApi::SetVolumeInfo(m_pPrimaryPandora, new VolumeInfo(0, "driftVolume",
-            driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(),
-            driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
-
-        this->ProvideExternalSteeringParameters(m_pPrimaryPandora);
-    }
 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(*m_pPrimaryPandora, fullConfigFileName));
 }
@@ -173,30 +165,25 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
     if (!m_pPrimaryPandora)
         throw cet::exception("LArPandora") << " StandardPandora::CreateDaughterPandoraInstances --- trying to create daughter Pandora instances in absence of primary instance ";
 
+    if (m_driftVolumeList.size() < 2)
+        return;
+
     for (const LArDriftVolume &driftVolume : m_driftVolumeList)
     {
-        mf::LogDebug("LArPandora") << " Creating Pandora Daughter Instance: [" << driftVolume.GetVolumeID() << "]" << std::endl;
-
-        std::ostringstream volumeIdString;
-        volumeIdString << driftVolume.GetVolumeID();
-
         const pandora::Pandora *const pPandora = this->CreateNewPandora();
         MultiPandoraApi::AddDaughterPandoraInstance(m_pPrimaryPandora, pPandora);
-        MultiPandoraApi::SetVolumeInfo(pPandora, new VolumeInfo(driftVolume.GetVolumeID(), "driftVolume_" + volumeIdString.str(),
-            driftVolume.GetCenterX(), driftVolume.GetCenterY(), driftVolume.GetCenterZ(),
-            driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(), driftVolume.IsPositiveDrift()));
-
+        MultiPandoraApi::SetVolumeId(pPandora, driftVolume.GetVolumeID());
         this->ProvideExternalSteeringParameters(pPandora);
 
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArPseudoLayerPlugin(*pPandora,
-            new lar_content::LArPseudoLayerPlugin(driftVolume.GetWirePitchU(), driftVolume.GetWirePitchV(), driftVolume.GetWirePitchW())));
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::SetLArTransformationPlugin(*pPandora,
-            new lar_content::LArRotationalTransformationPlugin(driftVolume.GetWireAngleU(), driftVolume.GetWireAngleV(), driftVolume.GetSigmaUVZ())));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*pPandora, new lar_content::LArPseudoLayerPlugin));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetLArTransformationPlugin(*pPandora, new lar_content::LArRotationalTransformationPlugin));
 
         std::string thisConfigFileName(configFileName);
 
         if (m_uniqueInstanceSettings)
         {
+            std::ostringstream volumeIdString;
+            volumeIdString << driftVolume.GetVolumeID();
             const size_t insertPosition((thisConfigFileName.length() < 4) ? 0 : thisConfigFileName.length() - std::string(".xml").length());
             thisConfigFileName = thisConfigFileName.insert(insertPosition, volumeIdString.str());
         }

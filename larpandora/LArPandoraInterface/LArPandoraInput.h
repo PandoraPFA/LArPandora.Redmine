@@ -68,13 +68,13 @@ public:
     static void CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap);
 
     /**
-     *  @brief  Create pandora box gaps to cover dead regions between drift volumes
+     *  @brief  Create pandora line gaps to cover dead regions between TPCs in a global drift volume approach
      *
      *  @param  settings the settings
-     *  @param  driftVolumeList the drift volume list
+     *  @param  driftVolumeMap the drift volume map
      *  @param  listOfGaps the list of gaps
      */
-    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList, const LArDetectorGapList &listOfGaps);
+    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const LArDetectorGapList &listOfGaps);
 
     /**
      *  @brief  Create the Pandora MC particles from the MC particles
@@ -86,16 +86,6 @@ public:
      */
     static void CreatePandoraMCParticles(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
         const MCTruthToMCParticles &truthToParticles, const MCParticlesToMCTruth &particlesToTruth);
-
-    /**
-     *  @brief  Create 2D projections of the Pandora MC particles
-     *
-     *  @param  settings the settings
-     *  @param  driftVolumeMap the geometry mapping
-     *  @param  particleVector the input vector of MC particles
-     */
-    static void CreatePandoraMCParticles2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
-        const MCParticleVector &particleVector);
 
     /**
      *  @brief  Create links between the 2D hits and Pandora MC particles
@@ -120,7 +110,7 @@ private:
      *  @param  endT the last trajectory point in the detector
      *  @param  nDrift the number of drift directions encountered on the trajectory
      */
-    static void GetTrueStartAndEndPoints(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const int volumeID,
+    static void GetTrueStartAndEndPoints(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const unsigned int volumeID,
         const art::Ptr<simb::MCParticle> &particle, int &startT, int &endT, int &nDrift);
 
     /**

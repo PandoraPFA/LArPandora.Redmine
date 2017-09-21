@@ -304,7 +304,7 @@ public:
      *  @param  cstat the input cryostat unique ID
      *  @param  tpc the input tpc unique ID
      */
-    static int GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc);
+    static unsigned int GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc);
 
     /**
      *  @brief  Convert to global coordinate system
