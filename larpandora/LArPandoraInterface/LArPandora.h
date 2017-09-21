@@ -18,10 +18,6 @@
 #include <string>
 #include <memory> // std::unique_ptr<>
 
-class TTree;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 namespace lar_pandora
 {
 
@@ -60,45 +56,28 @@ protected:
      */
     const pandora::Pandora *CreateNewPandora() const;
 
-    /**
-     *  @brief Initialize the internal monitoring
-     */
-    void InitializeMonitoring();
-
 protected:
-    std::string                 m_configFile;               ///<
-    std::string                 m_stitchingConfigFile;      ///<
+    std::string                     m_configFile;               ///< The config file
+    std::string                     m_stitchingConfigFile;      ///< The stitching config file (multi drift volumes only)
 
-    LArDriftVolumeList          m_driftVolumeList;          ///<
-    LArDriftVolumeMap           m_driftVolumeMap;           ///<
+    LArDriftVolumeList              m_driftVolumeList;          ///< The drift volume list
+    LArDriftVolumeMap               m_driftVolumeMap;           ///< The map from volume id to drift volume
 
 private:
-    LArPandoraInput::Settings    m_inputSettings;            ///<
-    LArPandoraOutput::Settings   m_outputSettings;           ///<
-    LArPandoraGeometry::Settings m_geometrySettings;         ///<
+    LArPandoraInput::Settings       m_inputSettings;            ///< The lar pandora input settings
+    LArPandoraOutput::Settings      m_outputSettings;           ///< The lar pandora output settings
+    LArPandoraGeometry::Settings    m_geometrySettings;         ///< The lar pandora geometry settings
 
-    std::unique_ptr<calo::LinearEnergyAlg> m_showerEnergyAlg;
-                                                            ///< Optional cluster energy algorithm.
-    bool                        m_runStitchingInstance;     ///<
-    bool                        m_enableProduction;         ///<
-    bool                        m_enableDetectorGaps;       ///<
-    bool                        m_lineGapsCreated;          ///<
-    bool                        m_enableMCParticles;        ///<
-    bool                        m_enableMonitoring;         ///<
+    std::unique_ptr<calo::LinearEnergyAlg> m_showerEnergyAlg;   ///< Optional cluster energy algorithm.
+    bool                            m_runStitchingInstance;     ///< Whether to run the pandora stitching instance (multi drift volumes only)
+    bool                            m_enableProduction;         ///< Whether to persist output products
+    bool                            m_enableDetectorGaps;       ///< Whether to pass detector gap information to Pandora instances
+    bool                            m_lineGapsCreated;          ///< Book-keeping: whether line gap creation has been called
+    bool                            m_enableMCParticles;        ///< Whether to pass mc information to Pandora instances to aid development
 
-    std::string                 m_geantModuleLabel;         ///<
-    std::string                 m_hitfinderModuleLabel;     ///<
-    std::string                 m_mvaModuleLabel;           ///<
-
-    TTree                      *m_pRecoTree;                ///<
-    int                         m_run;                      ///<
-    int                         m_event;                    ///<
-    int                         m_hits;                     ///<
-    int                         m_pandoraHits;              ///<
-    float                       m_collectionTime;           ///<
-    float                       m_inputTime;                ///<
-    float                       m_processTime;              ///<
-    float                       m_outputTime;               ///<
+    std::string                     m_geantModuleLabel;         ///< The geant module label
+    std::string                     m_hitfinderModuleLabel;     ///< The hit finder module label
+    std::string                     m_mvaModuleLabel;           ///< The mva module label
 };
 
 } // namespace lar_pandora

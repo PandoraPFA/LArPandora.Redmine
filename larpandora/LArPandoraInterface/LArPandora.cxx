@@ -26,8 +26,6 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Vertex.h"
 
-#include "TTree.h"
-
 #include "Api/PandoraApi.h"
 
 #include "larpandoracontent/LArContent.h"
@@ -62,7 +60,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_enableProduction = pset.get<bool>("EnableProduction", true);
     m_enableDetectorGaps = pset.get<bool>("EnableLineGaps", true);
     m_enableMCParticles = pset.get<bool>("EnableMCParticles", false);
-    m_enableMonitoring = pset.get<bool>("EnableMonitoring", false);
 
     // Input labels for this module
     m_geantModuleLabel = pset.get<std::string>("GeantModuleLabel", "largeant");
@@ -150,9 +147,6 @@ LArPandora::~LArPandora()
 
 void LArPandora::beginJob()
 {
-    if (m_enableMonitoring)
-        this->InitializeMonitoring();
-
     // Load geometry and then create Pandora instances
     LArPandoraGeometry::LoadGeometry(m_geometrySettings, m_driftVolumeList, m_driftVolumeMap);
 
@@ -204,13 +198,6 @@ void LArPandora::produce(art::Event &evt)
     this->ProcessPandoraOutput(evt, idToHitMap);
     this->ResetPandoraInstances();
 
-    if (m_enableMonitoring)
-    {
-        m_run = evt.run();
-        m_event = evt.id().event();
-        m_pRecoTree->Fill();
-    }
-
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] DONE! *** " << std::endl;
 }
 
@@ -224,11 +211,6 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         LArPandoraInput::CreatePandoraReadoutGaps(m_inputSettings, m_driftVolumeMap);
         m_lineGapsCreated = true;
     }
-
-    cet::cpu_timer theClock;
-
-    if (m_enableMonitoring)
-        theClock.start();
 
     HitVector artHits;
     SimChannelVector artSimChannels;
@@ -245,14 +227,6 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
         LArPandoraHelper::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
         LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
-    }
-
-    if (m_enableMonitoring)
-    {
-        theClock.stop();
-        m_collectionTime = theClock.accumulated_real_time();
-        theClock.reset();
-        theClock.start();
     }
 
     std::unique_ptr<anab::MVAReader<recob::Hit, 4> > pHitResults;
@@ -276,33 +250,14 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         LArPandoraInput::CreatePandoraMCParticles2D(m_inputSettings, m_driftVolumeMap, artMCParticleVector);
         LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, m_driftVolumeMap, idToHitMap, artHitsToTrackIDEs);
     }
-
-    if (m_enableMonitoring)
-    {
-        theClock.stop();
-        m_inputTime = theClock.accumulated_real_time();
-        m_hits = static_cast<int>(artHits.size());
-        m_pandoraHits = static_cast<int>(idToHitMap.size());
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap)
 {
-    cet::cpu_timer theClock;
-
-    if (m_enableMonitoring)
-        theClock.start();
-
     if (m_enableProduction)
         LArPandoraOutput::ProduceArtOutput(m_outputSettings, idToHitMap, evt);
-
-    if (m_enableMonitoring)
-    {
-        theClock.stop();
-        m_outputTime = theClock.accumulated_real_time();
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -310,10 +265,6 @@ void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHit
 void LArPandora::RunPandoraInstances()
 {
     mf::LogDebug("LArPandora") << " *** LArPandora::RunPandoraInstances() *** " << std::endl;
-    cet::cpu_timer theClock;
-
-    if (m_enableMonitoring)
-        theClock.start();
 
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(m_pPrimaryPandora));
 
@@ -322,12 +273,6 @@ void LArPandora::RunPandoraInstances()
 
     if (m_runStitchingInstance || daughterInstances.empty())
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::ProcessEvent(*m_pPrimaryPandora));
-
-    if (m_enableMonitoring)
-    {
-        theClock.stop();
-        m_processTime = theClock.accumulated_real_time();
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -366,22 +311,6 @@ const pandora::Pandora *LArPandora::CreateNewPandora() const
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, LArContent::RegisterBasicPlugins(*pPandora));
 
     return pPandora;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandora::InitializeMonitoring()
-{
-    art::ServiceHandle<art::TFileService> tfs;
-    m_pRecoTree = tfs->make<TTree>("monitoring", "LAr Reco");
-    m_pRecoTree->Branch("run", &m_run, "run/I");
-    m_pRecoTree->Branch("event", &m_event, "event/I");
-    m_pRecoTree->Branch("hits", &m_hits, "hits/I");
-    m_pRecoTree->Branch("pandoraHits", &m_pandoraHits, "pandoraHits/I");
-    m_pRecoTree->Branch("collectionTime", &m_collectionTime, "collectionTime/F");
-    m_pRecoTree->Branch("inputTime", &m_inputTime, "inputTime/F");
-    m_pRecoTree->Branch("processTime", &m_processTime, "processTime/F");
-    m_pRecoTree->Branch("outputTime", &m_outputTime, "outputTime/F");
 }
 
 } // namespace lar_pandora
