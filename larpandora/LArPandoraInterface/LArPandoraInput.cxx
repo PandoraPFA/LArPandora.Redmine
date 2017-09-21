@@ -281,12 +281,15 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
                         const geo::View_t iview = (geo::View_t)iplane;
                         const geo::View_t pandoraView(settings.m_globalViews ? LArPandoraGeometry::GetGlobalView(icstat, itpc, iview) : iview);
 
+                        parameters.m_lineStartX = -std::numeric_limits<float>::max(); // TODO Set correctly for global drift volume approach
+                        parameters.m_lineEndX = std::numeric_limits<float>::max();
+
                         if (pandoraView == geo::kW)
                         {
                             const float firstW(firstXYZ[2]);
                             const float lastW(lastXYZ[2]);
 
-                            parameters.m_hitType = pandora::TPC_VIEW_W;
+                            parameters.m_lineGapType = pandora::TPC_WIRE_GAP_VIEW_W;
                             parameters.m_lineStartZ = std::min(firstW, lastW) - halfWirePitch;
                             parameters.m_lineEndZ = std::max(firstW, lastW) + halfWirePitch;
                         }
@@ -295,7 +298,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
                             const float firstU(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(firstXYZ[1], firstXYZ[2]));
                             const float lastU(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoU(lastXYZ[1], lastXYZ[2]));
 
-                            parameters.m_hitType = pandora::TPC_VIEW_U;
+                            parameters.m_lineGapType = pandora::TPC_WIRE_GAP_VIEW_U;
                             parameters.m_lineStartZ = std::min(firstU, lastU) - halfWirePitch;
                             parameters.m_lineEndZ = std::max(firstU, lastU) + halfWirePitch;
                         }
@@ -304,7 +307,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
                             const float firstV(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(firstXYZ[1], firstXYZ[2]));
                             const float lastV(lar_content::LArGeometryHelper::GetLArTransformationPlugin(*pPandora)->YZtoV(lastXYZ[1], lastXYZ[2]));
 
-                            parameters.m_hitType = pandora::TPC_VIEW_V;
+                            parameters.m_lineGapType = pandora::TPC_WIRE_GAP_VIEW_V;
                             parameters.m_lineStartZ = std::min(firstV, lastV) - halfWirePitch;
                             parameters.m_lineEndZ = std::max(firstV, lastV) + halfWirePitch;
                         }
@@ -332,19 +335,44 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraInput::CreatePandoraDetectorGaps(const Settings &settings, const LArDetectorGapList &listOfGaps)
+void LArPandoraInput::CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList, const LArDetectorGapList &listOfGaps)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
         throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - primary Pandora instance does not exist ";
 
-    // TODO - Extend LineGap objects to cover these types of gaps! For now, just print them to screen...
-    for (const LArDetectorGap &nextGap : listOfGaps)
+    // ATTN Detector gaps expected to be present only with single, global drift volume
+    if (1 != driftVolumeList.size())
+        throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - cannot create detector gaps if multiple drift volumes present ";
+
+    for (const LArDetectorGap &gap : listOfGaps)
     {
-        mf::LogDebug("LArPandora") << " NEXT GAP - X1=" << nextGap.GetX1() << ", X2=" << nextGap.GetX2() << std::endl
-                                   << "            Y1=" << nextGap.GetY1() << ", Y2=" << nextGap.GetY2() << std::endl
-                                   << "            Z1=" << nextGap.GetZ1() << ", Z2=" << nextGap.GetZ2() << std::endl;
+        PandoraApi::Geometry::LineGap::Parameters parameters;
+
+        try
+        {
+            parameters.m_lineGapType = pandora::TPC_DRIFT_GAP;
+            parameters.m_lineStartX = gap.GetX1();
+            parameters.m_lineEndX = gap.GetX2()
+            parameters.m_lineStartZ = -std::numeric_limits<float>::max();
+            parameters.m_lineEndZ = std::numeric_limits<float>::max();
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraDetectorGaps - invalid line gap parameter provided, all assigned values must be finite, line gap omitted " << std::endl;
+            continue;
+        }
+
+        try
+        {
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LineGap::Create(*pPandora, parameters));
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraDetectorGaps - unable to create line gap, insufficient or invalid information supplied " << std::endl;
+            continue;
+        }
     }
 }
 

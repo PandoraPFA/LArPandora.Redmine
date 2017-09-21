@@ -71,9 +71,10 @@ public:
      *  @brief  Create pandora box gaps to cover dead regions between drift volumes
      *
      *  @param  settings the settings
+     *  @param  driftVolumeList the drift volume list
      *  @param  listOfGaps the list of gaps
      */
-    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDetectorGapList &listOfGaps);
+    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList, const LArDetectorGapList &listOfGaps);
 
     /**
      *  @brief  Create the Pandora MC particles from the MC particles
