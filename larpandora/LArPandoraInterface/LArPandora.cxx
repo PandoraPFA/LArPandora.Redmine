@@ -158,12 +158,12 @@ void LArPandora::beginJob()
     m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
 
-    // Load gaps associated with dead regions between drift volumes
-    if (m_enableDetectorGaps)
+    // Load gaps associated with dead regions between daughter drift volumes, if using global drift volume approach
+    if (m_enableDetectorGaps && m_geometrySettings.m_globalDriftVolume)
     {
         LArDetectorGapList listOfGaps;
         LArPandoraGeometry::LoadDetectorGaps(m_geometrySettings, listOfGaps);
-        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, listOfGaps);
+        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, m_driftVolumeList, listOfGaps);
     }
 
     // Print the configuration of the algorithm at the beginning of the job;
