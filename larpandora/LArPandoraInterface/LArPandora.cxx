@@ -145,7 +145,7 @@ LArPandora::~LArPandora()
 
 void LArPandora::beginJob()
 {
-    // Load geometry and then create Pandora instances
+    // Load geometry to determine number of required Pandora instances
     LArPandoraGeometry::LoadGeometry(m_geometrySettings, m_driftVolumeList, m_driftVolumeMap);
 
     this->CreatePandoraInstances();
@@ -156,16 +156,19 @@ void LArPandora::beginJob()
     m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
 
-    // Load basic LArTPC information
+    // Pass basic LArTPC information to pandora instances
     LArPandoraInput::CreatePandoraLArTPCs(m_inputSettings, m_driftVolumeList);
 
-    // Load gaps associated with dead regions between daughter drift volumes, if using global drift volume approach
+    // If using global drift volume approach, pass details of gaps between daughter volumes to the pandora instance
     if (m_enableDetectorGaps && m_geometrySettings.m_globalDriftVolume)
     {
         LArDetectorGapList listOfGaps;
         LArPandoraGeometry::LoadDetectorGaps(m_geometrySettings, listOfGaps);
         LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, m_driftVolumeList, listOfGaps);
     }
+
+    // Parse Pandora settings xml files
+    this->ConfigurePandoraInstances();
 
     // Print the configuration of the algorithm at the beginning of the job; the algorithm does not need to be set up for this.
     if (m_showerEnergyAlg)
@@ -183,14 +186,14 @@ void LArPandora::produce(art::Event &evt)
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
 
     // we set up the algorithm on each new event, in case the services have changed:
-    if (m_showerEnergyAlg) {
-      m_showerEnergyAlg->setup(
-        *(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-        *(lar::providerFrom<detinfo::DetectorClocksService>()),
-        *(lar::providerFrom<geo::Geometry>())
-        );
+    if (m_showerEnergyAlg)
+    {
+        m_showerEnergyAlg->setup(
+            *(lar::providerFrom<detinfo::DetectorPropertiesService>()),
+            *(lar::providerFrom<detinfo::DetectorClocksService>()),
+            *(lar::providerFrom<geo::Geometry>())
+            );
     } // if
-
 
     IdToHitMap idToHitMap;
     this->CreatePandoraInput(evt, idToHitMap);

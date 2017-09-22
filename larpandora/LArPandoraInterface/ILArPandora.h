@@ -44,6 +44,11 @@ protected:
     virtual void CreatePandoraInstances() = 0;
 
     /**
+     *  @brief  Configure pandora instances
+     */
+    virtual void ConfigurePandoraInstances() = 0;
+
+    /**
      *  @brief  Delete pandora instances
      */
     virtual void DeletePandoraInstances() = 0;
