@@ -178,10 +178,10 @@ void StandardPandora::CreateDaughterPandoraInstances(const std::string &configFi
 
         if (m_uniqueInstanceSettings)
         {
-            std::ostringstream volumeIdString;
-            volumeIdString << driftVolume.GetVolumeID();
+            std::ostringstream volumeIdStream;
+            volumeIdStream << driftVolume.GetVolumeID();
             const size_t insertPosition((thisConfigFileName.length() < 4) ? 0 : thisConfigFileName.length() - std::string(".xml").length());
-            thisConfigFileName = thisConfigFileName.insert(insertPosition, volumeIdString.str());
+            thisConfigFileName = thisConfigFileName.insert(insertPosition, volumeIdStream.str());
         }
 
         cet::search_path sp("FW_SEARCH_PATH");
