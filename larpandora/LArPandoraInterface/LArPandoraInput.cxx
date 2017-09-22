@@ -254,6 +254,7 @@ void LArPandoraInput::CreatePandoraLArTPCs(const Settings &settings, const LArDr
             parameters.m_wirePitchW = driftVolume.GetWirePitchW();
             parameters.m_wireAngleU = driftVolume.GetWireAngleU();
             parameters.m_wireAngleV = driftVolume.GetWireAngleV();
+            parameters.m_sigmaUVW = driftVolume.GetSigmaUVZ();
             parameters.m_isDriftInPositiveX = driftVolume.IsPositiveDrift();
         }
         catch (const pandora::StatusCodeException &)
