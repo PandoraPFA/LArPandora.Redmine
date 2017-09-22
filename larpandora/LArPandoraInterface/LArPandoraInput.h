@@ -60,21 +60,29 @@ public:
         const HitVector &hitVector, IdToHitMap &idToHitMap, const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults);
 
     /**
+     *  @brief  Create pandora LArTPCs to represent the different drift volumes in use
+     *
+     *  @param  settings the settings
+     *  @param  driftVolumeList the drift volume list
+     */
+    static void CreatePandoraLArTPCs(const Settings &settings, const LArDriftVolumeList &driftVolumeList);
+
+    /**
+     *  @brief  Create pandora line gaps to cover dead regions between TPCs in a global drift volume approach
+     *
+     *  @param  settings the settings
+     *  @param  driftVolumeList the drift volume list
+     *  @param  listOfGaps the list of gaps
+     */
+    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList, const LArDetectorGapList &listOfGaps);
+
+    /**
      *  @brief  Create pandora line gaps to cover any (continuous regions of) bad channels
      *
      *  @param  settings the settings
      *  @param  driftVolumeMap the geometry mapping
      */
     static void CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap);
-
-    /**
-     *  @brief  Create pandora line gaps to cover dead regions between TPCs in a global drift volume approach
-     *
-     *  @param  settings the settings
-     *  @param  driftVolumeMap the drift volume map
-     *  @param  listOfGaps the list of gaps
-     */
-    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const LArDetectorGapList &listOfGaps);
 
     /**
      *  @brief  Create the Pandora MC particles from the MC particles
