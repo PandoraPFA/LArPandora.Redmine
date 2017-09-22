@@ -265,7 +265,7 @@ void LArPandoraInput::CreatePandoraLArTPCs(const Settings &settings, const LArDr
 
         try
         {
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LArTPC::Create(*(settings.m_pPrimaryPandora), parameters));
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LArTPC::Create(*pPandora, parameters));
         }
         catch (const pandora::StatusCodeException &)
         {
