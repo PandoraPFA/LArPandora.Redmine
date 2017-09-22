@@ -212,6 +212,113 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraInput::CreatePandoraLArTPCs(const Settings &settings, const LArDriftVolumeList &driftVolumeList)
+{
+    mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraLArTPCs(...) *** " << std::endl;
+
+    if (!settings.m_pPrimaryPandora)
+        throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - primary Pandora instance does not exist ";
+
+    for (const LArDriftVolume &driftVolume : driftVolumeList)
+    {
+        const pandora::Pandora *pPandora(nullptr);
+
+        try
+        {
+            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, driftVolume.GetVolumeID());
+        }
+        catch (pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraLArTPCs - unable to assign tpc to a recognized volumeId and/or Pandora instance " << std::endl;
+            continue;
+        }
+
+        if (!pPandora)
+            continue;
+
+        PandoraApi::Geometry::LArTPC::Parameters parameters;
+
+        try
+        {
+            std::ostringstream volumeIdStream;
+            volumeIdStream << driftVolume.GetVolumeID();
+            parameters.m_larTPCName = "LArTPC_" + volumeIdStream.str();
+            parameters.m_centerX = driftVolume.GetCenterX();
+            parameters.m_centerY = driftVolume.GetCenterY();
+            parameters.m_centerZ = driftVolume.GetCenterZ();
+            parameters.m_widthX = driftVolume.GetWidthX();
+            parameters.m_widthY = driftVolume.GetWidthY();
+            parameters.m_widthZ = driftVolume.GetWidthZ();
+            parameters.m_wirePitchU = driftVolume.GetWirePitchU();
+            parameters.m_wirePitchV = driftVolume.GetWirePitchV();
+            parameters.m_wirePitchW = driftVolume.GetWirePitchW();
+            parameters.m_wireAngleU = driftVolume.GetWireAngleU();
+            parameters.m_wireAngleV = driftVolume.GetWireAngleV();
+            parameters.m_isDriftInPositiveX = driftVolume.IsPositiveDrift();
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraLArTPCs - invalid tpc parameter provided, all assigned values must be finite, tpc omitted " << std::endl;
+            continue;
+        }
+
+        try
+        {
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LArTPC::Create(*(settings.m_pPrimaryPandora), parameters));
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraLArTPCs - unable to create tpc, insufficient or invalid information supplied " << std::endl;
+            continue;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraInput::CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList, const LArDetectorGapList &listOfGaps)
+{
+    mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** " << std::endl;
+
+    if (!settings.m_pPrimaryPandora)
+        throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - primary Pandora instance does not exist ";
+
+    // ATTN Detector gaps expected to be specified only within a single, global drift volume
+    if (1 != driftVolumeList.size())
+        throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - cannot create detector gaps if multiple drift volumes present ";
+
+    for (const LArDetectorGap &gap : listOfGaps)
+    {
+        PandoraApi::Geometry::LineGap::Parameters parameters;
+
+        try
+        {
+            parameters.m_lineGapType = pandora::TPC_DRIFT_GAP;
+            parameters.m_lineStartX = gap.GetX1();
+            parameters.m_lineEndX = gap.GetX2();
+            parameters.m_lineStartZ = -std::numeric_limits<float>::max();
+            parameters.m_lineEndZ = std::numeric_limits<float>::max();
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraDetectorGaps - invalid line gap parameter provided, all assigned values must be finite, line gap omitted " << std::endl;
+            continue;
+        }
+
+        try
+        {
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LineGap::Create(*(settings.m_pPrimaryPandora), parameters));
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogWarning("LArPandora") << "CreatePandoraDetectorGaps - unable to create line gap, insufficient or invalid information supplied " << std::endl;
+            continue;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraReadoutGaps(...) *** " << std::endl;
@@ -330,49 +437,6 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
                     }
                 }
             }
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraInput::CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const LArDetectorGapList &listOfGaps)
-{
-    mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraDetectorGaps(...) *** " << std::endl;
-
-    if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - primary Pandora instance does not exist ";
-
-    // ATTN Detector gaps expected to be specified only within a single, global drift volume
-    if (1 != driftVolumeMap.size())
-        throw cet::exception("LArPandora") << "CreatePandoraDetectorGaps - cannot create detector gaps if multiple drift volumes present ";
-
-    for (const LArDetectorGap &gap : listOfGaps)
-    {
-        PandoraApi::Geometry::LineGap::Parameters parameters;
-
-        try
-        {
-            parameters.m_lineGapType = pandora::TPC_DRIFT_GAP;
-            parameters.m_lineStartX = gap.GetX1();
-            parameters.m_lineEndX = gap.GetX2();
-            parameters.m_lineStartZ = -std::numeric_limits<float>::max();
-            parameters.m_lineEndZ = std::numeric_limits<float>::max();
-        }
-        catch (const pandora::StatusCodeException &)
-        {
-            mf::LogWarning("LArPandora") << "CreatePandoraDetectorGaps - invalid line gap parameter provided, all assigned values must be finite, line gap omitted " << std::endl;
-            continue;
-        }
-
-        try
-        {
-            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::LineGap::Create(*(settings.m_pPrimaryPandora), parameters));
-        }
-        catch (const pandora::StatusCodeException &)
-        {
-            mf::LogWarning("LArPandora") << "CreatePandoraDetectorGaps - unable to create line gap, insufficient or invalid information supplied " << std::endl;
-            continue;
         }
     }
 }

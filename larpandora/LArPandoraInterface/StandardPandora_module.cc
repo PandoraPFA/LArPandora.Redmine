@@ -120,10 +120,6 @@ void StandardPandora::CreatePandoraInstances()
     {
         this->CreatePrimaryPandoraInstance(m_configFile);
     }
-
-    // Write out geometry here
-    if (!m_outputGeometryXmlFile.empty())
-        LArPandoraGeometry::WriteGeometry(m_outputGeometryXmlFile, m_driftVolumeList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

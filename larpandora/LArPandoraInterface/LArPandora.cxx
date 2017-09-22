@@ -69,8 +69,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     // Settings for LArPandoraGeometry
     m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", false);  // Keep separate drift volumes but interchange U and V
     m_geometrySettings.m_globalDriftVolume = pset.get<bool>("UseGlobalDriftVolume", false);  // Transform to a single global drift volume
-    m_geometrySettings.m_printGeometry = pset.get<bool>("PrintGeometry", false);
-    m_geometrySettings.m_geometryXmlFileName = pset.get<std::string>("GeometryXmlFileName", "");
 
     // Settings for LArPandoraInput
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
@@ -158,12 +156,15 @@ void LArPandora::beginJob()
     m_inputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
     m_outputSettings.m_pPrimaryPandora = m_pPrimaryPandora;
 
+    // Load basic LArTPC information
+    LArPandoraInput::CreatePandoraLArTPCs(m_inputSettings, m_driftVolumeList);
+
     // Load gaps associated with dead regions between daughter drift volumes, if using global drift volume approach
     if (m_enableDetectorGaps && m_geometrySettings.m_globalDriftVolume)
     {
         LArDetectorGapList listOfGaps;
         LArPandoraGeometry::LoadDetectorGaps(m_geometrySettings, listOfGaps);
-        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, m_driftVolumeMap, listOfGaps);
+        LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, m_driftVolumeList, listOfGaps);
     }
 
     // Print the configuration of the algorithm at the beginning of the job; the algorithm does not need to be set up for this.
