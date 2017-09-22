@@ -67,7 +67,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
         try
         {
             const unsigned int volumeID(LArPandoraGeometry::GetVolumeID(driftVolumeMap, hit_WireID.Cryostat, hit_WireID.TPC));
-            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+            pPandora = MultiPandoraApi::GetPandoraInstance(settings.m_pPrimaryPandora, volumeID);
         }
         catch (const pandora::StatusCodeException &)
         {
@@ -225,7 +225,7 @@ void LArPandoraInput::CreatePandoraLArTPCs(const Settings &settings, const LArDr
 
         try
         {
-            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, driftVolume.GetVolumeID());
+            pPandora = MultiPandoraApi::GetPandoraInstance(settings.m_pPrimaryPandora, driftVolume.GetVolumeID());
         }
         catch (pandora::StatusCodeException &)
         {
@@ -339,7 +339,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
             try
             {
                 const unsigned int volumeID(LArPandoraGeometry::GetVolumeID(driftVolumeMap, icstat,  itpc));
-                pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+                pPandora = MultiPandoraApi::GetPandoraInstance(settings.m_pPrimaryPandora, volumeID);
             }
             catch (pandora::StatusCodeException &)
             {
@@ -674,7 +674,7 @@ void LArPandoraInput::CreatePandoraMCLinks2D(const Settings &settings, const LAr
         try
         {
             const unsigned int volumeID(LArPandoraGeometry::GetVolumeID(driftVolumeMap, hit_WireID.Cryostat, hit_WireID.TPC));
-            pPandora = MultiPandoraApi::GetDaughterPandoraInstance(settings.m_pPrimaryPandora, volumeID);
+            pPandora = MultiPandoraApi::GetPandoraInstance(settings.m_pPrimaryPandora, volumeID);
         }
         catch (const pandora::StatusCodeException &)
         {
