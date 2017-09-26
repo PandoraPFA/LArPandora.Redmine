@@ -7,6 +7,8 @@
 // from cetlib version v3_00_01.
 ////////////////////////////////////////////////////////////////////////
 
+#include "larpandora/LArPandoraEventBuilding/LArPandoraEvent.h"
+
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
