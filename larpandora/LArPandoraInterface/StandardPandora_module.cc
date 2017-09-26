@@ -140,7 +140,7 @@ void StandardPandora::CreatePrimaryPandoraInstance()
     // If only single drift volume, primary pandora instance will do all pattern recognition, rather than perform a particle stitching role
     if (1 == m_driftVolumeList.size())
     {
-        MultiPandoraApi::SetVolumeId(m_pPrimaryPandora, 0);
+        MultiPandoraApi::SetVolumeId(m_pPrimaryPandora, m_driftVolumeList.front().GetVolumeID());
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerPlugin(*m_pPrimaryPandora, new lar_content::LArPseudoLayerPlugin));
         PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetLArTransformationPlugin(*m_pPrimaryPandora, new lar_content::LArRotationalTransformationPlugin));
     }
