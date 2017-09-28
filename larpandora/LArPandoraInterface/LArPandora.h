@@ -68,7 +68,6 @@ private:
     LArPandoraOutput::Settings      m_outputSettings;           ///< The lar pandora output settings
     LArPandoraGeometry::Settings    m_geometrySettings;         ///< The lar pandora geometry settings
 
-    std::unique_ptr<calo::LinearEnergyAlg> m_showerEnergyAlg;   ///< Optional cluster energy algorithm.
     bool                            m_runStitchingInstance;     ///< Whether to run the pandora stitching instance (multi drift volumes only)
     bool                            m_enableProduction;         ///< Whether to persist output products
     bool                            m_enableDetectorGaps;       ///< Whether to pass detector gap information to Pandora instances
