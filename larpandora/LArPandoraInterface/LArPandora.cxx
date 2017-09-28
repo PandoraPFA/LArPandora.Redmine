@@ -48,13 +48,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_configFile = pset.get<std::string>("ConfigFile");
     m_stitchingConfigFile = pset.get<std::string>("StitchingConfigFile", "No_File_Provided");
 
-    // prepare the optional cluster energy algorithm
-    if (pset.has_key("ShowerEnergy") && pset.is_key_to_table("ShowerEnergy"))
-    {
-        m_showerEnergyAlg = std::make_unique<calo::LinearEnergyAlg>(pset.get<fhicl::ParameterSet>("ShowerEnergy"));
-    }
-    else mf::LogWarning("LArPandora") << "No shower energy calibration set up.";
-
     // Configuration for this module
     m_runStitchingInstance = pset.get<bool>("RunStitchingInstance", false);
     m_enableProduction = pset.get<bool>("EnableProduction", true);
@@ -85,10 +78,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 
     // Settings for LArPandoraOutput
     m_outputSettings.m_pProducer = this;
-    m_outputSettings.m_buildTracks = pset.get<bool>("BuildTracks", true);
-    m_outputSettings.m_buildShowers = pset.get<bool>("BuildShowers", true);
     m_outputSettings.m_buildStitchedParticles = (m_runStitchingInstance && pset.get<bool>("BuildStitchedParticles", false));
-    m_outputSettings.m_showerEnergyAlg = m_showerEnergyAlg.get(); // may be nullptr
 
     // Status flags for this module
     m_lineGapsCreated = false;
@@ -98,38 +88,18 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
         produces< std::vector<recob::PFParticle> >();
         produces< std::vector<recob::SpacePoint> >();
         produces< std::vector<recob::Cluster> >();
-        produces< std::vector<recob::Seed> >();
         produces< std::vector<recob::Vertex> >();
 
         produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
         produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-        produces< art::Assns<recob::PFParticle, recob::Seed> >();
         produces< art::Assns<recob::PFParticle, recob::Vertex> >();
         produces< art::Assns<recob::SpacePoint, recob::Hit> >();
         produces< art::Assns<recob::Cluster, recob::Hit> >();
-        produces< art::Assns<recob::Seed, recob::Hit> >();
 
-        if (m_outputSettings.m_buildTracks)
+        if (m_outputSettings.m_buildStitchedParticles)
         {
-            produces< std::vector<recob::Track> >();
-            produces< art::Assns<recob::PFParticle, recob::Track> >();
-            produces< art::Assns<recob::Track, recob::Hit> >();
-
-            if (m_outputSettings.m_buildStitchedParticles)
-            {
-                produces< std::vector<anab::T0> >();
-                produces< art::Assns<recob::Track, anab::T0> >();
-            }
-        }
-
-        if (m_outputSettings.m_buildShowers)
-        {
-            produces< std::vector<recob::Shower> >();
-            produces< std::vector<recob::PCAxis> >();
-            produces< art::Assns<recob::PFParticle, recob::Shower> >();
-            produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
-            produces< art::Assns<recob::Shower, recob::Hit> >();
-            produces< art::Assns<recob::Shower, recob::PCAxis> >();
+            produces< std::vector<anab::T0> >();
+            produces< art::Assns<recob::PFParticle, anab::T0> >();
         }
     }
 }
@@ -169,14 +139,6 @@ void LArPandora::beginJob()
 
     // Parse Pandora settings xml files
     this->ConfigurePandoraInstances();
-
-    // Print the configuration of the algorithm at the beginning of the job; the algorithm does not need to be set up for this.
-    if (m_showerEnergyAlg)
-    {
-        mf::LogInfo log("LArPandora");
-        log << "Energy shower settings: ";
-        m_showerEnergyAlg->DumpConfiguration(log, "  ", "");
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,16 +146,6 @@ void LArPandora::beginJob()
 void LArPandora::produce(art::Event &evt)
 {
     mf::LogInfo("LArPandora") << " *** LArPandora::produce(...)  [Run=" << evt.run() << ", Event=" << evt.id().event() << "] *** " << std::endl;
-
-    // we set up the algorithm on each new event, in case the services have changed:
-    if (m_showerEnergyAlg)
-    {
-        m_showerEnergyAlg->setup(
-            *(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-            *(lar::providerFrom<detinfo::DetectorClocksService>()),
-            *(lar::providerFrom<geo::Geometry>())
-            );
-    } // if
 
     IdToHitMap idToHitMap;
     this->CreatePandoraInput(evt, idToHitMap);
