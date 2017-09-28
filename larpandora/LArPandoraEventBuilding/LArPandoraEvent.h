@@ -45,6 +45,45 @@ namespace lar_pandora
  */
 class LArPandoraEvent
 {
+public:
+
+    /**
+     *  @breif  Constructor from an art::Event
+     */
+    LArPandoraEvent( art::EDProducer * pProducer,
+                     art::Event *      pEvent, 
+                     std::string       inputProducerLabel,
+                     std::string       hitProducerLabel );
+
+    /**
+     *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle whose Pdg code
+     *          is a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
+     *
+     *  @param  shouldProduceNeutrinos  if the returned event should contain neutrinos (or non-neutrinos)
+     */
+    LArPandoraEvent FilterByPdgCode( const bool shouldProduceNeutrinos );
+
+    /**
+     *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle that is not 
+     *          tagged as a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
+     *
+     *  @param  shouldProduceNeutrinos  if the returned event should contain neutrinos (or non-neutrinos)
+     *  @param  tagProducerLabel        label for the producer of the CRTags
+     */
+    LArPandoraEvent FilterByCRTag( const bool          shouldProduceNeutrinos,
+                                   const std::string & tagProducerLabel );
+
+    /**
+     *  @breif  Write (put) the collections in this LArPandoraEvent to the art::Event
+     */
+    void WriteToEvent();
+
+    /**
+     *  @breif  Merge collections from two events into one
+     */
+    LArPandoraEvent Merge( LArPandoraEvent & other );
+
+
 private:
     
     // Meta data
@@ -96,7 +135,7 @@ private:
      *  @param  outputCollection  the required collection
      */
     template < class T >
-    void GetCollection( std::string                        inputLabel, 
+    void GetCollection( const std::string &                inputLabel, 
                         art::Handle< std::vector< T > > &  outputHandle, 
                         std::vector< art::Ptr< T > > &     outputCollection );
 
@@ -109,9 +148,8 @@ private:
      *  @param  outputAssociationMap  output mapping between the two data types supplied (T -> U)
      */
     template < class T, class U >
-    void GetAssociationMap( std::string                                                inputLabel, 
+    void GetAssociationMap( const std::string &                                        inputLabel, 
                             art::Handle< std::vector< T > > &                          inputHandleT, 
-                            art::Handle< std::vector< U > > &                          inputHandleU, 
                             std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  outputAssociationMap );
 
     /**
@@ -128,7 +166,7 @@ private:
      *  @param  inputPFParticles        input vector of PFParticles
      *  @param  filteredPFParticles     output vector of filtered PFParticles
      */
-    void GetFilteredParticlesByPdgCode( bool                                                  shouldProduceNeutrinos, 
+    void GetFilteredParticlesByPdgCode( const bool                                            shouldProduceNeutrinos, 
                                         const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
                                         std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles );
 
@@ -140,8 +178,8 @@ private:
      *  @param  inputPFParticles        input vector of PFParticles
      *  @param  filteredPFParticles     output vector of filtered PFParticles
      */
-    void GetFilteredParticlesByCRTag(   bool                                                  shouldProduceNeutrinos, 
-                                        std::string                                           tagProducerLabel,
+    void GetFilteredParticlesByCRTag(   const bool                                            shouldProduceNeutrinos, 
+                                        const std::string &                                   tagProducerLabel,
                                         const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
                                         std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles );
 
@@ -261,57 +299,14 @@ private:
         nutau = 16
     };
 
-public:
-
-    /**
-     *  @breif  Constructor from an art::Event
-     */
-    LArPandoraEvent( art::EDProducer * pProducer,
-                     art::Event *      pEvent, 
-                     std::string       inputProducerLabel,
-                     std::string       hitProducerLabel );
-
-    /**
-     *  @breif  Copy constructor
-     */
-    LArPandoraEvent( const LArPandoraEvent & other );
-
-
-    /**
-     *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle whose Pdg code
-     *          is a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
-     *
-     *  @param  shouldProduceNeutrinos  if the returned event should contain neutrinos (or non-neutrinos)
-     */
-    LArPandoraEvent FilterByPdgCode( bool shouldProduceNeutrinos );
-
-    /**
-     *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle that is not 
-     *          tagged as a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
-     *
-     *  @param  shouldProduceNeutrinos  if the returned event should contain neutrinos (or non-neutrinos)
-     *  @param  tagProducerLabel        label for the producer of the CRTags
-     */
-    LArPandoraEvent FilterByCRTag( bool         shouldProduceNeutrinos,
-                                   std::string  tagProducerLabel );
-
-    /**
-     *  @breif  Write (put) the collections in this LArPandoraEvent to the art::Event
-     */
-    void WriteToEvent();
-
-    /**
-     *  @breif  Merge collections from two events into one
-     */
-    LArPandoraEvent Merge( LArPandoraEvent & other );
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline LArPandoraEvent::LArPandoraEvent( art::EDProducer * pProducer,
-                                         art::Event *      pEvent,
-                                         std::string       inputProducerLabel,
-                                         std::string       hitProducerLabel ) :
+inline LArPandoraEvent::LArPandoraEvent( art::EDProducer *  pProducer,
+                                         art::Event *       pEvent,
+                                         std::string        inputProducerLabel,
+                                         std::string        hitProducerLabel ) :
     m_pProducer( pProducer ),
     m_pEvent( pEvent ), 
     m_inputProducerLabel( inputProducerLabel ),
@@ -320,37 +315,6 @@ inline LArPandoraEvent::LArPandoraEvent( art::EDProducer * pProducer,
 
     this->GetCollections();
 }
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline LArPandoraEvent::LArPandoraEvent( const LArPandoraEvent & other ) :
-    m_pProducer( other.m_pProducer ),
-    m_pEvent( other.m_pEvent),
-    m_inputProducerLabel( other.m_inputProducerLabel ),
-    m_hitProducerLabel( other.m_hitProducerLabel),
-    m_pfParticles( other.m_pfParticles ),
-    m_spacePoints( other.m_spacePoints ),
-    m_clusters( other.m_clusters ),   
-    m_vertices( other.m_vertices ),   
-    m_tracks( other.m_tracks ),     
-    m_showers( other.m_showers ),    
-    m_seeds( other.m_seeds ),      
-    m_pcAxes( other.m_pcAxes ),     
-    m_hits( other.m_hits ),       
-    m_pfParticleSpacePointMap( other.m_pfParticleSpacePointMap ),  
-    m_pfParticleClusterMap( other.m_pfParticleClusterMap ),     
-    m_pfParticleVertexMap( other.m_pfParticleVertexMap ),      
-    m_pfParticleTrackMap( other.m_pfParticleTrackMap ),       
-    m_pfParticleShowerMap( other.m_pfParticleShowerMap ),      
-    m_pfParticleSeedMap( other.m_pfParticleSeedMap ),        
-    m_pfParticlePCAxisMap( other.m_pfParticlePCAxisMap ),      
-    m_spacePointHitMap( other.m_spacePointHitMap ),         
-    m_clusterHitMap( other.m_clusterHitMap ),            
-    m_trackHitMap( other.m_trackHitMap ),              
-    m_showerHitMap( other.m_showerHitMap ),             
-    m_seedHitMap( other.m_seedHitMap ),               
-    m_showerPCAxisMap( other.m_showerPCAxisMap ) 
-{}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -384,27 +348,27 @@ inline void LArPandoraEvent::GetCollections()
     art::Handle< std::vector< recob::Hit > > hitHandle;
     this->GetCollection( m_hitProducerLabel, hitHandle, m_hits ); 
 
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, spacePointHandle, m_pfParticleSpacePointMap );
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, clusterHandle   , m_pfParticleClusterMap    );
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, vertexHandle    , m_pfParticleVertexMap     );
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, trackHandle     , m_pfParticleTrackMap      );
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, showerHandle    , m_pfParticleShowerMap     );
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, seedHandle      , m_pfParticleSeedMap       );
-    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, pcAxisHandle    , m_pfParticlePCAxisMap     );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticleSpacePointMap );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticleClusterMap    );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticleVertexMap     );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticleTrackMap      );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticleShowerMap     );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticleSeedMap       );
+    this->GetAssociationMap( m_inputProducerLabel, pfParticleHandle, m_pfParticlePCAxisMap     );
 
-    this->GetAssociationMap( m_inputProducerLabel, spacePointHandle, hitHandle, m_spacePointHitMap );
-    this->GetAssociationMap( m_inputProducerLabel, clusterHandle   , hitHandle, m_clusterHitMap    );
-    this->GetAssociationMap( m_inputProducerLabel, trackHandle     , hitHandle, m_trackHitMap      );
-    this->GetAssociationMap( m_inputProducerLabel, showerHandle    , hitHandle, m_showerHitMap     );
-    this->GetAssociationMap( m_inputProducerLabel, seedHandle      , hitHandle, m_seedHitMap       );
+    this->GetAssociationMap( m_inputProducerLabel, spacePointHandle, m_spacePointHitMap );
+    this->GetAssociationMap( m_inputProducerLabel, clusterHandle   , m_clusterHitMap    );
+    this->GetAssociationMap( m_inputProducerLabel, trackHandle     , m_trackHitMap      );
+    this->GetAssociationMap( m_inputProducerLabel, showerHandle    , m_showerHitMap     );
+    this->GetAssociationMap( m_inputProducerLabel, seedHandle      , m_seedHitMap       );
 
-    this->GetAssociationMap( m_inputProducerLabel, showerHandle, pcAxisHandle, m_showerPCAxisMap );
+    this->GetAssociationMap( m_inputProducerLabel, showerHandle, m_showerPCAxisMap );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template < class T >
-inline void LArPandoraEvent::GetCollection( std::string                        inputLabel, 
+inline void LArPandoraEvent::GetCollection( const std::string &                inputLabel, 
                                             art::Handle< std::vector< T > > &  outputHandle, 
                                             std::vector< art::Ptr< T > > &     outputCollection )
 {
@@ -419,9 +383,8 @@ inline void LArPandoraEvent::GetCollection( std::string                        i
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template < class T, class U >
-inline void LArPandoraEvent::GetAssociationMap( std::string                                                inputLabel, 
+inline void LArPandoraEvent::GetAssociationMap( const std::string &                                        inputLabel, 
                                                 art::Handle< std::vector< T > > &                          inputHandleT, 
-                                                art::Handle< std::vector< U > > &                          inputHandleU, 
                                                 std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  outputAssociationMap )
 {
     art::FindManyP< U > assoc( inputHandleT, (*m_pEvent), inputLabel );
@@ -443,7 +406,7 @@ inline void LArPandoraEvent::GetAssociationMap( std::string                     
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline LArPandoraEvent LArPandoraEvent::FilterByPdgCode( bool shouldProduceNeutrinos )
+inline LArPandoraEvent LArPandoraEvent::FilterByPdgCode( const bool shouldProduceNeutrinos )
 {
     // Get the primary top-level PFParticles that we want to keep
     std::vector< art::Ptr< recob::PFParticle > > primaryPFParticles;
@@ -471,8 +434,8 @@ inline LArPandoraEvent LArPandoraEvent::FilterByPdgCode( bool shouldProduceNeutr
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline LArPandoraEvent LArPandoraEvent::FilterByCRTag( bool         shouldProduceNeutrinos, 
-                                                       std::string  tagProducerLabel )
+inline LArPandoraEvent LArPandoraEvent::FilterByCRTag( const bool          shouldProduceNeutrinos, 
+                                                       const std::string & tagProducerLabel )
 {
     // Get the primary top-level PFParticles that we want to keep
     std::vector< art::Ptr< recob::PFParticle > > primaryPFParticles;
@@ -509,7 +472,7 @@ inline void LArPandoraEvent::GetPrimaryPFParticles( std::vector< art::Ptr< recob
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void LArPandoraEvent::GetFilteredParticlesByPdgCode( bool                                                  shouldProduceNeutrinos, 
+inline void LArPandoraEvent::GetFilteredParticlesByPdgCode( const bool                                            shouldProduceNeutrinos, 
                                                             const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
                                                             std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles )
 {
@@ -525,8 +488,8 @@ inline void LArPandoraEvent::GetFilteredParticlesByPdgCode( bool                
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void LArPandoraEvent::GetFilteredParticlesByCRTag(   bool                                                  shouldProduceNeutrinos, 
-                                                            std::string                                           tagProducerLabel,
+inline void LArPandoraEvent::GetFilteredParticlesByCRTag(   const bool                                            shouldProduceNeutrinos, 
+                                                            const std::string &                                   tagProducerLabel,
                                                             const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
                                                             std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles )
 {
