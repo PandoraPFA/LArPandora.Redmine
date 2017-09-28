@@ -29,6 +29,8 @@
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
 
+#include "lardataobj/AnalysisBase/CosmicTag.h"
+
 #include <memory>
 #include <algorithm>
 #include <map>
@@ -131,6 +133,19 @@ private:
                                         std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles );
 
     /**
+     *  @brief  Filters PFParticles based on their Pdg from the inputPFParticles
+     *
+     *  @param  shouldProduceNeutrinos  if the filtered particle vector should contain neutrinos (or non-neutrinos)
+     *  @param  tagProducerLabel        the label for the producer of the CR tags
+     *  @param  inputPFParticles        input vector of PFParticles
+     *  @param  filteredPFParticles     output vector of filtered PFParticles
+     */
+    void GetFilteredParticlesByCRTag(   bool                                                  shouldProduceNeutrinos, 
+                                        std::string                                           tagProducerLabel,
+                                        const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
+                                        std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles );
+
+    /**
      *  @brief  Produce a mapping between PFParticles and their ID
      *
      *  @param  idToPFParticleMap   output mapping between PFParticles and their IDs
@@ -219,6 +234,26 @@ private:
     template < class T, class U >
     void WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap );
 
+    /**
+     *  @brief  Append a collection onto an other collection
+     *
+     *  @param  collectionToMerge  the collection to accept
+     *  @param  collection         the collection to append
+     */
+    template < class T >
+    void MergeCollection( std::vector< art::Ptr< T > > &  collectionToMerge, 
+                          std::vector< art::Ptr< T > > &  collection );
+
+    /**
+     *  @brief  Append an association to another association
+     *
+     *  @param  associationToMerge  the association to accept
+     *  @param  association         the association to append
+     */
+    template < class T, class U >
+    void MergeAssociation( std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationToMerge, 
+                           std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  association );
+
     // Useful PDG codes for readability
     enum Pdg {
         nue   = 12,
@@ -251,9 +286,24 @@ public:
     LArPandoraEvent FilterByPdgCode( bool shouldProduceNeutrinos );
 
     /**
+     *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle that is not 
+     *          tagged as a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
+     *
+     *  @param  shouldProduceNeutrinos  if the returned event should contain neutrinos (or non-neutrinos)
+     *  @param  tagProducerLabel        label for the producer of the CRTags
+     */
+    LArPandoraEvent FilterByCRTag( bool         shouldProduceNeutrinos,
+                                   std::string  tagProducerLabel );
+
+    /**
      *  @breif  Write (put) the collections in this LArPandoraEvent to the art::Event
      */
     void WriteToEvent();
+
+    /**
+     *  @breif  Merge collections from two events into one
+     */
+    LArPandoraEvent Merge( LArPandoraEvent & other );
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -421,6 +471,35 @@ inline LArPandoraEvent LArPandoraEvent::FilterByPdgCode( bool shouldProduceNeutr
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline LArPandoraEvent LArPandoraEvent::FilterByCRTag( bool         shouldProduceNeutrinos, 
+                                                       std::string  tagProducerLabel )
+{
+    // Get the primary top-level PFParticles that we want to keep
+    std::vector< art::Ptr< recob::PFParticle > > primaryPFParticles;
+    this->GetPrimaryPFParticles( primaryPFParticles );
+
+    std::vector< art::Ptr< recob::PFParticle > > filteredPFParticles;
+    this->GetFilteredParticlesByCRTag( shouldProduceNeutrinos, tagProducerLabel, primaryPFParticles, filteredPFParticles );
+
+    // Collect all daughter PFParticles to produce the final list of selected PFParticles to persist
+    std::map< size_t, art::Ptr< recob::PFParticle > > idToPFParticleMap;
+    this->GetIdToPFParticleMap( idToPFParticleMap );
+
+    std::map< size_t, art::Ptr< recob::PFParticle > > idToSelectedPFParticleMap;
+    this->GetDownstreamPFParticles( filteredPFParticles, idToPFParticleMap, idToSelectedPFParticleMap);
+
+    std::vector< art::Ptr< recob::PFParticle > > selectedPFParticles;
+    this->GetParticleVector( idToSelectedPFParticleMap, selectedPFParticles );
+
+    // Collect all related collections
+    LArPandoraEvent filteredEvent( *this );
+    this->FilterByParticleSelection( filteredEvent, selectedPFParticles );
+
+    return filteredEvent;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline void LArPandoraEvent::GetPrimaryPFParticles( std::vector< art::Ptr< recob::PFParticle > > & primaryPFParticles )
 {
     for ( art::Ptr< recob::PFParticle > part : m_pfParticles ) 
@@ -437,6 +516,34 @@ inline void LArPandoraEvent::GetFilteredParticlesByPdgCode( bool                
     for ( art::Ptr< recob::PFParticle > part : inputPFParticles ) {
         unsigned int pdg = std::abs( part->PdgCode() );
         bool isNeutrino = ( pdg == nue || pdg == numu || pdg == nutau );
+
+        if ( ( shouldProduceNeutrinos && isNeutrino ) || ( !shouldProduceNeutrinos && !isNeutrino ) ) {
+            outputPFParticles.push_back( part );
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void LArPandoraEvent::GetFilteredParticlesByCRTag(   bool                                                  shouldProduceNeutrinos, 
+                                                            std::string                                           tagProducerLabel,
+                                                            const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
+                                                            std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles )
+{
+
+    art::Handle< std::vector< recob::PFParticle > > pfParticleHandle;
+    m_pEvent->getByLabel(m_inputProducerLabel, pfParticleHandle);
+
+    art::FindManyP< anab::CosmicTag > pfParticleTagAssoc( pfParticleHandle, *m_pEvent, tagProducerLabel );
+    
+    for ( art::Ptr< recob::PFParticle > part : inputPFParticles ) {
+        const std::vector< art::Ptr< anab::CosmicTag > > cosmicTags = pfParticleTagAssoc.at( part.key() );
+
+        /// @todo error gracefully
+        if (cosmicTags.size() != 1) exit(1);
+
+        art::Ptr< anab::CosmicTag > cosmicTag = cosmicTags.front();
+        bool isNeutrino = ( cosmicTag->CosmicType() == anab::kNotTagged );
 
         if ( ( shouldProduceNeutrinos && isNeutrino ) || ( !shouldProduceNeutrinos && !isNeutrino ) ) {
             outputPFParticles.push_back( part );
@@ -618,7 +725,6 @@ inline void LArPandoraEvent::WriteToEvent()
     this->WriteCollection( m_showers );    
     this->WriteCollection( m_seeds );      
     this->WriteCollection( m_pcAxes );     
-    this->WriteCollection( m_hits );       
     
     this->WriteAssociation( m_pfParticleSpacePointMap );
     this->WriteAssociation( m_pfParticleClusterMap );   
@@ -665,6 +771,56 @@ inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, st
   }
 
   m_pEvent->put( std::move( outputAssn ) );
+}
+
+// ---------------------------------------------------------------------------------------
+
+inline LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
+{
+    LArPandoraEvent outputEvent( other );
+
+    this->MergeCollection( other.m_pfParticles, m_pfParticles );
+    this->MergeCollection( other.m_spacePoints, m_spacePoints );
+    this->MergeCollection( other.m_clusters   , m_clusters );   
+    this->MergeCollection( other.m_vertices   , m_vertices );   
+    this->MergeCollection( other.m_tracks     , m_tracks );     
+    this->MergeCollection( other.m_showers    , m_showers );    
+    this->MergeCollection( other.m_seeds      , m_seeds );      
+    this->MergeCollection( other.m_pcAxes     , m_pcAxes );     
+    
+    this->MergeAssociation( other.m_pfParticleSpacePointMap, m_pfParticleSpacePointMap );
+    this->MergeAssociation( other.m_pfParticleClusterMap   , m_pfParticleClusterMap );   
+    this->MergeAssociation( other.m_pfParticleVertexMap    , m_pfParticleVertexMap );    
+    this->MergeAssociation( other.m_pfParticleTrackMap     , m_pfParticleTrackMap );     
+    this->MergeAssociation( other.m_pfParticleShowerMap    , m_pfParticleShowerMap );    
+    this->MergeAssociation( other.m_pfParticleSeedMap      , m_pfParticleSeedMap );      
+    this->MergeAssociation( other.m_pfParticlePCAxisMap    , m_pfParticlePCAxisMap );    
+    this->MergeAssociation( other.m_spacePointHitMap       , m_spacePointHitMap );       
+    this->MergeAssociation( other.m_clusterHitMap          , m_clusterHitMap );          
+    this->MergeAssociation( other.m_trackHitMap            , m_trackHitMap );            
+    this->MergeAssociation( other.m_showerHitMap           , m_showerHitMap );           
+    this->MergeAssociation( other.m_seedHitMap             , m_seedHitMap );             
+    this->MergeAssociation( other.m_showerPCAxisMap        , m_showerPCAxisMap );        
+
+    return outputEvent;
+}
+
+// ---------------------------------------------------------------------------------------
+
+template < class T >
+inline void LArPandoraEvent::MergeCollection( std::vector< art::Ptr< T > > &  collectionToMerge, 
+                                              std::vector< art::Ptr< T > > &  collection )
+{
+    collectionToMerge.insert( collectionToMerge.end(), collection.begin(), collection.end() );
+}
+
+// ---------------------------------------------------------------------------------------
+
+template < class T, class U >
+inline void MergeAssociation( std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationToMerge, 
+                              std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  association )
+{
+    associationToMerge.insert( association.begin(), association.end() );
 }
 
 // ---------------------------------------------------------------------------------------

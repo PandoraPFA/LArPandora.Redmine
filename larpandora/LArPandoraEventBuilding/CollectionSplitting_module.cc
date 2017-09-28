@@ -48,7 +48,6 @@ private:
   std::string     fInputProducerLabel;           ///< Label for the Pandora instance that produced the collections we want to split up
   std::string     fHitProducerLabel;             ///< Label for the hit producer that was used as input to the Pandora instance specified
   bool            fShouldProduceNeutrinos;       ///< If we should produce collections related to neutrino top-level PFParticles
-  bool            fShouldProduceCosmics;         ///< If we should produce collections related to cosmic (== non-neutrino) top-level PFParticles
 
 };
 
