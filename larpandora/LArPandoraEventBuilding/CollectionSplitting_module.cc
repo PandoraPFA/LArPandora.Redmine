@@ -83,7 +83,8 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
 
 void CollectionSplitting::produce(art::Event & e)
 {
-  lar_pandora::LArPandoraEvent fullEvent( this, &e, fInputProducerLabel, fHitProducerLabel );
+  lar_pandora::LArPandoraEvent::Labels labels( fInputProducerLabel, fHitProducerLabel ); 
+  lar_pandora::LArPandoraEvent fullEvent( this, &e, labels );
   lar_pandora::LArPandoraEvent filteredEvent( fullEvent.FilterByPdgCode( fShouldProduceNeutrinos ) );
   filteredEvent.WriteToEvent();
 }

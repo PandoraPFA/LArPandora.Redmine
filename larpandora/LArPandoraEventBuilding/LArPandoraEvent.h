@@ -47,13 +47,14 @@ class LArPandoraEvent
 {
 public:
 
+    class Labels;
+
     /**
      *  @breif  Constructor from an art::Event
      */
     LArPandoraEvent( art::EDProducer * pProducer,
                      art::Event *      pEvent, 
-                     std::string       inputProducerLabel,
-                     std::string       hitProducerLabel );
+                     const Labels &    inputLabels );
 
     /**
      *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle whose Pdg code
@@ -108,17 +109,50 @@ public:
         void SetSeedProducerLabel( const std::string & label );
         void SetPCAxisProducerLabel( const std::string & label );
 
+        void SetPFParticleToSpacePointProducerLabel( const std::string & label );
+        void SetPFParticleToClusterProducerLabel( const std::string & label );
+        void SetPFParticleToVertexProducerLabel( const std::string & label );
+        void SetPFParticleToTrackProducerLabel( const std::string & label );
+        void SetPFParticleToShowerProducerLabel( const std::string & label );
+        void SetPFParticleToSeedProducerLabel( const std::string & label );
+        void SetPFParticleToPCAxisProducerLabel( const std::string & label );
+        void SetSpacePointToHitProducerLabel( const std::string & label );
+        void SetClusterToHitProducerLabel( const std::string & label );
+        void SetTrackToHitProducerLabel( const std::string & label );
+        void SetShowerToHitProducerLabel( const std::string & label );
+        void SetSeedToHitProducerLabel( const std::string & label );
+        void SetShowerToPCAxisProducerLabel( const std::string & label );
+
+        enum LabelType {
+            PFParticleLabel,
+            SpacePointLabel,
+            ClusterLabel,
+            VertexLabel,
+            TrackLabel,
+            ShowerLabel,
+            SeedLabel,
+            PCAxisLabel,
+            HitLabel,
+            PFParticleToSpacePointLabel,
+            PFParticleToClusterLabel,
+            PFParticleToVertexLabel,
+            PFParticleToTrackLabel,
+            PFParticleToShowerLabel,
+            PFParticleToSeedLabel,
+            PFParticleToPCAxisLabel,
+            SpacePointToHitLabel,
+            ClusterToHitLabel,
+            TrackToHitLabel,
+            ShowerToHitLabel,
+            SeedToHitLabel,
+            ShowerToPCAxisLabel
+        };
+
+        std::string GetLabel( const LabelType & type );
+
     private:
 
-        std::string  m_pfParticleLabel;
-        std::string  m_spacePointLabel;
-        std::string  m_clusterLabel;
-        std::string  m_vertexLabel;
-        std::string  m_trackLabel;
-        std::string  m_showerLabel;
-        std::string  m_seedLabel;
-        std::string  m_pcAxisLabel;
-        std::string  m_hitLabel;
+        std::map< LabelType, std::string > m_labels;  ///< Map holding the labels
     };
 
 private:
@@ -126,8 +160,7 @@ private:
     // Meta data
     art::EDProducer * m_pProducer;            ///<
     art::Event *      m_pEvent;               ///<
-    std::string       m_inputProducerLabel;   ///<
-    std::string       m_hitProducerLabel;     ///<
+    Labels            m_labels;               ///<
 
     // Collections
     std::vector< art::Ptr< recob::PFParticle > > m_pfParticles;    ///<
@@ -172,7 +205,7 @@ private:
      *  @param  outputCollection  the required collection
      */
     template < class T >
-    void GetCollection( const std::string &                inputLabel, 
+    void GetCollection( const Labels::LabelType &          inputLabel, 
                         art::Handle< std::vector< T > > &  outputHandle, 
                         std::vector< art::Ptr< T > > &     outputCollection );
 
@@ -185,7 +218,7 @@ private:
      *  @param  outputAssociationMap  output mapping between the two data types supplied (T -> U)
      */
     template < class T, class U >
-    void GetAssociationMap( const std::string &                                        inputLabel, 
+    void GetAssociationMap( const Labels::LabelType &                                  inputLabel, 
                             art::Handle< std::vector< T > > &                          inputHandleT, 
                             std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  outputAssociationMap );
 
@@ -340,11 +373,11 @@ private:
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template < class T >
-inline void LArPandoraEvent::GetCollection( const std::string &                inputLabel, 
+inline void LArPandoraEvent::GetCollection( const Labels::LabelType &          inputLabel, 
                                             art::Handle< std::vector< T > > &  outputHandle, 
                                             std::vector< art::Ptr< T > > &     outputCollection )
 {
-    m_pEvent->getByLabel( inputLabel, outputHandle);   
+    m_pEvent->getByLabel( m_labels.GetLabel(inputLabel), outputHandle);   
 
     for( unsigned int i = 0; i != outputHandle->size(); i++ ) {
         art::Ptr< T > object( outputHandle, i );
@@ -355,11 +388,11 @@ inline void LArPandoraEvent::GetCollection( const std::string &                i
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template < class T, class U >
-inline void LArPandoraEvent::GetAssociationMap( const std::string &                                        inputLabel, 
+inline void LArPandoraEvent::GetAssociationMap( const Labels::LabelType &                                  inputLabel, 
                                                 art::Handle< std::vector< T > > &                          inputHandleT, 
                                                 std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  outputAssociationMap )
 {
-    art::FindManyP< U > assoc( inputHandleT, (*m_pEvent), inputLabel );
+    art::FindManyP< U > assoc( inputHandleT, (*m_pEvent), m_labels.GetLabel(inputLabel) );
 
     for ( unsigned int iT = 0; iT < inputHandleT->size(); iT++ ) {
 
@@ -391,9 +424,9 @@ inline void LArPandoraEvent::CollectAssociated( const art::Ptr< T > &           
 
 template < class T, class U >
 inline void LArPandoraEvent::GetFilteredAssociationMap( const std::vector< art::Ptr< T > > &                      collectionT, 
-                                       const std::vector< art::Ptr< U > > &                      collectionU, 
-                                       std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociationTtoU,
-                                       std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & outputAssociationTtoU )
+                                                        const std::vector< art::Ptr< U > > &                      collectionU, 
+                                                        std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociationTtoU,
+                                                        std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & outputAssociationTtoU )
 {
 
     for ( art::Ptr< T > objectT : collectionT ) {
@@ -456,7 +489,7 @@ inline void LArPandoraEvent::MergeCollection( std::vector< art::Ptr< T > > &  co
 
 template < class T, class U >
 inline void LArPandoraEvent::MergeAssociation( std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationToMerge, 
-                              std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  association )
+                                               std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  association )
 {
     associationToMerge.insert( association.begin(), association.end() );
 }
