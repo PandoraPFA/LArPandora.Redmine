@@ -88,9 +88,14 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
 void CollectionMerging::produce(art::Event & e)
 {
   // Get all reconstructions of the event
-  lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, fAllHitsCRProducerLabel  , fAllHitProducerLabel   );
-  lar_pandora::LArPandoraEvent crRemHitsCREvent( this, &e, fCRRemHitsCRProducerLabel, fCRRemHitProducerLabel );
-  lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, fCRRemHitsNuProducerLabel, fCRRemHitProducerLabel );
+  lar_pandora::LArPandoraEvent::Labels allHitsCRLabels( fAllHitsCRProducerLabel, fAllHitProducerLabel );
+  lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, allHitsCRLabels   );
+
+  lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels( fCRRemHitsCRProducerLabel, fCRRemHitProducerLabel );
+  lar_pandora::LArPandoraEvent crRemHitsCREvent( this, &e, crRemHitsCRLabels );
+
+  lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels( fCRRemHitsNuProducerLabel, fCRRemHitProducerLabel );
+  lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, crRemHitsNuLabels );
 
   // Filter and merge into a consolidated output
   if ( fShouldProduceNeutrinos ) {
