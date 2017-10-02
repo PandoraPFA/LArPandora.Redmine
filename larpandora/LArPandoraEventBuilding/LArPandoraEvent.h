@@ -57,6 +57,16 @@ public:
                      const Labels &    inputLabels );
 
     /**
+     *  @brief  Construct by copying an existing LArPandoraEvent, replacing the collections and associations 
+     *          by any objects associated with a PFParticle in the selection supplied.
+     * 
+     *  @param  event              input event to copy and filter
+     *  @param  pfParticleVector   input vector of selected particles 
+     */
+    LArPandoraEvent ( const LArPandoraEvent &                         event, 
+                      std::vector< art::Ptr< recob::PFParticle > > &  selectedPFParticles );
+
+    /**
      *  @breif  Produce a copy of the event keeping only the collections that are associated with a top-level particle whose Pdg code
      *          is a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
      *
@@ -292,17 +302,6 @@ private:
                             std::vector< art::Ptr< recob::PFParticle > > &             pfParticleVector );
     
     /**
-     *  @brief  Replaces the collections and associations in the supplied event by any objects in this's collections that are associated 
-     *          with a PFParticle in the selection supplied.
-     * 
-     *  @param  filteredEvent      input event with which to give the filtered collections
-     *  @param  pfParticleVector   input vector of selected particles 
-     */
-    void FilterByParticleSelection( LArPandoraEvent &                               filteredEvent, 
-                                    std::vector< art::Ptr< recob::PFParticle > > &  selectedPFParticles );
-
-
-    /**
      *  @brief  Collects all objects of type U associated to a given object of type T
      *
      *  @param  anObject         an input object of type T with which we want to collect associated objects of type U
@@ -311,7 +310,7 @@ private:
      */
     template < class T, class U >
     void CollectAssociated( const art::Ptr< T > &                                            anObject, 
-                            std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &        associationTtoU, 
+                            const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationTtoU, 
                             std::vector< art::Ptr< U > > &                                   associatedU );
 
     /**
@@ -325,10 +324,10 @@ private:
      *   @return mapping between the filtered collections
      */
     template < class T, class U >
-    void GetFilteredAssociationMap( const std::vector< art::Ptr< T > > &                      collectionT, 
-                                    const std::vector< art::Ptr< U > > &                      collectionU, 
-                                    std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociationTtoU,
-                                    std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & outputAssociationTtoU );
+    void GetFilteredAssociationMap( const std::vector< art::Ptr< T > > &                            collectionT, 
+                                    const std::vector< art::Ptr< U > > &                            collectionU, 
+                                    const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociationTtoU,
+                                    std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &       outputAssociationTtoU );
 
     /**
      *  @brief  Write a given collection to the event
@@ -413,30 +412,30 @@ inline void LArPandoraEvent::GetAssociationMap( const Labels::LabelType &       
 
 template < class T, class U >
 inline void LArPandoraEvent::CollectAssociated( const art::Ptr< T > &                                            anObject, 
-                                                std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &        associationTtoU, 
+                                                const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationTtoU, 
                                                 std::vector< art::Ptr< U > > &                                   associatedU )
 {
-    std::vector< art::Ptr< U > > associatedObjects = associationTtoU[ anObject ];
+    std::vector< art::Ptr< U > > associatedObjects = associationTtoU.at( anObject );
     associatedU.insert( associatedU.end(), associatedObjects.begin(), associatedObjects.end() );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template < class T, class U >
-inline void LArPandoraEvent::GetFilteredAssociationMap( const std::vector< art::Ptr< T > > &                      collectionT, 
-                                                        const std::vector< art::Ptr< U > > &                      collectionU, 
-                                                        std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociationTtoU,
-                                                        std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & outputAssociationTtoU )
+inline void LArPandoraEvent::GetFilteredAssociationMap( const std::vector< art::Ptr< T > > &                            collectionT, 
+                                                        const std::vector< art::Ptr< U > > &                            collectionU, 
+                                                        const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociationTtoU,
+                                                        std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &       outputAssociationTtoU )
 {
 
     for ( art::Ptr< T > objectT : collectionT ) {
         
         std::vector< art::Ptr< U > > emptyVector;
-        outputAssociationTtoU.insert( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::value_type( objectT, emptyVector ) );
+        if ( !outputAssociationTtoU.insert( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::value_type( objectT, emptyVector ) ).second )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredAssociationMap -- Can not have multiple association map entries for a single object.";
 
-        for ( art::Ptr< U > objectU : inputAssociationTtoU[ objectT ] ) {
+        for ( art::Ptr< U > objectU : inputAssociationTtoU.at( objectT ) ) {
 
-            // Check that the objectU is in collectionU
             typename std::vector< art::Ptr< U > >::const_iterator associatedObjectIter = std::find( collectionU.begin(), collectionU.end(), objectU );
             if ( associatedObjectIter == collectionU.end() ) continue;
        
