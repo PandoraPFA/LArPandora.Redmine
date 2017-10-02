@@ -1,7 +1,7 @@
 /**
- *  @file   larpandora/LArPandoraEventBuilding/SliceIdentification_module.cc
+ *  @file   larpandora/LArPandoraEventBuilding/LArPandoraSliceIdentification_module.cc
  *
- *  @brief  module for slice identification and tagging
+ *  @brief  module for lar pandora slice identification and tagging
  */
 
 #include "art/Framework/Core/EDProducer.h"
@@ -15,20 +15,20 @@
 namespace lar_pandora
 {
 
-class SliceIdentification : public art::EDProducer
+class LArPandoraSliceIdentification : public art::EDProducer
 {
 public:
-    explicit SliceIdentification(fhicl::ParameterSet const & p);
+    explicit LArPandoraSliceIdentification(fhicl::ParameterSet const & p);
 
-    SliceIdentification(SliceIdentification const &) = delete;
-    SliceIdentification(SliceIdentification &&) = delete;
-    SliceIdentification & operator = (SliceIdentification const &) = delete;
-    SliceIdentification & operator = (SliceIdentification &&) = delete;
+    LArPandoraSliceIdentification(LArPandoraSliceIdentification const &) = delete;
+    LArPandoraSliceIdentification(LArPandoraSliceIdentification &&) = delete;
+    LArPandoraSliceIdentification & operator = (LArPandoraSliceIdentification const &) = delete;
+    LArPandoraSliceIdentification & operator = (LArPandoraSliceIdentification &&) = delete;
 
     void produce(art::Event & e) override;
 };
 
-DEFINE_ART_MODULE(SliceIdentification)
+DEFINE_ART_MODULE(LArPandoraSliceIdentification)
 
 } // namespace lar_pandora
 
@@ -48,14 +48,14 @@ DEFINE_ART_MODULE(SliceIdentification)
 namespace lar_pandora
 {
 
-SliceIdentification::SliceIdentification(fhicl::ParameterSet const & p)
+LArPandoraSliceIdentification::LArPandoraSliceIdentification(fhicl::ParameterSet const & p)
 {
     // Call appropriate produces<>() functions here.
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void SliceIdentification::produce(art::Event & e)
+void LArPandoraSliceIdentification::produce(art::Event & e)
 {
     // Implementation of required member function here.
 }
