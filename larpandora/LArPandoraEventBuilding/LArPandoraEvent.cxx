@@ -93,8 +93,7 @@ LArPandoraEvent LArPandoraEvent::FilterByPdgCode( const bool shouldProduceNeutri
     this->GetParticleVector( idToSelectedPFParticleMap, selectedPFParticles );
 
     // Collect all related collections
-    LArPandoraEvent filteredEvent( *this );
-    this->FilterByParticleSelection( filteredEvent, selectedPFParticles );
+    LArPandoraEvent filteredEvent( *this, selectedPFParticles );
 
     return filteredEvent;
 }
@@ -122,10 +121,90 @@ LArPandoraEvent LArPandoraEvent::FilterByCRTag( const bool          shouldProduc
     this->GetParticleVector( idToSelectedPFParticleMap, selectedPFParticles );
 
     // Collect all related collections
-    LArPandoraEvent filteredEvent( *this );
-    this->FilterByParticleSelection( filteredEvent, selectedPFParticles );
+    LArPandoraEvent filteredEvent( *this, selectedPFParticles );
 
     return filteredEvent;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                         event, 
+                                   std::vector< art::Ptr< recob::PFParticle > > &  selectedPFParticles ) : 
+    m_pProducer( event.m_pProducer ),
+    m_pEvent( event.m_pEvent ), 
+    m_labels( event.m_labels ),
+    m_hits( event.m_hits )
+{
+    m_pfParticles = selectedPFParticles;
+
+    std::vector< art::Ptr< recob::PFParticle> > selectedParticles;
+    std::vector< art::Ptr< recob::SpacePoint> > selectedSpacePoints;
+    std::vector< art::Ptr< recob::Cluster>    > selectedClusters;
+    std::vector< art::Ptr< recob::Seed>       > selectedSeeds;
+    std::vector< art::Ptr< recob::Vertex>     > selectedVertices;
+    std::vector< art::Ptr< recob::Track>      > selectedTracks;
+    std::vector< art::Ptr< recob::Shower>     > selectedShowers; 
+    std::vector< art::Ptr< recob::PCAxis>     > selectedPCAxes;
+
+    for ( art::Ptr< recob::PFParticle > part : selectedPFParticles ) {
+        this->CollectAssociated( part, event.m_pfParticleSpacePointMap, selectedSpacePoints );
+        this->CollectAssociated( part, event.m_pfParticleClusterMap   , selectedClusters    );
+        this->CollectAssociated( part, event.m_pfParticleSeedMap      , selectedSeeds       );
+        this->CollectAssociated( part, event.m_pfParticleVertexMap    , selectedVertices    );
+        this->CollectAssociated( part, event.m_pfParticleTrackMap     , selectedTracks      );
+        this->CollectAssociated( part, event.m_pfParticleShowerMap    , selectedShowers     );
+        this->CollectAssociated( part, event.m_pfParticlePCAxisMap    , selectedPCAxes      );
+    }
+
+    m_spacePoints = selectedSpacePoints;
+    m_clusters    = selectedClusters;
+    m_seeds       = selectedSeeds;
+    m_vertices    = selectedVertices;
+    m_tracks      = selectedTracks;
+    m_showers     = selectedShowers;
+    m_pcAxes      = selectedPCAxes;
+
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::SpacePoint > > >    selectedPFParticleSpacePointMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > >       selectedPFParticleClusterMap;  
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >        selectedPFParticleVertexMap;  
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >         selectedPFParticleTrackMap;  
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >        selectedPFParticleShowerMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Seed > > >          selectedPFParticleSeedMap; 
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >        selectedPFParticlePCAxisMap;
+    std::map< art::Ptr< recob::SpacePoint >, std::vector< art::Ptr< recob::Hit > > >           selectedSpacePointHitMap;  
+    std::map< art::Ptr< recob::Cluster >   , std::vector< art::Ptr< recob::Hit > > >           selectedClusterHitMap;    
+    std::map< art::Ptr< recob::Track >     , std::vector< art::Ptr< recob::Hit > > >           selectedTrackHitMap;     
+    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::Hit > > >           selectedShowerHitMap;
+    std::map< art::Ptr< recob::Seed >      , std::vector< art::Ptr< recob::Hit > > >           selectedSeedHitMap; 
+    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        selectedShowerPCAxisMap;
+
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedSpacePoints, event.m_pfParticleSpacePointMap, selectedPFParticleSpacePointMap );
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedClusters   , event.m_pfParticleClusterMap   , selectedPFParticleClusterMap    );
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedVertices   , event.m_pfParticleVertexMap    , selectedPFParticleVertexMap     );
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedTracks     , event.m_pfParticleTrackMap     , selectedPFParticleTrackMap      );
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedShowers    , event.m_pfParticleShowerMap    , selectedPFParticleShowerMap     );
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedSeeds      , event.m_pfParticleSeedMap      , selectedPFParticleSeedMap       );
+    this->GetFilteredAssociationMap( selectedPFParticles, selectedPCAxes     , event.m_pfParticlePCAxisMap    , selectedPFParticlePCAxisMap     );
+    this->GetFilteredAssociationMap( selectedSpacePoints, event.m_hits, event.m_spacePointHitMap, selectedSpacePointHitMap ); 
+    this->GetFilteredAssociationMap( selectedClusters   , event.m_hits, event.m_clusterHitMap   , selectedClusterHitMap    );
+    this->GetFilteredAssociationMap( selectedTracks     , event.m_hits, event.m_trackHitMap     , selectedTrackHitMap      );
+    this->GetFilteredAssociationMap( selectedShowers    , event.m_hits, event.m_showerHitMap    , selectedShowerHitMap     );
+    this->GetFilteredAssociationMap( selectedSeeds      , event.m_hits, event.m_seedHitMap      , selectedSeedHitMap       );
+    this->GetFilteredAssociationMap( selectedShowers, selectedPCAxes, event.m_showerPCAxisMap, selectedShowerPCAxisMap );
+
+    m_pfParticleSpacePointMap = selectedPFParticleSpacePointMap;
+    m_pfParticleClusterMap    = selectedPFParticleClusterMap;
+    m_pfParticleVertexMap     = selectedPFParticleVertexMap;
+    m_pfParticleTrackMap      = selectedPFParticleTrackMap;
+    m_pfParticleShowerMap     = selectedPFParticleShowerMap;
+    m_pfParticleSeedMap       = selectedPFParticleSeedMap;
+    m_pfParticlePCAxisMap     = selectedPFParticlePCAxisMap;
+    m_spacePointHitMap        = selectedSpacePointHitMap;
+    m_clusterHitMap           = selectedClusterHitMap;
+    m_trackHitMap             = selectedTrackHitMap;
+    m_showerHitMap            = selectedShowerHitMap;
+    m_seedHitMap              = selectedSeedHitMap;
+    m_showerPCAxisMap         = selectedShowerPCAxisMap;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,8 +248,8 @@ void LArPandoraEvent::GetFilteredParticlesByCRTag(   const bool                 
     for ( art::Ptr< recob::PFParticle > part : inputPFParticles ) {
         const std::vector< art::Ptr< anab::CosmicTag > > cosmicTags = pfParticleTagAssoc.at( part.key() );
 
-        /// @todo error gracefully
-        if (cosmicTags.size() != 1) exit(1);
+        if (cosmicTags.size() != 1) 
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredParticlesByCRTag -- Found " << cosmicTags.size() << " CR tags for a PFParticle (require 1).";
 
         art::Ptr< anab::CosmicTag > cosmicTag = cosmicTags.front();
         bool isNeutrino = ( cosmicTag->CosmicType() == anab::kNotTagged );
@@ -186,7 +265,8 @@ void LArPandoraEvent::GetFilteredParticlesByCRTag(   const bool                 
 void LArPandoraEvent::GetIdToPFParticleMap( std::map< size_t, art::Ptr< recob::PFParticle > > & idToPFParticleMap ) 
 {
     for ( art::Ptr< recob::PFParticle > part : m_pfParticles ) 
-      idToPFParticleMap.insert( std::map< size_t, art::Ptr< recob::PFParticle > >::value_type( part->Self(), part ) );
+        if ( !idToPFParticleMap.insert( std::map< size_t, art::Ptr< recob::PFParticle > >::value_type( part->Self(), part ) ).second )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetIdToPFParticleMap -- Can't insert multiple entries with the same Id";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -201,7 +281,7 @@ void LArPandoraEvent::GetDownstreamPFParticles( const std::vector< art::Ptr< rec
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::GetDownstreamPFParticles( art::Ptr< recob::PFParticle >             part, 
+void LArPandoraEvent::GetDownstreamPFParticles( art::Ptr< recob::PFParticle >                              part, 
                                                 const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
                                                 std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap )
 {
@@ -211,8 +291,8 @@ void LArPandoraEvent::GetDownstreamPFParticles( art::Ptr< recob::PFParticle >   
     for ( size_t daughterId : part->Daughters() ) {
         std::map< size_t, art::Ptr< recob::PFParticle > >::const_iterator daughterIt = idToPFParticleMap.find( daughterId );
 
-        /// @todo handle error gracefully!
-        if ( daughterIt == idToPFParticleMap.end() ) std::exit(1);
+        if ( daughterIt == idToPFParticleMap.end() )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetDownstreamPFParticles -- Could not find daughter of PFParticle in the supplied map";
 
         this->GetDownstreamPFParticles( daughterIt->second, idToPFParticleMap, idToDownstreamPFParticleMap );
     }   
@@ -227,83 +307,6 @@ void LArPandoraEvent::GetParticleVector( const std::map< size_t, art::Ptr< recob
         art::Ptr< recob::PFParticle > part = it->second;
         pfParticleVector.push_back( part );
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraEvent::FilterByParticleSelection( LArPandoraEvent &                               filteredEvent, 
-                                                 std::vector< art::Ptr< recob::PFParticle > > &  selectedPFParticles )
-{
-    filteredEvent.m_pfParticles = selectedPFParticles;
-
-    std::vector< art::Ptr< recob::PFParticle> > selectedParticles;
-    std::vector< art::Ptr< recob::SpacePoint> > selectedSpacePoints;
-    std::vector< art::Ptr< recob::Cluster>    > selectedClusters;
-    std::vector< art::Ptr< recob::Seed>       > selectedSeeds;
-    std::vector< art::Ptr< recob::Vertex>     > selectedVertices;
-    std::vector< art::Ptr< recob::Track>      > selectedTracks;
-    std::vector< art::Ptr< recob::Shower>     > selectedShowers; 
-    std::vector< art::Ptr< recob::PCAxis>     > selectedPCAxes;
-
-    for ( art::Ptr< recob::PFParticle > part : selectedPFParticles ) {
-        this->CollectAssociated( part, m_pfParticleSpacePointMap, selectedSpacePoints );
-        this->CollectAssociated( part, m_pfParticleClusterMap   , selectedClusters    );
-        this->CollectAssociated( part, m_pfParticleSeedMap      , selectedSeeds       );
-        this->CollectAssociated( part, m_pfParticleVertexMap    , selectedVertices    );
-        this->CollectAssociated( part, m_pfParticleTrackMap     , selectedTracks      );
-        this->CollectAssociated( part, m_pfParticleShowerMap    , selectedShowers     );
-        this->CollectAssociated( part, m_pfParticlePCAxisMap    , selectedPCAxes      );
-    }
-
-    filteredEvent.m_spacePoints = selectedSpacePoints;
-    filteredEvent.m_clusters    = selectedClusters;
-    filteredEvent.m_seeds       = selectedSeeds;
-    filteredEvent.m_vertices    = selectedVertices;
-    filteredEvent.m_tracks      = selectedTracks;
-    filteredEvent.m_showers     = selectedShowers;
-    filteredEvent.m_pcAxes      = selectedPCAxes;
-
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::SpacePoint > > >    selectedPFParticleSpacePointMap;
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > >       selectedPFParticleClusterMap;  
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >        selectedPFParticleVertexMap;  
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >         selectedPFParticleTrackMap;  
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >        selectedPFParticleShowerMap;
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Seed > > >          selectedPFParticleSeedMap; 
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >        selectedPFParticlePCAxisMap;
-    std::map< art::Ptr< recob::SpacePoint >, std::vector< art::Ptr< recob::Hit > > >           selectedSpacePointHitMap;  
-    std::map< art::Ptr< recob::Cluster >   , std::vector< art::Ptr< recob::Hit > > >           selectedClusterHitMap;    
-    std::map< art::Ptr< recob::Track >     , std::vector< art::Ptr< recob::Hit > > >           selectedTrackHitMap;     
-    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::Hit > > >           selectedShowerHitMap;
-    std::map< art::Ptr< recob::Seed >      , std::vector< art::Ptr< recob::Hit > > >           selectedSeedHitMap; 
-    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        selectedShowerPCAxisMap;
-
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedSpacePoints, m_pfParticleSpacePointMap, selectedPFParticleSpacePointMap );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedClusters   , m_pfParticleClusterMap   , selectedPFParticleClusterMap    );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedVertices   , m_pfParticleVertexMap    , selectedPFParticleVertexMap     );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedTracks     , m_pfParticleTrackMap     , selectedPFParticleTrackMap      );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedShowers    , m_pfParticleShowerMap    , selectedPFParticleShowerMap     );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedSeeds      , m_pfParticleSeedMap      , selectedPFParticleSeedMap       );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedPCAxes     , m_pfParticlePCAxisMap    , selectedPFParticlePCAxisMap     );
-    this->GetFilteredAssociationMap( selectedSpacePoints, m_hits, m_spacePointHitMap, selectedSpacePointHitMap ); 
-    this->GetFilteredAssociationMap( selectedClusters   , m_hits, m_clusterHitMap   , selectedClusterHitMap    );
-    this->GetFilteredAssociationMap( selectedTracks     , m_hits, m_trackHitMap     , selectedTrackHitMap      );
-    this->GetFilteredAssociationMap( selectedShowers    , m_hits, m_showerHitMap    , selectedShowerHitMap     );
-    this->GetFilteredAssociationMap( selectedSeeds      , m_hits, m_seedHitMap      , selectedSeedHitMap       );
-    this->GetFilteredAssociationMap( selectedShowers, selectedPCAxes, m_showerPCAxisMap, selectedShowerPCAxisMap );
-
-    filteredEvent.m_pfParticleSpacePointMap = selectedPFParticleSpacePointMap;
-    filteredEvent.m_pfParticleClusterMap    = selectedPFParticleClusterMap;
-    filteredEvent.m_pfParticleVertexMap     = selectedPFParticleVertexMap;
-    filteredEvent.m_pfParticleTrackMap      = selectedPFParticleTrackMap;
-    filteredEvent.m_pfParticleShowerMap     = selectedPFParticleShowerMap;
-    filteredEvent.m_pfParticleSeedMap       = selectedPFParticleSeedMap;
-    filteredEvent.m_pfParticlePCAxisMap     = selectedPFParticlePCAxisMap;
-    filteredEvent.m_spacePointHitMap        = selectedSpacePointHitMap;
-    filteredEvent.m_clusterHitMap           = selectedClusterHitMap;
-    filteredEvent.m_trackHitMap             = selectedTrackHitMap;
-    filteredEvent.m_showerHitMap            = selectedShowerHitMap;
-    filteredEvent.m_seedHitMap              = selectedSeedHitMap;
-    filteredEvent.m_showerPCAxisMap         = selectedShowerPCAxisMap;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
