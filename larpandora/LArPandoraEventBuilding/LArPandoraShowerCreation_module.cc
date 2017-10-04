@@ -90,7 +90,7 @@ LArPandoraShowerCreation::LArPandoraShowerCreation(fhicl::ParameterSet const & p
     // prepare the optional cluster energy algorithm
     if (p.has_key("ShowerEnergy") && p.is_key_to_table("ShowerEnergy"))
     {
-        m_pShowerEnergyAlg = std::make_unique<calo::LinearEnergyAlg>(p.get<fhicl::ParameterSet>("ShowerEnergy"));
+        //m_pShowerEnergyAlg = std::make_unique<calo::LinearEnergyAlg>(p.get<fhicl::ParameterSet>("ShowerEnergy"));
     }
     else mf::LogWarning("LArPandora") << "No shower energy calibration set up.";
 
