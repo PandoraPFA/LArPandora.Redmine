@@ -21,6 +21,7 @@
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 class LArPandoraEventDump;
 
@@ -43,7 +44,7 @@ public:
   // Selected optional functions.
   void reconfigure(fhicl::ParameterSet const & p) override;
 
-  void PrintParticle( const art::Ptr< recob::PFParticle > & part, const std::map< size_t, art::Ptr< recob::PFParticle > > & pfParticleIdMap, const art::FindManyP<recob::Cluster> & pfPartToClusterAssoc, const int & depth ) ;
+  void PrintParticle( const art::Ptr< recob::PFParticle > & part, const std::map< size_t, art::Ptr< recob::PFParticle > > & pfParticleIdMap, const art::FindManyP<recob::Cluster> & pfPartToClusterAssoc, const art::FindManyP<recob::Hit> & clusterToHitAssoc, const int & depth );
 
 private:
 
@@ -74,7 +75,14 @@ void LArPandoraEventDump::analyze(art::Event const & e)
   art::Handle< std::vector< recob::PFParticle > > pfParticleHandle;
   e.getByLabel( fPandoraLabel, pfParticleHandle );
 
+  // Get the Clusters
+  art::Handle< std::vector< recob::Cluster > > clusterHandle;
+  e.getByLabel( fPandoraLabel, clusterHandle );
+
   std::cout << "N PFParticles : " << pfParticleHandle->size() << std::endl;
+  std::cout << std::string(80, '-') << std::endl;
+  
+  std::cout << "N Clusters    : " << clusterHandle->size() << std::endl;
   std::cout << std::string(80, '-') << std::endl;
 
   // Get the PFParticles ID map
@@ -85,23 +93,16 @@ void LArPandoraEventDump::analyze(art::Event const & e)
   }
 
   // Get the associations
-  art::FindManyP<recob::Cluster> pfPartToClusterAssoc( pfParticleHandle, e, fPandoraLabel );
+  art::FindManyP<recob::Cluster> pfPartToClusterAssoc( pfParticleHandle  , e, fPandoraLabel );
+  art::FindManyP<recob::Hit>     clusterToHitAssoc( clusterHandle, e, fPandoraLabel );
 
-  std::cout << "PFParticle -> Cluster associations size : " << pfPartToClusterAssoc.size() << std::endl;
-  for ( unsigned int i = 0; i < pfPartToClusterAssoc.size(); i++ ) {
-    auto clusters = pfPartToClusterAssoc.at( i );
-    std::cout << "PFParticle index " << i << "  :  " << clusters.size() << " Clusters" << std::endl;
-    for( auto cluster : clusters ) {
-        std::cout << "    " << cluster->ID() << std::endl;
-    }
-  }
 
   // Output the PFParticle hierarchy
   for ( auto it = pfParticleIdMap.begin(); it != pfParticleIdMap.end(); ++it ) {
     art::Ptr< recob::PFParticle > part = it->second;
     if ( part->IsPrimary() ) {
         // Display Particle
-        this->PrintParticle( part, pfParticleIdMap, pfPartToClusterAssoc, 0 );
+        this->PrintParticle( part, pfParticleIdMap, pfPartToClusterAssoc, clusterToHitAssoc, 0 );
     }
   }
 
@@ -114,15 +115,17 @@ void LArPandoraEventDump::reconfigure(fhicl::ParameterSet const & p)
   fPandoraLabel     = p.get<std::string>("PandoraLabel");
 }
 
-void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > & part, const std::map< size_t, art::Ptr< recob::PFParticle > > & pfParticleIdMap, const art::FindManyP<recob::Cluster> & pfPartToClusterAssoc, const int & depth ) 
+void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > & part, const std::map< size_t, art::Ptr< recob::PFParticle > > & pfParticleIdMap, const art::FindManyP<recob::Cluster> & pfPartToClusterAssoc, const art::FindManyP<recob::Hit> & clusterToHitAssoc, const int & depth ) 
 {
         std::cout << std::string( 4*depth, ' ') << "PFParticle ( " << part->Self() << " )" << std::endl;
+        std::cout << std::string( 4*depth, ' ') << "- Key          : " << part.key() << std::endl;
         std::cout << std::string( 4*depth, ' ') << "- PDG code     : " << part->PdgCode() << std::endl;
 
         std::vector< art::Ptr< recob::Cluster > > clusters = pfPartToClusterAssoc.at( part.key() );
         std::cout << std::string( 4*depth, ' ') << "- N Clusters   : " << clusters.size() << std::endl;
         for ( auto cluster : clusters ) {
-            std::cout << std::string( 4*depth, ' ') << "  - " << cluster->ID() << " ( " << cluster->View() << " )   : " << cluster->NHits() << std::endl;
+            std::vector< art::Ptr< recob::Hit > > hits = clusterToHitAssoc.at( cluster.key() );
+            std::cout << std::string( 4*depth, ' ') << "  - ID (" << cluster->ID() << ") : nHits = " << cluster->NHits() << " | " << hits.size() << std::endl;
         }
 
         if ( !part->IsPrimary() ) {
@@ -133,7 +136,7 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > & p
 
         for ( const auto & daughterId : part->Daughters() ) {
             art::Ptr< recob::PFParticle > daughter = pfParticleIdMap.at( daughterId );
-            this->PrintParticle( daughter, pfParticleIdMap, pfPartToClusterAssoc, depth + 1 );
+            this->PrintParticle( daughter, pfParticleIdMap, pfPartToClusterAssoc, clusterToHitAssoc, depth + 1 );
         }
 }
 
