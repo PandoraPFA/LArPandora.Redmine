@@ -18,6 +18,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
@@ -34,8 +35,6 @@
 #include <memory>
 #include <algorithm>
 #include <map>
-
-#include <typeinfo> // DEBUG
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -341,7 +340,7 @@ private:
      *  @brief  Write a given association to the event
      */
     template < class T, class U >
-    void WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap );
+    void WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap, const std::vector< art::Ptr< T > > & collectionT, const std::vector< art::Ptr< U > > & collectionU, const std::string & producerLabelU = "");
 
     /**
      *  @brief  Append a collection onto an other collection
@@ -462,26 +461,41 @@ inline void LArPandoraEvent::WriteCollection( const std::vector< art::Ptr< T > >
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template < class T, class U >
-inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap )
+inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap, const std::vector< art::Ptr< T > > & collectionT, const std::vector< art::Ptr< U > > & collectionU, const std::string & producerLabelU)
 {
-  
-  /* DEBUG */
-  T typeT;
-  U typeU;
-  std::cout << "Writing association : " << typeid( typeT ).name() << " -> " << typeid( typeU ).name() << std::endl;
-  /* END DEBUG*/
+
+  const lar::PtrMaker< T > makePtrT( *m_pEvent, *m_pProducer );
+
+  const lar::PtrMaker< U > * pMakePtrU;
+  if ( producerLabelU.empty() ) {
+    pMakePtrU = new lar::PtrMaker< U >( *m_pEvent, *m_pProducer );
+  }
+  else{
+    art::Handle< std::vector< U > > handleU;
+    m_pEvent->getByLabel( producerLabelU, handleU );
+    pMakePtrU = new lar::PtrMaker< U >( *m_pEvent, handleU.id() );
+  }
+  const lar::PtrMaker< U > makePtrU( *pMakePtrU );
 
   std::unique_ptr< art::Assns< T, U > > outputAssn( new art::Assns< T, U > );
 
   for ( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::const_iterator it=associationMap.begin(); it != associationMap.end(); ++it ) {
-    art::Ptr< T > objectT = it->first;
+
+    typename std::vector< art::Ptr< T > >::const_iterator itT = std::find( collectionT.begin(), collectionT.end(), it->first );
+    if ( itT == collectionT.end() ) 
+        throw cet::exception("LArPandora") << " LArPandoraEvent::WriteAssociation -- association map contains object not in collection.";
+    
+    art::Ptr< T > newObjectT( makePtrT( std::distance( collectionT.begin(), itT ) ) );
+
     for ( art::Ptr< U > objectU : it->second ) {
-        util::CreateAssn( *m_pProducer, *m_pEvent, objectU , objectT, *outputAssn );
-  
-        /* DEBUG */
-        auto assn = outputAssn->at( outputAssn->size() - 1 );
-        std::cout << "  " << assn.first.key() << " -> " << assn.second.key() << std::endl;
-        /* END DEBUG */
+    
+        typename std::vector< art::Ptr< U > >::const_iterator itU = std::find( collectionU.begin(), collectionU.end(), objectU );
+        if ( itU == collectionU.end() ) 
+            throw cet::exception("LArPandora") << " LArPandoraEvent::WriteAssociation -- association map contains object not in collection.";
+        
+        art::Ptr< U > newObjectU( makePtrU( std::distance( collectionU.begin(), itU ) ) );
+
+        util::CreateAssn( *m_pProducer, *m_pEvent, newObjectU , newObjectT, *outputAssn );  
     }
   }
 

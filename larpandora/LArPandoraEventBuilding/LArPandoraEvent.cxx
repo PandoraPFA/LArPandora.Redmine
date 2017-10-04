@@ -323,19 +323,19 @@ void LArPandoraEvent::WriteToEvent()
     this->WriteCollection( m_seeds );      
     this->WriteCollection( m_pcAxes );     
     
-    this->WriteAssociation( m_pfParticleSpacePointMap );
-    this->WriteAssociation( m_pfParticleClusterMap );   
-    this->WriteAssociation( m_pfParticleVertexMap );    
-    this->WriteAssociation( m_pfParticleTrackMap );     
-    this->WriteAssociation( m_pfParticleShowerMap );    
-    this->WriteAssociation( m_pfParticleSeedMap );      
-    this->WriteAssociation( m_pfParticlePCAxisMap );    
-    this->WriteAssociation( m_spacePointHitMap );       
-    this->WriteAssociation( m_clusterHitMap );          
-    this->WriteAssociation( m_trackHitMap );            
-    this->WriteAssociation( m_showerHitMap );           
-    this->WriteAssociation( m_seedHitMap );             
-    this->WriteAssociation( m_showerPCAxisMap );        
+    this->WriteAssociation( m_pfParticleSpacePointMap, m_pfParticles, m_spacePoints );
+    this->WriteAssociation( m_pfParticleClusterMap   , m_pfParticles, m_clusters    );   
+    this->WriteAssociation( m_pfParticleVertexMap    , m_pfParticles, m_vertices    );    
+    this->WriteAssociation( m_pfParticleTrackMap     , m_pfParticles, m_tracks      );     
+    this->WriteAssociation( m_pfParticleShowerMap    , m_pfParticles, m_showers     );    
+    this->WriteAssociation( m_pfParticleSeedMap      , m_pfParticles, m_seeds       );      
+    this->WriteAssociation( m_pfParticlePCAxisMap    , m_pfParticles, m_pcAxes      );     
+    this->WriteAssociation( m_spacePointHitMap       , m_spacePoints, m_hits        , m_labels.GetLabel( Labels::HitLabel ) );       
+    this->WriteAssociation( m_clusterHitMap          , m_clusters   , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );          
+    this->WriteAssociation( m_trackHitMap            , m_tracks     , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );            
+    this->WriteAssociation( m_showerHitMap           , m_showers    , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );           
+    this->WriteAssociation( m_seedHitMap             , m_seeds      , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );             
+    this->WriteAssociation( m_showerPCAxisMap        , m_showers    , m_pcAxes      );        
       
 }
 
