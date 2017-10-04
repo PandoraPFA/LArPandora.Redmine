@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <map>
 
+#include <typeinfo> // DEBUG
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace lar_pandora
@@ -463,12 +465,23 @@ template < class T, class U >
 inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap )
 {
   
+  /* DEBUG */
+  T typeT;
+  U typeU;
+  std::cout << "Writing association : " << typeid( typeT ).name() << " -> " << typeid( typeU ).name() << std::endl;
+  /* END DEBUG*/
+
   std::unique_ptr< art::Assns< T, U > > outputAssn( new art::Assns< T, U > );
 
   for ( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::const_iterator it=associationMap.begin(); it != associationMap.end(); ++it ) {
     art::Ptr< T > objectT = it->first;
     for ( art::Ptr< U > objectU : it->second ) {
         util::CreateAssn( *m_pProducer, *m_pEvent, objectU , objectT, *outputAssn );
+  
+        /* DEBUG */
+        auto assn = outputAssn->at( outputAssn->size() - 1 );
+        std::cout << "  " << assn.first.key() << " -> " << assn.second.key() << std::endl;
+        /* END DEBUG */
     }
   }
 
