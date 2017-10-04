@@ -61,6 +61,7 @@ DEFINE_ART_MODULE(LArPandoraTrackCreation)
 #include "larcore/Geometry/Geometry.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
@@ -94,11 +95,13 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 {
     std::unique_ptr< std::vector<recob::Track> > outputTracks( new std::vector<recob::Track> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> > outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
+    std::unique_ptr< art::Assns<recob::Track, recob::SpacePoint> > outputTracksToSpacePoints( new art::Assns<recob::Track, recob::SpacePoint> );
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     const float wirePitchW((theGeometry->MaxPlanes() > 2) ? theGeometry->WirePitch(geo::kW) : 0.5f * (theGeometry->WirePitch(geo::kU) + theGeometry->WirePitch(geo::kV)));
 
     int trackCounter(0);
+    const lar::PtrMaker<recob::Track> makeTrackPtr(evt, *this);
 
     // Organise inputs
     PFParticleVector pfParticleVector;
@@ -109,14 +112,14 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     PFParticlesToVertices pfParticlesToVertices;
     LArPandoraHelper::CollectVertices(evt, m_pfParticleLabel, vertexVector, pfParticlesToVertices);
 
-    for (const art::Ptr<recob::PFParticle> pfParticle : pfParticleVector)
+    for (const art::Ptr<recob::PFParticle> pPFParticle : pfParticleVector)
     {
         // Only interested in track-like pfparticles
-        if (!LArPandoraHelper::IsTrack(pfParticle))
+        if (!LArPandoraHelper::IsTrack(pPFParticle))
             continue;
 
         // Obtain associated spacepoints
-        PFParticlesToSpacePoints::const_iterator particleToSpacePointIter(pfParticlesToSpacePoints.find(pfParticle));
+        PFParticlesToSpacePoints::const_iterator particleToSpacePointIter(pfParticlesToSpacePoints.find(pPFParticle));
 
         if (pfParticlesToSpacePoints.end() == particleToSpacePointIter)
         {
@@ -125,7 +128,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         }
 
         // Obtain associated vertex
-        PFParticlesToVertices::const_iterator particleToVertexIter(pfParticlesToVertices.find(pfParticle));
+        PFParticlesToVertices::const_iterator particleToVertexIter(pfParticlesToVertices.find(pPFParticle));
 
         if ((pfParticlesToVertices.end() == particleToVertexIter) || (1 != particleToVertexIter->second.size()))
         {
@@ -152,14 +155,19 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
             continue;
         }
 
-        // Organise outputs
+        // Output objects
         outputTracks->emplace_back(LArPandoraTrackCreation::BuildTrack(trackCounter++, trackStateVector));
-        util::CreateAssn(*this, evt, pfParticle, outputTracks->back(), *(outputParticlesToTracks->get());
+        art::Ptr<recob::Track> pTrack(makeTrackPtr(outputTracks->size() - 1));
+
+        // Output associations, after output objects are in place
+        util::CreateAssn(*this, evt, pTrack, pPFParticle, *(outputParticlesToTracks.get()));
+        util::CreateAssn(*this, evt, *(outputTracks.get()), particleToSpacePointIter->second, *(outputTracksToSpacePoints.get()));
     }
 
     mf::LogDebug("LArPandoraTrackCreation") << "Number of new tracks: " << outputTracks->size() << std::endl;
 
     evt.put(std::move(outputTracks));
+    evt.put(std::move(outputTracksToSpacePoints));
     evt.put(std::move(outputParticlesToTracks));
 }
 
