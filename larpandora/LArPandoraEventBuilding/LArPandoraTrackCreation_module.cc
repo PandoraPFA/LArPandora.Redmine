@@ -147,7 +147,16 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
         // Call pandora "fast" track fitter
         lar_content::LArTrackStateVector trackStateVector;
-        lar_content::LArPfoHelper::GetSlidingFitTrajectory(cartesianPointVector, vertexPosition, m_slidingFitHalfWindow, wirePitchW, trackStateVector);
+
+        try
+        {
+            lar_content::LArPfoHelper::GetSlidingFitTrajectory(cartesianPointVector, vertexPosition, m_slidingFitHalfWindow, wirePitchW, trackStateVector);
+        }
+        catch (const pandora::StatusCodeException &)
+        {
+            mf::LogDebug("LArPandoraTrackCreation") << "Unable to extract sliding fit trajectory";
+            continue;
+        }
 
         if (trackStateVector.size() < m_minTrajectoryPoints)
         {
