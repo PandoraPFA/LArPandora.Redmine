@@ -32,7 +32,6 @@ public:
     LArPandoraShowerCreation & operator = (LArPandoraShowerCreation const &) = delete;
     LArPandoraShowerCreation & operator = (LArPandoraShowerCreation &&) = delete;
 
-    void beginJob();
     void produce(art::Event &evt) override;
 
 private:
@@ -51,8 +50,11 @@ private:
      */
     recob::PCAxis BuildPCAxis(const lar_content::LArShowerPCA &larShowerPCA) const;
 
-    const calo::LinearEnergyAlg    *m_pShowerEnergyAlg;         ///<
-    std::string                     m_pfParticleLabel;          ///< 
+    std::string                     m_pfParticleLabel;          ///< The pf particle label
+
+    // TODO When implementation lived in LArPandoraOutput, it contained key building blocks for calculation of shower energies per plane.
+    // Now functionality has moved to separate module, will require reimplementation (was deeply embedded in LArPandoraOutput structure).
+    // const calo::LinearEnergyAlg    *m_pShowerEnergyAlg;       ///< The address of the shower energy algorithm
 };
 
 DEFINE_ART_MODULE(LArPandoraShowerCreation)
@@ -91,16 +93,8 @@ namespace lar_pandora
 {
 
 LArPandoraShowerCreation::LArPandoraShowerCreation(fhicl::ParameterSet const &pset) :
-    m_pShowerEnergyAlg(nullptr),
     m_pfParticleLabel(pset.get<std::string>("PFParticleLabel"))
 {
-    // prepare the optional cluster energy algorithm
-    if (pset.has_key("ShowerEnergy") && pset.is_key_to_table("ShowerEnergy"))
-    {
-        //m_pShowerEnergyAlg = std::make_unique<calo::LinearEnergyAlg>(p.get<fhicl::ParameterSet>("ShowerEnergy"));
-    }
-    else mf::LogWarning("LArPandora") << "No shower energy calibration set up.";
-
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
     produces< art::Assns<recob::PFParticle, recob::Shower> >();
@@ -111,28 +105,8 @@ LArPandoraShowerCreation::LArPandoraShowerCreation(fhicl::ParameterSet const &ps
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraShowerCreation::beginJob()
-{
-    // Print the configuration of the algorithm at the beginning of the job; the algorithm does not need to be set up for this.
-    if (m_pShowerEnergyAlg)
-    {
-        mf::LogInfo log("LArPandoraShowerCreation");
-        log << "Energy shower settings: ";
-        m_pShowerEnergyAlg->DumpConfiguration(log, "  ", "");
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void LArPandoraShowerCreation::produce(art::Event &evt)
 {
-    // we set up the algorithm on each new event, in case the services have changed:
-    if (m_pShowerEnergyAlg)
-    {
-        //m_pShowerEnergyAlg->setup(*(lar::providerFrom<detinfo::DetectorPropertiesService>()),
-        //    *(lar::providerFrom<detinfo::DetectorClocksService>()), *(lar::providerFrom<geo::Geometry>()));
-    }
-
     std::unique_ptr< std::vector<recob::Shower> > outputShowers( new std::vector<recob::Shower> );
     std::unique_ptr< std::vector<recob::PCAxis> > outputPCAxes( new std::vector<recob::PCAxis> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Shower> > outputParticlesToShowers( new art::Assns<recob::PFParticle, recob::Shower> );
@@ -207,8 +181,6 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         util::CreateAssn(*this, evt, pPCAxis, pPFParticle, *(outputParticlesToPCAxes.get()));
         util::CreateAssn(*this, evt, *(outputShowers.get()), particleToSpacePointIter->second, *(outputShowersToSpacePoints.get()));
         util::CreateAssn(*this, evt, pPCAxis, pShower, *(outputShowersToPCAxes.get()));
-
-        // TODO if (m_showerEnergyAlg) ...
     }
     
     mf::LogDebug("LArPandora") << "   Number of new showers: " << outputShowers->size() << std::endl;
