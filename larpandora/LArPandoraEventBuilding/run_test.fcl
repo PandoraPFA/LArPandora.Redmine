@@ -14,6 +14,9 @@ dump_split_cosmic.PandoraLabel:  "pandoraCosmic"
 dump_split_nu:                   @local::pandora_event_dump
 dump_split_nu.PandoraLabel:      "pandoraNu"
 
+dump_merge_cosmic:               @local::pandora_event_dump
+dump_merge_cosmic.PandoraLabel:  "pandoraCosmicMerge"
+
 END_PROLOG
 
 
@@ -57,6 +60,7 @@ physics:
     dumpAll:          @local::dump_all
     dumpSplitCosmic:  @local::dump_split_cosmic
     dumpSplitNu:      @local::dump_split_nu
+    dumpMergeCosmic:  @local::dump_merge_cosmic
  }
 
  #reco sequence and trigger_paths to be defined elsewhere
