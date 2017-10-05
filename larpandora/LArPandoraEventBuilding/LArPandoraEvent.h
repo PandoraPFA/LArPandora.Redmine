@@ -362,6 +362,30 @@ private:
     void MergeAssociation( std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationToMerge, 
                            std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  association );
 
+
+    /**
+     *  @brief  Add a constant to all IDs in the supplied collection of PFParticles
+     *
+     *  @param  collection          the input collection to shift
+     *  @param  adjustedCollection  the output adjusted collection
+     *  @param  adjustedPtrsMap     mapping between the art::Ptrs in the input collection to the output collection
+     */
+    void AdjustIds( const std::vector< art::Ptr< recob::PFParticle > > &                        collection, 
+                    std::vector< art::Ptr< recob::PFParticle > > &                              adjustedCollection,
+                    std::map< art::Ptr< recob::PFParticle >, art::Ptr< recob::PFParticle > > &  adjustedPtrsMap );
+
+    /**
+     *  @brief  Add a constant to all IDs in the supplied collection of PFParticles
+     *
+     *  @param  inputAssociation     the input association to adjust
+     *  @param  adjustionMap         input mapping between existing and adjusted art::Ptrs
+     *  @param  adjustedAssociation  output adjusted association
+     */
+    template < class T, class U >
+    void AdjustAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociation, 
+                            const std::map< art::Ptr< T >, art::Ptr< T > > &                adjustionMap, 
+                            std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &       adjustedAssociation );
+
     // Useful PDG codes for readability
     enum Pdg {
         nue   = 12,
@@ -521,6 +545,17 @@ inline void LArPandoraEvent::MergeAssociation( std::map< art::Ptr< T >, std::vec
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+template < class T, class U >
+inline void LArPandoraEvent::AdjustAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociation, 
+                                                const std::map< art::Ptr< T >, art::Ptr< T > > &                adjustionMap, 
+                                                std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &       adjustedAssociation )
+{
+    for ( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::const_iterator it = inputAssociation.begin(); it != inputAssociation.end(); ++it ) {
+        if ( !adjustedAssociation.insert( std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::value_type( adjustionMap.at( it->first ), it->second ) ).second )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::AdjustAssociation -- input association map contains repeated keys.";
+    }  
+}
 
 } // namespace lar_pandora
 
