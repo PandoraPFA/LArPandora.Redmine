@@ -345,22 +345,36 @@ LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
 {
     LArPandoraEvent outputEvent( other );
 
-    this->MergeCollection( other.m_pfParticles, m_pfParticles );
-    this->MergeCollection( other.m_spacePoints, m_spacePoints );
-    this->MergeCollection( other.m_clusters   , m_clusters );   
-    this->MergeCollection( other.m_vertices   , m_vertices );   
-    this->MergeCollection( other.m_tracks     , m_tracks );     
-    this->MergeCollection( other.m_showers    , m_showers );    
-    this->MergeCollection( other.m_seeds      , m_seeds );      
-    this->MergeCollection( other.m_pcAxes     , m_pcAxes );     
+    std::vector< art::Ptr< recob::PFParticle > >  adjustedPFParticles;
+    std::map< art::Ptr< recob::PFParticle >, art::Ptr< recob::PFParticle > >  adjustedPFParticleMap;
+
+    this->AdjustIds( m_pfParticles, adjustedPFParticles, adjustedPFParticleMap);
+
+    //std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::
+    this->AdjustAssociation( m_pfParticleSpacePointMap, adjustedPFParticleMap, adjustedPFParicleSpacePointMap );
+    this->AdjustAssociation( m_pfParticleClusterMap   , adjustedPFParticleMap, adjustedPFParticleClusterMap   );
+    this->AdjustAssociation( m_pfParticleVertexMap    , adjustedPFParticleMap, adjustedPFParticleVertexMap    );
+    this->AdjustAssociation( m_pfParticleTrackMap     , adjustedPFParticleMap, adjustedPFParticleTrackMap     );
+    this->AdjustAssociation( m_pfParticleShowerMap    , adjustedPFParticleMap, adjustedPFParticleShowerMap    );
+    this->AdjustAssociation( m_pfParticleSeedMap      , adjustedPFParticleMap, adjustedPFParticleSeedMap      );
+    this->AdjustAssociation( m_pfParticlePCAxisMap    , adjustedPFParticleMap, adjustedPFParticlePCAxisMap    );
+
+    this->MergeCollection( other.m_pfParticles, adjustedPFParticles );
+    this->MergeCollection( other.m_spacePoints, m_spacePoints       );
+    this->MergeCollection( other.m_clusters   , m_clusters          );   
+    this->MergeCollection( other.m_vertices   , m_vertices          );   
+    this->MergeCollection( other.m_tracks     , m_tracks            );     
+    this->MergeCollection( other.m_showers    , m_showers           );    
+    this->MergeCollection( other.m_seeds      , m_seeds             );      
+    this->MergeCollection( other.m_pcAxes     , m_pcAxes            );     
     
-    this->MergeAssociation( other.m_pfParticleSpacePointMap, m_pfParticleSpacePointMap );
-    this->MergeAssociation( other.m_pfParticleClusterMap   , m_pfParticleClusterMap );   
-    this->MergeAssociation( other.m_pfParticleVertexMap    , m_pfParticleVertexMap );    
-    this->MergeAssociation( other.m_pfParticleTrackMap     , m_pfParticleTrackMap );     
-    this->MergeAssociation( other.m_pfParticleShowerMap    , m_pfParticleShowerMap );    
-    this->MergeAssociation( other.m_pfParticleSeedMap      , m_pfParticleSeedMap );      
-    this->MergeAssociation( other.m_pfParticlePCAxisMap    , m_pfParticlePCAxisMap );    
+    this->MergeAssociation( other.m_pfParticleSpacePointMap, adjustedPFParticleSpacePointMap );
+    this->MergeAssociation( other.m_pfParticleClusterMap   , adjustedPFParticleClusterMap );   
+    this->MergeAssociation( other.m_pfParticleVertexMap    , adjustedPFParticleVertexMap );    
+    this->MergeAssociation( other.m_pfParticleTrackMap     , adjustedPFParticleTrackMap );     
+    this->MergeAssociation( other.m_pfParticleShowerMap    , adjustedPFParticleShowerMap );    
+    this->MergeAssociation( other.m_pfParticleSeedMap      , adjustedPFParticleSeedMap );      
+    this->MergeAssociation( other.m_pfParticlePCAxisMap    , adjustedPFParticlePCAxisMap );    
     this->MergeAssociation( other.m_spacePointHitMap       , m_spacePointHitMap );       
     this->MergeAssociation( other.m_clusterHitMap          , m_clusterHitMap );          
     this->MergeAssociation( other.m_trackHitMap            , m_trackHitMap );            
@@ -372,6 +386,45 @@ LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEvent::AdjustIds( const std::vector< art::Ptr< recob::PFParticle > > &                        collection, 
+                                 std::vector< art::Ptr< recob::PFParticle > > &                              adjustedCollection,
+                                 std::map< art::Ptr< recob::PFParticle >, art::Ptr< recob::PFParticle > > &  adjustedPtrsMap )
+{
+    // Ensure that we have unique PFParticle IDs
+
+    size_t shift = 100000;
+    const lar::PtrMaker< recob::PFParticle > makePtrPFParticle( *m_pEvent, *m_pProducer );
+
+    for ( const art::Ptr< recob::PFParticle > & part : collection ) {
+
+        if ( part->Self() >= shift )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::AdjustIds -- PFParticles ID exceeds " << shift << "!";
+
+        size_t adjustedSelf   = part->Self()   + shift;
+        size_t adjustedParent = part->Parent() + shift;
+
+        const std::vector< size_t > daughters = part->Daughters();
+
+        std::vector< size_t > adjustedDaughters;
+        adjustedDaughters.reserve( daughters.size() );
+        std::transform( daughters.begin(), daughters.end(), adjustedDaughters.begin(), [&]( size_t id ) -> size_t { return id + shift; } );
+
+        /* BEGIN_DEBUG */
+        for( unsigned int d = 0; d < daughters.size(); d++) {
+            std::cout << ( ( adjustedDaughters[d] - daughters[d] == shift ) ? "Adjusting worked" : "Adjusting FAILED!!!!!!!!!!!" ) << std::endl;
+        }
+        /* END DEBUG */
+
+        recob::PFParticle adjustedPart( part->PdgCode(), adjustedSelf, adjustedParent, adjustedDaughters );
+        art::Ptr< recob::PFParticle > pAdjustedPart( makePtrPFParticle( adjustedCollection.size() ) );
+        adjustedCollection.emplace_back( pAdjustedPart );
+
+        if ( !adjustedPtrsMap.insert( std::map< art::Ptr< recob::PFParticle >, art::Ptr< recob::PFParticle > >::value_type( part, pAdjustedPart ) ).second )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::AdjustIds -- Supplied collection contains repeat PFParticles";
+    }
+
+}
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
