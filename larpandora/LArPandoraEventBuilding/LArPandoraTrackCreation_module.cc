@@ -40,9 +40,9 @@ private:
      */
     recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector) const;
 
-    std::string     m_pfParticleLabel;              ///< 
-    unsigned int    m_minTrajectoryPoints;          ///<
-    unsigned int    m_slidingFitHalfWindow;         ///< 
+    std::string     m_pfParticleLabel;              ///< The pf particle label
+    unsigned int    m_minTrajectoryPoints;          ///< The minimum number of trajectory points
+    unsigned int    m_slidingFitHalfWindow;         ///< The sliding fit half window
 };
 
 DEFINE_ART_MODULE(LArPandoraTrackCreation)
