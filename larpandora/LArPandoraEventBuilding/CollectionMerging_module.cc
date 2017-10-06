@@ -45,14 +45,25 @@ public:
 private:
 
   // FHicL congifurable parameters
-  std::string  fAllHitsCRProducerLabel;       ///< Label of the pandora instance that ran CR reco on all hits
-  std::string  fCRRemHitsCRProducerLabel;     ///< Label of the pandora instance that ran CR reco on CR removed hits
-  std::string  fCRRemHitsNuProducerLabel;     ///< Label of the pandora instance taht ran Nu reco on CR removed hits
-  std::string  fAllHitProducerLabel;          ///< Label of the primary hit producer 
-  std::string  fCRRemHitProducerLabel;        ///< Label of the CR removed hit producer
-  std::string  fClearCRTagProducerLabel;      ///< Label of the unabiguous CR tag producer
-  std::string  fNuIdCRTagProducerLabel;       ///< Label of the neutrino-ID CR tag producer
-  bool         fShouldProduceNeutrinos;       ///< If we should produce collections related to neutrino top-level PFParticles
+  std::string  fAllHitsCRProducerLabel;          ///< Label of the pandora instance that ran CR reco on all hits
+  std::string  fAllHitsCRTrackProducerLabel;     ///< Label of the track producer using the pandora instance that ran CR reco on all hits
+  std::string  fAllHitsCRShowerProducerLabel;    ///< Label of the shower producer using the pandora instance that ran CR reco on all hits
+
+  std::string  fCRRemHitsCRProducerLabel;        ///< Label of the pandora instance that ran CR reco on CR removed hits
+  std::string  fCRRemHitsCRTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran CR reco on CR removed hits
+  std::string  fCRRemHitsCRShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran CR reco on CR removed hits
+
+  std::string  fCRRemHitsNuProducerLabel;        ///< Label of the pandora instance that ran Nu reco on CR removed hits
+  std::string  fCRRemHitsNuTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran Nu reco on CR removed hits
+  std::string  fCRRemHitsNuShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran Nu reco on CR removed hits
+
+  std::string  fAllHitProducerLabel;             ///< Label of the primary hit producer 
+  std::string  fCRRemHitProducerLabel;           ///< Label of the CR removed hit producer
+
+  std::string  fClearCRTagProducerLabel;         ///< Label of the unabiguous CR tag producer
+  std::string  fNuIdCRTagProducerLabel;          ///< Label of the neutrino-ID CR tag producer
+
+  bool         fShouldProduceNeutrinos;          ///< If we should produce collections related to neutrino top-level PFParticles
 };
 
 
@@ -87,14 +98,18 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
 
 void CollectionMerging::produce(art::Event & e)
 {
+  /* BEGIN DEBUG */
+  std::cout << " MERGING - " << (fShouldProduceNeutrinos ? "Nu" : "Cosmic") << std::endl;
+  /* END DEBUG */
+
   // Get all reconstructions of the event
-  lar_pandora::LArPandoraEvent::Labels allHitsCRLabels( fAllHitsCRProducerLabel, fAllHitProducerLabel );
+  lar_pandora::LArPandoraEvent::Labels allHitsCRLabels( fAllHitsCRProducerLabel, fAllHitsCRTrackProducerLabel, fAllHitsCRShowerProducerLabel, fAllHitProducerLabel );
   lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, allHitsCRLabels   );
 
-  lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels( fCRRemHitsCRProducerLabel, fCRRemHitProducerLabel );
+  lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels( fCRRemHitsCRProducerLabel, fCRRemHitsCRTrackProducerLabel, fCRRemHitsCRShowerProducerLabel, fCRRemHitProducerLabel );
   lar_pandora::LArPandoraEvent crRemHitsCREvent( this, &e, crRemHitsCRLabels );
 
-  lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels( fCRRemHitsNuProducerLabel, fCRRemHitProducerLabel );
+  lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels( fCRRemHitsNuProducerLabel, fCRRemHitsNuTrackProducerLabel, fCRRemHitsNuShowerProducerLabel, fCRRemHitProducerLabel );
   lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, crRemHitsNuLabels );
 
   // Filter and merge into a consolidated output
@@ -110,13 +125,25 @@ void CollectionMerging::produce(art::Event & e)
     //lar_pandora::LArPandoraEvent mergedEvent( filteredAllHitsCREvent.Merge( filteredCRRemHitsCREvent ) );
     //mergedEvent.WriteToEvent();
   }
+
+  /* BEGIN DEBUG */
+  std::cout << " MERGING DONE." << std::endl;
+  /* END DEBUG */
 }
 
 void CollectionMerging::reconfigure(fhicl::ParameterSet const & p)
 {
-  fAllHitsCRProducerLabel   = p.get<std::string>("AllHitsCRProducerLabel");
-  fCRRemHitsCRProducerLabel = p.get<std::string>("CRRemHitsCRProducerLabel");
-  fCRRemHitsNuProducerLabel = p.get<std::string>("CRRemHitsNuProducerLabel");
+  fAllHitsCRProducerLabel         = p.get<std::string>("AllHitsCRProducerLabel");
+  fAllHitsCRTrackProducerLabel    = p.get<std::string>("AllHitsCRTrackProducerLabel");
+  fAllHitsCRShowerProducerLabel   = p.get<std::string>("AllHitsCRShowerProducerLabel");
+
+  fCRRemHitsCRProducerLabel       = p.get<std::string>("CRRemHitsCRProducerLabel");
+  fCRRemHitsCRTrackProducerLabel  = p.get<std::string>("CRRemHitsCRTrackProducerLabel");
+  fCRRemHitsCRShowerProducerLabel = p.get<std::string>("CRRemHitsCRShowerProducerLabel");
+
+  fCRRemHitsNuProducerLabel       = p.get<std::string>("CRRemHitsNuProducerLabel");
+  fCRRemHitsNuTrackProducerLabel  = p.get<std::string>("CRRemHitsNuTrackProducerLabel");
+  fCRRemHitsNuShowerProducerLabel = p.get<std::string>("CRRemHitsNuShowerProducerLabel");
 
   fAllHitProducerLabel      = p.get<std::string>("AllHitProducerLabel");
   fCRRemHitProducerLabel    = p.get<std::string>("CRRemHitProducerLabel");

@@ -9,13 +9,13 @@ dump_all:                        @local::pandora_event_dump
 dump_all.PandoraLabel:           "pandora"
 
 dump_split_cosmic:               @local::pandora_event_dump
-dump_split_cosmic.PandoraLabel:  "pandoraCosmic"
+dump_split_cosmic.PandoraLabel:  "pandoraFullCosmic"
 
 dump_split_nu:                   @local::pandora_event_dump
-dump_split_nu.PandoraLabel:      "pandoraNu"
+dump_split_nu.PandoraLabel:      "pandoraFullNu"
 
 dump_merge_cosmic:               @local::pandora_event_dump
-dump_merge_cosmic.PandoraLabel:  "pandoraCosmicMerge"
+dump_merge_cosmic.PandoraLabel:  "pandoraCosmic"
 
 END_PROLOG
 
