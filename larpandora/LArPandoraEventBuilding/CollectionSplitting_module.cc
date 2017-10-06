@@ -46,6 +46,8 @@ private:
 
   // FHicL congifurable parameters
   std::string     fInputProducerLabel;           ///< Label for the Pandora instance that produced the collections we want to split up
+  std::string     fTrackProducerLabel;           ///< Label for the track producer using the Pandora instance that produced the collections we want to split up
+  std::string     fShowerProducerLabel;          ///< Label for the shower producer using the Pandora instance that produced the collections we want to split up
   std::string     fHitProducerLabel;             ///< Label for the hit producer that was used as input to the Pandora instance specified
   bool            fShouldProduceNeutrinos;       ///< If we should produce collections related to neutrino top-level PFParticles
 
@@ -54,6 +56,7 @@ private:
 
 CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
 {
+
   reconfigure(p);
 
   // Define which types of collections this the module produces
@@ -83,15 +86,25 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
 
 void CollectionSplitting::produce(art::Event & e)
 {
-  lar_pandora::LArPandoraEvent::Labels labels( fInputProducerLabel, fHitProducerLabel ); 
+  /* BEGIN DEBUG */
+  std::cout << " SPLITTING - " << (fShouldProduceNeutrinos ? "Nu" : "Cosmic") << std::endl;
+  /* END DEBUG */
+
+  lar_pandora::LArPandoraEvent::Labels labels( fInputProducerLabel, fTrackProducerLabel, fShowerProducerLabel, fHitProducerLabel ); 
   lar_pandora::LArPandoraEvent fullEvent( this, &e, labels );
   lar_pandora::LArPandoraEvent filteredEvent( fullEvent.FilterByPdgCode( fShouldProduceNeutrinos ) );
   filteredEvent.WriteToEvent();
+
+  /* BEGIN DEBUG */
+  std::cout << " SPLITTING DONE." << std::endl;
+  /* END DEBUG */
 }
 
 void CollectionSplitting::reconfigure(fhicl::ParameterSet const & p)
 {
   fInputProducerLabel     = p.get<std::string>("InputProducerLabel");
+  fTrackProducerLabel     = p.get<std::string>("TrackProducerLabel");
+  fShowerProducerLabel    = p.get<std::string>("ShowerProducerLabel");
   fHitProducerLabel       = p.get<std::string>("HitProducerLabel");
   fShouldProduceNeutrinos = p.get<bool>("ShouldProduceNeutrinos", true);
 }

@@ -350,8 +350,15 @@ LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
 
     this->AdjustIds( m_pfParticles, adjustedPFParticles, adjustedPFParticleMap);
 
-    //std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::
-    this->AdjustAssociation( m_pfParticleSpacePointMap, adjustedPFParticleMap, adjustedPFParicleSpacePointMap );
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::SpacePoint > > > adjustedPFParticleSpacePointMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > >    adjustedPFParticleClusterMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >     adjustedPFParticleVertexMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >      adjustedPFParticleTrackMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >     adjustedPFParticleShowerMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Seed > > >       adjustedPFParticleSeedMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >     adjustedPFParticlePCAxisMap;
+
+    this->AdjustAssociation( m_pfParticleSpacePointMap, adjustedPFParticleMap, adjustedPFParticleSpacePointMap );
     this->AdjustAssociation( m_pfParticleClusterMap   , adjustedPFParticleMap, adjustedPFParticleClusterMap   );
     this->AdjustAssociation( m_pfParticleVertexMap    , adjustedPFParticleMap, adjustedPFParticleVertexMap    );
     this->AdjustAssociation( m_pfParticleTrackMap     , adjustedPFParticleMap, adjustedPFParticleTrackMap     );
@@ -369,18 +376,18 @@ LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
     this->MergeCollection( other.m_pcAxes     , m_pcAxes            );     
     
     this->MergeAssociation( other.m_pfParticleSpacePointMap, adjustedPFParticleSpacePointMap );
-    this->MergeAssociation( other.m_pfParticleClusterMap   , adjustedPFParticleClusterMap );   
-    this->MergeAssociation( other.m_pfParticleVertexMap    , adjustedPFParticleVertexMap );    
-    this->MergeAssociation( other.m_pfParticleTrackMap     , adjustedPFParticleTrackMap );     
-    this->MergeAssociation( other.m_pfParticleShowerMap    , adjustedPFParticleShowerMap );    
-    this->MergeAssociation( other.m_pfParticleSeedMap      , adjustedPFParticleSeedMap );      
-    this->MergeAssociation( other.m_pfParticlePCAxisMap    , adjustedPFParticlePCAxisMap );    
-    this->MergeAssociation( other.m_spacePointHitMap       , m_spacePointHitMap );       
-    this->MergeAssociation( other.m_clusterHitMap          , m_clusterHitMap );          
-    this->MergeAssociation( other.m_trackHitMap            , m_trackHitMap );            
-    this->MergeAssociation( other.m_showerHitMap           , m_showerHitMap );           
-    this->MergeAssociation( other.m_seedHitMap             , m_seedHitMap );             
-    this->MergeAssociation( other.m_showerPCAxisMap        , m_showerPCAxisMap );        
+    this->MergeAssociation( other.m_pfParticleClusterMap   , adjustedPFParticleClusterMap    );   
+    this->MergeAssociation( other.m_pfParticleVertexMap    , adjustedPFParticleVertexMap     );    
+    this->MergeAssociation( other.m_pfParticleTrackMap     , adjustedPFParticleTrackMap      );     
+    this->MergeAssociation( other.m_pfParticleShowerMap    , adjustedPFParticleShowerMap     );    
+    this->MergeAssociation( other.m_pfParticleSeedMap      , adjustedPFParticleSeedMap       );      
+    this->MergeAssociation( other.m_pfParticlePCAxisMap    , adjustedPFParticlePCAxisMap     );    
+    this->MergeAssociation( other.m_spacePointHitMap       , m_spacePointHitMap              );       
+    this->MergeAssociation( other.m_clusterHitMap          , m_clusterHitMap                 );          
+    this->MergeAssociation( other.m_trackHitMap            , m_trackHitMap                   );            
+    this->MergeAssociation( other.m_showerHitMap           , m_showerHitMap                  );           
+    this->MergeAssociation( other.m_seedHitMap             , m_seedHitMap                    );             
+    this->MergeAssociation( other.m_showerPCAxisMap        , m_showerPCAxisMap               );        
 
     return outputEvent;
 }
@@ -399,7 +406,7 @@ void LArPandoraEvent::AdjustIds( const std::vector< art::Ptr< recob::PFParticle 
     for ( const art::Ptr< recob::PFParticle > & part : collection ) {
 
         if ( part->Self() >= shift )
-            throw cet::exception("LArPandora") << " LArPandoraEvent::AdjustIds -- PFParticles ID exceeds " << shift << "!";
+            throw cet::exception("LArPandora") << " LArPandoraEvent::AdjustIds -- PFParticle ID exceeds " << shift << ". Can't merge the collections!";
 
         size_t adjustedSelf   = part->Self()   + shift;
         size_t adjustedParent = part->Parent() + shift;
@@ -453,6 +460,38 @@ LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToHitLabel           , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( SeedToHitLabel             , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToPCAxisLabel        , pfParticleProducerLabel ) );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+        
+LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
+                                 std::string trackProducerLabel,
+                                 std::string showerProducerLabel,
+                                 std::string hitProducerLabel )
+{
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleLabel, pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( SpacePointLabel, pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( ClusterLabel   , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( VertexLabel    , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( TrackLabel     , trackProducerLabel      ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerLabel    , showerProducerLabel     ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( SeedLabel      , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PCAxisLabel    , showerProducerLabel     ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( HitLabel       , hitProducerLabel        ) );
+
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToSpacePointLabel, pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToClusterLabel   , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToVertexLabel    , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToTrackLabel     , trackProducerLabel      ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToShowerLabel    , showerProducerLabel     ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToSeedLabel      , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToPCAxisLabel    , showerProducerLabel     ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( SpacePointToHitLabel       , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( ClusterToHitLabel          , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( TrackToHitLabel            , trackProducerLabel      ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToHitLabel           , showerProducerLabel     ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( SeedToHitLabel             , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToPCAxisLabel        , showerProducerLabel     ) );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

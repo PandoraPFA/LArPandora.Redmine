@@ -107,6 +107,9 @@ void LArPandoraSlices::WriteTag( const bool &                                   
 
 void LArPandoraSlices::IdentifySlices()
 {
+    // NEUTRINO RECONSTRUCTION
+    // ----------------------------------------------------
+
     // Get neutrino PFParticles
     art::Handle< std::vector< recob::PFParticle > > nuPFParticleHandle;
     m_pEvent->getByLabel( m_nuRecoProducerLabel, nuPFParticleHandle); 

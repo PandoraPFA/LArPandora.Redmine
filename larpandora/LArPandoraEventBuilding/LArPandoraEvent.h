@@ -110,6 +110,16 @@ public:
         Labels( std::string pfParticleProducerLabel,
                 std::string hitProducerLabel );
 
+        /**
+         *  @breif  Track / Shower parametrised constructor.
+         *          Sets all collection labels to be the same as the PFParticle producer label,
+         *          except those relating to track and shower production, which are supplied.
+         */
+        Labels( std::string pfParticleProducerLabel,
+                std::string trackProducerLabel,
+                std::string showerProducerLabel,
+                std::string hitProducerLabel );
+
         // Setter functions
 
         void SetSpacePointProducerLabel( const std::string & label );
@@ -552,7 +562,7 @@ inline void LArPandoraEvent::AdjustAssociation( const std::map< art::Ptr< T >, s
                                                 std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &       adjustedAssociation )
 {
     for ( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::const_iterator it = inputAssociation.begin(); it != inputAssociation.end(); ++it ) {
-        if ( !adjustedAssociation.insert( std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::value_type( adjustionMap.at( it->first ), it->second ) ).second )
+        if ( !adjustedAssociation.insert( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::value_type( adjustionMap.at( it->first ), it->second ) ).second )
             throw cet::exception("LArPandora") << " LArPandoraEvent::AdjustAssociation -- input association map contains repeated keys.";
     }  
 }
