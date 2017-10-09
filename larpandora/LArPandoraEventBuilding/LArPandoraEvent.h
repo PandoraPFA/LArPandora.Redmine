@@ -23,7 +23,6 @@
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Cluster.h"
-#include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
@@ -31,6 +30,7 @@
 #include "lardataobj/RecoBase/Hit.h"
 
 #include "lardataobj/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/T0.h"
 
 #include <memory>
 #include <algorithm>
@@ -55,7 +55,8 @@ public:
      */
     LArPandoraEvent( art::EDProducer * pProducer,
                      art::Event *      pEvent, 
-                     const Labels &    inputLabels );
+                     const Labels &    inputLabels,
+                     const bool &      shouldProduceT0s = false);
 
     /**
      *  @brief  Construct by copying an existing LArPandoraEvent, replacing the collections and associations 
@@ -127,7 +128,7 @@ public:
         void SetVertexProducerLabel( const std::string & label );
         void SetTrackProducerLabel( const std::string & label );
         void SetShowerProducerLabel( const std::string & label );
-        void SetSeedProducerLabel( const std::string & label );
+        void SetT0ProducerLabel( const std::string & label );
         void SetPCAxisProducerLabel( const std::string & label );
 
         void SetPFParticleToSpacePointProducerLabel( const std::string & label );
@@ -135,13 +136,12 @@ public:
         void SetPFParticleToVertexProducerLabel( const std::string & label );
         void SetPFParticleToTrackProducerLabel( const std::string & label );
         void SetPFParticleToShowerProducerLabel( const std::string & label );
-        void SetPFParticleToSeedProducerLabel( const std::string & label );
+        void SetPFParticleToT0ProducerLabel( const std::string & label );
         void SetPFParticleToPCAxisProducerLabel( const std::string & label );
         void SetSpacePointToHitProducerLabel( const std::string & label );
         void SetClusterToHitProducerLabel( const std::string & label );
         void SetTrackToHitProducerLabel( const std::string & label );
         void SetShowerToHitProducerLabel( const std::string & label );
-        void SetSeedToHitProducerLabel( const std::string & label );
         void SetShowerToPCAxisProducerLabel( const std::string & label );
 
         enum LabelType {
@@ -151,7 +151,7 @@ public:
             VertexLabel,
             TrackLabel,
             ShowerLabel,
-            SeedLabel,
+            T0Label,
             PCAxisLabel,
             HitLabel,
             PFParticleToSpacePointLabel,
@@ -159,13 +159,12 @@ public:
             PFParticleToVertexLabel,
             PFParticleToTrackLabel,
             PFParticleToShowerLabel,
-            PFParticleToSeedLabel,
+            PFParticleToT0Label,
             PFParticleToPCAxisLabel,
             SpacePointToHitLabel,
             ClusterToHitLabel,
             TrackToHitLabel,
             ShowerToHitLabel,
-            SeedToHitLabel,
             ShowerToPCAxisLabel
         };
 
@@ -182,6 +181,7 @@ private:
     art::EDProducer * m_pProducer;            ///<
     art::Event *      m_pEvent;               ///<
     Labels            m_labels;               ///<
+    bool              m_shouldProduceT0s;     ///<
 
     // Collections
     std::vector< art::Ptr< recob::PFParticle > > m_pfParticles;    ///<
@@ -190,7 +190,7 @@ private:
     std::vector< art::Ptr< recob::Vertex > >     m_vertices;       ///<
     std::vector< art::Ptr< recob::Track > >      m_tracks;         ///<
     std::vector< art::Ptr< recob::Shower > >     m_showers;        ///<
-    std::vector< art::Ptr< recob::Seed > >       m_seeds;          ///<
+    std::vector< art::Ptr< anab::T0 > >          m_t0s;            ///<
     std::vector< art::Ptr< recob::PCAxis > >     m_pcAxes;         ///<
     std::vector< art::Ptr< recob::Hit> >         m_hits;           ///<
 
@@ -200,14 +200,13 @@ private:
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >        m_pfParticleVertexMap;        ///<
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >         m_pfParticleTrackMap;         ///<
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >        m_pfParticleShowerMap;        ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Seed > > >          m_pfParticleSeedMap;          ///<
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< anab::T0 > > >             m_pfParticleT0Map;            ///<
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >        m_pfParticlePCAxisMap;        ///<
 
     std::map< art::Ptr< recob::SpacePoint >, std::vector< art::Ptr< recob::Hit > > >           m_spacePointHitMap;           ///<
     std::map< art::Ptr< recob::Cluster >   , std::vector< art::Ptr< recob::Hit > > >           m_clusterHitMap;              ///<
     std::map< art::Ptr< recob::Track >     , std::vector< art::Ptr< recob::Hit > > >           m_trackHitMap;                ///<
     std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::Hit > > >           m_showerHitMap;               ///<
-    std::map< art::Ptr< recob::Seed >      , std::vector< art::Ptr< recob::Hit > > >           m_seedHitMap;                 ///<
 
     std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        m_showerPCAxisMap;            ///<
     
@@ -350,7 +349,10 @@ private:
      *  @brief  Write a given association to the event
      */
     template < class T, class U >
-    void WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap, const std::vector< art::Ptr< T > > & collectionT, const std::vector< art::Ptr< U > > & collectionU, const std::string & producerLabelU = "");
+    void WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationMap, 
+                           const std::vector< art::Ptr< T > > &                             collectionT, 
+                           const std::vector< art::Ptr< U > > &                             collectionU, 
+                           const std::string &                                              producerLabelU = "");
 
     /**
      *  @brief  Append a collection onto an other collection
@@ -392,9 +394,9 @@ private:
      *  @param  adjustedAssociation  output adjusted association
      */
     template < class T, class U >
-    void AdjustAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & inputAssociation, 
-                            const std::map< art::Ptr< T >, art::Ptr< T > > &                adjustionMap, 
-                            std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &       adjustedAssociation );
+    void AdjustAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  inputAssociation, 
+                            const std::map< art::Ptr< T >, art::Ptr< T > > &                 adjustionMap, 
+                            std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &        adjustedAssociation );
 
     // Useful PDG codes for readability
     enum Pdg {
@@ -495,7 +497,10 @@ inline void LArPandoraEvent::WriteCollection( const std::vector< art::Ptr< T > >
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template < class T, class U >
-inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap, const std::vector< art::Ptr< T > > & collectionT, const std::vector< art::Ptr< U > > & collectionU, const std::string & producerLabelU)
+inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationMap, 
+                                               const std::vector< art::Ptr< T > > &                             collectionT, 
+                                               const std::vector< art::Ptr< U > > &                             collectionU, 
+                                               const std::string &                                              producerLabelU )
 {
 
   const lar::PtrMaker< T > makePtrT( *m_pEvent, *m_pProducer );

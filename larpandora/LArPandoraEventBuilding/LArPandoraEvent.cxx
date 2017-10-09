@@ -13,10 +13,12 @@ namespace lar_pandora
 
 LArPandoraEvent::LArPandoraEvent( art::EDProducer *  pProducer,
                                   art::Event *       pEvent,
-                                  const Labels &     inputLabels ) :
+                                  const Labels &     inputLabels,
+                                  const bool &       shouldProduceT0s ) :
     m_pProducer( pProducer ),
     m_pEvent( pEvent ), 
-    m_labels( inputLabels )
+    m_labels( inputLabels ),
+    m_shouldProduceT0s( shouldProduceT0s )
 {
 
     this->GetCollections();
@@ -45,28 +47,32 @@ void LArPandoraEvent::GetCollections()
     art::Handle< std::vector< recob::Shower > > showerHandle;
     this->GetCollection( Labels::ShowerLabel, showerHandle, m_showers ); 
 
-    art::Handle< std::vector< recob::Seed > > seedHandle;
-    this->GetCollection( Labels::SeedLabel, seedHandle, m_seeds ); 
-
     art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
     this->GetCollection( Labels::PCAxisLabel, pcAxisHandle, m_pcAxes ); 
 
     art::Handle< std::vector< recob::Hit > > hitHandle;
     this->GetCollection( Labels::HitLabel, hitHandle, m_hits ); 
 
+    if ( m_shouldProduceT0s ) {
+        art::Handle< std::vector< anab::T0 > > t0Handle;
+        this->GetCollection( Labels::T0Label, t0Handle, m_t0s ); 
+    }
+
+
     this->GetAssociationMap( Labels::PFParticleToSpacePointLabel, pfParticleHandle, m_pfParticleSpacePointMap );
     this->GetAssociationMap( Labels::PFParticleToClusterLabel   , pfParticleHandle, m_pfParticleClusterMap    );
     this->GetAssociationMap( Labels::PFParticleToVertexLabel    , pfParticleHandle, m_pfParticleVertexMap     );
     this->GetAssociationMap( Labels::PFParticleToTrackLabel     , pfParticleHandle, m_pfParticleTrackMap      );
     this->GetAssociationMap( Labels::PFParticleToShowerLabel    , pfParticleHandle, m_pfParticleShowerMap     );
-    this->GetAssociationMap( Labels::PFParticleToSeedLabel      , pfParticleHandle, m_pfParticleSeedMap       );
     this->GetAssociationMap( Labels::PFParticleToPCAxisLabel    , pfParticleHandle, m_pfParticlePCAxisMap     );
+
+    if ( m_shouldProduceT0s ) 
+        this->GetAssociationMap( Labels::PFParticleToT0Label        , pfParticleHandle, m_pfParticleT0Map         );
 
     this->GetAssociationMap( Labels::SpacePointToHitLabel, spacePointHandle, m_spacePointHitMap );
     this->GetAssociationMap( Labels::ClusterToHitLabel   , clusterHandle   , m_clusterHitMap    );
     this->GetAssociationMap( Labels::TrackToHitLabel     , trackHandle     , m_trackHitMap      );
     this->GetAssociationMap( Labels::ShowerToHitLabel    , showerHandle    , m_showerHitMap     );
-    this->GetAssociationMap( Labels::SeedToHitLabel      , seedHandle      , m_seedHitMap       );
 
     this->GetAssociationMap( Labels::ShowerToPCAxisLabel, showerHandle, m_showerPCAxisMap );
 }
@@ -133,6 +139,7 @@ LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                      
     m_pProducer( event.m_pProducer ),
     m_pEvent( event.m_pEvent ), 
     m_labels( event.m_labels ),
+    m_shouldProduceT0s( event.m_shouldProduceT0s ),
     m_hits( event.m_hits )
 {
     m_pfParticles = selectedPFParticles;
@@ -140,42 +147,46 @@ LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                      
     std::vector< art::Ptr< recob::PFParticle> > selectedParticles;
     std::vector< art::Ptr< recob::SpacePoint> > selectedSpacePoints;
     std::vector< art::Ptr< recob::Cluster>    > selectedClusters;
-    std::vector< art::Ptr< recob::Seed>       > selectedSeeds;
     std::vector< art::Ptr< recob::Vertex>     > selectedVertices;
     std::vector< art::Ptr< recob::Track>      > selectedTracks;
     std::vector< art::Ptr< recob::Shower>     > selectedShowers; 
     std::vector< art::Ptr< recob::PCAxis>     > selectedPCAxes;
+    std::vector< art::Ptr< anab::T0 >         > selectedT0s;
 
     for ( art::Ptr< recob::PFParticle > part : selectedPFParticles ) {
         this->CollectAssociated( part, event.m_pfParticleSpacePointMap, selectedSpacePoints );
         this->CollectAssociated( part, event.m_pfParticleClusterMap   , selectedClusters    );
-        this->CollectAssociated( part, event.m_pfParticleSeedMap      , selectedSeeds       );
         this->CollectAssociated( part, event.m_pfParticleVertexMap    , selectedVertices    );
         this->CollectAssociated( part, event.m_pfParticleTrackMap     , selectedTracks      );
         this->CollectAssociated( part, event.m_pfParticleShowerMap    , selectedShowers     );
         this->CollectAssociated( part, event.m_pfParticlePCAxisMap    , selectedPCAxes      );
+
+        if ( m_shouldProduceT0s ) 
+            this->CollectAssociated( part, event.m_pfParticleT0Map        , selectedT0s         );
     }
 
     m_spacePoints = selectedSpacePoints;
     m_clusters    = selectedClusters;
-    m_seeds       = selectedSeeds;
     m_vertices    = selectedVertices;
     m_tracks      = selectedTracks;
     m_showers     = selectedShowers;
     m_pcAxes      = selectedPCAxes;
+
+    if ( m_shouldProduceT0s ) 
+        m_t0s         = selectedT0s;
 
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::SpacePoint > > >    selectedPFParticleSpacePointMap;
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > >       selectedPFParticleClusterMap;  
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >        selectedPFParticleVertexMap;  
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >         selectedPFParticleTrackMap;  
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >        selectedPFParticleShowerMap;
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Seed > > >          selectedPFParticleSeedMap; 
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >        selectedPFParticlePCAxisMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< anab::T0 > > >             selectedPFParticleT0Map; 
+
     std::map< art::Ptr< recob::SpacePoint >, std::vector< art::Ptr< recob::Hit > > >           selectedSpacePointHitMap;  
     std::map< art::Ptr< recob::Cluster >   , std::vector< art::Ptr< recob::Hit > > >           selectedClusterHitMap;    
     std::map< art::Ptr< recob::Track >     , std::vector< art::Ptr< recob::Hit > > >           selectedTrackHitMap;     
     std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::Hit > > >           selectedShowerHitMap;
-    std::map< art::Ptr< recob::Seed >      , std::vector< art::Ptr< recob::Hit > > >           selectedSeedHitMap; 
     std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        selectedShowerPCAxisMap;
 
     this->GetFilteredAssociationMap( selectedPFParticles, selectedSpacePoints, event.m_pfParticleSpacePointMap, selectedPFParticleSpacePointMap );
@@ -183,13 +194,15 @@ LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                      
     this->GetFilteredAssociationMap( selectedPFParticles, selectedVertices   , event.m_pfParticleVertexMap    , selectedPFParticleVertexMap     );
     this->GetFilteredAssociationMap( selectedPFParticles, selectedTracks     , event.m_pfParticleTrackMap     , selectedPFParticleTrackMap      );
     this->GetFilteredAssociationMap( selectedPFParticles, selectedShowers    , event.m_pfParticleShowerMap    , selectedPFParticleShowerMap     );
-    this->GetFilteredAssociationMap( selectedPFParticles, selectedSeeds      , event.m_pfParticleSeedMap      , selectedPFParticleSeedMap       );
     this->GetFilteredAssociationMap( selectedPFParticles, selectedPCAxes     , event.m_pfParticlePCAxisMap    , selectedPFParticlePCAxisMap     );
+
+    if ( m_shouldProduceT0s ) 
+        this->GetFilteredAssociationMap( selectedPFParticles, selectedT0s        , event.m_pfParticleT0Map        , selectedPFParticleT0Map         );
+
     this->GetFilteredAssociationMap( selectedSpacePoints, event.m_hits, event.m_spacePointHitMap, selectedSpacePointHitMap ); 
     this->GetFilteredAssociationMap( selectedClusters   , event.m_hits, event.m_clusterHitMap   , selectedClusterHitMap    );
     this->GetFilteredAssociationMap( selectedTracks     , event.m_hits, event.m_trackHitMap     , selectedTrackHitMap      );
     this->GetFilteredAssociationMap( selectedShowers    , event.m_hits, event.m_showerHitMap    , selectedShowerHitMap     );
-    this->GetFilteredAssociationMap( selectedSeeds      , event.m_hits, event.m_seedHitMap      , selectedSeedHitMap       );
     this->GetFilteredAssociationMap( selectedShowers, selectedPCAxes, event.m_showerPCAxisMap, selectedShowerPCAxisMap );
 
     m_pfParticleSpacePointMap = selectedPFParticleSpacePointMap;
@@ -197,13 +210,15 @@ LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                      
     m_pfParticleVertexMap     = selectedPFParticleVertexMap;
     m_pfParticleTrackMap      = selectedPFParticleTrackMap;
     m_pfParticleShowerMap     = selectedPFParticleShowerMap;
-    m_pfParticleSeedMap       = selectedPFParticleSeedMap;
     m_pfParticlePCAxisMap     = selectedPFParticlePCAxisMap;
+
+    if ( m_shouldProduceT0s ) 
+        m_pfParticleT0Map         = selectedPFParticleT0Map;
+
     m_spacePointHitMap        = selectedSpacePointHitMap;
     m_clusterHitMap           = selectedClusterHitMap;
     m_trackHitMap             = selectedTrackHitMap;
     m_showerHitMap            = selectedShowerHitMap;
-    m_seedHitMap              = selectedSeedHitMap;
     m_showerPCAxisMap         = selectedShowerPCAxisMap;
 }
 
@@ -219,8 +234,8 @@ void LArPandoraEvent::GetPrimaryPFParticles( std::vector< art::Ptr< recob::PFPar
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraEvent::GetFilteredParticlesByPdgCode( const bool                                            shouldProduceNeutrinos, 
-                                                            const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
-                                                            std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles )
+                                                     const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles, 
+                                                     std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles )
 {
     for ( art::Ptr< recob::PFParticle > part : inputPFParticles ) {
         unsigned int pdg = std::abs( part->PdgCode() );
@@ -316,25 +331,29 @@ void LArPandoraEvent::WriteToEvent()
     
     this->WriteCollection( m_pfParticles );
     this->WriteCollection( m_spacePoints );
-    this->WriteCollection( m_clusters );   
-    this->WriteCollection( m_vertices );   
-    this->WriteCollection( m_tracks );     
-    this->WriteCollection( m_showers );    
-    this->WriteCollection( m_seeds );      
-    this->WriteCollection( m_pcAxes );     
+    this->WriteCollection( m_clusters    );   
+    this->WriteCollection( m_vertices    );   
+    this->WriteCollection( m_tracks      );     
+    this->WriteCollection( m_showers     );    
+    this->WriteCollection( m_pcAxes      );     
+
+    if ( m_shouldProduceT0s ) 
+        this->WriteCollection( m_t0s         );      
     
     this->WriteAssociation( m_pfParticleSpacePointMap, m_pfParticles, m_spacePoints );
     this->WriteAssociation( m_pfParticleClusterMap   , m_pfParticles, m_clusters    );   
     this->WriteAssociation( m_pfParticleVertexMap    , m_pfParticles, m_vertices    );    
     this->WriteAssociation( m_pfParticleTrackMap     , m_pfParticles, m_tracks      );     
     this->WriteAssociation( m_pfParticleShowerMap    , m_pfParticles, m_showers     );    
-    this->WriteAssociation( m_pfParticleSeedMap      , m_pfParticles, m_seeds       );      
-    this->WriteAssociation( m_pfParticlePCAxisMap    , m_pfParticles, m_pcAxes      );     
+    this->WriteAssociation( m_pfParticlePCAxisMap    , m_pfParticles, m_pcAxes      );    
+
+    if ( m_shouldProduceT0s ) 
+        this->WriteAssociation( m_pfParticleT0Map        , m_pfParticles, m_t0s         );      
+
     this->WriteAssociation( m_spacePointHitMap       , m_spacePoints, m_hits        , m_labels.GetLabel( Labels::HitLabel ) );       
     this->WriteAssociation( m_clusterHitMap          , m_clusters   , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );          
     this->WriteAssociation( m_trackHitMap            , m_tracks     , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );            
     this->WriteAssociation( m_showerHitMap           , m_showers    , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );           
-    this->WriteAssociation( m_seedHitMap             , m_seeds      , m_hits        , m_labels.GetLabel( Labels::HitLabel ) );             
     this->WriteAssociation( m_showerPCAxisMap        , m_showers    , m_pcAxes      );        
       
 }
@@ -355,16 +374,18 @@ LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >     adjustedPFParticleVertexMap;
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >      adjustedPFParticleTrackMap;
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >     adjustedPFParticleShowerMap;
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Seed > > >       adjustedPFParticleSeedMap;
     std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >     adjustedPFParticlePCAxisMap;
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< anab::T0 > > >          adjustedPFParticleT0Map;
 
     this->AdjustAssociation( m_pfParticleSpacePointMap, adjustedPFParticleMap, adjustedPFParticleSpacePointMap );
-    this->AdjustAssociation( m_pfParticleClusterMap   , adjustedPFParticleMap, adjustedPFParticleClusterMap   );
-    this->AdjustAssociation( m_pfParticleVertexMap    , adjustedPFParticleMap, adjustedPFParticleVertexMap    );
-    this->AdjustAssociation( m_pfParticleTrackMap     , adjustedPFParticleMap, adjustedPFParticleTrackMap     );
-    this->AdjustAssociation( m_pfParticleShowerMap    , adjustedPFParticleMap, adjustedPFParticleShowerMap    );
-    this->AdjustAssociation( m_pfParticleSeedMap      , adjustedPFParticleMap, adjustedPFParticleSeedMap      );
-    this->AdjustAssociation( m_pfParticlePCAxisMap    , adjustedPFParticleMap, adjustedPFParticlePCAxisMap    );
+    this->AdjustAssociation( m_pfParticleClusterMap   , adjustedPFParticleMap, adjustedPFParticleClusterMap    );
+    this->AdjustAssociation( m_pfParticleVertexMap    , adjustedPFParticleMap, adjustedPFParticleVertexMap     );
+    this->AdjustAssociation( m_pfParticleTrackMap     , adjustedPFParticleMap, adjustedPFParticleTrackMap      );
+    this->AdjustAssociation( m_pfParticleShowerMap    , adjustedPFParticleMap, adjustedPFParticleShowerMap     );
+    this->AdjustAssociation( m_pfParticlePCAxisMap    , adjustedPFParticleMap, adjustedPFParticlePCAxisMap     );
+
+    if ( m_shouldProduceT0s ) 
+        this->AdjustAssociation( m_pfParticleT0Map        , adjustedPFParticleMap, adjustedPFParticleT0Map         );
 
     this->MergeCollection( other.m_pfParticles, adjustedPFParticles );
     this->MergeCollection( other.m_spacePoints, m_spacePoints       );
@@ -372,21 +393,25 @@ LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
     this->MergeCollection( other.m_vertices   , m_vertices          );   
     this->MergeCollection( other.m_tracks     , m_tracks            );     
     this->MergeCollection( other.m_showers    , m_showers           );    
-    this->MergeCollection( other.m_seeds      , m_seeds             );      
-    this->MergeCollection( other.m_pcAxes     , m_pcAxes            );     
+    this->MergeCollection( other.m_pcAxes     , m_pcAxes            );    
+
+    if ( m_shouldProduceT0s ) 
+        this->MergeCollection( other.m_t0s        , m_t0s               );      
     
     this->MergeAssociation( other.m_pfParticleSpacePointMap, adjustedPFParticleSpacePointMap );
     this->MergeAssociation( other.m_pfParticleClusterMap   , adjustedPFParticleClusterMap    );   
     this->MergeAssociation( other.m_pfParticleVertexMap    , adjustedPFParticleVertexMap     );    
     this->MergeAssociation( other.m_pfParticleTrackMap     , adjustedPFParticleTrackMap      );     
     this->MergeAssociation( other.m_pfParticleShowerMap    , adjustedPFParticleShowerMap     );    
-    this->MergeAssociation( other.m_pfParticleSeedMap      , adjustedPFParticleSeedMap       );      
-    this->MergeAssociation( other.m_pfParticlePCAxisMap    , adjustedPFParticlePCAxisMap     );    
+    this->MergeAssociation( other.m_pfParticlePCAxisMap    , adjustedPFParticlePCAxisMap     );   
+
+    if ( m_shouldProduceT0s ) 
+        this->MergeAssociation( other.m_pfParticleT0Map        , adjustedPFParticleT0Map         );      
+
     this->MergeAssociation( other.m_spacePointHitMap       , m_spacePointHitMap              );       
     this->MergeAssociation( other.m_clusterHitMap          , m_clusterHitMap                 );          
     this->MergeAssociation( other.m_trackHitMap            , m_trackHitMap                   );            
     this->MergeAssociation( other.m_showerHitMap           , m_showerHitMap                  );           
-    this->MergeAssociation( other.m_seedHitMap             , m_seedHitMap                    );             
     this->MergeAssociation( other.m_showerPCAxisMap        , m_showerPCAxisMap               );        
 
     return outputEvent;
@@ -443,7 +468,7 @@ LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
     m_labels.insert( std::map< LabelType, std::string >::value_type( VertexLabel    , pfParticleProducerLabel) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( TrackLabel     , pfParticleProducerLabel) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerLabel    , pfParticleProducerLabel) );
-    m_labels.insert( std::map< LabelType, std::string >::value_type( SeedLabel      , pfParticleProducerLabel) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( T0Label        , pfParticleProducerLabel) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PCAxisLabel    , pfParticleProducerLabel) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( HitLabel       , hitProducerLabel       ) );
 
@@ -452,13 +477,12 @@ LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToVertexLabel    , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToTrackLabel     , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToShowerLabel    , pfParticleProducerLabel ) );
-    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToSeedLabel      , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToT0Label        , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToPCAxisLabel    , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( SpacePointToHitLabel       , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ClusterToHitLabel          , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( TrackToHitLabel            , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToHitLabel           , pfParticleProducerLabel ) );
-    m_labels.insert( std::map< LabelType, std::string >::value_type( SeedToHitLabel             , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToPCAxisLabel        , pfParticleProducerLabel ) );
 }
 
@@ -475,7 +499,7 @@ LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
     m_labels.insert( std::map< LabelType, std::string >::value_type( VertexLabel    , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( TrackLabel     , trackProducerLabel      ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerLabel    , showerProducerLabel     ) );
-    m_labels.insert( std::map< LabelType, std::string >::value_type( SeedLabel      , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( T0Label        , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PCAxisLabel    , showerProducerLabel     ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( HitLabel       , hitProducerLabel        ) );
 
@@ -484,13 +508,12 @@ LArPandoraEvent::Labels::Labels( std::string pfParticleProducerLabel,
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToVertexLabel    , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToTrackLabel     , trackProducerLabel      ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToShowerLabel    , showerProducerLabel     ) );
-    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToSeedLabel      , pfParticleProducerLabel ) );
+    m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToT0Label        , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( PFParticleToPCAxisLabel    , showerProducerLabel     ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( SpacePointToHitLabel       , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ClusterToHitLabel          , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( TrackToHitLabel            , trackProducerLabel      ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToHitLabel           , showerProducerLabel     ) );
-    m_labels.insert( std::map< LabelType, std::string >::value_type( SeedToHitLabel             , pfParticleProducerLabel ) );
     m_labels.insert( std::map< LabelType, std::string >::value_type( ShowerToPCAxisLabel        , showerProducerLabel     ) );
 }
 
@@ -531,9 +554,9 @@ void LArPandoraEvent::Labels::SetShowerProducerLabel( const std::string & label 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetSeedProducerLabel( const std::string & label )
+void LArPandoraEvent::Labels::SetT0ProducerLabel( const std::string & label )
 {
-    m_labels[SeedLabel] = label;
+    m_labels[T0Label] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -580,9 +603,9 @@ void LArPandoraEvent::Labels::SetPFParticleToShowerProducerLabel( const std::str
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToSeedProducerLabel( const std::string & label )
+void LArPandoraEvent::Labels::SetPFParticleToT0ProducerLabel( const std::string & label )
 {
-    m_labels[PFParticleToSeedLabel] = label;
+    m_labels[PFParticleToT0Label] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -618,13 +641,6 @@ void LArPandoraEvent::Labels::SetTrackToHitProducerLabel( const std::string & la
 void LArPandoraEvent::Labels::SetShowerToHitProducerLabel( const std::string & label )
 {
     m_labels[ShowerToHitLabel] = label;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraEvent::Labels::SetSeedToHitProducerLabel( const std::string & label )
-{
-    m_labels[SeedToHitLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

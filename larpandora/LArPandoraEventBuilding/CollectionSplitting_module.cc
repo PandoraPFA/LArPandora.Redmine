@@ -50,7 +50,8 @@ private:
   std::string     fShowerProducerLabel;          ///< Label for the shower producer using the Pandora instance that produced the collections we want to split up
   std::string     fHitProducerLabel;             ///< Label for the hit producer that was used as input to the Pandora instance specified
   bool            fShouldProduceNeutrinos;       ///< If we should produce collections related to neutrino top-level PFParticles
-
+  bool            fShouldProduceCosmics;         ///< If we should produce collections related to cosmic top-level PFParticles
+  bool            fShouldProduceT0s;             ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
 };
 
 
@@ -63,7 +64,10 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
   produces< std::vector<recob::PFParticle> >();
   produces< std::vector<recob::SpacePoint> >();
   produces< std::vector<recob::Cluster> >();
-  produces< std::vector<recob::Seed> >();
+
+  if ( fShouldProduceT0s )
+      produces< std::vector<anab::T0> >();
+
   produces< std::vector<recob::Vertex> >();
   produces< std::vector<recob::Track> >(); 
   produces< std::vector<recob::Shower> >();
@@ -71,7 +75,10 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
 
   produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
   produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-  produces< art::Assns<recob::PFParticle, recob::Seed> >();
+
+  if ( fShouldProduceT0s )
+      produces< art::Assns<recob::PFParticle, anab::T0> >();
+
   produces< art::Assns<recob::PFParticle, recob::Vertex> >();
   produces< art::Assns<recob::PFParticle, recob::Track> >();
   produces< art::Assns<recob::PFParticle, recob::Shower> >();
@@ -81,19 +88,27 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
   produces< art::Assns<recob::Shower, recob::PCAxis> >();
   produces< art::Assns<recob::SpacePoint, recob::Hit> >();
   produces< art::Assns<recob::Cluster, recob::Hit> >();
-  produces< art::Assns<recob::Seed, recob::Hit> >();
 }
 
 void CollectionSplitting::produce(art::Event & e)
 {
   /* BEGIN DEBUG */
-  std::cout << " SPLITTING - " << (fShouldProduceNeutrinos ? "Nu" : "Cosmic") << std::endl;
+  std::cout << " SPLITTING - " << (fShouldProduceNeutrinos ? "Nu" : "") << (fShouldProduceCosmics ? ( fShouldProduceNeutrinos ? " + Cosmic" : "Cosmic" ) : "") << std::endl;
   /* END DEBUG */
 
+  if ( !fShouldProduceNeutrinos && !fShouldProduceCosmics ) 
+    throw cet::exception("LArPandora") << " CollectionSplitting -- Must be configured to produce neutrinos or cosmics or both.";
+
   lar_pandora::LArPandoraEvent::Labels labels( fInputProducerLabel, fTrackProducerLabel, fShowerProducerLabel, fHitProducerLabel ); 
-  lar_pandora::LArPandoraEvent fullEvent( this, &e, labels );
-  lar_pandora::LArPandoraEvent filteredEvent( fullEvent.FilterByPdgCode( fShouldProduceNeutrinos ) );
-  filteredEvent.WriteToEvent();
+  lar_pandora::LArPandoraEvent fullEvent( this, &e, labels, fShouldProduceT0s );
+
+  if ( fShouldProduceNeutrinos && fShouldProduceCosmics ) {
+    fullEvent.WriteToEvent();
+  }
+  else {
+    lar_pandora::LArPandoraEvent filteredEvent( fullEvent.FilterByPdgCode( fShouldProduceNeutrinos ) );
+    filteredEvent.WriteToEvent();
+  }
 
   /* BEGIN DEBUG */
   std::cout << " SPLITTING DONE." << std::endl;
@@ -107,6 +122,8 @@ void CollectionSplitting::reconfigure(fhicl::ParameterSet const & p)
   fShowerProducerLabel    = p.get<std::string>("ShowerProducerLabel");
   fHitProducerLabel       = p.get<std::string>("HitProducerLabel");
   fShouldProduceNeutrinos = p.get<bool>("ShouldProduceNeutrinos", true);
+  fShouldProduceCosmics   = p.get<bool>("ShouldProduceCosmics", true);
+  fShouldProduceT0s       = p.get<bool>("ShouldProduceT0s", false);
 }
 
 DEFINE_ART_MODULE(CollectionSplitting)
