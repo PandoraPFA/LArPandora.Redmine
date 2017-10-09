@@ -64,6 +64,7 @@ private:
   std::string  fNuIdCRTagProducerLabel;          ///< Label of the neutrino-ID CR tag producer
 
   bool         fShouldProduceNeutrinos;          ///< If we should produce collections related to neutrino top-level PFParticles
+  bool         fShouldProduceT0s;                ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
 };
 
 
@@ -75,7 +76,10 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
   produces< std::vector<recob::PFParticle> >();
   produces< std::vector<recob::SpacePoint> >();
   produces< std::vector<recob::Cluster> >();
-  produces< std::vector<recob::Seed> >();
+
+  if ( fShouldProduceT0s )
+      produces< std::vector<anab::T0> >();
+
   produces< std::vector<recob::Vertex> >();
   produces< std::vector<recob::Track> >(); 
   produces< std::vector<recob::Shower> >();
@@ -83,7 +87,10 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
 
   produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
   produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-  produces< art::Assns<recob::PFParticle, recob::Seed> >();
+
+  if ( fShouldProduceT0s )
+    produces< art::Assns<recob::PFParticle, anab::T0> >();
+
   produces< art::Assns<recob::PFParticle, recob::Vertex> >();
   produces< art::Assns<recob::PFParticle, recob::Track> >();
   produces< art::Assns<recob::PFParticle, recob::Shower> >();
@@ -93,7 +100,6 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
   produces< art::Assns<recob::Shower, recob::PCAxis> >();
   produces< art::Assns<recob::SpacePoint, recob::Hit> >();
   produces< art::Assns<recob::Cluster, recob::Hit> >();
-  produces< art::Assns<recob::Seed, recob::Hit> >();
 }
 
 void CollectionMerging::produce(art::Event & e)
@@ -104,13 +110,13 @@ void CollectionMerging::produce(art::Event & e)
 
   // Get all reconstructions of the event
   lar_pandora::LArPandoraEvent::Labels allHitsCRLabels( fAllHitsCRProducerLabel, fAllHitsCRTrackProducerLabel, fAllHitsCRShowerProducerLabel, fAllHitProducerLabel );
-  lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, allHitsCRLabels   );
+  lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, allHitsCRLabels, fShouldProduceT0s   );
 
   lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels( fCRRemHitsCRProducerLabel, fCRRemHitsCRTrackProducerLabel, fCRRemHitsCRShowerProducerLabel, fCRRemHitProducerLabel );
-  lar_pandora::LArPandoraEvent crRemHitsCREvent( this, &e, crRemHitsCRLabels );
+  lar_pandora::LArPandoraEvent crRemHitsCREvent( this, &e, crRemHitsCRLabels, fShouldProduceT0s );
 
   lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels( fCRRemHitsNuProducerLabel, fCRRemHitsNuTrackProducerLabel, fCRRemHitsNuShowerProducerLabel, fCRRemHitProducerLabel );
-  lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, crRemHitsNuLabels );
+  lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, crRemHitsNuLabels, fShouldProduceT0s );
 
   // Filter and merge into a consolidated output
   if ( fShouldProduceNeutrinos ) {
@@ -152,6 +158,7 @@ void CollectionMerging::reconfigure(fhicl::ParameterSet const & p)
   fNuIdCRTagProducerLabel   = p.get<std::string>("NuIdCRTagProducerLabel");
 
   fShouldProduceNeutrinos   = p.get<bool>("ShouldProduceNeutrinos", true);
+  fShouldProduceT0s         = p.get<bool>("ShouldProduceT0s", false);
 }
 
 DEFINE_ART_MODULE(CollectionMerging)
