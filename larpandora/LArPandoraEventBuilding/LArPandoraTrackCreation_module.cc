@@ -11,6 +11,8 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 #include "larpandoracontent/LArObjects/LArPfoObjects.h"
 
@@ -39,6 +41,16 @@ private:
      *  @param trackStateVector the vector of trajectory points for this track
      */
     recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector) const;
+
+
+    /**
+     *  @brief Collect the hits associated with a input vector of SpacePoints
+     *
+     *  @param the event
+     *  @param input vector of space points
+     *  @param output vector of associated hits
+     */
+    void GetAssociatedHits( const art::Event * pEvt, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits );
 
     std::string     m_pfParticleLabel;              ///< The pf particle label
     unsigned int    m_minTrajectoryPoints;          ///< The minimum number of trajectory points
@@ -93,9 +105,14 @@ LArPandoraTrackCreation::LArPandoraTrackCreation(fhicl::ParameterSet const &pset
 
 void LArPandoraTrackCreation::produce(art::Event &evt)
 {
+    /* BEGIN DEBUG */
+    std::cout << " TRACK CREATION - " << m_pfParticleLabel << std::endl;
+    /* END DEBUG */
+
     std::unique_ptr< std::vector<recob::Track> > outputTracks( new std::vector<recob::Track> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> > outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
-    std::unique_ptr< art::Assns<recob::Track, recob::SpacePoint> > outputTracksToSpacePoints( new art::Assns<recob::Track, recob::SpacePoint> );
+    std::unique_ptr< art::Assns<recob::Track, recob::Hit> > outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
+    //std::unique_ptr< art::Assns<recob::Track, recob::SpacePoint> > outputTracksToSpacePoints( new art::Assns<recob::Track, recob::SpacePoint> );
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     const float wirePitchW((theGeometry->MaxPlanes() > 2) ? theGeometry->WirePitch(geo::kW) : 0.5f * (theGeometry->WirePitch(geo::kU) + theGeometry->WirePitch(geo::kV)));
@@ -164,20 +181,30 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
             continue;
         }
 
+        std::vector< art::Ptr< recob::Hit > > hitsInParticle;
+        this->GetAssociatedHits( &evt, particleToSpacePointIter->second, hitsInParticle );
+
         // Output objects
         outputTracks->emplace_back(LArPandoraTrackCreation::BuildTrack(trackCounter++, trackStateVector));
         art::Ptr<recob::Track> pTrack(makeTrackPtr(outputTracks->size() - 1));
 
         // Output associations, after output objects are in place
         util::CreateAssn(*this, evt, pTrack, pPFParticle, *(outputParticlesToTracks.get()));
-        util::CreateAssn(*this, evt, *(outputTracks.get()), particleToSpacePointIter->second, *(outputTracksToSpacePoints.get()));
+        util::CreateAssn(*this, evt, *(outputTracks.get()), hitsInParticle, *(outputTracksToHits.get()));
+        //util::CreateAssn(*this, evt, *(outputTracks.get()), particleToSpacePointIter->second, *(outputTracksToSpacePoints.get()));
     }
 
     mf::LogDebug("LArPandoraTrackCreation") << "Number of new tracks: " << outputTracks->size() << std::endl;
 
     evt.put(std::move(outputTracks));
-    evt.put(std::move(outputTracksToSpacePoints));
+    evt.put(std::move(outputTracksToHits));
+    //evt.put(std::move(outputTracksToSpacePoints));
     evt.put(std::move(outputParticlesToTracks));
+
+    /* BEGIN DEBUG */
+    std::cout << " TRACK CREATION DONE" << std::endl;
+    /* END DEBUG */
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,6 +227,21 @@ recob::Track LArPandoraTrackCreation::BuildTrack(const int id, const lar_content
     }
 
     return recob::Track(xyz, pxpypz, dummyDQDX, dummyMomentum, id);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraTrackCreation::GetAssociatedHits( const art::Event * pEvt, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits )
+{
+    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
+    pEvt->getByLabel( m_pfParticleLabel, spacePointHandle );
+    art::FindManyP< recob::Hit > spacePointToHitAssoc( spacePointHandle, *pEvt, m_pfParticleLabel);
+    
+    for ( const art::Ptr< recob::SpacePoint > & spacePoint : inputSpacePoints ) {
+        std::vector< art::Ptr< recob::Hit > > hits = spacePointToHitAssoc.at( spacePoint.key() );
+        associatedHits.insert( associatedHits.end(), hits.begin(), hits.end() );
+    }
+
 }
 
 } // namespace lar_pandora
