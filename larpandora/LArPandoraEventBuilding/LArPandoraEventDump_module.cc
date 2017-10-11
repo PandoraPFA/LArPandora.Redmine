@@ -29,6 +29,9 @@
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
 
+namespace lar_pandora
+{
+
 class LArPandoraEventDump;
 
 
@@ -226,3 +229,6 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
 }
 
 DEFINE_ART_MODULE(LArPandoraEventDump)
+
+} // namespace lar_pandora
+

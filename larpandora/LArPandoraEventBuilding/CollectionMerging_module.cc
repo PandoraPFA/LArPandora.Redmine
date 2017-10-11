@@ -21,6 +21,9 @@
 
 #include <memory>
 
+namespace lar_pandora
+{
+    
 class CollectionMerging;
 
 
@@ -152,3 +155,6 @@ void CollectionMerging::reconfigure(fhicl::ParameterSet const & p)
 }
 
 DEFINE_ART_MODULE(CollectionMerging)
+
+} // namespace lar_pandora
+
