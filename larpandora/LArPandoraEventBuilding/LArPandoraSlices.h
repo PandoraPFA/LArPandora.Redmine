@@ -18,6 +18,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
@@ -30,6 +31,8 @@
 #include "lardataobj/RecoBase/Hit.h"
 
 #include "lardataobj/AnalysisBase/CosmicTag.h"
+
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include <memory>
 #include <algorithm>
@@ -110,34 +113,42 @@ private:
     /**
      *  @brief  Tag the PFParticles in the supplied vector as specified 
      */
-    void WriteTag( const bool &                                          shouldTagAsNeutrino, 
-                   const std::vector< art::Ptr< recob::PFParticle > > &  pfParticleVector );
+    void WriteTag( const bool &                                                           shouldTagAsNeutrino, 
+                   const std::vector< art::Ptr< recob::PFParticle > > &                   pfParticleVector,
+                   std::unique_ptr< std::vector< anab::CosmicTag > > &                    outputTags,
+                   std::unique_ptr< art::Assns< recob::PFParticle, anab::CosmicTag > > &  outputAssn ); 
+
 
     /**
-     *  @brief  Get a vector of top-level PFParticles from an art handle 
+     *  @brief  Get a mapping between PFParticles and their Ids 
      */
-    void GetPrimaryPFParticles( const art::Handle< std::vector< recob::PFParticle > > &  pfParticleHandle, 
-                                std::vector< art::Ptr< recob::PFParticle > > &           primaryPFParticles );
-
+    void GetPFParticleIdMap( const PFParticleVector &  inputParticles,
+                             PFParticleMap &           outputMap );
     
     /**
-     *  @brief  Get mapping between PFParticles and their id
+     *  @brief  Make a new slice for each top-level neutrino PFParticle supplied by filling m_nuSlicePFParticles. 
      */
-    void GetIdToPFParticleMap( const art::Handle< std::vector< recob::PFParticle > > &  pfParticleHandle,
-                               std::map< size_t, art::Ptr< recob::PFParticle > > &      idToPFParticleMap );
+    void MakeSlicePerNeutrino( const PFParticleMap &                                nuPFParticleIdMap, 
+                               const PFParticleVector &                             nuTopLevelParticles, 
+                               const PFParticleVector &                             nuFinalStateParticles, 
+                               std::map< art::Ptr< recob::PFParticle>, SliceId > &  nuFinalStateParticlesToSlice );
 
-    
-    void GetDownstreamPFParticles( const std::vector< art::Ptr< recob::PFParticle > > &                                      primaryPFParticles, 
-                                   const std::map< size_t, art::Ptr< recob::PFParticle > > &                                 idToPFParticleMap, 
-                                   std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > > & primaryToDownstreamPFParticles );
+    /**
+     *  @brief  Collect all PFParticles downstream of a supplied particle
+     */
+    void CollectDaughters( const PFParticleMap &                  pfParticleMap,
+                           const art::Ptr< recob::PFParticle > &  part,
+                           PFParticleVector &                     daughterParticles );
 
-    void GetDownstreamPFParticles( const art::Ptr< recob::PFParticle > &                      part, 
-                                   const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                                   std::vector< art::Ptr< recob::PFParticle > > &             downstreamPFParticles );
 
-    void GetPFParticleToClusterMap( const art::Handle< std::vector< recob::PFParticle > > &                                pfParticleHandle,
-                                    const std::string &                                                                    producerLabel, 
-                                    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > > & pfParticleToClusterMap );
+    /**
+     *  @brief  Add CR PFParticles to existing neutrino slices (if they share hits), or make new slices
+     */
+    void AddCRParticlesToSlices( const PFParticleMap &                                      crPFParticleIdMap,
+                                 const PFParticleVector &                                   crFinalStateParticles,
+                                 const PFParticlesToHits &                                  crParticlesToHits,
+                                 const HitsToPFParticles &                                  nuHitsToParticles,
+                                 const std::map< art::Ptr< recob::PFParticle>, SliceId > &  nuFinalStateParticlesToSlice );
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

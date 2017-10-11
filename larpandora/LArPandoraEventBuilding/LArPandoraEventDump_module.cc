@@ -64,6 +64,8 @@ private:
 
   // Declare member data here.
   std::string fPandoraLabel; 
+  std::string fTrackLabel; 
+  std::string fShowerLabel; 
 };
 
 
@@ -105,39 +107,39 @@ void LArPandoraEventDump::analyze(art::Event const & e)
 
   // Get the Tracks
   art::Handle< std::vector< recob::Track > > trackHandle;
-  e.getByLabel( fPandoraLabel, trackHandle );
+  e.getByLabel( fTrackLabel, trackHandle );
 
   // Get the Shower
   art::Handle< std::vector< recob::Shower > > showerHandle;
-  e.getByLabel( fPandoraLabel, showerHandle );
+  e.getByLabel( fShowerLabel, showerHandle );
 
   // Get the PCAxes
   art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
-  e.getByLabel( fPandoraLabel, pcAxisHandle );
+  e.getByLabel( fShowerLabel, pcAxisHandle );
 
   // Get the associations
   art::FindManyP<recob::SpacePoint> pfPartToSpacePointAssoc( pfParticleHandle, e, fPandoraLabel );
   art::FindManyP<recob::Cluster>    pfPartToClusterAssoc(    pfParticleHandle, e, fPandoraLabel );
   art::FindManyP<recob::Vertex>     pfPartToVertexAssoc(     pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Track>      pfPartToTrackAssoc(      pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Shower>     pfPartToShowerAssoc(     pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::PCAxis>     pfPartToPCAxisAssoc(     pfParticleHandle, e, fPandoraLabel );
+  art::FindManyP<recob::Track>      pfPartToTrackAssoc(      pfParticleHandle, e, fTrackLabel );
+  art::FindManyP<recob::Shower>     pfPartToShowerAssoc(     pfParticleHandle, e, fShowerLabel );
+  art::FindManyP<recob::PCAxis>     pfPartToPCAxisAssoc(     pfParticleHandle, e, fShowerLabel );
 
   art::FindManyP<recob::Hit> spacePointToHitAssoc( spacePointHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Hit> clusterToHitAssoc( clusterHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Hit> trackToHitAssoc( trackHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Hit> showerToHitAssoc( showerHandle, e, fPandoraLabel );
+  art::FindManyP<recob::Hit> clusterToHitAssoc(    clusterHandle   , e, fPandoraLabel );
+  art::FindManyP<recob::Hit> trackToHitAssoc(      trackHandle     , e, fTrackLabel );
+  art::FindManyP<recob::Hit> showerToHitAssoc(     showerHandle    , e, fShowerLabel );
 
-  art::FindManyP<recob::PCAxis> showerToPCAxisAssoc( showerHandle, e, fPandoraLabel );
+  art::FindManyP<recob::PCAxis> showerToPCAxisAssoc( showerHandle, e, fShowerLabel );
 
   // Write out the collection sizes
   std::cout << "N PFParticles : " << pfParticleHandle->size() << std::endl;
   std::cout << "N SpacePoints : " << spacePointHandle->size() << std::endl;
-  std::cout << "N Clusters    : " << clusterHandle->size() << std::endl;
-  std::cout << "N Vertices    : " << vertexHandle->size() << std::endl;
-  std::cout << "N Tracks      : " << trackHandle->size() << std::endl;
-  std::cout << "N Showers     : " << showerHandle->size() << std::endl;
-  std::cout << "N PCAxes      : " << pcAxisHandle->size() << std::endl;
+  std::cout << "N Clusters    : " << clusterHandle->size()    << std::endl;
+  std::cout << "N Vertices    : " << vertexHandle->size()     << std::endl;
+  std::cout << "N Tracks      : " << trackHandle->size()      << std::endl;
+  std::cout << "N Showers     : " << showerHandle->size()     << std::endl;
+  std::cout << "N PCAxes      : " << pcAxisHandle->size()     << std::endl;
   std::cout << std::string(80, '-') << std::endl;
 
   // Get the PFParticles ID map
@@ -165,6 +167,8 @@ void LArPandoraEventDump::reconfigure(fhicl::ParameterSet const & p)
 {
   // Implementation of optional member function here.
   fPandoraLabel     = p.get<std::string>("PandoraLabel");
+  fTrackLabel       = p.get<std::string>("TrackLabel" , fPandoraLabel);
+  fShowerLabel      = p.get<std::string>("ShowerLabel", fPandoraLabel);
 }
 
 void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &                      part, 
