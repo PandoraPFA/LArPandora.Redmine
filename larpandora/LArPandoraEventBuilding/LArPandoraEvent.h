@@ -584,54 +584,6 @@ inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, st
 
     m_pEvent->put( std::move( outputAssn ) );
 }
-/*
-template < class T, class U >
-inline void LArPandoraEvent::WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationMap, 
-                                               const std::vector< art::Ptr< T > > &                             collectionT, 
-                                               const std::vector< art::Ptr< U > > &                             collectionU, 
-                                               const std::string &                                              producerLabelU )
-{
-
-    // Get the relevant pointer makers
-    const lar::PtrMaker< T > makePtrT( *m_pEvent, *m_pProducer );
-
-    const lar::PtrMaker< U > * pMakePtrU;
-    if ( producerLabelU.empty() ) {
-        pMakePtrU = new lar::PtrMaker< U >( *m_pEvent, *m_pProducer );
-    }
-    else{
-        art::Handle< std::vector< U > > handleU;
-        m_pEvent->getByLabel( producerLabelU, handleU );
-        pMakePtrU = new lar::PtrMaker< U >( *m_pEvent, handleU.id() );
-    }
-    const lar::PtrMaker< U > makePtrU( *pMakePtrU );
-
-    std::unique_ptr< art::Assns< T, U > > outputAssn( new art::Assns< T, U > );
-
-    for ( typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::const_iterator it=associationMap.begin(); it != associationMap.end(); ++it ) {
-
-        typename std::vector< art::Ptr< T > >::const_iterator itT = std::find( collectionT.begin(), collectionT.end(), it->first );
-        if ( itT == collectionT.end() ) 
-            throw cet::exception("LArPandora") << " LArPandoraEvent::WriteAssociation -- association map contains object not in collectionT." << std::endl;
-        
-        art::Ptr< T > newObjectT( makePtrT( std::distance( collectionT.begin(), itT ) ) );
-    
-        for ( const art::Ptr< U > & objectU : it->second ) {
-            typename std::vector< art::Ptr< U > >::const_iterator itU = std::find( collectionU.begin(), collectionU.end(), objectU );
-            if ( itU == collectionU.end() ) {
-                throw cet::exception("LArPandora") << " LArPandoraEvent::WriteAssociation -- association map contains object not in collectionU." << std::endl;
-            }
-            
-            art::Ptr< U > newObjectU( makePtrU( std::distance( collectionU.begin(), itU ) ) );
-    
-            util::CreateAssn( *m_pProducer, *m_pEvent, newObjectU , newObjectT, *outputAssn );  
-        }
-    }
-
-    m_pEvent->put( std::move( outputAssn ) );
-}
-*/
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template < class T >

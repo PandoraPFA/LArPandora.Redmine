@@ -105,8 +105,7 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
 void CollectionMerging::produce(art::Event & e)
 {
   /* BEGIN DEBUG */
-  //std::cout << " MERGING - " << (fShouldProduceNeutrinos ? "Nu" : "Cosmic") << std::endl;
-  std::cout << " TESTING" << std::endl;
+  std::cout << " MERGING - " << (fShouldProduceNeutrinos ? "Nu" : "Cosmic") << std::endl;
   /* END DEBUG */
 
   // Get all reconstructions of the event
@@ -119,8 +118,6 @@ void CollectionMerging::produce(art::Event & e)
   lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels( fCRRemHitsNuProducerLabel, fCRRemHitsNuTrackProducerLabel, fCRRemHitsNuShowerProducerLabel, fCRRemHitProducerLabel );
   lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, crRemHitsNuLabels, fShouldProduceT0s );
 
-  // TODO requires neutrino ID tags!
-  /*
   // Filter and merge into a consolidated output
   if ( fShouldProduceNeutrinos ) {
     lar_pandora::LArPandoraEvent filteredCRRemHitsNuEvent( crRemHitsNuEvent.FilterByCRTag( fShouldProduceNeutrinos, fNuIdCRTagProducerLabel  ) );
@@ -132,18 +129,9 @@ void CollectionMerging::produce(art::Event & e)
     lar_pandora::LArPandoraEvent mergedEvent( filteredAllHitsCREvent.Merge( filteredCRRemHitsCREvent ) );
     mergedEvent.WriteToEvent();
   }
-  */
 
   /* BEGIN DEBUG */
-  lar_pandora::LArPandoraEvent filteredAllHitsCREventA(   allHitsCREvent.FilterByCRTag(  fShouldProduceNeutrinos , fClearCRTagProducerLabel ) );
-  lar_pandora::LArPandoraEvent filteredAllHitsCREventB(   allHitsCREvent.FilterByCRTag( !fShouldProduceNeutrinos , fClearCRTagProducerLabel ) );
-  lar_pandora::LArPandoraEvent mergedEvent( filteredAllHitsCREventA.Merge( filteredAllHitsCREventB ).Merge( crRemHitsCREvent ) );
-  mergedEvent.WriteToEvent();
-  /* END DEBUG*/
-
-  /* BEGIN DEBUG */
-  //std::cout << " MERGING DONE." << std::endl;
-  std::cout << " TESTING DONE." << std::endl;
+  std::cout << " MERGING DONE." << std::endl;
   /* END DEBUG */
 }
 
