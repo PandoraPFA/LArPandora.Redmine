@@ -104,10 +104,6 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
 
 void CollectionMerging::produce(art::Event & e)
 {
-  /* BEGIN DEBUG */
-  std::cout << " MERGING - " << (fShouldProduceNeutrinos ? "Nu" : "Cosmic") << std::endl;
-  /* END DEBUG */
-
   // Get all reconstructions of the event
   lar_pandora::LArPandoraEvent::Labels allHitsCRLabels( fAllHitsCRProducerLabel, fAllHitsCRTrackProducerLabel, fAllHitsCRShowerProducerLabel, fAllHitProducerLabel );
   lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, allHitsCRLabels, fShouldProduceT0s   );
@@ -129,10 +125,6 @@ void CollectionMerging::produce(art::Event & e)
     lar_pandora::LArPandoraEvent mergedEvent( filteredAllHitsCREvent.Merge( filteredCRRemHitsCREvent ) );
     mergedEvent.WriteToEvent();
   }
-
-  /* BEGIN DEBUG */
-  std::cout << " MERGING DONE." << std::endl;
-  /* END DEBUG */
 }
 
 void CollectionMerging::reconfigure(fhicl::ParameterSet const & p)

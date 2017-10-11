@@ -92,10 +92,6 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const & p)
 
 void CollectionSplitting::produce(art::Event & e)
 {
-  /* BEGIN DEBUG */
-  std::cout << " SPLITTING - " << (fShouldProduceNeutrinos ? "Nu" : "") << (fShouldProduceCosmics ? ( fShouldProduceNeutrinos ? " + Cosmic" : "Cosmic" ) : "") << std::endl;
-  /* END DEBUG */
-
   if ( !fShouldProduceNeutrinos && !fShouldProduceCosmics ) 
     throw cet::exception("LArPandora") << " CollectionSplitting -- Must be configured to produce neutrinos or cosmics or both.";
 
@@ -109,10 +105,6 @@ void CollectionSplitting::produce(art::Event & e)
     lar_pandora::LArPandoraEvent filteredEvent( fullEvent.FilterByPdgCode( fShouldProduceNeutrinos ) );
     filteredEvent.WriteToEvent();
   }
-
-  /* BEGIN DEBUG */
-  std::cout << " SPLITTING DONE." << std::endl;
-  /* END DEBUG */
 }
 
 void CollectionSplitting::reconfigure(fhicl::ParameterSet const & p)
