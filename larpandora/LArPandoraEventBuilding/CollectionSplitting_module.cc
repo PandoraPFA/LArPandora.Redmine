@@ -21,6 +21,9 @@
 
 #include <memory>
 
+namespace lar_pandora
+{
+
 class CollectionSplitting;
 
 
@@ -119,3 +122,6 @@ void CollectionSplitting::reconfigure(fhicl::ParameterSet const & p)
 }
 
 DEFINE_ART_MODULE(CollectionSplitting)
+
+} // namespace lar_pandora
+

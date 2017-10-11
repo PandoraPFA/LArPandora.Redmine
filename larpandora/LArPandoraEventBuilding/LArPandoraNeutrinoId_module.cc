@@ -21,6 +21,9 @@
 
 #include <memory>
 
+namespace lar_pandora
+{
+
 class LArPandoraNeutrinoId;
 
 
@@ -94,3 +97,6 @@ void LArPandoraNeutrinoId::reconfigure(fhicl::ParameterSet const & p)
 }
 
 DEFINE_ART_MODULE(LArPandoraNeutrinoId)
+
+} // namespace lar_pandora
+
