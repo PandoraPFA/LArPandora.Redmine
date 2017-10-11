@@ -105,14 +105,9 @@ LArPandoraTrackCreation::LArPandoraTrackCreation(fhicl::ParameterSet const &pset
 
 void LArPandoraTrackCreation::produce(art::Event &evt)
 {
-    /* BEGIN DEBUG */
-    std::cout << " TRACK CREATION - " << m_pfParticleLabel << std::endl;
-    /* END DEBUG */
-
     std::unique_ptr< std::vector<recob::Track> > outputTracks( new std::vector<recob::Track> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> > outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
     std::unique_ptr< art::Assns<recob::Track, recob::Hit> > outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
-    //std::unique_ptr< art::Assns<recob::Track, recob::SpacePoint> > outputTracksToSpacePoints( new art::Assns<recob::Track, recob::SpacePoint> );
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     const float wirePitchW((theGeometry->MaxPlanes() > 2) ? theGeometry->WirePitch(geo::kW) : 0.5f * (theGeometry->WirePitch(geo::kU) + theGeometry->WirePitch(geo::kV)));
@@ -191,19 +186,13 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         // Output associations, after output objects are in place
         util::CreateAssn(*this, evt, pTrack, pPFParticle, *(outputParticlesToTracks.get()));
         util::CreateAssn(*this, evt, *(outputTracks.get()), hitsInParticle, *(outputTracksToHits.get()));
-        //util::CreateAssn(*this, evt, *(outputTracks.get()), particleToSpacePointIter->second, *(outputTracksToSpacePoints.get()));
     }
 
     mf::LogDebug("LArPandoraTrackCreation") << "Number of new tracks: " << outputTracks->size() << std::endl;
 
     evt.put(std::move(outputTracks));
     evt.put(std::move(outputTracksToHits));
-    //evt.put(std::move(outputTracksToSpacePoints));
     evt.put(std::move(outputParticlesToTracks));
-
-    /* BEGIN DEBUG */
-    std::cout << " TRACK CREATION DONE" << std::endl;
-    /* END DEBUG */
 
 }
 
