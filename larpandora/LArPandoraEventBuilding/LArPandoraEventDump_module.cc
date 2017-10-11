@@ -57,7 +57,6 @@ public:
                       const art::FindManyP<recob::Vertex> &                      pfPartToVertexAssoc,   
                       const art::FindManyP<recob::Track> &                       pfPartToTrackAssoc,   
                       const art::FindManyP<recob::Shower> &                      pfPartToShowerAssoc,    
-                      const art::FindManyP<recob::Seed> &                        pfPartToSeedAssoc,  
                       const art::FindManyP<recob::PCAxis> &                      pfPartToPCAxisAssoc,
                       const int &                                                depth ); 
 
@@ -112,10 +111,6 @@ void LArPandoraEventDump::analyze(art::Event const & e)
   art::Handle< std::vector< recob::Shower > > showerHandle;
   e.getByLabel( fPandoraLabel, showerHandle );
 
-  // Get the Seeds
-  art::Handle< std::vector< recob::Seed > > seedHandle;
-  e.getByLabel( fPandoraLabel, seedHandle );
-
   // Get the PCAxes
   art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
   e.getByLabel( fPandoraLabel, pcAxisHandle );
@@ -126,14 +121,12 @@ void LArPandoraEventDump::analyze(art::Event const & e)
   art::FindManyP<recob::Vertex>     pfPartToVertexAssoc(     pfParticleHandle, e, fPandoraLabel );
   art::FindManyP<recob::Track>      pfPartToTrackAssoc(      pfParticleHandle, e, fPandoraLabel );
   art::FindManyP<recob::Shower>     pfPartToShowerAssoc(     pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Seed>       pfPartToSeedAssoc(       pfParticleHandle, e, fPandoraLabel );
   art::FindManyP<recob::PCAxis>     pfPartToPCAxisAssoc(     pfParticleHandle, e, fPandoraLabel );
 
   art::FindManyP<recob::Hit> spacePointToHitAssoc( spacePointHandle, e, fPandoraLabel );
   art::FindManyP<recob::Hit> clusterToHitAssoc( clusterHandle, e, fPandoraLabel );
   art::FindManyP<recob::Hit> trackToHitAssoc( trackHandle, e, fPandoraLabel );
   art::FindManyP<recob::Hit> showerToHitAssoc( showerHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Hit> seedToHitAssoc( seedHandle, e, fPandoraLabel );
 
   art::FindManyP<recob::PCAxis> showerToPCAxisAssoc( showerHandle, e, fPandoraLabel );
 
@@ -144,7 +137,6 @@ void LArPandoraEventDump::analyze(art::Event const & e)
   std::cout << "N Vertices    : " << vertexHandle->size() << std::endl;
   std::cout << "N Tracks      : " << trackHandle->size() << std::endl;
   std::cout << "N Showers     : " << showerHandle->size() << std::endl;
-  std::cout << "N Seeds       : " << seedHandle->size() << std::endl;
   std::cout << "N PCAxes      : " << pcAxisHandle->size() << std::endl;
   std::cout << std::string(80, '-') << std::endl;
 
@@ -162,7 +154,7 @@ void LArPandoraEventDump::analyze(art::Event const & e)
 
     if ( part->IsPrimary() ) {
         // Display Particle
-        this->PrintParticle( part, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToSeedAssoc, pfPartToPCAxisAssoc, 0 );
+        this->PrintParticle( part, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, 0 );
     }
   }
 
@@ -182,7 +174,6 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
                                          const art::FindManyP<recob::Vertex> &                      pfPartToVertexAssoc,   
                                          const art::FindManyP<recob::Track> &                       pfPartToTrackAssoc,   
                                          const art::FindManyP<recob::Shower> &                      pfPartToShowerAssoc,    
-                                         const art::FindManyP<recob::Seed> &                        pfPartToSeedAssoc,  
                                          const art::FindManyP<recob::PCAxis> &                      pfPartToPCAxisAssoc,
                                          const int &                                                depth ) 
 {
@@ -211,7 +202,6 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
     std::vector< art::Ptr< recob::Vertex > >     vertices    = pfPartToVertexAssoc.at( part.key() );
     std::vector< art::Ptr< recob::Track > >      tracks      = pfPartToTrackAssoc.at( part.key() );
     std::vector< art::Ptr< recob::Shower > >     showers     = pfPartToShowerAssoc.at( part.key() );
-    std::vector< art::Ptr< recob::Seed > >       seeds       = pfPartToSeedAssoc.at( part.key() );
     std::vector< art::Ptr< recob::PCAxis > >     pcAxes      = pfPartToPCAxisAssoc.at( part.key() );
 
     // Output the number of associated objects
@@ -220,7 +210,6 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
     std::cout << indent << std::setw(w) << std::left << "- # Vertex"     << vertices.size()    << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # Track"      << tracks.size()      << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # Shower"     << showers.size()     << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Seed"       << seeds.size()       << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # PCAxis"     << pcAxes.size()      << std::endl;
     std::cout << rule << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # Daughters"  << part->NumDaughters() << std::endl;
@@ -228,7 +217,7 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
 
     for ( const auto & daughterId : part->Daughters() ) {
         art::Ptr< recob::PFParticle > daughter = pfParticleIdMap.at( daughterId );
-        this->PrintParticle( daughter, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToSeedAssoc, pfPartToPCAxisAssoc, depth + 4 );
+        this->PrintParticle( daughter, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, depth + 4 );
     }
 }
 

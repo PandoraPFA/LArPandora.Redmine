@@ -6,16 +6,13 @@ pandora_event_dump:
 }
 
 dump_all:                        @local::pandora_event_dump
-dump_all.PandoraLabel:           "pandora"
+dump_all.PandoraLabel:           "pandoraAllHitCRHypothesisAll"
 
-dump_split_cosmic:               @local::pandora_event_dump
-dump_split_cosmic.PandoraLabel:  "pandoraFullCosmic"
+dump_merge_cosmic:                 @local::pandora_event_dump
+dump_merge_cosmic.PandoraLabel:    "pandoraCosmic"
 
-dump_split_nu:                   @local::pandora_event_dump
-dump_split_nu.PandoraLabel:      "pandoraFullNu"
-
-dump_merge_cosmic:               @local::pandora_event_dump
-dump_merge_cosmic.PandoraLabel:  "pandoraCosmic"
+dump_merge_nu:                 @local::pandora_event_dump
+dump_merge_nu.PandoraLabel:    "pandoraNu"
 
 END_PROLOG
 
@@ -58,14 +55,13 @@ physics:
  analyzers:
  {
     dumpAll:          @local::dump_all
-    dumpSplitCosmic:  @local::dump_split_cosmic
-    dumpSplitNu:      @local::dump_split_nu
     dumpMergeCosmic:  @local::dump_merge_cosmic
+    dumpMergeNu:      @local::dump_merge_nu
  }
 
  #reco sequence and trigger_paths to be defined elsewhere
 
- stream1:   [ dumpAll, dumpSplitCosmic, dumpSplitNu  ]
+ stream1:   [ dumpAll, dumpMergeCosmic, dumpMergeNu  ]
  end_paths: [ stream1 ]  
 
 }
