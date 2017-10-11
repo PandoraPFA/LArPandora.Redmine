@@ -36,8 +36,6 @@
 #include <algorithm>
 #include <map>
 
-            #include <typeinfo> /* DEBUG */
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace lar_pandora
@@ -54,11 +52,19 @@ public:
 
     /**
      *  @breif  Constructor from an art::Event
+     *
+     *  @param  pProducer          pointer to the producer to write the output
+     *  @param  pEvent             pointer to the event to process
+     *  @param  inputLabel         labels for the producers of the input collections
+     *  @param  shouldProduceT0s   if T0s should be produced (usually only for multiple drift volume use cases)
+     *  @param  shift              amount by which to shift PFParticle IDs when merging
      */
     LArPandoraEvent( art::EDProducer * pProducer,
                      art::Event *      pEvent, 
                      const Labels &    inputLabels,
-                     const bool &      shouldProduceT0s = false);
+                     const bool &      shouldProduceT0s = false,
+                     const size_t &    shift = 100000 );
+
 
     /**
      *  @brief  Construct by copying an existing LArPandoraEvent, replacing the collections and associations 
@@ -187,6 +193,7 @@ private:
 
     // Options
     bool                         m_shouldProduceT0s;     ///<
+    const size_t                 m_shift;                ///<  Amount by which to shift PFParticle IDs when merging two reconstructions of the same event
 
 
     // Collections
@@ -504,19 +511,17 @@ inline void LArPandoraEvent::WriteCollection( const std::vector< art::Ptr< T > >
 
 inline void LArPandoraEvent::WriteCollection( const std::vector< art::Ptr< recob::PFParticle > > & collection )
 {
-    size_t shift = 100000; // TODO make this a member variable
-
     std::unique_ptr< std::vector< recob::PFParticle > > output( new std::vector< recob::PFParticle > );
 
     for ( art::Ptr< recob::PFParticle > part : collection ){
 
-        if ( part->Self() >= shift )
-            throw cet::exception("LArPandora") << " LArPandoraEvent::WriteCollection -- PFParticle ID exceeds " << shift << ". Can't merge the collections!" << std::endl;
+        if ( part->Self() >= m_shift )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::WriteCollection -- PFParticle ID exceeds shift value of " << m_shift << ". Can't merge the collections!" << std::endl;
 
         if ( m_pfParticleToOriginIdMap.find( part ) == m_pfParticleToOriginIdMap.end() )
             throw cet::exception("LArPandora") << " LArPandoraEvent::WriteCollection -- Can't find supplied PFParticle in the PFParticle to origin ID map." << std::endl;
 
-        size_t offset = shift * m_pfParticleToOriginIdMap.at( part );
+        size_t offset = m_shift * m_pfParticleToOriginIdMap.at( part );
 
         size_t adjustedSelf   = part->Self()   + offset;
 

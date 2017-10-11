@@ -14,11 +14,13 @@ namespace lar_pandora
 LArPandoraEvent::LArPandoraEvent( art::EDProducer *  pProducer,
                                   art::Event *       pEvent,
                                   const Labels &     inputLabels,
-                                  const bool &       shouldProduceT0s ) :
+                                  const bool &       shouldProduceT0s,
+                                  const size_t &     shift ) :
     m_pProducer( pProducer ),
     m_pEvent( pEvent ), 
     m_labels( inputLabels ),
-    m_shouldProduceT0s( shouldProduceT0s )
+    m_shouldProduceT0s( shouldProduceT0s ),
+    m_shift( shift )
 {
 
     this->GetCollections();
@@ -146,6 +148,7 @@ LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                      
     m_pEvent( event.m_pEvent ), 
     m_labels( event.m_labels ),
     m_shouldProduceT0s( event.m_shouldProduceT0s ),
+    m_shift( event.m_shift ),
     m_hits( event.m_hits )
 {
 
@@ -383,6 +386,9 @@ void LArPandoraEvent::WriteToEvent()
 
 LArPandoraEvent LArPandoraEvent::Merge( LArPandoraEvent & other )
 {
+    if ( m_shift != other.m_shift )
+        throw cet::exception("LArPandora") << " LArPandoraEvent::Merge - Can't merge LArPandoraEvents with differing shift values." << std::endl;
+
     LArPandoraEvent outputEvent( other );
 
     this->MergePFParticleToOriginIdMap( outputEvent.m_pfParticleToOriginIdMap, m_pfParticleToOriginIdMap );
