@@ -118,15 +118,10 @@ LArPandoraShowerCreation::LArPandoraShowerCreation(fhicl::ParameterSet const &ps
 
 void LArPandoraShowerCreation::produce(art::Event &evt)
 {
-    /* BEGIN DEBUG */
-    std::cout << " SHOWER CREATION - " << m_pfParticleLabel << std::endl;
-    /* END DEBUG */
-
     std::unique_ptr< std::vector<recob::Shower> > outputShowers( new std::vector<recob::Shower> );
     std::unique_ptr< std::vector<recob::PCAxis> > outputPCAxes( new std::vector<recob::PCAxis> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Shower> > outputParticlesToShowers( new art::Assns<recob::PFParticle, recob::Shower> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::PCAxis> > outputParticlesToPCAxes( new art::Assns<recob::PFParticle, recob::PCAxis> );
-    //std::unique_ptr< art::Assns<recob::Shower, recob::SpacePoint> > outputShowersToSpacePoints( new art::Assns<recob::Shower, recob::SpacePoint> );
     std::unique_ptr< art::Assns<recob::Shower, recob::Hit> > outputShowersToHits( new art::Assns<recob::Shower, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Shower, recob::PCAxis> > outputShowersToPCAxes( new art::Assns<recob::Shower, recob::PCAxis> );
 
@@ -199,7 +194,6 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         util::CreateAssn(*this, evt, pShower, pPFParticle, *(outputParticlesToShowers.get()));
         util::CreateAssn(*this, evt, pPCAxis, pPFParticle, *(outputParticlesToPCAxes.get()));
         util::CreateAssn(*this, evt, *(outputShowers.get()), hitsInParticle, *(outputShowersToHits.get()));
-        //util::CreateAssn(*this, evt, *(outputShowers.get()), particleToSpacePointIter->second, *(outputShowersToSpacePoints.get()));
         util::CreateAssn(*this, evt, pPCAxis, pShower, *(outputShowersToPCAxes.get()));
     }
     
@@ -211,12 +205,7 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
     evt.put(std::move(outputParticlesToShowers));
     evt.put(std::move(outputParticlesToPCAxes));
     evt.put(std::move(outputShowersToHits));
-    //evt.put(std::move(outputShowersToSpacePoints));
     evt.put(std::move(outputShowersToPCAxes));
-
-    /* BEGIN DEBUG */
-    std::cout << " SHOWER CREATION DONE." << std::endl;
-    /* END DEBUG */
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
