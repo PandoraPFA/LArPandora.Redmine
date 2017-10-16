@@ -223,6 +223,10 @@ private:
 
     std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        m_showerPCAxisMap;            ///<
     
+    // Internal association maps
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >    m_pfParticleDaughterMap;      ///<
+
+
     // -------------------------------------------------------------------------------------------------------------------------------------
     
     /**
@@ -256,6 +260,11 @@ private:
                             std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  outputAssociationMap );
 
     /**
+     *  @breif  Get the mapping from PFParticles to their daughters 
+     */
+    void GetPFParticleHierarchy();
+
+    /**
      *  @brief  Filters primary PFParticles from the m_pfParticles
      *
      *  @param  primaryPFParticles  output vector of all primary PFParticles in the input vector
@@ -287,11 +296,40 @@ private:
                                         std::vector< art::Ptr< recob::PFParticle > > &        outputPFParticles );
 
     /**
+     *  @brief  Filteres the hierarchy map using a given vector if filteredParticles
+     *
+     *  @param  filteredParticles                input PFParticles that have already been filtered
+     *  @param  unfilteredPFParticleDaughterMap  input hierarchy map to filter
+     *  @param  outputPFParticleDaughterMap      output filtered hierarchy map
+     */
+    void GetFilteredHierarchyMap( const std::vector< art::Ptr< recob::PFParticle > > &                                             filteredParticles,
+                                  const std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > > &  unfilteredPFParticleDaughterMap,
+                                  std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > > &        outputPFParticleDaughterMap );
+
+    /**
      *  @brief  Produce a mapping between PFParticles and their ID
      *
      *  @param  idToPFParticleMap   output mapping between PFParticles and their IDs
      */
     void GetIdToPFParticleMap( std::map< size_t, art::Ptr< recob::PFParticle > > & idToPFParticleMap );
+
+    /**
+     *  @brief  Get particles downstream of any particle in an input vector
+     *
+     *  @param  inputPFParticles       input vector of PFParticles 
+     *  @param  downstreamPFParticles  output vector of PFParticles downstream of those in the input vector
+     */
+    void GetDownstreamPFParticles( const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles,
+                                   std::vector< art::Ptr< recob::PFParticle > > &        downstreamPFParticles );
+
+    /**
+     *  @brief  Get particles downstream of a supplied particle
+     *
+     *  @param  part                   input PFParticles 
+     *  @param  downstreamPFParticles  output vector of PFParticles downstream of part
+     */
+    void GetDownstreamPFParticles( const art::Ptr< recob::PFParticle > &           part,
+                                   std::vector< art::Ptr< recob::PFParticle > > &  downstreamPFParticles );
 
     /**
      *  \brief  Collects all PFParticles downstream (children, grandchildren, ...) of a given PFParticle
@@ -524,7 +562,6 @@ inline void LArPandoraEvent::WriteCollection( const std::vector< art::Ptr< recob
         size_t offset = m_shift * m_pfParticleToOriginIdMap.at( part );
 
         size_t adjustedSelf   = part->Self()   + offset;
-
         size_t adjustedParent = part->Parent();
 
         if ( part->Parent() != recob::PFParticle::kPFParticlePrimary )

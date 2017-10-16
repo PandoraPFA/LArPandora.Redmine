@@ -83,6 +83,34 @@ void LArPandoraEvent::GetCollections()
     this->GetAssociationMap( Labels::ShowerToHitLabel    , showerHandle    , m_showerHitMap     );
 
     this->GetAssociationMap( Labels::ShowerToPCAxisLabel, showerHandle, m_showerPCAxisMap );
+
+
+    this->GetPFParticleHierarchy();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEvent::GetPFParticleHierarchy()
+{
+    std::map< size_t, art::Ptr< recob::PFParticle > > idToPFParticleMap;
+    this->GetIdToPFParticleMap( idToPFParticleMap );
+
+    for ( const art::Ptr< recob::PFParticle > & part : m_pfParticles ) {
+        std::vector< art::Ptr< recob::PFParticle > > daughters;
+        if ( !m_pfParticleDaughterMap.insert( std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >::value_type( part, daughters ) ).second )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetPFParticleHierarchy -- Repeated PFParticle in heirarchy map!" << std::endl;
+
+        for ( const size_t & daughterId : part->Daughters() ) {
+            if ( idToPFParticleMap.find( daughterId ) == idToPFParticleMap.end() )
+                throw cet::exception("LArPandora") << " LArPandoraEvent::GetPFParticleHierarchy -- Can't access map entry for daughter of PFParticle supplied." << std::endl;
+
+            art::Ptr< recob::PFParticle > daughter = idToPFParticleMap.at( daughterId );
+            if ( std::find( m_pfParticleDaughterMap[ part ].begin(), m_pfParticleDaughterMap[ part ].end(), daughter ) != m_pfParticleDaughterMap[ part ].end() )
+                throw cet::exception("LArPandora") << " LArPandoraEvent::GetPFParticleHierarchy -- Can't have the same daughter twice!" << std::endl;
+
+            m_pfParticleDaughterMap[ part ].push_back( daughter );
+        }        
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,14 +125,8 @@ LArPandoraEvent LArPandoraEvent::FilterByPdgCode( const bool shouldProduceNeutri
     this->GetFilteredParticlesByPdgCode( shouldProduceNeutrinos, primaryPFParticles, filteredPFParticles );
 
     // Collect all daughter PFParticles to produce the final list of selected PFParticles to persist
-    std::map< size_t, art::Ptr< recob::PFParticle > > idToPFParticleMap;
-    this->GetIdToPFParticleMap( idToPFParticleMap );
-
-    std::map< size_t, art::Ptr< recob::PFParticle > > idToSelectedPFParticleMap;
-    this->GetDownstreamPFParticles( filteredPFParticles, idToPFParticleMap, idToSelectedPFParticleMap);
-
     std::vector< art::Ptr< recob::PFParticle > > selectedPFParticles;
-    this->GetParticleVector( idToSelectedPFParticleMap, selectedPFParticles );
+    this->GetDownstreamPFParticles( filteredPFParticles, selectedPFParticles );
 
     // Collect all related collections
     LArPandoraEvent filteredEvent( *this, selectedPFParticles );
@@ -125,14 +147,8 @@ LArPandoraEvent LArPandoraEvent::FilterByCRTag( const bool          shouldProduc
     this->GetFilteredParticlesByCRTag( shouldProduceNeutrinos, tagProducerLabel, primaryPFParticles, filteredPFParticles );
 
     // Collect all daughter PFParticles to produce the final list of selected PFParticles to persist
-    std::map< size_t, art::Ptr< recob::PFParticle > > idToPFParticleMap;
-    this->GetIdToPFParticleMap( idToPFParticleMap );
-
-    std::map< size_t, art::Ptr< recob::PFParticle > > idToSelectedPFParticleMap;
-    this->GetDownstreamPFParticles( filteredPFParticles, idToPFParticleMap, idToSelectedPFParticleMap);
-
     std::vector< art::Ptr< recob::PFParticle > > selectedPFParticles;
-    this->GetParticleVector( idToSelectedPFParticleMap, selectedPFParticles );
+    this->GetDownstreamPFParticles( filteredPFParticles, selectedPFParticles );
 
     // Collect all related collections
     LArPandoraEvent filteredEvent( *this, selectedPFParticles );
@@ -232,6 +248,26 @@ LArPandoraEvent::LArPandoraEvent ( const LArPandoraEvent &                      
     m_trackHitMap             = selectedTrackHitMap;
     m_showerHitMap            = selectedShowerHitMap;
     m_showerPCAxisMap         = selectedShowerPCAxisMap;
+
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >  selectedPFParticleDaughterMap;
+    this->GetFilteredHierarchyMap( selectedPFParticles, event.m_pfParticleDaughterMap, selectedPFParticleDaughterMap );
+
+    m_pfParticleDaughterMap = selectedPFParticleDaughterMap;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEvent::GetFilteredHierarchyMap( const std::vector< art::Ptr< recob::PFParticle > > &                                             filteredParticles,
+                                               const std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > > &  unfilteredPFParticleDaughterMap,
+                                               std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > > &        outputPFParticleDaughterMap )
+{
+    for ( std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >::const_iterator it = unfilteredPFParticleDaughterMap.begin(); it != unfilteredPFParticleDaughterMap.end(); ++it ) {
+        if ( std::find( filteredParticles.begin(), filteredParticles.end(), it->first ) == filteredParticles.end() ) continue;
+
+        if ( ! outputPFParticleDaughterMap.insert( std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >::value_type( it->first, it->second ) ).second )
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredHierarchyMap -- Can't add multiple map entries for same PFParticle" << std::endl;
+
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -311,6 +347,31 @@ void LArPandoraEvent::GetIdToPFParticleMap( std::map< size_t, art::Ptr< recob::P
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraEvent::GetDownstreamPFParticles( const std::vector< art::Ptr< recob::PFParticle > > &  inputPFParticles,
+                                                std::vector< art::Ptr< recob::PFParticle > > &        downstreamPFParticles )
+{
+  for ( art::Ptr< recob::PFParticle > part : inputPFParticles )
+    this->GetDownstreamPFParticles( part, downstreamPFParticles );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEvent::GetDownstreamPFParticles( const art::Ptr< recob::PFParticle > &           part,
+                                                std::vector< art::Ptr< recob::PFParticle > > &  downstreamPFParticles )
+{
+    if ( m_pfParticleDaughterMap.find( part ) == m_pfParticleDaughterMap.end() )
+        throw cet::exception("LArPandora") << " LArPandoraEvent::GetDownstreamPFParticles -- Could not find PFParticle in the hierarchy map" << std::endl;
+
+    if ( std::find( downstreamPFParticles.begin(), downstreamPFParticles.end(), part ) == downstreamPFParticles.end() )
+        downstreamPFParticles.push_back( part );
+
+    for ( const art::Ptr< recob::PFParticle > & daughter : m_pfParticleDaughterMap.at( part ) )
+        this->GetDownstreamPFParticles( daughter, downstreamPFParticles );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/* ATTN now not needed */
 void LArPandoraEvent::GetDownstreamPFParticles( const std::vector< art::Ptr< recob::PFParticle > > &       inputPFParticles, 
                                                 const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
                                                 std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap )
@@ -321,6 +382,7 @@ void LArPandoraEvent::GetDownstreamPFParticles( const std::vector< art::Ptr< rec
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+/* ATTN now not needed */
 void LArPandoraEvent::GetDownstreamPFParticles( art::Ptr< recob::PFParticle >                              part, 
                                                 const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
                                                 std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap )
@@ -340,6 +402,7 @@ void LArPandoraEvent::GetDownstreamPFParticles( art::Ptr< recob::PFParticle >   
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+/* ATTN now not needed */
 void LArPandoraEvent::GetParticleVector( const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
                                          std::vector< art::Ptr< recob::PFParticle > > &             pfParticleVector )
 {
