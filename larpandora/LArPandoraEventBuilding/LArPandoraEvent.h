@@ -186,45 +186,45 @@ public:
 private:
     
     // Meta data
-    art::EDProducer * m_pProducer;                  ///<
-    art::Event *      m_pEvent;                     ///<
-    Labels            m_labels;                     ///<
+    art::EDProducer * m_pProducer;                  ///<  The producer which should write the output collections and associations
+    art::Event *      m_pEvent;                     ///<  The event to consider
+    Labels            m_labels;                     ///<  A set of labels describing the producers for each input collection
     std::map< art::Ptr< recob::PFParticle >, unsigned int >  m_pfParticleToOriginIdMap;  ///< Mapping between PFParticles, and an ID for the LArPandoraEvent from which they originated ( to keep track of merges )
 
     // Options
-    bool                         m_shouldProduceT0s;     ///<
+    bool                         m_shouldProduceT0s;     ///<  If T0s should be produced ( usually only true for use cases with multiple drift volumes )
     const size_t                 m_shift;                ///<  Amount by which to shift PFParticle IDs when merging two reconstructions of the same event
 
 
     // Collections
-    std::vector< art::Ptr< recob::PFParticle > > m_pfParticles;    ///<
-    std::vector< art::Ptr< recob::SpacePoint > > m_spacePoints;    ///<
-    std::vector< art::Ptr< recob::Cluster > >    m_clusters;       ///<
-    std::vector< art::Ptr< recob::Vertex > >     m_vertices;       ///<
-    std::vector< art::Ptr< recob::Track > >      m_tracks;         ///<
-    std::vector< art::Ptr< recob::Shower > >     m_showers;        ///<
-    std::vector< art::Ptr< anab::T0 > >          m_t0s;            ///<
-    std::vector< art::Ptr< recob::PCAxis > >     m_pcAxes;         ///<
-    std::vector< art::Ptr< recob::Hit> >         m_hits;           ///<
+    std::vector< art::Ptr< recob::PFParticle > > m_pfParticles;    ///<  The input collection of PFParticles
+    std::vector< art::Ptr< recob::SpacePoint > > m_spacePoints;    ///<  The input collection of SpacePoints
+    std::vector< art::Ptr< recob::Cluster > >    m_clusters;       ///<  The input collection of Clusters
+    std::vector< art::Ptr< recob::Vertex > >     m_vertices;       ///<  The input collection of Vertices
+    std::vector< art::Ptr< recob::Track > >      m_tracks;         ///<  The input collection of Tracks
+    std::vector< art::Ptr< recob::Shower > >     m_showers;        ///<  The input collection of Showers
+    std::vector< art::Ptr< anab::T0 > >          m_t0s;            ///<  The input collection of T0s
+    std::vector< art::Ptr< recob::PCAxis > >     m_pcAxes;         ///<  The input collection of PCAxes
+    std::vector< art::Ptr< recob::Hit> >         m_hits;           ///<  The input collection of Hits
 
     // Association maps
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::SpacePoint > > >    m_pfParticleSpacePointMap;    ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > >       m_pfParticleClusterMap;       ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >        m_pfParticleVertexMap;        ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >         m_pfParticleTrackMap;         ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >        m_pfParticleShowerMap;        ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< anab::T0 > > >             m_pfParticleT0Map;            ///<
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >        m_pfParticlePCAxisMap;        ///<
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::SpacePoint > > >    m_pfParticleSpacePointMap;    ///<  The input associations: PFParticle -> SpacePoint
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Cluster > > >       m_pfParticleClusterMap;       ///<  The input associations: PFParticle -> Cluster
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Vertex > > >        m_pfParticleVertexMap;        ///<  The input associations: PFParticle -> Vertex
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Track > > >         m_pfParticleTrackMap;         ///<  The input associations: PFParticle -> Track
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::Shower > > >        m_pfParticleShowerMap;        ///<  The input associations: PFParticle -> Shower
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< anab::T0 > > >             m_pfParticleT0Map;            ///<  The input associations: PFParticle -> T0
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PCAxis > > >        m_pfParticlePCAxisMap;        ///<  The input associations: PFParticle -> PCAxis
 
-    std::map< art::Ptr< recob::SpacePoint >, std::vector< art::Ptr< recob::Hit > > >           m_spacePointHitMap;           ///<
-    std::map< art::Ptr< recob::Cluster >   , std::vector< art::Ptr< recob::Hit > > >           m_clusterHitMap;              ///<
-    std::map< art::Ptr< recob::Track >     , std::vector< art::Ptr< recob::Hit > > >           m_trackHitMap;                ///<
-    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::Hit > > >           m_showerHitMap;               ///<
+    std::map< art::Ptr< recob::SpacePoint >, std::vector< art::Ptr< recob::Hit > > >           m_spacePointHitMap;           ///<  The input associations: SpacePoint -> Hit
+    std::map< art::Ptr< recob::Cluster >   , std::vector< art::Ptr< recob::Hit > > >           m_clusterHitMap;              ///<  The input associations: Cluster -> Hit
+    std::map< art::Ptr< recob::Track >     , std::vector< art::Ptr< recob::Hit > > >           m_trackHitMap;                ///<  The input associations: Track -> Hit
+    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::Hit > > >           m_showerHitMap;               ///<  The input associations: Shower -> Hit
 
-    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        m_showerPCAxisMap;            ///<
+    std::map< art::Ptr< recob::Shower >    , std::vector< art::Ptr< recob::PCAxis > > >        m_showerPCAxisMap;            ///<  The input associations: PCAxis -> Shower
     
     // Internal association maps
-    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >    m_pfParticleDaughterMap;      ///<
+    std::map< art::Ptr< recob::PFParticle >, std::vector< art::Ptr< recob::PFParticle > > >    m_pfParticleDaughterMap;      ///<  The mapping from parent to daughter PFParticles
 
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -368,17 +368,26 @@ private:
 
     /**
      *  @brief  Write a given collection to the event
+     *
+     *  @param  collection  the collection to write
      */
     template < class T >
     void WriteCollection( const std::vector< art::Ptr< T > > & collection );
 
     /**
      *  @brief  Specialization for PFParticles. Output IDs are shifted according to the PFParticleToOriginIdMap
+     *
+     *  @param  collection  the collection to write
      */
     void WriteCollection( const std::vector< art::Ptr< recob::PFParticle > > & collection );
 
     /**
      *  @brief  Write a given association to the event
+     *
+     *  @param  associationMap  the association to write from objects of type T -> U  
+     *  @param  collectionT     the collection of type T that has been written
+     *  @param  collectionU     the collection of type U that has been written
+     *  @param  thisProducesU   will this producer produce collectionU of was it produced by a different module?
      */
     template < class T, class U >
     void WriteAssociation( const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > &  associationMap, 
