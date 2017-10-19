@@ -52,6 +52,12 @@ public:
 
     /**
      *  @breif  Constructor from an art::Event
+     *
+     *  @param  pProducer            pointer to the producer to write the output
+     *  @param  pEvent               pointer to the event to process
+     *  @param  crRecoProducerLabel  label for the PFParticle producer using the CR hypothesis
+     *  @param  nuRecoProducerLabel  label for the PFParticle producer using the neutrino hypothesis
+     *  @param  hitProducerLabel     label for the hit producer used to make the input PFParticles
      */
     LArPandoraSlices( art::EDProducer *   pProducer,
                       art::Event *        pEvent, 
@@ -68,16 +74,22 @@ public:
 
     /**
      *  @brief  Get the vector of PFParticles in a given slice reconstructed as a cosmic ray
+     *
+     *  @param  id  the id of the slice to return
      */
     std::vector< art::Ptr< recob::PFParticle > > GetSliceAsCR( const SliceId & id );
 
     /**
      *  @brief  Get the vector of PFParticles in a given slice reconstructed as a neutrino
+     *
+     *  @param  id  the id of the slice to return
      */
     std::vector< art::Ptr< recob::PFParticle > > GetSliceAsNu( const SliceId & id );
 
     /**
      *  @brief  Identify a given slice as being the neutrino event
+     *
+     *  @param  id  the id of the slice to identify as containing the neutrino
      */
     void IdSliceAsNu( const SliceId & id );
 
@@ -89,21 +101,21 @@ public:
 private:
     
     // Meta data
-    art::EDProducer *  m_pProducer;            ///<
-    art::Event *       m_pEvent;               ///<
+    art::EDProducer *  m_pProducer;            ///<  The producer which should write the output collections and associations
+    art::Event *       m_pEvent;               ///<  The event to consider
 
     // Labels
-    const std::string  m_crRecoProducerLabel;  ///<
-    const std::string  m_nuRecoProducerLabel;  ///<
-    const std::string  m_hitProducerLabel;     ///<
+    const std::string  m_crRecoProducerLabel;  ///<  label for the PFParticle producer using the CR hypothesis
+    const std::string  m_nuRecoProducerLabel;  ///<  label for the PFParticle producer using the neutrino hypothesis
+    const std::string  m_hitProducerLabel;     ///<  label for the hit producer used to make the input PFParticles
 
     // Top-level PFParticles
-    std::map< SliceId, std::vector< art::Ptr< recob::PFParticle > > > m_crSlicePFParticles;  ///<
-    std::map< SliceId, std::vector< art::Ptr< recob::PFParticle > > > m_nuSlicePFParticles;  ///<
+    std::map< SliceId, std::vector< art::Ptr< recob::PFParticle > > > m_crSlicePFParticles;  ///<  mapping from slice ID --> PFParticles reconstructed under the cosmic hypothesis
+    std::map< SliceId, std::vector< art::Ptr< recob::PFParticle > > > m_nuSlicePFParticles;  ///<  mapping from slice ID --> PFParticles reconstructed under the neutrino hypothesis
 
     // Neutrino Id decisions
-    bool    m_doesEventContainNeutrino;  ///<
-    SliceId m_nuSliceId;                 ///<
+    bool    m_doesEventContainNeutrino;  ///<  has the user identified a slice as containing a neutrino
+    SliceId m_nuSliceId;                 ///<  the identified slice that contains the neutrino ( may not be set )
 
     /**
      *  @brief  Use the associations between PFParticles and hits to identify the slices
@@ -112,6 +124,11 @@ private:
 
     /**
      *  @brief  Tag the PFParticles in the supplied vector as specified 
+     *
+     *  @param  shouldTagAsNeutrino  should the particles be tagged as a neutrino (or cosmic)
+     *  @param  pfParticleVector     the input vector of PFParticles to be tagged 
+     *  @param  outputTags           the output collection of cosmic tags
+     *  @param  outputAssn           the output association from PFParticle -> CosmicTag
      */
     void WriteTag( const bool &                                                           shouldTagAsNeutrino, 
                    const std::vector< art::Ptr< recob::PFParticle > > &                   pfParticleVector,
@@ -121,12 +138,20 @@ private:
 
     /**
      *  @brief  Get a mapping between PFParticles and their Ids 
+     *
+     *  @param  inputParticles  input PFParticles to obtain the mapping from
+     *  @param  outputMap       output mapping between PFParticles and their Ids
      */
     void GetPFParticleIdMap( const PFParticleVector &  inputParticles,
                              PFParticleMap &           outputMap );
     
     /**
      *  @brief  Make a new slice for each top-level neutrino PFParticle supplied by filling m_nuSlicePFParticles. 
+     *
+     *  @param  nuPFParticleIdMap             input mapping between PFParticles and their Ids
+     *  @param  nuTopLevelParticles           input vector of top-level PFParticles (i.e. the neutrino PFParticles)
+     *  @param  nuFinalStateParticles         input vector of final state PFParticles (i.e the first daughters of neutrino PFParticles)
+     *  @param  nuFinalStateParticlesToSlice  output mapping from final state PFParticles to slice id 
      */
     void MakeSlicePerNeutrino( const PFParticleMap &                                nuPFParticleIdMap, 
                                const PFParticleVector &                             nuTopLevelParticles, 
@@ -135,6 +160,10 @@ private:
 
     /**
      *  @brief  Collect all PFParticles downstream of a supplied particle
+     *
+     *  @param  pfParticleMap      input mapping between PFParticles and their Ids
+     *  @param  part               the particle to seed the collection
+     *  @param  daughterParticles  the output vector of all PFParticles downstream part
      */
     void CollectDaughters( const PFParticleMap &                  pfParticleMap,
                            const art::Ptr< recob::PFParticle > &  part,
@@ -143,6 +172,12 @@ private:
 
     /**
      *  @brief  Add CR PFParticles to existing neutrino slices (if they share hits), or make new slices
+     *
+     *  @param  crPFParticleIdMap             input mapping from cosmic ray PFParticles to their Ids
+     *  @param  crFinalStateParticles         input vector of final-state cosmic PFParticles 
+     *  @param  crParticlesToHits             input mapping from cosmic PFParticles to associated hits
+     *  @param  nuHitsToParticles             input mapping from hits to associated neutrino PFParticles
+     *  @param  nuFinalStateParticlesToSlice  input mapping from neutrino final-state PFParticles to slice ids
      */
     void AddCRParticlesToSlices( const PFParticleMap &                                      crPFParticleIdMap,
                                  const PFParticleVector &                                   crFinalStateParticles,

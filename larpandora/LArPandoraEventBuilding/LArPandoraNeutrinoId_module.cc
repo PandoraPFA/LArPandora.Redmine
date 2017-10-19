@@ -49,9 +49,9 @@ private:
 
   // Declare member data here.
 
-  std::string   fCRProducerLabel;    ///<
-  std::string   fNuProducerLabel;    ///<
-  std::string   fHitProducerLabel;   ///<
+  std::string   fCRProducerLabel;    ///<  the input PFParticle producer under the cosmic hypothesis
+  std::string   fNuProducerLabel;    ///<  the input PFParticle producer under the neutrino hypothesis
+  std::string   fHitProducerLabel;   ///<  the input hit producer used to produces the input PFParticles
 };
 
 
