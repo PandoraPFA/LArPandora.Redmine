@@ -332,38 +332,6 @@ private:
                                    std::vector< art::Ptr< recob::PFParticle > > &  downstreamPFParticles );
 
     /**
-     *  \brief  Collects all PFParticles downstream (children, grandchildren, ...) of a given PFParticle
-     *
-     *  \param  part                         input PFParticle
-     *  \param  idToPFParticleMap            input mapping between PFParticles and their IDs
-     *  \param  idToDownstreamPFParticleMap  output mapping between of all downstream PFParticles and their IDs
-     */
-    void GetDownstreamPFParticles( art::Ptr< recob::PFParticle >                              part, 
-                                   const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                                   std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap );
-
-    /**
-     *  @brief  Collects all PFParticles downstream (children, grandchildren, ...) of a given vector of PFParticle
-     *
-     *  @param  inputPFParticles             input vector of PFParticles
-     *  @param  idToPFParticleMap            input mapping between PFParticles and their IDs
-     *  @param  idToDownstreamPFParticleMap  output mapping between of all downstream PFParticles and their IDs
-     */
-    void GetDownstreamPFParticles( const std::vector< art::Ptr< recob::PFParticle > > &       inputPFParticles, 
-                                   const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                                   std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap );
-    
-    /**
-     *  @brief  Converts a map from id to particles to a vector of particles
-     * 
-     *  @param  idToPFParticleMap  input map of PFParticles
-     *  @param  pfParticleVector   output vector of PFParticles
-     */
-    void GetParticleVector( const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                            std::vector< art::Ptr< recob::PFParticle > > &             pfParticleVector );
-    
-
-    /**
      *  @brief  Fills the PFParticleToOriginIdMap using an existing map from another LArPandoraEvent
      * 
      *  @param  existingMap  input map from PFParticles to origin IDs

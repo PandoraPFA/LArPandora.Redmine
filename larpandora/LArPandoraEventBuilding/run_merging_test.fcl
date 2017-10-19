@@ -21,10 +21,10 @@ dump_crRemHit_Nu.TrackLabel:       "pandoraSlicesNuHypothesisTrack"
 dump_crRemHit_Nu.ShowerLabel:      "pandoraSlicesNuHypothesisShower"
 
 dump_cosmic:                       @local::pandora_event_dump
-dump_cosmic.PandoraLabel:          "pandoraCosmic"
+dump_cosmic.PandoraLabel:          "pandoraConsolidatedCosmic"
 
 dump_nu:                           @local::pandora_event_dump
-dump_nu.PandoraLabel:              "pandoraNu"
+dump_nu.PandoraLabel:              "pandoraConsolidatedNu"
 
 END_PROLOG
 

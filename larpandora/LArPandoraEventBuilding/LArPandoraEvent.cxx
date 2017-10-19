@@ -371,49 +371,6 @@ void LArPandoraEvent::GetDownstreamPFParticles( const art::Ptr< recob::PFParticl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-/* ATTN now not needed */
-void LArPandoraEvent::GetDownstreamPFParticles( const std::vector< art::Ptr< recob::PFParticle > > &       inputPFParticles, 
-                                                const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                                                std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap )
-{
-  for ( art::Ptr< recob::PFParticle > part : inputPFParticles )
-    this->GetDownstreamPFParticles( part, idToPFParticleMap, idToDownstreamPFParticleMap );
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-/* ATTN now not needed */
-void LArPandoraEvent::GetDownstreamPFParticles( art::Ptr< recob::PFParticle >                              part, 
-                                                const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                                                std::map< size_t, art::Ptr< recob::PFParticle > > &        idToDownstreamPFParticleMap )
-{
-    if ( idToDownstreamPFParticleMap.find( part->Self() ) == idToDownstreamPFParticleMap.end() )
-        idToDownstreamPFParticleMap.insert( std::map< size_t, art::Ptr< recob::PFParticle > >::value_type( part->Self(), part ) );
-
-    for ( size_t daughterId : part->Daughters() ) {
-        std::map< size_t, art::Ptr< recob::PFParticle > >::const_iterator daughterIt = idToPFParticleMap.find( daughterId );
-
-        if ( daughterIt == idToPFParticleMap.end() )
-            throw cet::exception("LArPandora") << " LArPandoraEvent::GetDownstreamPFParticles -- Could not find daughter of PFParticle in the supplied map" << std::endl;
-
-        this->GetDownstreamPFParticles( daughterIt->second, idToPFParticleMap, idToDownstreamPFParticleMap );
-    }   
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-/* ATTN now not needed */
-void LArPandoraEvent::GetParticleVector( const std::map< size_t, art::Ptr< recob::PFParticle > > &  idToPFParticleMap, 
-                                         std::vector< art::Ptr< recob::PFParticle > > &             pfParticleVector )
-{
-    for ( std::map< size_t, art::Ptr< recob::PFParticle > >::const_iterator it=idToPFParticleMap.begin(); it != idToPFParticleMap.end(); ++it ) {
-        art::Ptr< recob::PFParticle > part = it->second;
-        pfParticleVector.push_back( part );
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void LArPandoraEvent::WriteToEvent()
 {
    
