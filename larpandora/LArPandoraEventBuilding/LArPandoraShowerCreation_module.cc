@@ -52,15 +52,6 @@ private:
      */
     recob::PCAxis BuildPCAxis(const lar_content::LArShowerPCA &larShowerPCA) const;
 
-    /**
-     *  @brief Collect the hits associated with a input vector of SpacePoints
-     *
-     *  @param the event
-     *  @param input vector of space points
-     *  @param output vector of associated hits
-     */
-    void GetAssociatedHits( const art::Event * pEvt, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits );
-
     std::string                     m_pfParticleLabel;          ///< The pf particle label
 
     // TODO When implementation lived in LArPandoraOutput, it contained key building blocks for calculation of shower energies per plane.
@@ -79,12 +70,13 @@ DEFINE_ART_MODULE(LArPandoraShowerCreation)
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 
+#include "lardata/Utilities/PtrMaker.h"
+
 #include "canvas/Utilities/InputTag.h"
 
 #include "larcore/Geometry/Geometry.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -174,8 +166,10 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         try
         {
             const lar_content::LArShowerPCA larShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, vertexPosition));
-            outputShowers->emplace_back(LArPandoraShowerCreation::BuildShower(larShowerPCA, vertexPosition));
-            outputPCAxes->emplace_back(LArPandoraShowerCreation::BuildPCAxis(larShowerPCA));
+            const recob::Shower shower(LArPandoraShowerCreation::BuildShower(larShowerPCA, vertexPosition));
+            const recob::PCAxis pcAxis(LArPandoraShowerCreation::BuildPCAxis(larShowerPCA));
+            outputShowers->emplace_back(shower);
+            outputPCAxes->emplace_back(pcAxis);
         }
         catch (const pandora::StatusCodeException &)
         {
@@ -188,7 +182,7 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         art::Ptr<recob::PCAxis> pPCAxis(makePCAxisPtr(outputPCAxes->size() - 1));
 
         std::vector< art::Ptr< recob::Hit > > hitsInParticle;
-        this->GetAssociatedHits( &evt, particleToSpacePointIter->second, hitsInParticle );
+        LArPandoraHelper::GetAssociatedHits( &evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle );
 
         // Output associations, after output objects are in place
         util::CreateAssn(*this, evt, pShower, pPFParticle, *(outputParticlesToShowers.get()));
@@ -258,21 +252,6 @@ recob::PCAxis LArPandoraShowerCreation::BuildPCAxis(const lar_content::LArShower
     const size_t iD(util::kBogusI); ///< Axis ID, not ready yet
 
     return recob::PCAxis(svdOK, numHitsUsed, eigenValues, eigenVecs, avePosition, aveHitDoca, iD);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraShowerCreation::GetAssociatedHits( const art::Event * pEvt, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits )
-{
-    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
-    pEvt->getByLabel( m_pfParticleLabel, spacePointHandle );
-    art::FindManyP< recob::Hit > spacePointToHitAssoc( spacePointHandle, *pEvt, m_pfParticleLabel);
-    
-    for ( const art::Ptr< recob::SpacePoint > & spacePoint : inputSpacePoints ) {
-        std::vector< art::Ptr< recob::Hit > > hits = spacePointToHitAssoc.at( spacePoint.key() );
-        associatedHits.insert( associatedHits.end(), hits.begin(), hits.end() );
-    }
-
 }
 
 } // namespace lar_pandora

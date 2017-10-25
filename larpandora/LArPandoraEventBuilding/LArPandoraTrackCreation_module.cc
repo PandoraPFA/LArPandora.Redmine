@@ -42,16 +42,6 @@ private:
      */
     recob::Track BuildTrack(const int id, const lar_content::LArTrackStateVector &trackStateVector) const;
 
-
-    /**
-     *  @brief Collect the hits associated with a input vector of SpacePoints
-     *
-     *  @param the event
-     *  @param input vector of space points
-     *  @param output vector of associated hits
-     */
-    void GetAssociatedHits( const art::Event * pEvt, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits );
-
     std::string     m_pfParticleLabel;              ///< The pf particle label
     unsigned int    m_minTrajectoryPoints;          ///< The minimum number of trajectory points
     unsigned int    m_slidingFitHalfWindow;         ///< The sliding fit half window
@@ -177,7 +167,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         }
 
         std::vector< art::Ptr< recob::Hit > > hitsInParticle;
-        this->GetAssociatedHits( &evt, particleToSpacePointIter->second, hitsInParticle );
+        LArPandoraHelper::GetAssociatedHits( &evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle );
 
         // Output objects
         outputTracks->emplace_back(LArPandoraTrackCreation::BuildTrack(trackCounter++, trackStateVector));
@@ -216,21 +206,6 @@ recob::Track LArPandoraTrackCreation::BuildTrack(const int id, const lar_content
     }
 
     return recob::Track(xyz, pxpypz, dummyDQDX, dummyMomentum, id);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraTrackCreation::GetAssociatedHits( const art::Event * pEvt, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits )
-{
-    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
-    pEvt->getByLabel( m_pfParticleLabel, spacePointHandle );
-    art::FindManyP< recob::Hit > spacePointToHitAssoc( spacePointHandle, *pEvt, m_pfParticleLabel);
-    
-    for ( const art::Ptr< recob::SpacePoint > & spacePoint : inputSpacePoints ) {
-        std::vector< art::Ptr< recob::Hit > > hits = spacePointToHitAssoc.at( spacePoint.key() );
-        associatedHits.insert( associatedHits.end(), hits.begin(), hits.end() );
-    }
-
 }
 
 } // namespace lar_pandora
