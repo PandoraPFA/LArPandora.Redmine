@@ -1,21 +1,14 @@
-////////////////////////////////////////////////////////////////////////
-// Class:       LArPandoraEventDump
-// Plugin Type: analyzer (art v2_07_03)
-// File:        LArPandoraEventDump_module.cc
-//
-// Generated at Tue Oct  3 12:55:39 2017 by Andrew D. Smith using cetskelgen
-// from cetlib version v3_00_01.
-////////////////////////////////////////////////////////////////////////
+/**
+ *  @file   larpandora/LArPandoraEventBuilding/LArPandoraEventDump.cc
+ *
+ *  @brief  module for lar pandora event dump
+ */
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "canvas/Utilities/InputTag.h"
+
 #include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
 
@@ -32,108 +25,92 @@
 namespace lar_pandora
 {
 
-class LArPandoraEventDump;
-
-
 class LArPandoraEventDump : public art::EDAnalyzer {
 public:
-  explicit LArPandoraEventDump(fhicl::ParameterSet const & p);
-  // The compiler-generated destructor is fine for non-base
-  // classes without bare pointers or other resource use.
+    explicit LArPandoraEventDump(fhicl::ParameterSet const & pset);
+    
+    LArPandoraEventDump(LArPandoraEventDump const &) = delete;
+    LArPandoraEventDump(LArPandoraEventDump &&) = delete;
+    LArPandoraEventDump & operator = (LArPandoraEventDump const &) = delete;
+    LArPandoraEventDump & operator = (LArPandoraEventDump &&) = delete;
 
-  // Plugins should not be copied or assigned.
-  LArPandoraEventDump(LArPandoraEventDump const &) = delete;
-  LArPandoraEventDump(LArPandoraEventDump &&) = delete;
-  LArPandoraEventDump & operator = (LArPandoraEventDump const &) = delete;
-  LArPandoraEventDump & operator = (LArPandoraEventDump &&) = delete;
-
-  // Required functions.
-  void analyze(art::Event const & e) override;
-
-  // Selected optional functions.
-  void reconfigure(fhicl::ParameterSet const & p) override;
-
-  void PrintParticle( const art::Ptr< recob::PFParticle > &                      part, 
-                      const std::map< size_t, art::Ptr< recob::PFParticle > > &  pfParticleIdMap, 
-                      const art::FindManyP<recob::SpacePoint> &                  pfPartToSpacePointAssoc,
-                      const art::FindManyP<recob::Cluster> &                     pfPartToClusterAssoc,
-                      const art::FindManyP<recob::Vertex> &                      pfPartToVertexAssoc,   
-                      const art::FindManyP<recob::Track> &                       pfPartToTrackAssoc,   
-                      const art::FindManyP<recob::Shower> &                      pfPartToShowerAssoc,    
-                      const art::FindManyP<recob::PCAxis> &                      pfPartToPCAxisAssoc,
-                      const int &                                                depth ); 
+    void analyze(art::Event const & evt) override;
 
 private:
+    void PrintParticle( const art::Ptr< recob::PFParticle > &                      part, 
+                        const std::map< size_t, art::Ptr< recob::PFParticle > > &  pfParticleIdMap, 
+                        const art::FindManyP<recob::SpacePoint> &                  pfPartToSpacePointAssoc,
+                        const art::FindManyP<recob::Cluster> &                     pfPartToClusterAssoc,
+                        const art::FindManyP<recob::Vertex> &                      pfPartToVertexAssoc,   
+                        const art::FindManyP<recob::Track> &                       pfPartToTrackAssoc,   
+                        const art::FindManyP<recob::Shower> &                      pfPartToShowerAssoc,    
+                        const art::FindManyP<recob::PCAxis> &                      pfPartToPCAxisAssoc,
+                        const int &                                                depth ); 
 
-  // Declare member data here.
-  std::string fPandoraLabel; 
-  std::string fTrackLabel; 
-  std::string fShowerLabel; 
+    std::string fPandoraLabel; 
+    std::string fTrackLabel; 
+    std::string fShowerLabel; 
 };
 
+DEFINE_ART_MODULE(LArPandoraEventDump)
 
-LArPandoraEventDump::LArPandoraEventDump(fhicl::ParameterSet const & p)
-  :
-  EDAnalyzer(p)  // ,
- // More initializers here.
-{
-    reconfigure(p);
-}
+} // namespace lar_pandora
 
-void LArPandoraEventDump::analyze(art::Event const & e)
+//------------------------------------------------------------------------------------------------------------------------------------------
+// implementation follows
+
+
+namespace lar_pandora
 {
-  // Implementation of required member function here.
- 
+
+LArPandoraEventDump::LArPandoraEventDump(fhicl::ParameterSet const & pset ) :
+    EDAnalyzer(pset),
+    fPandoraLabel(pset.get<std::string>("PandoraLabel")),
+    fTrackLabel(pset.get<std::string>("TrackLabel" , fPandoraLabel)),
+    fShowerLabel(pset.get<std::string>("ShowerLabel", fPandoraLabel)) {}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::analyze(art::Event const & evt)
+{
   std::cout << std::endl << std::endl; 
   std::cout << std::string(80, '-') << "\r- ";
   std::cout << "Event " << std::endl;
-  std::cout << e.id() << std::endl;
+  std::cout << evt.id() << std::endl;
   std::cout << fPandoraLabel << std::endl;
   std::cout << std::string(80, '-') << std::endl;
 
-
-  // Get the PFParticles
+  // Get the input collections
   art::Handle< std::vector< recob::PFParticle > > pfParticleHandle;
-  e.getByLabel( fPandoraLabel, pfParticleHandle );
-
-  // Get the SpacePoints
   art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
-  e.getByLabel( fPandoraLabel, spacePointHandle );
-
-  // Get the Clusters
   art::Handle< std::vector< recob::Cluster > > clusterHandle;
-  e.getByLabel( fPandoraLabel, clusterHandle );
-  
-  // Get the Vertices
   art::Handle< std::vector< recob::Vertex > > vertexHandle;
-  e.getByLabel( fPandoraLabel, vertexHandle );
-
-  // Get the Tracks
   art::Handle< std::vector< recob::Track > > trackHandle;
-  e.getByLabel( fTrackLabel, trackHandle );
-
-  // Get the Shower
   art::Handle< std::vector< recob::Shower > > showerHandle;
-  e.getByLabel( fShowerLabel, showerHandle );
-
-  // Get the PCAxes
   art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
-  e.getByLabel( fShowerLabel, pcAxisHandle );
+
+  evt.getByLabel( fPandoraLabel, pfParticleHandle );
+  evt.getByLabel( fPandoraLabel, spacePointHandle );
+  evt.getByLabel( fPandoraLabel, clusterHandle );
+  evt.getByLabel( fPandoraLabel, vertexHandle );
+  evt.getByLabel( fTrackLabel, trackHandle );
+  evt.getByLabel( fShowerLabel, showerHandle );
+  evt.getByLabel( fShowerLabel, pcAxisHandle );
 
   // Get the associations
-  art::FindManyP<recob::SpacePoint> pfPartToSpacePointAssoc( pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Cluster>    pfPartToClusterAssoc(    pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Vertex>     pfPartToVertexAssoc(     pfParticleHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Track>      pfPartToTrackAssoc(      pfParticleHandle, e, fTrackLabel );
-  art::FindManyP<recob::Shower>     pfPartToShowerAssoc(     pfParticleHandle, e, fShowerLabel );
-  art::FindManyP<recob::PCAxis>     pfPartToPCAxisAssoc(     pfParticleHandle, e, fShowerLabel );
+  art::FindManyP<recob::SpacePoint> pfPartToSpacePointAssoc( pfParticleHandle, evt, fPandoraLabel );
+  art::FindManyP<recob::Cluster>    pfPartToClusterAssoc(    pfParticleHandle, evt, fPandoraLabel );
+  art::FindManyP<recob::Vertex>     pfPartToVertexAssoc(     pfParticleHandle, evt, fPandoraLabel );
+  art::FindManyP<recob::Track>      pfPartToTrackAssoc(      pfParticleHandle, evt, fTrackLabel );
+  art::FindManyP<recob::Shower>     pfPartToShowerAssoc(     pfParticleHandle, evt, fShowerLabel );
+  art::FindManyP<recob::PCAxis>     pfPartToPCAxisAssoc(     pfParticleHandle, evt, fShowerLabel );
 
-  art::FindManyP<recob::Hit> spacePointToHitAssoc( spacePointHandle, e, fPandoraLabel );
-  art::FindManyP<recob::Hit> clusterToHitAssoc(    clusterHandle   , e, fPandoraLabel );
-  art::FindManyP<recob::Hit> trackToHitAssoc(      trackHandle     , e, fTrackLabel );
-  art::FindManyP<recob::Hit> showerToHitAssoc(     showerHandle    , e, fShowerLabel );
+  art::FindManyP<recob::Hit> spacePointToHitAssoc( spacePointHandle, evt, fPandoraLabel );
+  art::FindManyP<recob::Hit> clusterToHitAssoc(    clusterHandle   , evt, fPandoraLabel );
+  art::FindManyP<recob::Hit> trackToHitAssoc(      trackHandle     , evt, fTrackLabel );
+  art::FindManyP<recob::Hit> showerToHitAssoc(     showerHandle    , evt, fShowerLabel );
 
-  art::FindManyP<recob::PCAxis> showerToPCAxisAssoc( showerHandle, e, fShowerLabel );
+  art::FindManyP<recob::PCAxis> showerToPCAxisAssoc( showerHandle, evt, fShowerLabel );
 
   // Write out the collection sizes
   std::cout << "N PFParticles : " << pfParticleHandle->size() << std::endl;
@@ -166,13 +143,7 @@ void LArPandoraEventDump::analyze(art::Event const & e)
   std::cout << std::string(80, '-') << std::endl;
 }
 
-void LArPandoraEventDump::reconfigure(fhicl::ParameterSet const & p)
-{
-  // Implementation of optional member function here.
-  fPandoraLabel     = p.get<std::string>("PandoraLabel");
-  fTrackLabel       = p.get<std::string>("TrackLabel" , fPandoraLabel);
-  fShowerLabel      = p.get<std::string>("ShowerLabel", fPandoraLabel);
-}
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &                      part, 
                                          const std::map< size_t, art::Ptr< recob::PFParticle > > &  pfParticleIdMap, 
@@ -192,8 +163,8 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
     std::cout << std::endl << rule << std::endl;
     std::cout << indent << "PFParticle" << std::endl;
     std::cout << rule << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- Key" << part.key()      << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- Id"  << part->Self()    << std::endl;
+    std::cout << indent << std::setw(w) << std::left << "- Key" << part.key() << std::endl;
+    std::cout << indent << std::setw(w) << std::left << "- Id"  << part->Self() << std::endl;
 
     if ( part->IsPrimary() ) 
         std::cout << indent << std::setw(w) << std::left << "- Primary" << std::endl;
@@ -227,8 +198,6 @@ void LArPandoraEventDump::PrintParticle( const art::Ptr< recob::PFParticle > &  
         this->PrintParticle( daughter, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, depth + 4 );
     }
 }
-
-DEFINE_ART_MODULE(LArPandoraEventDump)
 
 } // namespace lar_pandora
 

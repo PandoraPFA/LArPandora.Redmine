@@ -1,160 +1,145 @@
-////////////////////////////////////////////////////////////////////////
-// Class:       CollectionMerging
-// Plugin Type: producer (art v2_07_03)
-// File:        CollectionMerging_module.cc
-//
-// Generated at Wed Sep 27 12:37:53 2017 by Andrew D. Smith using cetskelgen
-// from cetlib version v3_00_01.
-////////////////////////////////////////////////////////////////////////
+/**
+ *  @file   larpandora/LArPandoraEventBuilding/CollectionMerging_module.cc
+ *
+ *  @brief  module for lar pandora collection merging
+ */
 
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Run.h"
-#include "art/Framework/Principal/SubRun.h"
-#include "canvas/Utilities/InputTag.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "larpandora/LArPandoraEventBuilding/LArPandoraEvent.h"
+#include "fhiclcpp/ParameterSet.h"
 
 #include <memory>
 
 namespace lar_pandora
 {
-    
-class CollectionMerging;
 
-
-class CollectionMerging : public art::EDProducer {
+class CollectionMerging : public art::EDProducer
+{
 public:
-  explicit CollectionMerging(fhicl::ParameterSet const & p);
-  // The compiler-generated destructor is fine for non-base
-  // classes without bare pointers or other resource use.
+    explicit CollectionMerging(fhicl::ParameterSet const &pset);
 
-  // Plugins should not be copied or assigned.
-  CollectionMerging(CollectionMerging const &) = delete;
-  CollectionMerging(CollectionMerging &&) = delete;
-  CollectionMerging & operator = (CollectionMerging const &) = delete;
-  CollectionMerging & operator = (CollectionMerging &&) = delete;
+    CollectionMerging(CollectionMerging const &) = delete;
+    CollectionMerging(CollectionMerging &&) = delete;
+    CollectionMerging & operator = (CollectionMerging const &) = delete;
+    CollectionMerging & operator = (CollectionMerging &&) = delete;
 
-  // Required functions.
-  void produce(art::Event & e) override;
-
-  // Selected optional functions.
-  void reconfigure(fhicl::ParameterSet const & p) override;
+    void produce(art::Event &evt) override;
 
 private:
+    std::string     m_AllHitsCRProducerLabel;          ///< Label of the pandora instance that ran CR reco on all hits
+    std::string     m_AllHitsCRTrackProducerLabel;     ///< Label of the track producer using the pandora instance that ran CR reco on all hits
+    std::string     m_AllHitsCRShowerProducerLabel;    ///< Label of the shower producer using the pandora instance that ran CR reco on all hits
 
-  // FHicL congifurable parameters
-  std::string  fAllHitsCRProducerLabel;          ///< Label of the pandora instance that ran CR reco on all hits
-  std::string  fAllHitsCRTrackProducerLabel;     ///< Label of the track producer using the pandora instance that ran CR reco on all hits
-  std::string  fAllHitsCRShowerProducerLabel;    ///< Label of the shower producer using the pandora instance that ran CR reco on all hits
+    std::string     m_CRRemHitsCRProducerLabel;        ///< Label of the pandora instance that ran CR reco on CR removed hits
+    std::string     m_CRRemHitsCRTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran CR reco on CR removed hits
+    std::string     m_CRRemHitsCRShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran CR reco on CR removed hits
 
-  std::string  fCRRemHitsCRProducerLabel;        ///< Label of the pandora instance that ran CR reco on CR removed hits
-  std::string  fCRRemHitsCRTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran CR reco on CR removed hits
-  std::string  fCRRemHitsCRShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran CR reco on CR removed hits
+    std::string     m_CRRemHitsNuProducerLabel;        ///< Label of the pandora instance that ran Nu reco on CR removed hits
+    std::string     m_CRRemHitsNuTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran Nu reco on CR removed hits
+    std::string     m_CRRemHitsNuShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran Nu reco on CR removed hits
 
-  std::string  fCRRemHitsNuProducerLabel;        ///< Label of the pandora instance that ran Nu reco on CR removed hits
-  std::string  fCRRemHitsNuTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran Nu reco on CR removed hits
-  std::string  fCRRemHitsNuShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran Nu reco on CR removed hits
+    std::string     m_AllHitProducerLabel;             ///< Label of the primary hit producer 
+    std::string     m_CRRemHitProducerLabel;           ///< Label of the CR removed hit producer
 
-  std::string  fAllHitProducerLabel;             ///< Label of the primary hit producer 
-  std::string  fCRRemHitProducerLabel;           ///< Label of the CR removed hit producer
+    std::string     m_ClearCRTagProducerLabel;         ///< Label of the unabiguous CR tag producer
+    std::string     m_NuIdCRTagProducerLabel;          ///< Label of the neutrino-ID CR tag producer
 
-  std::string  fClearCRTagProducerLabel;         ///< Label of the unabiguous CR tag producer
-  std::string  fNuIdCRTagProducerLabel;          ///< Label of the neutrino-ID CR tag producer
-
-  bool         fShouldProduceNeutrinos;          ///< If we should produce collections related to neutrino top-level PFParticles
-  bool         fShouldProduceT0s;                ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
+    bool            m_ShouldProduceNeutrinos;          ///< If we should produce collections related to neutrino top-level PFParticles
+    bool            m_ShouldProduceT0s;                ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
 };
-
-
-CollectionMerging::CollectionMerging(fhicl::ParameterSet const & p)
-{
-  reconfigure(p);
-
-  // Define which types of collections this the module produces
-  produces< std::vector<recob::PFParticle> >();
-  produces< std::vector<recob::SpacePoint> >();
-  produces< std::vector<recob::Cluster> >();
-
-  if ( fShouldProduceT0s )
-      produces< std::vector<anab::T0> >();
-
-  produces< std::vector<recob::Vertex> >();
-  produces< std::vector<recob::Track> >(); 
-  produces< std::vector<recob::Shower> >();
-  produces< std::vector<recob::PCAxis> >();
-
-  produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
-  produces< art::Assns<recob::PFParticle, recob::Cluster> >();
-
-  if ( fShouldProduceT0s )
-    produces< art::Assns<recob::PFParticle, anab::T0> >();
-
-  produces< art::Assns<recob::PFParticle, recob::Vertex> >();
-  produces< art::Assns<recob::PFParticle, recob::Track> >();
-  produces< art::Assns<recob::PFParticle, recob::Shower> >();
-  produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
-  produces< art::Assns<recob::Track, recob::Hit> >();
-  produces< art::Assns<recob::Shower, recob::Hit> >();
-  produces< art::Assns<recob::Shower, recob::PCAxis> >();
-  produces< art::Assns<recob::SpacePoint, recob::Hit> >();
-  produces< art::Assns<recob::Cluster, recob::Hit> >();
-}
-
-void CollectionMerging::produce(art::Event & e)
-{
-  // Get all reconstructions of the event
-  lar_pandora::LArPandoraEvent::Labels allHitsCRLabels( fAllHitsCRProducerLabel, fAllHitsCRTrackProducerLabel, fAllHitsCRShowerProducerLabel, fAllHitProducerLabel );
-  lar_pandora::LArPandoraEvent allHitsCREvent(   this, &e, allHitsCRLabels, fShouldProduceT0s   );
-
-  lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels( fCRRemHitsCRProducerLabel, fCRRemHitsCRTrackProducerLabel, fCRRemHitsCRShowerProducerLabel, fCRRemHitProducerLabel );
-  lar_pandora::LArPandoraEvent crRemHitsCREvent( this, &e, crRemHitsCRLabels, fShouldProduceT0s );
-
-  lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels( fCRRemHitsNuProducerLabel, fCRRemHitsNuTrackProducerLabel, fCRRemHitsNuShowerProducerLabel, fCRRemHitProducerLabel );
-  lar_pandora::LArPandoraEvent crRemHitsNuEvent( this, &e, crRemHitsNuLabels, fShouldProduceT0s );
-
-  // Filter and merge into a consolidated output
-  if ( fShouldProduceNeutrinos ) {
-    lar_pandora::LArPandoraEvent filteredCRRemHitsNuEvent( crRemHitsNuEvent.FilterByCRTag( fShouldProduceNeutrinos, fNuIdCRTagProducerLabel  ) );
-    filteredCRRemHitsNuEvent.WriteToEvent();
-  }
-  else{
-    lar_pandora::LArPandoraEvent filteredAllHitsCREvent(   allHitsCREvent.FilterByCRTag(   fShouldProduceNeutrinos, fClearCRTagProducerLabel ) );
-    lar_pandora::LArPandoraEvent filteredCRRemHitsCREvent( crRemHitsCREvent.FilterByCRTag( fShouldProduceNeutrinos, fNuIdCRTagProducerLabel  ) );
-    lar_pandora::LArPandoraEvent mergedEvent( filteredAllHitsCREvent.Merge( filteredCRRemHitsCREvent ) );
-    mergedEvent.WriteToEvent();
-  }
-}
-
-void CollectionMerging::reconfigure(fhicl::ParameterSet const & p)
-{
-  fAllHitsCRProducerLabel         = p.get<std::string>("AllHitsCRProducerLabel");
-  fAllHitsCRTrackProducerLabel    = p.get<std::string>("AllHitsCRTrackProducerLabel");
-  fAllHitsCRShowerProducerLabel   = p.get<std::string>("AllHitsCRShowerProducerLabel");
-
-  fCRRemHitsCRProducerLabel       = p.get<std::string>("CRRemHitsCRProducerLabel");
-  fCRRemHitsCRTrackProducerLabel  = p.get<std::string>("CRRemHitsCRTrackProducerLabel");
-  fCRRemHitsCRShowerProducerLabel = p.get<std::string>("CRRemHitsCRShowerProducerLabel");
-
-  fCRRemHitsNuProducerLabel       = p.get<std::string>("CRRemHitsNuProducerLabel");
-  fCRRemHitsNuTrackProducerLabel  = p.get<std::string>("CRRemHitsNuTrackProducerLabel");
-  fCRRemHitsNuShowerProducerLabel = p.get<std::string>("CRRemHitsNuShowerProducerLabel");
-
-  fAllHitProducerLabel      = p.get<std::string>("AllHitProducerLabel");
-  fCRRemHitProducerLabel    = p.get<std::string>("CRRemHitProducerLabel");
-
-  fClearCRTagProducerLabel  = p.get<std::string>("ClearCRTagProducerLabel");
-  fNuIdCRTagProducerLabel   = p.get<std::string>("NuIdCRTagProducerLabel");
-
-  fShouldProduceNeutrinos   = p.get<bool>("ShouldProduceNeutrinos", true);
-  fShouldProduceT0s         = p.get<bool>("ShouldProduceT0s", false);
-}
 
 DEFINE_ART_MODULE(CollectionMerging)
 
 } // namespace lar_pandora
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+// implementation follows
+
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/PCAxis.h"
+#include "lardataobj/RecoBase/Hit.h"
+
+#include "larpandora/LArPandoraEventBuilding/LArPandoraEvent.h"
+
+namespace lar_pandora
+{
+
+CollectionMerging::CollectionMerging(fhicl::ParameterSet const &pset) :
+    m_AllHitsCRProducerLabel(pset.get<std::string>("AllHitsCRProducerLabel")),
+    m_AllHitsCRTrackProducerLabel(pset.get<std::string>("AllHitsCRTrackProducerLabel")),
+    m_AllHitsCRShowerProducerLabel(pset.get<std::string>("AllHitsCRShowerProducerLabel")),
+    m_CRRemHitsCRProducerLabel(pset.get<std::string>("CRRemHitsCRProducerLabel")),
+    m_CRRemHitsCRTrackProducerLabel(pset.get<std::string>("CRRemHitsCRTrackProducerLabel")),
+    m_CRRemHitsCRShowerProducerLabel(pset.get<std::string>("CRRemHitsCRShowerProducerLabel")),
+    m_CRRemHitsNuProducerLabel(pset.get<std::string>("CRRemHitsNuProducerLabel")),
+    m_CRRemHitsNuTrackProducerLabel(pset.get<std::string>("CRRemHitsNuTrackProducerLabel")),
+    m_CRRemHitsNuShowerProducerLabel(pset.get<std::string>("CRRemHitsNuShowerProducerLabel")),
+    m_AllHitProducerLabel(pset.get<std::string>("AllHitProducerLabel")),
+    m_CRRemHitProducerLabel(pset.get<std::string>("CRRemHitProducerLabel")),
+    m_ClearCRTagProducerLabel(pset.get<std::string>("ClearCRTagProducerLabel")),
+    m_NuIdCRTagProducerLabel(pset.get<std::string>("NuIdCRTagProducerLabel")),
+    m_ShouldProduceNeutrinos(pset.get<bool>("ShouldProduceNeutrinos", true)),
+    m_ShouldProduceT0s(pset.get<bool>("ShouldProduceT0s", false))
+{
+    produces< std::vector<recob::PFParticle> >();
+    produces< std::vector<recob::SpacePoint> >();
+    produces< std::vector<recob::Cluster> >();
+    produces< std::vector<recob::Vertex> >();
+    produces< std::vector<recob::Track> >(); 
+    produces< std::vector<recob::Shower> >();
+    produces< std::vector<recob::PCAxis> >();
+
+    produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
+    produces< art::Assns<recob::PFParticle, recob::Cluster> >();
+    produces< art::Assns<recob::PFParticle, recob::Vertex> >();
+    produces< art::Assns<recob::PFParticle, recob::Track> >();
+    produces< art::Assns<recob::PFParticle, recob::Shower> >();
+    produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
+    produces< art::Assns<recob::Track, recob::Hit> >();
+    produces< art::Assns<recob::Shower, recob::Hit> >();
+    produces< art::Assns<recob::Shower, recob::PCAxis> >();
+    produces< art::Assns<recob::SpacePoint, recob::Hit> >();
+    produces< art::Assns<recob::Cluster, recob::Hit> >();
+
+    if (m_ShouldProduceT0s)
+    {
+        produces< std::vector<anab::T0> >();
+        produces< art::Assns<recob::PFParticle, anab::T0> >();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CollectionMerging::produce(art::Event &evt)
+{
+    const lar_pandora::LArPandoraEvent::Labels allHitsCRLabels(m_AllHitsCRProducerLabel, m_AllHitsCRTrackProducerLabel, m_AllHitsCRShowerProducerLabel, m_AllHitProducerLabel);
+    lar_pandora::LArPandoraEvent allHitsCREvent(this, &evt, allHitsCRLabels, m_ShouldProduceT0s);
+
+    const lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels(m_CRRemHitsCRProducerLabel, m_CRRemHitsCRTrackProducerLabel, m_CRRemHitsCRShowerProducerLabel, m_CRRemHitProducerLabel);
+    lar_pandora::LArPandoraEvent crRemHitsCREvent(this, &evt, crRemHitsCRLabels, m_ShouldProduceT0s);
+
+    const lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels(m_CRRemHitsNuProducerLabel, m_CRRemHitsNuTrackProducerLabel, m_CRRemHitsNuShowerProducerLabel, m_CRRemHitProducerLabel);
+    lar_pandora::LArPandoraEvent crRemHitsNuEvent(this, &evt, crRemHitsNuLabels, m_ShouldProduceT0s);
+
+    if (m_ShouldProduceNeutrinos)
+    {
+        lar_pandora::LArPandoraEvent filteredCRRemHitsNuEvent(crRemHitsNuEvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_NuIdCRTagProducerLabel));
+        filteredCRRemHitsNuEvent.WriteToEvent();
+    }
+    else
+    {
+        lar_pandora::LArPandoraEvent filteredAllHitsCREvent(allHitsCREvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_ClearCRTagProducerLabel));
+        lar_pandora::LArPandoraEvent filteredCRRemHitsCREvent(crRemHitsCREvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_NuIdCRTagProducerLabel));
+        lar_pandora::LArPandoraEvent mergedEvent(filteredAllHitsCREvent.Merge(filteredCRRemHitsCREvent));
+        mergedEvent.WriteToEvent();
+    }
+}
+
+} // namespace lar_pandora
