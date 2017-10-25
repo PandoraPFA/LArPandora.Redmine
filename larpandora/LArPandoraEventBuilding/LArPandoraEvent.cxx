@@ -145,89 +145,34 @@ LArPandoraEvent::LArPandoraEvent (const LArPandoraEvent & event, PFParticleVecto
 {
 
     m_pfParticles = selectedPFParticles;
-
     this->FillPFParticleToOriginIdMap(event.m_pfParticleToOriginIdMap);
-
-    SpacePointVector selectedSpacePoints;
-    ClusterVector    selectedClusters;
-    VertexVector     selectedVertices;
-    TrackVector      selectedTracks;
-    ShowerVector     selectedShowers; 
-    PCAxisVector     selectedPCAxes;
-    T0Vector         selectedT0s;
 
     for (art::Ptr< recob::PFParticle > part : selectedPFParticles)
     {
-        this->CollectAssociated(part, event.m_pfParticleSpacePointMap, selectedSpacePoints);
-        this->CollectAssociated(part, event.m_pfParticleClusterMap, selectedClusters);
-        this->CollectAssociated(part, event.m_pfParticleVertexMap, selectedVertices);
-        this->CollectAssociated(part, event.m_pfParticleTrackMap, selectedTracks);
-        this->CollectAssociated(part, event.m_pfParticleShowerMap, selectedShowers);
-        this->CollectAssociated(part, event.m_pfParticlePCAxisMap, selectedPCAxes);
+        this->CollectAssociated(part, event.m_pfParticleSpacePointMap, m_spacePoints);
+        this->CollectAssociated(part, event.m_pfParticleClusterMap, m_clusters);
+        this->CollectAssociated(part, event.m_pfParticleVertexMap, m_vertices);
+        this->CollectAssociated(part, event.m_pfParticleTrackMap, m_tracks);
+        this->CollectAssociated(part, event.m_pfParticleShowerMap, m_showers);
+        this->CollectAssociated(part, event.m_pfParticlePCAxisMap, m_pcAxes);
 
         if (m_shouldProduceT0s) 
-            this->CollectAssociated(part, event.m_pfParticleT0Map, selectedT0s);
+            this->CollectAssociated(part, event.m_pfParticleT0Map, m_t0s);
     }
 
-    m_spacePoints = selectedSpacePoints;
-    m_clusters = selectedClusters;
-    m_vertices = selectedVertices;
-    m_tracks = selectedTracks;
-    m_showers = selectedShowers;
-    m_pcAxes = selectedPCAxes;
-
-    if (m_shouldProduceT0s) 
-        m_t0s = selectedT0s;
-
-    PFParticlesToSpacePoints selectedPFParticleSpacePointMap;
-    PFParticlesToClusters    selectedPFParticleClusterMap;  
-    PFParticlesToVertices    selectedPFParticleVertexMap;  
-    PFParticlesToTracks      selectedPFParticleTrackMap;  
-    PFParticlesToShowers     selectedPFParticleShowerMap;
-    PFParticlesToPCAxes      selectedPFParticlePCAxisMap;
-    PFParticlesToT0s         selectedPFParticleT0Map; 
-
-    SpacePointsToHitVector   selectedSpacePointHitMap;  
-    ClustersToHits           selectedClusterHitMap;    
-    TracksToHits             selectedTrackHitMap;     
-    ShowersToHits            selectedShowerHitMap;
-    ShowersToPCAxes          selectedShowerPCAxisMap;
-
-    this->GetFilteredAssociationMap(selectedPFParticles, selectedSpacePoints, event.m_pfParticleSpacePointMap, selectedPFParticleSpacePointMap);
-    this->GetFilteredAssociationMap(selectedPFParticles, selectedClusters, event.m_pfParticleClusterMap, selectedPFParticleClusterMap);
-    this->GetFilteredAssociationMap(selectedPFParticles, selectedVertices, event.m_pfParticleVertexMap, selectedPFParticleVertexMap);
-    this->GetFilteredAssociationMap(selectedPFParticles, selectedTracks, event.m_pfParticleTrackMap, selectedPFParticleTrackMap);
-    this->GetFilteredAssociationMap(selectedPFParticles, selectedShowers, event.m_pfParticleShowerMap, selectedPFParticleShowerMap);
-    this->GetFilteredAssociationMap(selectedPFParticles, selectedPCAxes, event.m_pfParticlePCAxisMap, selectedPFParticlePCAxisMap);
-    this->GetFilteredAssociationMap(selectedSpacePoints, event.m_hits, event.m_spacePointHitMap, selectedSpacePointHitMap); 
-    this->GetFilteredAssociationMap(selectedClusters, event.m_hits, event.m_clusterHitMap, selectedClusterHitMap);
-    this->GetFilteredAssociationMap(selectedTracks, event.m_hits, event.m_trackHitMap, selectedTrackHitMap);
-    this->GetFilteredAssociationMap(selectedShowers, event.m_hits, event.m_showerHitMap, selectedShowerHitMap);
-    this->GetFilteredAssociationMap(selectedShowers, selectedPCAxes, event.m_showerPCAxisMap, selectedShowerPCAxisMap);
+    this->GetFilteredAssociationMap(m_pfParticles, m_spacePoints, event.m_pfParticleSpacePointMap, m_pfParticleSpacePointMap);
+    this->GetFilteredAssociationMap(m_pfParticles, m_clusters, event.m_pfParticleClusterMap, m_pfParticleClusterMap);
+    this->GetFilteredAssociationMap(m_pfParticles, m_vertices, event.m_pfParticleVertexMap, m_pfParticleVertexMap);
+    this->GetFilteredAssociationMap(m_pfParticles, m_tracks, event.m_pfParticleTrackMap, m_pfParticleTrackMap);
+    this->GetFilteredAssociationMap(m_pfParticles, m_showers, event.m_pfParticleShowerMap, m_pfParticleShowerMap);
+    this->GetFilteredAssociationMap(m_pfParticles, m_pcAxes, event.m_pfParticlePCAxisMap, m_pfParticlePCAxisMap);
+    this->GetFilteredAssociationMap(m_spacePoints, event.m_hits, event.m_spacePointHitMap, m_spacePointHitMap); 
+    this->GetFilteredAssociationMap(m_clusters, event.m_hits, event.m_clusterHitMap, m_clusterHitMap);
+    this->GetFilteredAssociationMap(m_tracks, event.m_hits, event.m_trackHitMap, m_trackHitMap);
+    this->GetFilteredAssociationMap(m_showers, event.m_hits, event.m_showerHitMap, m_showerHitMap);
+    this->GetFilteredAssociationMap(m_showers, m_pcAxes, event.m_showerPCAxisMap, m_showerPCAxisMap);
     
-    if (m_shouldProduceT0s) 
-        this->GetFilteredAssociationMap(selectedPFParticles, selectedT0s, event.m_pfParticleT0Map, selectedPFParticleT0Map);
-
-    m_pfParticleSpacePointMap = selectedPFParticleSpacePointMap;
-    m_pfParticleClusterMap = selectedPFParticleClusterMap;
-    m_pfParticleVertexMap = selectedPFParticleVertexMap;
-    m_pfParticleTrackMap = selectedPFParticleTrackMap;
-    m_pfParticleShowerMap = selectedPFParticleShowerMap;
-    m_pfParticlePCAxisMap = selectedPFParticlePCAxisMap;
-
-    if (m_shouldProduceT0s) 
-        m_pfParticleT0Map = selectedPFParticleT0Map;
-
-    m_spacePointHitMap = selectedSpacePointHitMap;
-    m_clusterHitMap = selectedClusterHitMap;
-    m_trackHitMap = selectedTrackHitMap;
-    m_showerHitMap = selectedShowerHitMap;
-    m_showerPCAxisMap = selectedShowerPCAxisMap;
-
-    PFParticlesToPFParticles  selectedPFParticleDaughterMap;
-    this->GetFilteredHierarchyMap(selectedPFParticles, event.m_pfParticleDaughterMap, selectedPFParticleDaughterMap);
-
-    m_pfParticleDaughterMap = selectedPFParticleDaughterMap;
+    this->GetFilteredHierarchyMap(selectedPFParticles, event.m_pfParticleDaughterMap, m_pfParticleDaughterMap);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -240,7 +185,6 @@ void LArPandoraEvent::GetFilteredHierarchyMap(const PFParticleVector & filteredP
 
         if (! outputPFParticleDaughterMap.insert(PFParticlesToPFParticles::value_type(it->first, it->second)).second)
             throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredHierarchyMap -- Can't add multiple map entries for same PFParticle" << std::endl;
-
     }
 }
 
@@ -341,7 +285,6 @@ void LArPandoraEvent::GetDownstreamPFParticles(const art::Ptr< recob::PFParticle
 
 void LArPandoraEvent::WriteToEvent()
 {
-   
     this->WriteCollection(m_pfParticles);
     this->WriteCollection(m_spacePoints);
     this->WriteCollection(m_clusters);   
@@ -367,7 +310,6 @@ void LArPandoraEvent::WriteToEvent()
         this->WriteCollection(m_t0s);      
         this->WriteAssociation(m_pfParticleT0Map, m_pfParticles, m_t0s);      
     }
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -380,7 +322,6 @@ LArPandoraEvent LArPandoraEvent::Merge(LArPandoraEvent & other)
     LArPandoraEvent outputEvent(other);
 
     this->MergePFParticleToOriginIdMap(outputEvent.m_pfParticleToOriginIdMap, m_pfParticleToOriginIdMap);
-
 
     this->MergeCollection(outputEvent.m_pfParticles, m_pfParticles);
     this->MergeCollection(outputEvent.m_spacePoints, m_spacePoints);
@@ -417,7 +358,6 @@ LArPandoraEvent LArPandoraEvent::Merge(LArPandoraEvent & other)
 
 void LArPandoraEvent::MergePFParticleToOriginIdMap(std::map< art::Ptr< recob::PFParticle >, unsigned int > & mapToMerge, const std::map< art::Ptr< recob::PFParticle >, unsigned int > & mapToAdd)
 {
-
     unsigned int maxID = 0;
     if (mapToMerge.size() != 0) 
         maxID = std::max_element(mapToMerge.begin(), mapToMerge.end(), [](const std::pair< art::Ptr< recob::PFParticle >, unsigned int > & p1, const std::pair< art::Ptr< recob::PFParticle >, unsigned int  > & p2) { return p1.second < p2.second; })->second;
@@ -427,7 +367,6 @@ void LArPandoraEvent::MergePFParticleToOriginIdMap(std::map< art::Ptr< recob::PF
         if (!mapToMerge.insert(std::map< art::Ptr< recob::PFParticle >, unsigned int >::value_type(it->first, it->second + maxID + 1)).second)
             throw cet::exception("LArPandora") << " LArPandoraEvent::MergePFParticleToOriginIdMap - Can't merge collections containing repeated PFParticles." << std::endl;
     }
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
