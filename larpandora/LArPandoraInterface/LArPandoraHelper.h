@@ -528,6 +528,16 @@ public:
      *  @return true/false
      */
     static bool IsVisible(const art::Ptr<simb::MCParticle> particle);
+
+    /**
+     *  @brief  Get all hits associated with input spacepoints
+     *
+     *  @param  pEvt              the event containing the hits
+     *  @param  pfParticleLabel   label of the collection producing PFParticles
+     *  @param  inputSpacePoints  input spacepoints
+     *  @param  associatedHits    output hits associated with spacepoints
+     */
+    static void GetAssociatedHits( const art::Event * pEvt, const std::string & pfParticleLabel, const SpacePointVector & inputSpacePoints, HitVector & associatedHits );
 };
 
 } // namespace lar_pandora

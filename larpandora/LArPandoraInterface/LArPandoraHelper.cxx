@@ -1165,4 +1165,18 @@ bool LArPandoraHelper::IsVisible(const art::Ptr<simb::MCParticle> particle)
     return false;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::GetAssociatedHits( const art::Event * pEvt, const std::string & pfParticleLabel, const std::vector< art::Ptr< recob::SpacePoint > > & inputSpacePoints, std::vector< art::Ptr< recob::Hit > > & associatedHits )
+{
+    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
+    pEvt->getByLabel( pfParticleLabel, spacePointHandle );
+    art::FindManyP< recob::Hit > spacePointToHitAssoc( spacePointHandle, *pEvt, pfParticleLabel);
+    
+    for ( const art::Ptr< recob::SpacePoint > & spacePoint : inputSpacePoints ) {
+        std::vector< art::Ptr< recob::Hit > > hits = spacePointToHitAssoc.at( spacePoint.key() );
+        associatedHits.insert( associatedHits.end(), hits.begin(), hits.end() );
+    }
+}
+
 } // namespace lar_pandora
