@@ -162,9 +162,10 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         particleToVertexIter->second.front()->XYZ(vertexXYZ);
         const pandora::CartesianVector vertexPosition(vertexXYZ[0], vertexXYZ[1], vertexXYZ[2]);
 
-        // Call pandora "fast" shower fitter - TODO check exception handling
+        // Call pandora "fast" shower fitter
         try
         {
+            // Ensure successful creation of all structures before placing results in output containers
             const lar_content::LArShowerPCA larShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, vertexPosition));
             const recob::Shower shower(LArPandoraShowerCreation::BuildShower(larShowerPCA, vertexPosition));
             const recob::PCAxis pcAxis(LArPandoraShowerCreation::BuildPCAxis(larShowerPCA));

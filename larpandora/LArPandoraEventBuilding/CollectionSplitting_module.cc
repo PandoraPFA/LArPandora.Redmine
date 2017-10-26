@@ -18,7 +18,8 @@ namespace lar_pandora
 class CollectionSplitting;
 
 
-class CollectionSplitting : public art::EDProducer {
+class CollectionSplitting : public art::EDProducer
+{
 public:
     explicit CollectionSplitting(fhicl::ParameterSet const & pset);
 
@@ -102,7 +103,7 @@ void CollectionSplitting::produce(art::Event &evt)
     if (!m_ShouldProduceNeutrinos && !m_ShouldProduceCosmics) 
         throw cet::exception("LArPandora") << " CollectionSplitting -- Must be configured to produce neutrinos or cosmics or both.";
 
-    lar_pandora::LArPandoraEvent::Labels labels(m_InputProducerLabel, m_TrackProducerLabel, m_ShowerProducerLabel, m_HitProducerLabel); 
+    const lar_pandora::LArPandoraEvent::Labels labels(m_InputProducerLabel, m_TrackProducerLabel, m_ShowerProducerLabel, m_HitProducerLabel); 
     lar_pandora::LArPandoraEvent fullEvent(this, &evt, labels, m_ShouldProduceT0s);
 
     if (m_ShouldProduceNeutrinos && m_ShouldProduceCosmics)
