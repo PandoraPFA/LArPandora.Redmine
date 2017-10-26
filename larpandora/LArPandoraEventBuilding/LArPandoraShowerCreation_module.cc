@@ -181,8 +181,8 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         art::Ptr<recob::Shower> pShower(makeShowerPtr(outputShowers->size() - 1));
         art::Ptr<recob::PCAxis> pPCAxis(makePCAxisPtr(outputPCAxes->size() - 1));
 
-        std::vector< art::Ptr< recob::Hit > > hitsInParticle;
-        LArPandoraHelper::GetAssociatedHits( &evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle );
+        HitVector hitsInParticle;
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle);
 
         // Output associations, after output objects are in place
         util::CreateAssn(*this, evt, pShower, pPFParticle, *(outputParticlesToShowers.get()));

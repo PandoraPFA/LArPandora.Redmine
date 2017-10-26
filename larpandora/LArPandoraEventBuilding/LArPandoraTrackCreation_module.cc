@@ -167,8 +167,8 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
             continue;
         }
 
-        std::vector< art::Ptr< recob::Hit > > hitsInParticle;
-        LArPandoraHelper::GetAssociatedHits( &evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle );
+        HitVector hitsInParticle;
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle);
 
         // Output objects
         outputTracks->emplace_back(LArPandoraTrackCreation::BuildTrack(trackCounter++, trackStateVector));
@@ -184,7 +184,6 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     evt.put(std::move(outputTracks));
     evt.put(std::move(outputTracksToHits));
     evt.put(std::move(outputParticlesToTracks));
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
