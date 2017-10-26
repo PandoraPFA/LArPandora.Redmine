@@ -15,7 +15,8 @@
 namespace lar_pandora
 {
 
-class LArPandoraNeutrinoId : public art::EDProducer {
+class LArPandoraNeutrinoId : public art::EDProducer
+{
 public:
     explicit LArPandoraNeutrinoId(fhicl::ParameterSet const & pset);
 
@@ -40,7 +41,9 @@ DEFINE_ART_MODULE(LArPandoraNeutrinoId)
 // implementation follows
 
 #include "lardataobj/RecoBase/PFParticle.h"
+
 #include "larpandora/LArPandoraEventBuilding/LArPandoraSlices.h"
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 namespace lar_pandora
 {
@@ -54,20 +57,23 @@ LArPandoraNeutrinoId::LArPandoraNeutrinoId(fhicl::ParameterSet const & pset) :
     produces< art::Assns< recob::PFParticle, anab::CosmicTag > >();
 }
 
-void LArPandoraNeutrinoId::produce(art::Event & evt)
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraNeutrinoId::produce(art::Event &evt)
 {
-    lar_pandora::LArPandoraSlices slices(this, &evt, m_CRProducerLabel, m_NuProducerLabel, m_HitProducerLabel);
+    LArPandoraSlices slices(this, &evt, m_CRProducerLabel, m_NuProducerLabel, m_HitProducerLabel);
 
-    for (const auto & slice : slices.GetSlices()) {
-        std::vector< art::Ptr< recob::PFParticle > > crParticles = slices.GetSliceAsCR(slice);
-        std::vector< art::Ptr< recob::PFParticle > > nuParticles = slices.GetSliceAsNu(slice);
+    for (const auto &slice : slices.GetSlices())
+    {
+        const PFParticleVector &crParticles = slices.GetSliceAsCR(slice);
+        const PFParticleVector &nuParticles = slices.GetSliceAsNu(slice);
 
-        // Logic to produce a map: sliceId --> sliceProperties
+        // TODO Logic to produce a map: sliceId --> sliceProperties
         // ...
     }
 
-    // Temporarily just choose the first slice.
-    lar_pandora::LArPandoraSlices::SliceId bestSliceId = 0;
+    // TODO Implement slice selection; for now always take first slice
+    const LArPandoraSlices::SliceId bestSliceId(0);
 
     slices.IdSliceAsNu(bestSliceId);
     slices.WriteTags();

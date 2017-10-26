@@ -29,8 +29,6 @@
 #include <algorithm>
 #include <map>
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 namespace lar_pandora
 {
 
@@ -47,8 +45,80 @@ typedef std::map< art::Ptr<recob::SpacePoint>, std::vector< art::Ptr<recob::Hit>
 class LArPandoraEvent
 {
 public:
+    /**
+     *  @brief  Class to handle the required producer labels 
+     */
+    class Labels
+    {
+    public:
+        /**
+         *  @brief  Label type enumeration
+         */
+        enum LabelType
+        {
+            PFParticleLabel,
+            SpacePointLabel,
+            ClusterLabel,
+            VertexLabel,
+            TrackLabel,
+            ShowerLabel,
+            T0Label,
+            PCAxisLabel,
+            HitLabel,
+            PFParticleToSpacePointLabel,
+            PFParticleToClusterLabel,
+            PFParticleToVertexLabel,
+            PFParticleToTrackLabel,
+            PFParticleToShowerLabel,
+            PFParticleToT0Label,
+            PFParticleToPCAxisLabel,
+            SpacePointToHitLabel,
+            ClusterToHitLabel,
+            TrackToHitLabel,
+            ShowerToHitLabel,
+            ShowerToPCAxisLabel
+        };
 
-    class Labels;
+        /**
+         *  @brief  Minimal parametrised constructor.
+         *          Sets all collection labels to be the same as the PFParticle producer label 
+         */
+        Labels(const std::string &pfParticleProducerLabel, const std::string &hitProducerLabel);
+
+        /**
+         *  @brief  Track / Shower parametrised constructor.
+         *          Sets all collection labels to be the same as the PFParticle producer label,
+         *          except those relating to track and shower production, which are supplied.
+         */
+        Labels(const std::string &pfParticleProducerLabel, const std::string &trackProducerLabel, const std::string &showerProducerLabel,
+            const std::string &hitProducerLabel);
+
+        const std::string &GetLabel(const LabelType &type) const;
+
+        void SetSpacePointProducerLabel(const std::string &label);
+        void SetClusterProducerLabel(const std::string &label);
+        void SetVertexProducerLabel(const std::string &label);
+        void SetTrackProducerLabel(const std::string &label);
+        void SetShowerProducerLabel(const std::string &label);
+        void SetT0ProducerLabel(const std::string &label);
+        void SetPCAxisProducerLabel(const std::string &label);
+
+        void SetPFParticleToSpacePointProducerLabel(const std::string &label);
+        void SetPFParticleToClusterProducerLabel(const std::string &label);
+        void SetPFParticleToVertexProducerLabel(const std::string &label);
+        void SetPFParticleToTrackProducerLabel(const std::string &label);
+        void SetPFParticleToShowerProducerLabel(const std::string &label);
+        void SetPFParticleToT0ProducerLabel(const std::string &label);
+        void SetPFParticleToPCAxisProducerLabel(const std::string &label);
+        void SetSpacePointToHitProducerLabel(const std::string &label);
+        void SetClusterToHitProducerLabel(const std::string &label);
+        void SetTrackToHitProducerLabel(const std::string &label);
+        void SetShowerToHitProducerLabel(const std::string &label);
+        void SetShowerToPCAxisProducerLabel(const std::string &label);
+
+    private:
+        std::map<LabelType, std::string>    m_labels;   ///< Map holding the labels
+    };
 
     /**
      *  @brief  Constructor from an art::Event
@@ -60,7 +130,6 @@ public:
      *  @param  shift              amount by which to shift PFParticle IDs when merging
      */
     LArPandoraEvent(art::EDProducer *pProducer, art::Event *pEvent, const Labels & inputLabels, const bool & shouldProduceT0s = false, const size_t & shift = 100000);
-
 
     /**
      *  @brief  Construct by copying an existing LArPandoraEvent, replacing the collections and associations 
@@ -98,81 +167,7 @@ public:
      */
     LArPandoraEvent Merge(LArPandoraEvent & other);
 
-
-    /**
-     *  @brief  Class to handle the required producer labels 
-     */
-    class Labels
-    {
-    public:
-
-        /**
-         *  @brief  Minimal parametrised constructor.
-         *          Sets all collection labels to be the same as the PFParticle producer label 
-         */
-        Labels(std::string pfParticleProducerLabel, std::string hitProducerLabel);
-
-        /**
-         *  @brief  Track / Shower parametrised constructor.
-         *          Sets all collection labels to be the same as the PFParticle producer label,
-         *          except those relating to track and shower production, which are supplied.
-         */
-        Labels(std::string pfParticleProducerLabel, std::string trackProducerLabel, std::string showerProducerLabel, std::string hitProducerLabel);
-
-        void SetSpacePointProducerLabel(const std::string & label);
-        void SetClusterProducerLabel(const std::string & label);
-        void SetVertexProducerLabel(const std::string & label);
-        void SetTrackProducerLabel(const std::string & label);
-        void SetShowerProducerLabel(const std::string & label);
-        void SetT0ProducerLabel(const std::string & label);
-        void SetPCAxisProducerLabel(const std::string & label);
-
-        void SetPFParticleToSpacePointProducerLabel(const std::string & label);
-        void SetPFParticleToClusterProducerLabel(const std::string & label);
-        void SetPFParticleToVertexProducerLabel(const std::string & label);
-        void SetPFParticleToTrackProducerLabel(const std::string & label);
-        void SetPFParticleToShowerProducerLabel(const std::string & label);
-        void SetPFParticleToT0ProducerLabel(const std::string & label);
-        void SetPFParticleToPCAxisProducerLabel(const std::string & label);
-        void SetSpacePointToHitProducerLabel(const std::string & label);
-        void SetClusterToHitProducerLabel(const std::string & label);
-        void SetTrackToHitProducerLabel(const std::string & label);
-        void SetShowerToHitProducerLabel(const std::string & label);
-        void SetShowerToPCAxisProducerLabel(const std::string & label);
-
-        enum LabelType
-        {
-            PFParticleLabel,
-            SpacePointLabel,
-            ClusterLabel,
-            VertexLabel,
-            TrackLabel,
-            ShowerLabel,
-            T0Label,
-            PCAxisLabel,
-            HitLabel,
-            PFParticleToSpacePointLabel,
-            PFParticleToClusterLabel,
-            PFParticleToVertexLabel,
-            PFParticleToTrackLabel,
-            PFParticleToShowerLabel,
-            PFParticleToT0Label,
-            PFParticleToPCAxisLabel,
-            SpacePointToHitLabel,
-            ClusterToHitLabel,
-            TrackToHitLabel,
-            ShowerToHitLabel,
-            ShowerToPCAxisLabel
-        };
-
-        std::string GetLabel(const LabelType & type);
-
-    private:
-        std::map< LabelType, std::string > m_labels;  ///< Map holding the labels
-    };
-
 private:
-    
     /**
      *  @brief  Get the collections and associations from m_pEvent with the required labels
      */
@@ -344,8 +339,6 @@ private:
     template < class T, class U >
     void MergeAssociation(std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationToMerge, std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & association);
 
-    // -------------------------------------------------------------------------------------------------------------------------------------
-    
     art::EDProducer *m_pProducer;  ///<  The producer which should write the output collections and associations
     art::Event      *m_pEvent;     ///<  The event to consider
     Labels           m_labels;     ///<  A set of labels describing the producers for each input collection

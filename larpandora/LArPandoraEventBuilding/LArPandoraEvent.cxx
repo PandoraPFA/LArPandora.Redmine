@@ -6,8 +6,6 @@
 
 #include "larpandora/LArPandoraEventBuilding/LArPandoraEvent.h"
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 namespace lar_pandora
 {
 
@@ -370,8 +368,9 @@ void LArPandoraEvent::MergePFParticleToOriginIdMap(std::map< art::Ptr< recob::PF
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-LArPandoraEvent::Labels::Labels(std::string pfParticleProducerLabel, std::string hitProducerLabel)
+LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, const std::string &hitProducerLabel)
 {
     m_labels.insert(std::map< LabelType, std::string >::value_type(PFParticleLabel, pfParticleProducerLabel));
     m_labels.insert(std::map< LabelType, std::string >::value_type(SpacePointLabel, pfParticleProducerLabel));
@@ -399,7 +398,8 @@ LArPandoraEvent::Labels::Labels(std::string pfParticleProducerLabel, std::string
 
 //------------------------------------------------------------------------------------------------------------------------------------------
         
-LArPandoraEvent::Labels::Labels(std::string pfParticleProducerLabel, std::string trackProducerLabel, std::string showerProducerLabel, std::string hitProducerLabel)
+LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, const std::string &trackProducerLabel, const std::string &showerProducerLabel,
+    const std::string &hitProducerLabel)
 {
     m_labels.insert(std::map< LabelType, std::string >::value_type(PFParticleLabel, pfParticleProducerLabel));
     m_labels.insert(std::map< LabelType, std::string >::value_type(SpacePointLabel, pfParticleProducerLabel));
@@ -427,146 +427,142 @@ LArPandoraEvent::Labels::Labels(std::string pfParticleProducerLabel, std::string
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetSpacePointProducerLabel(const std::string & label)
+const std::string &LArPandoraEvent::Labels::GetLabel(const LabelType &type) const
+{
+    return m_labels.at(type);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEvent::Labels::SetSpacePointProducerLabel(const std::string &label)
 {
     m_labels[SpacePointLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetClusterProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetClusterProducerLabel(const std::string &label)
 {
     m_labels[ClusterLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetVertexProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetVertexProducerLabel(const std::string &label)
 {
     m_labels[VertexLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetTrackProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetTrackProducerLabel(const std::string &label)
 {
     m_labels[TrackLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetShowerProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetShowerProducerLabel(const std::string &label)
 {
     m_labels[ShowerLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetT0ProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetT0ProducerLabel(const std::string &label)
 {
     m_labels[T0Label] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPCAxisProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPCAxisProducerLabel(const std::string &label)
 {
     m_labels[PCAxisLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
         
-void LArPandoraEvent::Labels::SetPFParticleToSpacePointProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToSpacePointProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToSpacePointLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToClusterProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToClusterProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToClusterLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToVertexProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToVertexProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToVertexLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToTrackProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToTrackProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToTrackLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToShowerProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToShowerProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToShowerLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToT0ProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToT0ProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToT0Label] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetPFParticleToPCAxisProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetPFParticleToPCAxisProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToPCAxisLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetSpacePointToHitProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetSpacePointToHitProducerLabel(const std::string &label)
 {
     m_labels[SpacePointToHitLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetClusterToHitProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetClusterToHitProducerLabel(const std::string &label)
 {
     m_labels[ClusterToHitLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetTrackToHitProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetTrackToHitProducerLabel(const std::string &label)
 {
     m_labels[TrackToHitLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetShowerToHitProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetShowerToHitProducerLabel(const std::string &label)
 {
     m_labels[ShowerToHitLabel] = label;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEvent::Labels::SetShowerToPCAxisProducerLabel(const std::string & label)
+void LArPandoraEvent::Labels::SetShowerToPCAxisProducerLabel(const std::string &label)
 {
     m_labels[ShowerToPCAxisLabel] = label;
 }
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-std::string LArPandoraEvent::Labels::GetLabel(const LabelType & type)
-{
-    return m_labels[ type ];
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 } // namespace lar_pandora

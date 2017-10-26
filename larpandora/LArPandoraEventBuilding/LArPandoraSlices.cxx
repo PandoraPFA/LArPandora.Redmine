@@ -10,12 +10,11 @@
 
 #include "larpandora/LArPandoraEventBuilding/LArPandoraSlices.h"
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 namespace lar_pandora
 {
 
-LArPandoraSlices::LArPandoraSlices(art::EDProducer *pProducer, art::Event *pEvent, const std::string & crRecoProducerLabel, const std::string & nuRecoProducerLabel, const std::string & hitProducerLabel) :
+LArPandoraSlices::LArPandoraSlices(art::EDProducer *pProducer, art::Event *pEvent, const std::string &crRecoProducerLabel, const std::string &nuRecoProducerLabel,
+        const std::string &hitProducerLabel) :
     m_pProducer(pProducer),
     m_pEvent(pEvent),
     m_crRecoProducerLabel(crRecoProducerLabel),
@@ -28,60 +27,59 @@ LArPandoraSlices::LArPandoraSlices(art::EDProducer *pProducer, art::Event *pEven
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-std::vector< LArPandoraSlices::SliceId > LArPandoraSlices::GetSlices()
+std::vector<LArPandoraSlices::SliceId> LArPandoraSlices::GetSlices()
 {
-    std::vector< SliceId > slices(m_crSlicePFParticles.size());
+    std::vector<SliceId> slices(m_crSlicePFParticles.size());
     std::iota(std::begin(slices), std::end(slices), 0);
     return slices;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PFParticleVector LArPandoraSlices::GetSliceAsCR(const SliceId & id)
+PFParticleVector LArPandoraSlices::GetSliceAsCR(const SliceId sliceId)
 {
-    if (m_crSlicePFParticles.count(id) == 0)
-        throw cet::exception("LArPandora") << " LArPandoraSlices::GetSliceAsCR -- Slice Id " << id << " is out of bounds.";
+    if (m_crSlicePFParticles.count(sliceId) == 0)
+        throw cet::exception("LArPandora") << " LArPandoraSlices::GetSliceAsCR -- Slice Id " << sliceId << " is out of bounds.";
 
-    return m_crSlicePFParticles.at(id);
+    return m_crSlicePFParticles.at(sliceId);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PFParticleVector LArPandoraSlices::GetSliceAsNu(const SliceId & id)
+PFParticleVector LArPandoraSlices::GetSliceAsNu(const SliceId sliceId)
 {
-    if (m_nuSlicePFParticles.count(id) == 0)
-        throw cet::exception("LArPandora") << " LArPandoraSlices::GetSliceAsNu -- Slice Id " << id << " is out of bounds.";
+    if (m_nuSlicePFParticles.count(sliceId) == 0)
+        throw cet::exception("LArPandora") << " LArPandoraSlices::GetSliceAsNu -- Slice Id " << sliceId << " is out of bounds.";
 
-    return m_nuSlicePFParticles.at(id);
+    return m_nuSlicePFParticles.at(sliceId);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::IdSliceAsNu(const SliceId & id)
+void LArPandoraSlices::IdSliceAsNu(const SliceId sliceId)
 {
-    if (m_nuSlicePFParticles.count(id) == 0)
-        throw cet::exception("LArPandora") << " LArPandoraSlices::IdSliceAsNu -- Can't identify slice " << id << " as the neutrino. Slice Id out of bounds.";
+    if (m_nuSlicePFParticles.count(sliceId) == 0)
+        throw cet::exception("LArPandora") << " LArPandoraSlices::IdSliceAsNu -- Can't identify slice " << sliceId << " as the neutrino. Slice Id out of bounds.";
 
     m_doesEventContainNeutrino = true;
-    m_nuSliceId = id;
+    m_nuSliceId = sliceId;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraSlices::WriteTags()
 {
-
     if (m_nuSlicePFParticles.size() != m_crSlicePFParticles.size())
         throw cet::exception("LArPandora") << " LArPandoraSlices::WriteTags -- Malformed slices.";
 
     std::unique_ptr< std::vector< anab::CosmicTag > >                    outputTags(new std::vector< anab::CosmicTag >);
     std::unique_ptr< art::Assns< recob::PFParticle, anab::CosmicTag > >  outputAssn(new art::Assns< recob::PFParticle, anab::CosmicTag >);
 
-    for (std::map< SliceId, PFParticleVector >::const_iterator it = m_nuSlicePFParticles.begin(); it != m_nuSlicePFParticles.end(); ++it) 
+    for (const auto &mapEntry : m_nuSlicePFParticles) 
     {
-        SliceId sliceId = it->first;
-        PFParticleVector crPFParticles = this->GetSliceAsCR(sliceId);
-        PFParticleVector nuPFParticles = this->GetSliceAsNu(sliceId);
+        const SliceId sliceId(mapEntry.first);
+        const PFParticleVector &crPFParticles(this->GetSliceAsCR(sliceId));
+        const PFParticleVector &nuPFParticles(this->GetSliceAsNu(sliceId));
 
         if (!m_doesEventContainNeutrino)
         {
@@ -97,22 +95,20 @@ void LArPandoraSlices::WriteTags()
     
     m_pEvent->put(std::move(outputTags));
     m_pEvent->put(std::move(outputAssn));
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::WriteTag(const bool & shouldTagAsNeutrino, const PFParticleVector & pfParticleVector, std::unique_ptr< std::vector< anab::CosmicTag > > & outputTags, std::unique_ptr< art::Assns< recob::PFParticle, anab::CosmicTag > > &  outputAssn) 
+void LArPandoraSlices::WriteTag(const bool shouldTagAsNeutrino, const PFParticleVector &pfParticleVector, std::unique_ptr< std::vector<anab::CosmicTag> > &outputTags,
+    std::unique_ptr< art::Assns<recob::PFParticle, anab::CosmicTag> > &outputAssn) 
 {
-    const art::PtrMaker< anab::CosmicTag > makeCRTagPtr(*m_pEvent, *m_pProducer);
+    const art::PtrMaker<anab::CosmicTag> makeCRTagPtr(*m_pEvent, *m_pProducer);
+    const std::vector<float> dummyEndPoints(3, std::numeric_limits<float>::max());
 
-    for (const art::Ptr< recob::PFParticle > & part : pfParticleVector)
+    for (const art::Ptr<recob::PFParticle> &part : pfParticleVector)
     {
-        std::vector< float > endPoints(3, std::numeric_limits< float >::max());
-        anab::CosmicTag tag(endPoints, endPoints, std::numeric_limits< float >::max(), (shouldTagAsNeutrino ? anab::kNotTagged : anab::kUnknown));
-
-        outputTags->emplace_back(tag);
-        art::Ptr< anab::CosmicTag > pTag(makeCRTagPtr(outputTags->size() - 1));
+        outputTags->emplace_back(anab::CosmicTag(dummyEndPoints, dummyEndPoints, std::numeric_limits<float>::max(), (shouldTagAsNeutrino ? anab::kNotTagged : anab::kUnknown)));
+        art::Ptr<anab::CosmicTag> pTag(makeCRTagPtr(outputTags->size() - 1));
         util::CreateAssn(*m_pProducer, *m_pEvent, pTag, part, *outputAssn);  
     }
 }
@@ -122,42 +118,42 @@ void LArPandoraSlices::WriteTag(const bool & shouldTagAsNeutrino, const PFPartic
 void LArPandoraSlices::IdentifySlices()
 {
     // Collect inputs
-    PFParticleVector           nuParticles;
-    SpacePointVector           nuSpacePoints;
-    PFParticlesToSpacePoints   nuParticlesToSpacePoints;
-    SpacePointsToHits          nuSpacePointsToHits;
+    PFParticleVector nuParticles;
+    SpacePointVector nuSpacePoints;
+    PFParticlesToSpacePoints nuParticlesToSpacePoints;
+    SpacePointsToHits nuSpacePointsToHits;
     LArPandoraHelper::CollectPFParticles(*m_pEvent, m_nuRecoProducerLabel, nuParticles, nuParticlesToSpacePoints);
     LArPandoraHelper::CollectSpacePoints(*m_pEvent, m_nuRecoProducerLabel, nuSpacePoints, nuSpacePointsToHits);
 
-    PFParticleVector           crParticles;
-    SpacePointVector           crSpacePoints;
-    PFParticlesToSpacePoints   crParticlesToSpacePoints;
-    SpacePointsToHits          crSpacePointsToHits;
+    PFParticleVector crParticles;
+    SpacePointVector crSpacePoints;
+    PFParticlesToSpacePoints crParticlesToSpacePoints;
+    SpacePointsToHits crSpacePointsToHits;
     LArPandoraHelper::CollectPFParticles(*m_pEvent, m_crRecoProducerLabel, crParticles, crParticlesToSpacePoints);
     LArPandoraHelper::CollectSpacePoints(*m_pEvent, m_crRecoProducerLabel, crSpacePoints, crSpacePointsToHits);
     
     // Get Final state PFParticle -> Hit maps
-    PFParticlesToHits  nuParticlesToHits;
-    HitsToPFParticles  nuHitsToParticles;
+    PFParticlesToHits nuParticlesToHits;
+    HitsToPFParticles nuHitsToParticles;
     LArPandoraHelper::BuildPFParticleHitMaps(nuParticles, nuParticlesToSpacePoints, nuSpacePointsToHits, nuParticlesToHits, nuHitsToParticles, LArPandoraHelper::kAddDaughters);
     
-    PFParticlesToHits  crParticlesToHits;
-    HitsToPFParticles  crHitsToParticles;
+    PFParticlesToHits crParticlesToHits;
+    HitsToPFParticles crHitsToParticles;
     LArPandoraHelper::BuildPFParticleHitMaps(crParticles, crParticlesToSpacePoints, crSpacePointsToHits, crParticlesToHits, crHitsToParticles, LArPandoraHelper::kAddDaughters);
     
     // Get top-level and final state PFParticles
-    PFParticleVector  nuTopLevelParticles;
+    PFParticleVector nuTopLevelParticles;
     LArPandoraHelper::SelectNeutrinoPFParticles(nuParticles, nuTopLevelParticles);
     
-    PFParticleVector  nuFinalStateParticles;
+    PFParticleVector nuFinalStateParticles;
     LArPandoraHelper::SelectFinalStatePFParticles(nuParticles, nuFinalStateParticles);
     
-    PFParticleVector  crFinalStateParticles;
+    PFParticleVector crFinalStateParticles;
     LArPandoraHelper::SelectFinalStatePFParticles(crParticles, crFinalStateParticles);
 
     // Get PFParticle maps
-    PFParticleMap     nuPFParticleIdMap;
-    PFParticleMap     crPFParticleIdMap;
+    PFParticleMap nuPFParticleIdMap;
+    PFParticleMap crPFParticleIdMap;
     this->GetPFParticleIdMap(nuParticles, nuPFParticleIdMap);
     this->GetPFParticleIdMap(crParticles, crPFParticleIdMap);
 
@@ -167,51 +163,51 @@ void LArPandoraSlices::IdentifySlices()
 
     // Add CR PFParticles to slices if they share any hits, and make new slice otherwise
     this->AddCRParticlesToSlices(crPFParticleIdMap, crFinalStateParticles, crParticlesToHits, nuHitsToParticles, nuFinalStateParticlesToSlice);
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::GetPFParticleIdMap(const PFParticleVector & inputParticles, PFParticleMap & outputMap)
+void LArPandoraSlices::GetPFParticleIdMap(const PFParticleVector &inputParticles, PFParticleMap &outputMap)
 {
-    for (const art::Ptr< recob::PFParticle > & part : inputParticles) 
+    for (const art::Ptr<recob::PFParticle> &part : inputParticles) 
         outputMap.insert(PFParticleMap::value_type(part->Self(), part));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::MakeSlicePerNeutrino(const PFParticleMap & nuPFParticleIdMap, const PFParticleVector & nuTopLevelParticles, const PFParticleVector & nuFinalStateParticles, std::map< art::Ptr< recob::PFParticle>, SliceId > &  nuFinalStateParticlesToSlice)
+void LArPandoraSlices::MakeSlicePerNeutrino(const PFParticleMap &nuPFParticleIdMap, const PFParticleVector &nuTopLevelParticles,
+    const PFParticleVector &nuFinalStateParticles, std::map< art::Ptr< recob::PFParticle>, SliceId > &nuFinalStateParticlesToSlice)
 {
     for (SliceId id = 0; id < nuTopLevelParticles.size(); id++) 
     {
-        const art::Ptr< recob::PFParticle > topLevelParticle = nuTopLevelParticles[id];
+        const art::Ptr<recob::PFParticle> topLevelParticle = nuTopLevelParticles.at(id);
 
-        PFParticleVector  nuParticlesInSlice;
-        PFParticleVector  crParticlesInSlice;
+        PFParticleVector nuParticlesInSlice;
+        PFParticleVector crParticlesInSlice;
         this->CollectDaughters(nuPFParticleIdMap, topLevelParticle, nuParticlesInSlice);
 
-        m_nuSlicePFParticles.insert(std::map< SliceId, PFParticleVector >::value_type(id, nuParticlesInSlice)); 
-        m_crSlicePFParticles.insert(std::map< SliceId, PFParticleVector >::value_type(id, crParticlesInSlice)); 
+        m_nuSlicePFParticles.insert(std::map<SliceId, PFParticleVector>::value_type(id, nuParticlesInSlice)); 
+        m_crSlicePFParticles.insert(std::map<SliceId, PFParticleVector>::value_type(id, crParticlesInSlice)); 
         
-        for (const art::Ptr< recob::PFParticle > & part : nuFinalStateParticles)
+        for (const art::Ptr<recob::PFParticle> &part : nuFinalStateParticles)
         {
-
-            if (LArPandoraHelper::GetParentPFParticle(nuPFParticleIdMap, part) != topLevelParticle) continue;
+            if (LArPandoraHelper::GetParentPFParticle(nuPFParticleIdMap, part) != topLevelParticle)
+                continue;
 
             // Now have a final state daughter of the topLevelParticle
-            nuFinalStateParticlesToSlice.insert(std::map< art::Ptr< recob::PFParticle>, SliceId >::value_type(part, id));
+            nuFinalStateParticlesToSlice.insert(std::map<art::Ptr<recob::PFParticle>, SliceId>::value_type(part, id));
         }
     } 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::CollectDaughters(const PFParticleMap & pfParticleMap, const art::Ptr< recob::PFParticle > & part, PFParticleVector & daughterParticles)
+void LArPandoraSlices::CollectDaughters(const PFParticleMap &pfParticleMap, const art::Ptr<recob::PFParticle> &part, PFParticleVector &daughterParticles)
 {
     if (std::find(daughterParticles.begin(), daughterParticles.end(), part) == daughterParticles.end()) 
         daughterParticles.push_back(part);
     
-    for (const size_t & daughterId : part->Daughters())
+    for (const size_t &daughterId : part->Daughters())
     {
         if (pfParticleMap.find(daughterId) == pfParticleMap.end())
             throw cet::exception("LArPandora") << " LArPandoraSlices::CollectDaughters - Can't find any daughter PFParticle in ID map." << std::endl;
@@ -222,11 +218,11 @@ void LArPandoraSlices::CollectDaughters(const PFParticleMap & pfParticleMap, con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::AddCRParticlesToSlices(const PFParticleMap & crPFParticleIdMap, const PFParticleVector & crFinalStateParticles, const PFParticlesToHits & crParticlesToHits, const HitsToPFParticles & nuHitsToParticles, const std::map< art::Ptr< recob::PFParticle>, SliceId > & nuFinalStateParticlesToSlice)
+void LArPandoraSlices::AddCRParticlesToSlices(const PFParticleMap &crPFParticleIdMap, const PFParticleVector &crFinalStateParticles, const PFParticlesToHits &crParticlesToHits,
+    const HitsToPFParticles &nuHitsToParticles, const std::map< art::Ptr< recob::PFParticle>, SliceId > &nuFinalStateParticlesToSlice)
 {
-    for (const art::Ptr< recob::PFParticle> & part : crFinalStateParticles)
+    for (const art::Ptr<recob::PFParticle> &part : crFinalStateParticles)
     {
-
         if (crParticlesToHits.find(part) == crParticlesToHits.end()) 
             throw cet::exception("LArPandora") << " LArPandoraSlices::AddCRParticlesToSlices - Can't find any hits for supplied PFParticle." << std::endl;
 
@@ -237,10 +233,10 @@ void LArPandoraSlices::AddCRParticlesToSlices(const PFParticleMap & crPFParticle
         SliceId id = m_nuSlicePFParticles.size();
 
         // Use its hits to find a matching exisiting slice
-        for (const art::Ptr< recob::Hit > & hit : crParticlesToHits.at(part))
+        for (const art::Ptr<recob::Hit> &hit : crParticlesToHits.at(part))
         {
-
-            if (nuHitsToParticles.find(hit) == nuHitsToParticles.end()) continue;
+            if (nuHitsToParticles.find(hit) == nuHitsToParticles.end())
+                continue;
 
             if (nuFinalStateParticlesToSlice.find(nuHitsToParticles.at(hit)) == nuFinalStateParticlesToSlice.end())
                 throw cet::exception("LArPandora") << " LArPandoraSlices::AddCRParticlesToSlices - Can't find slice associated with supplied final state PFParticle." << std::endl;
@@ -253,14 +249,13 @@ void LArPandoraSlices::AddCRParticlesToSlices(const PFParticleMap & crPFParticle
         // New slice
         if (id == m_nuSlicePFParticles.size())
         {
-            PFParticleVector  nuParticlesInSlice;
-            m_nuSlicePFParticles.insert(std::map< SliceId, PFParticleVector >::value_type(id, nuParticlesInSlice)); 
-            m_crSlicePFParticles.insert(std::map< SliceId, PFParticleVector >::value_type(id, daughterParticles)); 
+            m_nuSlicePFParticles.insert(std::map<SliceId, PFParticleVector>::value_type(id, PFParticleVector())); 
+            m_crSlicePFParticles.insert(std::map<SliceId, PFParticleVector>::value_type(id, daughterParticles)); 
         }
         // Existing slice
         else
         {
-            if (m_nuSlicePFParticles.find(id) == m_nuSlicePFParticles.end() || m_crSlicePFParticles.find(id) == m_crSlicePFParticles.end())
+            if ((m_nuSlicePFParticles.find(id) == m_nuSlicePFParticles.end()) || (m_crSlicePFParticles.find(id) == m_crSlicePFParticles.end()))
                 throw cet::exception("LArPandora") << " LArPandoraSlices::AddCRParticlesToSlices - Invalid slice found : " << id << "." << std::endl;
 
             m_crSlicePFParticles.at(id).insert(m_crSlicePFParticles.at(id).end(), daughterParticles.begin(), daughterParticles.end());
