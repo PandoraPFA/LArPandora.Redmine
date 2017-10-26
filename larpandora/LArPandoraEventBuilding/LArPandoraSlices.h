@@ -7,9 +7,6 @@
 #ifndef LAR_PANDORA_SLICES_H
 #define LAR_PANDORA_SLICES_H 1
 
-#include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/PtrMaker.h"
-
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Cluster.h"

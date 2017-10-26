@@ -58,12 +58,13 @@ DEFINE_ART_MODULE(LArPandoraTrackCreation)
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 
+#include "art/Persistency/Common/PtrMaker.h"
+
 #include "canvas/Utilities/InputTag.h"
 
 #include "larcore/Geometry/Geometry.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
@@ -103,7 +104,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     const float wirePitchW((theGeometry->MaxPlanes() > 2) ? theGeometry->WirePitch(geo::kW) : 0.5f * (theGeometry->WirePitch(geo::kU) + theGeometry->WirePitch(geo::kV)));
 
     int trackCounter(0);
-    const lar::PtrMaker<recob::Track> makeTrackPtr(evt, *this);
+    const art::PtrMaker<recob::Track> makeTrackPtr(evt, *this);
 
     // Organise inputs
     PFParticleVector pfParticleVector;

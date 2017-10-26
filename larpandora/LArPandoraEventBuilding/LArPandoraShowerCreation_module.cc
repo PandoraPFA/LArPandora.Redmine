@@ -70,7 +70,7 @@ DEFINE_ART_MODULE(LArPandoraShowerCreation)
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 
 #include "canvas/Utilities/InputTag.h"
 
@@ -117,8 +117,8 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
     std::unique_ptr< art::Assns<recob::Shower, recob::Hit> > outputShowersToHits( new art::Assns<recob::Shower, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Shower, recob::PCAxis> > outputShowersToPCAxes( new art::Assns<recob::Shower, recob::PCAxis> );
 
-    const lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *this);
-    const lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *this);
+    const art::PtrMaker<recob::Shower> makeShowerPtr(evt, *this);
+    const art::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *this);
 
     // Organise inputs
     PFParticleVector pfParticleVector;

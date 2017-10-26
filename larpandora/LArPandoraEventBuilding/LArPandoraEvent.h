@@ -7,8 +7,9 @@
 #ifndef LAR_PANDORA_EVENT_H
 #define LAR_PANDORA_EVENT_H 1
 
+#include "art/Persistency/Common/PtrMaker.h"
+
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
@@ -516,7 +517,7 @@ template < class T, class U >
 inline void LArPandoraEvent::WriteAssociation(const std::map< art::Ptr< T >, std::vector< art::Ptr< U > > > & associationMap, const std::vector< art::Ptr< T > > & collectionT, const std::vector< art::Ptr< U > > & collectionU, const bool thisProducesU)
 {
 
-    const lar::PtrMaker< T > makePtrT(*m_pEvent, *m_pProducer);
+    const art::PtrMaker< T > makePtrT(*m_pEvent, *m_pProducer);
     std::unique_ptr< art::Assns< T, U > > outputAssn(new art::Assns< T, U >);
 
     for (typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::const_iterator it=associationMap.begin(); it != associationMap.end(); ++it) 
@@ -533,7 +534,7 @@ inline void LArPandoraEvent::WriteAssociation(const std::map< art::Ptr< T >, std
 
             if (thisProducesU)
             {
-                const lar::PtrMaker< U > makePtrU(*m_pEvent, *m_pProducer);
+                const art::PtrMaker< U > makePtrU(*m_pEvent, *m_pProducer);
 
                 typename std::vector< art::Ptr< U > >::const_iterator itU = std::find(collectionU.begin(), collectionU.end(), objectU);
                 if (itU == collectionU.end()) 
