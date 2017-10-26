@@ -4,6 +4,10 @@
  *  @brief  A mapping between two different reconstruction hypotheses on the same input hit collection
  */
 
+#include "art/Persistency/Common/PtrMaker.h"
+
+#include "lardata/Utilities/AssociationUtil.h"
+
 #include "larpandora/LArPandoraEventBuilding/LArPandoraSlices.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +104,7 @@ void LArPandoraSlices::WriteTags()
 
 void LArPandoraSlices::WriteTag(const bool & shouldTagAsNeutrino, const PFParticleVector & pfParticleVector, std::unique_ptr< std::vector< anab::CosmicTag > > & outputTags, std::unique_ptr< art::Assns< recob::PFParticle, anab::CosmicTag > > &  outputAssn) 
 {
-    const lar::PtrMaker< anab::CosmicTag > makeCRTagPtr(*m_pEvent, *m_pProducer);
+    const art::PtrMaker< anab::CosmicTag > makeCRTagPtr(*m_pEvent, *m_pProducer);
 
     for (const art::Ptr< recob::PFParticle > & part : pfParticleVector)
     {
