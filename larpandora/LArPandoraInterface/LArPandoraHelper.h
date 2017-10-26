@@ -104,7 +104,7 @@ public:
      *  @param label the label for the Wire list in the event
      *  @param wireVector the ouput vector of Wire objects
      */
-    static void CollectWires(const art::Event &evt, const std::string label, WireVector &wireVector);
+    static void CollectWires(const art::Event &evt, const std::string &label, WireVector &wireVector);
 
     /**
      *  @brief Collect the reconstructed Hits from the ART event record
@@ -113,7 +113,7 @@ public:
      *  @param label the label for the Hit list in the event
      *  @param hitVector the ouput vector of Hit objects
      */
-    static void CollectHits(const art::Event &evt, const std::string label, HitVector &hitVector);
+    static void CollectHits(const art::Event &evt, const std::string &label, HitVector &hitVector);
 
     /**
      *  @brief Collect the reconstructed PFParticles from the ART event record
@@ -122,7 +122,7 @@ public:
      *  @param label the label for the PFParticle list in the event
      *  @param particleVector the output vector of PFParticle objects
      */
-    static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector);
+    static void CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector);
 
     /**
      *  @brief Collect the reconstructed SpacePoints and associated hits from the ART event record
@@ -132,7 +132,7 @@ public:
      *  @param spacePointVector the output vector of SpacePoint objects
      *  @param spacePointsToHits the output map from SpacePoint to Hit objects
      */
-    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector,
+    static void CollectSpacePoints(const art::Event &evt, const std::string &label, SpacePointVector &spacePointVector,
         SpacePointsToHits &spacePointsToHits);
 
     /**
@@ -144,7 +144,7 @@ public:
      *  @param spacePointsToHits the output map from SpacePoint to Hit objects
      *  @param hitsToSpacePoints the output map from Hit to SpacePoint objects
      */
-    static void CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector,
+    static void CollectSpacePoints(const art::Event &evt, const std::string &label, SpacePointVector &spacePointVector,
         SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints);
 
     /**
@@ -155,7 +155,7 @@ public:
      *  @param clusterVector the output vector of Cluster objects
      *  @param clustersToHits the output map from Cluster to Hit objects
      */
-    static void CollectClusters(const art::Event &evt, const std::string label, ClusterVector &clusterVector,
+    static void CollectClusters(const art::Event &evt, const std::string &label, ClusterVector &clusterVector,
         ClustersToHits &clustersToHits);
 
     /**
@@ -166,7 +166,7 @@ public:
      *  @param particleVector the output vector of PFParticle objects
      *  @param particlesToSpacePoints the output map from PFParticle to SpacePoint objects
      */
-    static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
+    static void CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
         PFParticlesToSpacePoints &particlesToSpacePoints);
 
     /**
@@ -177,7 +177,7 @@ public:
      *  @param particleVector the output vector of PFParticle objects
      *  @param particlesToClusters the output map from PFParticle to Cluster objects
      */
-    static void CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
+    static void CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
         PFParticlesToClusters &particlesToClusters);
 
     /**
@@ -188,7 +188,7 @@ public:
      *  @param showerVector the output vector of Shower objects
      *  @param particlesToShowers the output map from PFParticle to Shower objects
      */
-    static void CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+    static void CollectShowers(const art::Event &evt, const std::string &label, ShowerVector &showerVector,
         PFParticlesToShowers &particlesToShowers);
 
     /**
@@ -199,7 +199,7 @@ public:
      *  @param showerVector the output vector of Shower objects
      *  @param showersToHits the output map from Shower to Hit objects
      */
-    static void CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+    static void CollectShowers(const art::Event &evt, const std::string &label, ShowerVector &showerVector,
         ShowersToHits &showersToHits);
 
     /**
@@ -210,7 +210,7 @@ public:
      *  @param trackVector the output vector of Track objects
      *  @param particlesToTracks the output map from PFParticle to Track objects
      */
-    static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+    static void CollectTracks(const art::Event &evt, const std::string &label, TrackVector &trackVector,
         PFParticlesToTracks &particlesToTracks);
 
     /**
@@ -221,7 +221,7 @@ public:
      *  @param trackVector the output vector of Track objects
      *  @param tracksToHits the output map from Track to Hit objects
      */
-    static void CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+    static void CollectTracks(const art::Event &evt, const std::string &label, TrackVector &trackVector,
         TracksToHits &tracksToHits);
 
     /**
@@ -232,7 +232,7 @@ public:
      *  @param seedVector the output vector of Seed objects
      *  @param particlesToSeeds the output map from PFParticle to Seed objects
      */
-    static void CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
+    static void CollectSeeds(const art::Event &evt, const std::string &label, SeedVector &seedVector,
         PFParticlesToSeeds &particlesToSeeds);
 
     /**
@@ -243,7 +243,7 @@ public:
      *  @param seedVector the output vector of Seed objects
      *  @param seedsToHits the output map from Seed to Hit objects
      */
-    static void CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
+    static void CollectSeeds(const art::Event &evt, const std::string &label, SeedVector &seedVector,
         SeedsToHits &seedsToHits);
 
     /**
@@ -254,7 +254,7 @@ public:
      *  @param vertexVector the output vector of Vertex objects
      *  @param particlesToVertices the output map from PFParticle to Vertex objects
      */
-    static void CollectVertices(const art::Event &evt, const std::string label, VertexVector &vertexVector,
+    static void CollectVertices(const art::Event &evt, const std::string &label, VertexVector &vertexVector,
         PFParticlesToVertices &particlesToVertices);
 
     /**
@@ -296,7 +296,7 @@ public:
      *  @param daughterMode treatment of daughter particles in construction of maps
      *  @param useClusters choice of intermediate object (true for Clusters, false for SpacePoints)
      */
-    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_mid,
+    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string &label_pfpart, const std::string &label_mid,
         PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters,
         const bool useClusters = true);
 
@@ -310,7 +310,7 @@ public:
      *  @param daughterMode treatment of daughter particles in construction of maps
      *  @param useClusters choice of intermediate object (true for Clusters, false for SpacePoints)
      */
-    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string label,
+    static void BuildPFParticleHitMaps(const art::Event &evt, const std::string &label,
         PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters,
         const bool useClusters = true);
 
@@ -322,7 +322,7 @@ public:
      *  @param cosmicTagVector output vector of CosmicTag objects
      *  @param tracksToCosmicTags output map from tracks to cosmic tags
      */
-    static void CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector,
+    static void CollectCosmicTags(const art::Event &evt, const std::string &label, CosmicTagVector &cosmicTagVector,
         TracksToCosmicTags &tracksToCosmicTags);
 
     /**
@@ -333,7 +333,7 @@ public:
      *  @param t0Vector output vector of T0 objects
      *  @param tracksToT0s output map from tracks to T0s
      */
-    static void CollectT0s(const art::Event &evt, const std::string label, T0Vector &t0Vector,
+    static void CollectT0s(const art::Event &evt, const std::string &label, T0Vector &t0Vector,
         TracksToT0s &tracksToT0s);
 
     /**
@@ -343,7 +343,7 @@ public:
      *  @param label the label for the truth information in the event
      *  @param simChannelVector output vector of SimChannel objects
      */
-    static void CollectSimChannels(const art::Event &evt, const std::string label, SimChannelVector &simChannelVector);
+    static void CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector);
 
     /**
      *  @brief Collect a vector of MCParticle objects from the ART event record
@@ -352,7 +352,7 @@ public:
      *  @param label the label for the truth information in the event
      *  @param particleVector the output vector of MCParticle objects
      */
-    static void CollectMCParticles(const art::Event &evt, const std::string label, MCParticleVector &particleVector);
+    static void CollectMCParticles(const art::Event &evt, const std::string &label, MCParticleVector &particleVector);
 
     /**
      *  @brief Collect truth information from the ART event record
@@ -362,7 +362,7 @@ public:
      *  @param truthToParticles output map from MCTruth to MCParticle objects
      *  @param particlesToTruth output map from MCParticle to MCTruth objects
      */
-    static void CollectMCParticles(const art::Event &evt, const std::string label, MCTruthToMCParticles &truthToParticles,
+    static void CollectMCParticles(const art::Event &evt, const std::string &label, MCTruthToMCParticles &truthToParticles,
         MCParticlesToMCTruth &particlesToTruth);
 
     /**
@@ -396,8 +396,19 @@ public:
      *  @param hitsToParticles the output mapping between reconstructed hits and true particles
      *  @param daughterMode treatment of daughter particles in construction of maps
      */
-    static void BuildMCParticleHitMaps(const art::Event &evt, const std::string label, const HitVector &hitVector,
+    static void BuildMCParticleHitMaps(const art::Event &evt, const std::string &label, const HitVector &hitVector,
         MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters);
+
+    /**
+     *  @brief  Get all hits associated with input spacepoints
+     *
+     *  @param  evt the event containing the hits
+     *  @param  label the label of the collection producing PFParticles
+     *  @param  inputSpacePoints input spacepoints
+     *  @param  associatedHits output hits associated with spacepoints
+     */
+    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
+        HitVector &associatedHits);
 
     /**
      *  @brief Select reconstructed neutrino particles from a list of all reconstructed particles
@@ -528,16 +539,6 @@ public:
      *  @return true/false
      */
     static bool IsVisible(const art::Ptr<simb::MCParticle> particle);
-
-    /**
-     *  @brief  Get all hits associated with input spacepoints
-     *
-     *  @param  pEvt              the event containing the hits
-     *  @param  pfParticleLabel   label of the collection producing PFParticles
-     *  @param  inputSpacePoints  input spacepoints
-     *  @param  associatedHits    output hits associated with spacepoints
-     */
-    static void GetAssociatedHits( const art::Event * pEvt, const std::string & pfParticleLabel, const SpacePointVector & inputSpacePoints, HitVector & associatedHits );
 };
 
 } // namespace lar_pandora

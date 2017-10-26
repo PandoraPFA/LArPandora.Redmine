@@ -10,11 +10,9 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larreco/ClusterFinder/ClusterCreator.h"
-#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::TPCID
 #include "larreco/RecoAlg/ClusterRecoUtil/StandardClusterParamsAlg.h"
 #include "larreco/RecoAlg/ClusterParamsImportWrapper.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/PtrMaker.h"
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
