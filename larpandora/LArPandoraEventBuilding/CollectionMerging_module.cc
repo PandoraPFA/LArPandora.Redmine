@@ -120,24 +120,24 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const &pset) :
 void CollectionMerging::produce(art::Event &evt)
 {
     const lar_pandora::LArPandoraEvent::Labels allHitsCRLabels(m_AllHitsCRProducerLabel, m_AllHitsCRTrackProducerLabel, m_AllHitsCRShowerProducerLabel, m_AllHitProducerLabel);
-    lar_pandora::LArPandoraEvent allHitsCREvent(this, &evt, allHitsCRLabels, m_ShouldProduceT0s);
+    const lar_pandora::LArPandoraEvent allHitsCREvent(this, &evt, allHitsCRLabels, m_ShouldProduceT0s);
 
     const lar_pandora::LArPandoraEvent::Labels crRemHitsCRLabels(m_CRRemHitsCRProducerLabel, m_CRRemHitsCRTrackProducerLabel, m_CRRemHitsCRShowerProducerLabel, m_CRRemHitProducerLabel);
-    lar_pandora::LArPandoraEvent crRemHitsCREvent(this, &evt, crRemHitsCRLabels, m_ShouldProduceT0s);
+    const lar_pandora::LArPandoraEvent crRemHitsCREvent(this, &evt, crRemHitsCRLabels, m_ShouldProduceT0s);
 
     const lar_pandora::LArPandoraEvent::Labels crRemHitsNuLabels(m_CRRemHitsNuProducerLabel, m_CRRemHitsNuTrackProducerLabel, m_CRRemHitsNuShowerProducerLabel, m_CRRemHitProducerLabel);
-    lar_pandora::LArPandoraEvent crRemHitsNuEvent(this, &evt, crRemHitsNuLabels, m_ShouldProduceT0s);
+    const lar_pandora::LArPandoraEvent crRemHitsNuEvent(this, &evt, crRemHitsNuLabels, m_ShouldProduceT0s);
 
     if (m_ShouldProduceNeutrinos)
     {
-        lar_pandora::LArPandoraEvent filteredCRRemHitsNuEvent(crRemHitsNuEvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_NuIdCRTagProducerLabel));
+        const lar_pandora::LArPandoraEvent filteredCRRemHitsNuEvent(crRemHitsNuEvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_NuIdCRTagProducerLabel));
         filteredCRRemHitsNuEvent.WriteToEvent();
     }
     else
     {
-        lar_pandora::LArPandoraEvent filteredAllHitsCREvent(allHitsCREvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_ClearCRTagProducerLabel));
-        lar_pandora::LArPandoraEvent filteredCRRemHitsCREvent(crRemHitsCREvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_NuIdCRTagProducerLabel));
-        lar_pandora::LArPandoraEvent mergedEvent(filteredAllHitsCREvent.Merge(filteredCRRemHitsCREvent));
+        const lar_pandora::LArPandoraEvent filteredAllHitsCREvent(allHitsCREvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_ClearCRTagProducerLabel));
+        const lar_pandora::LArPandoraEvent filteredCRRemHitsCREvent(crRemHitsCREvent.FilterByCRTag(m_ShouldProduceNeutrinos, m_NuIdCRTagProducerLabel));
+        const lar_pandora::LArPandoraEvent mergedEvent(filteredAllHitsCREvent.Merge(filteredCRRemHitsCREvent));
         mergedEvent.WriteToEvent();
     }
 }

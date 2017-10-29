@@ -104,7 +104,7 @@ void CollectionSplitting::produce(art::Event &evt)
         throw cet::exception("LArPandora") << " CollectionSplitting -- Must be configured to produce neutrinos or cosmics or both.";
 
     const lar_pandora::LArPandoraEvent::Labels labels(m_InputProducerLabel, m_TrackProducerLabel, m_ShowerProducerLabel, m_HitProducerLabel); 
-    lar_pandora::LArPandoraEvent fullEvent(this, &evt, labels, m_ShouldProduceT0s);
+    const lar_pandora::LArPandoraEvent fullEvent(this, &evt, labels, m_ShouldProduceT0s);
 
     if (m_ShouldProduceNeutrinos && m_ShouldProduceCosmics)
     {
@@ -112,7 +112,7 @@ void CollectionSplitting::produce(art::Event &evt)
     }
     else
     {
-        lar_pandora::LArPandoraEvent filteredEvent(fullEvent.FilterByPdgCode(m_ShouldProduceNeutrinos));
+        const lar_pandora::LArPandoraEvent filteredEvent(fullEvent.FilterByPdgCode(m_ShouldProduceNeutrinos));
         filteredEvent.WriteToEvent();
     }
 }

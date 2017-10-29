@@ -52,21 +52,21 @@ public:
     /**
      *  @brief  Get the vector of slice Id
      */
-    std::vector< SliceId > GetSlices();
+    std::vector< SliceId > GetSlices() const;
 
     /**
      *  @brief  Get the vector of PFParticles in a given slice reconstructed as a cosmic ray
      *
      *  @param  sliceId the id of the slice to return
      */
-    PFParticleVector GetSliceAsCR(const SliceId sliceId);
+    PFParticleVector GetSliceAsCR(const SliceId sliceId) const;
 
     /**
      *  @brief  Get the vector of PFParticles in a given slice reconstructed as a neutrino
      *
      *  @param  sliceId the id of the slice to return
      */
-    PFParticleVector GetSliceAsNu(const SliceId sliceId);
+    PFParticleVector GetSliceAsNu(const SliceId sliceId) const;
 
     /**
      *  @brief  Identify a given slice as being the neutrino event
@@ -78,7 +78,7 @@ public:
     /**
      *  @brief  Produce the CR tags for the slices, and write to the event
      */
-    void WriteTags();
+    void WriteTags() const;
 
 private:
     /**
@@ -95,7 +95,7 @@ private:
      *  @param  outputAssn the output association from PFParticle -> CosmicTag
      */
     void WriteTag(const bool shouldTagAsNeutrino, const PFParticleVector &pfParticleVector, std::unique_ptr< std::vector< anab::CosmicTag > > &outputTags,
-        std::unique_ptr< art::Assns< recob::PFParticle, anab::CosmicTag > > &outputAssn);
+        std::unique_ptr< art::Assns< recob::PFParticle, anab::CosmicTag > > &outputAssn) const;
 
     /**
      *  @brief  Get a mapping between PFParticles and their Ids 
@@ -103,7 +103,7 @@ private:
      *  @param  inputParticles input PFParticles to obtain the mapping from
      *  @param  outputMap output mapping between PFParticles and their Ids
      */
-    void GetPFParticleIdMap(const PFParticleVector &inputParticles, PFParticleMap &outputMap);
+    void GetPFParticleIdMap(const PFParticleVector &inputParticles, PFParticleMap &outputMap) const;
     
     /**
      *  @brief  Make a new slice for each top-level neutrino PFParticle supplied by filling m_nuSlicePFParticles. 
@@ -123,7 +123,7 @@ private:
      *  @param  part the particle to seed the collection
      *  @param  daughterParticles the output vector of all PFParticles downstream part
      */
-    void CollectDaughters(const PFParticleMap &pfParticleMap, const art::Ptr< recob::PFParticle > &part, PFParticleVector &daughterParticles);
+    void CollectDaughters(const PFParticleMap &pfParticleMap, const art::Ptr< recob::PFParticle > &part, PFParticleVector &daughterParticles) const;
 
     /**
      *  @brief  Add CR PFParticles to existing neutrino slices (if they share hits), or make new slices
