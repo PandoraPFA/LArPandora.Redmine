@@ -27,7 +27,7 @@ LArPandoraSlices::LArPandoraSlices(art::EDProducer *pProducer, art::Event *pEven
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-std::vector<LArPandoraSlices::SliceId> LArPandoraSlices::GetSlices()
+std::vector<LArPandoraSlices::SliceId> LArPandoraSlices::GetSlices() const
 {
     std::vector<SliceId> slices(m_crSlicePFParticles.size());
     std::iota(std::begin(slices), std::end(slices), 0);
@@ -36,7 +36,7 @@ std::vector<LArPandoraSlices::SliceId> LArPandoraSlices::GetSlices()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PFParticleVector LArPandoraSlices::GetSliceAsCR(const SliceId sliceId)
+PFParticleVector LArPandoraSlices::GetSliceAsCR(const SliceId sliceId) const
 {
     if (m_crSlicePFParticles.count(sliceId) == 0)
         throw cet::exception("LArPandora") << " LArPandoraSlices::GetSliceAsCR -- Slice Id " << sliceId << " is out of bounds.";
@@ -46,7 +46,7 @@ PFParticleVector LArPandoraSlices::GetSliceAsCR(const SliceId sliceId)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PFParticleVector LArPandoraSlices::GetSliceAsNu(const SliceId sliceId)
+PFParticleVector LArPandoraSlices::GetSliceAsNu(const SliceId sliceId) const
 {
     if (m_nuSlicePFParticles.count(sliceId) == 0)
         throw cet::exception("LArPandora") << " LArPandoraSlices::GetSliceAsNu -- Slice Id " << sliceId << " is out of bounds.";
@@ -67,7 +67,7 @@ void LArPandoraSlices::IdSliceAsNu(const SliceId sliceId)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::WriteTags()
+void LArPandoraSlices::WriteTags() const
 {
     if (m_nuSlicePFParticles.size() != m_crSlicePFParticles.size())
         throw cet::exception("LArPandora") << " LArPandoraSlices::WriteTags -- Malformed slices.";
@@ -100,7 +100,7 @@ void LArPandoraSlices::WriteTags()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraSlices::WriteTag(const bool shouldTagAsNeutrino, const PFParticleVector &pfParticleVector, std::unique_ptr< std::vector<anab::CosmicTag> > &outputTags,
-    std::unique_ptr< art::Assns<recob::PFParticle, anab::CosmicTag> > &outputAssn) 
+    std::unique_ptr< art::Assns<recob::PFParticle, anab::CosmicTag> > &outputAssn) const
 {
     const art::PtrMaker<anab::CosmicTag> makeCRTagPtr(*m_pEvent, *m_pProducer);
     const std::vector<float> dummyEndPoints(3, std::numeric_limits<float>::max());
@@ -167,7 +167,7 @@ void LArPandoraSlices::IdentifySlices()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::GetPFParticleIdMap(const PFParticleVector &inputParticles, PFParticleMap &outputMap)
+void LArPandoraSlices::GetPFParticleIdMap(const PFParticleVector &inputParticles, PFParticleMap &outputMap) const
 {
     for (const art::Ptr<recob::PFParticle> &part : inputParticles) 
         outputMap.insert(PFParticleMap::value_type(part->Self(), part));
@@ -202,7 +202,7 @@ void LArPandoraSlices::MakeSlicePerNeutrino(const PFParticleMap &nuPFParticleIdM
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraSlices::CollectDaughters(const PFParticleMap &pfParticleMap, const art::Ptr<recob::PFParticle> &part, PFParticleVector &daughterParticles)
+void LArPandoraSlices::CollectDaughters(const PFParticleMap &pfParticleMap, const art::Ptr<recob::PFParticle> &part, PFParticleVector &daughterParticles) const
 {
     if (std::find(daughterParticles.begin(), daughterParticles.end(), part) == daughterParticles.end()) 
         daughterParticles.push_back(part);
