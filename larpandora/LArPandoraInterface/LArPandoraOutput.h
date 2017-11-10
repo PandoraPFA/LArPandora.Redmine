@@ -38,7 +38,7 @@ public:
 
         const pandora::Pandora *m_pPrimaryPandora;              ///<
         art::EDProducer        *m_pProducer;                    ///<
-        bool                    m_buildStitchedParticles;       ///<
+        bool                    m_shouldRunStitching;           ///<
     };
 
     /**

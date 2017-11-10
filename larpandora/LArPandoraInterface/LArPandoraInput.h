@@ -51,13 +51,12 @@ public:
      *  @brief  Create the Pandora 2D hits from the ART hits
      *
      *  @param  settings the settings
-     *  @param  driftVolumeMap the geometry mapping
      *  @param  hits the input list of ART hits for this event
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
      *  @param  pHitResults to provide MVA data for the hits
      */
-    static void CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
-        const HitVector &hitVector, IdToHitMap &idToHitMap, const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults);
+    static void CreatePandoraHits2D(const Settings &settings, const HitVector &hitVector, IdToHitMap &idToHitMap,
+        const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults);
 
     /**
      *  @brief  Create pandora LArTPCs to represent the different drift volumes in use
@@ -74,52 +73,45 @@ public:
      *  @param  driftVolumeList the drift volume list
      *  @param  listOfGaps the list of gaps
      */
-    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList, const LArDetectorGapList &listOfGaps);
+    static void CreatePandoraDetectorGaps(const Settings &settings, const LArDriftVolumeList &driftVolumeList,
+        const LArDetectorGapList &listOfGaps);
 
     /**
      *  @brief  Create pandora line gaps to cover any (continuous regions of) bad channels
      *
      *  @param  settings the settings
-     *  @param  driftVolumeMap the geometry mapping
      */
-    static void CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap);
+    static void CreatePandoraReadoutGaps(const Settings &settings);
 
     /**
      *  @brief  Create the Pandora MC particles from the MC particles
      *
      *  @param  settings the settings
-     *  @param  driftVolumeMap the geometry mapping
      *  @param  truthToParticles  mapping from MC truth to MC particles
      *  @param  particlesToTruth  mapping from MC particles to MC truth
      */
-    static void CreatePandoraMCParticles(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
-        const MCTruthToMCParticles &truthToParticles, const MCParticlesToMCTruth &particlesToTruth);
+    static void CreatePandoraMCParticles(const Settings &settings, const MCTruthToMCParticles &truthToParticles,
+        const MCParticlesToMCTruth &particlesToTruth);
 
     /**
      *  @brief  Create links between the 2D hits and Pandora MC particles
      *
      *  @param  settings the settings
-     *  @param  driftVolumeMap the geometry mapping
      *  @param  hitMap mapping from Pandora hit addresses to ART hits
      *  @param  hitToParticleMap mapping from each ART hit to its underlying G4 track ID
      */
-    static void CreatePandoraMCLinks2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap,
-        const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap);
+    static void CreatePandoraMCLinks2D(const Settings &settings, const HitMap &hitMap, const HitsToTrackIDEs &hitToParticleMap);
 
 private:
     /**
      *  @brief  Loop over MC trajectory points and identify start and end points within the detector
      *
      *  @param  settings the settings
-     *  @param  driftVolumeMap the geometry mapping
-     *  @param  volumeID the drift volume ID
      *  @param  particle the true particle
      *  @param  startT the first trajectory point in the detector
      *  @param  endT the last trajectory point in the detector
-     *  @param  nDrift the number of drift directions encountered on the trajectory
      */
-    static void GetTrueStartAndEndPoints(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const unsigned int volumeID,
-        const art::Ptr<simb::MCParticle> &particle, int &startT, int &endT, int &nDrift);
+    static void GetTrueStartAndEndPoints(const Settings &settings, const art::Ptr<simb::MCParticle> &particle, int &startT, int &endT);
 
     /**
      *  @brief  Loop over MC trajectory points and identify start and end points within a given cryostat and TPC
