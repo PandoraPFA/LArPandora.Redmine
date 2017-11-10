@@ -39,7 +39,7 @@ private:
     void DeletePandoraInstances();
 
     /**
-     *  @brief  Pass external steering parameters, read from fhicl parameter set, to LArParent Pandora algorithm
+     *  @brief  Pass external steering parameters, read from fhicl parameter set, to LArMaster Pandora algorithm
      * 
      *  @param  pPandora the address of the relevant pandora instance
      */
@@ -61,7 +61,7 @@ DEFINE_ART_MODULE(StandardPandora)
 #include "larpandoracontent/LArPlugins/LArPseudoLayerPlugin.h"
 #include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
 #include "larpandoracontent/LArStitching/MultiPandoraApi.h"
-#include "larpandoracontent/LArUtility/ParentAlgorithm.h"
+#include "larpandoracontent/LArUtility/MasterAlgorithm.h"
 
 #include <iostream>
 
@@ -134,16 +134,16 @@ void StandardPandora::DeletePandoraInstances()
 
 void StandardPandora::ProvideExternalSteeringParameters(const pandora::Pandora *const pPandora) const
 {
-    auto *const pEventSteeringParameters = new lar_content::ParentAlgorithm::ExternalSteeringParameters;
+    auto *const pEventSteeringParameters = new lar_content::MasterAlgorithm::ExternalSteeringParameters;
     pEventSteeringParameters->m_shouldRunAllHitsCosmicReco = m_shouldRunAllHitsCosmicReco;
-    // TODO pEventSteeringParameters->m_shouldRunStitching = m_shouldRunStitching;
+    pEventSteeringParameters->m_shouldRunStitching = m_shouldRunStitching;
     pEventSteeringParameters->m_shouldRunCosmicHitRemoval = m_shouldRunCosmicHitRemoval;
     pEventSteeringParameters->m_shouldRunSlicing = m_shouldRunSlicing;
     pEventSteeringParameters->m_shouldRunNeutrinoRecoOption = m_shouldRunNeutrinoRecoOption;
     pEventSteeringParameters->m_shouldRunCosmicRecoOption = m_shouldRunCosmicRecoOption;
     pEventSteeringParameters->m_shouldIdentifyNeutrinoSlice = m_shouldIdentifyNeutrinoSlice;
     pEventSteeringParameters->m_printOverallRecoStatus = m_printOverallRecoStatus;
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, pandora::ExternallyConfiguredAlgorithm::SetExternalParameters(*pPandora, "LArParent", pEventSteeringParameters));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, pandora::ExternallyConfiguredAlgorithm::SetExternalParameters(*pPandora, "LArMaster", pEventSteeringParameters));
 }
 
 } // namespace lar_pandora
