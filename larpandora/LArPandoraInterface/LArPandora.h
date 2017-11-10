@@ -34,49 +34,37 @@ public:
      */
     LArPandora(fhicl::ParameterSet const &pset);
 
-    /**
-     *  @brief  Destructor
-     */
-    ~LArPandora();
-
     void beginJob();
     void produce(art::Event &evt);
 
 protected:
-    void DeletePandoraInstances();
+    std::string                     m_configFile;                   ///< The config file
+
+    bool                            m_shouldRunAllHitsCosmicReco;   ///< Steering: whether to run all hits cosmic-ray reconstruction
+    bool                            m_shouldRunStitching;           ///< Steering: whether to stitch cosmic-ray muons crossing between volumes
+    bool                            m_shouldRunCosmicHitRemoval;    ///< Steering: whether to remove hits from tagged cosmic-rays
+    bool                            m_shouldRunSlicing;             ///< Steering: whether to slice events into separate regions for processing
+    bool                            m_shouldRunNeutrinoRecoOption;  ///< Steering: whether to run neutrino reconstruction for each slice
+    bool                            m_shouldRunCosmicRecoOption;    ///< Steering: whether to run cosmic-ray reconstruction for each slice
+    bool                            m_shouldIdentifyNeutrinoSlice;  ///< Steering: whether to identify most appropriate neutrino slice
+    bool                            m_printOverallRecoStatus;       ///< Steering: whether to print current operation status messages
+
+private:        
     void CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap);
     void ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap);
-    void RunPandoraInstances();
-    void ResetPandoraInstances();
 
-    /**
-     *  @brief  Create a new Pandora instance and register lar content algs and plugins
-     *
-     *  @return the address of the new Pandora instance
-     */
-    const pandora::Pandora *CreateNewPandora() const;
+    std::string                     m_geantModuleLabel;             ///< The geant module label
+    std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
+    std::string                     m_mvaModuleLabel;               ///< The mva module label
 
-protected:
-    std::string                     m_configFile;               ///< The config file
-    std::string                     m_stitchingConfigFile;      ///< The stitching config file (multi drift volumes only)
+    bool                            m_enableProduction;             ///< Whether to persist output products
+    bool                            m_enableDetectorGaps;           ///< Whether to pass detector gap information to Pandora instances
+    bool                            m_enableMCParticles;            ///< Whether to pass mc information to Pandora instances to aid development
+    bool                            m_lineGapsCreated;              ///< Book-keeping: whether line gap creation has been called
 
-    LArDriftVolumeList              m_driftVolumeList;          ///< The drift volume list
-    LArDriftVolumeMap               m_driftVolumeMap;           ///< The map from volume id to drift volume
-
-private:
-    LArPandoraInput::Settings       m_inputSettings;            ///< The lar pandora input settings
-    LArPandoraOutput::Settings      m_outputSettings;           ///< The lar pandora output settings
-    LArPandoraGeometry::Settings    m_geometrySettings;         ///< The lar pandora geometry settings
-
-    bool                            m_runStitchingInstance;     ///< Whether to run the pandora stitching instance (multi drift volumes only)
-    bool                            m_enableProduction;         ///< Whether to persist output products
-    bool                            m_enableDetectorGaps;       ///< Whether to pass detector gap information to Pandora instances
-    bool                            m_lineGapsCreated;          ///< Book-keeping: whether line gap creation has been called
-    bool                            m_enableMCParticles;        ///< Whether to pass mc information to Pandora instances to aid development
-
-    std::string                     m_geantModuleLabel;         ///< The geant module label
-    std::string                     m_hitfinderModuleLabel;     ///< The hit finder module label
-    std::string                     m_mvaModuleLabel;           ///< The mva module label
+    LArPandoraGeometry::Settings    m_geometrySettings;             ///< The lar pandora geometry settings
+    LArPandoraInput::Settings       m_inputSettings;                ///< The lar pandora input settings
+    LArPandoraOutput::Settings      m_outputSettings;               ///< The lar pandora output settings
 };
 
 } // namespace lar_pandora

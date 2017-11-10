@@ -33,7 +33,6 @@
 
 #include "larpandoracontent/LArHelpers/LArClusterHelper.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
-#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 
@@ -55,28 +54,18 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     if (!settings.m_pProducer)
         throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- pointer to ART Producer module does not exist ";
 
-    PandoraInstanceList pandoraInstanceList;
-    const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(settings.m_pPrimaryPandora));
+    // Obtain a sorted vector of all output Pfos and their daughters
+    const pandora::PfoList *pPfoList(nullptr);
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*(settings.m_pPrimaryPandora), pPfoList));
 
-    if (settings.m_buildStitchedParticles || daughterInstances.empty())
-    {
-        pandoraInstanceList.push_back(settings.m_pPrimaryPandora);
-    }
-    else
-    {
-        pandoraInstanceList.insert(pandoraInstanceList.end(), daughterInstances.begin(), daughterInstances.end());
-    }
-
-    pandora::PfoList concatenatedPfoList;
-    for (const pandora::Pandora *const pPandora : pandoraInstanceList)
-    {
-        const pandora::PfoList *pPfoList(nullptr);
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPandora, pPfoList));
-        concatenatedPfoList.insert(concatenatedPfoList.end(), pPfoList->begin(), pPfoList->end());
-    }
-
-    if (concatenatedPfoList.empty())
+    if (pPfoList->empty())
         mf::LogDebug("LArPandora") << "   Warning: No reconstructed particles for this event " << std::endl;
+
+    pandora::PfoList connectedPfoList;
+    lar_content::LArPfoHelper::GetAllConnectedPfos(*pPfoList, connectedPfoList);
+
+    pandora::PfoVector pfoVector(connectedPfoList.begin(), connectedPfoList.end());
+    std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
     // Set up ART outputs from RecoBase and AnalysisBase
     std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
@@ -98,13 +87,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     cluster::StandardClusterParamsAlg ClusterParamAlgo;
 
     size_t particleCounter(0), vertexCounter(0), spacePointCounter(0), clusterCounter(0), t0Counter(0);
-
-    // Obtain a sorted vector of all output Pfos and their daughters
-    pandora::PfoList connectedPfoList;
-    lar_content::LArPfoHelper::GetAllConnectedPfos(concatenatedPfoList, connectedPfoList);
-
-    pandora::PfoVector pfoVector(connectedPfoList.begin(), connectedPfoList.end());
-    std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
     // Build maps of pandora::Pfos and build recob::vertices
     ThreeDParticleMap particleMap;
@@ -276,7 +258,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
         const double T0((sumN > 0. && std::fabs(sumT) > sumN) ? (sumT / sumN) : 0.);
 
-        if (settings.m_buildStitchedParticles && std::fabs(T0) > 0.)
+        if (settings.m_shouldRunStitching && std::fabs(T0) > 0.)
         {
             outputT0s->emplace_back(anab::T0(T0, 3, outputParticles->back().Self(), t0Counter++));
             util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputT0s.get()), *(outputParticlesToT0s.get()), outputT0s->size() - 1, outputT0s->size());
@@ -288,7 +270,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     mf::LogDebug("LArPandora") << "   Number of new space points: " << outputSpacePoints->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new vertices: " << outputVertices->size() << std::endl;
 
-    if (settings.m_buildStitchedParticles)
+    if (settings.m_shouldRunStitching)
         mf::LogDebug("LArPandora") << "   Number of new T0s: " << outputT0s->size() << std::endl;
 
     evt.put(std::move(outputParticles));
@@ -302,7 +284,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputSpacePointsToHits));
     evt.put(std::move(outputClustersToHits));
 
-    if (settings.m_buildStitchedParticles)
+    if (settings.m_shouldRunStitching)
     {
         evt.put(std::move(outputT0s));
         evt.put(std::move(outputParticlesToT0s));
@@ -456,7 +438,7 @@ double LArPandoraOutput::CalculateT0(const art::Ptr<recob::Hit> hit, const pando
 LArPandoraOutput::Settings::Settings() :
     m_pPrimaryPandora(nullptr),
     m_pProducer(nullptr),
-    m_buildStitchedParticles(false)
+    m_shouldRunStitching(false)
 {
 }
 

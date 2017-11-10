@@ -7,8 +7,6 @@
 #ifndef LAR_PANDORA_GEOMETRY_H
 #define LAR_PANDORA_GEOMETRY_H 1
 
-namespace pandora { class TiXmlElement; }
-
 namespace lar_pandora
 {
 
@@ -258,7 +256,6 @@ public:
         Settings();
 
         bool            m_globalCoordinates;        ///< Use global coordinate system
-        bool            m_globalDriftVolume;        ///< Use global drift volume
     };
 
     /**
@@ -276,16 +273,7 @@ public:
      *  @param driftVolumeList the output list of drift volumes
      *  @param driftVolumeMap the output mapping between cryostat/tpc and drift volumes
      */
-    static void LoadGeometry(const Settings &settings, LArDriftVolumeList &driftVolumeList, LArDriftVolumeMap &driftVolumeMap);
-
-    /**
-     *  @brief  Get drift volume ID from a specified cryostat/tpc pair
-     *
-     *  @param  driftVolumeMap the output mapping between cryostat/tpc and drift volumes
-     *  @param  cstat the input cryostat unique ID
-     *  @param  tpc the input tpc unique ID
-     */
-    static unsigned int GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc);
+    static void LoadGeometry(const Settings &settings, LArDriftVolumeList &driftVolumeList);
 
     /**
      *  @brief  Convert to global coordinate system
@@ -297,7 +285,6 @@ public:
     static geo::View_t GetGlobalView(const unsigned int cstat, const unsigned int tpc, const geo::View_t hit_View);
 
 private:
-
     /**
      *  @brief  Generate a unique identifier for each TPC
      *

@@ -19,15 +19,11 @@
 namespace lar_pandora
 {
 
-void LArPandoraGeometry::LoadDetectorGaps(const Settings &settings, LArDetectorGapList &listOfGaps)
+void LArPandoraGeometry::LoadDetectorGaps(const Settings &/*settings*/, LArDetectorGapList &listOfGaps)
 {
     // Detector gaps can only be loaded once - throw an exception if the output lists are already filled
     if (!listOfGaps.empty())
         throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadDetectorGaps --- the list of gaps already exists ";
-
-    // Only populate detector gaps when using global drift volume
-    if (!settings.m_globalDriftVolume)
-        return;
 
     // Loop over drift volumes and write out the dead regions at their boundaries
     LArDriftVolumeList driftVolumeList;
@@ -74,57 +70,23 @@ void LArPandoraGeometry::LoadDetectorGaps(const Settings &settings, LArDetectorG
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraGeometry::LoadGeometry(const Settings &settings, LArDriftVolumeList &outputVolumeList, LArDriftVolumeMap &outputVolumeMap)
+void LArPandoraGeometry::LoadGeometry(const Settings &settings, LArDriftVolumeList &outputVolumeList)
 {
-    // Geometry can only be loaded once - throw an exception if the output lists are already filled
-    if (!outputVolumeList.empty() || !outputVolumeMap.empty())
+    if (!outputVolumeList.empty())
         throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- the list of drift volumes already exists ";
 
-    // Global drift volume - use a global coordinate system and combine all drift volumes into a single global volume
-    if (settings.m_globalDriftVolume)
+    if (settings.m_globalCoordinates)
     {
-        LArDriftVolumeList inputVolumeList;
-        LArPandoraGeometry::LoadGeometry(inputVolumeList);
-        LArPandoraGeometry::LoadGlobalParentGeometry(inputVolumeList, outputVolumeList);
-    }
-
-    // Global coordinates - use a global coordinate system but keep drift volumes separate
-    else if (settings.m_globalCoordinates)
-    {
+        // Use a global coordinate system but keep drift volumes separate
         LArDriftVolumeList inputVolumeList;
         LArPandoraGeometry::LoadGeometry(inputVolumeList);
         LArPandoraGeometry::LoadGlobalDaughterGeometry(inputVolumeList, outputVolumeList);
     }
-
-    // Separate drift volumes - keep drift volumes separate with their separate coordinate systems
     else
     {
+        // Separate drift volumes - keep drift volumes separate with their separate coordinate systems
         LArPandoraGeometry::LoadGeometry(outputVolumeList);
     }
-
-    // Create mapping between tpc/cstat labels and drift volumes
-    for (const LArDriftVolume &driftVolume : outputVolumeList)
-    {
-        for (const LArDaughterDriftVolume &tpcVolume : driftVolume.GetTpcVolumeList())
-        {
-            (void) outputVolumeMap.insert(LArDriftVolumeMap::value_type(LArPandoraGeometry::GetTpcID(tpcVolume.GetCryostat(), tpcVolume.GetTpc()), driftVolume));
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-unsigned int LArPandoraGeometry::GetVolumeID(const LArDriftVolumeMap &driftVolumeMap, const unsigned int cstat, const unsigned int tpc)
-{
-    if (driftVolumeMap.empty())
-        throw cet::exception("LArPandora") << " LArPandoraGeometry::GetVolumeID --- detector geometry map is empty";
-
-    LArDriftVolumeMap::const_iterator iter = driftVolumeMap.find(LArPandoraGeometry::GetTpcID(cstat, tpc));
-
-    if (driftVolumeMap.end() == iter)
-        throw cet::exception("LArPandora") << " LArPandoraGeometry::GetVolumeID --- found a TPC that doesn't belong to a drift volume";
-
-    return iter->second.GetVolumeID();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -169,6 +131,7 @@ bool LArPandoraGeometry::ShouldSwitchUV(const unsigned int cstat, const unsigned
     // We determine whether U and V views should be switched by checking the drift direction
     art::ServiceHandle<geo::Geometry> theGeometry;
     const geo::TPCGeo &theTpc(theGeometry->TPC(tpc, cstat));
+
     const bool isPositiveDrift(theTpc.DriftDirection() == geo::kPosX);
     return LArPandoraGeometry::ShouldSwitchUV(isPositiveDrift);
 }
@@ -435,8 +398,7 @@ const LArDaughterDriftVolumeList &LArDriftVolume::GetTpcVolumeList() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 LArPandoraGeometry::Settings::Settings() :
-    m_globalCoordinates(false),
-    m_globalDriftVolume(false)
+    m_globalCoordinates(true)
 {
 }
 
