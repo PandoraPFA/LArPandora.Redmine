@@ -35,8 +35,7 @@
 namespace lar_pandora
 {
 
-void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const HitVector &hitVector, IdToHitMap &idToHitMap,
-    const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults)
+void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const HitVector &hitVector, IdToHitMap &idToHitMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraHits2D(...) *** " << std::endl;
 
@@ -69,20 +68,6 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const HitVec
         const double xpos_cm(theDetector->ConvertTicksToX(hit_Time, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
         const double dxpos_cm(std::fabs(theDetector->ConvertTicksToX(hit_TimeEnd, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat) -
             theDetector->ConvertTicksToX(hit_TimeStart, hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat)));
-
-        if (settings.m_truncateReadout)
-        {
-            const geo::TPCGeo &theTpc(theGeometry->TPC(hit_WireID.TPC, hit_WireID.Cryostat));
-            double localCoord[3] = {0.,0.,0.};
-            double worldCoord[3] = {0.,0.,0.};
-            theTpc.LocalToWorld(localCoord, worldCoord);
-
-            const double drift_min_xpos_cm(worldCoord[0] - theTpc.ActiveHalfWidth());
-            const double drift_max_xpos_cm(worldCoord[0] + theTpc.ActiveHalfWidth());
-
-            if (xpos_cm < drift_min_xpos_cm || xpos_cm > drift_max_xpos_cm)
-                continue;
-        }
 
         // Get hit Y and Z coordinates, based on central position of wire
         double xyz[3];
@@ -117,23 +102,9 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const HitVec
             caloHitParameters.m_electromagneticEnergy = mips * settings.m_mips_to_gev;
             caloHitParameters.m_hadronicEnergy = mips * settings.m_mips_to_gev;
             caloHitParameters.m_pParentAddress = (void*)((intptr_t)(++hitCounter));
+            caloHitParameters.m_larTPCVolumeId = LArPandoraGeometry::GetVolumeID(driftVolumeMap, hit_WireID.Cryostat, hit_WireID.TPC);
 
-            if (pHitResults)
-            {
-                const std::array<float, 4> mvaOutput(pHitResults->getOutput(hit));
-
-                const float showerWeight(mvaOutput.at(pHitResults->getIndex("em")));
-                const float trackWeight(mvaOutput.at(pHitResults->getIndex("track")));
-                const float otherWeight(mvaOutput.at(pHitResults->getIndex("none")));
-                const float weightSum(showerWeight + trackWeight + otherWeight);
-
-                caloHitParameters.m_showerProbability = (weightSum > std::numeric_limits<float>::epsilon()) ? showerWeight / weightSum : 0.f;
-                caloHitParameters.m_trackProbability = (weightSum > std::numeric_limits<float>::epsilon()) ? trackWeight / weightSum : 0.f;
-                caloHitParameters.m_otherProbability = (weightSum > std::numeric_limits<float>::epsilon()) ? otherWeight / weightSum : 0.f;
-                caloHitParameters.m_michelProbability = mvaOutput.at(pHitResults->getIndex("michel")); // ATTN Michel output currently independent
-            }
-
-            const geo::View_t pandora_View(settings.m_globalViews ? LArPandoraGeometry::GetGlobalView(hit_WireID.Cryostat, hit_WireID.TPC, hit_View) : hit_View);
+            const geo::View_t pandora_View(LArPandoraGeometry::GetGlobalView(hit_WireID.Cryostat, hit_WireID.TPC, hit_View));
 
             if (pandora_View == geo::kW)
             {
@@ -173,14 +144,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const HitVec
         // Create the Pandora hit
         try
         {
-            if (pHitResults)
-            {
-                PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters, caloHitFactory));
-            }
-            else
-            {
-                PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters));
-            }
+            PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*pPandora, caloHitParameters, caloHitFactory));
         }
         catch (const pandora::StatusCodeException &)
         {
@@ -207,9 +171,7 @@ void LArPandoraInput::CreatePandoraLArTPCs(const Settings &settings, const LArDr
 
         try
         {
-            std::ostringstream volumeIdStream;
-            volumeIdStream << driftVolume.GetVolumeID();
-            parameters.m_larTPCName = "LArTPC_" + volumeIdStream.str();
+            parameters.m_larTPCVolumeId = driftVolume.GetVolumeID();
             parameters.m_centerX = driftVolume.GetCenterX();
             parameters.m_centerY = driftVolume.GetCenterY();
             parameters.m_centerZ = driftVolume.GetCenterZ();
@@ -340,7 +302,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings)
                     try
                     {
                         const geo::View_t iview = (geo::View_t)iplane;
-                        const geo::View_t pandoraView(settings.m_globalViews ? LArPandoraGeometry::GetGlobalView(icstat, itpc, iview) : iview);
+                        const geo::View_t pandoraView(LArPandoraGeometry::GetGlobalView(icstat, itpc, iview));
 
                         parameters.m_lineStartX = -std::numeric_limits<float>::max(); // TODO Set correctly for global drift volume approach
                         parameters.m_lineEndX = std::numeric_limits<float>::max();
@@ -742,9 +704,7 @@ LArPandoraInput::Settings::Settings() :
     m_dEdX_max(std::numeric_limits<double>::max()),
     m_dEdX_mip(2.),
     m_mips_to_gev(3.5e-4),
-    m_recombination_factor(0.63),
-    m_globalViews(true),
-    m_truncateReadout(false)
+    m_recombination_factor(0.63)
 {
 }
 

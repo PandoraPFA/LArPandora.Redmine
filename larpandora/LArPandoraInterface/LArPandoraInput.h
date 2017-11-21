@@ -43,20 +43,17 @@ public:
         double                  m_dEdX_mip;                 ///<
         double                  m_mips_to_gev;              ///<
         double                  m_recombination_factor;     ///<
-        bool                    m_globalViews;              ///<
-        bool                    m_truncateReadout;          ///<
     };
 
     /**
      *  @brief  Create the Pandora 2D hits from the ART hits
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the mapping from volume id to drift volume
      *  @param  hits the input list of ART hits for this event
      *  @param  idToHitMap to receive the mapping from Pandora hit ID to ART hit
-     *  @param  pHitResults to provide MVA data for the hits
      */
-    static void CreatePandoraHits2D(const Settings &settings, const HitVector &hitVector, IdToHitMap &idToHitMap,
-        const std::unique_ptr<anab::MVAReader<recob::Hit, 4> > &pHitResults);
+    static void CreatePandoraHits2D(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap, const HitVector &hitVector, IdToHitMap &idToHitMap);
 
     /**
      *  @brief  Create pandora LArTPCs to represent the different drift volumes in use

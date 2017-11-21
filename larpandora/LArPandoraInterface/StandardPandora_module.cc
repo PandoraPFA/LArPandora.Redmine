@@ -58,10 +58,10 @@ DEFINE_ART_MODULE(StandardPandora)
 #include "Api/PandoraApi.h"
 
 #include "larpandoracontent/LArContent.h"
+#include "larpandoracontent/LArControlFlow/MultiPandoraApi.h"
+#include "larpandoracontent/LArControlFlow/MasterAlgorithm.h"
 #include "larpandoracontent/LArPlugins/LArPseudoLayerPlugin.h"
 #include "larpandoracontent/LArPlugins/LArRotationalTransformationPlugin.h"
-#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
-#include "larpandoracontent/LArUtility/MasterAlgorithm.h"
 
 #include <iostream>
 
@@ -141,7 +141,7 @@ void StandardPandora::ProvideExternalSteeringParameters(const pandora::Pandora *
     pEventSteeringParameters->m_shouldRunSlicing = m_shouldRunSlicing;
     pEventSteeringParameters->m_shouldRunNeutrinoRecoOption = m_shouldRunNeutrinoRecoOption;
     pEventSteeringParameters->m_shouldRunCosmicRecoOption = m_shouldRunCosmicRecoOption;
-    pEventSteeringParameters->m_shouldIdentifyNeutrinoSlice = m_shouldIdentifyNeutrinoSlice;
+    pEventSteeringParameters->m_shouldPerformSliceId = m_shouldPerformSliceId;
     pEventSteeringParameters->m_printOverallRecoStatus = m_printOverallRecoStatus;
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, pandora::ExternallyConfiguredAlgorithm::SetExternalParameters(*pPandora, "LArMaster", pEventSteeringParameters));
 }
