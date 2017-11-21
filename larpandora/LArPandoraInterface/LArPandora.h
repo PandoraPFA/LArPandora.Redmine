@@ -13,8 +13,6 @@
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 
-#include "larreco/Calorimetry/LinearEnergyAlg.h"
-
 #include <string>
 #include <memory> // std::unique_ptr<>
 
@@ -46,7 +44,7 @@ protected:
     bool                            m_shouldRunSlicing;             ///< Steering: whether to slice events into separate regions for processing
     bool                            m_shouldRunNeutrinoRecoOption;  ///< Steering: whether to run neutrino reconstruction for each slice
     bool                            m_shouldRunCosmicRecoOption;    ///< Steering: whether to run cosmic-ray reconstruction for each slice
-    bool                            m_shouldIdentifyNeutrinoSlice;  ///< Steering: whether to identify most appropriate neutrino slice
+    bool                            m_shouldPerformSliceId;         ///< Steering: whether to identify slices and select most appropriate pfos
     bool                            m_printOverallRecoStatus;       ///< Steering: whether to print current operation status messages
 
 private:        
@@ -55,16 +53,16 @@ private:
 
     std::string                     m_geantModuleLabel;             ///< The geant module label
     std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
-    std::string                     m_mvaModuleLabel;               ///< The mva module label
 
     bool                            m_enableProduction;             ///< Whether to persist output products
     bool                            m_enableDetectorGaps;           ///< Whether to pass detector gap information to Pandora instances
     bool                            m_enableMCParticles;            ///< Whether to pass mc information to Pandora instances to aid development
     bool                            m_lineGapsCreated;              ///< Book-keeping: whether line gap creation has been called
 
-    LArPandoraGeometry::Settings    m_geometrySettings;             ///< The lar pandora geometry settings
     LArPandoraInput::Settings       m_inputSettings;                ///< The lar pandora input settings
     LArPandoraOutput::Settings      m_outputSettings;               ///< The lar pandora output settings
+
+    LArDriftVolumeMap               m_driftVolumeMap;               ///< The map from volume id to drift volume
 };
 
 } // namespace lar_pandora

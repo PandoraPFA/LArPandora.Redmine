@@ -9,7 +9,6 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "cetlib/cpu_timer.h"
 
-#include "lardata/ArtDataHelper/MVAReader.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
@@ -29,7 +28,6 @@
 
 #include "larpandoracontent/LArContent.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
-#include "larpandoracontent/LArStitching/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
@@ -51,17 +49,15 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_shouldRunSlicing(pset.get<bool>("ShouldRunSlicing")),
     m_shouldRunNeutrinoRecoOption(pset.get<bool>("ShouldRunNeutrinoRecoOption")),
     m_shouldRunCosmicRecoOption(pset.get<bool>("ShouldRunCosmicRecoOption")),
-    m_shouldIdentifyNeutrinoSlice(pset.get<bool>("ShouldIdentifyNeutrinoSlice")),
+    m_shouldPerformSliceId(pset.get<bool>("ShouldPerformSliceId")),
     m_printOverallRecoStatus(pset.get<bool>("PrintOverallRecoStatus", false)),
     m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant")),
     m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel")),
-    m_mvaModuleLabel(pset.get<std::string>("MVAModuleLabel", "")),
     m_enableProduction(pset.get<bool>("EnableProduction", true)),
     m_enableDetectorGaps(pset.get<bool>("EnableLineGaps", true)),
     m_enableMCParticles(pset.get<bool>("EnableMCParticles", false)),
     m_lineGapsCreated(false)
 {
-    m_geometrySettings.m_globalCoordinates = pset.get<bool>("UseGlobalCoordinates", true);
     m_inputSettings.m_useHitWidths = pset.get<bool>("UseHitWidths", true);
     m_inputSettings.m_uidOffset = pset.get<int>("UidOffset", 100000000);
     m_inputSettings.m_dx_cm = pset.get<double>("DefaultHitWidth", 0.5);
@@ -71,8 +67,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_inputSettings.m_dEdX_mip = pset.get<double>("dEdXmip", 2.);
     m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
-    m_inputSettings.m_globalViews = m_geometrySettings.m_globalCoordinates;
-    m_inputSettings.m_truncateReadout = pset.get<bool>("TruncateReadout", false);
     m_outputSettings.m_pProducer = this;
     m_outputSettings.m_shouldRunStitching = m_shouldRunStitching;
 
@@ -102,7 +96,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 void LArPandora::beginJob()
 {
     LArDriftVolumeList driftVolumeList;
-    LArPandoraGeometry::LoadGeometry(m_geometrySettings, driftVolumeList);
+    LArPandoraGeometry::LoadGeometry(driftVolumeList, m_driftVolumeMap);
 
     this->CreatePandoraInstances();
 
@@ -119,7 +113,7 @@ void LArPandora::beginJob()
     if (m_enableDetectorGaps)
     {
         LArDetectorGapList listOfGaps;
-        LArPandoraGeometry::LoadDetectorGaps(m_geometrySettings, listOfGaps);
+        LArPandoraGeometry::LoadDetectorGaps(listOfGaps);
         LArPandoraInput::CreatePandoraDetectorGaps(m_inputSettings, driftVolumeList, listOfGaps);
     }
 
@@ -166,20 +160,7 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
     }
 
-    std::unique_ptr<anab::MVAReader<recob::Hit, 4> > pHitResults;
-
-    if (!m_mvaModuleLabel.empty())
-    {
-        pHitResults = anab::MVAReader<recob::Hit, 4>::create(evt, m_mvaModuleLabel);
-
-        if (!pHitResults)
-            mf::LogWarning("LArPandora") << "No MVA results available." << std::endl;
-
-        if (pHitResults && ((pHitResults->getIndex("em") < 0) || (pHitResults->getIndex("track") < 0) || (pHitResults->getIndex("michel") < 0) || (pHitResults->getIndex("none") < 0)))
-            throw cet::exception("LArPandora") << "MVA Data present, but no em/track/michel/none-labelled columns in MVA data products." << std::endl;
-    }
-
-    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, artHits, idToHitMap, pHitResults);
+    LArPandoraInput::CreatePandoraHits2D(m_inputSettings, m_driftVolumeMap, artHits, idToHitMap);
 
     if (m_enableMCParticles && !evt.isRealData())
     {
