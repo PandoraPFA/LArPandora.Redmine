@@ -63,7 +63,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_inputSettings.m_dx_cm = pset.get<double>("DefaultHitWidth", 0.5);
     m_inputSettings.m_int_cm = pset.get<double>("InteractionLength", 84.);
     m_inputSettings.m_rad_cm = pset.get<double>("RadiationLength", 14.);
-    m_inputSettings.m_dEdX_max = pset.get<double>("dEdXmax", std::numeric_limits<double>::max());
+    m_inputSettings.m_dEdX_max = pset.get<double>("dEdXmax", 100000000.);
     m_inputSettings.m_dEdX_mip = pset.get<double>("dEdXmip", 2.);
     m_inputSettings.m_mips_to_gev = pset.get<double>("MipsToGeV", 3.5e-4);
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);

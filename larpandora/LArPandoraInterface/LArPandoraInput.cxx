@@ -701,7 +701,7 @@ LArPandoraInput::Settings::Settings() :
     m_dx_cm(0.5),
     m_int_cm(84.),
     m_rad_cm(14.),
-    m_dEdX_max(std::numeric_limits<double>::max()),
+    m_dEdX_max(100000000.),
     m_dEdX_mip(2.),
     m_mips_to_gev(3.5e-4),
     m_recombination_factor(0.63)
