@@ -247,7 +247,7 @@ void LArPandoraInput::CreatePandoraDetectorGaps(const Settings &settings, const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings)
+void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraReadoutGaps(...) *** " << std::endl;
 
@@ -301,11 +301,20 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings)
 
                     try
                     {
+                        parameters.m_lineStartX = -std::numeric_limits<float>::max();
+                        parameters.m_lineEndX = std::numeric_limits<float>::max();
+
+                        const unsigned int volumeId(LArPandoraGeometry::GetVolumeID(driftVolumeMap, icstat, itpc));
+                        LArDriftVolumeMap::const_iterator volumeIter(driftVolumeMap.find(volumeId));
+
+                        if (driftVolumeMap.end() != volumeIter)
+                        {
+                            parameters.m_lineStartX = volumeIter->second.GetCenterX() - 0.5f * volumeIter->second.GetWidthX();
+                            parameters.m_lineEndX = volumeIter->second.GetCenterX() + 0.5f * volumeIter->second.GetWidthX();
+                        }
+
                         const geo::View_t iview = (geo::View_t)iplane;
                         const geo::View_t pandoraView(LArPandoraGeometry::GetGlobalView(icstat, itpc, iview));
-
-                        parameters.m_lineStartX = -std::numeric_limits<float>::max(); // TODO Set correctly for global drift volume approach
-                        parameters.m_lineEndX = std::numeric_limits<float>::max();
 
                         if (pandoraView == geo::kW)
                         {
