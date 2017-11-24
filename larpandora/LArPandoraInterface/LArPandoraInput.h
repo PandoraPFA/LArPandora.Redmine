@@ -77,8 +77,9 @@ public:
      *  @brief  Create pandora line gaps to cover any (continuous regions of) bad channels
      *
      *  @param  settings the settings
+     *  @param  driftVolumeMap the mapping from volume id to drift volume
      */
-    static void CreatePandoraReadoutGaps(const Settings &settings);
+    static void CreatePandoraReadoutGaps(const Settings &settings, const LArDriftVolumeMap &driftVolumeMap);
 
     /**
      *  @brief  Create the Pandora MC particles from the MC particles
