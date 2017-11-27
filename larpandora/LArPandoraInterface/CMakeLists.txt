@@ -6,6 +6,7 @@ art_make(
           LIB_LIBRARIES larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         larsim_Simulation lardataobj_Simulation
+                        larsim_MCCheater_BackTracker_service 
                         lardataobj_RawData
                         lardataobj_RecoBase
                         lardataobj_AnalysisBase
