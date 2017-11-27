@@ -22,6 +22,8 @@
 
 #include "nusimdata/SimulationBase/MCTruth.h"
 
+#include "larsim/MCCheater/BackTracker.h"	
+
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
@@ -448,6 +450,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const L
     const MCTruthToMCParticles &truthToParticleMap, const MCParticlesToMCTruth &particleToTruthMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCParticles(...) *** " << std::endl;
+    art::ServiceHandle<cheat::BackTracker> backTracker;
 
     if (!settings.m_pPrimaryPandora)
         throw cet::exception("LArPandora") << "CreatePandoraMCParticles - primary Pandora instance does not exist ";
@@ -602,12 +605,25 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const L
             const float pZ(particle->Pz(firstT));
             const float E(particle->E(firstT));
 
+            // Find the source of the mc particle
+            int nuanceCode(0);
+            const int trackID(particle->TrackId());
+
+            if (simb::kCosmicRay == backTracker->TrackIDToMCTruth(trackID)->Origin())
+            {
+                nuanceCode = 3000;
+            }
+            else if (simb::kSingleParticle == backTracker->TrackIDToMCTruth(trackID)->Origin())
+            {
+                nuanceCode = 2000;
+            }
+
             // Create 3D Pandora MC Particle
             lar_content::LArMCParticleParameters mcParticleParameters;
 
             try
             {
-                mcParticleParameters.m_nuanceCode = 0;
+                mcParticleParameters.m_nuanceCode = nuanceCode;
                 mcParticleParameters.m_energy = E;
                 mcParticleParameters.m_particleId = particle->PdgCode();
                 mcParticleParameters.m_momentum = pandora::CartesianVector(pX, pY, pZ);
