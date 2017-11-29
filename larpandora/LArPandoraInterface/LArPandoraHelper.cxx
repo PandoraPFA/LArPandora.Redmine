@@ -40,7 +40,7 @@
 namespace lar_pandora
 {
 
-void LArPandoraHelper::CollectWires(const art::Event &evt, const std::string label, WireVector &wireVector)
+void LArPandoraHelper::CollectWires(const art::Event &evt, const std::string &label, WireVector &wireVector)
 {
     art::Handle< std::vector<recob::Wire> > theWires;
     evt.getByLabel(label, theWires);
@@ -64,7 +64,7 @@ void LArPandoraHelper::CollectWires(const art::Event &evt, const std::string lab
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectHits(const art::Event &evt, const std::string label, HitVector &hitVector)
+void LArPandoraHelper::CollectHits(const art::Event &evt, const std::string &label, HitVector &hitVector)
 {
     art::Handle< std::vector<recob::Hit> > theHits;
     evt.getByLabel(label, theHits);
@@ -88,7 +88,7 @@ void LArPandoraHelper::CollectHits(const art::Event &evt, const std::string labe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector)
+void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector)
 {
     art::Handle< std::vector<recob::PFParticle> > theParticles;
     evt.getByLabel(label, theParticles);
@@ -112,7 +112,7 @@ void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector,
+void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::string &label, SpacePointVector &spacePointVector,
     SpacePointsToHits &spacePointsToHits)
 {
     HitsToSpacePoints hitsToSpacePoints;
@@ -121,7 +121,7 @@ void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::string label, SpacePointVector &spacePointVector,
+void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::string &label, SpacePointVector &spacePointVector,
     SpacePointsToHits &spacePointsToHits, HitsToSpacePoints &hitsToSpacePoints)
 {
     art::Handle< std::vector<recob::SpacePoint> > theSpacePoints;
@@ -150,7 +150,7 @@ void LArPandoraHelper::CollectSpacePoints(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectClusters(const art::Event &evt, const std::string label, ClusterVector &clusterVector,
+void LArPandoraHelper::CollectClusters(const art::Event &evt, const std::string &label, ClusterVector &clusterVector,
     ClustersToHits &clustersToHits)
 {
     art::Handle< std::vector<recob::Cluster> > theClusters;
@@ -183,7 +183,7 @@ void LArPandoraHelper::CollectClusters(const art::Event &evt, const std::string 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
+void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
     PFParticlesToSpacePoints &particlesToSpacePoints)
 {
     art::Handle< std::vector<recob::PFParticle> > theParticles;
@@ -216,7 +216,7 @@ void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string label, PFParticleVector &particleVector,
+void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
     PFParticlesToClusters &particlesToClusters)
 {
     art::Handle< std::vector<recob::PFParticle> > theParticles;
@@ -249,7 +249,7 @@ void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector,
+void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string &label, ShowerVector &showerVector,
     PFParticlesToShowers &particlesToShowers)
 {
     art::Handle< std::vector<recob::Shower> > theShowers;
@@ -277,7 +277,7 @@ void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string l
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector,
+void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string &label, TrackVector &trackVector,
     PFParticlesToTracks &particlesToTracks)
 {
     art::Handle< std::vector<recob::Track> > theTracks;
@@ -305,7 +305,7 @@ void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string la
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string label, TrackVector &trackVector, TracksToHits &tracksToHits)
+void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string &label, TrackVector &trackVector, TracksToHits &tracksToHits)
 {
     art::Handle< std::vector<recob::Track> > theTracks;
     evt.getByLabel(label, theTracks);
@@ -337,7 +337,7 @@ void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string la
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string label, ShowerVector &showerVector, ShowersToHits &showersToHits)
+void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string &label, ShowerVector &showerVector, ShowersToHits &showersToHits)
 {
     art::Handle< std::vector<recob::Shower> > theShowers;
     evt.getByLabel(label, theShowers);
@@ -369,7 +369,7 @@ void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string l
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector,
+void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string &label, SeedVector &seedVector,
     PFParticlesToSeeds &particlesToSeeds)
 {
     art::Handle< std::vector<recob::Seed> > theSeeds;
@@ -402,7 +402,7 @@ void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string lab
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string label, SeedVector &seedVector, SeedsToHits &seedsToHits)
+void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string &label, SeedVector &seedVector, SeedsToHits &seedsToHits)
 {
     art::Handle< std::vector<recob::Seed> > theSeeds;
     evt.getByLabel(label, theSeeds);
@@ -436,7 +436,7 @@ void LArPandoraHelper::CollectSeeds(const art::Event &evt, const std::string lab
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectVertices(const art::Event &evt, const std::string label, VertexVector &vertexVector,
+void LArPandoraHelper::CollectVertices(const art::Event &evt, const std::string &label, VertexVector &vertexVector,
     PFParticlesToVertices &particlesToVertices)
 {
     art::Handle< std::vector<recob::Vertex> > theVertices;
@@ -560,7 +560,7 @@ void LArPandoraHelper::BuildPFParticleHitMaps(const PFParticleVector &particleVe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::BuildPFParticleHitMaps(const art::Event &evt, const std::string label,
+void LArPandoraHelper::BuildPFParticleHitMaps(const art::Event &evt, const std::string &label,
     PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode, const bool useClusters)
 {
     return LArPandoraHelper::BuildPFParticleHitMaps(evt, label, label, particlesToHits, hitsToParticles, daughterMode, useClusters);
@@ -568,7 +568,7 @@ void LArPandoraHelper::BuildPFParticleHitMaps(const art::Event &evt, const std::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::BuildPFParticleHitMaps(const art::Event &evt, const std::string label_pfpart, const std::string label_middle,
+void LArPandoraHelper::BuildPFParticleHitMaps(const art::Event &evt, const std::string &label_pfpart, const std::string &label_middle,
     PFParticlesToHits &particlesToHits, HitsToPFParticles &hitsToParticles, const DaughterMode daughterMode, const bool useClusters)
 {
     // Use intermediate clusters
@@ -642,7 +642,7 @@ void LArPandoraHelper::SelectFinalStatePFParticles(const PFParticleVector &input
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectCosmicTags(const art::Event &evt, const std::string label, CosmicTagVector &cosmicTagVector,
+void LArPandoraHelper::CollectCosmicTags(const art::Event &evt, const std::string &label, CosmicTagVector &cosmicTagVector,
     TracksToCosmicTags &tracksToCosmicTags)
 {
     art::Handle< std::vector<anab::CosmicTag> > theCosmicTags;
@@ -663,7 +663,7 @@ void LArPandoraHelper::CollectCosmicTags(const art::Event &evt, const std::strin
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectT0s(const art::Event &evt, const std::string label, T0Vector &t0Vector, TracksToT0s &tracksToT0s)
+void LArPandoraHelper::CollectT0s(const art::Event &evt, const std::string &label, T0Vector &t0Vector, TracksToT0s &tracksToT0s)
 {
     art::Handle< std::vector<anab::T0> > theT0s;
     evt.getByLabel(label, theT0s);
@@ -683,7 +683,7 @@ void LArPandoraHelper::CollectT0s(const art::Event &evt, const std::string label
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::string label, SimChannelVector &simChannelVector)
+void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector)
 {
     if (evt.isRealData())
         throw cet::exception("LArPandora") << " PandoraCollector::CollectSimChannels --- Trying to access MC truth from real data ";
@@ -710,7 +710,7 @@ void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string label, MCParticleVector &particleVector)
+void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string &label, MCParticleVector &particleVector)
 {
     if (evt.isRealData())
         throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
@@ -737,7 +737,7 @@ void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string label, MCTruthToMCParticles &truthToParticles,
+void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string &label, MCTruthToMCParticles &truthToParticles,
     MCParticlesToMCTruth &particlesToTruth)
 {
     if (evt.isRealData())
@@ -884,7 +884,7 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const HitsToTrackIDEs &hitsToTrack
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::string label, const HitVector &hitVector,
+void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::string &label, const HitVector &hitVector,
     MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode)
 {
     SimChannelVector simChannelVector;
@@ -896,6 +896,22 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
     LArPandoraHelper::CollectMCParticles(evt, label, truthToParticles, particlesToTruth);
     LArPandoraHelper::BuildMCParticleHitMaps(hitVector, simChannelVector, hitsToTrackIDEs);
     LArPandoraHelper::BuildMCParticleHitMaps(hitsToTrackIDEs, truthToParticles, particlesToHits, hitsToParticles, daughterMode);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
+    HitVector &associatedHits)
+{
+    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
+    evt.getByLabel(label, spacePointHandle);
+    art::FindManyP<recob::Hit> spacePointToHitAssoc(spacePointHandle, evt, label);
+    
+    for (const art::Ptr<recob::SpacePoint> &spacePoint : inputSpacePoints)
+    {
+        const HitVector &hits = spacePointToHitAssoc.at(spacePoint.key());
+        associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

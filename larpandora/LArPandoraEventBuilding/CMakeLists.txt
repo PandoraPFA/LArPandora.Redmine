@@ -6,7 +6,6 @@ art_make(
           LIB_LIBRARIES larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         larsim_Simulation lardataobj_Simulation
-                        larsim_MCCheater_BackTracker_service 
                         lardataobj_RawData
                         lardataobj_RecoBase
                         lardataobj_AnalysisBase
@@ -19,6 +18,7 @@ art_make(
                         ${PANDORASDK}
                         ${PANDORAMONITORING}
                         LArPandoraContent
+                        larpandora_LArPandoraInterface
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
@@ -37,12 +37,9 @@ art_make(
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
-                        MODULE_LIBRARIES larpandora_LArPandoraInterface
+                        MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
           )
 
 install_headers()
 install_fhicl()
 install_source()
-
-add_subdirectory(scripts)
-
