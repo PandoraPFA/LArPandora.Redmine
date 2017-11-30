@@ -16,7 +16,7 @@
 
 #include "nusimdata/SimulationBase/MCTruth.h"
 
-#include "larsim/MCCheater/BackTracker.h"
+#include "larsim/MCCheater/ParticleInventoryService.h"
 
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
@@ -373,7 +373,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
     const MCParticlesToMCTruth &particleToTruthMap)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCParticles(...) *** " << std::endl;
-    art::ServiceHandle<cheat::BackTracker> backTracker; 
+    art::ServiceHandle<cheat::ParticleInventoryService> particleInventoryService;
 
     if (!settings.m_pPrimaryPandora)
         throw cet::exception("LArPandora") << "CreatePandoraMCParticles - primary Pandora instance does not exist ";
@@ -507,7 +507,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
         // Find the source of the mc particle
         int nuanceCode(0);
         const int trackID(particle->TrackId());
-        const simb::Origin_t origin(backTracker->TrackIDToMCTruth(trackID)->Origin());
+        const simb::Origin_t origin(particleInventoryService->TrackIdToMCTruth(trackID).Origin());
 
         if (simb::kCosmicRay == origin)
         {
