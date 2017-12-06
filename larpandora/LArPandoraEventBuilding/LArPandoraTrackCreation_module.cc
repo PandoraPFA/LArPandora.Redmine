@@ -13,6 +13,7 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/TrackHitMeta.h"
 
 #include "larpandoracontent/LArObjects/LArPfoObjects.h"
 
@@ -90,6 +91,7 @@ LArPandoraTrackCreation::LArPandoraTrackCreation(fhicl::ParameterSet const &pset
     produces< std::vector<recob::Track> >();
     produces< art::Assns<recob::PFParticle, recob::Track> >();
     produces< art::Assns<recob::Track, recob::Hit> >();
+    produces< art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta> >();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,6 +101,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     std::unique_ptr< std::vector<recob::Track> > outputTracks( new std::vector<recob::Track> );
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Track> > outputParticlesToTracks( new art::Assns<recob::PFParticle, recob::Track> );
     std::unique_ptr< art::Assns<recob::Track, recob::Hit> > outputTracksToHits( new art::Assns<recob::Track, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta> > outputTracksToHitsWithMeta( new art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta> );
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     const float wirePitchW((theGeometry->MaxPlanes() > 2) ? theGeometry->WirePitch(geo::kW) : 0.5f * (theGeometry->WirePitch(geo::kU) + theGeometry->WirePitch(geo::kV)));
@@ -177,6 +180,13 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         // Output associations, after output objects are in place
         util::CreateAssn(*this, evt, pTrack, pPFParticle, *(outputParticlesToTracks.get()));
         util::CreateAssn(*this, evt, *(outputTracks.get()), hitsInParticle, *(outputTracksToHits.get()));
+
+        for (unsigned int hitIndex = 0; hitIndex < hitsInParticle.size(); hitIndex++)
+        {
+            const art::Ptr<recob::Hit> pHit(hitsInParticle.at(hitIndex));
+            recob::TrackHitMeta metadata(hitIndex, -std::numeric_limits<double>::max());
+            outputTracksToHitsWithMeta->addSingle(pTrack, pHit, metadata);
+        }
     }
 
     mf::LogDebug("LArPandoraTrackCreation") << "Number of new tracks: " << outputTracks->size() << std::endl;
