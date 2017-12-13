@@ -7,8 +7,6 @@
 #ifndef LAR_PANDORA_GEOMETRY_H
 #define LAR_PANDORA_GEOMETRY_H 1
 
-namespace pandora { class TiXmlElement; }
-
 namespace lar_pandora
 {
 
@@ -247,36 +245,19 @@ class LArPandoraGeometry
 {
 public:
     /**
-     *  @brief  Settings class
-     */
-    class Settings
-    {
-    public:
-        /**
-         *  @brief  Default constructor
-         */
-        Settings();
-
-        bool            m_globalCoordinates;        ///< Use global coordinate system
-        bool            m_globalDriftVolume;        ///< Use global drift volume
-    };
-
-    /**
      *  @brief Load the 2D gaps that go with the chosen geometry
      *
-     *  @param settings the input configuration
      *  @param listOfGaps the output list of 2D gaps.
      */
-    static void LoadDetectorGaps(const Settings &settings, LArDetectorGapList &listOfGaps);
+    static void LoadDetectorGaps(LArDetectorGapList &listOfGaps);
 
     /**
      *  @brief Load drift volume geometry
      *
-     *  @param settings the input configuration
-     *  @param driftVolumeList the output list of drift volumes
-     *  @param driftVolumeMap the output mapping between cryostat/tpc and drift volumes
+     *  @param outputVolumeList the output list of drift volumes
+     *  @param outputVolumeMap the output mapping between cryostat/tpc and drift volumes
      */
-    static void LoadGeometry(const Settings &settings, LArDriftVolumeList &driftVolumeList, LArDriftVolumeMap &driftVolumeMap);
+    static void LoadGeometry(LArDriftVolumeList &outputVolumeList, LArDriftVolumeMap &outputVolumeMap);
 
     /**
      *  @brief  Get drift volume ID from a specified cryostat/tpc pair
@@ -297,7 +278,6 @@ public:
     static geo::View_t GetGlobalView(const unsigned int cstat, const unsigned int tpc, const geo::View_t hit_View);
 
 private:
-
     /**
      *  @brief  Generate a unique identifier for each TPC
      *
@@ -328,15 +308,6 @@ private:
      *  @param  driftVolumeList to receive the populated drift volume list
      */
     static void LoadGeometry(LArDriftVolumeList &driftVolumeList);
-
-    /**
-     *  @brief  This method will create one or more global volumes (these are conglomeration of drift volumes that share a common drift
-     *          orientation along the X-axis, have parallel or near-parallel wire angles, and similar wire pitches)
-     *
-     *  @param  driftVolumeList to receive the input drift volume list
-     *  @param  parentVolumeList to receive the output parent drift volume list
-     */
-    static void LoadGlobalParentGeometry(const LArDriftVolumeList &driftVolumeList, LArDriftVolumeList &parentVolumeList);
 
     /**
      *  @brief  This method will create one or more daughter volumes (these share a common drift orientation along the X-axis,

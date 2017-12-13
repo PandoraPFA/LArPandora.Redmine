@@ -19,15 +19,11 @@
 namespace lar_pandora
 {
 
-void LArPandoraGeometry::LoadDetectorGaps(const Settings &settings, LArDetectorGapList &listOfGaps)
+void LArPandoraGeometry::LoadDetectorGaps(LArDetectorGapList &listOfGaps)
 {
     // Detector gaps can only be loaded once - throw an exception if the output lists are already filled
     if (!listOfGaps.empty())
         throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadDetectorGaps --- the list of gaps already exists ";
-
-    // Only populate detector gaps when using global drift volume
-    if (!settings.m_globalDriftVolume)
-        return;
 
     // Loop over drift volumes and write out the dead regions at their boundaries
     LArDriftVolumeList driftVolumeList;
@@ -74,33 +70,15 @@ void LArPandoraGeometry::LoadDetectorGaps(const Settings &settings, LArDetectorG
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraGeometry::LoadGeometry(const Settings &settings, LArDriftVolumeList &outputVolumeList, LArDriftVolumeMap &outputVolumeMap)
+void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &outputVolumeList, LArDriftVolumeMap &outputVolumeMap)
 {
-    // Geometry can only be loaded once - throw an exception if the output lists are already filled
-    if (!outputVolumeList.empty() || !outputVolumeMap.empty())
+    if (!outputVolumeList.empty())
         throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- the list of drift volumes already exists ";
 
-    // Global drift volume - use a global coordinate system and combine all drift volumes into a single global volume
-    if (settings.m_globalDriftVolume)
-    {
-        LArDriftVolumeList inputVolumeList;
-        LArPandoraGeometry::LoadGeometry(inputVolumeList);
-        LArPandoraGeometry::LoadGlobalParentGeometry(inputVolumeList, outputVolumeList);
-    }
-
-    // Global coordinates - use a global coordinate system but keep drift volumes separate
-    else if (settings.m_globalCoordinates)
-    {
-        LArDriftVolumeList inputVolumeList;
-        LArPandoraGeometry::LoadGeometry(inputVolumeList);
-        LArPandoraGeometry::LoadGlobalDaughterGeometry(inputVolumeList, outputVolumeList);
-    }
-
-    // Separate drift volumes - keep drift volumes separate with their separate coordinate systems
-    else
-    {
-        LArPandoraGeometry::LoadGeometry(outputVolumeList);
-    }
+    // Use a global coordinate system but keep drift volumes separate
+    LArDriftVolumeList inputVolumeList;
+    LArPandoraGeometry::LoadGeometry(inputVolumeList);
+    LArPandoraGeometry::LoadGlobalDaughterGeometry(inputVolumeList, outputVolumeList);
 
     // Create mapping between tpc/cstat labels and drift volumes
     for (const LArDriftVolume &driftVolume : outputVolumeList)
@@ -169,6 +147,7 @@ bool LArPandoraGeometry::ShouldSwitchUV(const unsigned int cstat, const unsigned
     // We determine whether U and V views should be switched by checking the drift direction
     art::ServiceHandle<geo::Geometry> theGeometry;
     const geo::TPCGeo &theTpc(theGeometry->TPC(tpc, cstat));
+
     const bool isPositiveDrift(theTpc.DriftDirection() == geo::kPosX);
     return LArPandoraGeometry::ShouldSwitchUV(isPositiveDrift);
 }
@@ -309,62 +288,6 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraGeometry::LoadGlobalParentGeometry(const LArDriftVolumeList &driftVolumeList, LArDriftVolumeList &parentVolumeList)
-{
-    // This method will create one or more master drift volumes (these are groups of drift volumes that share a common drift orientation
-    // along the X-axis, have parallel or near-parallel wire angles, and similar wire pitches
-
-    if (!parentVolumeList.empty())
-        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalParentGeometry --- parent geometry has already been loaded ";
-
-    if (driftVolumeList.empty())
-        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalParentGeometry --- detector geometry has not yet been loaded ";
-
-    // Take most properties from first volume, then loop over all volumes
-    const LArDriftVolume &frontVolume(driftVolumeList.front());
-
-    const bool   switchViews(LArPandoraGeometry::ShouldSwitchUV(frontVolume.IsPositiveDrift()));
-    const bool   isPositiveDrift(switchViews ? !frontVolume.IsPositiveDrift() : frontVolume.IsPositiveDrift());
-    const float parentWirePitchU(std::max(frontVolume.GetWirePitchU(), frontVolume.GetWirePitchV()));
-    const float parentWirePitchV(parentWirePitchU);
-    const float parentWirePitchW(frontVolume.GetWirePitchW());
-    const float parentWireAngleU(switchViews ? - frontVolume.GetWireAngleV() : frontVolume.GetWireAngleU());
-    const float parentWireAngleV(switchViews ? - frontVolume.GetWireAngleU() : frontVolume.GetWireAngleV());
-
-    float parentMinX(frontVolume.GetCenterX() - 0.5f * frontVolume.GetWidthX());
-    float parentMaxX(frontVolume.GetCenterX() + 0.5f * frontVolume.GetWidthX());
-    float parentMinY(frontVolume.GetCenterY() - 0.5f * frontVolume.GetWidthY());
-    float parentMaxY(frontVolume.GetCenterY() + 0.5f * frontVolume.GetWidthY());
-    float parentMinZ(frontVolume.GetCenterZ() - 0.5f * frontVolume.GetWidthZ());
-    float parentMaxZ(frontVolume.GetCenterZ() + 0.5f * frontVolume.GetWidthZ());
-
-    LArDaughterDriftVolumeList tpcVolumeList;
-
-    for (const LArDriftVolume &driftVolume : driftVolumeList)
-    {
-        parentMinX = std::min(parentMinX, driftVolume.GetCenterX() - 0.5f * driftVolume.GetWidthX());
-        parentMaxX = std::max(parentMaxX, driftVolume.GetCenterX() + 0.5f * driftVolume.GetWidthX());
-        parentMinY = std::min(parentMinY, driftVolume.GetCenterY() - 0.5f * driftVolume.GetWidthY());
-        parentMaxY = std::max(parentMaxY, driftVolume.GetCenterY() + 0.5f * driftVolume.GetWidthY());
-        parentMinZ = std::min(parentMinZ, driftVolume.GetCenterZ() - 0.5f * driftVolume.GetWidthZ());
-        parentMaxZ = std::max(parentMaxZ, driftVolume.GetCenterZ() + 0.5f * driftVolume.GetWidthZ());
-
-        tpcVolumeList.insert(tpcVolumeList.end(), driftVolume.GetTpcVolumeList().begin(), driftVolume.GetTpcVolumeList().end());
-    }
-
-    // Create parent drift volume (volume ID = 0)
-    parentVolumeList.push_back(LArDriftVolume(0, isPositiveDrift,
-        parentWirePitchU, parentWirePitchV, parentWirePitchW, parentWireAngleU, parentWireAngleV,
-        0.5f * (parentMaxX + parentMinX), 0.5f * (parentMaxY + parentMinY), 0.5f * (parentMaxZ + parentMinZ),
-        (parentMaxX - parentMinX), (parentMaxY - parentMinY), (parentMaxZ - parentMinZ),
-        frontVolume.GetSigmaUVZ(), tpcVolumeList));
-
-    if (parentVolumeList.empty())
-        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGlobalParentGeometry --- failed to create parent geometry list ";
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &driftVolumeList, LArDriftVolumeList &daughterVolumeList)
 {
     // This method will create one or more daughter volumes (these share a common drift orientation along the X-axis,
@@ -429,15 +352,6 @@ LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiv
 const LArDaughterDriftVolumeList &LArDriftVolume::GetTpcVolumeList() const
 {
     return m_tpcVolumeList;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-LArPandoraGeometry::Settings::Settings() :
-    m_globalCoordinates(false),
-    m_globalDriftVolume(false)
-{
 }
 
 } // namespace lar_pandora
