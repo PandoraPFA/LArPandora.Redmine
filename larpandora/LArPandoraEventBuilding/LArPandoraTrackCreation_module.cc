@@ -90,6 +90,8 @@ LArPandoraTrackCreation::LArPandoraTrackCreation(fhicl::ParameterSet const &pset
     produces< std::vector<recob::Track> >();
     produces< art::Assns<recob::PFParticle, recob::Track> >();
     produces< art::Assns<recob::Track, recob::Hit> >();
+
+    if (m_minTrajectoryPoints<2) throw cet::exception("LArPandoraTrackCreation") << "MinTrajectoryPoints should not be smaller than 2!";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
