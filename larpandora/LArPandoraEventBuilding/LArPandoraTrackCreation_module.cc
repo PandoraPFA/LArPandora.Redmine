@@ -152,10 +152,10 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
         // Call pandora "fast" track fitter
         lar_content::LArTrackStateVector trackStateVector;
-
+        std::vector<int> indexVector;
         try
         {
-            lar_content::LArPfoHelper::GetSlidingFitTrajectory(cartesianPointVector, vertexPosition, m_slidingFitHalfWindow, wirePitchW, trackStateVector);
+            lar_content::LArPfoHelper::GetSlidingFitTrajectory(cartesianPointVector, vertexPosition, m_slidingFitHalfWindow, wirePitchW, trackStateVector, &indexVector);
         }
         catch (const pandora::StatusCodeException &)
         {
@@ -170,7 +170,14 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         }
 
         HitVector hitsInParticle;
-        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle);
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle, &indexVector);
+
+        // Add invalid points at the end of the vector, so that the number of the trajectory points is the same as the number of hits
+        unsigned int nInvalidPoints = hitsInParticle.size()-trackStateVector.size();
+        for (unsigned int i=0;i<nInvalidPoints;++i) {
+            trackStateVector.push_back(lar_content::LArTrackState(pandora::CartesianVector(util::kBogusF,util::kBogusF,util::kBogusF),
+                                                                  pandora::CartesianVector(util::kBogusF,util::kBogusF,util::kBogusF), nullptr));
+        }
 
         // Output objects
         outputTracks->emplace_back(LArPandoraTrackCreation::BuildTrack(trackCounter++, trackStateVector));
@@ -195,19 +202,28 @@ recob::Track LArPandoraTrackCreation::BuildTrack(const int id, const lar_content
     if (trackStateVector.empty())
         throw cet::exception("LArPandoraTrackCreation") << "BuildTrack - No input trajectory points provided ";
 
-    std::vector<TVector3> xyz;
-    std::vector<TVector3> pxpypz;
-
-    std::vector<double> dummyMomentum(std::vector<double>(2, util::kBogusD));
-    std::vector< std::vector<double> > dummyDQDX(std::vector< std::vector<double> >(0));
+    recob::tracking::Positions_t xyz;
+    recob::tracking::Momenta_t pxpypz;
+    recob::TrackTrajectory::Flags_t flags;
 
     for (const lar_content::LArTrackState &trackState : trackStateVector)
     {
-        xyz.emplace_back(TVector3(trackState.GetPosition().GetX(), trackState.GetPosition().GetY(), trackState.GetPosition().GetZ()));
-        pxpypz.emplace_back(TVector3(trackState.GetDirection().GetX(), trackState.GetDirection().GetY(), trackState.GetDirection().GetZ()));
+        xyz.emplace_back(recob::tracking::Point_t(trackState.GetPosition().GetX(), trackState.GetPosition().GetY(), trackState.GetPosition().GetZ()));
+        pxpypz.emplace_back(recob::tracking::Vector_t(trackState.GetDirection().GetX(), trackState.GetDirection().GetY(), trackState.GetDirection().GetZ()));
+        // Set flag NoPoint if point has bogus coordinates, otherwise use clean flag set
+        if (std::abs(trackState.GetPosition().GetX()-util::kBogusF)<FLT_MIN &&
+            std::abs(trackState.GetPosition().GetY()-util::kBogusF)<FLT_MIN &&
+            std::abs(trackState.GetPosition().GetZ()-util::kBogusF)<FLT_MIN)
+	{
+            flags.emplace_back(recob::TrajectoryPointFlags(recob::TrajectoryPointFlags::InvalidHitIndex, recob::TrajectoryPointFlagTraits::NoPoint));
+	} else {
+            flags.emplace_back(recob::TrajectoryPointFlags());
+	}
     }
 
-    return recob::Track(xyz, pxpypz, dummyDQDX, dummyMomentum, id);
+    // note from gc: eventually we should produce a TrackTrajectory, not a Track with empty covariance matrix and bogus chi2, etc.
+    return recob::Track(recob::TrackTrajectory(std::move(xyz), std::move(pxpypz), std::move(flags), false),
+			util::kBogusI, util::kBogusF, util::kBogusI, recob::tracking::SMatrixSym55(), recob::tracking::SMatrixSym55(), id);
 }
 
 } // namespace lar_pandora
