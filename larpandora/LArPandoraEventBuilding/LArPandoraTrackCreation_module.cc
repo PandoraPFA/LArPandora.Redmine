@@ -193,6 +193,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
     evt.put(std::move(outputTracks));
     evt.put(std::move(outputTracksToHits));
+    evt.put(std::move(outputTracksToHitsWithMeta));
     evt.put(std::move(outputParticlesToTracks));
 }
 
