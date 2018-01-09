@@ -10,6 +10,7 @@
 #include "art/Framework/Principal/Event.h"
 
 #include "lardataobj/Simulation/SimChannel.h"
+#include "Pandora/PandoraInternal.h"
 
 #include <map>
 #include <set>
@@ -409,7 +410,7 @@ public:
      *  @param  indexVector vector of spacepoint indices reflecting trajectory points sorting order
      */
     static void GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
-        HitVector &associatedHits, const std::vector<int>* indexVector = nullptr);
+        HitVector &associatedHits, const pandora::IntVector* const indexVector = nullptr);
 
     /**
      *  @brief Select reconstructed neutrino particles from a list of all reconstructed particles

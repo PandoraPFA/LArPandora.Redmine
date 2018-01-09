@@ -901,7 +901,7 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
-    HitVector &associatedHits, const std::vector<int>* indexVector)
+    HitVector &associatedHits, const pandora::IntVector* const indexVector)
 {
     art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
     evt.getByLabel(label, spacePointHandle);
@@ -912,7 +912,7 @@ void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::strin
         // If indexVector is filled, sort hits according to trajectory points order
         for (int index : (*indexVector))
         {
-            const art::Ptr<recob::SpacePoint> &spacePoint = inputSpacePoints[index];
+            const art::Ptr<recob::SpacePoint> &spacePoint = inputSpacePoints.at(index);
             const HitVector &hits = spacePointToHitAssoc.at(spacePoint.key());
             associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
         }

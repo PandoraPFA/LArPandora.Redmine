@@ -37,6 +37,7 @@ art_make(
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
+                        ${ROOT_GENVECTOR}
                         MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
           )
 

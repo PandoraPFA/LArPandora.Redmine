@@ -152,7 +152,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
         // Call pandora "fast" track fitter
         lar_content::LArTrackStateVector trackStateVector;
-        std::vector<int> indexVector;
+        pandora::IntVector indexVector;
         try
         {
             lar_content::LArPfoHelper::GetSlidingFitTrajectory(cartesianPointVector, vertexPosition, m_slidingFitHalfWindow, wirePitchW, trackStateVector, &indexVector);
@@ -173,7 +173,11 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle, &indexVector);
 
         // Add invalid points at the end of the vector, so that the number of the trajectory points is the same as the number of hits
-        unsigned int nInvalidPoints = hitsInParticle.size()-trackStateVector.size();
+        if (trackStateVector.size()>hitsInParticle.size())
+        {
+            throw cet::exception("LArPandoraTrackCreation") << "trackStateVector.size() is greater than hitsInParticle.size()";
+        }
+        const unsigned int nInvalidPoints = hitsInParticle.size()-trackStateVector.size();
         for (unsigned int i=0;i<nInvalidPoints;++i) {
             trackStateVector.push_back(lar_content::LArTrackState(pandora::CartesianVector(util::kBogusF,util::kBogusF,util::kBogusF),
                                                                   pandora::CartesianVector(util::kBogusF,util::kBogusF,util::kBogusF), nullptr));
@@ -211,9 +215,9 @@ recob::Track LArPandoraTrackCreation::BuildTrack(const int id, const lar_content
         xyz.emplace_back(recob::tracking::Point_t(trackState.GetPosition().GetX(), trackState.GetPosition().GetY(), trackState.GetPosition().GetZ()));
         pxpypz.emplace_back(recob::tracking::Vector_t(trackState.GetDirection().GetX(), trackState.GetDirection().GetY(), trackState.GetDirection().GetZ()));
         // Set flag NoPoint if point has bogus coordinates, otherwise use clean flag set
-        if (std::abs(trackState.GetPosition().GetX()-util::kBogusF)<FLT_MIN &&
-            std::abs(trackState.GetPosition().GetY()-util::kBogusF)<FLT_MIN &&
-            std::abs(trackState.GetPosition().GetZ()-util::kBogusF)<FLT_MIN)
+        if (std::fabs(trackState.GetPosition().GetX()-util::kBogusF)<std::numeric_limits<float>::epsilon() &&
+            std::fabs(trackState.GetPosition().GetY()-util::kBogusF)<std::numeric_limits<float>::epsilon() &&
+            std::fabs(trackState.GetPosition().GetZ()-util::kBogusF)<std::numeric_limits<float>::epsilon())
 	{
             flags.emplace_back(recob::TrajectoryPointFlags(recob::TrajectoryPointFlags::InvalidHitIndex, recob::TrajectoryPointFlagTraits::NoPoint));
 	} else {
