@@ -51,6 +51,7 @@ private:
     void CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap);
     void ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap);
 
+    std::string                     m_generatorModuleLabel;         ///< The generator module label
     std::string                     m_geantModuleLabel;             ///< The geant module label
     std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
 

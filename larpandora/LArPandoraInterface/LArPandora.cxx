@@ -24,6 +24,8 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Vertex.h"
 
+#include "nusimdata/SimulationBase/MCParticle.h"
+
 #include "Api/PandoraApi.h"
 
 #include "larpandoracontent/LArContent.h"
@@ -51,6 +53,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_shouldRunCosmicRecoOption(pset.get<bool>("ShouldRunCosmicRecoOption")),
     m_shouldPerformSliceId(pset.get<bool>("ShouldPerformSliceId")),
     m_printOverallRecoStatus(pset.get<bool>("PrintOverallRecoStatus", false)),
+    m_generatorModuleLabel(pset.get<std::string>("GeneratorModuleLabel", "")),
     m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant")),
     m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel")),
     m_enableProduction(pset.get<bool>("EnableProduction", true)),
@@ -147,6 +150,7 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
     SimChannelVector artSimChannels;
     HitsToTrackIDEs artHitsToTrackIDEs;
     MCParticleVector artMCParticleVector;
+    RawMCParticleVector generatorArtMCParticleVector;
     MCTruthToMCParticles artMCTruthToMCParticles;
     MCParticlesToMCTruth artMCParticlesToMCTruth;
 
@@ -155,6 +159,10 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
     if (m_enableMCParticles && !evt.isRealData())
     {
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCParticleVector);
+
+        if (!m_generatorModuleLabel.empty())
+            LArPandoraHelper::CollectGeneratorMCParticles(evt, m_generatorModuleLabel, generatorArtMCParticleVector);
+
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
         LArPandoraHelper::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
         LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
@@ -164,7 +172,7 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
 
     if (m_enableMCParticles && !evt.isRealData())
     {
-        LArPandoraInput::CreatePandoraMCParticles(m_inputSettings, artMCTruthToMCParticles, artMCParticlesToMCTruth);
+        LArPandoraInput::CreatePandoraMCParticles(m_inputSettings, artMCTruthToMCParticles, artMCParticlesToMCTruth, generatorArtMCParticleVector);
         LArPandoraInput::CreatePandoraMCLinks2D(m_inputSettings, idToHitMap, artHitsToTrackIDEs);
     }
 }

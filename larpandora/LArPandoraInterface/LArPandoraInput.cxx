@@ -370,7 +370,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const MCTruthToMCParticles &truthToParticleMap,
-    const MCParticlesToMCTruth &particleToTruthMap)
+    const MCParticlesToMCTruth &particleToTruthMap, const RawMCParticleVector &generatorMCParticleVector)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCParticles(...) *** " << std::endl;
     art::ServiceHandle<cheat::ParticleInventoryService> particleInventoryService;
@@ -469,6 +469,10 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
     // Loop over G4 particles
     int particleCounter(0);
 
+    // Find Primary Generator Particles
+    std::map<const simb::MCParticle, bool> primaryGeneratorMCParticleMap;
+    LArPandoraInput::FindPrimaryParticles(generatorMCParticleVector, primaryGeneratorMCParticleMap);
+
     for (MCParticleMap::const_iterator iterI = particleMap.begin(), iterEndI = particleMap.end(); iterI != iterEndI; ++iterI)
     {
         const art::Ptr<simb::MCParticle> particle = iterI->second;
@@ -509,7 +513,11 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
         const int trackID(particle->TrackId());
         const simb::Origin_t origin(particleInventoryService->TrackIdToMCTruth(trackID).Origin());
 
-        if (simb::kCosmicRay == origin)
+        if (LArPandoraInput::IsPrimaryMCParticle(particle, primaryGeneratorMCParticleMap))
+        {
+            nuanceCode = 2001;
+        }
+        else if (simb::kCosmicRay == origin)
         {
             nuanceCode = 3000;
         }
@@ -568,6 +576,41 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
     }
 
     mf::LogDebug("LArPandora") << "Number of mc particles: " << particleCounter << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraInput::FindPrimaryParticles(const RawMCParticleVector &mcParticleVector, std::map<const simb::MCParticle, bool> &primaryMCParticleMap)  
+{
+    for (const simb::MCParticle &mcParticle : mcParticleVector)
+    {
+        if ("primary" == mcParticle.Process())
+        {
+            primaryMCParticleMap.emplace(std::make_pair(mcParticle, false));
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraInput::IsPrimaryMCParticle(const art::Ptr<simb::MCParticle> &mcParticle, std::map<const simb::MCParticle, bool> &primaryMCParticleMap) 
+{
+    for (auto &mcParticleIter : primaryMCParticleMap)
+    {
+        if (!mcParticleIter.second)
+        {
+            const simb::MCParticle primaryMCParticle(mcParticleIter.first);
+
+            if (std::fabs(primaryMCParticle.Px() - mcParticle->Px()) < std::numeric_limits<double>::epsilon() && 
+                std::fabs(primaryMCParticle.Py() - mcParticle->Py()) < std::numeric_limits<double>::epsilon() && 
+                std::fabs(primaryMCParticle.Pz() - mcParticle->Pz()) < std::numeric_limits<double>::epsilon())
+            {
+                mcParticleIter.second = true;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

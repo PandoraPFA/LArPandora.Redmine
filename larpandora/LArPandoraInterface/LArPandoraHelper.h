@@ -39,6 +39,7 @@ typedef std::vector< art::Ptr<recob::Shower> >      ShowerVector;
 typedef std::vector< art::Ptr<recob::PFParticle> >  PFParticleVector;
 typedef std::vector< art::Ptr<simb::MCTruth> >      MCTruthVector;
 typedef std::vector< art::Ptr<simb::MCParticle> >   MCParticleVector;
+typedef std::vector< simb::MCParticle>              RawMCParticleVector;
 typedef std::vector< art::Ptr<sim::SimChannel> >    SimChannelVector;
 typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 typedef std::vector< art::Ptr<anab::CosmicTag> >    CosmicTagVector;
@@ -353,6 +354,16 @@ public:
      *  @param particleVector the output vector of MCParticle objects
      */
     static void CollectMCParticles(const art::Event &evt, const std::string &label, MCParticleVector &particleVector);
+
+    /**
+     *  @brief Collect a vector of MCParticle objects from the generator in the ART event record.  ATTN: This function is 
+     *         needed as accessing generator (opposed to Geant4) level MCParticles requires use of MCTruth block.
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the truth information in the generator
+     *  @param particleVector the output vector of MCParticle objects
+     */
+    static void CollectGeneratorMCParticles(const art::Event &evt, const std::string &label, RawMCParticleVector &particleVector);
 
     /**
      *  @brief Collect truth information from the ART event record
