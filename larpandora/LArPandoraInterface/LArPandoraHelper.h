@@ -10,14 +10,13 @@
 #include "art/Framework/Principal/Event.h"
 
 #include "lardataobj/Simulation/SimChannel.h"
-#include "Pandora/PandoraInternal.h"
 
 #include <map>
 #include <set>
 #include <vector>
 
 namespace anab {class CosmicTag; class T0; }
-namespace pandora {class ParticleFlowObject; class Vertex;}
+namespace pandora {class ParticleFlowObject; class Vertex; typedef std::vector<int> IntVector;}
 namespace recob {class Cluster; class Hit; class PFParticle; class Seed; class Shower; class SpacePoint; class Track; class Vertex; class Wire;}
 namespace sim {class SimChannel; class TrackIDE;}
 namespace simb {class MCParticle; class MCTruth;}

@@ -31,6 +31,7 @@
 
 #include "Objects/ParticleFlowObject.h"
 #include "Pandora/PdgTable.h"
+#include "Pandora/PandoraInternal.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
