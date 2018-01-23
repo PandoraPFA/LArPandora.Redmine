@@ -89,7 +89,23 @@ public:
      *  @param  particlesToTruth  mapping from MC particles to MC truth
      */
     static void CreatePandoraMCParticles(const Settings &settings, const MCTruthToMCParticles &truthToParticles,
-        const MCParticlesToMCTruth &particlesToTruth);
+        const MCParticlesToMCTruth &particlesToTruth, const RawMCParticleVector &generatorMCParticleVector);
+
+    /**
+     *  @brief Find all primary MCParticles in a given vector of MCParticles
+     *
+     *  @param mcParticleVector vector of all MCParticles to consider
+     *  @param primaryMCParticleMap map containing primary MCParticles and bool indicating whether particle has been accounted for
+     */
+    static void FindPrimaryParticles(const RawMCParticleVector &mcParticleVector, std::map<const simb::MCParticle, bool> &primaryMCParticleMap);
+
+    /**
+     *  @brief Check whether an MCParticle can be found in a given map
+     *
+     *  @param mcParticle target MCParticle
+     *  @param primaryMCParticleMap map containing primary MCParticles and bool indicating whether particle has been accounted for
+     */
+    static bool IsPrimaryMCParticle(const art::Ptr<simb::MCParticle> &mcParticle, std::map<const simb::MCParticle, bool> &primaryMCParticleMap);
 
     /**
      *  @brief  Create links between the 2D hits and Pandora MC particles

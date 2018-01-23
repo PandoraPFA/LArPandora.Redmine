@@ -716,7 +716,7 @@ void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::stri
     if (evt.isRealData())
         throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
-    art::Handle< std::vector<simb::MCParticle> > theParticles;
+    art::Handle< RawMCParticleVector > theParticles;
     evt.getByLabel(label, theParticles);
 
     if (!theParticles.isValid())
@@ -738,13 +738,45 @@ void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraHelper::CollectGeneratorMCParticles(const art::Event &evt, const std::string &label, RawMCParticleVector &particleVector)
+{
+    if (evt.isRealData())
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectGeneratorMCParticles --- Trying to access MC truth from real data ";
+
+    art::Handle< std::vector<simb::MCTruth> > mcTruthBlocks;
+    evt.getByLabel(label, mcTruthBlocks);
+
+    if (!mcTruthBlocks.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find MC truth blocks from generator... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << mcTruthBlocks->size() << " MC truth blocks " << std::endl;
+    }
+
+    if (mcTruthBlocks->size() != 1)
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectGeneratorMCParticles --- Unexpected number of MC truth blocks ";
+
+    const art::Ptr<simb::MCTruth> mcTruth(mcTruthBlocks, 0);
+
+    for (int i = 0; i < mcTruth->NParticles(); ++i)
+    {
+        particleVector.push_back(mcTruth->GetParticle(i));
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string &label, MCTruthToMCParticles &truthToParticles,
     MCParticlesToMCTruth &particlesToTruth)
 {
     if (evt.isRealData())
         throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
-    art::Handle< std::vector<simb::MCParticle> > theParticles;
+    art::Handle< RawMCParticleVector > theParticles;
     evt.getByLabel(label, theParticles);
 
     if (!theParticles.isValid())
