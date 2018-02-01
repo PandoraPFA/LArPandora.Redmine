@@ -1,21 +1,24 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	larpandora	v06_21_00
-defaultqual	e14
+parent	larpandora	v06_22_00
+defaultqual	e15
 #
 fcldir  product_dir job
 fwdir   product_dir scripts
 #
 product         version
-larreco         v06_53_01
-larpandoracontent         v03_09_03
+larreco         v06_54_00
+larpandoracontent         v03_09_04
 
 cetbuildtools	v6_01_01	-	only_for_build
 end_product_list
 
   
-# e14  - with gcc 6.3.0 and -std=c++14
+# e15  - with gcc 6.4.0 and -std=c++14
 qualifier	larreco		larpandoracontent	notes
+e15:debug	e15:debug	e15:debug
+e15:opt		e15:opt		e15:opt
+e15:prof	e15:prof	e15:prof
 e14:debug	e14:debug	e14:debug
 e14:opt		e14:opt		e14:opt
 e14:prof	e14:prof	e14:prof
