@@ -46,6 +46,7 @@ private:
     std::string     m_pfParticleLabel;              ///< The pf particle label
     unsigned int    m_minTrajectoryPoints;          ///< The minimum number of trajectory points
     unsigned int    m_slidingFitHalfWindow;         ///< The sliding fit half window
+    bool            m_useAllParticles;              ///< Build a recob::Track for every recob::PFParticle
 };
 
 DEFINE_ART_MODULE(LArPandoraTrackCreation)
@@ -86,7 +87,8 @@ namespace lar_pandora
 LArPandoraTrackCreation::LArPandoraTrackCreation(fhicl::ParameterSet const &pset) :
     m_pfParticleLabel(pset.get<std::string>("PFParticleLabel")),
     m_minTrajectoryPoints(pset.get<unsigned int>("MinTrajectoryPoints", 2)),
-    m_slidingFitHalfWindow(pset.get<unsigned int>("SlidingFitHalfWindow", 20))
+    m_slidingFitHalfWindow(pset.get<unsigned int>("SlidingFitHalfWindow", 20)),
+    m_useAllParticles(pset.get<bool>("UseAllParticles", false))
 {
     produces< std::vector<recob::Track> >();
     produces< art::Assns<recob::PFParticle, recob::Track> >();
@@ -123,8 +125,8 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
     for (const art::Ptr<recob::PFParticle> pPFParticle : pfParticleVector)
     {
-        // Only interested in track-like pfparticles
-        if (!LArPandoraHelper::IsTrack(pPFParticle))
+        // Select track-like pfparticles
+        if (!m_useAllParticles && !LArPandoraHelper::IsTrack(pPFParticle))
             continue;
 
         // Obtain associated spacepoints
@@ -230,16 +232,16 @@ recob::Track LArPandoraTrackCreation::BuildTrack(const int id, const lar_content
         if (std::fabs(trackState.GetPosition().GetX()-util::kBogusF)<std::numeric_limits<float>::epsilon() &&
             std::fabs(trackState.GetPosition().GetY()-util::kBogusF)<std::numeric_limits<float>::epsilon() &&
             std::fabs(trackState.GetPosition().GetZ()-util::kBogusF)<std::numeric_limits<float>::epsilon())
-	{
+        {
             flags.emplace_back(recob::TrajectoryPointFlags(recob::TrajectoryPointFlags::InvalidHitIndex, recob::TrajectoryPointFlagTraits::NoPoint));
-	} else {
+        } else {
             flags.emplace_back(recob::TrajectoryPointFlags());
-	}
+        }
     }
 
     // note from gc: eventually we should produce a TrackTrajectory, not a Track with empty covariance matrix and bogus chi2, etc.
     return recob::Track(recob::TrackTrajectory(std::move(xyz), std::move(pxpypz), std::move(flags), false),
-			util::kBogusI, util::kBogusF, util::kBogusI, recob::tracking::SMatrixSym55(), recob::tracking::SMatrixSym55(), id);
+                        util::kBogusI, util::kBogusF, util::kBogusI, recob::tracking::SMatrixSym55(), recob::tracking::SMatrixSym55(), id);
 }
 
 } // namespace lar_pandora
