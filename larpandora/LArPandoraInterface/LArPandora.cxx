@@ -56,6 +56,8 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_generatorModuleLabel(pset.get<std::string>("GeneratorModuleLabel", "")),
     m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant")),
     m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel")),
+    m_backtrackerModuleLabel(pset.get<std::string>("BackTrackerModuleLabel","")),
+    m_useBackTracker(pset.get<bool>("UseBackTracker", false)),
     m_enableProduction(pset.get<bool>("EnableProduction", true)),
     m_enableDetectorGaps(pset.get<bool>("EnableLineGaps", true)),
     m_enableMCParticles(pset.get<bool>("EnableMCParticles", false)),
@@ -164,8 +166,16 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
             LArPandoraHelper::CollectGeneratorMCParticles(evt, m_generatorModuleLabel, generatorArtMCParticleVector);
 
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
-        LArPandoraHelper::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
-        LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
+
+        if (!m_useBackTracker)
+        {
+            LArPandoraHelper::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
+            LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
+        }
+        else
+        {
+            LArPandoraHelper::BuildMCParticleHitMaps(evt, m_hitfinderModuleLabel, m_backtrackerModuleLabel, artHitsToTrackIDEs);
+        }
     }
 
     LArPandoraInput::CreatePandoraHits2D(m_inputSettings, m_driftVolumeMap, artHits, idToHitMap);

@@ -13,6 +13,7 @@
 
 #include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -266,13 +267,18 @@ void LArPandoraHelper::CollectShowers(const art::Event &evt, const std::string &
         mf::LogDebug("LArPandora") << "  Found: " << theShowers->size() << " Showers " << std::endl;
     }
 
-    art::FindOneP<recob::PFParticle> theParticleAssns(theShowers, evt, label);
+    art::FindManyP<recob::PFParticle> theShowerAssns(theShowers, evt, label);
     for (unsigned int i = 0; i < theShowers->size(); ++i)
     {
         const art::Ptr<recob::Shower> shower(theShowers, i);
         showerVector.push_back(shower);
-        const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
-        particlesToShowers[particle].push_back(shower);
+
+        const std::vector< art::Ptr<recob::PFParticle> > particles = theShowerAssns.at(i);
+        for (unsigned int j=0; j<particles.size(); ++j)
+        {
+            const art::Ptr<recob::PFParticle> particle = particles.at(j);
+            particlesToShowers[particle].push_back(shower);
+        }
     }
 }
 
@@ -294,13 +300,18 @@ void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string &l
         mf::LogDebug("LArPandora") << "  Found: " << theTracks->size() << " Tracks " << std::endl;
     }
 
-    art::FindOneP<recob::PFParticle> theParticleAssns(theTracks, evt, label);
+    art::FindManyP<recob::PFParticle> theTrackAssns(theTracks, evt, label);
     for (unsigned int i = 0; i < theTracks->size(); ++i)
     {
         const art::Ptr<recob::Track> track(theTracks, i);
         trackVector.push_back(track);
-        const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
-        particlesToTracks[particle].push_back(track);
+
+        const std::vector< art::Ptr<recob::PFParticle> > particles = theTrackAssns.at(i);
+        for (unsigned int j=0; j<particles.size(); ++j)
+        {
+            const art::Ptr<recob::PFParticle> particle = particles.at(j);
+            particlesToTracks[particle].push_back(track);
+        }
     }
 }
 
@@ -651,12 +662,12 @@ void LArPandoraHelper::CollectCosmicTags(const art::Event &evt, const std::strin
 
     if (theCosmicTags.isValid())
     {
-        art::FindOneP<recob::Track> theCosmicAssns(theCosmicTags, evt, label);
+        art::FindOneP<recob::Track> theCosmicAssns(theCosmicTags, evt, label); // We assume there is one tag per algorithm
         for (unsigned int i = 0; i < theCosmicTags->size(); ++i)
         {
             const art::Ptr<anab::CosmicTag> cosmicTag(theCosmicTags, i);
             const art::Ptr<recob::Track> track = theCosmicAssns.at(i);
-            tracksToCosmicTags[track].push_back(cosmicTag); // Note: we assume there could be many tags spread over multiple algorithms
+            tracksToCosmicTags[track].push_back(cosmicTag); // We assume there could be multiple algorithms
             cosmicTagVector.push_back(cosmicTag);
         }
     }
@@ -664,20 +675,25 @@ void LArPandoraHelper::CollectCosmicTags(const art::Event &evt, const std::strin
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectT0s(const art::Event &evt, const std::string &label, T0Vector &t0Vector, TracksToT0s &tracksToT0s)
+void LArPandoraHelper::CollectT0s(const art::Event &evt, const std::string &label, T0Vector &t0Vector, PFParticlesToT0s &particlesToT0s)
 {
     art::Handle< std::vector<anab::T0> > theT0s;
     evt.getByLabel(label, theT0s);
 
     if (theT0s.isValid())
     {
-        art::FindOneP<recob::Track> theAssns(theT0s, evt, label);
+        art::FindManyP<recob::PFParticle> theAssns(theT0s, evt, label);
         for (unsigned int i = 0; i < theT0s->size(); ++i)
         {
             const art::Ptr<anab::T0> theT0(theT0s, i);
-            const art::Ptr<recob::Track> track = theAssns.at(i);
-            tracksToT0s[track] = theT0; // Note: we assume there is only ever one T0 per track
             t0Vector.push_back(theT0);
+
+            const std::vector< art::Ptr<recob::PFParticle> > particles = theAssns.at(i);
+            for (unsigned int j=0; j<particles.size(); ++j)
+            {
+                const art::Ptr<recob::PFParticle> theParticle = particles.at(j);
+                particlesToT0s[theParticle].push_back(theT0); // We assume there could be multiple T0s per PFParticle
+            }
         }
     }
 }
@@ -933,6 +949,78 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::string &hitLabel, const std::string &backtrackLabel,
+    HitsToTrackIDEs &hitsToTrackIDEs)
+{
+    // Start by getting the collection of Hits
+    art::Handle< std::vector<recob::Hit> > theHits;
+    evt.getByLabel(hitLabel, theHits);
+
+    if (!theHits.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find hits... " << std::endl;
+        return;
+    }
+
+    HitVector hitVector;
+
+    for (unsigned int i = 0; i < theHits->size(); ++i)
+    {
+        const art::Ptr<recob::Hit> hit(theHits, i);
+        hitVector.push_back(hit);
+    }
+
+    // Now get the associations between Hits and MCParticles
+    std::vector<anab::BackTrackerHitMatchingData const*> backtrackerVector;
+
+    MCParticleVector particleVector;
+
+    art::FindManyP<simb::MCParticle, anab::BackTrackerHitMatchingData> particles_per_hit(theHits, evt, backtrackLabel);
+
+    if (!particles_per_hit.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find reco-truth matching... " << std::endl;
+        return;
+    }
+
+    // Now loop over the hits and build a collection of IDEs
+    for (HitVector::const_iterator iter = hitVector.begin(), iterEnd = hitVector.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::Hit> hit = *iter;
+
+        particleVector.clear(); backtrackerVector.clear();
+        particles_per_hit.get(hit.key(), particleVector, backtrackerVector);
+
+        for (unsigned int j = 0; j < particleVector.size(); ++j)
+        {
+            const art::Ptr<simb::MCParticle> particle = particleVector[j];
+
+            sim::TrackIDE trackIDE;
+            trackIDE.trackID = particle->TrackId();
+            trackIDE.energy = backtrackerVector[j]->energy;
+            trackIDE.energyFrac = backtrackerVector[j]->ideFraction;
+
+            hitsToTrackIDEs[hit].push_back(trackIDE);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::string &truthLabel, const std::string &hitLabel,
+    const std::string &backtrackLabel, MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode)
+{
+    MCTruthToMCParticles truthToParticles;
+    MCParticlesToMCTruth particlesToTruth;
+    HitsToTrackIDEs hitsToTrackIDEs;
+
+    LArPandoraHelper::CollectMCParticles(evt, truthLabel, truthToParticles, particlesToTruth);
+    LArPandoraHelper::BuildMCParticleHitMaps(evt, hitLabel, backtrackLabel, hitsToTrackIDEs);
+    LArPandoraHelper::BuildMCParticleHitMaps(hitsToTrackIDEs, truthToParticles, particlesToHits, hitsToParticles, daughterMode);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
     HitVector &associatedHits, const pandora::IntVector* const indexVector)
 {
@@ -956,6 +1044,28 @@ void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::strin
             const HitVector &hits = spacePointToHitAssoc.at(spacePoint.key());
             associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
         }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildMCParticleMap(const MCParticleVector &particleVector, MCParticleMap &particleMap)
+{
+    for (MCParticleVector::const_iterator iter = particleVector.begin(), iterEnd = particleVector.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<simb::MCParticle> particle = *iter;
+        particleMap[particle->TrackId()] = particle;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::BuildPFParticleMap(const PFParticleVector &particleVector, PFParticleMap &particleMap)
+{
+    for (PFParticleVector::const_iterator iter = particleVector.begin(), iterEnd = particleVector.end(); iter != iterEnd; ++iter)
+    {
+        const art::Ptr<recob::PFParticle> particle = *iter;
+        particleMap[particle->Self()] = particle;
     }
 }
 

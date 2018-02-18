@@ -69,7 +69,7 @@ typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCParticle> >   Hi
 typedef std::map< art::Ptr<recob::Hit>,        art::Ptr<simb::MCTruth> >      HitsToMCTruth;
 typedef std::map< art::Ptr<recob::Hit>,        TrackIDEVector >               HitsToTrackIDEs;
 typedef std::map< art::Ptr<recob::Track>,      CosmicTagVector >              TracksToCosmicTags;
-typedef std::map< art::Ptr<recob::Track>,      art::Ptr<anab::T0> >           TracksToT0s;
+typedef std::map< art::Ptr<recob::PFParticle>, T0Vector >                     PFParticlesToT0s;
 
 typedef std::map< int, art::Ptr<recob::PFParticle> >  PFParticleMap;
 typedef std::map< int, art::Ptr<recob::Cluster> >     ClusterMap;
@@ -332,10 +332,10 @@ public:
      *  @param evt the ART event record
      *  @param label the label for the T0 information in the event
      *  @param t0Vector output vector of T0 objects
-     *  @param tracksToT0s output map from tracks to T0s
+     *  @param particlesToT0s output map from PParticles to T0s
      */
     static void CollectT0s(const art::Event &evt, const std::string &label, T0Vector &t0Vector,
-        TracksToT0s &tracksToT0s);
+        PFParticlesToT0s &particlesToT0s);
 
     /**
      *  @brief Collect a vector of SimChannel objects from the ART event record
@@ -356,7 +356,7 @@ public:
     static void CollectMCParticles(const art::Event &evt, const std::string &label, MCParticleVector &particleVector);
 
     /**
-     *  @brief Collect a vector of MCParticle objects from the generator in the ART event record.  ATTN: This function is 
+     *  @brief Collect a vector of MCParticle objects from the generator in the ART event record.  ATTN: This function is
      *         needed as accessing generator (opposed to Geant4) level MCParticles requires use of MCTruth block.
      *
      *  @param evt the ART event record
@@ -388,7 +388,7 @@ public:
     /**
      *  @brief Build mapping between Hits and MCParticles, starting from Hit/TrackIDE/MCParticle information
      *
-     *  @param hitsToTrackIDEs the input map from hits to true energy deposites
+     *  @param hitsToTrackIDEs the input map from hits to true energy deposits
      *  @param truthToParticles the input map of truth information
      *  @param particlesToHits the mapping between true particles and reconstructed hits
      *  @param hitsToParticles the mapping between reconstructed hits and true particles
@@ -409,6 +409,32 @@ public:
      */
     static void BuildMCParticleHitMaps(const art::Event &evt, const std::string &label, const HitVector &hitVector,
         MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles, const DaughterMode daughterMode = kUseDaughters);
+
+    /**
+     *  @brief  Get mapping between hits and true energy deposits using back-tracker information
+     *
+     *  @param  evt the event record
+     *  @param  hitLabel the label of the collection of hits
+     *  @param  backtrackLabel the label of the collection of back-tracker information
+     *  @param  hitsToTrackIDEs the output map between hits and true energy deposits
+     */
+    static void BuildMCParticleHitMaps(const art::Event &evt, const std::string &hitLabel, const std::string &backtrackLabel,
+        HitsToTrackIDEs &hitsToTrackIDEs);
+
+    /**
+     *  @brief Build mapping between Hits and MCParticles, starting from Hit/TrackIDE/MCParticle information
+     *
+     *  @param evt the event record
+     *  @param truthLabel the label describing the G4 truth information
+     *  @param hitLabel the label describing the hit collection
+     *  @param backtrackLabel the label describing the back-tracker information
+     *  @param particlesToHits the mapping between true particles and reconstructed hits
+     *  @param hitsToParticles the mapping between reconstructed hits and true particles
+     *  @param daughterMode treatment of daughter particles in construction of maps
+     */
+    static void BuildMCParticleHitMaps(const art::Event &evt, const std::string &truthLabel, const std::string &hitLabel,
+        const std::string &backtrackLabel, MCParticlesToHits &particlesToHits, HitsToMCParticles &hitsToParticles,
+        const DaughterMode daughterMode = kUseDaughters);
 
     /**
      *  @brief  Get all hits associated with input spacepoints
@@ -437,6 +463,22 @@ public:
      *  @param outputParticles the output vector of final-state particles
      */
     static void SelectFinalStatePFParticles(const PFParticleVector &inputParticles, PFParticleVector &outputParticles);
+
+    /**
+     *  @brief Build particle maps for true particles
+     *
+     *  @param particleVector the input vector of true particles
+     *  @param particleMap the output mapping between true particle and true track ID
+     */
+    static void BuildMCParticleMap(const MCParticleVector &particleVector, MCParticleMap &particleMap);
+
+    /**
+     *  @brief Build particle maps for reconstructed particles
+     *
+     *  @param particleVector the input vector of reconstructed particles
+     *  @param particleMap the output mapping between reconstructed particles and particle ID
+     */
+    static void BuildPFParticleMap(const PFParticleVector &particleVector, PFParticleMap &particleMap);
 
     /**
      *  @brief Return the top-level parent particle by navigating up the chain of parent/daughter associations
