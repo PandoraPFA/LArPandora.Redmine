@@ -54,9 +54,9 @@ private:
 
         /**
          *  @brief  operator <
-         * 
+         *
          *  @param  rhs object for comparison
-         * 
+         *
          *  @return boolean
          */
         bool operator<(const SimpleMCPrimary &rhs) const;
@@ -136,7 +136,7 @@ private:
 
     /**
      *  @brief  Extract details of each mc primary (ordered by number of true hits)
-     * 
+     *
      *  @param  evt the event
      *  @param  mcParticlesToHits the mc primary to hits map
      *  @param  hitsToMCParticles the hits to mc particles map
@@ -148,7 +148,7 @@ private:
 
     /**
      *  @brief  Obtain a sorted list of matched pfos for each mc primary
-     * 
+     *
      *  @param  simpleMCPrimaryList the simple mc primary list
      *  @param  mcToFullPfoMatchingMap the mc to full pfo matching map
      *  @param  pfoToHitListMap the pfo to hit list map
@@ -159,17 +159,17 @@ private:
 
     /**
      *  @brief  Whether a mc particle is neutrino induced
-     * 
+     *
      *  @param  pMCParticle address of the mc particle
      *  @param  artMCParticlesToMCTruth the mapping from mc particles to mc truth
-     * 
+     *
      *  @return boolean
      */
     bool IsNeutrinoInduced(const art::Ptr<simb::MCParticle> pMCParticle, const MCParticlesToMCTruth &artMCParticlesToMCTruth) const;
 
     /**
      *  @brief  Obtain a vector of mc truth
-     * 
+     *
      *  @param  evt the event
      *  @param  mcNeutrinoVector to receive the populated vector of mc truth
      */
@@ -177,7 +177,7 @@ private:
 
     /**
      *  @brief  Obtain a vector of reco neutrinos
-     * 
+     *
      *  @param  evt the event
      *  @param  recoNeutrinoVector to receive the populated vector of reco neutrinos
      */
@@ -185,7 +185,7 @@ private:
 
     /**
      *  @brief  Print all the raw matching output to screen
-     * 
+     *
      *  @param  mcTruthVector the mc truth vector
      *  @param  recoNeutrinoVector the reco neutrino vector
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
@@ -194,7 +194,7 @@ private:
 
     /**
      *  @brief  Apply a well-defined matching procedure to the comprehensive matches in the provided mc primary matching map
-     * 
+     *
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
      *  @param  matchingDetailsMap the matching details map, to be populated
      */
@@ -204,7 +204,7 @@ private:
 
     /**
      *  @brief  Get the strongest pfo match (most matched hits) between an available mc primary and an available pfo
-     * 
+     *
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
      *  @param  usedMCIds the list of mc primary ids with an existing match
      *  @param  usedPfoIds the list of pfo ids with an existing match
@@ -214,7 +214,7 @@ private:
 
     /**
      *  @brief  Get the best matches for any pfos left-over after the strong matching procedure
-     * 
+     *
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
      *  @param  usedPfoIds the list of pfo ids with an existing match
      *  @param  matchingDetailsMap the matching details map, to be populated
@@ -223,7 +223,7 @@ private:
 
     /**
      *  @brief  Print the results of the matching procedure
-     * 
+     *
      *  @param  mcPrimaryMatchingMap the input/raw mc primary matching map
      *  @param  matchingDetailsMap the matching details map
      */
@@ -231,30 +231,30 @@ private:
 
     /**
      *  @brief  Whether a provided mc primary passes selection, based on number of "good" hits
-     * 
+     *
      *  @param  simpleMCPrimary the simple mc primary
-     * 
+     *
      *  @return boolean
      */
     bool IsGoodMCPrimary(const SimpleMCPrimary &simpleMCPrimary) const;
 
     /**
      *  @brief  Whether a provided mc primary has a match, of any quality (use simple matched pfo list and information in matching details map)
-     * 
+     *
      *  @param  simpleMCPrimary the simple mc primary
      *  @param  simpleMatchedPfoList the list of simple matched pfos
      *  @param  matchingDetailsMap the matching details map
-     * 
+     *
      *  @return boolean
      */
     bool HasMatch(const SimpleMCPrimary &simpleMCPrimary, const SimpleMatchedPfoList &simpleMatchedPfoList, const MatchingDetailsMap &matchingDetailsMap) const;
 
     /**
      *  @brief  Whether a provided mc primary and pfo are deemed to be a good match
-     * 
+     *
      *  @param  simpleMCPrimary the simple mc primary
      *  @param  simpleMatchedPfo the simple matched pfo
-     * 
+     *
      *  @return boolean
      */
     bool IsGoodMatch(const SimpleMCPrimary &simpleMCPrimary, const SimpleMatchedPfo &simpleMatchedPfo) const;
@@ -271,28 +271,30 @@ private:
 
     /**
      *  @brief  Sort simple mc primaries by number of mc hits
-     * 
+     *
      *  @param  lhs the left-hand side
      *  @param  rhs the right-hand side
-     * 
+     *
      *  @return boolean
      */
     static bool SortSimpleMCPrimaries(const SimpleMCPrimary &lhs, const SimpleMCPrimary &rhs);
 
     /**
      *  @brief  Sort simple matched pfos by number of matched hits
-     * 
+     *
      *  @param  lhs the left-hand side
      *  @param  rhs the right-hand side
-     * 
+     *
      *  @return boolean
      */
     static bool SortSimpleMatchedPfos(const SimpleMatchedPfo &lhs, const SimpleMatchedPfo &rhs);
 
     std::string         m_hitfinderLabel;               ///< The name/label of the hit producer module
-    std::string         m_clusterLabel;                 ///< The name/label of the cluster producer module
     std::string         m_particleLabel;                ///< The name/label of the particle producer module
     std::string         m_geantModuleLabel;             ///< The name/label of the geant module
+    std::string         m_backtrackerLabel;             ///< The name/label of the back-tracker module
+
+    bool                m_useBackTracker;               ///< Use back-tracker information for reco/true matching
 
     bool                m_printAllToScreen;             ///< Whether to print all/raw matching details to screen
     bool                m_printMatchingToScreen;        ///< Whether to print matching output to screen
@@ -349,9 +351,10 @@ PFParticleValidation::~PFParticleValidation()
 void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
 {
     m_particleLabel = pset.get<std::string>("PFParticleModule", "pandoraNu");
-    m_clusterLabel = pset.get<std::string>("ClusterModule", "pandoraNu");
     m_hitfinderLabel = pset.get<std::string>("HitFinderModule", "gaushit");
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
+    m_backtrackerLabel = pset.get<std::string>("BackTrackerModule","gaushitTruthMatch");
+    m_useBackTracker = pset.get<bool>("UseBackTracker",false);
     m_printAllToScreen = pset.get<bool>("PrintAllToScreen", true);
     m_printMatchingToScreen = pset.get<bool>("PrintMatchingToScreen", true);
     m_neutrinoInducedOnly = pset.get<bool>("NeutrinoInducedOnly", true);
@@ -385,11 +388,21 @@ void PFParticleValidation::analyze(const art::Event &evt)
 
     PFParticlesToHits pfParticlesToHits;
     HitsToPFParticles hitsToPfParticles;
-    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_clusterLabel, pfParticlesToHits, hitsToPfParticles, LArPandoraHelper::kAddDaughters);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, pfParticlesToHits, hitsToPfParticles, LArPandoraHelper::kAddDaughters);
 
     MCParticlesToHits mcParticlesToHits;
     HitsToMCParticles hitsToMCParticles;
-    LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
+
+    if (!m_useBackTracker)
+    {
+        LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector,
+            mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
+    }
+    else
+    {
+        LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, m_hitfinderLabel, m_backtrackerLabel,
+            mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
+    }
 
     MCParticleMatchingMap mcParticleMatchingMap;
     this->GetMCParticleMatchingMap(pfParticlesToHits, mcParticlesToHits, hitsToMCParticles, mcParticleMatchingMap);
@@ -442,7 +455,7 @@ void PFParticleValidation::GetMCParticleMatchingMap(const PFParticlesToHits &pfP
             if (hitsToMCParticles.end() == mcParticleIter)
                 continue;
 
-            const art::Ptr<simb::MCParticle> pTrueParticle = mcParticleIter->second;    
+            const art::Ptr<simb::MCParticle> pTrueParticle = mcParticleIter->second;
             mcParticleMatchingMap[pTrueParticle][pRecoParticle].push_back(pHit);
         }
     }
@@ -884,7 +897,7 @@ bool PFParticleValidation::SortSimpleMatchedPfos(const SimpleMatchedPfo &lhs, co
 PFParticleValidation::SimpleMCPrimary::SimpleMCPrimary() :
     m_id(-1),
     m_pdgCode(0),
-    m_nMCHitsTotal(0),  
+    m_nMCHitsTotal(0),
     m_nMCHitsU(0),
     m_nMCHitsV(0),
     m_nMCHitsW(0),
@@ -910,7 +923,7 @@ bool PFParticleValidation::SimpleMCPrimary::operator<(const SimpleMCPrimary &rhs
 PFParticleValidation::SimpleMatchedPfo::SimpleMatchedPfo() :
     m_id(-1),
     m_parentId(-1),
-    m_pdgCode(0), 
+    m_pdgCode(0),
     m_nPfoHitsTotal(0),
     m_nPfoHitsU(0),
     m_nPfoHitsV(0),
