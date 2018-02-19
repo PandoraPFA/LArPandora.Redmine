@@ -294,8 +294,6 @@ private:
     std::string         m_geantModuleLabel;             ///< The name/label of the geant module
     std::string         m_backtrackerLabel;             ///< The name/label of the back-tracker module
 
-    bool                m_useBackTracker;               ///< Use back-tracker information for reco/true matching
-
     bool                m_printAllToScreen;             ///< Whether to print all/raw matching details to screen
     bool                m_printMatchingToScreen;        ///< Whether to print matching output to screen
 
@@ -354,7 +352,6 @@ void PFParticleValidation::reconfigure(fhicl::ParameterSet const &pset)
     m_hitfinderLabel = pset.get<std::string>("HitFinderModule", "gaushit");
     m_geantModuleLabel = pset.get<std::string>("GeantModule","largeant");
     m_backtrackerLabel = pset.get<std::string>("BackTrackerModule","gaushitTruthMatch");
-    m_useBackTracker = pset.get<bool>("UseBackTracker",false);
     m_printAllToScreen = pset.get<bool>("PrintAllToScreen", true);
     m_printMatchingToScreen = pset.get<bool>("PrintMatchingToScreen", true);
     m_neutrinoInducedOnly = pset.get<bool>("NeutrinoInducedOnly", true);
@@ -393,13 +390,14 @@ void PFParticleValidation::analyze(const art::Event &evt)
     MCParticlesToHits mcParticlesToHits;
     HitsToMCParticles hitsToMCParticles;
 
-    if (!m_useBackTracker)
+    LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector,
+        mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
+
+    if (hitsToMCParticles.empty())
     {
-        LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector,
-            mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
-    }
-    else
-    {
+        if (m_backtrackerLabel.empty())
+            throw cet::exception("LArPandora") << " PFParticleValidation::analyze - no sim channels found, backtracker module must be set in FHiCL " << std::endl;
+
         LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, m_hitfinderLabel, m_backtrackerLabel,
             mcParticlesToHits, hitsToMCParticles, LArPandoraHelper::kAddDaughters);
     }

@@ -237,7 +237,6 @@ private:
      bool         m_addDaughterPFParticles; ///<
      bool         m_addDaughterMCParticles; ///<
 
-     bool         m_useBackTracker;         ///<
      bool         m_recursiveMatching;      ///<
      bool         m_printDebug;             ///< switch for print statements (TODO: use message service!)
 };
@@ -305,7 +304,6 @@ void PFParticleMonitoring::reconfigure(fhicl::ParameterSet const &pset)
     m_addDaughterPFParticles = pset.get<bool>("AddDaughterPFParticles",true);
     m_addDaughterMCParticles = pset.get<bool>("AddDaughterMCParticles",true);
 
-    m_useBackTracker = pset.get<bool>("UseBackTracker",false);
     m_recursiveMatching = pset.get<bool>("RecursiveMatching",false);
     m_printDebug = pset.get<bool>("PrintDebug",false);
 }
@@ -555,13 +553,14 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, trueParticleVector);
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, truthToParticles, particlesToTruth);
 
-        if (!m_useBackTracker)
+        LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
+            (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kUseDaughters) : LArPandoraHelper::kIgnoreDaughters));
+
+        if (trueHitsToParticles.empty())
         {
-            LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, hitVector, trueParticlesToHits, trueHitsToParticles,
-                (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kUseDaughters) : LArPandoraHelper::kIgnoreDaughters));
-        }
-        else
-        {
+            if (m_backtrackerLabel.empty())
+                throw cet::exception("LArPandora") << " PFParticleMonitoring::analyze - no sim channels found, backtracker module must be set in FHiCL " << std::endl;
+
             LArPandoraHelper::BuildMCParticleHitMaps(evt, m_geantModuleLabel, m_hitfinderLabel, m_backtrackerLabel,
                 trueParticlesToHits, trueHitsToParticles,
                 (m_useDaughterMCParticles ? (m_addDaughterMCParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kUseDaughters) : LArPandoraHelper::kIgnoreDaughters));
