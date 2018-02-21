@@ -54,6 +54,7 @@ private:
     std::string                     m_generatorModuleLabel;         ///< The generator module label
     std::string                     m_geantModuleLabel;             ///< The geant module label
     std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
+    std::string                     m_backtrackerModuleLabel;       ///< The back tracker module label
 
     bool                            m_enableProduction;             ///< Whether to persist output products
     bool                            m_enableDetectorGaps;           ///< Whether to pass detector gap information to Pandora instances

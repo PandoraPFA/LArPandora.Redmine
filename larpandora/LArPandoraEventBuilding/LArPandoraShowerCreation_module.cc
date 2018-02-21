@@ -52,7 +52,8 @@ private:
      */
     recob::PCAxis BuildPCAxis(const lar_content::LArShowerPCA &larShowerPCA) const;
 
-    std::string                     m_pfParticleLabel;          ///< The pf particle label
+    std::string     m_pfParticleLabel;              ///< The pf particle label
+    bool            m_useAllParticles;              ///< Build a recob::Track for every recob::PFParticle
 
     // TODO When implementation lived in LArPandoraOutput, it contained key building blocks for calculation of shower energies per plane.
     // Now functionality has moved to separate module, will require reimplementation (was deeply embedded in LArPandoraOutput structure).
@@ -96,7 +97,8 @@ namespace lar_pandora
 {
 
 LArPandoraShowerCreation::LArPandoraShowerCreation(fhicl::ParameterSet const &pset) :
-    m_pfParticleLabel(pset.get<std::string>("PFParticleLabel"))
+    m_pfParticleLabel(pset.get<std::string>("PFParticleLabel")),
+    m_useAllParticles(pset.get<bool>("UseAllParticles", false))
 {
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
@@ -131,8 +133,8 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
 
     for (const art::Ptr<recob::PFParticle> pPFParticle : pfParticleVector)
     {
-        // Only interested in shower-like pfparticles
-        if (!LArPandoraHelper::IsShower(pPFParticle))
+        // Select shower-like pfparticles
+        if (!m_useAllParticles && !LArPandoraHelper::IsShower(pPFParticle))
             continue;
 
         // Obtain associated spacepoints
@@ -191,7 +193,7 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         util::CreateAssn(*this, evt, *(outputShowers.get()), hitsInParticle, *(outputShowersToHits.get()));
         util::CreateAssn(*this, evt, pPCAxis, pShower, *(outputShowersToPCAxes.get()));
     }
-    
+
     mf::LogDebug("LArPandora") << "   Number of new showers: " << outputShowers->size() << std::endl;
     mf::LogDebug("LArPandora") << "   Number of new pcaxes:  " << outputPCAxes->size() << std::endl;
 

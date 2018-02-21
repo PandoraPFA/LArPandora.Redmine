@@ -33,7 +33,6 @@ namespace lar_pandora
 {
 
 typedef std::vector< art::Ptr<recob::PCAxis> >                                              PCAxisVector;
-typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<anab::T0> > >          PFParticlesToT0s;
 typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<recob::PCAxis> > >     PFParticlesToPCAxes;
 typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<recob::PFParticle> > > PFParticlesToPFParticles;
 typedef std::map< art::Ptr<recob::Shower>, std::vector< art::Ptr<recob::PCAxis> > >         ShowersToPCAxes;
