@@ -90,6 +90,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_pProducer = this;
     m_outputSettings.m_buildTracks = pset.get<bool>("BuildTracks", true);
     m_outputSettings.m_buildShowers = pset.get<bool>("BuildShowers", true);
+    m_outputSettings.m_buildShowersAsTracks = pset.get<bool>("BuildShowersAsTracks", false);
     m_outputSettings.m_buildStitchedParticles = (m_runStitchingInstance && pset.get<bool>("BuildStitchedParticles", false));
     m_outputSettings.m_showerEnergyAlg = m_showerEnergyAlg.get(); // may be nullptr
 

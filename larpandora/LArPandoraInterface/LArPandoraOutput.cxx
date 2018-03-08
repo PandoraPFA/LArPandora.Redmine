@@ -320,17 +320,14 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 vtxElement, vtxElement + 1);
 
             // Build Seeds, Tracks, T0s
-            if (lar_content::LArPfoHelper::IsTrack(pPfo) && pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
+            if (pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
             {
-                const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
-
-                if (!pLArTrackPfo)
-                {
-                    mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo is track-like but is not a LArTrackPfo ";
+                if (!m_buildShowersAsTracks && !lar_content::LArPfoHelper::IsTrack(pPfo))
                     continue;
-                }
 
-                const lar_content::LArTrackStateVector &trackStateVector = pLArTrackPfo->m_trackStateVector;
+                // Calculate sliding fit trajectory
+                lar_content::LArTrackStateVector trackStateVector;
+                lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, 20, 0.3f, trackStateVector);
 
                 if (trackStateVector.size() < settings.m_minTrajectoryPoints)
                 {
@@ -831,7 +828,8 @@ LArPandoraOutput::Settings::Settings() :
     m_minTrajectoryPoints(2),
     m_buildShowers(true),
     m_buildStitchedParticles(false),
-    m_showerEnergyAlg(nullptr)
+    m_showerEnergyAlg(nullptr),
+    m_buildShowersAsTracks(false)
 {
 }
 

@@ -297,8 +297,10 @@ void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string la
     for (unsigned int i = 0; i < theTracks->size(); ++i)
     {
         const art::Ptr<recob::Track> track(theTracks, i);
-        trackVector.push_back(track);
         const art::Ptr<recob::PFParticle> particle = theParticleAssns.at(i);
+        if (!LArPandoraHelper::IsTrack(particle))
+           continue;
+        trackVector.push_back(track);
         particlesToTracks[particle].push_back(track);
     }
 }
