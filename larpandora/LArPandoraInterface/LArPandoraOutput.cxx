@@ -322,7 +322,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             // Build Seeds, Tracks, T0s
             if (pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
             {
-                if (!m_buildShowersAsTracks && !lar_content::LArPfoHelper::IsTrack(pPfo))
+                if (!settings.m_buildShowersAsTracks && !lar_content::LArPfoHelper::IsTrack(pPfo))
                     continue;
 
                 // Calculate sliding fit trajectory
