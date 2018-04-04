@@ -628,7 +628,7 @@ void LArPandoraInput::CreatePandoraMCLinks2D(const Settings &settings, const IdT
     {
         const int hitID(iterI->first);
         const art::Ptr<recob::Hit> hit(iterI->second);
-        const geo::WireID hit_WireID(hit->WireID());
+      //  const geo::WireID hit_WireID(hit->WireID());
 
         // Get list of associated MC particles
         HitsToTrackIDEs::const_iterator iterJ = hitToParticleMap.find(hit);
