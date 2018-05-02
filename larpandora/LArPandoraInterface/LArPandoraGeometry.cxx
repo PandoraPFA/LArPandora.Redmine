@@ -4,7 +4,7 @@
  *  @brief  Helper functions for extracting detector geometry for use in reconsruction
  */
 
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 #include "larcore/Geometry/Geometry.h"
 #include "larcorealg/Geometry/TPCGeo.h"
