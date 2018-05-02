@@ -6,7 +6,7 @@
  */
 
 #include "art/Framework/Core/EDProducer.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larreco/ClusterFinder/ClusterCreator.h"
@@ -217,7 +217,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputClusters.get()), *(outputParticlesToClusters.get()),
                     outputClusters->size() - 1, outputClusters->size());
 
-                LOG_DEBUG("LArPandora") << "Stored cluster ID=" << outputClusters->back().ID() << " (#" << (outputClusters->size() - 1)
+// workaround for #19851
+//                LOG_DEBUG("LArPandora") << "Stored cluster ID=" << outputClusters->back().ID() << " (#" << (outputClusters->size() - 1)
+                mf::LogDebug("LArPandora") << "Stored cluster ID=" << outputClusters->back().ID() << " (#" << (outputClusters->size() - 1)
                     << ") with " << clusterHits.size() << " hits";
             }
         }
