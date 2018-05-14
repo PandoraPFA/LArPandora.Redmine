@@ -6,7 +6,7 @@
  */
 
 #include "art/Framework/Core/EDProducer.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larreco/ClusterFinder/ClusterCreator.h"

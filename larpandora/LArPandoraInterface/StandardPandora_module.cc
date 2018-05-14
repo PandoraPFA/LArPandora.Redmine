@@ -53,7 +53,7 @@ DEFINE_ART_MODULE(StandardPandora)
 //------------------------------------------------------------------------------------------------------------------------------------------
 // implementation follows
 
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 #include "Api/PandoraApi.h"
 
