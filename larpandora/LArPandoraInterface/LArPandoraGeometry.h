@@ -122,6 +122,7 @@ public:
      *  @param  wirePitchW       wire pitch (W view)
      *  @param  wireAngleU       wire angle (U view)
      *  @param  wireAngleV       wire angle (V view)
+     *  @param  wireAngleW       wire angle (W view)
      *  @param  centerX          centre of volume (X)
      *  @param  centerY          centre of volume (Y)
      *  @param  centerZ          centre of volume (Z)
@@ -134,7 +135,7 @@ public:
      *  @param  tpcVolumeList    input list of TPC volumes
      */
     LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift,
-        const float wirePitchU, const float wirePitchV, const float wirePitchW, const float wireAngleU, const float wireAngleV,
+        const float wirePitchU, const float wirePitchV, const float wirePitchW, const float wireAngleU, const float wireAngleV, const float wireAngleW,
         const float centerX, const float centerY, const float centerZ, const float widthX, const float widthY, const float widthZ,
         const float sigmaUVZ, const LArDaughterDriftVolumeList &tpcVolumeList);
 
@@ -172,6 +173,11 @@ public:
      *  @brief Return wire angle in V view (Pandora convention)
      */
     float GetWireAngleV() const;
+
+    /**
+     *  @brief Return wire angle in W view (Pandora convention)
+     */
+    float GetWireAngleW() const;
 
     /**
      *  @brief Return X position at centre of drift volume
@@ -221,6 +227,7 @@ private:
     float           m_wirePitchW;
     float           m_wireAngleU;
     float           m_wireAngleV;
+    float           m_wireAngleW;
     float           m_centerX;
     float           m_centerY;
     float           m_centerZ;
@@ -439,6 +446,13 @@ inline float LArDriftVolume::GetWireAngleU() const
 inline float LArDriftVolume::GetWireAngleV() const
 {
     return m_wireAngleV;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float LArDriftVolume::GetWireAngleW() const
+{
+    return m_wireAngleW;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
