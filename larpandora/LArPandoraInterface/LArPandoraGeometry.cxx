@@ -201,7 +201,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
             cstatList.insert(itpc1);
 
             const float wireAngleU(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
-            const float wireAngleV((0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat)) * -1.f);
+            const float wireAngleV(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat));
             const float wireAngleW((wirePlanes > 2) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)) : 0.f);
 
             if (std::fabs(wireAngleW) > maxDeltaTheta)
@@ -275,7 +275,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 
             // Create new daughter drift volume (volume ID = 0 to N-1)
             driftVolumeList.push_back(LArDriftVolume(driftVolumeList.size(), isPositiveDrift,
-                wirePitchU, wirePitchV, wirePitchW, wireAngleU, wireAngleV,
+                wirePitchU, wirePitchV, wirePitchW, wireAngleU, wireAngleV, wireAngleW,
                 0.5f * (driftMaxX + driftMinX), 0.5f * (driftMaxY + driftMinY), 0.5f * (driftMaxZ + driftMinZ),
                 (driftMaxX - driftMinX), (driftMaxY - driftMinY), (driftMaxZ - driftMinZ),
                 (wirePitchU + wirePitchV + wirePitchW + 0.1f), tpcVolumeList));
@@ -310,9 +310,10 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
         const float daughterWirePitchW(driftVolume.GetWirePitchW());
         const float daughterWireAngleU(switchViews ? - driftVolume.GetWireAngleV() : driftVolume.GetWireAngleU());
         const float daughterWireAngleV(switchViews ? - driftVolume.GetWireAngleU() : driftVolume.GetWireAngleV());
+        const float daughterWireAngleW(driftVolume.GetWireAngleW());
 
         daughterVolumeList.push_back(LArDriftVolume(driftVolume.GetVolumeID(), driftVolume.IsPositiveDrift(),
-            daughterWirePitchU, daughterWirePitchV, daughterWirePitchW, daughterWireAngleU, daughterWireAngleV,
+            daughterWirePitchU, daughterWirePitchV, daughterWirePitchW, daughterWireAngleU, daughterWireAngleV, daughterWireAngleW,
             driftVolume.GetCenterX(), driftVolume.GetCenterY() , driftVolume.GetCenterZ(),
             driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(),
             driftVolume.GetSigmaUVZ(), driftVolume.GetTpcVolumeList()));
@@ -326,7 +327,7 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift,
-        const float wirePitchU, const float wirePitchV, const float wirePitchW, const float wireAngleU, const float wireAngleV,
+        const float wirePitchU, const float wirePitchV, const float wirePitchW, const float wireAngleU, const float wireAngleV, const float wireAngleW,
         const float centerX, const float centerY, const float centerZ, const float widthX, const float widthY, const float widthZ,
         const float sigmaUVZ, const LArDaughterDriftVolumeList &tpcVolumeList) :
     m_volumeID(volumeID),
@@ -336,6 +337,7 @@ LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiv
     m_wirePitchW(wirePitchW),
     m_wireAngleU(wireAngleU),
     m_wireAngleV(wireAngleV),
+    m_wireAngleW(wireAngleW),
     m_centerX(centerX),
     m_centerY(centerY),
     m_centerZ(centerZ),
