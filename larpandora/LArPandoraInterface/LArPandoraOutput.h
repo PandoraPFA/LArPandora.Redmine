@@ -51,6 +51,17 @@ public:
     static void ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt);
 
     /**
+     *  @brief  Find the index of an input object in an input list. Throw an exception if it doesn't exist
+     *
+     *  @param  pT the input object for which the ID should be found
+     *  @param  tList a list of objects of type pT to query
+     *  
+     *  @return the ID of the input object
+     */
+    template <typename T>
+    static size_t GetId(const T *const pT, const std::list<const T*> &tList);
+
+    /**
      *  @brief Build a recob::Cluster object from an input vector of recob::Hit objects
      *
      *  @param id the id code for the cluster
@@ -89,6 +100,19 @@ public:
      */
     static double CalculateT0(const art::Ptr<recob::Hit> hit, const pandora::CaloHit *const pCaloHit);
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline size_t LArPandoraOutput::GetId(const T *const pT, const std::list<const T*> &tList)
+{
+    typename std::list<const T*>::const_iterator it(std::find(tList.begin(), tList.end(), pT));
+
+    if (it == tList.end())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::GetId --- can't find the id of supplied object";
+
+    return static_cast<size_t>(std::distance(tList.begin(), it));
+}
 
 } // namespace lar_pandora
 
