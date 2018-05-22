@@ -47,6 +47,86 @@ namespace lar_pandora
 
 void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt)
 {
+    if (!settings.m_pPrimaryPandora)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- primary Pandora instance does not exist ";
+
+    if (!settings.m_pProducer)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- pointer to ART Producer module does not exist ";
+    
+    // Set up the output collections
+    std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
+    std::unique_ptr< std::vector<recob::Vertex> >     outputVertices( new std::vector<recob::Vertex> );
+    std::unique_ptr< std::vector<recob::Cluster> >    outputClusters( new std::vector<recob::Cluster> );
+    std::unique_ptr< std::vector<recob::SpacePoint> > outputSpacePoints( new std::vector<recob::SpacePoint> );
+    std::unique_ptr< std::vector<anab::T0> >          outputT0s( new std::vector<anab::T0> );
+
+    // Set up the output associations
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
+    std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> >          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
+    std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
+
+    // ---
+
+    // Collect immutable lists of pandora collections that we should convert to ART format
+    // The index of an object in a list will become the ID of the ART object produced
+    const pandora::PfoList pfoList(LArPandoraOutput::CollectPfos(*(settings.m_pPrimaryPandora)));
+
+    IdToIdVectorMap pfoToVerticesMap;
+    const pandora::VertexList vertexList(LArPandoraOutput::CollectVertices(pfoList, pfoToVerticesMap));
+
+    IdToIdVectorMap pfoToClustersMap;
+    const pandora::ClusterList clusterList(LArPandoraOutput::CollectClusters(pfoList, pfoToClustersMap));
+
+    IdToIdVectorMap pfoToThreeDHitsMap
+    const pandora::CaloHitList threeDHitList(LArPandoraOutput::Collect3DHits(pfoList, pfoToThreeDHitsMap));
+
+    // ---
+    
+    // Get mapping from pandora hits to art hits
+    CaloHitToArtHitMap pandoraHitToArtHitMap;
+    LArPandoraOutput::GetPandoraToArtHitMap(clusterList, threeDHitList, idToHitMap, pandoraHitToArtHitMap);
+
+    // Build the ART outputs from the pandora objects
+    LArPandoraOutput::BuildVertices(vertexList, outputVertices);
+    LArPandoraOutput::BuildSpacePoints(threeDHitList, pandoraHitToArtHitMap, outputSpacePoints, outputSpacePointsToHits);
+
+    IdToIdVectorMap pfoToArtClustersMap
+    LArPandoraOutput::BuildClusters(clusterList, outputClusters, outputClustersToHits, pfoToArtClustersMap);
+
+    LArPandoraOutput::BuildPFParticles(pfoList, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
+
+    if (settings.m_shouldRunStitching)
+        LArPandoraOutput::BuildT0s(pfoList, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
+
+    // ---
+
+    // Add the outputs to the event
+    evt.put(std::move(outputParticles));
+    evt.put(std::move(outputSpacePoints));
+    evt.put(std::move(outputClusters));
+    evt.put(std::move(outputVertices));
+
+    evt.put(std::move(outputParticlesToSpacePoints));
+    evt.put(std::move(outputParticlesToClusters));
+    evt.put(std::move(outputParticlesToVertices));
+    evt.put(std::move(outputSpacePointsToHits));
+    evt.put(std::move(outputClustersToHits));
+
+    if (settings.m_shouldRunStitching)
+    {
+        evt.put(std::move(outputT0s));
+        evt.put(std::move(outputParticlesToT0s));
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/*
+void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt)
+{
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtOutput() *** " << std::endl;
 
     if (!settings.m_pPrimaryPandora)
@@ -303,13 +383,341 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
     mf::LogDebug("LArPandora") << " *** LArPandora::ProduceArtOutput() [DONE!] *** " << std::endl;
 }
+*/
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo)
+pandora::PfoList LArPandoraOutput::CollectPfos(const pandora::Pandora *const pMasterPandora)
 {
-    mf::LogDebug("LArPandora") << "   Building Cluster [" << id << "], Number of hits = " << hitVector.size() << std::endl;
+    const pandora::PfoList *pParentPfoList(nullptr);
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pMasterPandora, pParentPfoList));
 
+    pandora::PfoList pfoList;
+    LArPandoraOutput::CollectPfos(*pPfoList, pfoList);
+
+    return pfoList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::CollectPfos(const pandora::PfoList &parentPfoList, pandora::PfoList &pfoList)
+{
+    if (!pfoList.empty())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- trying to collect pfos into a non-empty list ";
+
+    lar_content::LArPfoHelper::GetAllConnectedPfos(parentPfoList, pfoList);
+    std::sort(pfoList.begin(), pfoList.end(), lar_content::LArPfoHelper::SortByNHits);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::VertexList LArPandoraOutput::CollectVertices(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToVerticesMap)
+{
+    pandora::VertexList vertexList;
+
+    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    {
+        // Get the pfo ID and set up the map entry
+        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        if (!pfoToVerticesMap.insert(IdToIdVectorMap::value_type(pfoId, {})).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::CollectVertices --- repeated pfos in input list ";
+
+        // Ensure the pfo has exactly one vertex
+        if (pPfo->GetVertexList().empty()) continue;
+
+        if (pPfo->GetVertexList().size() != 1)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::CollectVertices --- this particle has multiple interaction vertices ";
+
+        const pandora::Vertex *const pVertex(pPfo->GetVertexList().front());
+
+        // Get the vertex ID and add it to the vertex list if required
+        size_t vertexId(vertexList.size());
+        try
+        {
+            vertexId = LArPandoraOutput::GetId(pVertex, vertexList);
+        }
+        catch (const cet::exception &)
+        {
+            // Vertex doesn't yet exist
+            vertexList.push_back(pVertex);
+        }
+
+        // Add the mapping from pfo to vertex ID
+        pfoToVerticesMap.at(pfoId).push_back(vertexId);
+    }
+
+    return vertexList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToClustersMap)
+{
+    pandora::ClusterList clusterList;
+
+    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    {
+        // Get the pfo ID and set up the map entry
+        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        if (!pfoToClustersMap.insert(IdToIdVectorMap::value_type(pfoId, {})).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::CollectClusters --- repeated pfos in input list ";
+
+        // Get the sorted list of clusters associated with the pfo
+        pandora::ClusterVector sortedClusters(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
+        std::sort(sortedClusters.begin(), sortedClusters.end(), lar_content::LArClusterHelper::SortByNHits);
+
+        for (const pandora::Cluster *const pCluster : sortedClusters)
+        {
+            if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
+                continue;
+
+            pfoToClustersMap.at(pfoId).push_back(clusterList.size());
+            clusterList.push_back(pCluster);
+        }
+    }
+
+    return clusterList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::Collect3DHits(const pandora::PfoList &pfo, pandora::CaloHitVector &caloHits)
+{
+    // Get the sorted list of 3D hits associated with the pfo
+    pandora::CaloHitList threeDHits;
+    lar_content::LArPfoHelper::GetCaloHits(pPfo, pandora::TPC_3D, threeDHits);
+
+    caloHits.insert(caloHits.end(), threeDHits.begin(), threeDHits.end());
+    std::sort(caloHits.begin(), caloHits.end(), lar_content::LArClusterHelper::SortHitsByPosition);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::CaloHitList LArPandoraOutput::Collect3DHits(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToThreeDHitsMap)
+{
+    pandora::CaloHitList caloHitList;
+
+    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    {
+        // Get the pfo ID and set up the map entry
+        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        if (!pfoToThreeDHitsMap.insert(IdToIdVectorMap::value_type(pfoId, {})).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::Collect3DHits --- repeated pfos in input list ";
+
+        pandora::CaloHitVector sorted3DHits;
+        LArPandoraOutput::Collect3DHits(pPfo, sorted3DHits);
+
+        for (const pandora::CaloHit *const pCaloHit3D : sorted3DHits)
+        {
+            if (pandora::TPC_3D != pCaloHit3D->GetHitType())
+                throw cet::exception("LArPandora") << " LArPandoraOutput::Collect3DHits --- found a 2D hit in a 3D cluster";
+
+            pfoToThreeDHitsMap.at(pfoId).push_back(clusterList.size());
+            caloHitList.push_back(pCaloHit3D);
+        }
+    }
+
+    return caloHitList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::BuildVertices(const pandora::VertexList &vertexList, std::unique_ptr< std::vector<recob::Vertex> > &outputVertices)
+{
+    for (const pandora::Vertex *const pVertex : vertexList)
+        outputVertices.push_back(LArPandoraOutput::Vertex(pVertex, vertexList));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::BuildSpacePoints(const pandora::CaloHitList &threeDHitList, const CaloHitToArtHitMap &caloHitToArtHitMap, 
+    std::unique_ptr< std::vector<recob::SpacePoint> > &outputSpacePoints, std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> > &outputSpacePointsToHits)
+{
+    for (const pandora::CaloHit *const pCaloHit : threeDHitList)
+    {
+        LArPandoraOutput::AddAssociation(pCaloHit, pandoraHitToArtHitMap, outputSpacePointsToHits);
+        outputSpacePoints.push_back(LArPandoraOutput::BuildSpacePoint(pCaloHit, threeDHitList));
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::BuildClusters(const pandora::ClusterList &clusterList, const CaloHitToArtHitMap &pandoraHitToArtHitMap, std::unique_ptr< std::vector<recob::Cluster> > &outputClusters, 
+    std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> > &outputClustersToHits, IdToIdVectorMap &pfoToArtClustersMap)
+{
+    cluster::StandardClusterParamsAlg clusterParamAlgo;
+    
+    // Produce the art clusters
+    size_t nextClusterId(0);
+    IdToIdVectorMap pandoraClusterToArtClustersMap;
+    for (const pandora::Cluster *const pCluster : clusterList)
+    {
+        ClusterToHitVectorMap clusterToHitVectorMap;
+        for (const recob::Cluster &cluster : LArPandoraOutput::BuildClusters(pCluster, clusterList, pandoraHitToArtHitMap, pandoraClusterToArtClustersMap, clusterToHitVectorMap, nextClusterId, clusterParamAlgo))
+        {
+            LArPandoraOutput::AddAssociation(nextClusterId - 1, clusterToHitVectorMap.at(cluster), outputClustersToHits);
+            outputClusters.push_back(cluster);
+        }
+    }
+
+    // Get mapping from pfo id to art cluster id
+    for (IdToIdVectorMap::const_iterator it = pfoToClustersMap; it != pfoToClustersMap.end(); ++it)
+    {
+        if (!pfoToArtClustersMap.insert(IdToIdVectorMap::value_type(it->first, {})).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- repeated pfo ids ";
+
+        for (const size_t pandoraClusterId : it->second)
+        {
+            IdToIdVectorMap::const_iterator it2(pandoraClusterToArtClustersMap.find(pandoraClusterId));
+
+            if (it2 == pandoraClusterToArtClustersMap.end())
+                throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- found a pandora cluster with no associated recob cluster ";
+
+            for (const size_t recobClusterId : it2->second)
+                pfoToArtClustersMap.at(it->first).push_back(recobClusterId);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::BuildPFParticles(const pandora::PfoList &pfoList, const IdToIdVectorMap &pfoToVerticesMap,
+    const IdToIdVectorMap &pfoToThreeDHitsMap, const IdToIdVectorMap &pfoToArtClustersMap,
+    std::unique_ptr< std::vector<recob::PFParticle> > &outputParticles,
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> > &outputParticlesToVertices, 
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > &outputParticlesToSpacePoints,
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> > &outputParticlesToClusters)
+{
+    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    {
+        outputParticles.push_back(LArPandoraOutput::BuildPFParticle(pPfo, pfoList));
+       
+        // Associations from PFParticle
+        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        LArPandoraOutput::AddAssociation(pfoId, pfoToVerticesMap, outputParticlesToVertices);
+        LArPandoraOutput::AddAssociation(pfoId, pfoToThreeDHitsMap, outputParticlesToSpacePoints);
+        LArPandoraOutput::AddAssociation(pfoId, pfoToArtClustersMap, outputParticlesToClusters);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::BuildT0s(const pandora::PfoList &pfoList, std::unique_ptr< std::vector<anab::T0> > &outputT0s,
+    const CaloHitToArtHitMap &pandoraHitToArtHitMap, std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> > &outputParticlesToT0s)
+{
+    size_t nextT0Id(0);
+    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    {
+        anab::T0 t0;
+        if (!LArPandoraOutput::BuildT0(pPfo, pfoList, nextT0Id, pandoraHitToArtHitMap, t0)) continue;
+        
+        LArPandoraOutput::AddAssociation(pfoId, nextT0Id - 1, outputParticlesToT0s);
+        outputT0s.push_back(t0);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::PFParticle LArPandoraOutput::BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList)
+{
+    // Get parent Pfo ID
+    const pandora::PfoList &parentList(pPfo->GetParentPfoList());
+    if (parentList.size() > 1)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildPFParticle --- this pfo has multiple parent particles ";
+
+    const size_t parentId(parentList.empty() ? recob::PFParticle::kPFParticlePrimary : LArPandoraOutput::GetId(parentList.front(), pfoList));
+
+    // Get daughters Pfo IDs
+    std::vector<size_t> daughterIds;
+    for (const pandora::ParticleFlowObject *const pDaughterPfo : pPfo->GetDaughterPfoList())
+        daughterIds.push_back(LArPandoraOutput::GetId(pDaughterPfo, pfoToIdMap));
+
+    std::sort(daughterIds.begin(), daughterIds.end());
+
+    const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+    return recob::PFParticle(pPfo->GetParticleId(), pfoId, parentId, daughterIds);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Vertex LArPandoraOutput::BuildVertex(const pandora::Vertex *const pVertex, const pandora::VertexList &vertexList)
+{
+    double pos[3] = {pVertex->GetPosition().GetX(), pVertex->GetPosition().GetY(), pVertex->GetPosition().GetZ()};
+    return recob::Vertex(pos, LArPandoraOutput::GetId(pVertex, vertexList));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::GetHitsInCluster(const pandora::Cluster *const pCluster, pandora::CaloHitVector &sortedHits)
+{
+    if (!sortedHits.empty())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::GetHitsInCluster --- vector to hold hits is not empty ";
+
+    pandora::CaloHitList hitList;
+    pCluster->GetOrderedCaloHitList().FillCaloHitList(hitList);
+    hitList.insert(hitList.end(), pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
+
+    sortedHits.insert(sortedHits.end(), hitList.begin(), hitList.end());
+    std::sort(sotedHits.begin(), sortedHits.end(), lar_content::LArClusterHelper::SortHitsByPosition);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+std::vector<recob::Cluster> LArPandoraOutput::BuildClusters(const pandora::Cluster *const pCluster, const pandora::ClusterList &clusterList,
+    const CaloHitToArtHitMap &pandoraHitToArtHitMap, IdToIdVectorMap &pandoraClusterToArtClustersMap, 
+    ClusterToHitVector &clusterToHitVectorMap, size_t &nextId, cluster::ClusterParamsAlgBase &algo)
+{
+    std::vector<recob::Cluster> clusters;
+
+    // Get the cluster ID and set up the map entry
+    const size_t clusterId(LArPandoraOutput::GetId(pCluster, clusterList));
+    if (!pandoraClusterToArtClustersMap.insert(IdToIdVectorMap::value_type(clusterId, {})).second)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- repeated clusters in input list ";
+
+    pandora::CaloHitVector sortedHits;
+    LArPandoraOutput::GetHitsInCluster(pCluster, sortedHits);
+
+    HitArray hitArray; // hits organised by drift volume
+    HitList isolatedHits;
+
+    for (const pandora::CaloHit *const pCaloHit2D : sortedHits)
+    {
+        if (pandoraHitToArtHitMap.find(pCaloHit2D) == pandoraHitToArtHitMap.end())
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- couldn't find art hit for input pandora hit ";
+            
+        const art::Ptr<recob::Hit> hit(pandoraHitToArtHitMap.at(pCaloHit2D));
+
+        const geo::WireID wireID(hit->WireID());
+        const unsigned int volID(100000 * wireID.Cryostat + wireID.TPC);
+        hitArray[volID].push_back(hit);
+
+        if (pCaloHit2D->IsIsolated())
+            isolatedHits.insert(hit);
+    }
+
+    if (hitArray.empty())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- found a cluster with no hits ";
+
+    for (const HitArray::value_type &hitArrayEntry : hitArray)
+    {
+        const HitVector &clusterHits(hitArrayEntry.second);
+
+        clusters.push_back(LArPandoraOutput::BuildCluster(nextId, clusterHits, isolatedHits, algo));
+        pandoraClusterToArtClustersMap.at(clusterId).push_back(nextId);
+
+        if (!clusterToHitVectorMap.insert(ClusterToHitVector::value_type(pCluster, clusterHits)).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- repeated input clusters ";
+
+        nextId++;
+    }
+
+    return clusters;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::Cluster LArPandoraOutput::BuildCluster(const size_t id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo)
+{
     if (hitVector.empty())
         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildCluster --- No input hits were provided ";
 
@@ -391,17 +799,92 @@ recob::Cluster LArPandoraOutput::BuildCluster(const int id, const HitVector &hit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const int id, const pandora::CaloHit *const pCaloHit)
+recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const pandora::CaloHit *const pCaloHit, const pandora::CaloHitList &threeDHitList)
 {
     if (pandora::TPC_3D != pCaloHit->GetHitType())
         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSpacePoint --- trying to build a space point from a 2D hit";
 
     const pandora::CartesianVector point(pCaloHit->GetPositionVector());
     double xyz[3] = { point.GetX(), point.GetY(), point.GetZ() };
+
+    // ATTN using dummy information
     double dxdydz[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // TODO: Fill in the error matrix
     double chi2(0.0);
 
-    return recob::SpacePoint(xyz, dxdydz, chi2, id);
+    return recob::SpacePoint(xyz, dxdydz, chi2, LArPandoraOutput::GetId(pCaloHit, threeDHitList));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LArPandoraOutput::BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList, size_t &nextId,
+    const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0)
+{
+    pandora::CaloHitVector sorted3DHits;
+    LArPandoraOutput::Collect3DHits(pPfo, sorted3DHits);
+
+    double sumT(0.), sumN(0.);
+
+    for (const pandora::CaloHit *const pCaloHit3D : sorted3DHits)
+    {
+        if (pandora::TPC_3D != pCaloHit3D->GetHitType())
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildT0 --- found a 2D hit in a 3D cluster";
+
+        const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentAddress());
+
+        if (pandoraHitToArtHitMap.find(pCaloHit2D) == pandoraHitToArtHitMap.end())
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- couldn't find art hit for input pandora hit ";
+            
+        const art::Ptr<recob::Hit> hit(pandoraHitToArtHitMap.at(pCaloHit2D));
+
+        HitVector spacePointHits;
+        spacePointHits.push_back(hit);
+
+        // ATTN: We assume that the 2D Pandora hits have been shifted
+        sumT += LArPandoraOutput::CalculateT0(hit, pCaloHit2D);
+        sumN += 1.;
+    }
+
+    // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
+    const double T0((sumN > 0. && std::fabs(sumT) > sumN) ? (sumT / sumN) : 0.);
+
+    if (std::fabs(T0) <= std::numeric_limits<double>::epsilon()) return false;
+
+    // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  pfparticle SelfID code;  T0 ID code]
+    t0 = anab::T0(T0, 3, LArPandoraOutput::GetId(pPfo, pfoList), nextId++);
+
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::GetPandoraToArtHitMap(const pandora::ClusterList &clusterList, const pandora::CaloHitList &threeDHitList, 
+    const IdToHitMap &idToHitMap, CaloHitToArtHitMap &pandoraHitToArtHitMap)
+{
+    // Collect 2D hits from clusters
+    for (const pandora::Cluster *const pCluster : clusterList)
+    {
+        if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
+            throw cet::exception("LArPandora") << " LArPandoraOutput::GetPandoraToArtHitMap --- found a 3D input cluster ";
+
+        pandora::CaloHitVector sortedHits;
+        LArPandoraOutput::GetHitsInCluster(pCluster, sortedHits);
+
+        for (const pandora::CaloHit *const pCaloHit : sortedHits)
+        {
+            if (!pandoraHitToArtHitMap.insert(CaloHitToArtHitMap::value_type(pCaloHit, LArPandoraOutput::GetHit(idToHitMap, pCaloHit))).second)
+                throw cet::exception("LArPandora") << " LArPandoraOutput::GetPandoraToArtHitMap --- found repeated input hits ";
+        }
+    }
+        
+    for (const pandora::CaloHit *const pCaloHit : threeDHitList)
+    {
+        if (pCaloHit.GetHitType() != pandora::TPC_3D)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::GetPandoraToArtHitMap --- found a non-3D hit in the input list ";
+
+        // ATTN get the 2D calo hit from the 3D calo hit then find the art hit!
+        if (!pandoraHitToArtHitMap.insert(CaloHitToArtHitMap::value_type(pCaloHit, LArPandoraOutput::GetHit(idToHitMap, static_cast<const pandora::CaloHit*>(pCalo->GetParentAddress())))).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::GetPandoraToArtHitMap --- found repeated input hits ";
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
