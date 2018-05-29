@@ -44,9 +44,22 @@ public:
          */
         Settings();
 
+        /**
+         *  @brief  Check the parameters and throw an exception if they are not valid
+         */
+        void Validate() const;
+
         const pandora::Pandora *m_pPrimaryPandora;              ///<
         art::EDProducer        *m_pProducer;                    ///<
         bool                    m_shouldRunStitching;           ///<
+        bool                    m_shouldProduceAllOutcomes;     ///< If all outcomes should be produced in separate collections (choose false if you only require the consolidated output)
+        std::string             m_allOutcomesInstanceLabel;     ///< The label for the instance producing all outcomes
+        std::string             m_cosmicSliceWorkerName;        ///< The name of the cosmic slice pandora worker instance
+        std::string             m_cosmicPfoListName;            ///< The name of the final pfo list from a cosmic worker instance
+        std::string             m_neutrinoSliceWorkerName;      ///< The name of the neutrino slice pandora worker instance
+        std::string             m_neutrinoPfoListName;          ///< The name of the final pfo list from a neutrino worker instance
+        std::string             m_slicingWorkerName;            ///< The name of the slicing pandora worker instance
+        std::string             m_slicePfoListName;             ///< The name of the final pfo list from a slicing worker instance
     };
 
     /**

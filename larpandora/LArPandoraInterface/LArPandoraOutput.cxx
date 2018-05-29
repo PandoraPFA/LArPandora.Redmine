@@ -47,11 +47,7 @@ namespace lar_pandora
 
 void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt)
 {
-    if (!settings.m_pPrimaryPandora)
-        throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- primary Pandora instance does not exist ";
-
-    if (!settings.m_pProducer)
-        throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- pointer to ART Producer module does not exist ";
+    settings.Validate();
     
     // Set up the output collections
     std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
@@ -680,12 +676,45 @@ double LArPandoraOutput::CalculateT0(const art::Ptr<recob::Hit> hit, const pando
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 LArPandoraOutput::Settings::Settings() :
     m_pPrimaryPandora(nullptr),
     m_pProducer(nullptr),
-    m_shouldRunStitching(false)
+    m_shouldRunStitching(false),
+    m_shouldProduceAllOutcomes(false)
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::Settings::Validate() const
+{
+    if (!m_pPrimaryPandora)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- primary Pandora instance does not exist ";
+
+    if (!m_pProducer)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- pointer to ART Producer module does not exist ";
+
+    if (!m_shouldProduceAllOutcomes) return;
+
+    if (m_cosmicSliceWorkerName.empty()) 
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- cosmic slice worker name not set ";
+    
+    if (m_cosmicPfoListName.empty()) 
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- cosmic pfo list name not set ";
+    
+    if (m_neutrinoSliceWorkerName.empty()) 
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- neutrino slice worker name not set ";
+    
+    if (m_neutrinoPfoListName.empty()) 
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- neutrino pfo list name not set ";
+    
+    if (m_slicingWorkerName.empty()) 
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- slicing worker name not set ";
+    
+    if (m_slicePfoListName.empty()) 
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- slice pfo list name not set ";
 }
 
 } // namespace lar_pandora
