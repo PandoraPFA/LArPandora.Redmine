@@ -31,7 +31,7 @@ art_make(
                         art_Utilities
                         canvas
                         ${MF_MESSAGELOGGER}
-                        ${MF_UTILITIES}
+                        
                         ${FHICLCPP}
                         cetlib cetlib_except
                         ${Boost_SYSTEM_LIBRARY}
