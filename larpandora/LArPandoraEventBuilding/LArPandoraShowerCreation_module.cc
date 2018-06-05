@@ -127,6 +127,10 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
     PFParticlesToSpacePoints pfParticlesToSpacePoints;
     LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, pfParticleVector, pfParticlesToSpacePoints);
 
+    PFParticleVector pfParticles;
+    PFParticlesToClusters pfParticlesToClusters;
+    LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, pfParticles, pfParticlesToClusters);
+
     VertexVector vertexVector;
     PFParticlesToVertices pfParticlesToVertices;
     LArPandoraHelper::CollectVertices(evt, m_pfParticleLabel, vertexVector, pfParticlesToVertices);
@@ -143,6 +147,15 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         if (pfParticlesToSpacePoints.end() == particleToSpacePointIter)
         {
             mf::LogDebug("LArPandoraShowerCreation") << "No spacepoints associated to particle ";
+            continue;
+        }
+
+        // Obtain associated clusters
+        PFParticlesToClusters::const_iterator particleToClustersIter(pfParticlesToClusters.find(pPFParticle));
+
+        if (pfParticlesToClusters.end() == particleToClustersIter)
+        {
+            mf::LogDebug("LArPandoraShowerCreation") << "No clusters associated to particle ";
             continue;
         }
 
@@ -185,7 +198,7 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         art::Ptr<recob::PCAxis> pPCAxis(makePCAxisPtr(outputPCAxes->size() - 1));
 
         HitVector hitsInParticle;
-        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle);
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToClustersIter->second, hitsInParticle);
 
         // Output associations, after output objects are in place
         util::CreateAssn(*this, evt, pShower, pPFParticle, *(outputParticlesToShowers.get()));

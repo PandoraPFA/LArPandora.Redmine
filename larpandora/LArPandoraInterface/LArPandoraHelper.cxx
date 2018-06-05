@@ -1055,6 +1055,34 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const ClusterVector &inputClusters,
+    HitVector &associatedHits, const pandora::IntVector* const indexVector)
+{
+    art::Handle< std::vector< recob::Cluster > > clusterHandle;
+    evt.getByLabel(label, clusterHandle);
+    art::FindManyP<recob::Hit> clusterToHitAssoc(clusterHandle, evt, label);
+
+    if (indexVector != nullptr)
+    {
+        // If indexVector is filled, sort hits according to trajectory points order
+        for (int index : (*indexVector))
+        {
+            const art::Ptr<recob::Cluster> &cluster = inputClusters.at(index);
+            const HitVector &hits = clusterToHitAssoc.at(cluster.key());
+            associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
+        }
+    } else {
+        // If indexVector is empty just loop through inputSpacePoints
+        for (const art::Ptr<recob::Cluster> &cluster : inputClusters)
+        {
+            const HitVector &hits = clusterToHitAssoc.at(cluster.key());
+            associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
     HitVector &associatedHits, const pandora::IntVector* const indexVector)
 {
