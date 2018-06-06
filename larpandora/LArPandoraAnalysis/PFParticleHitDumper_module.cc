@@ -79,7 +79,7 @@ private:
      *  @param particlesToShowers mapping between PFParticles and showers
      */
      void FillAssociated2DHits(const art::Event &evt, const PFParticleVector &particleVector, const PFParticlesToHits &particlesToHits, const PFParticlesToHits &particlesToHitsClusters,
-	      const PFParticlesToTracks &particlesToTracks, const TracksToHits &tracksToHits, const PFParticlesToShowers &particlesToShowers, const ShowersToHits &showersToHits);
+          const PFParticlesToTracks &particlesToTracks, const TracksToHits &tracksToHits, const PFParticlesToShowers &particlesToShowers, const ShowersToHits &showersToHits);
 
     /**
      *  @brief Store raw data
@@ -423,7 +423,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
         {
             if (trackVector.size() != 1 && m_printDebug)
                 std::cout << " Warning: Found particle with more than one associated track " << std::endl;
-	        
+
             const art::Ptr<recob::Track> track = *(trackVector.begin());
 
             if (m_printDebug)
@@ -438,7 +438,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
 
                 m_pRecoTracks->Fill();
             }
-		}
+        }
     }
 }
 
@@ -535,7 +535,7 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleHitDumper::FillAssociated2DHits(const art::Event &evt, const PFParticleVector &particleVector, const PFParticlesToHits &particlesToHits, const PFParticlesToHits &particlesToHitsClusters,
-	const PFParticlesToTracks &particlesToTracks, const TracksToHits &tracksToHits, const PFParticlesToShowers &particlesToShowers, const ShowersToHits &showersToHits)
+    const PFParticlesToTracks &particlesToTracks, const TracksToHits &tracksToHits, const PFParticlesToShowers &particlesToShowers, const ShowersToHits &showersToHits)
 {
     // Create dummy entry if there are no 2D hits
     if (particleVector.empty())
