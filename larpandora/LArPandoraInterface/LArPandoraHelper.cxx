@@ -1056,11 +1056,11 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T>> &inputVector,
+void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T> > &inputVector,
     HitVector &associatedHits, const pandora::IntVector* const indexVector)
 {
 
-    art::Handle< std::vector< T > > handle;
+    art::Handle<std::vector<T> > handle;
     evt.getByLabel(label, handle);
     art::FindManyP<recob::Hit> hitAssoc(handle, evt, label);
 
@@ -1375,10 +1375,10 @@ bool LArPandoraHelper::IsVisible(const art::Ptr<simb::MCParticle> particle)
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<recob::Cluster>> &inputVector,
-    HitVector &associatedHits, const pandora::IntVector* const indexVector);
+template void LArPandoraHelper::GetAssociatedHits(const art::Event &, const std::string &, const std::vector<art::Ptr<recob::Cluster> > &,
+    HitVector &, const pandora::IntVector* const);
 
-template void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<recob::SpacePoint>> &inputVector,
-    HitVector &associatedHits, const pandora::IntVector* const indexVector);
+template void LArPandoraHelper::GetAssociatedHits(const art::Event &, const std::string &, const std::vector<art::Ptr<recob::SpacePoint> > &,
+    HitVector &, const pandora::IntVector* const);
 
 } // namespace lar_pandora

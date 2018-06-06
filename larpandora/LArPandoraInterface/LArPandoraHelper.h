@@ -460,7 +460,7 @@ public:
      *  @param  indexVector vector of spacepoint indices reflecting trajectory points sorting order
      */
     template <typename T>
-    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T>> &inputVector,
+    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T> > &inputVector,
         HitVector &associatedHits, const pandora::IntVector* const indexVector = nullptr);
 
     /**
