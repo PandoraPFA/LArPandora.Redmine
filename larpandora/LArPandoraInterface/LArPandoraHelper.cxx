@@ -1055,55 +1055,29 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const ClusterVector &inputClusters,
+template <typename T>
+void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T>> &inputVector,
     HitVector &associatedHits, const pandora::IntVector* const indexVector)
 {
-    art::Handle< std::vector< recob::Cluster > > clusterHandle;
-    evt.getByLabel(label, clusterHandle);
-    art::FindManyP<recob::Hit> clusterToHitAssoc(clusterHandle, evt, label);
+
+    art::Handle< std::vector< T > > handle;
+    evt.getByLabel(label, handle);
+    art::FindManyP<recob::Hit> hitAssoc(handle, evt, label);
 
     if (indexVector != nullptr)
     {
         // If indexVector is filled, sort hits according to trajectory points order
         for (int index : (*indexVector))
         {
-            const art::Ptr<recob::Cluster> &cluster = inputClusters.at(index);
-            const HitVector &hits = clusterToHitAssoc.at(cluster.key());
+            const art::Ptr<T> &element = inputVector.at(index);
+            const HitVector &hits = hitAssoc.at(element.key());
             associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
         }
     } else {
         // If indexVector is empty just loop through inputSpacePoints
-        for (const art::Ptr<recob::Cluster> &cluster : inputClusters)
+        for (const art::Ptr<T> &element : inputVector)
         {
-            const HitVector &hits = clusterToHitAssoc.at(cluster.key());
-            associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
-    HitVector &associatedHits, const pandora::IntVector* const indexVector)
-{
-    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
-    evt.getByLabel(label, spacePointHandle);
-    art::FindManyP<recob::Hit> spacePointToHitAssoc(spacePointHandle, evt, label);
-
-    if (indexVector != nullptr)
-    {
-        // If indexVector is filled, sort hits according to trajectory points order
-        for (int index : (*indexVector))
-        {
-            const art::Ptr<recob::SpacePoint> &spacePoint = inputSpacePoints.at(index);
-            const HitVector &hits = spacePointToHitAssoc.at(spacePoint.key());
-            associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
-        }
-    } else {
-        // If indexVector is empty just loop through inputSpacePoints
-        for (const art::Ptr<recob::SpacePoint> &spacePoint : inputSpacePoints)
-        {
-            const HitVector &hits = spacePointToHitAssoc.at(spacePoint.key());
+            const HitVector &hits = hitAssoc.at(element.key());
             associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
         }
     }
@@ -1397,5 +1371,14 @@ bool LArPandoraHelper::IsVisible(const art::Ptr<simb::MCParticle> particle)
 
     return false;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<recob::Cluster>> &inputVector,
+    HitVector &associatedHits, const pandora::IntVector* const indexVector);
+
+template void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<recob::SpacePoint>> &inputVector,
+    HitVector &associatedHits, const pandora::IntVector* const indexVector);
 
 } // namespace lar_pandora
