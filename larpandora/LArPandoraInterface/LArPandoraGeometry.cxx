@@ -308,8 +308,8 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
         const float daughterWirePitchU(switchViews ? driftVolume.GetWirePitchV() : driftVolume.GetWirePitchU());
         const float daughterWirePitchV(switchViews ? driftVolume.GetWirePitchU() : driftVolume.GetWirePitchV());
         const float daughterWirePitchW(driftVolume.GetWirePitchW());
-        const float daughterWireAngleU(switchViews ? - driftVolume.GetWireAngleV() : driftVolume.GetWireAngleU());
-        const float daughterWireAngleV(switchViews ? - driftVolume.GetWireAngleU() : driftVolume.GetWireAngleV());
+        const float daughterWireAngleU(switchViews ? driftVolume.GetWireAngleV() : driftVolume.GetWireAngleU());
+        const float daughterWireAngleV(switchViews ? driftVolume.GetWireAngleU() : driftVolume.GetWireAngleV());
         const float daughterWireAngleW(driftVolume.GetWireAngleW());
 
         daughterVolumeList.push_back(LArDriftVolume(driftVolume.GetVolumeID(), driftVolume.IsPositiveDrift(),
