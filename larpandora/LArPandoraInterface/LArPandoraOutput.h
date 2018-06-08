@@ -11,6 +11,8 @@
 
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
+
 #include "larpandora/LArPandoraInterface/ILArPandora.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
@@ -88,6 +90,15 @@ public:
      *  @return T0 relative to input hit in nanoseconds
      */
     static double CalculateT0(const art::Ptr<recob::Hit> hit, const pandora::CaloHit *const pCaloHit);
+
+    /**
+     *  @brief Get metadata about a given pfo
+     *
+     *  @param pPfo the Pandora pfo
+     *
+     *  @return metadata collected about the input pfo
+     */
+    static larpandoraobj::PFParticleMetadata GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo);
 };
 
 } // namespace lar_pandora
