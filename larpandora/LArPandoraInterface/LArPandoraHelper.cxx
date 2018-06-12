@@ -35,6 +35,7 @@
 #include "Pandora/PandoraInternal.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <limits>
 #include <iostream>
@@ -245,6 +246,39 @@ void LArPandoraHelper::CollectPFParticles(const art::Event &evt, const std::stri
         {
             const art::Ptr<recob::Cluster> cluster = clusters.at(j);
             particlesToClusters[particle].push_back(cluster);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraHelper::CollectPFParticleMetadata(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
+    PFParticlesToMetadata &particlesToMetadata)
+{
+    art::Handle< std::vector<recob::PFParticle> > theParticles;
+    evt.getByLabel(label, theParticles);
+
+    if (!theParticles.isValid())
+    {
+        mf::LogDebug("LArPandora") << "  Failed to find particles... " << std::endl;
+        return;
+    }
+    else
+    {
+        mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " PFParticles " << std::endl;
+    }
+
+    art::FindManyP<larpandoraobj::PFParticleMetadata> theMetadataAssns(theParticles, evt, label);
+    for (unsigned int i = 0; i < theParticles->size(); ++i)
+    {
+        const art::Ptr<recob::PFParticle> particle(theParticles, i);
+        particleVector.push_back(particle);
+
+        const std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > pfParticleMetadataList = theMetadataAssns.at(i);
+        for (unsigned int j=0; j<pfParticleMetadataList.size(); ++j)
+        {
+            const art::Ptr<larpandoraobj::PFParticleMetadata> pfParticleMetadata = pfParticleMetadataList.at(j);
+            particlesToMetadata[particle].push_back(pfParticleMetadata);
         }
     }
 }
