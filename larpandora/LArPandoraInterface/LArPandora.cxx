@@ -80,7 +80,9 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
         produces< std::vector<recob::SpacePoint> >();
         produces< std::vector<recob::Cluster> >();
         produces< std::vector<recob::Vertex> >();
+        produces< std::vector<larpandoraobj::PFParticleMetadata> >();
 
+        produces< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> >();
         produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
         produces< art::Assns<recob::PFParticle, recob::Cluster> >();
         produces< art::Assns<recob::PFParticle, recob::Vertex> >();

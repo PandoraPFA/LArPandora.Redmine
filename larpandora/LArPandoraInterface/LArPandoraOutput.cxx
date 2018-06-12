@@ -35,6 +35,7 @@
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <algorithm>
 #include <iterator>
@@ -67,19 +68,21 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     pandora::PfoVector pfoVector(connectedPfoList.begin(), connectedPfoList.end());
     std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 
-    // Set up ART outputs from RecoBase and AnalysisBase
-    std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
-    std::unique_ptr< std::vector<recob::SpacePoint> > outputSpacePoints( new std::vector<recob::SpacePoint> );
-    std::unique_ptr< std::vector<recob::Cluster> >    outputClusters( new std::vector<recob::Cluster> );
-    std::unique_ptr< std::vector<recob::Vertex> >     outputVertices( new std::vector<recob::Vertex> );
-    std::unique_ptr< std::vector<anab::T0> >          outputT0s( new std::vector<anab::T0> );
+    // Set up ART outputs from RecoBase, AnalysisBase and LArPandoraObjects
+    std::unique_ptr< std::vector<recob::PFParticle> >                 outputParticles( new std::vector<recob::PFParticle> );
+    std::unique_ptr< std::vector<recob::SpacePoint> >                 outputSpacePoints( new std::vector<recob::SpacePoint> );
+    std::unique_ptr< std::vector<recob::Cluster> >                    outputClusters( new std::vector<recob::Cluster> );
+    std::unique_ptr< std::vector<recob::Vertex> >                     outputVertices( new std::vector<recob::Vertex> );
+    std::unique_ptr< std::vector<anab::T0> >                          outputT0s( new std::vector<anab::T0> );
+    std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > outputParticleMetadata( new std::vector<larpandoraobj::PFParticleMetadata> );
 
-    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
-    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
-    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
-    std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> >          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
-    std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
-    std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > outputParticlesToMetadata( new art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> >                 outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >                    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >                     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
+    std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> >                          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
+    std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >                        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >                           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
 
     // prepare the algorithm to compute the cluster characteristics;
     // we use the "standard" one here; configuration would happen here,
@@ -156,6 +159,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // Build Particle
         recob::PFParticle newParticle(pPfo->GetParticleId(), pfoIdCode, parentIdCode, daughterIdCodes);
         outputParticles->push_back(newParticle);
+
+        // Build default metadata
+        outputParticleMetadata->emplace_back(larpandoraobj::PFParticleMetadata(pPfo));
+
+        // Associate metadata
+        util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputParticleMetadata.get()), *(outputParticlesToMetadata.get()), outputParticleMetadata->size()-1, outputParticleMetadata->size());
 
         // Associate Vertex
         if (!pPfo->GetVertexList().empty())
@@ -277,7 +286,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputSpacePoints));
     evt.put(std::move(outputClusters));
     evt.put(std::move(outputVertices));
+    evt.put(std::move(outputParticleMetadata));
 
+    evt.put(std::move(outputParticlesToMetadata));
     evt.put(std::move(outputParticlesToSpacePoints));
     evt.put(std::move(outputParticlesToClusters));
     evt.put(std::move(outputParticlesToVertices));
