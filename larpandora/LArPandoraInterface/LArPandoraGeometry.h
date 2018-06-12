@@ -7,6 +7,9 @@
 #ifndef LAR_PANDORA_GEOMETRY_H
 #define LAR_PANDORA_GEOMETRY_H 1
 
+#include <map>
+#include <vector>
+
 namespace lar_pandora
 {
 
