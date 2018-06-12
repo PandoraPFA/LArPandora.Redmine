@@ -14,6 +14,7 @@
 #include "larpandora/LArPandoraInterface/LArPandoraGeometry.h"
 
 #include <iomanip>
+#include <set>
 #include <sstream>
 
 namespace lar_pandora
@@ -111,7 +112,8 @@ geo::View_t LArPandoraGeometry::GetGlobalView(const unsigned int cstat, const un
 {
     const bool switchUV(LArPandoraGeometry::ShouldSwitchUV(cstat, tpc));
 
-    if (hit_View == geo::kW)
+    // ATTN This implicitly assumes that there will be u, v and (maybe) one of either w or y views
+    if ((hit_View == geo::kW) || (hit_View == geo::kY))
     {
         return geo::kW;
     }
@@ -165,23 +167,36 @@ bool LArPandoraGeometry::ShouldSwitchUV(const bool isPositiveDrift)
 void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 {
     // This method will group TPCs into "drift volumes" (these are regions of the detector that share a common drift direction,
-    // common range of X coordinates, and common detector parameters such as wire pitch and wire angle).
-    //
-    // ATTN: we assume that all two-wire detectors use the U and V views, and that the wires in the W view are always vertical
-    //       An exception will be thrown if W wires are not vertical, indicating that LArPandoraGeometry should not be used.
-
+    // common range of x coordinates, and common detector parameters such as wire pitch and wire angle).
     if (!driftVolumeList.empty())
         throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- detector geometry has already been loaded ";
 
     typedef std::set<unsigned int> UIntSet;
 
-    // Load Geometry Service
+    // Pandora requires three independent images, and ability to correlate features between images (via wire angles and transformation plugin).
     art::ServiceHandle<geo::Geometry> theGeometry;
-    const unsigned int wirePlanes(theGeometry->MaxPlanes());
+    const unsigned int nWirePlanes(theGeometry->MaxPlanes());
+
+    if (nWirePlanes > 3)
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- More than three wire planes present ";
+
+    // We here check the plane information only for the first tpc in the first cryostat.
+    if ((0 == theGeometry->Ncryostats()) || (0 == theGeometry->NTPC(0)))
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- unable to access first tpc in first cryostat ";
+
+    std::unordered_set<geo::_plane_proj> planeSet;
+    for (unsigned int iPlane = 0; iPlane < nWirePlanes; ++iPlane)
+        (void) planeSet.insert(theGeometry->TPC(0, 0).Plane(iPlane).View());
+
+    if ((nWirePlanes != planeSet.size()) || !planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY)))
+        throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- expect to find u and v views; if there is one further view, it must be w or y ";
+
+    const bool useYPlane((nWirePlanes > 2) && planeSet.count(geo::kY));
 
     const float wirePitchU(theGeometry->WirePitch(geo::kU));
     const float wirePitchV(theGeometry->WirePitch(geo::kV));
-    const float wirePitchW((wirePlanes > 2) ? theGeometry->WirePitch(geo::kW) : 0.5f * (wirePitchU + wirePitchV));
+    const float wirePitchW((nWirePlanes < 3) ? 0.5f * (wirePitchU + wirePitchV) : (useYPlane) ? theGeometry->WirePitch(geo::kY) :
+        theGeometry->WirePitch(geo::kW));
 
     const float maxDeltaTheta(0.01f); // leave this hard-coded for now
 
@@ -201,11 +216,9 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
             cstatList.insert(itpc1);
 
             const float wireAngleU(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
-            const float wireAngleV((0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat)) * -1.f);
-            const float wireAngleW((wirePlanes > 2) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)) : 0.f);
-
-            if (std::fabs(wireAngleW) > maxDeltaTheta)
-                throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- the W-wires are not vertical in this detector ";
+            const float wireAngleV(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat));
+            const float wireAngleW((nWirePlanes < 3) ? 0.f : (useYPlane) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat)) :
+                (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)));
 
             double localCoord1[3] = {0., 0., 0.};
             double worldCoord1[3] = {0., 0., 0.};
@@ -239,7 +252,8 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 
                 const float dThetaU(theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kU, itpc2, icstat));
                 const float dThetaV(theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kV, itpc2, icstat));
-                const float dThetaW((wirePlanes > 2) ? (theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kW, itpc2, icstat)) : 0.f);
+                const float dThetaW((nWirePlanes < 3) ? 0.f : (useYPlane) ? (theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kY, itpc2, icstat)) :
+                    (theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kW, itpc2, icstat)));
 
                 if (dThetaU > maxDeltaTheta || dThetaV > maxDeltaTheta || dThetaW > maxDeltaTheta)
                     continue;
@@ -275,7 +289,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 
             // Create new daughter drift volume (volume ID = 0 to N-1)
             driftVolumeList.push_back(LArDriftVolume(driftVolumeList.size(), isPositiveDrift,
-                wirePitchU, wirePitchV, wirePitchW, wireAngleU, wireAngleV,
+                wirePitchU, wirePitchV, wirePitchW, wireAngleU, wireAngleV, wireAngleW,
                 0.5f * (driftMaxX + driftMinX), 0.5f * (driftMaxY + driftMinY), 0.5f * (driftMaxZ + driftMinZ),
                 (driftMaxX - driftMinX), (driftMaxY - driftMinY), (driftMaxZ - driftMinZ),
                 (wirePitchU + wirePitchV + wirePitchW + 0.1f), tpcVolumeList));
@@ -308,11 +322,12 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
         const float daughterWirePitchU(switchViews ? driftVolume.GetWirePitchV() : driftVolume.GetWirePitchU());
         const float daughterWirePitchV(switchViews ? driftVolume.GetWirePitchU() : driftVolume.GetWirePitchV());
         const float daughterWirePitchW(driftVolume.GetWirePitchW());
-        const float daughterWireAngleU(switchViews ? - driftVolume.GetWireAngleV() : driftVolume.GetWireAngleU());
-        const float daughterWireAngleV(switchViews ? - driftVolume.GetWireAngleU() : driftVolume.GetWireAngleV());
+        const float daughterWireAngleU(switchViews ? driftVolume.GetWireAngleV() : driftVolume.GetWireAngleU());
+        const float daughterWireAngleV(switchViews ? driftVolume.GetWireAngleU() : driftVolume.GetWireAngleV());
+        const float daughterWireAngleW(driftVolume.GetWireAngleW());
 
         daughterVolumeList.push_back(LArDriftVolume(driftVolume.GetVolumeID(), driftVolume.IsPositiveDrift(),
-            daughterWirePitchU, daughterWirePitchV, daughterWirePitchW, daughterWireAngleU, daughterWireAngleV,
+            daughterWirePitchU, daughterWirePitchV, daughterWirePitchW, daughterWireAngleU, daughterWireAngleV, daughterWireAngleW,
             driftVolume.GetCenterX(), driftVolume.GetCenterY() , driftVolume.GetCenterZ(),
             driftVolume.GetWidthX(), driftVolume.GetWidthY(), driftVolume.GetWidthZ(),
             driftVolume.GetSigmaUVZ(), driftVolume.GetTpcVolumeList()));
@@ -326,7 +341,7 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiveDrift,
-        const float wirePitchU, const float wirePitchV, const float wirePitchW, const float wireAngleU, const float wireAngleV,
+        const float wirePitchU, const float wirePitchV, const float wirePitchW, const float wireAngleU, const float wireAngleV, const float wireAngleW,
         const float centerX, const float centerY, const float centerZ, const float widthX, const float widthY, const float widthZ,
         const float sigmaUVZ, const LArDaughterDriftVolumeList &tpcVolumeList) :
     m_volumeID(volumeID),
@@ -336,6 +351,7 @@ LArDriftVolume::LArDriftVolume(const unsigned int volumeID, const bool isPositiv
     m_wirePitchW(wirePitchW),
     m_wireAngleU(wireAngleU),
     m_wireAngleV(wireAngleV),
+    m_wireAngleW(wireAngleW),
     m_centerX(centerX),
     m_centerY(centerY),
     m_centerZ(centerZ),

@@ -111,7 +111,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
             if (pandora_View == geo::kW)
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_W;
-                const double wpos_cm(z0_cm);
+                const double wpos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoW(y0_cm, z0_cm));
                 caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., wpos_cm);
             }
             else if(pandora_View == geo::kU)
@@ -185,6 +185,7 @@ void LArPandoraInput::CreatePandoraLArTPCs(const Settings &settings, const LArDr
             parameters.m_wirePitchW = driftVolume.GetWirePitchW();
             parameters.m_wireAngleU = driftVolume.GetWireAngleU();
             parameters.m_wireAngleV = driftVolume.GetWireAngleV();
+            parameters.m_wireAngleW = driftVolume.GetWireAngleW();
             parameters.m_sigmaUVW = driftVolume.GetSigmaUVZ();
             parameters.m_isDriftInPositiveX = driftVolume.IsPositiveDrift();
         }
