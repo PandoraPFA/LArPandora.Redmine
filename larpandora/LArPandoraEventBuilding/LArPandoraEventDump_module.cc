@@ -22,6 +22,8 @@
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
 
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
+
 namespace lar_pandora
 {
 
@@ -43,6 +45,7 @@ private:
                        const art::FindManyP<recob::SpacePoint>                   &pfPartToSpacePointAssoc,
                        const art::FindManyP<recob::Cluster>                      &pfPartToClusterAssoc,
                        const art::FindManyP<recob::Vertex>                       &pfPartToVertexAssoc,
+                       const art::FindManyP<larpandoraobj::PFParticleMetadata>   &pfPartToMetadataAssoc,
                        const art::FindManyP<recob::Track>                        &pfPartToTrackAssoc,
                        const art::FindManyP<recob::Shower>                       &pfPartToShowerAssoc,
                        const art::FindManyP<recob::PCAxis>                       &pfPartToPCAxisAssoc,
@@ -87,6 +90,7 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
     art::Handle< std::vector< recob::Cluster > > clusterHandle;
     art::Handle< std::vector< recob::Vertex > > vertexHandle;
+    art::Handle< std::vector< larpandoraobj::PFParticleMetadata > > metadataHandle;
     art::Handle< std::vector< recob::Track > > trackHandle;
     art::Handle< std::vector< recob::Shower > > showerHandle;
     art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
@@ -95,17 +99,19 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     evt.getByLabel(m_PandoraLabel, spacePointHandle);
     evt.getByLabel(m_PandoraLabel, clusterHandle);
     evt.getByLabel(m_PandoraLabel, vertexHandle);
+    evt.getByLabel(m_PandoraLabel, metadataHandle);
     evt.getByLabel(m_TrackLabel, trackHandle);
     evt.getByLabel(m_ShowerLabel, showerHandle);
     evt.getByLabel(m_ShowerLabel, pcAxisHandle);
 
     // Get the associations
-    art::FindManyP<recob::SpacePoint> pfPartToSpacePointAssoc(pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Cluster>    pfPartToClusterAssoc(   pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Vertex>     pfPartToVertexAssoc(    pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Track>      pfPartToTrackAssoc(     pfParticleHandle, evt, m_TrackLabel);
-    art::FindManyP<recob::Shower>     pfPartToShowerAssoc(    pfParticleHandle, evt, m_ShowerLabel);
-    art::FindManyP<recob::PCAxis>     pfPartToPCAxisAssoc(    pfParticleHandle, evt, m_ShowerLabel);
+    art::FindManyP<recob::SpacePoint>                   pfPartToSpacePointAssoc(pfParticleHandle, evt, m_PandoraLabel);
+    art::FindManyP<recob::Cluster>                      pfPartToClusterAssoc(   pfParticleHandle, evt, m_PandoraLabel);
+    art::FindManyP<recob::Vertex>                       pfPartToVertexAssoc(    pfParticleHandle, evt, m_PandoraLabel);
+    art::FindManyP<larpandoraobj::PFParticleMetadata>   pfPartToMetadataAssoc(  pfParticleHandle, evt, m_PandoraLabel);
+    art::FindManyP<recob::Track>                        pfPartToTrackAssoc(     pfParticleHandle, evt, m_TrackLabel);
+    art::FindManyP<recob::Shower>                       pfPartToShowerAssoc(    pfParticleHandle, evt, m_ShowerLabel);
+    art::FindManyP<recob::PCAxis>                       pfPartToPCAxisAssoc(    pfParticleHandle, evt, m_ShowerLabel);
 
     art::FindManyP<recob::Hit> spacePointToHitAssoc(spacePointHandle, evt, m_PandoraLabel);
     art::FindManyP<recob::Hit> clusterToHitAssoc(   clusterHandle   , evt, m_PandoraLabel);
@@ -119,6 +125,7 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     std::cout << "N SpacePoints : " << spacePointHandle->size() << std::endl;
     std::cout << "N Clusters    : " << clusterHandle->size()    << std::endl;
     std::cout << "N Vertices    : " << vertexHandle->size()     << std::endl;
+    std::cout << "N Metadata    : " << metadataHandle->size()   << std::endl;
     std::cout << "N Tracks      : " << trackHandle->size()      << std::endl;
     std::cout << "N Showers     : " << showerHandle->size()     << std::endl;
     std::cout << "N PCAxes      : " << pcAxisHandle->size()     << std::endl;
@@ -140,7 +147,7 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
         if (part->IsPrimary())
         {
             this->PrintParticle(part, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc,
-                pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, 0);
+                pfPartToMetadataAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, 0);
         }
     }
 
@@ -154,6 +161,7 @@ void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle >     
                                         const art::FindManyP<recob::SpacePoint>                   &pfPartToSpacePointAssoc,
                                         const art::FindManyP<recob::Cluster>                      &pfPartToClusterAssoc,
                                         const art::FindManyP<recob::Vertex>                       &pfPartToVertexAssoc,   
+                                        const art::FindManyP<larpandoraobj::PFParticleMetadata>   &pfPartToMetadataAssoc,
                                         const art::FindManyP<recob::Track>                        &pfPartToTrackAssoc,   
                                         const art::FindManyP<recob::Shower>                       &pfPartToShowerAssoc,    
                                         const art::FindManyP<recob::PCAxis>                       &pfPartToPCAxisAssoc,
@@ -183,12 +191,13 @@ void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle >     
     std::cout << rule << std::endl;
 
     // Get the associated objects
-    const std::vector< art::Ptr< recob::SpacePoint > > &spacePoints = pfPartToSpacePointAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Cluster > >    &clusters    = pfPartToClusterAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Vertex > >     &vertices    = pfPartToVertexAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Track > >      &tracks      = pfPartToTrackAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Shower > >     &showers     = pfPartToShowerAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::PCAxis > >     &pcAxes      = pfPartToPCAxisAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::SpacePoint > >                  &spacePoints = pfPartToSpacePointAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::Cluster > >                     &clusters    = pfPartToClusterAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::Vertex > >                      &vertices    = pfPartToVertexAssoc.at( part.key() );
+    const std::vector< art::Ptr< larpandoraobj::PFParticleMetadata > >  &metadata    = pfPartToMetadataAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::Track > >                       &tracks      = pfPartToTrackAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::Shower > >                      &showers     = pfPartToShowerAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::PCAxis > >                      &pcAxes      = pfPartToPCAxisAssoc.at( part.key() );
 
     // Output the number of associated objects
     std::cout << indent << std::setw(w) << std::left << "- # SpacePoint" << spacePoints.size() << std::endl;
@@ -197,15 +206,23 @@ void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle >     
     std::cout << indent << std::setw(w) << std::left << "- # Track"      << tracks.size()      << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # Shower"     << showers.size()     << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # PCAxis"     << pcAxes.size()      << std::endl;
+    std::cout << indent << std::setw(w) << std::left << "- # Metadata"   << metadata.size()    << std::endl;
+
+    for (unsigned int metadataId = 0; metadataId < metadata.size(); ++metadataId)
+    {
+        for (const auto &propertiesMapEntry : metadata.at(metadataId)->GetPropertiesMap())
+            std::cout << indent << std::setw(w) << std::left << "-- Property " << propertiesMapEntry.first << ", value " << propertiesMapEntry.second << std::endl;
+    }
+
     std::cout << rule << std::endl;
     std::cout << indent << std::setw(w) << std::left << "- # Daughters"  << part->NumDaughters() << std::endl;
     std::cout << rule << std::endl;
 
-    for (const auto &daughterId : part->Daughters())
+    for (auto &daughterId : part->Daughters())
     {
         art::Ptr< recob::PFParticle > daughter = pfParticleIdMap.at(daughterId);
         this->PrintParticle(daughter, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc,
-            pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, depth + 4);
+            pfPartToMetadataAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, depth + 4);
     }
 }
 
