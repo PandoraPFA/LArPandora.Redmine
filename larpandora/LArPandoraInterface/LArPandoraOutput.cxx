@@ -35,6 +35,7 @@
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <algorithm>
 #include <iterator>
@@ -160,8 +161,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         outputParticles->push_back(newParticle);
 
         // Build default metadata
-        larpandoraobj::PFParticleMetadata newMetadata(LArPandoraOutput::GetPFParticleMetadata(pPfo));
-        outputParticleMetadata->push_back(newMetadata);
+        outputParticleMetadata->emplace_back(larpandoraobj::PFParticleMetadata(pPfo));
 
         // Associate metadata
         util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputParticleMetadata.get()), *(outputParticlesToMetadata.get()), outputParticleMetadata->size()-1, outputParticleMetadata->size());
@@ -442,14 +442,6 @@ double LArPandoraOutput::CalculateT0(const art::Ptr<recob::Hit> hit, const pando
 
     // This calculation should give the T0 in nanoseconds relative to the initial 2D hit
     return (- dir * x0_cm * ns_per_tick / cm_per_tick);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-larpandoraobj::PFParticleMetadata LArPandoraOutput::GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo)
-{
-    larpandoraobj::PFParticleMetadata metadata;
-    return metadata;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

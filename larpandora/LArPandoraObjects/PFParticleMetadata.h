@@ -7,6 +7,11 @@
 #ifndef LAR_PANDORA_PFPARTICLE_METADATA_H
 #define LAR_PANDORA_PFPARTICLE_METADATA_H
 
+#include "Objects/ParticleFlowObject.h"
+
+#include <map>
+#include <string>
+
 namespace larpandoraobj
 {
 
@@ -17,53 +22,37 @@ class PFParticleMetadata
 {
 public:
     /**
-     *  @brief  Reconstruction hypothesis
-     */
-    enum ReconstructionHypothesis
-    {
-        COSMIC,
-        NEUTRINO,
-        TEST_BEAM
-    };
-
-    /**
-     *  @brief  Constructor for clear cosmic rays
+     *  @brief  Default constructor
      */
     PFParticleMetadata();
-    
+
     /**
-     *  @brief  Constructor for particles in a slice
+     *  @brief  Constructor
      *
      *  @param  hypothesis the reconstruction hypothesis used
-     *  @param  sliceIndex the index of the slice in which the PFPartilce belongs
      */
-    PFParticleMetadata(const ReconstructionHypothesis &hypothesis, const unsigned int sliceIndex);
+    PFParticleMetadata(const pandora::ParticleFlowObject *const pPfo);
+
+    typedef pandora::PropertiesMap PropertiesMap;   ///< The properties map typedef
 
     /**
-     *  @brief  Get the reconstruction hypothesis
+     *  @brief  Get the properties map
      *
-     *  @return hypothesis
+     *  @return const reference to the properties map
      */
-    ReconstructionHypothesis GetReconstructionHypothesis() const;
-    
-    /**
-     *  @brief  Check if the PFParticle is a clear cosmic ray
-     *
-     *  @return boolean
-     */
-    bool IsClearCosmicRay() const;
+    const PropertiesMap &GetPropertiesMap() const;
 
     /**
-     *  @brief  Get the slice index
+     *  @brief  Set the properties map, or replace the existing map, with a user-provided map
      *
-     *  @return the slice index
+     *  @param  propertiesMap the replacement properties map
      */
-    unsigned int GetSliceIndex() const;
+    void SetPropertiesMap(const PropertiesMap &propertiesMap);
+
+    // Further structures/properties to be added as they are requested
 
 private:
-    ReconstructionHypothesis m_hypothesis;    ///< The reconstruction hypothesis used
-    bool                     m_isClearCosmic; ///< If the PFParticle is identified as a clear cosmic ray
-    unsigned int             m_sliceIndex;    ///< The index of the slice (if available) in which the PFParticle belongs
+    PropertiesMap   m_propertiesMap;                ///< The properties map
 };
 
 } // namespace lar_pandora
