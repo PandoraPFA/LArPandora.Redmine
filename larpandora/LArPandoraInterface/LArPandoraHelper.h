@@ -451,15 +451,16 @@ public:
         const DaughterMode daughterMode = kUseDaughters);
 
     /**
-     *  @brief  Get all hits associated with input spacepoints
+     *  @brief  Get all hits associated with input clusters
      *
      *  @param  evt the event containing the hits
      *  @param  label the label of the collection producing PFParticles
-     *  @param  inputSpacePoints input spacepoints
-     *  @param  associatedHits output hits associated with spacepoints
+     *  @param  input vector input of T (clusters, spacepoints)
+     *  @param  associatedHits output hits associated with T
      *  @param  indexVector vector of spacepoint indices reflecting trajectory points sorting order
      */
-    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
+    template <typename T>
+    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T> > &inputVector,
         HitVector &associatedHits, const pandora::IntVector* const indexVector = nullptr);
 
     /**

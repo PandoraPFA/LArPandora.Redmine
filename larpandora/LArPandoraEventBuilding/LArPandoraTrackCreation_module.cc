@@ -115,9 +115,11 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     const art::PtrMaker<recob::Track> makeTrackPtr(evt, *this);
 
     // Organise inputs
-    PFParticleVector pfParticleVector;
+    PFParticleVector pfParticleVector, extraPfParticleVector;
     PFParticlesToSpacePoints pfParticlesToSpacePoints;
+    PFParticlesToClusters pfParticlesToClusters;
     LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, pfParticleVector, pfParticlesToSpacePoints);
+    LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, extraPfParticleVector, pfParticlesToClusters);
 
     VertexVector vertexVector;
     PFParticlesToVertices pfParticlesToVertices;
@@ -135,6 +137,15 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         if (pfParticlesToSpacePoints.end() == particleToSpacePointIter)
         {
             mf::LogDebug("LArPandoraTrackCreation") << "No spacepoints associated to particle ";
+            continue;
+        }
+
+        // Obtain associated clusters
+        PFParticlesToClusters::const_iterator particleToClustersIter(pfParticlesToClusters.find(pPFParticle));
+
+        if (pfParticlesToClusters.end() == particleToClustersIter)
+        {
+            mf::LogDebug("LArPandoraShowerCreation") << "No clusters associated to particle ";
             continue;
         }
 
@@ -176,7 +187,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         }
 
         HitVector hitsInParticle;
-        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsInParticle, &indexVector);
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToClustersIter->second, hitsInParticle);
 
         // Add invalid points at the end of the vector, so that the number of the trajectory points is the same as the number of hits
         if (trackStateVector.size()>hitsInParticle.size())
