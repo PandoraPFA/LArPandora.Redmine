@@ -123,13 +123,11 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
     const art::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *this);
 
     // Organise inputs
-    PFParticleVector pfParticleVector;
+    PFParticleVector pfParticleVector, extraPfParticleVector;
     PFParticlesToSpacePoints pfParticlesToSpacePoints;
-    LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, pfParticleVector, pfParticlesToSpacePoints);
-
-    PFParticleVector pfParticles;
     PFParticlesToClusters pfParticlesToClusters;
-    LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, pfParticles, pfParticlesToClusters);
+    LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, pfParticleVector, pfParticlesToSpacePoints);
+    LArPandoraHelper::CollectPFParticles(evt, m_pfParticleLabel, extraPfParticleVector, pfParticlesToClusters);
 
     VertexVector vertexVector;
     PFParticlesToVertices pfParticlesToVertices;
