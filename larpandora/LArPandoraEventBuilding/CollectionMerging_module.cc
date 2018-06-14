@@ -95,6 +95,7 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const &pset) :
     produces< std::vector<recob::Track> >(); 
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
+    produces< std::vector<larpandoraobj::PFParticleMetadata> >();
 
     produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
@@ -102,6 +103,7 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const &pset) :
     produces< art::Assns<recob::PFParticle, recob::Track> >();
     produces< art::Assns<recob::PFParticle, recob::Shower> >();
     produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
+    produces< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> >();
     produces< art::Assns<recob::Track, recob::Hit> >();
     produces< art::Assns<recob::Shower, recob::Hit> >();
     produces< art::Assns<recob::Shower, recob::PCAxis> >();
