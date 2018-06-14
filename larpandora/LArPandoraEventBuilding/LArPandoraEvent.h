@@ -24,6 +24,7 @@
 #include "lardataobj/AnalysisBase/T0.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <memory>
 #include <algorithm>
@@ -31,6 +32,9 @@
 
 namespace lar_pandora
 {
+
+typedef std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> >                                              MetadataVector;
+typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > >     PFParticlesToMetadata;
 
 typedef std::vector< art::Ptr<recob::PCAxis> >                                              PCAxisVector;
 typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<recob::PCAxis> > >     PFParticlesToPCAxes;
@@ -62,6 +66,7 @@ public:
             TrackLabel,
             ShowerLabel,
             T0Label,
+            PFParticleMetadataLabel,
             PCAxisLabel,
             HitLabel,
             PFParticleToSpacePointLabel,
@@ -70,6 +75,7 @@ public:
             PFParticleToTrackLabel,
             PFParticleToShowerLabel,
             PFParticleToT0Label,
+            PFParticleToMetadataLabel,
             PFParticleToPCAxisLabel,
             SpacePointToHitLabel,
             ClusterToHitLabel,
@@ -100,6 +106,7 @@ public:
         void SetTrackProducerLabel(const std::string &label);
         void SetShowerProducerLabel(const std::string &label);
         void SetT0ProducerLabel(const std::string &label);
+        void SetMetadataProducerLabel(const std::string &label);
         void SetPCAxisProducerLabel(const std::string &label);
 
         void SetPFParticleToSpacePointProducerLabel(const std::string &label);
@@ -108,6 +115,7 @@ public:
         void SetPFParticleToTrackProducerLabel(const std::string &label);
         void SetPFParticleToShowerProducerLabel(const std::string &label);
         void SetPFParticleToT0ProducerLabel(const std::string &label);
+        void SetPFParticleToMetadataProducerLabel(const std::string &label);
         void SetPFParticleToPCAxisProducerLabel(const std::string &label);
         void SetSpacePointToHitProducerLabel(const std::string &label);
         void SetClusterToHitProducerLabel(const std::string &label);
@@ -364,6 +372,7 @@ private:
     TrackVector                 m_tracks;                       ///<  The input collection of Tracks
     ShowerVector                m_showers;                      ///<  The input collection of Showers
     T0Vector                    m_t0s;                          ///<  The input collection of T0s
+    MetadataVector              m_metadata;                     ///<  The input collection of PFParticle metadata
     PCAxisVector                m_pcAxes;                       ///<  The input collection of PCAxes
     HitVector                   m_hits;                         ///<  The input collection of Hits
 
@@ -374,6 +383,7 @@ private:
     PFParticlesToTracks         m_pfParticleTrackMap;           ///<  The input associations: PFParticle -> Track
     PFParticlesToShowers        m_pfParticleShowerMap;          ///<  The input associations: PFParticle -> Shower
     PFParticlesToT0s            m_pfParticleT0Map;              ///<  The input associations: PFParticle -> T0
+    PFParticlesToMetadata       m_pfParticleMetadataMap;        ///<  The input associations: PFParticle -> Metadata
     PFParticlesToPCAxes         m_pfParticlePCAxisMap;          ///<  The input associations: PFParticle -> PCAxis
 
     SpacePointsToHitVector      m_spacePointHitMap;             ///<  The input associations: SpacePoint -> Hit
