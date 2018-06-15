@@ -61,6 +61,14 @@ private:
     void GetPFParticleIdMap(const PFParticleHandle &pfParticleHandle, PFParticleIdMap &pfParticleMap);
 
     /**
+     * @brief Print out scores in PFParticleMetadata
+     *
+     * @param evt the art event to analyze
+     * @param pfParticleHandle the handle for the PFParticle collection
+     */
+    void PrintOutScores(const art::Event &evt, const PFParticleHandle &pfParticleHandle) const;
+
+    /**
      *  @brief  Produce a mapping from PFParticle ID to the art ptr to the PFParticle itself for fast navigation
      *
      *  @param  pfParticleMap the mapping from ID to PFParticle
@@ -83,6 +91,7 @@ private:
     std::string m_pandoraLabel;         ///< The label for the pandora producer
     std::string m_trackLabel;           ///< The label for the track producer from PFParticles
     std::string m_showerLabel;          ///< The label for the shower producer from PFParticles
+    bool        m_printOutScores;       ///< Option to investigate the associations to scores for PFParticles
 };
 
 DEFINE_ART_MODULE(ConsolidatedPFParticleAnalysisTemplate)
@@ -100,6 +109,8 @@ DEFINE_ART_MODULE(ConsolidatedPFParticleAnalysisTemplate)
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+
+#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include "Pandora/PdgTable.h"
 
@@ -120,6 +131,7 @@ void ConsolidatedPFParticleAnalysisTemplate::reconfigure(fhicl::ParameterSet con
     m_pandoraLabel = pset.get<std::string>("PandoraLabel");
     m_trackLabel = pset.get<std::string>("TrackLabel");
     m_showerLabel = pset.get<std::string>("ShowerLabel");
+    m_printOutScores = pset.get<bool>("PrintOutScores",true);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,6 +152,10 @@ void ConsolidatedPFParticleAnalysisTemplate::analyze(const art::Event &evt)
     PFParticleIdMap pfParticleMap;
     this->GetPFParticleIdMap(pfParticleHandle, pfParticleMap);
     
+    /// Investigate scores associated as larpandoraobject::metadata for the PFParticles
+    if (m_printOutScores)
+        this->PrintOutScores(evt, pfParticleHandle);
+
     // Produce two PFParticle vectors containing final-state particles:
     // 1. Particles identified as cosmic-rays - recontructed under cosmic-hypothesis
     // 2. Daughters of the neutrino PFParticle - reconstructed under the neutrino hypothesis
@@ -174,6 +190,32 @@ void ConsolidatedPFParticleAnalysisTemplate::GetPFParticleIdMap(const PFParticle
         if (!pfParticleMap.insert(PFParticleIdMap::value_type(pParticle->Self(), pParticle)).second)
         {
             throw cet::exception("ConsolidatedPFParticleAnalysisTemplate") << "  Unable to get PFParticle ID map, the input PFParticle collection has repeat IDs!";
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void ConsolidatedPFParticleAnalysisTemplate::PrintOutScores(const art::Event &evt, const PFParticleHandle &pfParticleHandle) const
+{
+    // Get the associations between PFParticles and larpandoraobj::PFParticleMetadata
+    art::FindManyP< larpandoraobj::PFParticleMetadata > pfPartToMetadataAssoc(pfParticleHandle, evt, m_pandoraLabel);
+
+    for (unsigned int i = 0; i < pfParticleHandle->size(); ++i)
+    {
+        const std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > &pfParticleMetadataList(pfPartToMetadataAssoc.at(i));
+        if (!pfParticleMetadataList.empty())
+        {
+            const art::Ptr<recob::PFParticle> pParticle(pfParticleHandle, i);
+            for (unsigned int j=0; j<pfParticleMetadataList.size(); ++j)
+            {
+                const art::Ptr<larpandoraobj::PFParticleMetadata> &pfParticleMetadata(pfParticleMetadataList.at(j));
+                const pandora::PropertiesMap &pfParticlePropertiesMap(pfParticleMetadata->GetPropertiesMap());
+                if (!pfParticlePropertiesMap.empty())
+                    std::cout << " Found PFParticle " << pParticle->Self() << " with: " << std::endl;
+                for (pandora::PropertiesMap::const_iterator it = pfParticlePropertiesMap.begin(); it != pfParticlePropertiesMap.end(); ++it)
+                    std::cout << "  - " << it->first << " = " << it->second << std::endl;
+            }
         }
     }
 }
