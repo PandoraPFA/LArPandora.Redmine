@@ -58,7 +58,7 @@ private:
      *  @param particlesToSpacePoints mapping between 3D hits and PFParticles
      *  @param spacePointsToHits mapping between 3D hits and 2D hits
      */
-    void FillReco3D(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints,
+     void FillReco3D(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints,
         const SpacePointsToHits &spacePointsToHits);
     
     /** 
@@ -69,6 +69,18 @@ private:
      */
      void FillReco2D(const HitVector &hitVector, const HitsToPFParticles &hitsToParticles);
     
+    /**
+     *  @brief Store number of 2D hits associated to PFParticle in different ways
+     *
+     *  @param particleVector the input vector of PFParticles
+     *  @param particlesToHits mapping between PFParticles and 2D hits through space points
+     *  @param particlesToHitsClusters mapping between PFParticles and 2D hits through clusters
+     *  @param particlesToTracks mapping between PFParticles and tracks
+     *  @param particlesToShowers mapping between PFParticles and showers
+     */
+     void FillAssociated2DHits(const art::Event &evt, const PFParticleVector &particleVector, const PFParticlesToHits &particlesToHits, const PFParticlesToHits &particlesToHitsClusters,
+          const PFParticlesToTracks &particlesToTracks, const TracksToHits &tracksToHits, const PFParticlesToShowers &particlesToShowers, const ShowersToHits &showersToHits);
+
     /**
      *  @brief Store raw data
      *
@@ -106,6 +118,7 @@ private:
      TTree       *m_pRecoTracks;     ///<
      TTree       *m_pReco3D;         ///< 
      TTree       *m_pReco2D;         ///<
+     TTree       *m_pRecoComparison; ///<
      TTree       *m_pRecoWire;       ///<
 
      int          m_run;             ///< 
@@ -127,11 +140,17 @@ private:
      double       m_z;               ///<
      double       m_q;               ///<
 
+     int          m_hitsFromSpacePoints;   ///<
+     int          m_hitsFromClusters;      ///<
+     int          m_hitsFromTrackOrShower; ///<
+
      std::string  m_calwireLabel;    ///<
      std::string  m_hitfinderLabel;  ///<
+     std::string  m_clusterLabel;    ///<
      std::string  m_spacepointLabel; ///< 
      std::string  m_particleLabel;   ///<
      std::string  m_trackLabel;      ///<
+     std::string  m_showerLabel;     ///<
 
      bool         m_storeWires;      ///<
      bool         m_printDebug;      ///< switch for print statements (TODO: use message service!)
@@ -160,6 +179,7 @@ DEFINE_ART_MODULE(PFParticleHitDumper)
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
@@ -189,9 +209,11 @@ PFParticleHitDumper::~PFParticleHitDumper()
 void PFParticleHitDumper::reconfigure(fhicl::ParameterSet const &pset)
 {
     m_storeWires      = pset.get<bool>("StoreWires", false);
-    m_trackLabel      = pset.get<std::string>("TrackModule", "pandora");
+    m_trackLabel      = pset.get<std::string>("TrackModule", "pandoraTrack");
+    m_showerLabel     = pset.get<std::string>("ShowerModule", "pandoraShower");
     m_particleLabel   = pset.get<std::string>("PFParticleModule", "pandora");
     m_spacepointLabel = pset.get<std::string>("SpacePointModule", "pandora");
+    m_clusterLabel    = pset.get<std::string>("ClusterModule", "pandora");
     m_hitfinderLabel  = pset.get<std::string>("HitFinderModule", "gaushit");
     m_calwireLabel    = pset.get<std::string>("CalWireModule", "caldata");
     m_printDebug      = pset.get<bool>("PrintDebug",false);
@@ -241,6 +263,15 @@ void PFParticleHitDumper::beginJob()
     m_pReco2D->Branch("x", &m_x, "x/D");
     m_pReco2D->Branch("w", &m_w, "w/D");
     m_pReco2D->Branch("q", &m_q, "q/D");
+
+    m_pRecoComparison = tfs->make<TTree>("pandora2Dcomparison", "LAr Reco 2D (comparison)");
+    m_pRecoComparison->Branch("run", &m_run,"run/I");
+    m_pRecoComparison->Branch("event", &m_event,"event/I");
+    m_pRecoComparison->Branch("particle", &m_particle, "particle/I");
+    m_pRecoComparison->Branch("pdgcode", &m_pdgcode, "pdgcode/I");
+    m_pRecoComparison->Branch("hitsFromSpacePoints", &m_hitsFromSpacePoints, "hitsFromSpacePoints/I");
+    m_pRecoComparison->Branch("hitsFromClusters", &m_hitsFromClusters, "hitsFromClusters/I");
+    m_pRecoComparison->Branch("hitsFromTrackOrShower", &m_hitsFromTrackOrShower, "hitsFromTrackOrShower/I");
 
     m_pRecoWire = tfs->make<TTree>("rawdata", "LAr Reco Wires");
     m_pRecoWire->Branch("run", &m_run,"run/I");
@@ -294,30 +325,38 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     }
 
     // Need DetectorProperties service to convert from ticks to X
-  //  auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    //  auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Need geometry service to convert channel to wire ID
     art::ServiceHandle<geo::Geometry> theGeometry;
 
     // Get particles, tracks, space points, hits (and wires)
     // ====================================================
-    TrackVector              trackVector;
+    TrackVector              trackVector, trackVectorExtra;
+    ShowerVector             showerVector, showerVectorExtra;
     PFParticleVector         particleVector;
     SpacePointVector         spacePointVector;
     HitVector                hitVector;
     WireVector               wireVector;
 
     PFParticlesToTracks      particlesToTracks;
+    PFParticlesToShowers     particlesToShowers;
     PFParticlesToSpacePoints particlesToSpacePoints;
-    PFParticlesToHits        particlesToHits;
-    HitsToPFParticles        hitsToParticles;
+    PFParticlesToHits        particlesToHits, particlesToHitsClusters;
+    TracksToHits             tracksToHits;
+    ShowersToHits            showersToHits;
+    HitsToPFParticles        hitsToParticles, hitsToParticlesClusters;
     SpacePointsToHits        spacePointsToHits;
 
     LArPandoraHelper::CollectHits(evt, m_hitfinderLabel, hitVector);
     LArPandoraHelper::CollectSpacePoints(evt, m_spacepointLabel, spacePointVector, spacePointsToHits);
     LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVector, particlesToTracks);
+    LArPandoraHelper::CollectTracks(evt, m_trackLabel, trackVectorExtra, tracksToHits);
+    LArPandoraHelper::CollectShowers(evt, m_showerLabel, showerVector, particlesToShowers);
+    LArPandoraHelper::CollectShowers(evt, m_showerLabel, showerVectorExtra, showersToHits);
     LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, particleVector, particlesToSpacePoints);
-    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_spacepointLabel, particlesToHits, hitsToParticles, LArPandoraHelper::DaughterMode::kUseDaughters, false);
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_clusterLabel, particlesToHitsClusters, hitsToParticlesClusters);
 
     if (m_storeWires)
         LArPandoraHelper::CollectWires(evt, m_calwireLabel, wireVector);
@@ -342,6 +381,12 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     if (m_printDebug)
         std::cout << "   PFParticleHitDumper::FillReco2D(...) " << std::endl;
     this->FillReco2D(hitVector, hitsToParticles);
+
+    // Loop over Hits (Fill Associated 2D Hits Tree)
+    // =============================================
+    if (m_printDebug)
+        std::cout << "   PFParticleHitDumper::FillAssociated2DHits(...) " << std::endl;
+    this->FillAssociated2DHits(evt, particleVector, particlesToHits, particlesToHitsClusters, particlesToTracks, tracksToHits, particlesToShowers, showersToHits);
 
     // Loop over Wires (Fill Reco Wire Tree)
     // =====================================
@@ -378,22 +423,22 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
         {
             if (trackVector.size() != 1 && m_printDebug)
                 std::cout << " Warning: Found particle with more than one associated track " << std::endl;
-	        
+
             const art::Ptr<recob::Track> track = *(trackVector.begin());
 
             if (m_printDebug)
                 std::cout << "    PFPARTICLE [" << m_particle << "] (" << track->NumberTrajectoryPoints() << " Trajectory Points)" << std::endl;
 
-	    for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
+            for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
             {
-	        const TVector3 position(track->LocationAtPoint(p));
+                const TVector3 position(track->LocationAtPoint(p));
                 m_x = position.x();
                 m_y = position.y();
                 m_z = position.z();
 
                 m_pRecoTracks->Fill();
-	    }
-	}
+            }
+        }
     }
 }
 
@@ -484,6 +529,70 @@ void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, con
 
             m_pReco3D->Fill();
         }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PFParticleHitDumper::FillAssociated2DHits(const art::Event &evt, const PFParticleVector &particleVector, const PFParticlesToHits &particlesToHits, const PFParticlesToHits &particlesToHitsClusters,
+    const PFParticlesToTracks &particlesToTracks, const TracksToHits &tracksToHits, const PFParticlesToShowers &particlesToShowers, const ShowersToHits &showersToHits)
+{
+    // Create dummy entry if there are no 2D hits
+    if (particleVector.empty())
+    {
+        m_pRecoComparison->Fill();
+    }
+
+    for (unsigned int i = 0; i<particleVector.size(); ++i)
+    {
+        //initialise variables
+        m_particle = -1;
+        m_pdgcode = 0;
+        m_hitsFromSpacePoints = 0;
+        m_hitsFromClusters = 0;
+        m_hitsFromTrackOrShower = 0;
+
+        const art::Ptr<recob::PFParticle> particle = particleVector.at(i);
+        m_particle = particle->Self();
+        m_pdgcode = particle->PdgCode();
+
+        PFParticlesToHits::const_iterator pIter  = particlesToHits.find(particle);
+        PFParticlesToHits::const_iterator pIter2 = particlesToHitsClusters.find(particle);
+        if (particlesToHits.end() != pIter)
+            m_hitsFromSpacePoints = pIter->second.size();
+        if (particlesToHitsClusters.end() != pIter2)
+            m_hitsFromClusters = pIter2->second.size();
+
+        if (m_pdgcode == 13)
+        {
+            PFParticlesToTracks::const_iterator iter = particlesToTracks.find(particle);
+            const art::Ptr<recob::Track> track = *(iter->second.begin());
+
+            TracksToHits::const_iterator iter2 = tracksToHits.find(track);
+            if (tracksToHits.end() != iter2)
+            {
+                const HitVector &hitVector = iter2->second;
+                m_hitsFromTrackOrShower = hitVector.size();
+            }
+        }
+        else if (m_pdgcode == 11)
+        {
+            PFParticlesToShowers::const_iterator iter = particlesToShowers.find(particle);
+            const art::Ptr<recob::Shower> shower = *(iter->second.begin());
+
+            ShowersToHits::const_iterator iter2 = showersToHits.find(shower);
+            if (showersToHits.end() != iter2)
+            {
+                const HitVector &hitVector = iter2->second;
+                m_hitsFromTrackOrShower = hitVector.size();
+            }
+        }
+
+        if (m_printDebug)
+            std::cout << " PFParticle " << m_particle << " (PDG " << m_pdgcode << ") has " << m_hitsFromSpacePoints << " hits from space points and "
+                << m_hitsFromClusters << " hits from clusters, and its recob::Track/Shower has " << m_hitsFromTrackOrShower << " associated hits " << std::endl;
+
+        m_pRecoComparison->Fill();
     }
 }
 
