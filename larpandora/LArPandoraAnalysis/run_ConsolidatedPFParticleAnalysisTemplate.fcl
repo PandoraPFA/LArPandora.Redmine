@@ -1,0 +1,42 @@
+#include "services_microboone.fcl"
+
+process_name : ConsolidatedPFParticleAnalysisTemplate      #The process name must NOT contain any underscores
+
+source : {
+ module_type : RootInput
+    maxEvents   : -1
+    }
+
+services :
+{
+#  scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+ TFileService: { fileName: "ConsolidatedPFParticleAnalysisTemplate.root" }
+}
+
+outputs: {
+#  optionalout: { module_type: RootOutput
+#                fileName: "output_file.root"
+#               fastCloning: false }
+}
+
+physics: {
+ producers : {
+     # ParameterSets for zero or more producer modules
+  }
+ analyzers: {
+     # ParameterSets for zero or more analyzer modules
+  myana: { module_type:    ConsolidatedPFParticleAnalysisTemplate
+	   PandoraLabel:   "pandora"
+	   TrackLabel:     "pandora"
+	   ShowerLabel:    "pandora"
+           input_param:    "optional" }
+  }
+ filters : {
+     # ParameterSets for zero or more filter modules
+  }
+ path0 : [  myana ]
+
+#here, just a shorthand: could have done ana: [ myana ] then end_paths: [ ana ]
+    end_paths: [ path0 ]
+
+    }
