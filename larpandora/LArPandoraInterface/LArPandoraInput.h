@@ -35,12 +35,14 @@ public:
 
         const pandora::Pandora *m_pPrimaryPandora;          ///<
         bool                    m_useHitWidths;             ///<
+        bool                    m_useBirksCorrection;       ///<
         int                     m_uidOffset;                ///<
         double                  m_dx_cm;                    ///<
         double                  m_int_cm;                   ///<
         double                  m_rad_cm;                   ///<
-        double                  m_dEdX_max;                 ///<
         double                  m_dEdX_mip;                 ///<
+        double                  m_mips_max;                 ///<
+        double                  m_mips_if_negative;         ///<
         double                  m_mips_to_gev;              ///<
         double                  m_recombination_factor;     ///<
     };
