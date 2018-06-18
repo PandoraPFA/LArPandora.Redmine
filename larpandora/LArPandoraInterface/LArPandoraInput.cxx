@@ -7,6 +7,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcorealg/Geometry/TPCGeo.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 
 #include "lardataobj/RecoBase/Hit.h"
@@ -749,15 +750,18 @@ double LArPandoraInput::GetMips(const Settings &settings, const double hit_Charg
     art::ServiceHandle<geo::Geometry> theGeometry;
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
-    // TODO: Check if this procedure is correct
+    // TODO: Unite this procedure with other calorimetry procedures under development
     const double dQdX(hit_Charge / (theGeometry->WirePitch(hit_View))); // ADC/cm
     const double dQdX_e(dQdX / (theDetector->ElectronsToADC() * settings.m_recombination_factor)); // e/cm
-    double dEdX(theDetector->BirksCorrection(dQdX_e));
+    const double dEdX(settings.m_useBirksCorrection ? theDetector->BirksCorrection(dQdX_e) : dQdX_e * 1000. / util::kGeVToElectrons); // MeV/cm
+    double mips(dEdX / settings.m_dEdX_mip);
 
-    if ((dEdX < 0) || (dEdX > settings.m_dEdX_max))
-        dEdX = settings.m_dEdX_max;
+    if (mips < 0.)
+        mips = settings.m_mips_if_negative;
 
-    const double mips(dEdX / settings.m_dEdX_mip);
+    if (mips > settings.m_mips_max)
+        mips = settings.m_mips_max;
+
     return mips;
 }
 
@@ -767,12 +771,14 @@ double LArPandoraInput::GetMips(const Settings &settings, const double hit_Charg
 LArPandoraInput::Settings::Settings() :
     m_pPrimaryPandora(nullptr),
     m_useHitWidths(true),
+    m_useBirksCorrection(false),
     m_uidOffset(100000000),
     m_dx_cm(0.5),
     m_int_cm(84.),
     m_rad_cm(14.),
-    m_dEdX_max(100000000.),
     m_dEdX_mip(2.),
+    m_mips_max(50.),
+    m_mips_if_negative(0.),
     m_mips_to_gev(3.5e-4),
     m_recombination_factor(0.63)
 {
