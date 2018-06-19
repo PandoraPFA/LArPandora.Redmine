@@ -45,6 +45,7 @@ protected:
     bool                            m_shouldRunNeutrinoRecoOption;  ///< Steering: whether to run neutrino reconstruction for each slice
     bool                            m_shouldRunCosmicRecoOption;    ///< Steering: whether to run cosmic-ray reconstruction for each slice
     bool                            m_shouldPerformSliceId;         ///< Steering: whether to identify slices and select most appropriate pfos
+    bool                            m_shouldProduceAllOutcomes;     ///< Steering: whether to produce all reconstruction outcomes
     bool                            m_printOverallRecoStatus;       ///< Steering: whether to print current operation status messages
 
 private:        
@@ -55,6 +56,8 @@ private:
     std::string                     m_geantModuleLabel;             ///< The geant module label
     std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
     std::string                     m_backtrackerModuleLabel;       ///< The back tracker module label
+    
+    std::string                     m_allOutcomesInstanceLabel;     ///< The instance label for all outcomes
 
     bool                            m_enableProduction;             ///< Whether to persist output products
     bool                            m_enableDetectorGaps;           ///< Whether to pass detector gap information to Pandora instances

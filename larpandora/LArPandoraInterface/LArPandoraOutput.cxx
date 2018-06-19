@@ -49,7 +49,7 @@ namespace lar_pandora
 void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt)
 {
     settings.Validate();
-    
+   
     // Set up the output collections
     std::unique_ptr< std::vector<recob::PFParticle> >                   outputParticles( new std::vector<recob::PFParticle> );
     std::unique_ptr< std::vector<recob::Vertex> >                       outputVertices( new std::vector<recob::Vertex> );
@@ -73,7 +73,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     // The index of an object in a list will become the ID of the ART object produced
     // Also obtain mappings between IDs in different collections which will become associations
 
-    const pandora::PfoList pfoList(LArPandoraOutput::CollectPfos(settings.m_pPrimaryPandora));
+    const pandora::PfoList pfoList(settings.m_shouldProduceAllOutcomes ?
+        LArPandoraOutput::CollectAllPfoOutcomes(settings.m_pPrimaryPandora) :
+        LArPandoraOutput::CollectPfos(settings.m_pPrimaryPandora));
 
     IdToIdVectorMap pfoToVerticesMap;
     const pandora::VertexList vertexList(LArPandoraOutput::CollectVertices(pfoList, pfoToVerticesMap));
@@ -107,24 +109,110 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     // ---
 
     // Add the outputs to the event
-    evt.put(std::move(outputParticles));
-    evt.put(std::move(outputSpacePoints));
-    evt.put(std::move(outputClusters));
-    evt.put(std::move(outputVertices));
-    evt.put(std::move(outputParticleMetadata));
+    const std::string instanceName(settings.m_shouldProduceAllOutcomes ? settings.m_allOutcomesInstanceLabel : "");
 
-    evt.put(std::move(outputParticlesToMetadata));
-    evt.put(std::move(outputParticlesToSpacePoints));
-    evt.put(std::move(outputParticlesToClusters));
-    evt.put(std::move(outputParticlesToVertices));
-    evt.put(std::move(outputSpacePointsToHits));
-    evt.put(std::move(outputClustersToHits));
+    evt.put(std::move(outputParticles), instanceName);
+    evt.put(std::move(outputSpacePoints), instanceName);
+    evt.put(std::move(outputClusters), instanceName);
+    evt.put(std::move(outputVertices), instanceName);
+    evt.put(std::move(outputParticleMetadata), instanceName);
+
+    evt.put(std::move(outputParticlesToMetadata), instanceName);
+    evt.put(std::move(outputParticlesToSpacePoints), instanceName);
+    evt.put(std::move(outputParticlesToClusters), instanceName);
+    evt.put(std::move(outputParticlesToVertices), instanceName);
+    evt.put(std::move(outputSpacePointsToHits), instanceName);
+    evt.put(std::move(outputClustersToHits), instanceName);
 
     if (settings.m_shouldRunStitching)
     {
-        evt.put(std::move(outputT0s));
-        evt.put(std::move(outputParticlesToT0s));
+        evt.put(std::move(outputT0s), instanceName);
+        evt.put(std::move(outputParticlesToT0s), instanceName);
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora *const pMasterPandora)
+{
+    pandora::PfoList collectedPfos;
+        
+    const pandora::PfoList *pParentPfoList(nullptr);
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pMasterPandora, pParentPfoList));
+
+    // Identify the pandora worker instances by their name
+    const pandora::Pandora *pSliceWorker(nullptr);
+    const pandora::Pandora *pNuWorker(nullptr);
+    const pandora::Pandora *pCRWorker(nullptr);
+
+    for (const pandora::Pandora *const pPandora : MultiPandoraApi::GetDaughterPandoraInstanceList(pMasterPandora))
+    {
+        const std::string name(pPandora->GetName());
+
+        if (name == "SliceWorker")
+        {
+            if (pSliceWorker)
+                throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- multiple slice worker instances! ";
+
+            pSliceWorker = pPandora;
+        }
+        else if (name == "NeutrinoWorker")
+        {
+            if (pNuWorker)
+                throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- multiple neutrino slice worker instances! ";
+
+            pNuWorker = pPandora;
+        }
+        else if (name == "CosmicRayWorker")
+        {
+            if (pCRWorker)
+                throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- multiple cosmic-ray slice worker instances! ";
+
+            pCRWorker = pPandora;
+        }
+    }
+
+    if (!pSliceWorker || !pNuWorker || !pCRWorker)
+        throw cet::exception("LArPandora") << " LArPandoraOutput::CollectAllPfoOutcomes--- Can't produce all outcomes for a non-consolidated pandora producer ";
+
+    // Collect slices under bothe reconstruction outcomes
+    const pandora::PfoList *pSlicePfoList(nullptr);
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pSliceWorker, pSlicePfoList));
+
+    for (unsigned int sliceIndex = 0; sliceIndex < pSlicePfoList->size(); ++sliceIndex)
+    {
+        const pandora::PfoList *pNuPfoList(nullptr);
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pNuWorker, "NeutrinoParticles3D" + std::to_string(sliceIndex), pNuPfoList));
+        collectedPfos.insert(collectedPfos.end(), pNuPfoList->begin(), pNuPfoList->end());
+
+        const pandora::PfoList *pCRPfoList(nullptr);
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pCRWorker, "MuonParticles3D" + std::to_string(sliceIndex), pCRPfoList));
+        collectedPfos.insert(collectedPfos.end(), pCRPfoList->begin(), pCRPfoList->end());
+    }
+
+    // Collect clear cosmic-rays
+    for (const pandora::ParticleFlowObject *const pPfo : *pParentPfoList)
+    {
+        bool isClearCosmic(false);
+        try
+        {
+            isClearCosmic = pPfo->GetPropertiesMap().at("isClearCosmic");
+        }
+        catch (...)
+        {
+            continue;
+        }
+
+        if (!isClearCosmic)
+            continue;
+        
+        collectedPfos.push_back(pPfo);
+    }
+    
+    pandora::PfoList pfoList;
+    LArPandoraOutput::CollectPfos(collectedPfos, pfoList);
+
+    return pfoList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,7 +221,7 @@ pandora::PfoList LArPandoraOutput::CollectPfos(const pandora::Pandora *const pMa
 {
     const pandora::PfoList *pParentPfoList(nullptr);
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pMasterPandora, pParentPfoList));
-
+    
     pandora::PfoList pfoList;
     LArPandoraOutput::CollectPfos(*pParentPfoList, pfoList);
 
@@ -297,16 +385,41 @@ void LArPandoraOutput::GetPandoraToArtHitMap(const pandora::ClusterList &cluster
 
 art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit)
 {
-    const void *const pHitAddress(pCaloHit->GetParentAddress());
-    const intptr_t hitID_temp((intptr_t)(pHitAddress));
-    const int hitID((int)(hitID_temp));
+    // ATTN The CaloHit can come from the master pandora instance (depth = 0) or one of its daughers (depth = 1).
+    //      Here we keepy trying to access the ART hit increasing the depth step-by-step
+    for (unsigned int depth = 0, maxDepth = 2; depth < maxDepth; ++depth)
+    {
+        art::Ptr<recob::Hit> artHit;
 
-    IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
+        try
+        {
+            // Navigate to the hit address in the pandora master instance (assuming the depth is correct)
+            const pandora::CaloHit *pParentCaloHit = pCaloHit;
+            for (unsigned int i = 0; i < depth; ++i)
+                pParentCaloHit = static_cast<const pandora::CaloHit *>(pCaloHit->GetParentAddress());
 
-    if (idToHitMap.end() == artIter)
-        throw cet::exception("LArPandora") << " LArPandoraOutput::GetHit --- found a Pandora hit without a parent ART hit ";
+            // Attempt to find the mapping from the "parent" calo hit to the ART hit
+            const void *const pHitAddress(pParentCaloHit->GetParentAddress());
+            const intptr_t hitID_temp((intptr_t)(pHitAddress));
+            const int hitID((int)(hitID_temp));
+        
+            IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
+        
+            // If there is no such mapping from "parent" calo hit to the ART hit, then increase the depth and try again!
+            if (idToHitMap.end() == artIter)
+                continue;
 
-    return artIter->second;
+            artHit = artIter->second;
+        }
+        catch (...)
+        {
+            continue;
+        }
+
+        return artHit;
+    }
+     
+    throw cet::exception("LArPandora") << " LArPandoraOutput::GetHit --- found a Pandora hit without a parent ART hit ";
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -718,7 +831,11 @@ void LArPandoraOutput::Settings::Validate() const
         throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- pointer to ART Producer module does not exist ";
 
     if (!m_shouldProduceAllOutcomes) return;
+    
+    if (m_allOutcomesInstanceLabel.empty())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- all outcomes instance label not set ";
 
+    /*
     if (m_cosmicSliceWorkerName.empty()) 
         throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- cosmic slice worker name not set ";
     
@@ -736,6 +853,7 @@ void LArPandoraOutput::Settings::Validate() const
     
     if (m_slicePfoListName.empty()) 
         throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- slice pfo list name not set ";
+    */
 }
 
 } // namespace lar_pandora
