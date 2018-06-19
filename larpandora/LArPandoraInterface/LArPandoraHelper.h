@@ -15,7 +15,8 @@
 #include <set>
 #include <vector>
 
-namespace anab {class CosmicTag; class T0; }
+namespace anab {class CosmicTag; class T0;}
+namespace larpandoraobj {class PFParticleMetadata;}
 namespace pandora {class ParticleFlowObject; class Vertex; typedef std::vector<int> IntVector;}
 namespace recob {class Cluster; class Hit; class PFParticle; class Seed; class Shower; class SpacePoint; class Track; class Vertex; class Wire;}
 namespace sim {class SimChannel; struct TrackIDE;}
@@ -44,6 +45,7 @@ typedef std::vector< art::Ptr<sim::SimChannel> >    SimChannelVector;
 typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 typedef std::vector< art::Ptr<anab::CosmicTag> >    CosmicTagVector;
 typedef std::vector< art::Ptr<anab::T0> >           T0Vector;
+typedef std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> >  MetadataVector;
 
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ShowerVector >                 PFParticlesToShowers;
@@ -52,6 +54,7 @@ typedef std::map< art::Ptr<recob::PFParticle>, SeedVector >                   PF
 typedef std::map< art::Ptr<recob::PFParticle>, VertexVector >                 PFParticlesToVertices;
 typedef std::map< art::Ptr<recob::PFParticle>, SpacePointVector >             PFParticlesToSpacePoints;
 typedef std::map< art::Ptr<recob::PFParticle>, HitVector >                    PFParticlesToHits;
+typedef std::map< art::Ptr<recob::PFParticle>, MetadataVector >               PFParticlesToMetadata;
 typedef std::map< art::Ptr<recob::Track>,      HitVector >                    TracksToHits;
 typedef std::map< art::Ptr<recob::Shower>,     HitVector >                    ShowersToHits;
 typedef std::map< art::Ptr<recob::Cluster>,    HitVector >                    ClustersToHits;
@@ -180,6 +183,17 @@ public:
      */
     static void CollectPFParticles(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
         PFParticlesToClusters &particlesToClusters);
+
+    /**
+     *  @brief Collect the reconstructed PFParticle Metadata from the ART event record
+     *
+     *  @param evt the ART event record
+     *  @param label the label for the PFParticle list in the event
+     *  @param particleVector the output vector of PFParticle objects
+     *  @param particlesToSpacePoints the output map from PFParticle to PFParticleMetadata objects
+     */
+    static void CollectPFParticleMetadata(const art::Event &evt, const std::string &label, PFParticleVector &particleVector,
+        PFParticlesToMetadata &particlesToMetadata);
 
     /**
      *  @brief Collect the reconstructed PFParticles and associated Showers from the ART event record
@@ -437,15 +451,16 @@ public:
         const DaughterMode daughterMode = kUseDaughters);
 
     /**
-     *  @brief  Get all hits associated with input spacepoints
+     *  @brief  Get all hits associated with input clusters
      *
      *  @param  evt the event containing the hits
      *  @param  label the label of the collection producing PFParticles
-     *  @param  inputSpacePoints input spacepoints
-     *  @param  associatedHits output hits associated with spacepoints
+     *  @param  input vector input of T (clusters, spacepoints)
+     *  @param  associatedHits output hits associated with T
      *  @param  indexVector vector of spacepoint indices reflecting trajectory points sorting order
      */
-    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const SpacePointVector &inputSpacePoints,
+    template <typename T>
+    static void GetAssociatedHits(const art::Event &evt, const std::string &label, const std::vector<art::Ptr<T> > &inputVector,
         HitVector &associatedHits, const pandora::IntVector* const indexVector = nullptr);
 
     /**
