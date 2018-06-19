@@ -224,6 +224,19 @@ public:
         std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> > &outputParticlesToClusters);
 
     /**
+     *  @brief  Build metadata objects from a list of input pfos
+     *
+     *  @param  event the art event
+     *  @param  pProducer the address of the producer module
+     *  @param  pfoList the input list of pfos
+     *  @param  outputParticleMetadata the output vector of PFParticleMetadata
+     *  @param  outputParticlesToMetadata the output associations between PFParticles and metadata
+     */
+    static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const pandora::PfoList &pfoList, 
+    std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > &outputParticleMetadata,
+    std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > &outputParticlesToMetadata);
+
+    /**
      *  @brief  Calculate the T0 of each pfos and add them to the output vector
      *          Create the associations between PFParticle and T0s
      *

@@ -33,6 +33,7 @@
 
 #include "larpandoracontent/LArHelpers/LArClusterHelper.h"
 #include "larpandoracontent/LArHelpers/LArPfoHelper.h"
+#include "larpandoracontent/LArControlFlow/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
 #include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
@@ -50,19 +51,21 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     settings.Validate();
     
     // Set up the output collections
-    std::unique_ptr< std::vector<recob::PFParticle> > outputParticles( new std::vector<recob::PFParticle> );
-    std::unique_ptr< std::vector<recob::Vertex> >     outputVertices( new std::vector<recob::Vertex> );
-    std::unique_ptr< std::vector<recob::Cluster> >    outputClusters( new std::vector<recob::Cluster> );
-    std::unique_ptr< std::vector<recob::SpacePoint> > outputSpacePoints( new std::vector<recob::SpacePoint> );
-    std::unique_ptr< std::vector<anab::T0> >          outputT0s( new std::vector<anab::T0> );
+    std::unique_ptr< std::vector<recob::PFParticle> >                   outputParticles( new std::vector<recob::PFParticle> );
+    std::unique_ptr< std::vector<recob::Vertex> >                       outputVertices( new std::vector<recob::Vertex> );
+    std::unique_ptr< std::vector<recob::Cluster> >                      outputClusters( new std::vector<recob::Cluster> );
+    std::unique_ptr< std::vector<recob::SpacePoint> >                   outputSpacePoints( new std::vector<recob::SpacePoint> );
+    std::unique_ptr< std::vector<anab::T0> >                            outputT0s( new std::vector<anab::T0> );
+    std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> >   outputParticleMetadata( new std::vector<larpandoraobj::PFParticleMetadata> );
 
     // Set up the output associations
-    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
-    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
-    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
-    std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> >          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
-    std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
-    std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > outputParticlesToMetadata( new art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> >                 outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> >                    outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
+    std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> >                     outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
+    std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> >                          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
+    std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> >                           outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
+    std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> >                        outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
 
     // ---
 
@@ -96,6 +99,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
     LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, pfoList, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
 
+    LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, pfoList, outputParticleMetadata, outputParticlesToMetadata);
+
     if (settings.m_shouldRunStitching)
         LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, pfoList, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
 
@@ -106,7 +111,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputSpacePoints));
     evt.put(std::move(outputClusters));
     evt.put(std::move(outputVertices));
+    evt.put(std::move(outputParticleMetadata));
 
+    evt.put(std::move(outputParticlesToMetadata));
     evt.put(std::move(outputParticlesToSpacePoints));
     evt.put(std::move(outputParticlesToClusters));
     evt.put(std::move(outputParticlesToVertices));
@@ -392,6 +399,20 @@ void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDPr
         LArPandoraOutput::AddAssociation(event, pProducer, pfoId, pfoToVerticesMap, outputParticlesToVertices);
         LArPandoraOutput::AddAssociation(event, pProducer, pfoId, pfoToThreeDHitsMap, outputParticlesToSpacePoints);
         LArPandoraOutput::AddAssociation(event, pProducer, pfoId, pfoToArtClustersMap, outputParticlesToClusters);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const pandora::PfoList &pfoList, 
+    std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > &outputParticleMetadata,
+    std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > &outputParticlesToMetadata) 
+{
+    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    {
+        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        LArPandoraOutput::AddAssociation(event, pProducer, pfoId, outputParticleMetadata->size(), outputParticlesToMetadata);
+        outputParticleMetadata->push_back(larpandoraobj::PFParticleMetadata(pPfo));
     }
 }
 
