@@ -49,6 +49,7 @@ namespace lar_pandora
 void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt)
 {
     settings.Validate();
+    const std::string instanceLabel(settings.m_shouldProduceAllOutcomes ? settings.m_allOutcomesInstanceLabel : "");
    
     // Set up the output collections
     std::unique_ptr< std::vector<recob::PFParticle> >                   outputParticles( new std::vector<recob::PFParticle> );
@@ -94,40 +95,38 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
     // Build the ART outputs from the pandora objects
     LArPandoraOutput::BuildVertices(vertexList, outputVertices);
-    LArPandoraOutput::BuildSpacePoints(evt, settings.m_pProducer, threeDHitList, pandoraHitToArtHitMap, outputSpacePoints, outputSpacePointsToHits);
+    LArPandoraOutput::BuildSpacePoints(evt, settings.m_pProducer, instanceLabel, threeDHitList, pandoraHitToArtHitMap, outputSpacePoints, outputSpacePointsToHits);
 
     IdToIdVectorMap pfoToArtClustersMap;
-    LArPandoraOutput::BuildClusters(evt, settings.m_pProducer, clusterList, pandoraHitToArtHitMap, pfoToClustersMap, outputClusters, outputClustersToHits, pfoToArtClustersMap);
+    LArPandoraOutput::BuildClusters(evt, settings.m_pProducer, instanceLabel, clusterList, pandoraHitToArtHitMap, pfoToClustersMap, outputClusters, outputClustersToHits, pfoToArtClustersMap);
 
-    LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, pfoList, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
+    LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, instanceLabel, pfoList, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
 
-    LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, pfoList, outputParticleMetadata, outputParticlesToMetadata);
+    LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, instanceLabel, pfoList, outputParticleMetadata, outputParticlesToMetadata);
 
     if (settings.m_shouldRunStitching)
-        LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, pfoList, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
+        LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoList, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
 
     // ---
 
     // Add the outputs to the event
-    const std::string instanceName(settings.m_shouldProduceAllOutcomes ? settings.m_allOutcomesInstanceLabel : "");
+    evt.put(std::move(outputParticles), instanceLabel);
+    evt.put(std::move(outputSpacePoints), instanceLabel);
+    evt.put(std::move(outputClusters), instanceLabel);
+    evt.put(std::move(outputVertices), instanceLabel);
+    evt.put(std::move(outputParticleMetadata), instanceLabel);
 
-    evt.put(std::move(outputParticles), instanceName);
-    evt.put(std::move(outputSpacePoints), instanceName);
-    evt.put(std::move(outputClusters), instanceName);
-    evt.put(std::move(outputVertices), instanceName);
-    evt.put(std::move(outputParticleMetadata), instanceName);
-
-    evt.put(std::move(outputParticlesToMetadata), instanceName);
-    evt.put(std::move(outputParticlesToSpacePoints), instanceName);
-    evt.put(std::move(outputParticlesToClusters), instanceName);
-    evt.put(std::move(outputParticlesToVertices), instanceName);
-    evt.put(std::move(outputSpacePointsToHits), instanceName);
-    evt.put(std::move(outputClustersToHits), instanceName);
+    evt.put(std::move(outputParticlesToMetadata), instanceLabel);
+    evt.put(std::move(outputParticlesToSpacePoints), instanceLabel);
+    evt.put(std::move(outputParticlesToClusters), instanceLabel);
+    evt.put(std::move(outputParticlesToVertices), instanceLabel);
+    evt.put(std::move(outputSpacePointsToHits), instanceLabel);
+    evt.put(std::move(outputClustersToHits), instanceLabel);
 
     if (settings.m_shouldRunStitching)
     {
-        evt.put(std::move(outputT0s), instanceName);
-        evt.put(std::move(outputParticlesToT0s), instanceName);
+        evt.put(std::move(outputT0s), instanceLabel);
+        evt.put(std::move(outputParticlesToT0s), instanceLabel);
     }
 }
 
@@ -432,7 +431,7 @@ void LArPandoraOutput::BuildVertices(const pandora::VertexList &vertexList, std:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildSpacePoints(const art::Event &event, const art::EDProducer *const pProducer, 
+void LArPandoraOutput::BuildSpacePoints(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, 
     const pandora::CaloHitList &threeDHitList, const CaloHitToArtHitMap &pandoraHitToArtHitMap, 
     std::unique_ptr< std::vector<recob::SpacePoint> > &outputSpacePoints,
     std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> > &outputSpacePointsToHits)
@@ -443,14 +442,14 @@ void LArPandoraOutput::BuildSpacePoints(const art::Event &event, const art::EDPr
         if (it == pandoraHitToArtHitMap.end())
             throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSpacePoints --- found a pandora hit without a corresponding art hit ";
 
-        LArPandoraOutput::AddAssociation(event, pProducer, LArPandoraOutput::GetId(pCaloHit, threeDHitList), {it->second}, outputSpacePointsToHits);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, LArPandoraOutput::GetId(pCaloHit, threeDHitList), {it->second}, outputSpacePointsToHits);
         outputSpacePoints->push_back(LArPandoraOutput::BuildSpacePoint(pCaloHit, threeDHitList));
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildClusters(const art::Event &event, const art::EDProducer *const pProducer, const pandora::ClusterList &clusterList,
+void LArPandoraOutput::BuildClusters(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::ClusterList &clusterList,
     const CaloHitToArtHitMap &pandoraHitToArtHitMap, const IdToIdVectorMap &pfoToClustersMap, 
     std::unique_ptr< std::vector<recob::Cluster> > &outputClusters, 
     std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> > &outputClustersToHits, IdToIdVectorMap &pfoToArtClustersMap)
@@ -470,7 +469,7 @@ void LArPandoraOutput::BuildClusters(const art::Event &event, const art::EDProdu
 
         for (unsigned int i = 0; i < clusters.size(); ++i)
         {
-            LArPandoraOutput::AddAssociation(event, pProducer, nextClusterId - 1, hitVectors.at(i), outputClustersToHits);
+            LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, nextClusterId - 1, hitVectors.at(i), outputClustersToHits);
             outputClusters->push_back(clusters.at(i));
         }
     }
@@ -496,7 +495,7 @@ void LArPandoraOutput::BuildClusters(const art::Event &event, const art::EDProdu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const pandora::PfoList &pfoList, 
+void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList, 
     const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, const IdToIdVectorMap &pfoToArtClustersMap,
     std::unique_ptr< std::vector<recob::PFParticle> > &outputParticles,
     std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> > &outputParticlesToVertices, 
@@ -509,29 +508,29 @@ void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDPr
        
         // Associations from PFParticle
         const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
-        LArPandoraOutput::AddAssociation(event, pProducer, pfoId, pfoToVerticesMap, outputParticlesToVertices);
-        LArPandoraOutput::AddAssociation(event, pProducer, pfoId, pfoToThreeDHitsMap, outputParticlesToSpacePoints);
-        LArPandoraOutput::AddAssociation(event, pProducer, pfoId, pfoToArtClustersMap, outputParticlesToClusters);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToVerticesMap, outputParticlesToVertices);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToThreeDHitsMap, outputParticlesToSpacePoints);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToArtClustersMap, outputParticlesToClusters);
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const pandora::PfoList &pfoList, 
+void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList, 
     std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > &outputParticleMetadata,
     std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > &outputParticlesToMetadata) 
 {
     for (const pandora::ParticleFlowObject *const pPfo : pfoList)
     {
         const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
-        LArPandoraOutput::AddAssociation(event, pProducer, pfoId, outputParticleMetadata->size(), outputParticlesToMetadata);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, outputParticleMetadata->size(), outputParticlesToMetadata);
         outputParticleMetadata->push_back(larpandoraobj::PFParticleMetadata(pPfo));
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const pandora::PfoList &pfoList, 
+void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList, 
     std::unique_ptr< std::vector<anab::T0> > &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
     std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> > &outputParticlesToT0s)
 {
@@ -541,7 +540,7 @@ void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *
         anab::T0 t0;
         if (!LArPandoraOutput::BuildT0(pPfo, pfoList, nextT0Id, pandoraHitToArtHitMap, t0)) continue;
         
-        LArPandoraOutput::AddAssociation(event, pProducer, LArPandoraOutput::GetId(pPfo, pfoList), nextT0Id - 1, outputParticlesToT0s);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, LArPandoraOutput::GetId(pPfo, pfoList), nextT0Id - 1, outputParticlesToT0s);
         outputT0s->push_back(t0);
     }
 }
