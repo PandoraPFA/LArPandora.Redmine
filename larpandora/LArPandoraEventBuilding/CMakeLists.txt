@@ -31,15 +31,17 @@ art_make(
                         art_Utilities
                         canvas
                         ${MF_MESSAGELOGGER}
-                        
                         ${FHICLCPP}
                         cetlib cetlib_except
                         ${Boost_SYSTEM_LIBRARY}
+                        ${Boost_FILESYSTEM_LIBRARY}
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
                         ${ROOT_GENVECTOR}
                         MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
           )
+
+      simple_plugin(SimpleNeutrinoId "tool" larpandora_LArPandoraEventBuilding)
 
 install_headers()
 install_fhicl()
