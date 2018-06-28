@@ -1,4 +1,5 @@
-<pandora>
+ipandora>
+    <!-- Output list management -->
     <!-- GLOBAL SETTINGS -->
     <IsMonitoringEnabled>true</IsMonitoringEnabled>
     <ShouldDisplayAlgorithmInfo>false</ShouldDisplayAlgorithmInfo>
@@ -311,6 +312,16 @@
     <algorithm type = "LArNeutrinoProperties">
         <NeutrinoPfoListName>NeutrinoParticles3D</NeutrinoPfoListName>
     </algorithm>
+
+    <!-- Track and shower building -->
+    <algorithm type = "LArTrackParticleBuilding">
+        <PfoListName>NeutrinoParticles3D</PfoListName>
+        <VertexListName>NeutrinoVertices3D</VertexListName>
+    </algorithm>
+    <algorithm type = "LArPcaShowerParticleBuilding">
+        <PfoListName>NeutrinoParticles3D</PfoListName>
+        <VertexListName>NeutrinoVertices3D</VertexListName>
+    </algorithm>  
 
     <!-- Output list management -->
     <algorithm type = "LArPostProcessing">

@@ -195,7 +195,7 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
         bool isClearCosmic(false);
         try
         {
-            isClearCosmic = pPfo->GetPropertiesMap().at("isClearCosmic");
+            isClearCosmic = pPfo->GetPropertiesMap().at("IsClearCosmic");
         }
         catch (...)
         {

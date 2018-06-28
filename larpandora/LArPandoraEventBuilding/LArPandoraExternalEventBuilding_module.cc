@@ -8,7 +8,6 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Utilities/make_tool.h"
-#include "art/Persistency/Common/PtrMaker.h"
 
 #include "canvas/Utilities/InputTag.h"
 
@@ -20,6 +19,7 @@
 
 #include "larpandora/LArPandoraEventBuilding/Slice.h"
 #include "larpandora/LArPandoraEventBuilding/NeutrinoIdBaseTool.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraEvent.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
@@ -48,7 +48,7 @@ private:
      *  @param  evt the ART event
      *  @param  particlesToMetadata the output mapping from PFParticles to their metadata
      */
-    void CollectPFParticles(const art::Event &evt, PFParticleToMetadata &particlesToMetadata) const;
+    void CollectPFParticles(const art::Event &evt, PFParticleToMetadata &particlesToMetadata, PFParticleVector &particles) const;
 
     /**
      *  @brief  Build mapping from ID to PFParticle for fast navigation through the hierarchy
@@ -77,15 +77,15 @@ private:
     void CollectSlices(const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, SliceVector &slices) const;
 
     /**
-     *  @brief  Get the consolidated collection of particles based on the slice IDs
+     *  @brief  Get the consolidated collection of particles based on the slice ids
      *
-     *  @param  evt the ART event
+     *  @param  allParticles input vector of all particles
      *  @param  clearCosmics the input vector of clear cosmic ray muons
      *  @param  slices the input vector of slices
-     *  @param  shouldKeepVector output vector of booleans for each input PFParticle - true if the particle should be kept in the consolidated output
-     *  @param  particlesToShouldKeep the output association from PFParticle to a bool which is true if the particles should be kept in the consolidated output
+     *  @param  consolidatedParticles the output vector of particles to include in the consolidated output 
      */
-    void CollectConsolidatedParticles(const art::Event &evt, const PFParticleVector &clearCosmics, const SliceVector &slices, std::unique_ptr<std::vector<bool> > &shouldKeepVector, std::unique_ptr<art::Assns<recob::PFParticle, bool> > &particlesToShouldKeep) const;
+    void CollectConsolidatedParticles(const PFParticleVector &allParticles, const PFParticleVector &clearCosmics, const SliceVector &slices, PFParticleVector &consolidatedParticles) const;
+
     /**
      *  @brief  Query a metadata object for a given key and return the corresponding value
      *
@@ -96,8 +96,13 @@ private:
      */
     float GetMetadataValue(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata, const std::string &key) const;
 
-    art::InputTag                       m_pandoraTag;        ///< The input tag for the pandora producer
-    std::unique_ptr<NeutrinoIdBaseTool> m_neutrinoIdTool;    ///< The neutrino id tool
+    std::string                         m_inputProducerLabel;  ///< Label for the Pandora instance that produced the collections we want to consolidated
+    std::string                         m_trackProducerLabel;  ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
+    std::string                         m_showerProducerLabel; ///< Label for the shower producer using the Pandora instance that produced the collections we want to consolidate
+    std::string                         m_hitProducerLabel;    ///< Label for the hit producer that was used as input to the Pandora instance specified
+    bool                                m_shouldProduceT0s;    ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
+    art::InputTag                       m_pandoraTag;          ///< The input tag for the pandora producer
+    std::unique_ptr<NeutrinoIdBaseTool> m_neutrinoIdTool;      ///< The neutrino id tool
 };
 
 DEFINE_ART_MODULE(LArPandoraExternalEventBuilding)
@@ -113,19 +118,50 @@ namespace lar_pandora
 {
 
 LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::ParameterSet const &pset) :
-    m_pandoraTag(art::InputTag(pset.get<std::string>("PandoraLabel"))),
+    m_inputProducerLabel(pset.get<std::string>("InputProducerLabel")),
+    m_trackProducerLabel(pset.get<std::string>("TrackProducerLabel")),
+    m_showerProducerLabel(pset.get<std::string>("ShowerProducerLabel")),
+    m_hitProducerLabel(pset.get<std::string>("HitProducerLabel")),
+    m_shouldProduceT0s(pset.get<bool>("ShouldProduceT0s", false)),
+    m_pandoraTag(art::InputTag(m_inputProducerLabel)),
     m_neutrinoIdTool(art::make_tool<NeutrinoIdBaseTool>(pset.get<fhicl::ParameterSet>("NeutrinoIdTool")))
 {
-    produces<std::vector<bool> >();
-    produces<art::Assns<recob::PFParticle, bool> >();
+    produces< std::vector<recob::PFParticle> >();
+    produces< std::vector<recob::SpacePoint> >();
+    produces< std::vector<recob::Cluster> >();
+    produces< std::vector<recob::Vertex> >();
+    produces< std::vector<recob::Track> >(); 
+    produces< std::vector<recob::Shower> >();
+    produces< std::vector<recob::PCAxis> >();
+    produces< std::vector<larpandoraobj::PFParticleMetadata> >();
+
+    produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
+    produces< art::Assns<recob::PFParticle, recob::Cluster> >();
+    produces< art::Assns<recob::PFParticle, recob::Vertex> >();
+    produces< art::Assns<recob::PFParticle, recob::Track> >();
+    produces< art::Assns<recob::PFParticle, recob::Shower> >();
+    produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
+    produces< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> >();
+    produces< art::Assns<recob::Track, recob::Hit> >();
+    produces< art::Assns<recob::Shower, recob::Hit> >();
+    produces< art::Assns<recob::Shower, recob::PCAxis> >();
+    produces< art::Assns<recob::SpacePoint, recob::Hit> >();
+    produces< art::Assns<recob::Cluster, recob::Hit> >();
+
+    if (m_shouldProduceT0s)
+    {
+        produces< std::vector<anab::T0> >();
+        produces< art::Assns<recob::PFParticle, anab::T0> >();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraExternalEventBuilding::produce(art::Event &evt)
 {
+    PFParticleVector particles;
     PFParticleToMetadata particlesToMetadata;
-    this->CollectPFParticles(evt, particlesToMetadata);
+    this->CollectPFParticles(evt, particlesToMetadata, particles);
 
     PFParticleMap particleMap;
     this->BuildPFParticleMap(particlesToMetadata, particleMap);
@@ -138,24 +174,35 @@ void LArPandoraExternalEventBuilding::produce(art::Event &evt)
     
     m_neutrinoIdTool->ClassifySlices(slices);
 
-    std::unique_ptr<std::vector<bool> > shouldKeepVector(new std::vector<bool>);
-    std::unique_ptr<art::Assns<recob::PFParticle, bool> > particlesToShouldKeep(new art::Assns<recob::PFParticle, bool>);
-    this->CollectConsolidatedParticles(evt, clearCosmics, slices, shouldKeepVector, particlesToShouldKeep);
+    PFParticleVector consolidatedParticles;
+    this->CollectConsolidatedParticles(particles, clearCosmics, slices, consolidatedParticles);
 
-    evt.put(std::move(shouldKeepVector));
-    evt.put(std::move(particlesToShouldKeep));
+    const LArPandoraEvent::Labels labels(m_inputProducerLabel, m_trackProducerLabel, m_showerProducerLabel, m_hitProducerLabel); 
+    const LArPandoraEvent consolidatedEvent(LArPandoraEvent(this, &evt, labels, m_shouldProduceT0s), consolidatedParticles);
+
+    consolidatedEvent.WriteToEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraExternalEventBuilding::CollectPFParticles(const art::Event &evt, PFParticleToMetadata &particlesToMetadata) const
+void LArPandoraExternalEventBuilding::CollectPFParticles(const art::Event &evt, PFParticleToMetadata &particlesToMetadata, PFParticleVector &particles) const
 {
-    art::Handle<art::Assns<recob::PFParticle,larpandoraobj::PFParticleMetadata,void> > particleMetadataAssn;
-    evt.getByLabel(m_pandoraTag, particleMetadataAssn);
-   
-    for (const auto &entry : *particleMetadataAssn)
+    art::Handle<std::vector<recob::PFParticle> > pfParticleHandle;
+    evt.getByLabel(m_pandoraTag, pfParticleHandle);
+
+    art::FindManyP<larpandoraobj::PFParticleMetadata> pfParticleMetadataAssoc(pfParticleHandle, evt, m_pandoraTag);
+  
+    for (unsigned int i = 0; i < pfParticleHandle->size(); ++i)
     {
-        if (!particlesToMetadata.insert(PFParticleToMetadata::value_type(entry.first, entry.second)).second)
+        const art::Ptr<recob::PFParticle> part(pfParticleHandle, i);
+        const auto &metadata(pfParticleMetadataAssoc.at(part.key()));
+
+        particles.push_back(part);
+
+        if (metadata.size() != 1) 
+            throw cet::exception("LArPandora") << " LArPandoraExternalEventBuilding::CollectPFParticles -- Found a PFParticle without exactly 1 metadata associated." << std::endl;
+
+        if (!particlesToMetadata.insert(PFParticleToMetadata::value_type(part, metadata.front())).second)
             throw cet::exception("LArPandoraExternalEventBuilding") << "Repeated PFParticles" << std::endl;
     }
 }
@@ -281,30 +328,23 @@ float LArPandoraExternalEventBuilding::GetMetadataValue(const art::Ptr<larpandor
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
-void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const art::Event &evt, const PFParticleVector &clearCosmics, const SliceVector &slices, std::unique_ptr<std::vector<bool> > &shouldKeepVector, std::unique_ptr<art::Assns<recob::PFParticle, bool> > &particlesToShouldKeep) const
+
+void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const PFParticleVector &allParticles, const PFParticleVector &clearCosmics, const SliceVector &slices, PFParticleVector &consolidatedParticles) const
 {
-    // Collect the chosen particles into a single vector
-    PFParticleVector chosenParticles;
-    chosenParticles.insert(chosenParticles.end(), clearCosmics.begin(), clearCosmics.end());
+    PFParticleVector collectedParticles;
+    collectedParticles.insert(collectedParticles.end(), clearCosmics.begin(), clearCosmics.end());
 
     for (const auto &slice : slices)
     {
         const PFParticleVector &particles(slice.IsTaggedAsNeutrino() ? slice.GetNeutrinoHypothesis() : slice.GetCosmicRayHypothesis());
-        chosenParticles.insert(chosenParticles.end(), particles.begin(), particles.end());
+        collectedParticles.insert(collectedParticles.end(), particles.begin(), particles.end());
     }
-    
-    // Get the full list of PFParticles
-    art::Handle<std::vector<recob::PFParticle> > particleHandle;
-    evt.getByLabel(m_pandoraTag, particleHandle);
-    
-    // Produce the output association to booleans
-    const art::PtrMaker<bool> makePtr(evt, *this);
-    for (unsigned int i = 0; i < particleHandle->size(); ++i)
+
+    // ATTN This is required to ensure that the particles remain in order!
+    for (const auto &part : allParticles)
     {
-        const art::Ptr<recob::PFParticle> part(particleHandle, i);
-        shouldKeepVector->push_back(std::find(chosenParticles.begin(), chosenParticles.end(), part) != chosenParticles.end());
-        particlesToShouldKeep->addSingle(part, makePtr(i));
+        if (std::find(collectedParticles.begin(), collectedParticles.end(), part) != collectedParticles.end())
+            consolidatedParticles.push_back(part);
     }
 }
 

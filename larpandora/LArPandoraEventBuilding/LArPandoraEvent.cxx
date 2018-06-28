@@ -36,6 +36,7 @@ LArPandoraEvent::LArPandoraEvent(const LArPandoraEvent &event, const PFParticleV
     m_hits(event.m_hits)
 {
     m_pfParticles = selectedPFParticles;
+
     this->FillPFParticleToOriginIdMap(event.m_pfParticleToOriginIdMap);
 
     for (art::Ptr< recob::PFParticle > part : selectedPFParticles)
