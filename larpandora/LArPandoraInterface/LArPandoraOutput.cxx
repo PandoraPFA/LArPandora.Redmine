@@ -140,52 +140,52 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pMasterPandora, pParentPfoList));
 
     // Identify the pandora worker instances by their name
-    const pandora::Pandora *pSliceWorker(nullptr);
-    const pandora::Pandora *pNuWorker(nullptr);
-    const pandora::Pandora *pCRWorker(nullptr);
+    const pandora::Pandora *pSlicingWorker(nullptr);
+    const pandora::Pandora *pSliceNuWorker(nullptr);
+    const pandora::Pandora *pSliceCRWorker(nullptr);
 
     for (const pandora::Pandora *const pPandora : MultiPandoraApi::GetDaughterPandoraInstanceList(pMasterPandora))
     {
         const std::string name(pPandora->GetName());
 
-        if (name == "SliceWorker")
+        if (name == "SlicingWorker")
         {
-            if (pSliceWorker)
+            if (pSlicingWorker)
                 throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- multiple slice worker instances! ";
 
-            pSliceWorker = pPandora;
+            pSlicingWorker = pPandora;
         }
-        else if (name == "NeutrinoWorker")
+        else if (name == "SliceNuWorker")
         {
-            if (pNuWorker)
+            if (pSliceNuWorker)
                 throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- multiple neutrino slice worker instances! ";
 
-            pNuWorker = pPandora;
+            pSliceNuWorker = pPandora;
         }
-        else if (name == "CosmicRayWorker")
+        else if (name == "SliceCRWorker")
         {
-            if (pCRWorker)
+            if (pSliceCRWorker)
                 throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- multiple cosmic-ray slice worker instances! ";
 
-            pCRWorker = pPandora;
+            pSliceCRWorker = pPandora;
         }
     }
 
-    if (!pSliceWorker || !pNuWorker || !pCRWorker)
+    if (!pSlicingWorker || !pSliceNuWorker || !pSliceCRWorker)
         throw cet::exception("LArPandora") << " LArPandoraOutput::CollectAllPfoOutcomes--- Can't produce all outcomes for a non-consolidated pandora producer ";
 
     // Collect slices under bothe reconstruction outcomes
     const pandora::PfoList *pSlicePfoList(nullptr);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pSliceWorker, pSlicePfoList));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pSlicingWorker, pSlicePfoList));
 
     for (unsigned int sliceIndex = 0; sliceIndex < pSlicePfoList->size(); ++sliceIndex)
     {
         const pandora::PfoList *pNuPfoList(nullptr);
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pNuWorker, "NeutrinoParticles3D" + std::to_string(sliceIndex), pNuPfoList));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pSliceNuWorker, "NeutrinoParticles3D" + std::to_string(sliceIndex), pNuPfoList));
         collectedPfos.insert(collectedPfos.end(), pNuPfoList->begin(), pNuPfoList->end());
 
         const pandora::PfoList *pCRPfoList(nullptr);
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pCRWorker, "MuonParticles3D" + std::to_string(sliceIndex), pCRPfoList));
+        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pSliceCRWorker, "MuonParticles3D" + std::to_string(sliceIndex), pCRPfoList));
         collectedPfos.insert(collectedPfos.end(), pCRPfoList->begin(), pCRPfoList->end());
     }
 
@@ -833,26 +833,6 @@ void LArPandoraOutput::Settings::Validate() const
     
     if (m_allOutcomesInstanceLabel.empty())
         throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- all outcomes instance label not set ";
-
-    /*
-    if (m_cosmicSliceWorkerName.empty()) 
-        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- cosmic slice worker name not set ";
-    
-    if (m_cosmicPfoListName.empty()) 
-        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- cosmic pfo list name not set ";
-    
-    if (m_neutrinoSliceWorkerName.empty()) 
-        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- neutrino slice worker name not set ";
-    
-    if (m_neutrinoPfoListName.empty()) 
-        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- neutrino pfo list name not set ";
-    
-    if (m_slicingWorkerName.empty()) 
-        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- slicing worker name not set ";
-    
-    if (m_slicePfoListName.empty()) 
-        throw cet::exception("LArPandora") << " LArPandoraOutput::Settings::Validate --- slice pfo list name not set ";
-    */
 }
 
 } // namespace lar_pandora
