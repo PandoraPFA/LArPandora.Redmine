@@ -234,32 +234,17 @@ pandora::VertexList LArPandoraOutput::CollectVertices(const pandora::PfoList &pf
 
     for (const pandora::ParticleFlowObject *const pPfo : pfoList)
     {
-        // Get the pfo ID and set up the map entry
-        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
-        if (!pfoToVerticesMap.insert(IdToIdVectorMap::value_type(pfoId, {})).second)
-            throw cet::exception("LArPandora") << " LArPandoraOutput::CollectVertices --- repeated pfos in input list ";
-
-        // Ensure the pfo has exactly one vertex
-        if (pPfo->GetVertexList().empty()) continue;
-
-        if (pPfo->GetVertexList().size() != 1)
-            throw cet::exception("LArPandora") << " LArPandoraOutput::CollectVertices --- this particle has multiple interaction vertices ";
-
-        const pandora::Vertex *const pVertex(pPfo->GetVertexList().front());
+        const pandora::Vertex *const pVertex(lar_content::LArPfoHelper::GetVertex(pPfo));
 
         // Get the vertex ID and add it to the vertex list if required
-        size_t vertexId(vertexList.size());
-        try
-        {
-            vertexId = LArPandoraOutput::GetId(pVertex, vertexList);
-        }
-        catch (const cet::exception &)
-        {
-            // Vertex doesn't yet exist
+        const bool isInList(std::find(vertexList.begin(), vertexList.end(), pVertex) != vertexList.end());
+        const size_t vertexId(isInList ? LArPandoraOutput::GetId(pVertex, vertexList) : vertexList.size());
+        
+        if (!isInList)
             vertexList.push_back(pVertex);
-        }
 
-        pfoToVerticesMap.at(pfoId).push_back(vertexId);
+        if (!pfoToVerticesMap.insert(IdToIdVectorMap::value_type(LArPandoraOutput::GetId(pPfo, pfoList), {vertexId})).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::CollectVertices --- repeated pfos in input list ";
     }
 
     return vertexList;
@@ -273,23 +258,19 @@ pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoList &p
 
     for (const pandora::ParticleFlowObject *const pPfo : pfoList)
     {
-        // Get the pfo ID and set up the map entry
-        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
-        if (!pfoToClustersMap.insert(IdToIdVectorMap::value_type(pfoId, {})).second)
+        // Get the sorted list of clusters from the pfo
+        pandora::ClusterList clusters;
+        lar_content::LArPfoHelper::GetTwoDClusterList(pPfo, clusters);
+        clusters.sort(lar_content::LArClusterHelper::SortByNHits);
+
+        // Get incrementing id's for each cluster
+        IdVector clusterIds(clusters.size());
+        std::iota(clusterIds.begin(), clusterIds.end(), clusterList.size());
+        
+        clusterList.insert(clusterList.end(), clusters.begin(), clusters.end());
+
+        if (!pfoToClustersMap.insert(IdToIdVectorMap::value_type(LArPandoraOutput::GetId(pPfo, pfoList), clusterIds)).second)
             throw cet::exception("LArPandora") << " LArPandoraOutput::CollectClusters --- repeated pfos in input list ";
-
-        // Get the sorted list of clusters associated with the pfo
-        pandora::ClusterVector sortedClusters(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
-        std::sort(sortedClusters.begin(), sortedClusters.end(), lar_content::LArClusterHelper::SortByNHits);
-
-        for (const pandora::Cluster *const pCluster : sortedClusters)
-        {
-            if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
-                continue;
-
-            pfoToClustersMap.at(pfoId).push_back(clusterList.size());
-            clusterList.push_back(pCluster);
-        }
     }
 
     return clusterList;
@@ -325,7 +306,7 @@ pandora::CaloHitList LArPandoraOutput::Collect3DHits(const pandora::PfoList &pfo
 
         for (const pandora::CaloHit *const pCaloHit3D : sorted3DHits)
         {
-            if (pandora::TPC_3D != pCaloHit3D->GetHitType())
+            if (pandora::TPC_3D != pCaloHit3D->GetHitType()) // TODO decide if this is required, or should I just insert them?
                 throw cet::exception("LArPandora") << " LArPandoraOutput::Collect3DHits --- found a 2D hit in a 3D cluster";
 
             pfoToThreeDHitsMap.at(pfoId).push_back(caloHitList.size());
@@ -372,8 +353,10 @@ void LArPandoraOutput::GetPandoraToArtHitMap(const pandora::ClusterList &cluster
 
 art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, const pandora::CaloHit *const pCaloHit)
 {
-    // ATTN The CaloHit can come from the master pandora instance (depth = 0) or one of its daughers (depth = 1).
-    //      Here we keepy trying to access the ART hit increasing the depth step-by-step
+    //  TODO make this less evil
+
+    // ATTN The CaloHit can come from the primary pandora instance (depth = 0) or one of its daughers (depth = 1).
+    //      Here we keep trying to access the ART hit increasing the depth step-by-step
     for (unsigned int depth = 0, maxDepth = 2; depth < maxDepth; ++depth)
     {
         art::Ptr<recob::Hit> artHit;

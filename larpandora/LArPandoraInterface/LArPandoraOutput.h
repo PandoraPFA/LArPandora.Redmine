@@ -30,7 +30,8 @@ namespace lar_pandora
 class LArPandoraOutput
 {
 public:
-    typedef std::map<size_t, std::vector<size_t> > IdToIdVectorMap;
+    typedef std::vector<size_t> IdVector;
+    typedef std::map<size_t, IdVector> IdToIdVectorMap;
     typedef std::map<const pandora::CaloHit *, art::Ptr<recob::Hit> > CaloHitToArtHitMap;
   
     typedef std::unique_ptr< std::vector<recob::PFParticle> > PFParticleCollection;
