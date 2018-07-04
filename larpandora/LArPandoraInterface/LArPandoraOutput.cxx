@@ -361,32 +361,23 @@ art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, cons
     {
         art::Ptr<recob::Hit> artHit;
 
-        try
-        {
-            // Navigate to the hit address in the pandora master instance (assuming the depth is correct)
-            const pandora::CaloHit *pParentCaloHit = pCaloHit;
-            for (unsigned int i = 0; i < depth; ++i)
-                pParentCaloHit = static_cast<const pandora::CaloHit *>(pCaloHit->GetParentAddress());
+        // Navigate to the hit address in the pandora master instance (assuming the depth is correct)
+        const pandora::CaloHit *pParentCaloHit = pCaloHit;
+        for (unsigned int i = 0; i < depth; ++i)
+            pParentCaloHit = static_cast<const pandora::CaloHit *>(pCaloHit->GetParentAddress());
 
-            // Attempt to find the mapping from the "parent" calo hit to the ART hit
-            const void *const pHitAddress(pParentCaloHit->GetParentAddress());
-            const intptr_t hitID_temp((intptr_t)(pHitAddress));
-            const int hitID((int)(hitID_temp));
-        
-            IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
-        
-            // If there is no such mapping from "parent" calo hit to the ART hit, then increase the depth and try again!
-            if (idToHitMap.end() == artIter)
-                continue;
-
-            artHit = artIter->second;
-        }
-        catch (...)
-        {
+        // Attempt to find the mapping from the "parent" calo hit to the ART hit
+        const void *const pHitAddress(pParentCaloHit->GetParentAddress());
+        const intptr_t hitID_temp((intptr_t)(pHitAddress));
+        const int hitID((int)(hitID_temp));
+    
+        IdToHitMap::const_iterator artIter = idToHitMap.find(hitID);
+    
+        // If there is no such mapping from "parent" calo hit to the ART hit, then increase the depth and try again!
+        if (idToHitMap.end() == artIter)
             continue;
-        }
 
-        return artHit;
+        return artIter->second;
     }
      
     throw cet::exception("LArPandora") << " LArPandoraOutput::GetHit --- found a Pandora hit without a parent ART hit ";
