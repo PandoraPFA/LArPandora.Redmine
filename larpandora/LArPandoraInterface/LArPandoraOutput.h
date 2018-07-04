@@ -32,6 +32,22 @@ class LArPandoraOutput
 public:
     typedef std::map<size_t, std::vector<size_t> > IdToIdVectorMap;
     typedef std::map<const pandora::CaloHit *, art::Ptr<recob::Hit> > CaloHitToArtHitMap;
+  
+    typedef std::unique_ptr< std::vector<recob::PFParticle> > PFParticleCollection;
+    typedef std::unique_ptr< std::vector<recob::Vertex> > VertexCollection;
+    typedef std::unique_ptr< std::vector<recob::Cluster> > ClusterCollection;
+    typedef std::unique_ptr< std::vector<recob::SpacePoint> > SpacePointCollection;
+    typedef std::unique_ptr< std::vector<anab::T0> > T0Collection;
+    typedef std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > PFParticleMetadataCollection;
+
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > PFParticleToMetadataCollection;
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > PFParticleToSpacePointCollection;
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> > PFParticleToClusterCollection;
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> > PFParticleToVertexCollection;
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> > PFParticleToT0Collection;
+
+    typedef std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> > ClusterToHitCollection;
+    typedef std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> > SpacePointToHitCollection;
 
     /**
      *  @brief  Settings class
@@ -169,7 +185,7 @@ private:
      *  @param  vertexList the input list of pandora vertices
      *  @param  outputVertices the output vector of ART vertices
      */
-    static void BuildVertices(const pandora::VertexList &vertexList, std::unique_ptr< std::vector<recob::Vertex> > &outputVertices);
+    static void BuildVertices(const pandora::VertexList &vertexList, VertexCollection &outputVertices);
 
     /**
      *  @brief  Convert pandora 3D hits to ART spacepoints and add them to the output vector
@@ -182,9 +198,9 @@ private:
      *  @param  outputSpacePoints the output vector of spacepoints
      *  @param  outputSpacePointsToHits the output associations between spacepoints and hits
      */
-    static void BuildSpacePoints(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::CaloHitList &threeDHitList,
-        const CaloHitToArtHitMap &pandoraHitToArtHitMap, std::unique_ptr< std::vector<recob::SpacePoint> > &outputSpacePoints,
-        std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> > &outputSpacePointsToHits);
+    static void BuildSpacePoints(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const pandora::CaloHitList &threeDHitList, const CaloHitToArtHitMap &pandoraHitToArtHitMap, SpacePointCollection &outputSpacePoints,
+        SpacePointToHitCollection &outputSpacePointsToHits);
 
     /**
      *  @brief  Convert pandora 2D clusters to ART clusters and add them to the output vector
@@ -200,10 +216,9 @@ private:
      *  @param  outputClustersToHits the output associations between clusters and hits
      *  @param  pfoToArtClustersMap the output mapping from pfo ID to art cluster ID
      */
-    static void BuildClusters(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::ClusterList &clusterList,
-        const CaloHitToArtHitMap &pandoraHitToArtHitMap, const IdToIdVectorMap &pfoToClustersMap,
-        std::unique_ptr< std::vector<recob::Cluster> > &outputClusters, 
-        std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> > &outputClustersToHits, IdToIdVectorMap &pfoToArtClustersMap);
+    static void BuildClusters(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const pandora::ClusterList &clusterList, const CaloHitToArtHitMap &pandoraHitToArtHitMap, const IdToIdVectorMap &pfoToClustersMap,
+        ClusterCollection &outputClusters, ClusterToHitCollection &outputClustersToHits, IdToIdVectorMap &pfoToArtClustersMap);
 
     /**
      *  @brief  Convert between pfos and PFParticles and add them to the output vector
@@ -220,12 +235,11 @@ private:
      *  @param  outputParticlesToSpacePoints the output associations between PFParticles and spacepoints
      *  @param  outputParticlesToClusters the output associations between PFParticles and clusters
      */
-    static void BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList,
-        const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, const IdToIdVectorMap &pfoToArtClustersMap,
-        std::unique_ptr< std::vector<recob::PFParticle> > &outputParticles,
-        std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> > &outputParticlesToVertices,
-        std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > &outputParticlesToSpacePoints,
-        std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> > &outputParticlesToClusters);
+    static void BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const pandora::PfoList &pfoList, const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, 
+        const IdToIdVectorMap &pfoToArtClustersMap, PFParticleCollection &outputParticles, 
+        PFParticleToVertexCollection &outputParticlesToVertices, PFParticleToSpacePointCollection &outputParticlesToSpacePoints,
+        PFParticleToClusterCollection &outputParticlesToClusters);
 
     /**
      *  @brief  Build metadata objects from a list of input pfos
@@ -236,9 +250,9 @@ private:
      *  @param  outputParticleMetadata the output vector of PFParticleMetadata
      *  @param  outputParticlesToMetadata the output associations between PFParticles and metadata
      */
-    static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList, 
-    std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > &outputParticleMetadata,
-    std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > &outputParticlesToMetadata);
+    static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, 
+        const pandora::PfoList &pfoList, PFParticleMetadataCollection &outputParticleMetadata,
+        PFParticleToMetadataCollection &outputParticlesToMetadata);
 
     /**
      *  @brief  Calculate the T0 of each pfos and add them to the output vector
@@ -251,9 +265,9 @@ private:
      *  @param  pandoraHitToArtHitMap the input mapping from pandora hits to ART hits
      *  @param  outputParticlesToT0s the output associations between PFParticles and T0s
      */
-    static void BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList,
-        std::unique_ptr< std::vector<anab::T0> > &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
-        std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> > &outputParticlesToT0s);
+    static void BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const pandora::PfoList &pfoList, T0Collection &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
+        PFParticleToT0Collection &outputParticlesToT0s);
 
     /**
      *  @brief  Convert from a pandora vertex to an ART vertex
@@ -312,7 +326,8 @@ private:
      *  If you don't know which algorithm to pick, StandardClusterParamsAlg is a good default.
      *  The hits that are isolated (that is, present in isolatedHits) are not fed to the cluster parameter algorithms.
      */
-    static recob::Cluster BuildCluster(const size_t id, const HitVector &hitVector, const HitList &isolatedHits, cluster::ClusterParamsAlgBase &algo);
+    static recob::Cluster BuildCluster(const size_t id, const HitVector &hitVector, const HitList &isolatedHits,
+        cluster::ClusterParamsAlgBase &algo);
     
     /**
      *  @brief  Convert from a pfo to and ART PFParticle
@@ -335,7 +350,8 @@ private:
      *
      *  @return if a T0 was produced (calculated from the stitching hit shift distance)
      */
-    static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList, size_t &nextId, const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0);
+    static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList, size_t &nextId,
+        const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0);
     
     /**
      *  @brief  Convert X0 correction into T0 correction
