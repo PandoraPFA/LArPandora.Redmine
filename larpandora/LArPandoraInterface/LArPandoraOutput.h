@@ -69,20 +69,20 @@ private:
     /**
      *  @brief  Collect the current pfos (including all downstream pfos) from the master pandora instance
      *
-     *  @param  pMasterPandora address of master pandora instance
+     *  @param  pPrimaryPandora address of master pandora instance
      *
      *  @return a sorted list of all pfos to convert to ART PFParticles
      */
-    static pandora::PfoList CollectPfos(const pandora::Pandora *const pMasterPandora);
+    static pandora::PfoList CollectPfos(const pandora::Pandora *const pPrimaryPandora);
     
     /**
      *  @brief  Collect the pfos (including all downstream pfos) from the master and daughter pandora instances
      *
-     *  @param  pMasterPandora address of master pandora instance
+     *  @param  pPrimaryPandora address of master pandora instance
      *
      *  @return a sorted list of all pfos to convert to ART PFParticles
      */
-    static pandora::PfoList CollectAllPfoOutcomes(const pandora::Pandora *const pMasterPandora);
+    static pandora::PfoList CollectAllPfoOutcomes(const pandora::Pandora *const pPrimaryPandora);
 
     /**
      *  @brief  Collect a sorted list of all downstream pfos of an input list of parent
@@ -357,7 +357,8 @@ private:
      *  @param  association the output association to update
      */
     template <typename A, typename B>
-    static void AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const size_t idA, const size_t idB, std::unique_ptr< art::Assns<A, B> > &association);
+    static void AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const size_t idA, const size_t idB, std::unique_ptr< art::Assns<A, B> > &association);
 
     /**
      *  @brief  Add associations between input objects
@@ -369,7 +370,8 @@ private:
      *  @param  association the output association to update
      */
     template <typename A, typename B>
-    static void AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const size_t idA, const IdToIdVectorMap &aToBMap, std::unique_ptr< art::Assns<A, B> > &association);
+    static void AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const size_t idA, const IdToIdVectorMap &aToBMap, std::unique_ptr< art::Assns<A, B> > &association);
 
     /**
      *  @brief  Add associations between input objects
@@ -381,7 +383,8 @@ private:
      *  @param  association the output association to update
      */
     template <typename A, typename B>
-    static void AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const size_t idA, const std::vector< art::Ptr<B> > &bVector, std::unique_ptr< art::Assns<A, B> > &association);
+    static void AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
+        const size_t idA, const std::vector< art::Ptr<B> > &bVector, std::unique_ptr< art::Assns<A, B> > &association);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -400,7 +403,8 @@ inline size_t LArPandoraOutput::GetId(const T *const pT, const std::list<const T
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename A, typename B>
-inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const size_t idA, const size_t idB, std::unique_ptr< art::Assns<A, B> > &association)
+inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer,
+    const std::string &instanceLabel, const size_t idA, const size_t idB, std::unique_ptr< art::Assns<A, B> > &association)
 {
     const art::PtrMaker<A> makePtrA(event, *pProducer, instanceLabel);
     art::Ptr<A> pA(makePtrA(idA));
@@ -414,7 +418,8 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename A, typename B>
-inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const size_t idA, const IdToIdVectorMap &aToBMap, std::unique_ptr< art::Assns<A, B> > &association)
+inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer,
+    const std::string &instanceLabel, const size_t idA, const IdToIdVectorMap &aToBMap, std::unique_ptr< art::Assns<A, B> > &association)
 {
     IdToIdVectorMap::const_iterator it(aToBMap.find(idA));
     if (it == aToBMap.end())
@@ -434,7 +439,9 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename A, typename B>
-inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const size_t idA, const std::vector< art::Ptr<B> > &bVector, std::unique_ptr< art::Assns<A, B> > &association)
+inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer,
+    const std::string &instanceLabel, const size_t idA, const std::vector< art::Ptr<B> > &bVector,
+    std::unique_ptr< art::Assns<A, B> > &association)
 {
     const art::PtrMaker<A> makePtrA(event, *pProducer, instanceLabel);
     art::Ptr<A> pA(makePtrA(idA));

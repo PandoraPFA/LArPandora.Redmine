@@ -132,19 +132,19 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora *const pMasterPandora)
+pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora *const pPrimaryPandora)
 {
     pandora::PfoList collectedPfos;
         
     const pandora::PfoList *pParentPfoList(nullptr);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pMasterPandora, pParentPfoList));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPrimaryPandora, pParentPfoList));
 
     // Identify the pandora worker instances by their name
     const pandora::Pandora *pSlicingWorker(nullptr);
     const pandora::Pandora *pSliceNuWorker(nullptr);
     const pandora::Pandora *pSliceCRWorker(nullptr);
 
-    for (const pandora::Pandora *const pPandora : MultiPandoraApi::GetDaughterPandoraInstanceList(pMasterPandora))
+    for (const pandora::Pandora *const pPandora : MultiPandoraApi::GetDaughterPandoraInstanceList(pPrimaryPandora))
     {
         const std::string name(pPandora->GetName());
 
@@ -216,10 +216,10 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::PfoList LArPandoraOutput::CollectPfos(const pandora::Pandora *const pMasterPandora)
+pandora::PfoList LArPandoraOutput::CollectPfos(const pandora::Pandora *const pPrimaryPandora)
 {
     const pandora::PfoList *pParentPfoList(nullptr);
-    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pMasterPandora, pParentPfoList));
+    PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPrimaryPandora, pParentPfoList));
     
     pandora::PfoList pfoList;
     LArPandoraOutput::CollectPfos(*pParentPfoList, pfoList);
