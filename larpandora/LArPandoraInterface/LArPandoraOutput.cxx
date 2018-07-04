@@ -68,12 +68,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     ClusterToHitCollection            outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
     SpacePointToHitCollection         outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
 
-    // ---
-
     // Collect immutable lists of pandora collections that we should convert to ART format
-    // The index of an object in a list will become the ID of the ART object produced
-    // Also obtain mappings between IDs in different collections which will become associations
-
     const pandora::PfoList pfoList(settings.m_shouldProduceAllOutcomes ?
         LArPandoraOutput::CollectAllPfoOutcomes(settings.m_pPrimaryPandora) :
         LArPandoraOutput::CollectPfos(settings.m_pPrimaryPandora));
@@ -87,8 +82,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     IdToIdVectorMap pfoToThreeDHitsMap;
     const pandora::CaloHitList threeDHitList(LArPandoraOutput::Collect3DHits(pfoList, pfoToThreeDHitsMap));
 
-    // ---
-    
     // Get mapping from pandora hits to art hits
     CaloHitToArtHitMap pandoraHitToArtHitMap;
     LArPandoraOutput::GetPandoraToArtHitMap(clusterList, threeDHitList, idToHitMap, pandoraHitToArtHitMap);
@@ -106,8 +99,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
     if (settings.m_shouldRunStitching)
         LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoList, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
-
-    // ---
 
     // Add the outputs to the event
     evt.put(std::move(outputParticles), instanceLabel);
@@ -146,7 +137,7 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
 
     for (const pandora::Pandora *const pPandora : MultiPandoraApi::GetDaughterPandoraInstanceList(pPrimaryPandora))
     {
-        const std::string name(pPandora->GetName());
+        const std::string &name(pPandora->GetName());
 
         if (name == "SlicingWorker")
         {
@@ -193,14 +184,11 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
     for (const pandora::ParticleFlowObject *const pPfo : *pParentPfoList)
     {
         bool isClearCosmic(false);
-        try
-        {
-            isClearCosmic = pPfo->GetPropertiesMap().at("IsClearCosmic");
-        }
-        catch (...)
-        {
-            continue;
-        }
+
+        const auto &properties(pPfo->GetPropertiesMap());
+        const auto it(properties.find("IsClearCosmic"));
+        if (it != properties.end())
+            isClearCosmic = static_cast<bool>(std::round(pPfo->GetPropertiesMap().at("IsClearCosmic")));
 
         if (!isClearCosmic)
             continue;
