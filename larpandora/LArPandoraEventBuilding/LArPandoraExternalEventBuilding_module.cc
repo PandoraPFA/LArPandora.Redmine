@@ -61,20 +61,22 @@ private:
     /**
      *  @brief  Collect PFParticles that have been identified as clear cosmic ray muons by pandora
      *
+     *  @param  allParticles input vector of all particles
      *  @param  particlesToMetadata the input mapping from PFParticles to their metadata
      *  @param  particleMap the input mapping from ID to PFParticle
      *  @param  clearCosmics the output vector of clear cosmic rays
      */
-    void CollectClearCosmicRays(const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, PFParticleVector &clearCosmics) const;
+    void CollectClearCosmicRays(const PFParticleVector &allParticles, const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, PFParticleVector &clearCosmics) const;
 
     /**
      *  @brief  Collect slices 
      *
+     *  @param  allParticles input vector of all particles
      *  @param  particlesToMetadata the input mapping from PFParticles to their metadata
      *  @param  particleMap the input mapping from ID to PFParticle
      *  @param  slices the output vector of slices
      */
-    void CollectSlices(const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, SliceVector &slices) const;
+    void CollectSlices(const PFParticleVector &allParticles, const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, SliceVector &slices) const;
 
     /**
      *  @brief  Get the consolidated collection of particles based on the slice ids
@@ -122,7 +124,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_trackProducerLabel(pset.get<std::string>("TrackProducerLabel")),
     m_showerProducerLabel(pset.get<std::string>("ShowerProducerLabel")),
     m_hitProducerLabel(pset.get<std::string>("HitProducerLabel")),
-    m_shouldProduceT0s(pset.get<bool>("ShouldProduceT0s", false)),
+    m_shouldProduceT0s(pset.get<bool>("ShouldProduceT0s")),
     m_pandoraTag(art::InputTag(m_inputProducerLabel)),
     m_neutrinoIdTool(art::make_tool<NeutrinoIdBaseTool>(pset.get<fhicl::ParameterSet>("NeutrinoIdTool")))
 {
@@ -167,10 +169,10 @@ void LArPandoraExternalEventBuilding::produce(art::Event &evt)
     this->BuildPFParticleMap(particlesToMetadata, particleMap);
 
     PFParticleVector clearCosmics;
-    this->CollectClearCosmicRays(particlesToMetadata, particleMap, clearCosmics);
+    this->CollectClearCosmicRays(particles, particlesToMetadata, particleMap, clearCosmics);
 
     SliceVector slices;
-    this->CollectSlices(particlesToMetadata, particleMap, slices);
+    this->CollectSlices(particles, particlesToMetadata, particleMap, slices);
     
     m_neutrinoIdTool->ClassifySlices(slices);
 
@@ -220,17 +222,20 @@ void LArPandoraExternalEventBuilding::BuildPFParticleMap(const PFParticleToMetad
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraExternalEventBuilding::CollectClearCosmicRays(const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, PFParticleVector &clearCosmics) const
+void LArPandoraExternalEventBuilding::CollectClearCosmicRays(const PFParticleVector &allParticles, const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, PFParticleVector &clearCosmics) const
 {
-    for (const auto &entry : particlesToMetadata)
+    for (const auto &part : allParticles)
     {
+        // Get the parent of the particle
+        const auto parentIt(particlesToMetadata.find(LArPandoraHelper::GetParentPFParticle(particleMap, part)));
+        if (parentIt == particlesToMetadata.end())
+            throw cet::exception("LArPandoraExternalEventBuilding") << "Found PFParticle without metadata" << std::endl;
+
+        // ATTN particles without the "IsClearCosmic" parameter are not clear cosmics
         try
         {
-            // Check if the parent PFParticle is clear cosmic
-            const auto parentIterator(particlesToMetadata.find(LArPandoraHelper::GetParentPFParticle(particleMap, entry.first)));
-
-            if (static_cast<bool>(std::round(this->GetMetadataValue(parentIterator->second, "IsClearCosmic"))))
-                clearCosmics.push_back(entry.first);
+            if (static_cast<bool>(std::round(this->GetMetadataValue(parentIt->second, "IsClearCosmic"))))
+                clearCosmics.push_back(part);
         }
         catch (const cet::exception &)
         {
@@ -240,59 +245,48 @@ void LArPandoraExternalEventBuilding::CollectClearCosmicRays(const PFParticleToM
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, SliceVector &slices) const
+void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allParticles, const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, SliceVector &slices) const
 {
     std::map<unsigned int, float> nuScores;
     std::map<unsigned int, PFParticleVector> crHypotheses;
     std::map<unsigned int, PFParticleVector> nuHypotheses;
 
     // Collect the slice information
-    for (const auto &entry : particlesToMetadata)
+    for (const auto &part : allParticles)
     {
         // Find the parent PFParticle
-        const auto parentIterator(particlesToMetadata.find(LArPandoraHelper::GetParentPFParticle(particleMap, entry.first)));
-        if (parentIterator == particlesToMetadata.end())
-            throw cet::exception("LArPandoraExternalEventBuilding") << "Can't find the parent of input PFParticle" << std::endl;
-        
-        const int pdg(std::abs(parentIterator->first->PdgCode())); 
-        const bool isNeutrino(std::abs(pdg) == pandora::NU_E || std::abs(pdg) == pandora::NU_MU || std::abs(pdg) == pandora::NU_TAU);
-
-        unsigned int sliceId(std::numeric_limits<unsigned int>::max());
-        float nuScore(-std::numeric_limits<float>::max()); 
-
+        const auto parentIt(particlesToMetadata.find(LArPandoraHelper::GetParentPFParticle(particleMap, part)));
+        if (parentIt == particlesToMetadata.end())
+            throw cet::exception("LArPandoraExternalEventBuilding") << "Found PFParticle without metadata" << std::endl;
+       
+        // Skip PFParticles that are clear cosmics
         try
         {
-            sliceId = static_cast<unsigned int>(std::round(this->GetMetadataValue(parentIterator->second, "SliceIndex")));
-            nuScore = this->GetMetadataValue(parentIterator->second, "NuScore");
+            if (static_cast<bool>(std::round(this->GetMetadataValue(parentIt->second, "IsClearCosmic"))))
+                continue;
         }
-        catch (const cet::exception &exception)
+        catch (const cet::exception &)
         {
-            // The above information should only unavailable for clear cosmic PFParticles
-            try
-            {
-                if (static_cast<bool>(std::round(this->GetMetadataValue(parentIterator->second, "IsClearCosmic")))) continue;
-            }
-            catch (const cet::exception &)
-            {
-            }
-
-            throw exception;
         }
+
+        unsigned int sliceId(static_cast<unsigned int>(std::round(this->GetMetadataValue(parentIt->second, "SliceIndex"))));
+        float nuScore(this->GetMetadataValue(parentIt->second, "NuScore"));
 
         // ATTN all PFParticles in the same slice will have the same nuScore
         nuScores[sliceId] = nuScore;
 
-        if (isNeutrino)
+        if (LArPandoraHelper::IsNeutrino(parentIt->first))
         {
-            nuHypotheses[sliceId].push_back(entry.first);
+            nuHypotheses[sliceId].push_back(part);
         }
         else 
         {
-            crHypotheses[sliceId].push_back(entry.first);
+            crHypotheses[sliceId].push_back(part);
         }
     }
 
     // Produce the slices
+    // ATTN slice indices are enumerated from 1
     for (unsigned int sliceId = 1; sliceId <= nuScores.size(); ++sliceId)
     {
         // Get the neutrino score
@@ -340,7 +334,8 @@ void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const PFParti
         collectedParticles.insert(collectedParticles.end(), particles.begin(), particles.end());
     }
 
-    // ATTN This is required to ensure that the particles remain in order!
+    // ATTN the collected particles are the ones we want to output, but here we loop over all particles to ensure that the consolidated 
+    // particles have the same ordering.
     for (const auto &part : allParticles)
     {
         if (std::find(collectedParticles.begin(), collectedParticles.end(), part) != collectedParticles.end())
