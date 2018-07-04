@@ -10,10 +10,4 @@
             
     <class name="art::Assns<larpandoraobj::PFParticleMetadata, recob::PFParticle,void>"/>
     <class name="art::Wrapper<art::Assns<larpandoraobj::PFParticleMetadata, recob::PFParticle,void> >"/>
-            
-    <class name="art::Assns<recob::PFParticle,bool,void>"/>
-    <class name="art::Wrapper<art::Assns<recob::PFParticle,bool,void> >"/>
-            
-    <class name="art::Assns<bool,recob::PFParticle,void>"/>
-    <class name="art::Wrapper<art::Assns<bool,recob::PFParticle,void> >"/>
 </lcgdict>
