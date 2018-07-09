@@ -321,7 +321,7 @@
     <algorithm type = "LArPcaShowerParticleBuilding">
         <PfoListName>NeutrinoParticles3D</PfoListName>
         <VertexListName>NeutrinoVertices3D</VertexListName>
-    </algorithm>  
+    </algorithm>
 
     <!-- Output list management -->
     <algorithm type = "LArPostProcessing">
