@@ -234,6 +234,9 @@ pandora::VertexList LArPandoraOutput::CollectVertices(const pandora::PfoList &pf
 
     for (const pandora::ParticleFlowObject *const pPfo : pfoList)
     {
+        if (pPfo->GetVertexList().empty())
+            continue;
+
         const pandora::Vertex *const pVertex(lar_content::LArPfoHelper::GetVertex(pPfo));
 
         // Get the vertex ID and add it to the vertex list if required
