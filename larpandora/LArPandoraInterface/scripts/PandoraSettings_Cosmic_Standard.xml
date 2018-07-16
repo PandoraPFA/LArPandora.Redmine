@@ -312,10 +312,6 @@
         <PfoListName>MuonParticles3D</PfoListName>
         <VertexListName>CRVertices3D</VertexListName>
     </algorithm>
-    <algorithm type = "LArPcaShowerParticleBuilding">
-        <PfoListName>MuonParticles3D</PfoListName>
-        <VertexListName>CRVertices3D</VertexListName>
-    </algorithm>
 
     <!-- Output list management -->
     <algorithm type = "LArPostProcessing">
