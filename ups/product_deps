@@ -16,6 +16,8 @@ end_product_list
   
 # e15  - with gcc 6.4.0 and -std=c++14
 qualifier	larreco		larpandoracontent	notes
+e17:debug	e17:debug	e17:debug
+e17:prof	e17:prof	e17:prof
 e15:debug	e15:debug	e15:debug
 e15:prof	e15:prof	e15:prof
 c2:debug	c2:debug	c2:debug
