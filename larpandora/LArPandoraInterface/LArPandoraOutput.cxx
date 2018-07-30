@@ -469,9 +469,15 @@ void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDPr
        
         // Associations from PFParticle
         const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
-        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToVerticesMap, outputParticlesToVertices);
-        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToThreeDHitsMap, outputParticlesToSpacePoints);
-        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToArtClustersMap, outputParticlesToClusters);
+
+        if (pfoToVerticesMap.find(pfoId) != pfoToVerticesMap.end())
+            LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToVerticesMap, outputParticlesToVertices);
+
+        if (pfoToThreeDHitsMap.find(pfoId) != pfoToThreeDHitsMap.end())
+            LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToThreeDHitsMap, outputParticlesToSpacePoints);
+
+        if (pfoToArtClustersMap.find(pfoId) != pfoToArtClustersMap.end())
+            LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToArtClustersMap, outputParticlesToClusters);
     }
 }
 
