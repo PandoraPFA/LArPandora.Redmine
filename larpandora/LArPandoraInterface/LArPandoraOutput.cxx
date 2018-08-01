@@ -172,12 +172,12 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
     for (unsigned int sliceIndex = 0; sliceIndex < pSlicePfoList->size(); ++sliceIndex)
     {
         const pandora::PfoList *pNuPfoList(nullptr);
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pSliceNuWorker, "NeutrinoParticles3D" + std::to_string(sliceIndex), pNuPfoList));
-        collectedPfos.insert(collectedPfos.end(), pNuPfoList->begin(), pNuPfoList->end());
+        if (pandora::STATUS_CODE_SUCCESS == PandoraApi::GetPfoList(*pSliceNuWorker, "NeutrinoParticles3D" + std::to_string(sliceIndex), pNuPfoList))
+            collectedPfos.insert(collectedPfos.end(), pNuPfoList->begin(), pNuPfoList->end());
 
         const pandora::PfoList *pCRPfoList(nullptr);
-        PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetPfoList(*pSliceCRWorker, "MuonParticles3D" + std::to_string(sliceIndex), pCRPfoList));
-        collectedPfos.insert(collectedPfos.end(), pCRPfoList->begin(), pCRPfoList->end());
+        if (pandora::STATUS_CODE_SUCCESS == PandoraApi::GetPfoList(*pSliceCRWorker, "MuonParticles3D" + std::to_string(sliceIndex), pCRPfoList))
+            collectedPfos.insert(collectedPfos.end(), pCRPfoList->begin(), pCRPfoList->end());
     }
 
     // Collect clear cosmic-rays
