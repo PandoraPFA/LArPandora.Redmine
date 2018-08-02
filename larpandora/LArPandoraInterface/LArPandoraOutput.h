@@ -118,7 +118,7 @@ private:
      *
      *  @return the list of vertices collected
      */
-    static pandora::VertexList CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap);
+    static pandora::VertexVector CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap);
 
     /**
      *  @brief  Collect a sorted list of all 2D clusters contained in the input pfo list
@@ -189,7 +189,7 @@ private:
      *  @param  vertexList the input list of pandora vertices
      *  @param  outputVertices the output vector of ART vertices
      */
-    static void BuildVertices(const pandora::VertexList &vertexList, VertexCollection &outputVertices);
+    static void BuildVertices(const pandora::VertexVector &vertexVector, VertexCollection &outputVertices);
 
     /**
      *  @brief  Convert pandora 3D hits to ART spacepoints and add them to the output vector
@@ -277,21 +277,21 @@ private:
      *  @brief  Convert from a pandora vertex to an ART vertex
      *
      *  @param  pVertex the input vertex
-     *  @param  vertexList the input list of vertices
+     *  @param  vertexId the id of the vertex to produce
      *
      *  @param  the ART vertex
      */
-    static recob::Vertex BuildVertex(const pandora::Vertex *const pVertex, const pandora::VertexList &vertexList);
+    static recob::Vertex BuildVertex(const pandora::Vertex *const pVertex, const size_t vertexId);
     
     /**
      *  @brief  Convert from a pandora 3D hit to an ART spacepoint
      *
      *  @param  pCaloHit the input hit
-     *  @param  threeDHitList the input list of 3D hits
+     *  @param  spacePointId the id of the space-point to produce
      *
      *  @param  the ART spacepoint
      */
-    static recob::SpacePoint BuildSpacePoint(const pandora::CaloHit *const pCaloHit, const pandora::CaloHitList &threeDHitList);
+    static recob::SpacePoint BuildSpacePoint(const pandora::CaloHit *const pCaloHit, const size_t spacePointId);
 
     /**
      *  @brief  Collect a sorted list of all 2D hits in a cluster
@@ -337,11 +337,12 @@ private:
      *  @brief  Convert from a pfo to and ART PFParticle
      *
      *  @param  pPfo the input pfo to convert
+     *  @param  pfoId the id of the pfo to produce
      *  @param  pfoList the input list of pfos
      *
      *  @param  the ART PFParticle
      */
-    static recob::PFParticle BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector);
+    static recob::PFParticle BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const size_t pfoId, const pandora::PfoVector &pfoVector);
 
     /**
      *  @brief  If required, build a T0 for the input pfo
