@@ -69,18 +69,18 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     SpacePointToHitCollection         outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
 
     // Collect immutable lists of pandora collections that we should convert to ART format
-    const pandora::PfoList pfoList(settings.m_shouldProduceAllOutcomes ?
+    const pandora::PfoVector pfoVector(settings.m_shouldProduceAllOutcomes ?
         LArPandoraOutput::CollectAllPfoOutcomes(settings.m_pPrimaryPandora) :
         LArPandoraOutput::CollectPfos(settings.m_pPrimaryPandora));
 
     IdToIdVectorMap pfoToVerticesMap;
-    const pandora::VertexList vertexList(LArPandoraOutput::CollectVertices(pfoList, pfoToVerticesMap));
+    const pandora::VertexList vertexList(LArPandoraOutput::CollectVertices(pfoVector, pfoToVerticesMap));
 
     IdToIdVectorMap pfoToClustersMap;
-    const pandora::ClusterList clusterList(LArPandoraOutput::CollectClusters(pfoList, pfoToClustersMap));
+    const pandora::ClusterList clusterList(LArPandoraOutput::CollectClusters(pfoVector, pfoToClustersMap));
 
     IdToIdVectorMap pfoToThreeDHitsMap;
-    const pandora::CaloHitList threeDHitList(LArPandoraOutput::Collect3DHits(pfoList, pfoToThreeDHitsMap));
+    const pandora::CaloHitList threeDHitList(LArPandoraOutput::Collect3DHits(pfoVector, pfoToThreeDHitsMap));
 
     // Get mapping from pandora hits to art hits
     CaloHitToArtHitMap pandoraHitToArtHitMap;
@@ -93,12 +93,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     IdToIdVectorMap pfoToArtClustersMap;
     LArPandoraOutput::BuildClusters(evt, settings.m_pProducer, instanceLabel, clusterList, pandoraHitToArtHitMap, pfoToClustersMap, outputClusters, outputClustersToHits, pfoToArtClustersMap);
 
-    LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, instanceLabel, pfoList, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
+    LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, instanceLabel, pfoVector, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
 
-    LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, instanceLabel, pfoList, outputParticleMetadata, outputParticlesToMetadata);
+    LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, instanceLabel, pfoVector, outputParticleMetadata, outputParticlesToMetadata);
 
     if (settings.m_shouldRunStitching)
-        LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoList, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
+        LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoVector, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
 
     // Add the outputs to the event
     evt.put(std::move(outputParticles), instanceLabel);
@@ -123,7 +123,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora *const pPrimaryPandora)
+pandora::PfoVector LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora *const pPrimaryPandora)
 {
     pandora::PfoList collectedPfos;
         
@@ -196,57 +196,63 @@ pandora::PfoList LArPandoraOutput::CollectAllPfoOutcomes(const pandora::Pandora 
         collectedPfos.push_back(pPfo);
     }
     
-    pandora::PfoList pfoList;
-    LArPandoraOutput::CollectPfos(collectedPfos, pfoList);
+    pandora::PfoVector pfoVector;
+    LArPandoraOutput::CollectPfos(collectedPfos, pfoVector);
 
-    return pfoList;
+    return pfoVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::PfoList LArPandoraOutput::CollectPfos(const pandora::Pandora *const pPrimaryPandora)
+pandora::PfoVector LArPandoraOutput::CollectPfos(const pandora::Pandora *const pPrimaryPandora)
 {
     const pandora::PfoList *pParentPfoList(nullptr);
     PANDORA_THROW_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::GetCurrentPfoList(*pPrimaryPandora, pParentPfoList));
     
-    pandora::PfoList pfoList;
-    LArPandoraOutput::CollectPfos(*pParentPfoList, pfoList);
+    pandora::PfoVector pfoVector;
+    LArPandoraOutput::CollectPfos(*pParentPfoList, pfoVector);
 
-    return pfoList;
+    return pfoVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::CollectPfos(const pandora::PfoList &parentPfoList, pandora::PfoList &pfoList)
+void LArPandoraOutput::CollectPfos(const pandora::PfoList &parentPfoList, pandora::PfoVector &pfoVector)
 {
-    if (!pfoList.empty())
+    if (!pfoVector.empty())
         throw cet::exception("LArPandora") << " LArPandoraOutput::CollectPfos--- trying to collect pfos into a non-empty list ";
 
+    pandora::PfoList pfoList;
     lar_content::LArPfoHelper::GetAllConnectedPfos(parentPfoList, pfoList);
-    pfoList.sort(lar_content::LArPfoHelper::SortByNHits);
+
+    pfoVector.insert(pfoVector.end(), pfoList.begin(), pfoList.end());
+    std::sort(pfoVector.begin(), pfoVector.end(), lar_content::LArPfoHelper::SortByNHits);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::VertexList LArPandoraOutput::CollectVertices(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToVerticesMap)
+pandora::VertexList LArPandoraOutput::CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap)
 {
     pandora::VertexList vertexList;
 
-    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+
         if (pPfo->GetVertexList().empty())
             continue;
 
         const pandora::Vertex *const pVertex(lar_content::LArPfoHelper::GetVertex(pPfo));
 
         // Get the vertex ID and add it to the vertex list if required
-        const bool isInList(std::find(vertexList.begin(), vertexList.end(), pVertex) != vertexList.end());
-        const size_t vertexId(isInList ? LArPandoraOutput::GetId(pVertex, vertexList) : vertexList.size());
+        const auto it(std::find(vertexList.begin(), vertexList.end(), pVertex));
+        const bool isInList(it != vertexList.end());
+        const size_t vertexId(isInList ? std::distance(vertexList.begin(), it) : vertexList.size());
         
         if (!isInList)
             vertexList.push_back(pVertex);
 
-        if (!pfoToVerticesMap.insert(IdToIdVectorMap::value_type(LArPandoraOutput::GetId(pPfo, pfoList), {vertexId})).second)
+        if (!pfoToVerticesMap.insert(IdToIdVectorMap::value_type(pfoId, {vertexId})).second)
             throw cet::exception("LArPandora") << " LArPandoraOutput::CollectVertices --- repeated pfos in input list ";
     }
 
@@ -255,12 +261,14 @@ pandora::VertexList LArPandoraOutput::CollectVertices(const pandora::PfoList &pf
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToClustersMap)
+pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToClustersMap)
 {
     pandora::ClusterList clusterList;
 
-    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+
         // Get the sorted list of clusters from the pfo
         pandora::ClusterList clusters;
         lar_content::LArPfoHelper::GetTwoDClusterList(pPfo, clusters);
@@ -272,7 +280,7 @@ pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoList &p
         
         clusterList.insert(clusterList.end(), clusters.begin(), clusters.end());
 
-        if (!pfoToClustersMap.insert(IdToIdVectorMap::value_type(LArPandoraOutput::GetId(pPfo, pfoList), clusterIds)).second)
+        if (!pfoToClustersMap.insert(IdToIdVectorMap::value_type(pfoId, clusterIds)).second)
             throw cet::exception("LArPandora") << " LArPandoraOutput::CollectClusters --- repeated pfos in input list ";
     }
 
@@ -293,14 +301,14 @@ void LArPandoraOutput::Collect3DHits(const pandora::ParticleFlowObject *const pP
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::CaloHitList LArPandoraOutput::Collect3DHits(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToThreeDHitsMap)
+pandora::CaloHitList LArPandoraOutput::Collect3DHits(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToThreeDHitsMap)
 {
     pandora::CaloHitList caloHitList;
 
-    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
-        // Get the pfo ID and set up the map entry
-        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+
         if (!pfoToThreeDHitsMap.insert(IdToIdVectorMap::value_type(pfoId, {})).second)
             throw cet::exception("LArPandora") << " LArPandoraOutput::Collect3DHits --- repeated pfos in input list ";
 
@@ -400,13 +408,18 @@ void LArPandoraOutput::BuildSpacePoints(const art::Event &event, const art::EDPr
     const pandora::CaloHitList &threeDHitList, const CaloHitToArtHitMap &pandoraHitToArtHitMap, SpacePointCollection &outputSpacePoints,
     SpacePointToHitCollection &outputSpacePointsToHits)
 {
-    for (const pandora::CaloHit *const pCaloHit : threeDHitList)
+    pandora::CaloHitVector threeDHitVector;
+    threeDHitVector.insert(threeDHitVector.end(), threeDHitList.begin(), threeDHitList.end());
+
+    for (unsigned int hitId = 0; hitId < threeDHitVector.size(); hitId++)
     {
+        const pandora::CaloHit *const pCaloHit(threeDHitVector.at(hitId));
+
         CaloHitToArtHitMap::const_iterator it(pandoraHitToArtHitMap.find(pCaloHit));
         if (it == pandoraHitToArtHitMap.end())
             throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSpacePoints --- found a pandora hit without a corresponding art hit ";
 
-        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, LArPandoraOutput::GetId(pCaloHit, threeDHitList), {it->second}, outputSpacePointsToHits);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, hitId, {it->second}, outputSpacePointsToHits);
         outputSpacePoints->push_back(LArPandoraOutput::BuildSpacePoint(pCaloHit, threeDHitList));
     }
 }
@@ -458,18 +471,18 @@ void LArPandoraOutput::BuildClusters(const art::Event &event, const art::EDProdu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList, 
+void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector, 
     const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, const IdToIdVectorMap &pfoToArtClustersMap,
     PFParticleCollection &outputParticles, PFParticleToVertexCollection &outputParticlesToVertices, 
     PFParticleToSpacePointCollection &outputParticlesToSpacePoints, PFParticleToClusterCollection &outputParticlesToClusters)
 {
-    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
-        outputParticles->push_back(LArPandoraOutput::BuildPFParticle(pPfo, pfoList));
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+
+        outputParticles->push_back(LArPandoraOutput::BuildPFParticle(pPfo, pfoVector));
        
         // Associations from PFParticle
-        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
-
         if (pfoToVerticesMap.find(pfoId) != pfoToVerticesMap.end())
             LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToVerticesMap, outputParticlesToVertices);
 
@@ -484,12 +497,13 @@ void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDPr
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer,
-    const std::string &instanceLabel, const pandora::PfoList &pfoList, PFParticleMetadataCollection &outputParticleMetadata,
+    const std::string &instanceLabel, const pandora::PfoVector &pfoVector, PFParticleMetadataCollection &outputParticleMetadata,
     PFParticleToMetadataCollection &outputParticlesToMetadata) 
 {
-    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
-        const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+        
         LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, outputParticleMetadata->size(), outputParticlesToMetadata);
         outputParticleMetadata->push_back(larpandoraobj::PFParticleMetadata(pPfo));
     }
@@ -497,40 +511,42 @@ void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoList &pfoList, 
+void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector, 
     T0Collection &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
     PFParticleToT0Collection &outputParticlesToT0s)
 {
     size_t nextT0Id(0);
-    for (const pandora::ParticleFlowObject *const pPfo : pfoList)
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+
         anab::T0 t0;
-        if (!LArPandoraOutput::BuildT0(pPfo, pfoList, nextT0Id, pandoraHitToArtHitMap, t0)) continue;
+        if (!LArPandoraOutput::BuildT0(pPfo, pfoVector, nextT0Id, pandoraHitToArtHitMap, t0)) continue;
         
-        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, LArPandoraOutput::GetId(pPfo, pfoList), nextT0Id - 1, outputParticlesToT0s);
+        LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, nextT0Id - 1, outputParticlesToT0s);
         outputT0s->push_back(t0);
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::PFParticle LArPandoraOutput::BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList)
+recob::PFParticle LArPandoraOutput::BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector)
 {
     // Get parent Pfo ID
     const pandora::PfoList &parentList(pPfo->GetParentPfoList());
     if (parentList.size() > 1)
         throw cet::exception("LArPandora") << " LArPandoraOutput::BuildPFParticle --- this pfo has multiple parent particles ";
 
-    const size_t parentId(parentList.empty() ? recob::PFParticle::kPFParticlePrimary : LArPandoraOutput::GetId(parentList.front(), pfoList));
+    const size_t parentId(parentList.empty() ? recob::PFParticle::kPFParticlePrimary : LArPandoraOutput::GetId(parentList.front(), pfoVector));
 
     // Get daughters Pfo IDs
     std::vector<size_t> daughterIds;
     for (const pandora::ParticleFlowObject *const pDaughterPfo : pPfo->GetDaughterPfoList())
-        daughterIds.push_back(LArPandoraOutput::GetId(pDaughterPfo, pfoList));
+        daughterIds.push_back(LArPandoraOutput::GetId(pDaughterPfo, pfoVector));
 
     std::sort(daughterIds.begin(), daughterIds.end());
 
-    const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoList));
+    const size_t pfoId(LArPandoraOutput::GetId(pPfo, pfoVector));
     return recob::PFParticle(pPfo->GetParticleId(), pfoId, parentId, daughterIds);
 }
 
@@ -711,7 +727,7 @@ recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const pandora::CaloHit *cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool LArPandoraOutput::BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList, size_t &nextId,
+bool LArPandoraOutput::BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector, size_t &nextId,
     const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0)
 {
     pandora::CaloHitVector sorted3DHits;
@@ -746,7 +762,7 @@ bool LArPandoraOutput::BuildT0(const pandora::ParticleFlowObject *const pPfo, co
     if (std::fabs(T0) <= std::numeric_limits<double>::epsilon()) return false;
 
     // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  pfparticle SelfID code;  T0 ID code]
-    t0 = anab::T0(T0, 3, LArPandoraOutput::GetId(pPfo, pfoList), nextId++);
+    t0 = anab::T0(T0, 3, LArPandoraOutput::GetId(pPfo, pfoVector), nextId++);
 
     return true;
 }

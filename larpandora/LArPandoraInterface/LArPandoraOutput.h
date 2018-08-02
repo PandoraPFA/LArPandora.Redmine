@@ -90,7 +90,7 @@ private:
      *
      *  @return a sorted list of all pfos to convert to ART PFParticles
      */
-    static pandora::PfoList CollectPfos(const pandora::Pandora *const pPrimaryPandora);
+    static pandora::PfoVector CollectPfos(const pandora::Pandora *const pPrimaryPandora);
     
     /**
      *  @brief  Collect the pfos (including all downstream pfos) from the master and daughter pandora instances
@@ -99,7 +99,7 @@ private:
      *
      *  @return a sorted list of all pfos to convert to ART PFParticles
      */
-    static pandora::PfoList CollectAllPfoOutcomes(const pandora::Pandora *const pPrimaryPandora);
+    static pandora::PfoVector CollectAllPfoOutcomes(const pandora::Pandora *const pPrimaryPandora);
 
     /**
      *  @brief  Collect a sorted list of all downstream pfos of an input list of parent
@@ -107,7 +107,7 @@ private:
      *  @param  parentPfoList the input list of parent pfos
      *  @param  pfoList the sorted output list of all downstream pfos
      */
-    static void CollectPfos(const pandora::PfoList &parentPfoList, pandora::PfoList &pfoList);
+    static void CollectPfos(const pandora::PfoList &parentPfoList, pandora::PfoVector &pfoVector);
 
     /**
      *  @brief  Collect all vertices contained in the input pfo list
@@ -118,7 +118,7 @@ private:
      *
      *  @return the list of vertices collected
      */
-    static pandora::VertexList CollectVertices(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToVerticesMap);
+    static pandora::VertexList CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap);
 
     /**
      *  @brief  Collect a sorted list of all 2D clusters contained in the input pfo list
@@ -129,7 +129,7 @@ private:
      *
      *  @return the list of clusters collected
      */
-    static pandora::ClusterList CollectClusters(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToClustersMap);
+    static pandora::ClusterList CollectClusters(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToClustersMap);
     
     /**
      *  @brief  Collect a sorted vector of all 3D hits in the input pfo
@@ -148,7 +148,7 @@ private:
      *
      *  @return the list of 3D hits collected
      */
-    static pandora::CaloHitList Collect3DHits(const pandora::PfoList &pfoList, IdToIdVectorMap &pfoToThreeDHitsMap);
+    static pandora::CaloHitList Collect3DHits(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToThreeDHitsMap);
 
     /**
      *  @brief  Find the index of an input object in an input list. Throw an exception if it doesn't exist
@@ -160,6 +160,9 @@ private:
      */
     template <typename T>
     static size_t GetId(const T *const pT, const std::list<const T*> &tList);
+    
+    template <typename T>
+    static size_t GetId(const T *const pT, const std::vector<const T*> &tVector);
     
     /**
      *  @brief  Collect all 2D and 3D hits that were used / produced in the reconstruction and map them to their corresponding ART hit
@@ -237,7 +240,7 @@ private:
      *  @param  outputParticlesToClusters the output associations between PFParticles and clusters
      */
     static void BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
-        const pandora::PfoList &pfoList, const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, 
+        const pandora::PfoVector &pfoVector, const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, 
         const IdToIdVectorMap &pfoToArtClustersMap, PFParticleCollection &outputParticles, 
         PFParticleToVertexCollection &outputParticlesToVertices, PFParticleToSpacePointCollection &outputParticlesToSpacePoints,
         PFParticleToClusterCollection &outputParticlesToClusters);
@@ -252,7 +255,7 @@ private:
      *  @param  outputParticlesToMetadata the output associations between PFParticles and metadata
      */
     static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, 
-        const pandora::PfoList &pfoList, PFParticleMetadataCollection &outputParticleMetadata,
+        const pandora::PfoVector &pfoVector, PFParticleMetadataCollection &outputParticleMetadata,
         PFParticleToMetadataCollection &outputParticlesToMetadata);
 
     /**
@@ -267,7 +270,7 @@ private:
      *  @param  outputParticlesToT0s the output associations between PFParticles and T0s
      */
     static void BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
-        const pandora::PfoList &pfoList, T0Collection &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
+        const pandora::PfoVector &pfoVector, T0Collection &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
         PFParticleToT0Collection &outputParticlesToT0s);
 
     /**
@@ -338,7 +341,7 @@ private:
      *
      *  @param  the ART PFParticle
      */
-    static recob::PFParticle BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList);
+    static recob::PFParticle BuildPFParticle(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector);
 
     /**
      *  @brief  If required, build a T0 for the input pfo
@@ -351,7 +354,7 @@ private:
      *
      *  @return if a T0 was produced (calculated from the stitching hit shift distance)
      */
-    static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoList &pfoList, size_t &nextId,
+    static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector, size_t &nextId,
         const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0);
     
     /**
@@ -415,6 +418,19 @@ inline size_t LArPandoraOutput::GetId(const T *const pT, const std::list<const T
         throw cet::exception("LArPandora") << " LArPandoraOutput::GetId --- can't find the id of supplied object";
 
     return static_cast<size_t>(std::distance(tList.begin(), it));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline size_t LArPandoraOutput::GetId(const T *const pT, const std::vector<const T*> &tVector)
+{
+    typename std::vector<const T*>::const_iterator it(std::find(tVector.begin(), tVector.end(), pT));
+
+    if (it == tVector.end())
+        throw cet::exception("LArPandora") << " LArPandoraOutput::GetId --- can't find the id of supplied object";
+
+    return static_cast<size_t>(std::distance(tVector.begin(), it));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
