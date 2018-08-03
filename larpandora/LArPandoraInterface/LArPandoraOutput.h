@@ -105,15 +105,15 @@ private:
      *  @brief  Collect a sorted list of all downstream pfos of an input list of parent
      *
      *  @param  parentPfoList the input list of parent pfos
-     *  @param  pfoList the sorted output list of all downstream pfos
+     *  @param  pfoVector the sorted output list of all downstream pfos
      */
     static void CollectPfos(const pandora::PfoList &parentPfoList, pandora::PfoVector &pfoVector);
 
     /**
      *  @brief  Collect all vertices contained in the input pfo list
-     *          Order is guaranteed provided pfoList is ordered
+     *          Order is guaranteed provided pfoVector is ordered
      *
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *  @param  pfoToVerticesMap the output mapping from pfo ID to vertex IDs (zero or one)
      *
      *  @return the list of vertices collected
@@ -122,9 +122,9 @@ private:
 
     /**
      *  @brief  Collect a sorted list of all 2D clusters contained in the input pfo list
-     *          Order is guaranteed provided pfoList is ordered
+     *          Order is guaranteed provided pfoVector is ordered
      *
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *  @param  pfoToClustersMap the output mapping from pfo ID to cluster IDs
      *
      *  @return the list of clusters collected
@@ -141,9 +141,9 @@ private:
 
     /**
      *  @brief  Collect a sorted list of all 3D hits contained in the input pfo list
-     *          Order is guaranteed provided pfoList is ordered
+     *          Order is guaranteed provided pfoVector is ordered
      *
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *  @param  pfoToThreeDHitsMap the output mapping from pfo ID to 3D hit IDs
      *
      *  @return the list of 3D hits collected
@@ -161,6 +161,14 @@ private:
     template <typename T>
     static size_t GetId(const T *const pT, const std::list<const T*> &tList);
     
+    /**
+     *  @brief  Find the index of an input object in an input vector. Throw an exception if it doesn't exist
+     *
+     *  @param  pT the input object for which the ID should be found
+     *  @param  tVector a list of objects of type pT to query
+     *  
+     *  @return the ID of the input object
+     */
     template <typename T>
     static size_t GetId(const T *const pT, const std::vector<const T*> &tVector);
     
@@ -186,7 +194,7 @@ private:
     /**
      *  @brief  Convert pandora vertices to ART vertices and add them to the output vector
      *
-     *  @param  vertexList the input list of pandora vertices
+     *  @param  vertexVector the input list of pandora vertices
      *  @param  outputVertices the output vector of ART vertices
      */
     static void BuildVertices(const pandora::VertexVector &vertexVector, VertexCollection &outputVertices);
@@ -230,7 +238,7 @@ private:
      *
      *  @param  event the art event
      *  @param  pProducer the address of the producer module
-     *  @param  pfoList the input list of pfos to convert
+     *  @param  pfoVector the input list of pfos to convert
      *  @param  pfoToVerticesMap the input mapping from pfo ID to vertex IDs
      *  @param  pfoToThreeDHitsMap the input mapping from pfo ID to 3D hit IDs
      *  @param  pfoToArtClustersMap the input mapping from pfo ID to ART cluster IDs
@@ -250,7 +258,7 @@ private:
      *
      *  @param  event the art event
      *  @param  pProducer the address of the producer module
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *  @param  outputParticleMetadata the output vector of PFParticleMetadata
      *  @param  outputParticlesToMetadata the output associations between PFParticles and metadata
      */
@@ -264,7 +272,7 @@ private:
      *
      *  @param  event the art event
      *  @param  pProducer the address of the producer module
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *  @param  outputT0s the output vector of T0s
      *  @param  pandoraHitToArtHitMap the input mapping from pandora hits to ART hits
      *  @param  outputParticlesToT0s the output associations between PFParticles and T0s
@@ -338,7 +346,7 @@ private:
      *
      *  @param  pPfo the input pfo to convert
      *  @param  pfoId the id of the pfo to produce
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *
      *  @param  the ART PFParticle
      */
@@ -348,7 +356,7 @@ private:
      *  @brief  If required, build a T0 for the input pfo
      *
      *  @param  pPfo the input pfo
-     *  @param  pfoList the input list of pfos
+     *  @param  pfoVector the input list of pfos
      *  @param  nextId the ID of the T0 - will be incremented if the t0 was produced
      *  @param  pandoraHitToArtHitMap the input mapping from pandora hits to ART hits
      *  @param  t0 the output T0
