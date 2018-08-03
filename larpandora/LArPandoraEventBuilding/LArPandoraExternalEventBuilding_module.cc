@@ -269,9 +269,8 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         {
         }
 
-        unsigned int sliceId(static_cast<unsigned int>(std::round(this->GetMetadataValue(parentIt->second, "SliceIndex"))));
-        float nuScore(this->GetMetadataValue(parentIt->second, "NuScore"));
-
+        const unsigned int sliceId(static_cast<unsigned int>(std::round(this->GetMetadataValue(parentIt->second, "SliceIndex"))));
+        const float nuScore(this->GetMetadataValue(parentIt->second, "NuScore"));
         // ATTN all PFParticles in the same slice will have the same nuScore
         nuScores[sliceId] = nuScore;
 
@@ -285,6 +284,10 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         }
     }
 
+    // ATTN: we need to ensure that for each slice there is a cosmic and neutrino hypothesis, even if the pass created no PFOs
+    // in such a case we add an empty vector of pfparticles
+    const PFParticleVector emptyPFParticleVector;
+
     // Produce the slices
     // ATTN slice indices are enumerated from 1
     for (unsigned int sliceId = 1; sliceId <= nuScores.size(); ++sliceId)
@@ -293,18 +296,17 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         const auto nuScoresIter(nuScores.find(sliceId));
         if (nuScoresIter == nuScores.end())
             throw cet::exception("LArPandoraExternalEventBuilding") << "Scrambled slice information - can't find nuScore with id = " << sliceId << std::endl;
-        
+
+        PFParticleVector nuPFParticleVector, crPFParticleVector;
         // Get the neutrino hypothesis
         const auto nuHypothesisIter(nuHypotheses.find(sliceId));
-        if (nuHypothesisIter == nuHypotheses.end())
-            throw cet::exception("LArPandoraExternalEventBuilding") << "Scrambled slice information - can't find neutrino hypothesis with id = " << sliceId << std::endl;
-        
+        nuPFParticleVector = ((nuHypothesisIter == nuHypotheses.end()) ? emptyPFParticleVector : nuHypothesisIter->second);
+
         // Get the cosmic hypothesis
         const auto crHypothesisIter(crHypotheses.find(sliceId));
-        if (crHypothesisIter == crHypotheses.end())
-            throw cet::exception("LArPandoraExternalEventBuilding") << "Scrambled slice information - can't find cosmic hypothesis with id = " << sliceId << std::endl;
+        crPFParticleVector = ((crHypothesisIter == crHypotheses.end()) ? emptyPFParticleVector : crHypothesisIter->second);
 
-        slices.emplace_back(nuScoresIter->second, nuHypothesisIter->second, crHypothesisIter->second);
+        slices.emplace_back(nuScoresIter->second, nuPFParticleVector, crPFParticleVector);
     }
 }
 
