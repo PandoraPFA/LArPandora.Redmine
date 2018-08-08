@@ -174,7 +174,7 @@ void LArPandoraExternalEventBuilding::produce(art::Event &evt)
     SliceVector slices;
     this->CollectSlices(particles, particlesToMetadata, particleMap, slices);
     
-    m_neutrinoIdTool->ClassifySlices(slices);
+    m_neutrinoIdTool->ClassifySlices(slices, evt);
 
     PFParticleVector consolidatedParticles;
     this->CollectConsolidatedParticles(particles, clearCosmics, slices, consolidatedParticles);

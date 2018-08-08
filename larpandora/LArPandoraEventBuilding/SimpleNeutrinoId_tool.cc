@@ -30,8 +30,9 @@ public:
      *  @brief  Classify slices as neutrino or cosmic
      *
      *  @param  slices the input vector of slices to classify
+     *  @param  evt the art event
      */
-    void ClassifySlices(SliceVector &slices) override;
+    void ClassifySlices(SliceVector &slices, const art::Event &evt) override;
 };
 
 DEFINE_ART_CLASS_TOOL(SimpleNeutrinoId)
@@ -50,7 +51,7 @@ SimpleNeutrinoId::SimpleNeutrinoId(fhicl::ParameterSet const &/*pset*/)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void SimpleNeutrinoId::ClassifySlices(SliceVector &slices) 
+void SimpleNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &/*evt*/) 
 {
     if (slices.empty()) return;
 
