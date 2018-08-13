@@ -289,18 +289,6 @@ pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoVector 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraOutput::Collect3DHits(const pandora::ParticleFlowObject *const pPfo, pandora::CaloHitVector &caloHits)
-{
-    // Get the sorted list of 3D hits associated with the pfo
-    pandora::CaloHitList threeDHits;
-    lar_content::LArPfoHelper::GetCaloHits(pPfo, pandora::TPC_3D, threeDHits);
-
-    caloHits.insert(caloHits.end(), threeDHits.begin(), threeDHits.end());
-    std::sort(caloHits.begin(), caloHits.end(), lar_content::LArClusterHelper::SortHitsByPosition);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 pandora::CaloHitList LArPandoraOutput::Collect3DHits(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToThreeDHitsMap)
 {
     pandora::CaloHitList caloHitList;
@@ -326,6 +314,18 @@ pandora::CaloHitList LArPandoraOutput::Collect3DHits(const pandora::PfoVector &p
     }
 
     return caloHitList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::Collect3DHits(const pandora::ParticleFlowObject *const pPfo, pandora::CaloHitVector &caloHits)
+{
+    // Get the sorted list of 3D hits associated with the pfo
+    pandora::CaloHitList threeDHits;
+    lar_content::LArPfoHelper::GetCaloHits(pPfo, pandora::TPC_3D, threeDHits);
+
+    caloHits.insert(caloHits.end(), threeDHits.begin(), threeDHits.end());
+    std::sort(caloHits.begin(), caloHits.end(), lar_content::LArClusterHelper::SortHitsByPosition);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -370,8 +370,6 @@ art::Ptr<recob::Hit> LArPandoraOutput::GetHit(const IdToHitMap &idToHitMap, cons
     //      Here we keep trying to access the ART hit increasing the depth step-by-step
     for (unsigned int depth = 0, maxDepth = 2; depth < maxDepth; ++depth)
     {
-        art::Ptr<recob::Hit> artHit;
-
         // Navigate to the hit address in the pandora master instance (assuming the depth is correct)
         const pandora::CaloHit *pParentCaloHit = pCaloHit;
         for (unsigned int i = 0; i < depth; ++i)
