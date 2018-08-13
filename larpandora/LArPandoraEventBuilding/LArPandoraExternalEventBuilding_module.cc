@@ -47,6 +47,7 @@ private:
      *
      *  @param  evt the ART event
      *  @param  particlesToMetadata the output mapping from PFParticles to their metadata
+     *  @param  particles the output vector of particles
      */
     void CollectPFParticles(const art::Event &evt, PFParticleToMetadata &particlesToMetadata, PFParticleVector &particles) const;
 
