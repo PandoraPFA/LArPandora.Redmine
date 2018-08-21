@@ -1,4 +1,4 @@
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+message(STATUS "LArPandoraObjects: PANDORA_INC is $ENV{PANDORA_INC}" )
 include_directories( $ENV{PANDORA_INC} )
 
 art_make( BASENAME_ONLY
