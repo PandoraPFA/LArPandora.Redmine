@@ -1,10 +1,8 @@
 include_directories( $ENV{PANDORA_INC} )
 include_directories( $ENV{LARPANDORACONTENT_INC} )
 
-add_subdirectory(SliceIdTools)
-
-art_make( 
-          LIB_LIBRARIES larcorealg_Geometry
+set( 
+          sliceid_tool_lib_list larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         larsim_Simulation lardataobj_Simulation
                         lardataobj_RawData
@@ -41,6 +39,11 @@ art_make(
                         ${ROOT_GENVECTOR}
                         MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
           )
+
+art_make(TOOL_LIBRARIES ${sliceid_tool_lib_list})
+
+#simple_plugin(SimpleNeutrinoId "tool" larpandora_LArPandoraEventBuilding_SliceIdTools)
+#simple_plugin(SimpleBeamParticleId "tool" larpandora_LArPandoraEventBuilding_SliceIdTools)
 
 install_headers()
 install_fhicl()
