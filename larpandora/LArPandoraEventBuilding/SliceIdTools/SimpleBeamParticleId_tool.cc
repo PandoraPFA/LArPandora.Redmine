@@ -33,9 +33,10 @@ public:
      *  @param  evt the art event
      */
     void ClassifySlices(SliceVector &slices, const art::Event &evt) override;
-
+    
 private:
     float m_minBDTScore; ///< The minimum BDT score to select a slice as a beam particle
+
 };
 
 DEFINE_ART_CLASS_TOOL(SimpleBeamParticleId)
@@ -57,11 +58,27 @@ SimpleBeamParticleId::SimpleBeamParticleId(fhicl::ParameterSet const &pset) :
 
 void SimpleBeamParticleId::ClassifySlices(SliceVector &slices, const art::Event &/*evt*/) 
 {
-    for (Slice &slice : slices)
+    if (slices.empty()) return;
+
+    // Find the most probable slice
+    float highestBeamParticleScore(-std::numeric_limits<float>::max());
+    unsigned int mostProbableSliceIndex(std::numeric_limits<unsigned int>::max());
+
+    for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
-        if (slice.GetTopologicalScore() > m_minBDTScore)
-            slice.TagAsTarget();
+        const float beamParticleScore(slices.at(sliceIndex).GetTopologicalScore());
+        std::cout << "Slice " << sliceIndex << " - " << beamParticleScore << std::endl;
+        if (beamParticleScore > highestBeamParticleScore)
+        {
+            highestBeamParticleScore = beamParticleScore;
+            mostProbableSliceIndex = sliceIndex;
+        }
     }
+
+    std::cout << "Tagging slice " << mostProbableSliceIndex << std::endl;
+
+    // Tag the most probable slice as a the beam particle
+    slices.at(mostProbableSliceIndex).TagAsTarget();
 }
 
 } // namespace lar_pandora

@@ -112,6 +112,15 @@ private:
      */
     bool IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const;
 
+    /**
+     *  @brief  Query a metadata object to see if it is a target particle
+     *
+     *  @param  metadata the metadata object to query
+     *  
+     *  @return boolean - if the particle is a target
+     */
+    bool IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const;
+
     std::string                         m_inputProducerLabel;  ///< Label for the Pandora instance that produced the collections we want to consolidated
     std::string                         m_trackProducerLabel;  ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
     std::string                         m_showerProducerLabel; ///< Label for the shower producer using the Pandora instance that produced the collections we want to consolidate
@@ -343,7 +352,9 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
     const PFParticleVector emptyPFParticleVector;
 
     // Produce the slices
-    for (const unsigned int sliceId : usedSliceIds)
+
+    // ATTN slice indices are enumerated from 1
+    for (unsigned int sliceId = 1; sliceId <= targetScores.size(); ++sliceId)
     {
         // Get the target score
         const auto targetScoresIter(targetScores.find(sliceId));
@@ -359,7 +370,6 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         // Get the cosmic hypothesis
         const auto crHypothesisIter(crHypotheses.find(sliceId));
         crPFParticleVector = ((crHypothesisIter == crHypotheses.end()) ? emptyPFParticleVector : crHypothesisIter->second);
-        
         slices.emplace_back(targetScoresIter->second, targetPFParticleVector, crPFParticleVector);
     }
 }
@@ -413,6 +423,7 @@ bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFP
     }
 }
 
+<<<<<<< HEAD
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
@@ -432,5 +443,7 @@ void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
     m_pSubRunTree->Fill();  
 }
 
+=======
+>>>>>>> Extended neutrino id tool to the general slice id tool - now works for protoDUNE
 } // namespace lar_pandora
 
