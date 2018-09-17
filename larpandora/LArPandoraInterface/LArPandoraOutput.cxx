@@ -320,24 +320,21 @@ namespace lar_pandora
                   vtxElement, vtxElement + 1);
 
             // Build Seeds, Tracks, T0s
-            std::cout << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD - Setting=" << settings.m_buildShowersAsTracks << std::endl;
-            std::cout << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD - IsTrack=" << lar_content::LArPfoHelper::IsTrack(pPfo) << std::endl;
-
             // Calculate sliding fit trajectory
             lar_content::LArTrackStateVector trackStateVector;
 
-            if (settings.m_buildShowersAsTracks || lar_content::LArPfoHelper::IsTrack(pPfo))
+            if ((settings.m_buildShowersAsTracks && lar_content::LArPfoHelper::IsShower(pPfo)) || lar_content::LArPfoHelper::IsTrack(pPfo))
             {
-               std::cout << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD - Try to Make Track!" << std::endl;                
-
+               std::cout << "-------- IsShower: " << lar_content::LArPfoHelper::IsShower(pPfo) << std::endl;                
+               std::cout << "-------- IsTrack:  " << lar_content::LArPfoHelper::IsTrack(pPfo) << std::endl;                
+               std::cout << "-------- Building a track..." << std::endl;
                try
                {
                   lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, 20, 0.3f, trackStateVector);
-                  std::cout << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD - Number of Trajectory Points = " << trackStateVector.size() << std::endl;
                }
                catch (const pandora::StatusCodeException &)
                {
-                  std::cout << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD - Exception Caught" << std::endl;
+                  std::cout << "Exception Caught: Unable to get sliding fit trajectory" << std::endl;
                }
             }
             if (trackStateVector.size() >= settings.m_minTrajectoryPoints && settings.m_buildTracks)
