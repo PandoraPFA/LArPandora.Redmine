@@ -1064,7 +1064,7 @@ void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::strin
     evt.getByLabel(label, handle);
     art::FindManyP<recob::Hit> hitAssoc(handle, evt, label);
 
-    if (indexVector != nullptr)
+    if ((indexVector != nullptr) && (inputVector.size()==indexVector->size()))
     {
         // If indexVector is filled, sort hits according to trajectory points order
         for (int index : (*indexVector))
