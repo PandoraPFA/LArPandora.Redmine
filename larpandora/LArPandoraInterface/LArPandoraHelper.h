@@ -47,6 +47,8 @@ typedef std::vector< art::Ptr<anab::CosmicTag> >    CosmicTagVector;
 typedef std::vector< art::Ptr<anab::T0> >           T0Vector;
 typedef std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> >  MetadataVector;
 
+typedef std::unordered_set< art::Ptr<recob::Hit> > HitSet;
+
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ShowerVector >                 PFParticlesToShowers;
 typedef std::map< art::Ptr<recob::PFParticle>, ClusterVector >                PFParticlesToClusters;
