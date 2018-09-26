@@ -208,15 +208,21 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         }
 
         HitVector hitsFromSpacePoints, hitsFromClusters, hitsInParticle;
+        HitSet hitsInParticleSet;
+
         LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsFromSpacePoints, &indexVector);
         LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToClustersIter->second, hitsFromClusters);
         //ATTN: we want the order of hits from space points if they made them, to match trajectory points,
         //but we also want as many hits as clustered, so add the ones not associated to space points at the end
         for (unsigned int hitIndex = 0; hitIndex < hitsFromSpacePoints.size(); hitIndex++)
+        {
 	    hitsInParticle.push_back(hitsFromSpacePoints.at(hitIndex));
+            hitsInParticleSet.insert(hitsFromSpacePoints.at(hitIndex));
+        }
+
         for (unsigned int hitIndex = 0; hitIndex < hitsFromClusters.size(); hitIndex++)
         {
-            if (std::find(hitsInParticle.begin(), hitsInParticle.end(), hitsFromClusters.at(hitIndex)) == hitsInParticle.end())
+            if (hitsInParticleSet.count(hitsFromClusters.at(hitIndex)) == 0)
                 hitsInParticle.push_back(hitsFromClusters.at(hitIndex));
         }
 
