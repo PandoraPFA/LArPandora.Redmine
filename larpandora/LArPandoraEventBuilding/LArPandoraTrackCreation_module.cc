@@ -212,8 +212,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
         LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsFromSpacePoints, &indexVector);
         LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToClustersIter->second, hitsFromClusters);
-        //ATTN: we want the order of hits from space points if they made them, to match trajectory points,
-        //but we also want as many hits as clustered, so add the ones not associated to space points at the end
+        //ATTN: hits ordered from space points if available, rest added at the end
         for (unsigned int hitIndex = 0; hitIndex < hitsFromSpacePoints.size(); hitIndex++)
         {
 	    hitsInParticle.push_back(hitsFromSpacePoints.at(hitIndex));
@@ -245,7 +244,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         util::CreateAssn(*this, evt, pTrack, pPFParticle, *(outputParticlesToTracks.get()));
         util::CreateAssn(*this, evt, *(outputTracks.get()), hitsInParticle, *(outputTracksToHits.get()));
 
-	//ATTN: now adding metadata to those with an index from space points only, for the rest should be null
+	//ATTN: metadata added with index from space points if available, null for others
         for (unsigned int hitIndex = 0; hitIndex < hitsInParticle.size(); hitIndex++)
         {
             const art::Ptr<recob::Hit> pHit(hitsInParticle.at(hitIndex));

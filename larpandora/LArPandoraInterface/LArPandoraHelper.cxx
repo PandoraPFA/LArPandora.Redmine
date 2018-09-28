@@ -1064,8 +1064,11 @@ void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::strin
     evt.getByLabel(label, handle);
     art::FindManyP<recob::Hit> hitAssoc(handle, evt, label);
 
-    if ((indexVector != nullptr) && (inputVector.size()==indexVector->size()))
+    if (indexVector != nullptr)
     {
+        if (inputVector.size() != indexVector->size())
+            throw cet::exception("LArPandora") << " PandoraHelper::GetAssociatedHits --- trying to use an index vector not matching input vector";
+
         // If indexVector is filled, sort hits according to trajectory points order
         for (int index : (*indexVector))
         {
@@ -1073,7 +1076,9 @@ void LArPandoraHelper::GetAssociatedHits(const art::Event &evt, const std::strin
             const HitVector &hits = hitAssoc.at(element.key());
             associatedHits.insert(associatedHits.end(), hits.begin(), hits.end());
         }
-    } else {
+    }
+    else
+    {
         // If indexVector is empty just loop through inputSpacePoints
         for (const art::Ptr<T> &element : inputVector)
         {
