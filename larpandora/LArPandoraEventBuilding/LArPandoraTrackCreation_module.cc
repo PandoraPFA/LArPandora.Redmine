@@ -216,7 +216,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         for (unsigned int hitIndex = 0; hitIndex < hitsFromSpacePoints.size(); hitIndex++)
         {
 	    hitsInParticle.push_back(hitsFromSpacePoints.at(hitIndex));
-            hitsInParticleSet.insert(hitsFromSpacePoints.at(hitIndex));
+            (void) hitsInParticleSet.insert(hitsFromSpacePoints.at(hitIndex));
         }
 
         for (unsigned int hitIndex = 0; hitIndex < hitsFromClusters.size(); hitIndex++)
