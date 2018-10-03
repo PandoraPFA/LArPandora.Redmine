@@ -325,9 +325,6 @@ namespace lar_pandora
 
             if ((settings.m_buildShowersAsTracks && lar_content::LArPfoHelper::IsShower(pPfo)) || lar_content::LArPfoHelper::IsTrack(pPfo))
             {
-               std::cout << "-------- IsShower: " << lar_content::LArPfoHelper::IsShower(pPfo) << std::endl;                
-               std::cout << "-------- IsTrack:  " << lar_content::LArPfoHelper::IsTrack(pPfo) << std::endl;                
-               std::cout << "-------- Building a track..." << std::endl;
                try
                {
                   lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, 20, 0.3f, trackStateVector);
