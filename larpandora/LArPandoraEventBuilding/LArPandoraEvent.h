@@ -521,7 +521,7 @@ template <typename T, typename U>
 inline void LArPandoraEvent::WriteAssociation(const std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &associationMap, const std::vector<art::Ptr<T> > &collectionT,
     const std::vector<art::Ptr<U> > &collectionU, const bool thisProducesU) const
 {
-    const art::PtrMaker<T> makePtrT(*m_pEvent, *m_pProducer);
+    const art::PtrMaker<T> makePtrT(*m_pEvent);
     std::unique_ptr<art::Assns<T, U> > outputAssn(new art::Assns<T, U>);
 
     for (typename std::map<art::Ptr<T>, std::vector<art::Ptr<U> > >::const_iterator it = associationMap.begin(); it != associationMap.end(); ++it) 
@@ -536,7 +536,7 @@ inline void LArPandoraEvent::WriteAssociation(const std::map<art::Ptr<T>, std::v
         {
             if (thisProducesU)
             {
-                const art::PtrMaker<U> makePtrU(*m_pEvent, *m_pProducer);
+                const art::PtrMaker<U> makePtrU(*m_pEvent);
 
                 typename std::vector<art::Ptr<U> >::const_iterator itU = std::find(collectionU.begin(), collectionU.end(), objectU);
                 if (itU == collectionU.end()) 

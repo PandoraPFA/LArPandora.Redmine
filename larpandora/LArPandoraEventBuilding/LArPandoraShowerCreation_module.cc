@@ -119,8 +119,8 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
     std::unique_ptr< art::Assns<recob::Shower, recob::Hit> > outputShowersToHits( new art::Assns<recob::Shower, recob::Hit> );
     std::unique_ptr< art::Assns<recob::Shower, recob::PCAxis> > outputShowersToPCAxes( new art::Assns<recob::Shower, recob::PCAxis> );
 
-    const art::PtrMaker<recob::Shower> makeShowerPtr(evt, *this);
-    const art::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *this);
+    const art::PtrMaker<recob::Shower> makeShowerPtr(evt);
+    const art::PtrMaker<recob::PCAxis> makePCAxisPtr(evt);
 
     // Organise inputs
     PFParticleVector pfParticleVector, extraPfParticleVector;

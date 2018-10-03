@@ -445,13 +445,13 @@ inline size_t LArPandoraOutput::GetId(const T *const pT, const std::vector<const
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename A, typename B>
-inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer,
+inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const,
     const std::string &instanceLabel, const size_t idA, const size_t idB, std::unique_ptr< art::Assns<A, B> > &association)
 {
-    const art::PtrMaker<A> makePtrA(event, *pProducer, instanceLabel);
+    const art::PtrMaker<A> makePtrA(event, instanceLabel);
     art::Ptr<A> pA(makePtrA(idA));
 
-    const art::PtrMaker<B> makePtrB(event, *pProducer, instanceLabel);
+    const art::PtrMaker<B> makePtrB(event, instanceLabel);
     art::Ptr<B> pB(makePtrB(idB));
     
     association->addSingle(pA, pB);
@@ -460,17 +460,17 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename A, typename B>
-inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer,
+inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const,
     const std::string &instanceLabel, const size_t idA, const IdToIdVectorMap &aToBMap, std::unique_ptr< art::Assns<A, B> > &association)
 {
     IdToIdVectorMap::const_iterator it(aToBMap.find(idA));
     if (it == aToBMap.end())
         throw cet::exception("LArPandora") << " LArPandoraOutput::AddAssociation --- id doesn't exists in the assocaition map";
 
-    const art::PtrMaker<A> makePtrA(event, *pProducer, instanceLabel);
+    const art::PtrMaker<A> makePtrA(event, instanceLabel);
     art::Ptr<A> pA(makePtrA(idA));
 
-    const art::PtrMaker<B> makePtrB(event, *pProducer, instanceLabel);
+    const art::PtrMaker<B> makePtrB(event, instanceLabel);
     for (const size_t idB : it->second)
     {
         art::Ptr<B> pB(makePtrB(idB));
@@ -481,11 +481,11 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename A, typename B>
-inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const pProducer,
+inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const,
     const std::string &instanceLabel, const size_t idA, const std::vector< art::Ptr<B> > &bVector,
     std::unique_ptr< art::Assns<A, B> > &association)
 {
-    const art::PtrMaker<A> makePtrA(event, *pProducer, instanceLabel);
+    const art::PtrMaker<A> makePtrA(event, instanceLabel);
     art::Ptr<A> pA(makePtrA(idA));
     
     for (const art::Ptr<B> &pB : bVector)
