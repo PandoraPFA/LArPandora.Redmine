@@ -43,9 +43,6 @@ set(
 
 art_make(TOOL_LIBRARIES ${sliceid_tool_lib_list})
 
-#simple_plugin(SimpleNeutrinoId "tool" larpandora_LArPandoraEventBuilding_SliceIdTools)
-#simple_plugin(SimpleBeamParticleId "tool" larpandora_LArPandoraEventBuilding_SliceIdTools)
-
 install_headers()
 install_fhicl()
 install_source()
