@@ -8,7 +8,11 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "lardataobj/RecoBase/OpFlash.h"
+#include "lardataobj/RecoBase/PFParticle.h"
 
+#include "ubana/LLSelectionTool/OpT0Finder/Base/OpT0FinderTypes.h"
+
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandora/LArPandoraEventBuilding/SliceIdBaseTool.h"
 #include "larpandora/LArPandoraEventBuilding/Slice.h"
 
@@ -57,7 +61,38 @@ private:
      */
     void GetFlashesInBeamWindow(const FlashVector &flashes, FlashVector &flashesInWindow) const;
 
+    /**
+     *  @breif  Get the 3D spacepoints (with charge) associated with the PFParticles in the slice that are produced from hits in the W view
+     *
+     *  @param  pfParticleMap the mapping from PFParticle ID to PFParticle
+     *  @param  slice the input slice
+     *
+     *  @return the output charged cluster
+     */
+    flashana::QCluster_t GetChargeCluster(const PFParticleMap &pfParticleMap, const Slice &slice) const;
+
+    /**
+     *  @breif  Collect all downstream particles of those in the input vector
+     *
+     *  @param  pfParticleMap the mapping from PFParticle ID to PFParticle
+     *  @param  parentPFParticles the input vector of PFParticles
+     *  @param  downstreamPFParticle the output vector of PFParticles including those downstream of the input
+     */
+    void CollectDownstreamPFParticles(const PFParticleMap &pfParticleMap, const PFParticleVector &parentPFParticles, 
+        PFParticleVector &downstreamPFParticles) const;
+
+    /**
+     *  @breif  Collect all downstream particles of a given particle
+     *
+     *  @param  pfParticleMap the mapping from PFParticle ID to PFParticle
+     *  @param  particle the input PFParticle
+     *  @param  downstreamPFParticle the output vector of PFParticles including those downstream of the input
+     */
+    void CollectDownstreamPFParticles(const PFParticleMap &pfParticleMap, const art::Ptr<recob::PFParticle> &particle,
+        PFParticleVector &downstreamPFParticles) const;
+
     std::string  m_flashLabel;       ///< The label of the flash producer
+    std::string  m_pandoraLabel;     ///< The label of the allOutcomes pandora producer
     float        m_beamWindowStart;  ///< The start time of the beam window
     float        m_beamWindowEnd;    ///< The end time of the beam window
     float        m_minBeamFlashPE;   ///< The minimum number of photoelectrons required to consider a flash as the beam flash
@@ -75,9 +110,10 @@ namespace lar_pandora
     
 FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_flashLabel(pset.get<std::string>("FlashLabel")),
-    m_beamWindowStart(pset.get<float>("BeamWindowStartTime", 3.2f)),
-    m_beamWindowEnd(pset.get<float>("BeamWindowEndTime", 4.8f)),
-    m_minBeamFlashPE(pset.get<float>("BeamFlashPEThreshold", 50.f))
+    m_pandoraLabel(pset.get<std::string>("PandoraAllOutcomesLabel")),
+    m_beamWindowStart(pset.get<float>("BeamWindowStartTime")),
+    m_beamWindowEnd(pset.get<float>("BeamWindowEndTime")),
+    m_minBeamFlashPE(pset.get<float>("BeamFlashPEThreshold"))
 {
 }
 
@@ -91,11 +127,19 @@ void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt)
     recob::OpFlash beamFlash;
     if (!this->GetBeamFlash(evt, beamFlash))
         return;
-   
-    /*
+ 
+    // Get all of the PFParticles from the event and the mapping between them
+    PFParticleVector pfParticles;
+    LArPandoraHelper::CollectPFParticles(evt, m_pandoraLabel, pfParticles);
+
+    PFParticleMap pfParticleMap;
+    LArPandoraHelper::BuildPFParticleMap(pfParticles, pfParticleMap);
+
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
-    }*/
+        const auto slice(slices.at(sliceIndex));
+        const auto chargeCluster(this->GetChargeCluster(pfParticleMap, slice));
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,5 +178,42 @@ void FlashNeutrinoId::GetFlashesInBeamWindow(const FlashVector &flashes, FlashVe
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+flashana::QCluster_t FlashNeutrinoId::GetChargeCluster(const PFParticleMap &pfParticleMap, const Slice &slice) const
+{
+    // Collect all PFParticles in the slice, including those downstream of the primaries
+    // ATTN here we only use the neutrino hypothesis, in theory this should work with either (or indeed both with some thought)
+    PFParticleVector allParticlesInSlice;
+    this->CollectDownstreamPFParticles(pfParticleMap, slice.GetTargetHypothesis(), allParticlesInSlice);
+
+    return flashana::QCluster_t();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FlashNeutrinoId::CollectDownstreamPFParticles(const PFParticleMap &pfParticleMap, const PFParticleVector &parentPFParticles,
+    PFParticleVector &downstreamPFParticles) const
+{
+    for (const auto &particle : parentPFParticles)
+        this->CollectDownstreamPFParticles(pfParticleMap, particle, downstreamPFParticles);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FlashNeutrinoId::CollectDownstreamPFParticles(const PFParticleMap &pfParticleMap, const art::Ptr<recob::PFParticle> &particle,
+    PFParticleVector &downstreamPFParticles) const
+{
+    if (std::find(downstreamPFParticles.begin(), downstreamPFParticles.end(), particle) == downstreamPFParticles.end())
+        downstreamPFParticles.push_back(particle);
+
+    for (const auto &daughterId : particle->Daughters())
+    {
+        const auto iter(pfParticleMap.find(daughterId));
+        if (iter == pfParticleMap.end())
+            throw cet::exception("FlashNeutrinoId") << "Scrambled PFParticle IDs" << std::endl;
+
+        this->CollectDownstreamPFParticles(pfParticleMap, iter->second, downstreamPFParticles);
+    }
+}
 
 } // namespace lar_pandora
