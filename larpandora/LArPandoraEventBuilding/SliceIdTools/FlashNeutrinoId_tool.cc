@@ -9,6 +9,8 @@
 
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 #include "ubana/LLSelectionTool/OpT0Finder/Base/OpT0FinderTypes.h"
 
@@ -64,12 +66,15 @@ private:
     /**
      *  @breif  Get the 3D spacepoints (with charge) associated with the PFParticles in the slice that are produced from hits in the W view
      *
-     *  @param  pfParticleMap the mapping from PFParticle ID to PFParticle
+     *  @param  pfParticleMap the input mapping from PFParticle ID to PFParticle
+     *  @param  pfParticleToSpacePointMap the input mapping from PFParticles to SpacePoints
+     *  @param  spacePointToHitMap the input mapping from SpacePoints to Hits
      *  @param  slice the input slice
      *
      *  @return the output charged cluster
      */
-    flashana::QCluster_t GetChargeCluster(const PFParticleMap &pfParticleMap, const Slice &slice) const;
+    flashana::QCluster_t GetChargeCluster(const PFParticleMap &pfParticleMap, const PFParticlesToSpacePoints &pfParticleToSpacePointMap,
+        const SpacePointsToHits &spacePointToHitMap, const Slice &slice) const;
 
     /**
      *  @breif  Collect all downstream particles of those in the input vector
@@ -128,17 +133,23 @@ void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt)
     if (!this->GetBeamFlash(evt, beamFlash))
         return;
  
-    // Get all of the PFParticles from the event and the mapping between them
+    // Collect the PFParticles and their associations to SpacePoints
     PFParticleVector pfParticles;
-    LArPandoraHelper::CollectPFParticles(evt, m_pandoraLabel, pfParticles);
+    PFParticlesToSpacePoints pfParticleToSpacePointMap;
+    LArPandoraHelper::CollectPFParticles(evt, m_pandoraLabel, pfParticles, pfParticleToSpacePointMap);
 
+    // Collect the SpacePoints and their associations to Hits
+    SpacePointVector spacePoints;
+    SpacePointsToHits spacePointToHitMap;
+    LArPandoraHelper::CollectSpacePoints(evt, m_pandoraLabel, spacePoints, spacePointToHitMap);
+
+    // Build a map from PFParticle ID to PFParticle for navigation through the hierarchy
     PFParticleMap pfParticleMap;
     LArPandoraHelper::BuildPFParticleMap(pfParticles, pfParticleMap);
 
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
-        const auto slice(slices.at(sliceIndex));
-        const auto chargeCluster(this->GetChargeCluster(pfParticleMap, slice));
+        const auto chargeCluster(this->GetChargeCluster(pfParticleMap, pfParticleToSpacePointMap, spacePointToHitMap, slices.at(sliceIndex)));
     }
 }
 
@@ -179,14 +190,41 @@ void FlashNeutrinoId::GetFlashesInBeamWindow(const FlashVector &flashes, FlashVe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-flashana::QCluster_t FlashNeutrinoId::GetChargeCluster(const PFParticleMap &pfParticleMap, const Slice &slice) const
+flashana::QCluster_t FlashNeutrinoId::GetChargeCluster(const PFParticleMap &pfParticleMap,
+    const PFParticlesToSpacePoints &pfParticleToSpacePointMap, const SpacePointsToHits &spacePointToHitMap, const Slice &slice) const
 {
     // Collect all PFParticles in the slice, including those downstream of the primaries
     // ATTN here we only use the neutrino hypothesis, in theory this should work with either (or indeed both with some thought)
     PFParticleVector allParticlesInSlice;
     this->CollectDownstreamPFParticles(pfParticleMap, slice.GetTargetHypothesis(), allParticlesInSlice);
 
-    return flashana::QCluster_t();
+    flashana::QCluster_t chargeCluster;
+    for (const auto &particle : allParticlesInSlice)
+    {
+        // Get the associated spacepoints
+        const auto &partToSpacePointIter(pfParticleToSpacePointMap.find(particle));
+        if (partToSpacePointIter == pfParticleToSpacePointMap.end())
+            continue;
+
+        for (const auto &spacePoint : partToSpacePointIter->second)
+        {
+            // Get the associated hit
+            const auto &spacePointToHitIter(spacePointToHitMap.find(spacePoint));
+            if (spacePointToHitIter == spacePointToHitMap.end())
+                continue;
+
+            // Only use hits from the collection plane
+            const auto &hit(spacePointToHitIter->second);
+            if (hit->View() != geo::kZ)
+                continue;
+            
+            // Add the charged point to the vector
+            const auto &position(spacePoint->XYZ());
+            chargeCluster.emplace_back(position[0], position[1], position[2], hit->Integral());
+        }
+    }
+
+    return chargeCluster;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
