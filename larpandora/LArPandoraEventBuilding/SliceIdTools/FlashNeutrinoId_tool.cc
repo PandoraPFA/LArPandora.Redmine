@@ -18,6 +18,8 @@
 #include "larpandora/LArPandoraEventBuilding/SliceIdBaseTool.h"
 #include "larpandora/LArPandoraEventBuilding/Slice.h"
 
+#include "Objects/CartesianVector.h"
+
 namespace lar_pandora
 {
 
@@ -96,11 +98,28 @@ private:
     void CollectDownstreamPFParticles(const PFParticleMap &pfParticleMap, const art::Ptr<recob::PFParticle> &particle,
         PFParticleVector &downstreamPFParticles) const;
 
-    std::string  m_flashLabel;       ///< The label of the flash producer
-    std::string  m_pandoraLabel;     ///< The label of the allOutcomes pandora producer
-    float        m_beamWindowStart;  ///< The start time of the beam window
-    float        m_beamWindowEnd;    ///< The end time of the beam window
-    float        m_minBeamFlashPE;   ///< The minimum number of photoelectrons required to consider a flash as the beam flash
+    bool IsSliceCompatibleWithBeamFlash(const flashana::QCluster_t &chargeCluster, const recob::OpFlash &beamFlash) const;
+
+    pandora::CartesianVector GetChargeWeightedCenter(const flashana::QCluster_t &chargeCluster) const;
+
+    float GetTotalCharge(const flashana::QCluster_t &chargeCluster) const;
+
+    // Producer labels
+    std::string  m_flashLabel;             ///< The label of the flash producer
+    std::string  m_pandoraLabel;           ///< The label of the allOutcomes pandora producer
+
+    // Cuts for selecting the beam flash
+    float        m_beamWindowStart;        ///< The start time of the beam window
+    float        m_beamWindowEnd;          ///< The end time of the beam window
+    float        m_minBeamFlashPE;         ///< The minimum number of photoelectrons required to consider a flash as the beam flash
+
+    // Pre-selection cuts to determine if a slice is compatible with the beam flash
+    float        m_maxDeltaY;              ///< The maximum difference in Y between the beam flash center and the weighted charge center
+    float        m_maxDeltaZ;              ///< The maximum difference in Z between the beam flash center and the weighted charge center
+    float        m_maxDeltaYSigma;         ///< As for maxDeltaY, but measured in units of the flash width in Y
+    float        m_maxDeltaZSigma;         ///< As for maxDeltaZ, but measured in units of the flash width in Z
+    float        m_minChargeToLightRatio;  ///< The minimum ratio between the total charge and the total PE
+    float        m_maxChargeToLightRatio;  ///< The maximum ratio between the total charge and the total PE
 };
 
 DEFINE_ART_CLASS_TOOL(FlashNeutrinoId)
@@ -118,7 +137,13 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pandoraLabel(pset.get<std::string>("PandoraAllOutcomesLabel")),
     m_beamWindowStart(pset.get<float>("BeamWindowStartTime")),
     m_beamWindowEnd(pset.get<float>("BeamWindowEndTime")),
-    m_minBeamFlashPE(pset.get<float>("BeamFlashPEThreshold"))
+    m_minBeamFlashPE(pset.get<float>("BeamFlashPEThreshold")),
+    m_maxDeltaY(pset.get<float>("MaxDeltaY")),
+    m_maxDeltaZ(pset.get<float>("MaxDeltaZ")),
+    m_maxDeltaYSigma(pset.get<float>("MaxDeltaYSigma")),
+    m_maxDeltaZSigma(pset.get<float>("MaxDeltaZSigma")),
+    m_minChargeToLightRatio(pset.get<float>("MinChargeToLightRatio")),
+    m_maxChargeToLightRatio(pset.get<float>("MaxChargeToLightRatio"))
 {
 }
 
@@ -147,9 +172,17 @@ void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt)
     PFParticleMap pfParticleMap;
     LArPandoraHelper::BuildPFParticleMap(pfParticles, pfParticleMap);
 
+    
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
+        // Collect all spacepoints in the slice that were produced from a hit on the collection plane, and assign them the corresponding charge
         const auto chargeCluster(this->GetChargeCluster(pfParticleMap, pfParticleToSpacePointMap, spacePointToHitMap, slices.at(sliceIndex)));
+
+        if (chargeCluster.empty())
+            continue;
+
+        if (!this->IsSliceCompatibleWithBeamFlash(chargeCluster, beamFlash))
+            continue;
     }
 }
 
@@ -252,6 +285,68 @@ void FlashNeutrinoId::CollectDownstreamPFParticles(const PFParticleMap &pfPartic
 
         this->CollectDownstreamPFParticles(pfParticleMap, iter->second, downstreamPFParticles);
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool FlashNeutrinoId::IsSliceCompatibleWithBeamFlash(const flashana::QCluster_t &chargeCluster, const recob::OpFlash &beamFlash) const
+{
+    // Check the flash is usable
+    if (beamFlash.TotalPE() < std::numeric_limits<float>::epsilon())
+        return false;
+    
+    if (beamFlash.YWidth() < std::numeric_limits<float>::epsilon())
+        return false;
+    
+    if (beamFlash.ZWidth() < std::numeric_limits<float>::epsilon())
+        return false;
+
+    // Calculate the pre-selection variables
+    const auto chargeCenter(this->GetChargeWeightedCenter(chargeCluster));
+    const auto deltaY(std::abs(chargeCenter.GetY() - beamFlash.YCenter()));
+    const auto deltaZ(std::abs(chargeCenter.GetZ() - beamFlash.ZCenter()));
+    const auto chargeToLightRatio(this->GetTotalCharge(chargeCluster) / beamFlash.TotalPE());  // TODO ATTN check if this should be total PE or max PE. Code differs from technote
+
+    // Check if the slice passes the pre-selection cuts
+    return (deltaY < m_maxDeltaY                           &&
+            deltaZ < m_maxDeltaZ                           &&
+            deltaY / beamFlash.YWidth() < m_maxDeltaYSigma &&
+            deltaZ / beamFlash.ZWidth() < m_maxDeltaZSigma &&
+            chargeToLightRatio > m_minChargeToLightRatio   &&
+            chargeToLightRatio < m_maxChargeToLightRatio   );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::CartesianVector FlashNeutrinoId::GetChargeWeightedCenter(const flashana::QCluster_t &chargeCluster) const
+{
+    pandora::CartesianVector center(0.f, 0.f, 0.f);
+    float totalCharge(0.f);
+
+    for (const auto &chargePoint : chargeCluster)
+    {
+        center += pandora::CartesianVector(chargePoint.x, chargePoint.y, chargePoint.z) * chargePoint.q;
+        totalCharge += chargePoint.q;
+    }
+
+    if (totalCharge < std::numeric_limits<float>::epsilon())
+        throw cet::exception("FlashNeutrinoId") << "Can't find charge weighted center of slice with zero total charge" << std::endl;
+
+    center *= (1.f / totalCharge);
+
+    return center;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float FlashNeutrinoId::GetTotalCharge(const flashana::QCluster_t &chargeCluster) const
+{
+    float totalCharge(0.f);
+
+    for (const auto &chargePoint : chargeCluster)
+        totalCharge += chargePoint.q;
+
+    return totalCharge;
 }
 
 } // namespace lar_pandora
