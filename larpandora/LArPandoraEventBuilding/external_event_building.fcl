@@ -1,0 +1,26 @@
+#include "simple_neutrino_id.fcl"
+#include "flash_neutrino_id.fcl"
+
+BEGIN_PROLOG
+
+pandora_event_building :
+{
+    module_type: "LArPandoraExternalEventBuilding"
+
+    InputProducerLabel:  "pandoraRepeat:allOutcomes"
+    TrackProducerLabel:  "pandoraAllOutcomesTrack"
+    ShowerProducerLabel: "pandoraAllOutcomesShower"
+    HitProducerLabel:    "gaushit"
+
+    ShouldProduceT0s:     false
+}
+
+# Simple neutrino ID tool - Reproduce the standard consolidated output using the neutrino ID score from Pandora
+pandora_simple_event_building: @local::pandora_event_building
+pandora_simple_event_building.SliceIdTool: @local::simple_neutrino_id_tool
+
+# Flash neutrino ID tool - Use optical information only to select the neutrino slice
+pandora_flash_event_building: @local::pandora_event_building
+pandora_flash_event_building.SliceIdTool: @local::flash_neutrino_id_tool
+
+END_PROLOG
