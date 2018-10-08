@@ -39,7 +39,7 @@ art_make(
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
                         ${ROOT_GENVECTOR}
-                        MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
+            MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
           )
 
 install_headers()

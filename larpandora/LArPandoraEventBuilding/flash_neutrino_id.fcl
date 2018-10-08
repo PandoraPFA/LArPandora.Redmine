@@ -1,0 +1,34 @@
+#include "flashmatchalg.fcl"
+
+BEGIN_PROLOG
+
+flash_neutrino_id_tool :
+{
+    tool_type: "FlashNeutrinoId"
+
+    # Input producers
+    FlashLabel:              "simpleFlashBeam"
+    PandoraAllOutcomesLabel: "pandoraRepeat:allOutcomes"
+
+    # Beam flash conditions
+    BeamWindowStartTime:      3.2
+    BeamWindowEndTime:        4.8
+    BeamFlashPEThreshold:     50.0
+    
+    # Pre-selection cut values
+    MaxDeltaY:                95.0
+    MaxDeltaZ:                105.0
+    MaxDeltaYSigma:           2.1 
+    MaxDeltaZSigma:           1.0
+    MinChargeToLightRatio:    2.0
+    MaxChargeToLightRatio:    200.0
+
+    # Flash matching congifuration
+    ChargeToPhotonFactor:     1.0
+    FlashMatchConfig:         @local::flashmatch_config
+}
+    
+flash_neutrino_id_tool.FlashMatchConfig.FlashMatchManager.AllowReuseFlash: true
+flash_neutrino_id_tool.FlashMatchConfig.QLLMatch.NormalizeHypothesis:      false
+
+END_PROLOG
