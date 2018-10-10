@@ -15,7 +15,6 @@
 
 #include "ubana/LLSelectionTool/OpT0Finder/Base/OpT0FinderTypes.h"
 #include "ubana/LLSelectionTool/OpT0Finder/Base/FlashMatchManager.h"
-// #include "ubana/LLSelectionTool/OpT0Finder/Algorithms/LightCharge.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandora/LArPandoraEventBuilding/SliceIdBaseTool.h"
@@ -48,6 +47,31 @@ public:
     void ClassifySlices(SliceVector &slices, const art::Event &evt) override;
 
 private:
+    /**
+     *  @brief  Data to describe an amount of charge deposited in a given 3D position
+     */
+    class Deposition
+    {
+    public:
+        /**
+         *  @brief  Default constructor
+         *
+         *  @param  x the x-component of the charge position
+         *  @param  y the z-component of the charge position
+         *  @param  z the z-component of the charge position
+         *  @param  charge the charge deposited
+         *  @param  nPhotons the estimated numer of photons produced
+         */
+        Deposition(const float x, const float y, const float z, const float charge, const float nPhotons);
+
+        float m_x;         ///< The x-component of the charge position
+        float m_y;         ///< The z-component of the charge position
+        float m_z;         ///< The z-component of the charge position
+        float m_charge;    ///< The charge deposited
+        float m_nPhotons;  ///< The estimated numer of photons produced
+    };
+
+    typedef std::vector<Deposition> DepositionVector;
     typedef std::vector<recob::OpFlash> FlashVector;
 
     /**
@@ -85,7 +109,7 @@ private:
      *
      *  @return the output charged cluster
      */
-    flashana::QCluster_t GetChargeCluster(const PFParticleMap &pfParticleMap, const PFParticlesToSpacePoints &pfParticleToSpacePointMap,
+    DepositionVector GetDepositionVector(const PFParticleMap &pfParticleMap, const PFParticlesToSpacePoints &pfParticleToSpacePointMap,
         const SpacePointsToHits &spacePointToHitMap, const Slice &slice) const;
 
     /**
@@ -109,42 +133,52 @@ private:
         PFParticleVector &downstreamPFParticles) const;
 
     /**
+     *  @brief  Convert from deposited charge to number of photons for a given particle
+     *
+     *  @param  charge the input charge
+     *  @param  particle the input particle
+     *
+     *  @return the number of photons
+     */
+    float GetNPhotons(const float charge, const art::Ptr<recob::PFParticle> &particle) const;
+
+    /**
      *  @breif  Determine if a given slice is compatible with the beam flash by applying pre-selection cuts
      *
-     *  @param  chargeCluster the charge cluster from the space points in the slice
+     *  @param  depositionVector the charge cluster from the space points in the slice
      *  @param  beamFlash the beam flash
      *
-     *  @return if the chargeCluster is compatible with the beamFlash
+     *  @return if the depositionVector is compatible with the beamFlash
      */
-    bool IsSliceCompatibleWithBeamFlash(const flashana::QCluster_t &chargeCluster, const recob::OpFlash &beamFlash) const;
+    bool IsSliceCompatibleWithBeamFlash(const DepositionVector &depositionVector, const recob::OpFlash &beamFlash) const;
 
     /**
      *  @brief  Get the centroid of the input charge cluster, weighted by charge
      *
-     *  @param  chargeCluster the input charge cluster
+     *  @param  depositionVector the input charge cluster
      *
      *  @return the charge weighted centroid
      */
-    pandora::CartesianVector GetChargeWeightedCenter(const flashana::QCluster_t &chargeCluster) const;
+    pandora::CartesianVector GetChargeWeightedCenter(const DepositionVector &depositionVector) const;
 
     /**
      *  @brief  Get the total charge from an input charge cluster
      *
-     *  @param  chargeCluster the input charge cluster
+     *  @param  depositionVector the input charge cluster
      *
      *  @return the total charge
      */
-    float GetTotalCharge(const flashana::QCluster_t &chargeCluster) const;
+    float GetTotalCharge(const DepositionVector &depositionVector) const;
 
     /**
      *  @breif  Apply flash matching between the input charge cluster and beam flash and return the score
      *
-     *  @param  chargeCluster the input charge cluster
+     *  @param  depositionVector the input charge cluster
      *  @param  beamFlash the input beam flash
      *
      *  @return the flash match score
      */
-    float GetFlashMatchScore(const flashana::QCluster_t &chargeCluster, const recob::OpFlash &beamFlash);
+    float GetFlashMatchScore(const DepositionVector &depositionVector, const recob::OpFlash &beamFlash);
 
     /**
      *  @breif  Convert a recob::OpFlash into a flashana::Flash_t
@@ -158,11 +192,11 @@ private:
     /**
      *  @brief  Convert a charge cluster into a light cluster by applying the chargeToPhotonFactor to every point
      *
-     *  @param  chargeCluster the input charge cluster
+     *  @param  depositionVector the input charge cluster
      *
      *  @return the output light cluster
      */
-    flashana::QCluster_t GetLightCluster(const flashana::QCluster_t &chargeCluster);
+    flashana::QCluster_t GetLightCluster(const DepositionVector &depositionVector);
 
     // Producer labels
     std::string  m_flashLabel;    ///< The label of the flash producer
@@ -182,9 +216,10 @@ private:
     float        m_maxChargeToLightRatio;  ///< The maximum ratio between the total charge and the total PE
 
     // Variables required for flash matching
-    float                       m_chargeToPhotonFactor; ///< The conversion factor between chargee an number of photons
-    flashana::FlashMatchManager m_flashMatchManager;    ///< The flash match manager
-    std::vector<unsigned int>   m_opDetVector;          ///< The ordered vector of optical detector IDs
+    float                          m_chargeToNPhotonsTrack;   ///< The conversion factor between charge and number of photons for tracks
+    float                          m_chargeToNPhotonsShower;  ///< The conversion factor between charge and number of photons for showers
+    flashana::FlashMatchManager    m_flashMatchManager;       ///< The flash match manager
+    std::vector<unsigned int>      m_opDetVector;             ///< The ordered vector of optical detector IDs
 };
 
 DEFINE_ART_CLASS_TOOL(FlashNeutrinoId)
@@ -209,7 +244,8 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_maxDeltaZSigma(pset.get<float>("MaxDeltaZSigma")),
     m_minChargeToLightRatio(pset.get<float>("MinChargeToLightRatio")),
     m_maxChargeToLightRatio(pset.get<float>("MaxChargeToLightRatio")),
-    m_chargeToPhotonFactor(pset.get<float>("ChargeToPhotonFactor"))
+    m_chargeToNPhotonsTrack(pset.get<float>("ChargeToNPhotonsTrack")),
+    m_chargeToNPhotonsShower(pset.get<float>("ChargeToNPhotonsShower"))
 {
     m_flashMatchManager.Configure(pset.get<flashana::Config_t>("FlashMatchConfig"));
     
@@ -239,7 +275,7 @@ void FlashNeutrinoId::GetOrderedOpDetVector(fhicl::ParameterSet const &pset)
 
         for (const auto &opDet : pmtMapping)
         {
-            // Each OpDet in the defauly list must be listed once and only once
+            // Each OpDet in the default list must be listed once and only once
             if (std::count(opDetVector.begin(), opDetVector.end(), opDet) != 1)
                 throw cet::exception("FlashNeutrinoId") << "Unknown or repeated PMT ID: " << opDet << std::endl;
 
@@ -286,17 +322,17 @@ void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt)
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
         // Collect all spacepoints in the slice that were produced from a hit on the collection plane, and assign them the corresponding charge
-        const auto chargeCluster(this->GetChargeCluster(pfParticleMap, pfParticleToSpacePointMap, spacePointToHitMap, slices.at(sliceIndex)));
+        const auto depositionVector(this->GetDepositionVector(pfParticleMap, pfParticleToSpacePointMap, spacePointToHitMap, slices.at(sliceIndex)));
 
-        if (chargeCluster.empty())
+        if (depositionVector.empty())
             continue;
 
         // Apply the pre-selection cuts to ensure that the slice is compatible with the beam flash
-        if (!this->IsSliceCompatibleWithBeamFlash(chargeCluster, beamFlash))
+        if (!this->IsSliceCompatibleWithBeamFlash(depositionVector, beamFlash))
             continue;
 
         // Apply flash-matching, and store this slice if it has the current highest score
-        const auto flashMatchScore(this->GetFlashMatchScore(chargeCluster, beamFlash));
+        const auto flashMatchScore(this->GetFlashMatchScore(depositionVector, beamFlash));
         if (flashMatchScore > highestFlashMatchScore)
         {
             highestFlashMatchScore = flashMatchScore;
@@ -347,7 +383,7 @@ void FlashNeutrinoId::GetFlashesInBeamWindow(const FlashVector &flashes, FlashVe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-flashana::QCluster_t FlashNeutrinoId::GetChargeCluster(const PFParticleMap &pfParticleMap,
+FlashNeutrinoId::DepositionVector FlashNeutrinoId::GetDepositionVector(const PFParticleMap &pfParticleMap,
     const PFParticlesToSpacePoints &pfParticleToSpacePointMap, const SpacePointsToHits &spacePointToHitMap, const Slice &slice) const
 {
     // Collect all PFParticles in the slice, including those downstream of the primaries
@@ -355,7 +391,7 @@ flashana::QCluster_t FlashNeutrinoId::GetChargeCluster(const PFParticleMap &pfPa
     PFParticleVector allParticlesInSlice;
     this->CollectDownstreamPFParticles(pfParticleMap, slice.GetTargetHypothesis(), allParticlesInSlice);
 
-    flashana::QCluster_t chargeCluster;
+    DepositionVector depositionVector;
     for (const auto &particle : allParticlesInSlice)
     {
         // Get the associated spacepoints
@@ -377,11 +413,13 @@ flashana::QCluster_t FlashNeutrinoId::GetChargeCluster(const PFParticleMap &pfPa
             
             // Add the charged point to the vector
             const auto &position(spacePoint->XYZ());
-            chargeCluster.emplace_back(position[0], position[1], position[2], hit->Integral());
+            const auto charge(hit->Integral());
+
+            depositionVector.emplace_back(position[0], position[1], position[2], charge, this->GetNPhotons(charge, particle));
         }
     }
 
-    return chargeCluster;
+    return depositionVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -413,23 +451,30 @@ void FlashNeutrinoId::CollectDownstreamPFParticles(const PFParticleMap &pfPartic
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool FlashNeutrinoId::IsSliceCompatibleWithBeamFlash(const flashana::QCluster_t &chargeCluster, const recob::OpFlash &beamFlash) const
+float FlashNeutrinoId::GetNPhotons(const float charge, const art::Ptr<recob::PFParticle> &particle) const
+{
+    return (LArPandoraHelper::IsTrack(particle) ? m_chargeToNPhotonsTrack : m_chargeToNPhotonsShower);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool FlashNeutrinoId::IsSliceCompatibleWithBeamFlash(const FlashNeutrinoId::DepositionVector &depositionVector, const recob::OpFlash &beamFlash) const
 {
     // Check the flash is usable
-    if (beamFlash.TotalPE() < std::numeric_limits<float>::epsilon())
+    if (beamFlash.TotalPE() <= std::numeric_limits<float>::epsilon())
         return false;
     
-    if (beamFlash.YWidth() < std::numeric_limits<float>::epsilon())
+    if (beamFlash.YWidth() <= std::numeric_limits<float>::epsilon())
         return false;
     
-    if (beamFlash.ZWidth() < std::numeric_limits<float>::epsilon())
+    if (beamFlash.ZWidth() <= std::numeric_limits<float>::epsilon())
         return false;
 
     // Calculate the pre-selection variables
-    const auto chargeCenter(this->GetChargeWeightedCenter(chargeCluster));
+    const auto chargeCenter(this->GetChargeWeightedCenter(depositionVector));
     const auto deltaY(std::abs(chargeCenter.GetY() - beamFlash.YCenter()));
     const auto deltaZ(std::abs(chargeCenter.GetZ() - beamFlash.ZCenter()));
-    const auto chargeToLightRatio(this->GetTotalCharge(chargeCluster) / beamFlash.TotalPE());  // TODO ATTN check if this should be total PE or max PE. Code differs from technote
+    const auto chargeToLightRatio(this->GetTotalCharge(depositionVector) / beamFlash.TotalPE());  // TODO ATTN check if this should be total PE or max PE. Code differs from technote
 
     // Check if the slice passes the pre-selection cuts
     return (deltaY < m_maxDeltaY                           &&
@@ -442,18 +487,18 @@ bool FlashNeutrinoId::IsSliceCompatibleWithBeamFlash(const flashana::QCluster_t 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::CartesianVector FlashNeutrinoId::GetChargeWeightedCenter(const flashana::QCluster_t &chargeCluster) const
+pandora::CartesianVector FlashNeutrinoId::GetChargeWeightedCenter(const FlashNeutrinoId::DepositionVector &depositionVector) const
 {
     pandora::CartesianVector center(0.f, 0.f, 0.f);
     float totalCharge(0.f);
 
-    for (const auto &chargePoint : chargeCluster)
+    for (const auto &chargePoint : depositionVector)
     {
-        center += pandora::CartesianVector(chargePoint.x, chargePoint.y, chargePoint.z) * chargePoint.q;
-        totalCharge += chargePoint.q;
+        center += pandora::CartesianVector(chargePoint.m_x, chargePoint.m_y, chargePoint.m_z) * chargePoint.m_charge;
+        totalCharge += chargePoint.m_charge;
     }
 
-    if (totalCharge < std::numeric_limits<float>::epsilon())
+    if (totalCharge <= std::numeric_limits<float>::epsilon())
         throw cet::exception("FlashNeutrinoId") << "Can't find charge weighted center of slice with zero total charge" << std::endl;
 
     center *= (1.f / totalCharge);
@@ -463,25 +508,25 @@ pandora::CartesianVector FlashNeutrinoId::GetChargeWeightedCenter(const flashana
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float FlashNeutrinoId::GetTotalCharge(const flashana::QCluster_t &chargeCluster) const
+float FlashNeutrinoId::GetTotalCharge(const FlashNeutrinoId::DepositionVector &depositionVector) const
 {
     float totalCharge(0.f);
 
-    for (const auto &chargePoint : chargeCluster)
-        totalCharge += chargePoint.q;
+    for (const auto &chargePoint : depositionVector)
+        totalCharge += chargePoint.m_charge;
 
     return totalCharge;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float FlashNeutrinoId::GetFlashMatchScore(const flashana::QCluster_t &chargeCluster, const recob::OpFlash &beamFlash)
+float FlashNeutrinoId::GetFlashMatchScore(const FlashNeutrinoId::DepositionVector &depositionVector, const recob::OpFlash &beamFlash)
 {
     m_flashMatchManager.Reset();
 
     // Convert the flash and the charge cluster into the required format for flash matching
     auto flash(this->ConvertFlashFormat(beamFlash));
-    auto lightCluster(this->GetLightCluster(chargeCluster));
+    auto lightCluster(this->GetLightCluster(depositionVector));
 
     // Perform the match
     m_flashMatchManager.Emplace(std::move(flash));
@@ -536,28 +581,25 @@ flashana::Flash_t FlashNeutrinoId::ConvertFlashFormat(const recob::OpFlash &beam
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-flashana::QCluster_t FlashNeutrinoId::GetLightCluster(const flashana::QCluster_t &chargeCluster)
+flashana::QCluster_t FlashNeutrinoId::GetLightCluster(const FlashNeutrinoId::DepositionVector &depositionVector)
 {
     flashana::QCluster_t lightCluster;
-    std::vector<flashana::Hit3D_t> hits;
 
-    // Conver the charge cluster to the required format
-    for (const auto &point : chargeCluster)
-    {
-        flashana::Hit3D_t hit;
-        hit.x = point.x;
-        hit.y = point.y;
-        hit.z = point.z;
-        hit.q = point.q;
-        hit.plane = 2;
-
-        hits.push_back(hit);
-    }
-
-    // TODO We need to use a different conversion factor depending on the particle type of the 
-    //lightCluster += static_cast<flashana::LightCharge *>(m_flashMatchManager.GetCustomAlgo("LightCharge"))->FlashHypothesisCharge(hits, 1.f);
+    for (const auto &point : depositionVector)
+        lightCluster.emplace_back(point.m_x, point.m_y, point.m_z, point.m_nPhotons);
 
     return lightCluster;
 }        
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+FlashNeutrinoId::Deposition::Deposition(const float x, const float y, const float z, const float charge, const float nPhotons) :
+    m_x(x),
+    m_y(y),
+    m_z(z),
+    m_charge(charge),
+    m_nPhotons(nPhotons)
+{
+}
 
 } // namespace lar_pandora
