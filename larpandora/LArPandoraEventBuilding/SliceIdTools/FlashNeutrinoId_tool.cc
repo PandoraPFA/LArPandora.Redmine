@@ -286,20 +286,42 @@ void FlashNeutrinoId::GetOrderedOpDetVector(fhicl::ParameterSet const &pset)
     {
         m_opDetVector = opDetVector;
     }
+
+    // BEGIN DEBUG
+    std::cout << "FlashNeutrinoId - Configured OpDets" << std::endl;
+    for (const auto &opDet : m_opDetVector)
+        std::cout << opDet << "  ";
+    std::cout << std::endl;
+    // END DEBUG
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt) 
 {
+    // BEGIN DEBUG
+    std::cout << std::endl;
+    std::cout << "FlashNeutrinoId --------------------------------------------" << std::endl;
+    std::cout << "Checking for slices" << std::endl;
+    // END DEBUG
+    
     if (slices.empty())
         return;
+    
+    // BEGIN DEBUG
+    std::cout << "Need to choose between " << slices.size() << " slices" << std::endl;
+    std::cout << "Checking for a beam flash" << std::endl;
+    // END DEBUG
 
     // Find the flash, if any, in time with the beam with the largest number of photoelectrons that is sufficiently bright
     recob::OpFlash beamFlash;
     if (!this->GetBeamFlash(evt, beamFlash))
         return;
- 
+    
+    // BEGIN DEBUG
+    std::cout << "Found a viable beam flash!" << std::endl;
+    // END DEBUG
+    
     // Collect the PFParticles and their associations to SpacePoints
     PFParticleVector pfParticles;
     PFParticlesToSpacePoints pfParticleToSpacePointMap;
@@ -319,27 +341,62 @@ void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt)
     float highestFlashMatchScore(-std::numeric_limits<float>::max());
     unsigned int bestSliceIndex(std::numeric_limits<unsigned int>::max());
 
+    // BEGIN DEBUG
+    std::cout << std::endl;
+    std::cout << "Looking for a slice to match the flash" << std::endl;
+    // END DEBUG
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
         // Collect all spacepoints in the slice that were produced from a hit on the collection plane, and assign them the corresponding charge
         const auto depositionVector(this->GetDepositionVector(pfParticleMap, pfParticleToSpacePointMap, spacePointToHitMap, slices.at(sliceIndex)));
+    
+        // BEGIN DEBUG
+        std::cout << std::endl;
+        std::cout << "Slice " << sliceIndex << " ==========" << std::endl;
+        std::cout << "Found " << depositionVector.size() << " charge deposition points" << std::endl;
+        // END DEBUG
 
         if (depositionVector.empty())
             continue;
+        
+        // BEGIN DEBUG
+        std::cout << "Checking if slice is compatible with beam flash" << std::endl;
+        // END DEBUG
 
         // Apply the pre-selection cuts to ensure that the slice is compatible with the beam flash
         if (!this->IsSliceCompatibleWithBeamFlash(depositionVector, beamFlash))
             continue;
+        
+        // BEGIN DEBUG
+        std::cout << "Slice is compatible with the beam flash!" << std::endl;
+        std::cout << "Getting the flash match score" << std::endl;
+        // END DEBUG
 
         // Apply flash-matching, and store this slice if it has the current highest score
         const auto flashMatchScore(this->GetFlashMatchScore(depositionVector, beamFlash));
-        if (flashMatchScore > highestFlashMatchScore)
+    
+        // BEGIN DEBUG
+        std::cout << "Flash match score = " << flashMatchScore << std::endl;
+        // END DEBUG
+
+        if (flashMatchScore > highestFlashMatchScore && flashMatchScore > 0.f)
         {
+            // BEGIN DEBUG
+            std::cout << "This is the best match so far!" << std::endl;
+            // END DEBUG
             highestFlashMatchScore = flashMatchScore;
             bestSliceIndex = sliceIndex;
             foundViableSlice = true;
         }
     }
+            
+    // BEGIN DEBUG
+    std::cout << std::endl;
+    if (!foundViableSlice)
+        std::cout << "None of the slices matched with the flash!" << std::endl;
+    else
+        std::cout << "Found a match! Tagging slice " << bestSliceIndex << " as the neutrino" << std::endl;
+    // END DEBUG
 
     // Select the best slice (if any)
     if (foundViableSlice)
@@ -357,6 +414,10 @@ bool FlashNeutrinoId::GetBeamFlash(const art::Event &evt, recob::OpFlash &beamFl
     // Find those inside the beam window
     FlashVector flashesInBeamWindow;
     this->GetFlashesInBeamWindow(flashes, flashesInBeamWindow);
+    
+    // BEGIN DEBUG
+    std::cout << "There are are " << flashes.size() << " flashes, of which " << flashesInBeamWindow.size() << " are in the beam window" << std::endl;
+    // END DEBUG
 
     if (flashesInBeamWindow.empty())
         return false;
@@ -365,6 +426,14 @@ bool FlashNeutrinoId::GetBeamFlash(const art::Event &evt, recob::OpFlash &beamFl
     beamFlash = (*std::max_element(flashesInBeamWindow.begin(), flashesInBeamWindow.end(), [](const recob::OpFlash &a, const recob::OpFlash &b) {
         return a.TotalPE() < b.TotalPE();
     }));
+    
+    // BEGIN DEBUG
+    std::cout << "The PE of the flashes in the beam window are:" << std::endl;
+    for (const auto &flash : flashesInBeamWindow)
+        std::cout << " - " << flash.TotalPE() << std::endl;
+
+    std::cout << "The brightest flash has " << beamFlash.TotalPE() << " total PE" << std::endl;
+    // END DEBUG
 
     return (beamFlash.TotalPE() >= m_minBeamFlashPE);
 }
@@ -460,6 +529,10 @@ float FlashNeutrinoId::GetNPhotons(const float charge, const art::Ptr<recob::PFP
 
 bool FlashNeutrinoId::IsSliceCompatibleWithBeamFlash(const FlashNeutrinoId::DepositionVector &depositionVector, const recob::OpFlash &beamFlash) const
 {
+    // BEGIN DEBUG
+    std::cout << "Checking if beam flash is usable" << std::endl;
+    // END DEBUG
+    
     // Check the flash is usable
     if (beamFlash.TotalPE() <= std::numeric_limits<float>::epsilon())
         return false;
@@ -469,12 +542,20 @@ bool FlashNeutrinoId::IsSliceCompatibleWithBeamFlash(const FlashNeutrinoId::Depo
     
     if (beamFlash.ZWidth() <= std::numeric_limits<float>::epsilon())
         return false;
-
+    
     // Calculate the pre-selection variables
     const auto chargeCenter(this->GetChargeWeightedCenter(depositionVector));
     const auto deltaY(std::abs(chargeCenter.GetY() - beamFlash.YCenter()));
     const auto deltaZ(std::abs(chargeCenter.GetZ() - beamFlash.ZCenter()));
     const auto chargeToLightRatio(this->GetTotalCharge(depositionVector) / beamFlash.TotalPE());  // TODO ATTN check if this should be total PE or max PE. Code differs from technote
+    
+    // BEGIN DEBUG
+    std::cout << "Slice has the following features:" << std::endl;
+    std::cout << " - chargeCenter : " << chargeCenter.GetX() << ", " << chargeCenter.GetY() << ", " << chargeCenter.GetZ() << std::endl;
+    std::cout << " - deltaY       : " << deltaY << std::endl;
+    std::cout << " - deltaZ       : " << deltaZ << std::endl;
+    std::cout << " - Q / L ratio  : " << chargeToLightRatio << std::endl;
+    // END DEBUG
 
     // Check if the slice passes the pre-selection cuts
     return (deltaY < m_maxDeltaY                           &&
@@ -533,13 +614,17 @@ float FlashNeutrinoId::GetFlashMatchScore(const FlashNeutrinoId::DepositionVecto
     m_flashMatchManager.Emplace(std::move(lightCluster));
     const auto matches(m_flashMatchManager.Match());
 
+    // BEGIN DEBUG
+    std::cout << "Matching complete. Found " << matches.size() << " matches" << std::endl;
+    // END DEBUG
+
     // Unable to match
     if (matches.empty())
-        return 0.f;
+        return -1.f;
 
     if (matches.size() != 1)
         throw cet::exception("FlashNeutrinoId") << "Flash matching returned multiple matches!" << std::endl;
-
+    
     return matches.front().score;
 }
 
