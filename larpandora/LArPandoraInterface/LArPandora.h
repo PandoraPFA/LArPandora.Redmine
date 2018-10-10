@@ -54,6 +54,7 @@ private:
 
     std::string                     m_generatorModuleLabel;         ///< The generator module label
     std::string                     m_geantModuleLabel;             ///< The geant module label
+    std::string                     m_simChannelModuleLabel;        ///< The SimChannel producer module label
     std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
     std::string                     m_backtrackerModuleLabel;       ///< The back tracker module label
     

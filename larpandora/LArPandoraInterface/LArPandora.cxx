@@ -56,6 +56,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_printOverallRecoStatus(pset.get<bool>("PrintOverallRecoStatus", false)),
     m_generatorModuleLabel(pset.get<std::string>("GeneratorModuleLabel", "")),
     m_geantModuleLabel(pset.get<std::string>("GeantModuleLabel", "largeant")),
+    m_simChannelModuleLabel(pset.get<std::string>("SimChannelModuleLabel", m_geantModuleLabel)),
     m_hitfinderModuleLabel(pset.get<std::string>("HitFinderModuleLabel")),
     m_backtrackerModuleLabel(pset.get<std::string>("BackTrackerModuleLabel","")),
     m_allOutcomesInstanceLabel(pset.get<std::string>("AllOutcomesInstanceLabel", "allOutcomes")),
@@ -180,7 +181,7 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
 
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
 
-        LArPandoraHelper::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels);
+        LArPandoraHelper::CollectSimChannels(evt, m_simChannelModuleLabel, artSimChannels);
         if (!artSimChannels.empty())
         {
             LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
