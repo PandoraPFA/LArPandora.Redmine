@@ -31,6 +31,9 @@ flash_neutrino_id_tool :
     ChargeToNPhotonsTrack:    363.636
     ChargeToNPhotonsShower:   512.815
     FlashMatchConfig:         @local::flashmatch_config
+
+    # Debug
+    ShouldWriteToFile:        true
 }
     
 flash_neutrino_id_tool.FlashMatchConfig.FlashMatchManager.AllowReuseFlash: true
