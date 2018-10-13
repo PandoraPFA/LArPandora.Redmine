@@ -912,6 +912,7 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate() :
     m_run(-std::numeric_limits<int>::max()),
     m_subRun(-std::numeric_limits<int>::max()),
     m_event(-std::numeric_limits<int>::max()),
+    m_hasDeposition(false),
     m_totalCharge(-std::numeric_limits<float>::max()),
     m_centerX(-std::numeric_limits<float>::max()),
     m_centerY(-std::numeric_limits<float>::max()),
@@ -938,6 +939,7 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const S
     m_run(event.run()),
     m_subRun(event.subRun()),
     m_event(event.event()),
+    m_hasDeposition(false),
     m_totalCharge(-std::numeric_limits<float>::max()),
     m_centerX(-std::numeric_limits<float>::max()),
     m_centerY(-std::numeric_limits<float>::max()),
@@ -958,7 +960,9 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const S
     m_lightCluster = this->GetLightCluster(chargeDeposition);
     
     m_totalCharge = this->GetTotalCharge(chargeDeposition);
-    if (m_totalCharge <= std::numeric_limits<float>::epsilon())
+    m_hasDeposition = (m_totalCharge > std::numeric_limits<float>::epsilon());
+
+    if (!m_hasDeposition)
         return;
 
     const auto chargeCenter(this->GetChargeWeightedCenter(chargeDeposition));
