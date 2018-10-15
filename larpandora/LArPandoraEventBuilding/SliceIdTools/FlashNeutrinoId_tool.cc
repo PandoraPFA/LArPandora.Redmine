@@ -1043,7 +1043,7 @@ void FlashNeutrinoId::SliceCandidate::CollectDownstreamPFParticles(const PFParti
 
 float FlashNeutrinoId::SliceCandidate::GetNPhotons(const float charge, const art::Ptr<recob::PFParticle> &particle) const
 {
-    return (LArPandoraHelper::IsTrack(particle) ? m_chargeToNPhotonsTrack : m_chargeToNPhotonsShower);
+    return charge * (LArPandoraHelper::IsTrack(particle) ? m_chargeToNPhotonsTrack : m_chargeToNPhotonsShower);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
