@@ -189,8 +189,10 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
         else
         {
             if (m_backtrackerModuleLabel.empty())
+            {
               throw cet::exception("LArPandora") << "LArPandora::CreatePandoraInput - Can't build MCParticle to Hit map." << std::endl <<
                   "No SimChannels found and BackTrackerModuleLabel isn't set in FHiCL." << std::endl;
+            }
 
             LArPandoraHelper::BuildMCParticleHitMaps(evt, m_hitfinderModuleLabel, m_backtrackerModuleLabel, artHitsToTrackIDEs);
         }
