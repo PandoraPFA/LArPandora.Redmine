@@ -352,9 +352,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
     const PFParticleVector emptyPFParticleVector;
 
     // Produce the slices
-
-    // ATTN slice indices are enumerated from 1
-    for (unsigned int sliceId = 1; sliceId <= targetScores.size(); ++sliceId)
+    for (const unsigned int sliceId : usedSliceIds)
     {
         // Get the target score
         const auto targetScoresIter(targetScores.find(sliceId));
@@ -423,7 +421,7 @@ bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFP
     }
 }
 
-<<<<<<< HEAD
+
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
@@ -443,7 +441,5 @@ void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
     m_pSubRunTree->Fill();  
 }
 
-=======
->>>>>>> Extended neutrino id tool to the general slice id tool - now works for protoDUNE
 } // namespace lar_pandora
 
