@@ -18,6 +18,7 @@ set(
                         ${PANDORAMONITORING}
                         LArPandoraContent
                         larpandora_LArPandoraInterface
+                        larpandora_LArPandoraEventBuilding
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}

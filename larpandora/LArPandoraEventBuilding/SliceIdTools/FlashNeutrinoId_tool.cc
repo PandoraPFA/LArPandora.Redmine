@@ -19,6 +19,7 @@
 #include "ubana/LLSelectionTool/OpT0Finder/Base/FlashMatchManager.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+#include "larpandora/LArPandoraEventBuilding/LArPandoraSliceIdHelper.h"
 #include "larpandora/LArPandoraEventBuilding/SliceIdBaseTool.h"
 #include "larpandora/LArPandoraEventBuilding/Slice.h"
 
@@ -404,9 +405,11 @@ private:
     /**
      *  @brief  Fill the slice tree
      *
+     *  @param  evt the art event
+     *  @param  slices the input vector of slices
      *  @param  sliceCandidates the candidate slices
      */
-    void FillSliceTree(const SliceCandidateVector &sliceCandidates);
+    void FillSliceTree(const art::Event &evt, const SliceVector &slices, const SliceCandidateVector &sliceCandidates);
 
     // Producer labels
     std::string  m_flashLabel;    ///< The label of the flash producer
@@ -432,13 +435,21 @@ private:
     std::vector<unsigned int>      m_opDetVector;             ///< The ordered vector of optical detector IDs
 
     // Debugging / testing
-    bool            m_shouldWriteToFile;  ///< If we should write interesting information to a root file
-    OutputEvent     m_outputEvent;        ///< The output event whose address is used by the output branch
-    FlashCandidate  m_outputFlash;        ///< The output flash whose address is used by the output branch
-    SliceCandidate  m_outputSlice;        ///< The output slice whose address is used by the output branch
-    TTree          *m_pEventTree;         ///< The event tree
-    TTree          *m_pFlashTree;         ///< The flash tree
-    TTree          *m_pSliceTree;         ///< The slice tree
+    bool                                    m_shouldWriteToFile;   ///< If we should write interesting information to a root file
+    bool                                    m_hasMCNeutrino;       ///< If there is an MC neutrino we can use to get truth information
+    int                                     m_nuInteractionType;   ///< The interaction type code from MCTruth
+    float                                   m_nuEnergy;            ///< The true neutrino energy
+    std::string                             m_truthLabel;          ///< The MCTruth producer label
+    std::string                             m_mcParticleLabel;     ///< The MCParticle producer label
+    std::string                             m_hitLabel;            ///< The Hit producer label
+    std::string                             m_backtrackLabel;      ///< The Hit -> MCParticle producer label
+    OutputEvent                             m_outputEvent;         ///< The output event whose address is used by the output branch
+    FlashCandidate                          m_outputFlash;         ///< The output flash whose address is used by the output branch
+    SliceCandidate                          m_outputSlice;         ///< The output slice whose address is used by the output branch
+    LArPandoraSliceIdHelper::SliceMetadata  m_outputSliceMetadata; ///< The output slice metadata whose address is used by the output branch
+    TTree                                  *m_pEventTree;          ///< The event tree
+    TTree                                  *m_pFlashTree;          ///< The flash tree
+    TTree                                  *m_pSliceTree;          ///< The slice tree
 };
 
 DEFINE_ART_CLASS_TOOL(FlashNeutrinoId)
@@ -466,6 +477,11 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_chargeToNPhotonsTrack(pset.get<float>("ChargeToNPhotonsTrack")),
     m_chargeToNPhotonsShower(pset.get<float>("ChargeToNPhotonsShower")),
     m_shouldWriteToFile(pset.get<bool>("ShouldWriteToFile", false)),
+    m_hasMCNeutrino(m_shouldWriteToFile ? pset.get<bool>("HasMCNeutrino") : false),
+    m_truthLabel(m_hasMCNeutrino ? pset.get<std::string>("MCTruthLabel") : ""),
+    m_mcParticleLabel(m_hasMCNeutrino ? pset.get<std::string>("MCParticleLabel") : ""),
+    m_hitLabel(m_hasMCNeutrino ? pset.get<std::string>("HitLabel") : ""),
+    m_backtrackLabel(m_hasMCNeutrino ? pset.get<std::string>("BacktrackerLabel") : ""),
     m_pEventTree(nullptr),
     m_pFlashTree(nullptr),
     m_pSliceTree(nullptr)
@@ -536,8 +552,17 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pSliceTree->Branch("flashMatchScore"   , &m_outputSlice.m_flashMatchScore   , "flashMatchScore/F");
     m_pSliceTree->Branch("totalPEHypothesis" , &m_outputSlice.m_totalPEHypothesis , "totalPEHypothesis/F");
     m_pSliceTree->Branch("isTaggedAsTarget"  , &m_outputSlice.m_isTaggedAsTarget  , "isTaggedAsTarget/O");
-    // TODO if neutrino MC info is available in the input file, then add:
-    //     slice purity, completeness, isMostComplete, interaction type & true nu energy
+
+    if (m_hasMCNeutrino)
+    {
+        // Truth MC information about the slice
+        m_pSliceTree->Branch("purity"           , &m_outputSliceMetadata.m_purity        , "purity/F");
+        m_pSliceTree->Branch("completeness"     , &m_outputSliceMetadata.m_completeness  , "completeness/F");
+        m_pSliceTree->Branch("isMostComplete"   , &m_outputSliceMetadata.m_isMostComplete, "isMostComplete/O");
+        m_pSliceTree->Branch("nHits"            , &m_outputSliceMetadata.m_nHits         , "nHits/I");
+        m_pSliceTree->Branch("nuInteractionType", &m_nuInteractionType                   , "nuInteractionType/F");
+        m_pSliceTree->Branch("nuEnergy"         , &m_nuEnergy                            , "nuEnergy/F");
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -607,7 +632,7 @@ void FlashNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &evt)
         return;
 
     this->FillFlashTree(flashCandidates);
-    this->FillSliceTree(sliceCandidates);
+    this->FillSliceTree(evt, slices, sliceCandidates);
     this->FillEventTree();
 }
 
@@ -760,14 +785,37 @@ void FlashNeutrinoId::FillFlashTree(const FlashCandidateVector &flashCandidates)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
     
-void FlashNeutrinoId::FillSliceTree(const SliceCandidateVector &sliceCandidates)
+void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &slices, const SliceCandidateVector &sliceCandidates)
 {
     if (!m_pSliceTree)
         throw cet::exception("FlashNeutrinoId") << "Trying to fill the slice tree which hasn't been configured" << std::endl;
     
-    for (const auto &sliceCandidate : sliceCandidates)
+    // We won't ever have any slice candidates if there wasn't a beam flash, so just skip!
+    if (!m_outputEvent.m_hasBeamFlash)
+        return;
+ 
+    if (slices.size() != sliceCandidates.size())
+        throw cet::exception("FlashNeutrinoId") << "The number of slice candidates doesn't match the number of slices" << std::endl;
+
+    // If available, get the information from the MC neutrino
+    LArPandoraSliceIdHelper::SliceMetadataVector sliceMetadata;
+    if (m_hasMCNeutrino)
     {
-        m_outputSlice = sliceCandidate;
+        LArPandoraSliceIdHelper::GetSliceMetadata(slices, evt, m_truthLabel, m_mcParticleLabel, m_hitLabel, m_backtrackLabel,
+            m_pandoraLabel, sliceMetadata, m_nuInteractionType, m_nuEnergy);
+    }
+
+    if (slices.size() != sliceMetadata.size())
+        throw cet::exception("FlashNeutrinoId") << "The number of slice metadata doesn't match the number of slices" << std::endl;
+   
+    // Output the info for each slice
+    for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
+    {
+        m_outputSlice = sliceCandidates.at(sliceIndex);
+
+        if (m_hasMCNeutrino)
+            m_outputSliceMetadata = sliceMetadata.at(sliceIndex);
+
         m_pSliceTree->Fill();
     }
 }
