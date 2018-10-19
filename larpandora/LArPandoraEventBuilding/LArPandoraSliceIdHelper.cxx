@@ -23,12 +23,14 @@ namespace lar_pandora
 
 void LArPandoraSliceIdHelper::GetSliceMetadata(const SliceVector &slices, const art::Event &evt, const std::string &truthLabel,
     const std::string &mcParticleLabel, const std::string &hitLabel, const std::string &backtrackLabel, const std::string &pandoraLabel,
-    SliceMetadataVector &sliceMetadata, simb::MCNeutrino &mcNeutrino)
+    SliceMetadataVector &sliceMetadata, int &interactionType, float &nuEnergy)
 {
     // Find the beam neutrino in MC
     const auto beamNuMCTruth(LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth(evt, truthLabel));
-    mcNeutrino = beamNuMCTruth->GetNeutrino();
-
+    const auto mcNeutrino(beamNuMCTruth->GetNeutrino());
+    interactionType = mcNeutrino.InteractionType();
+    nuEnergy = mcNeutrino.Nu().E();
+    
     // Collect all MC particles resulting from the beam neutrino
     MCParticleVector mcParticles;
     LArPandoraSliceIdHelper::CollectNeutrinoMCParticles(evt, truthLabel, mcParticleLabel, beamNuMCTruth, mcParticles);
