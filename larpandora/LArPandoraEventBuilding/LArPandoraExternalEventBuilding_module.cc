@@ -266,6 +266,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
     std::map<unsigned int, float> targetScores;
     std::map<unsigned int, PFParticleVector> crHypotheses;
     std::map<unsigned int, PFParticleVector> targetHypotheses;
+    std::vector<unsigned int> usedSliceIds;
 
     // Collect the slice information
     for (const auto &part : allParticles)
@@ -288,8 +289,14 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         const unsigned int sliceId(static_cast<unsigned int>(std::round(this->GetMetadataValue(parentIt->second, "SliceIndex"))));
         const float targetScore(this->GetMetadataValue(parentIt->second, m_scoreKey));
 
-        // ATTN all PFParticles in the same slice will have the same targetScore
-        targetScores[sliceId] = targetScore;
+        // Keep track of the slice IDs we have used, and their corresponding score
+        if (std::find(usedSliceIds.begin(), usedSliceIds.end(), sliceId) == usedSliceIds.end())
+        {
+            usedSliceIds.push_back(sliceId);
+
+            // ATTN all PFParticles in the same slice will have the same targetScore
+            targetScores[sliceId] = targetScore;
+        }
 
         if (this->IsTarget(parentIt->second))
         {
@@ -301,13 +308,15 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         }
     }
 
+    // Sort the slice IDs to ensure reproducibility
+    std::sort(usedSliceIds.begin(), usedSliceIds.end());
+
     // ATTN: we need to ensure that for each slice there is a cosmic and neutrino hypothesis, even if the pass created no PFOs
     // in such a case we add an empty vector of pfparticles
     const PFParticleVector emptyPFParticleVector;
 
     // Produce the slices
-    // ATTN slice indices are enumerated from 1
-    for (unsigned int sliceId = 1; sliceId <= targetScores.size(); ++sliceId)
+    for (const unsigned int sliceId : usedSliceIds)
     {
         // Get the target score
         const auto targetScoresIter(targetScores.find(sliceId));
@@ -315,6 +324,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
             throw cet::exception("LArPandoraExternalEventBuilding") << "Scrambled slice information - can't find target score with id = " << sliceId << std::endl;
 
         PFParticleVector targetPFParticleVector, crPFParticleVector;
+
         // Get the target hypothesis
         const auto targetHypothesisIter(targetHypotheses.find(sliceId));
         targetPFParticleVector = ((targetHypothesisIter == targetHypotheses.end()) ? emptyPFParticleVector : targetHypothesisIter->second);
@@ -322,7 +332,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         // Get the cosmic hypothesis
         const auto crHypothesisIter(crHypotheses.find(sliceId));
         crPFParticleVector = ((crHypothesisIter == crHypotheses.end()) ? emptyPFParticleVector : crHypothesisIter->second);
-
+        
         slices.emplace_back(targetScoresIter->second, targetPFParticleVector, crPFParticleVector);
     }
 }
