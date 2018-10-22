@@ -218,6 +218,14 @@ private:
         SliceCandidate(const art::Event &event, const Slice &slice, const PFParticleMap &pfParticleMap,
             const PFParticlesToSpacePoints &pfParticleToSpacePointMap, const SpacePointsToHits &spacePointToHitMap,
             const float chargeToNPhotonsTrack, const float chargeToNPhotonsShower);
+
+        /**
+         *  @brief  Parametrized constructor for slices that aren't considered by the flash neutrino ID module - monitoring only
+         *
+         *  @param  event the art event
+         *  @param  slice the slice
+         */
+        SliceCandidate(const art::Event &event, const Slice &slice);
         
         /**
          *  @breif  Determine if a given slice is compatible with the beam flash by applying pre-selection cuts
@@ -320,23 +328,26 @@ private:
     
     public:
         // Features of the slice are used when writing to file is enabled
-        int   m_run;                     ///< The run number
-        int   m_subRun;                  ///< The subRun number
-        int   m_event;                   ///< The event number
-        bool  m_hasDeposition;           ///< If the slice has any charge deposited on the collection plane which produced a spacepoint
-        float m_totalCharge;             ///< The total charge deposited on the collection plane by hits that produced spacepoints
-        float m_centerX;                 ///< The charge weighted center of the slice in X
-        float m_centerY;                 ///< The charge weighted center of the slice in Y
-        float m_centerZ;                 ///< The charge weighted center of the slice in Z
-        float m_deltaY;                  ///< The distance of the slice centroid from the flash centroid in Y
-        float m_deltaZ;                  ///< The distance of the slice centroid from the flash centroid in Z
-        float m_deltaYSigma;             ///< deltaY but in units of the flash width in Y
-        float m_deltaZSigma;             ///< deltaZ but in units of the flash width in Z
-        float m_chargeToLightRatio;      ///< The ratio between the total charge and the total PE of the beam flash
-        bool  m_passesPrecuts;           ///< If the slice passes the preselection cuts
-        float m_flashMatchScore;         ///< The flash matching score between the slice and the beam flash
-        float m_totalPEHypothesis;       ///< The total PE of the hypothesized flash for this slice
-        bool  m_isTaggedAsTarget;        ///< If the slice has been tagged as the target (neutrino)
+        int   m_run;                      ///< The run number
+        int   m_subRun;                   ///< The subRun number
+        int   m_event;                    ///< The event number
+        bool  m_hasDeposition;            ///< If the slice has any charge deposited on the collection plane which produced a spacepoint
+        float m_totalCharge;              ///< The total charge deposited on the collection plane by hits that produced spacepoints
+        float m_centerX;                  ///< The charge weighted center of the slice in X
+        float m_centerY;                  ///< The charge weighted center of the slice in Y
+        float m_centerZ;                  ///< The charge weighted center of the slice in Z
+        float m_deltaY;                   ///< The distance of the slice centroid from the flash centroid in Y
+        float m_deltaZ;                   ///< The distance of the slice centroid from the flash centroid in Z
+        float m_deltaYSigma;              ///< deltaY but in units of the flash width in Y
+        float m_deltaZSigma;              ///< deltaZ but in units of the flash width in Z
+        float m_chargeToLightRatio;       ///< The ratio between the total charge and the total PE of the beam flash
+        bool  m_passesPrecuts;            ///< If the slice passes the preselection cuts
+        float m_flashMatchScore;          ///< The flash matching score between the slice and the beam flash
+        float m_totalPEHypothesis;        ///< The total PE of the hypothesized flash for this slice
+        bool  m_isTaggedAsTarget;         ///< If the slice has been tagged as the target (neutrino)
+        bool  m_isConsideredByFlashId;    ///< If the slice was considered by the flash ID tool - this will be false if there wasn't a beam flash found in the event
+        float m_topologicalNeutrinoScore; ///< The topological-information-only neutrino ID score from Pandora
+        bool  m_hasBestTopologicalScore;  ///< If this slice has the highest topological score in the event
         
         float                m_chargeToNPhotonsTrack;   ///< The conversion factor between charge and number of photons for tracks
         float                m_chargeToNPhotonsShower;  ///< The conversion factor between charge and number of photons for showers
@@ -410,6 +421,13 @@ private:
      *  @param  sliceCandidates the candidate slices
      */
     void FillSliceTree(const art::Event &evt, const SliceVector &slices, const SliceCandidateVector &sliceCandidates);
+
+    /**
+     *  @brief  Identify the slice which has the largest topological neutrino ID score, and flag it
+     *
+     *  @param  sliceCandidates the candidate slices
+     */
+    void IdentifySliceWithBestTopologicalScore(SliceCandidateVector &sliceCandidates) const;
 
     // Producer labels
     std::string  m_flashLabel;    ///< The label of the flash producer
@@ -535,23 +553,26 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pFlashTree->Branch("isBeamFlash"        , &m_outputFlash.m_isBeamFlash        , "isBeamFlash/O");
 
     m_pSliceTree = fileService->make<TTree>("slices","");
-    m_pSliceTree->Branch("run"               , &m_outputSlice.m_run               , "run/I");
-    m_pSliceTree->Branch("subRun"            , &m_outputSlice.m_subRun            , "subRun/I");
-    m_pSliceTree->Branch("event"             , &m_outputSlice.m_event             , "event/I");
-    m_pSliceTree->Branch("hasDeposition"     , &m_outputSlice.m_hasDeposition     , "hasDeposition/O");
-    m_pSliceTree->Branch("totalCharge"       , &m_outputSlice.m_totalCharge       , "totalCharge/F");
-    m_pSliceTree->Branch("centerX"           , &m_outputSlice.m_centerX           , "centerX/F");
-    m_pSliceTree->Branch("centerY"           , &m_outputSlice.m_centerY           , "centerY/F");
-    m_pSliceTree->Branch("centerZ"           , &m_outputSlice.m_centerZ           , "centerZ/F");
-    m_pSliceTree->Branch("deltaY"            , &m_outputSlice.m_deltaY            , "deltaY/F");
-    m_pSliceTree->Branch("deltaZ"            , &m_outputSlice.m_deltaZ            , "deltaZ/F");
-    m_pSliceTree->Branch("deltaYSigma"       , &m_outputSlice.m_deltaYSigma       , "deltaYSigma/F");
-    m_pSliceTree->Branch("deltaZSigma"       , &m_outputSlice.m_deltaZSigma       , "deltaZSigma/F");
-    m_pSliceTree->Branch("chargeToLightRatio", &m_outputSlice.m_chargeToLightRatio, "chargeToLightRatio/F");
-    m_pSliceTree->Branch("passesPreCuts"     , &m_outputSlice.m_passesPrecuts     , "passesPrecuts/O");
-    m_pSliceTree->Branch("flashMatchScore"   , &m_outputSlice.m_flashMatchScore   , "flashMatchScore/F");
-    m_pSliceTree->Branch("totalPEHypothesis" , &m_outputSlice.m_totalPEHypothesis , "totalPEHypothesis/F");
-    m_pSliceTree->Branch("isTaggedAsTarget"  , &m_outputSlice.m_isTaggedAsTarget  , "isTaggedAsTarget/O");
+    m_pSliceTree->Branch("run"                    , &m_outputSlice.m_run                     , "run/I");
+    m_pSliceTree->Branch("subRun"                 , &m_outputSlice.m_subRun                  , "subRun/I");
+    m_pSliceTree->Branch("event"                  , &m_outputSlice.m_event                   , "event/I");
+    m_pSliceTree->Branch("hasDeposition"          , &m_outputSlice.m_hasDeposition           , "hasDeposition/O");
+    m_pSliceTree->Branch("totalCharge"            , &m_outputSlice.m_totalCharge             ,  "totalCharge/F");
+    m_pSliceTree->Branch("centerX"                , &m_outputSlice.m_centerX                 , "centerX/F");
+    m_pSliceTree->Branch("centerY"                , &m_outputSlice.m_centerY                 , "centerY/F");
+    m_pSliceTree->Branch("centerZ"                , &m_outputSlice.m_centerZ                 , "centerZ/F");
+    m_pSliceTree->Branch("deltaY"                 , &m_outputSlice.m_deltaY                  , "deltaY/F");
+    m_pSliceTree->Branch("deltaZ"                 , &m_outputSlice.m_deltaZ                  , "deltaZ/F");
+    m_pSliceTree->Branch("deltaYSigma"            , &m_outputSlice.m_deltaYSigma             , "deltaYSigma/F");
+    m_pSliceTree->Branch("deltaZSigma"            , &m_outputSlice.m_deltaZSigma             , "deltaZSigma/F");
+    m_pSliceTree->Branch("chargeToLightRatio"     , &m_outputSlice.m_chargeToLightRatio      , "chargeToLightRatio/F");
+    m_pSliceTree->Branch("passesPreCuts"          , &m_outputSlice.m_passesPrecuts           , "passesPrecuts/O");
+    m_pSliceTree->Branch("flashMatchScore"        , &m_outputSlice.m_flashMatchScore         , "flashMatchScore/F");
+    m_pSliceTree->Branch("totalPEHypothesis"      , &m_outputSlice.m_totalPEHypothesis       , "totalPEHypothesis/F");
+    m_pSliceTree->Branch("isTaggedAsTarget"       , &m_outputSlice.m_isTaggedAsTarget        , "isTaggedAsTarget/O");
+    m_pSliceTree->Branch("isConsideredByFlashId"  , &m_outputSlice.m_isConsideredByFlashId   , "isConsideredByFlashId/O");
+    m_pSliceTree->Branch("topologicalScore"       , &m_outputSlice.m_topologicalNeutrinoScore, "topologicalScore/F");
+    m_pSliceTree->Branch("hasBestTopologicalScore", &m_outputSlice.m_hasBestTopologicalScore , "hasBestTopologicalScore/O");
 
     if (m_hasMCNeutrino)
     {
@@ -789,13 +810,23 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
 {
     if (!m_pSliceTree)
         throw cet::exception("FlashNeutrinoId") << "Trying to fill the slice tree which hasn't been configured" << std::endl;
-    
-    // We won't ever have any slice candidates if there wasn't a beam flash, so just skip!
+
+    // We won't ever have any slice candidates if there wasn't a beam flash
+    SliceCandidateVector allSliceCandidates(sliceCandidates);
     if (!m_outputEvent.m_hasBeamFlash)
-        return;
- 
-    if (slices.size() != sliceCandidates.size())
+    {
+        if (!allSliceCandidates.empty())
+            throw cet::exception("FlashNeutrinoId") << "There were slice candidates made even though there wasn't a beam flash!" << std::endl;
+
+        // ATTN this code is only required for monitoring to compare with the topological score
+        for (const auto &slice : slices)
+            allSliceCandidates.emplace_back(evt, slice);
+    }
+
+    if (slices.size() != allSliceCandidates.size())
         throw cet::exception("FlashNeutrinoId") << "The number of slice candidates doesn't match the number of slices" << std::endl;
+
+    this->IdentifySliceWithBestTopologicalScore(allSliceCandidates);
 
     // If available, get the information from the MC neutrino
     LArPandoraSliceIdHelper::SliceMetadataVector sliceMetadata;
@@ -807,17 +838,40 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
 
     if (slices.size() != sliceMetadata.size())
         throw cet::exception("FlashNeutrinoId") << "The number of slice metadata doesn't match the number of slices" << std::endl;
-   
+
     // Output the info for each slice
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
-        m_outputSlice = sliceCandidates.at(sliceIndex);
+        m_outputSlice = allSliceCandidates.at(sliceIndex);
 
         if (m_hasMCNeutrino)
             m_outputSliceMetadata = sliceMetadata.at(sliceIndex);
 
         m_pSliceTree->Fill();
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FlashNeutrinoId::IdentifySliceWithBestTopologicalScore(SliceCandidateVector &sliceCandidates) const
+{
+    float bestTopologicalScore(-std::numeric_limits<float>::max());
+    unsigned int bestSliceIndex(std::numeric_limits<unsigned int>::max());
+
+    for (unsigned int sliceIndex = 0; sliceIndex < sliceCandidates.size(); ++sliceIndex)
+    {
+        const float topologicalScore(sliceCandidates.at(sliceIndex).m_topologicalNeutrinoScore);
+        if (topologicalScore < bestTopologicalScore)
+            continue;
+
+        bestTopologicalScore = topologicalScore;
+        bestSliceIndex = sliceIndex;
+    }
+
+    if (bestSliceIndex > sliceCandidates.size())
+        throw cet::exception("FlashNeutrinoId") << "Couldn't find slice the best topological score" << std::endl;
+
+    sliceCandidates.at(bestSliceIndex).m_hasBestTopologicalScore = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -974,6 +1028,37 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate() :
     m_flashMatchScore(-std::numeric_limits<float>::max()),
     m_totalPEHypothesis(-std::numeric_limits<float>::max()),
     m_isTaggedAsTarget(false),
+    m_isConsideredByFlashId(false),
+    m_topologicalNeutrinoScore(-std::numeric_limits<float>::max()),
+    m_hasBestTopologicalScore(false),
+    m_chargeToNPhotonsTrack(-std::numeric_limits<float>::max()),
+    m_chargeToNPhotonsShower(-std::numeric_limits<float>::max())
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const Slice &slice) :
+    m_run(event.run()),
+    m_subRun(event.subRun()),
+    m_event(event.event()),
+    m_hasDeposition(false),
+    m_totalCharge(-std::numeric_limits<float>::max()),
+    m_centerX(-std::numeric_limits<float>::max()),
+    m_centerY(-std::numeric_limits<float>::max()),
+    m_centerZ(-std::numeric_limits<float>::max()),
+    m_deltaY(-std::numeric_limits<float>::max()),
+    m_deltaZ(-std::numeric_limits<float>::max()),
+    m_deltaYSigma(-std::numeric_limits<float>::max()),
+    m_deltaZSigma(-std::numeric_limits<float>::max()),
+    m_chargeToLightRatio(-std::numeric_limits<float>::max()),
+    m_passesPrecuts(false),
+    m_flashMatchScore(-std::numeric_limits<float>::max()),
+    m_totalPEHypothesis(-std::numeric_limits<float>::max()),
+    m_isTaggedAsTarget(false),
+    m_isConsideredByFlashId(false),
+    m_topologicalNeutrinoScore(slice.GetTopologicalScore()),
+    m_hasBestTopologicalScore(false),
     m_chargeToNPhotonsTrack(-std::numeric_limits<float>::max()),
     m_chargeToNPhotonsShower(-std::numeric_limits<float>::max())
 {
@@ -1001,6 +1086,9 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const S
     m_flashMatchScore(-std::numeric_limits<float>::max()),
     m_totalPEHypothesis(-std::numeric_limits<float>::max()),
     m_isTaggedAsTarget(false),
+    m_isConsideredByFlashId(true),
+    m_topologicalNeutrinoScore(slice.GetTopologicalScore()),
+    m_hasBestTopologicalScore(false),
     m_chargeToNPhotonsTrack(chargeToNPhotonsTrack),
     m_chargeToNPhotonsShower(chargeToNPhotonsShower)
 {
