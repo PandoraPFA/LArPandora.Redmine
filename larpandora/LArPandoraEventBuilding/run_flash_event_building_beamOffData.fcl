@@ -2,3 +2,4 @@
 
 physics.producers.pandoraFlashEventBuilding.SliceIdTool.BeamWindowStartTime: 3.57
 physics.producers.pandoraFlashEventBuilding.SliceIdTool.BeamWindowEndTime:   5.25
+physics.producers.pandoraFlashEventBuilding.SliceIdTool.HasMCNeutrino:       false
