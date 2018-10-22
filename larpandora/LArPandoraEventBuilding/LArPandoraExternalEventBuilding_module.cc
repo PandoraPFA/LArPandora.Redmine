@@ -421,7 +421,6 @@ bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFP
     }
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)

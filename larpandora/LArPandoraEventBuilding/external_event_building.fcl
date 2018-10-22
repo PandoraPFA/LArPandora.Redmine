@@ -12,6 +12,9 @@ pandora_event_building :
     ShowerProducerLabel: "pandoraAllOutcomesShower"
     HitProducerLabel:    "gaushit"
 
+    IsData:               false
+    GeneratorLabel:       "generator"
+
     ShouldProduceT0s:     false
 }
 
