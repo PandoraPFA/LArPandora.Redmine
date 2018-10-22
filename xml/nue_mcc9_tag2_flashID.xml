@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<!-- Production Project -->
+
+<!DOCTYPE project [
+<!ENTITY release "v07_07_03">
+<!ENTITY quals "e17:prof">
+<!ENTITY name "OctMini_MCC9_tag2_BNB_nue_cosmic">
+<!ENTITY dataset "prodgenie_bnb_intrinsic_nue_cosmic_uboone_mcc9.0_beta2_oct_reco_2d_wc_reco2">
+<!ENTITY user "wvdp">
+]>
+
+<job>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size -->
+  <maxfilesperjob>10</maxfilesperjob>
+  <numevents>20</numevents>
+  <numjobs>1</numjobs>
+
+  <!-- Operating System -->
+  <os>SL6</os>
+
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <tag>&release;</tag>
+    <qual>&quals;</qual>
+    <local>/pnfs/uboone/resilient/users/asmith/OctMiniRetreat/</local>
+  </larsoft>
+
+  <!-- Project stages -->
+  <stage name="flashNeutrinoId_MC">
+    <inputdef>&dataset;</inputdef>
+    <schema>root</schema>
+    <fcl>run_flash_event_building_MC.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/users/&user;/&name;/flashNeutrinoId_MC</outdir>
+    <logdir>/pnfs/uboone/scratch/users/&user;/&name;/flashNeutrinoId_MC</logdir>
+    <workdir>/pnfs/uboone/resilient/users/&user;/work/&name;/</workdir>
+    <bookdir>/uboone/data/users/&user;/book/&name;/</bookdir>
+    <datatier>generated</datatier>
+    <jobsub>--expected-lifetime=7h -Q --append_condor_requirements='(TARGET.HAS_CVMFS_uboone_opensciencegrid_org==true)'</jobsub>
+    <jobsub_start>--append_condor_requirements='(TARGET.HAS_CVMFS_uboone_opensciencegrid_org==true)'</jobsub_start> 
+    <disk>20GB</disk>
+    <memory>1999</memory>
+    
+  </stage>
+
+</project>
+
+</job>
