@@ -7,7 +7,7 @@ pandora_event_building :
 {
     module_type: "LArPandoraExternalEventBuilding"
 
-    InputProducerLabel:  "pandoraRepeat:allOutcomes"
+    InputProducerLabel:  "pandoraPatRec:allOutcomes"
     TrackProducerLabel:  "pandoraAllOutcomesTrack"
     ShowerProducerLabel: "pandoraAllOutcomesShower"
     HitProducerLabel:    "gaushit"

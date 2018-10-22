@@ -54,8 +54,8 @@ physics:
 }
 
 # Configuration
-physics.producers.pandoraAllOutcomesTrack.PFParticleLabel:  "pandora:allOutcomes"
-physics.producers.pandoraAllOutcomesShower.PFParticleLabel: "pandora:allOutcomes"
+physics.producers.pandoraAllOutcomesTrack.PFParticleLabel:  "pandoraPatRec:allOutcomes"
+physics.producers.pandoraAllOutcomesShower.PFParticleLabel: "pandoraPatRec:allOutcomes"
 
 outputs:
 {

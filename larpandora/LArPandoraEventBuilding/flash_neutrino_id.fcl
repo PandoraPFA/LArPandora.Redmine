@@ -8,7 +8,7 @@ flash_neutrino_id_tool :
 
     # Input producers
     FlashLabel:              "simpleFlashBeam"
-    PandoraAllOutcomesLabel: "pandora:allOutcomes"
+    PandoraAllOutcomesLabel: "pandoraPatRec:allOutcomes"
 
     # PMT reordering
     ShouldRemapPMTs:          false
