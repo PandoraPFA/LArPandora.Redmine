@@ -1,0 +1,1 @@
+/pnfs/uboone/data/uboone/reconstructed/prod_v07_07_00_01/data_extbnb_run1_dev_mcc9_v07_07_00_01/reco_2d/00/00/64/19/PhysicsRun-2016_5_28_22_39_7-0006419-00008_20160529T213755_ext_bnb_20160530T023538_merged_20181020T062921_reco1_postdl_20181020T084830_reco2.root
