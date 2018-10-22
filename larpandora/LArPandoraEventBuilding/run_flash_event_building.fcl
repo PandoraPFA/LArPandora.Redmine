@@ -3,10 +3,6 @@
 
 BEGIN_PROLOG
 
-# TODO For development purposes, we re-run pandora with allOutcomes switched on.
-#      When samples are available with allOutcomes by default, we don't need to re-run pandora
-pandoraRepeat:                 @local::microboone_pandoraFull
-
 pandoraAllOutcomesTrack:       @local::microboone_pandoraTrackCreation
 pandoraAllOutcomesShower:      @local::microboone_pandoraShowerCreation
 pandoraFlashEventBuilding:     @local::pandora_flash_event_building
@@ -45,13 +41,12 @@ physics:
 
  producers:
  {
-    pandoraRepeat:             @local::pandoraRepeat
     pandoraAllOutcomesTrack:   @local::pandoraAllOutcomesTrack
     pandoraAllOutcomesShower:  @local::pandoraAllOutcomesShower
     pandoraFlashEventBuilding: @local::pandoraFlashEventBuilding
  }
 
- reco: [ pandoraRepeat, pandoraAllOutcomesTrack, pandoraAllOutcomesShower, pandoraFlashEventBuilding ]
+ reco: [ pandoraAllOutcomesTrack, pandoraAllOutcomesShower, pandoraFlashEventBuilding ]
 
  stream1:   [ out1 ]
  end_paths: [ stream1 ]  
@@ -59,10 +54,8 @@ physics:
 }
 
 # Configuration
-physics.producers.pandoraRepeat.ProduceAllOutcomes: true
-
-physics.producers.pandoraAllOutcomesTrack.PFParticleLabel:  "pandoraRepeat:allOutcomes"
-physics.producers.pandoraAllOutcomesShower.PFParticleLabel: "pandoraRepeat:allOutcomes"
+physics.producers.pandoraAllOutcomesTrack.PFParticleLabel:  "pandora:allOutcomes"
+physics.producers.pandoraAllOutcomesShower.PFParticleLabel: "pandora:allOutcomes"
 
 outputs:
 {
