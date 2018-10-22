@@ -473,6 +473,7 @@ private:
     float                                   m_nuVertexY;           ///< The true neutrino vertex Y position
     float                                   m_nuVertexZ;           ///< The true neutrino vertex Z position
     float                                   m_nuTime;              ///< The time of the true neutrino interaction
+    int                                     m_nuPdgCode;           ///< The true neutrino pdg code
     std::string                             m_truthLabel;          ///< The MCTruth producer label
     std::string                             m_mcParticleLabel;     ///< The MCParticle producer label
     std::string                             m_hitLabel;            ///< The Hit producer label
@@ -604,6 +605,7 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
         m_pSliceTree->Branch("nuInteractionType", &m_nuInteractionType                   , "nuInteractionType/F");
         m_pSliceTree->Branch("nuEnergy"         , &m_nuEnergy                            , "nuEnergy/F");
         m_pSliceTree->Branch("nuInteractionTime", &m_nuTime                              , "nuInteractionTime/F");
+        m_pSliceTree->Branch("nuPdgCode"        , &m_nuPdgCode                           , "nuPdgCode/I");
         m_pSliceTree->Branch("nuVertexX"        , &m_nuVertexX                           , "nuVertexX/F");
         m_pSliceTree->Branch("nuVertexY"        , &m_nuVertexY                           , "nuVertexY/F");
         m_pSliceTree->Branch("nuVertexZ"        , &m_nuVertexZ                           , "nuVertexZ/F");
@@ -868,6 +870,7 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
         m_nuVertexY = nuMCParticle.Vy();
         m_nuVertexZ = nuMCParticle.Vz();
         m_nuTime = nuMCParticle.T();
+        m_nuPdgCode = nuMCParticle.PdgCode();
     
         if (slices.size() != sliceMetadata.size())
             throw cet::exception("FlashNeutrinoId") << "The number of slice metadata doesn't match the number of slices" << std::endl;
