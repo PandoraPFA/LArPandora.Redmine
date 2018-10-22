@@ -10,6 +10,8 @@
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 #include "larpandora/LArPandoraEventBuilding/Slice.h"
 
+#include "nusimdata/SimulationBase/MCTruth.h"
+
 namespace lar_pandora
 {
 
@@ -49,12 +51,11 @@ public:
      *  @param  backtrackLabel the label of the Hit -> MCParticle association producer
      *  @param  pandoraLabel the label of the Pandora all outcomes producer
      *  @param  sliceMetadata the output vector of slice metadata (mapping 1:1 to the slices)
-     *  @param  interactionType the output true interaction type code of the MCNeutrino
-     *  @param  nuEnergy the output true energy of the neutrino
+     *  @param  nuNeutrino the mc neutrino from the beam neutrino MCTruth block
      */ 
     static void GetSliceMetadata(const SliceVector &slices, const art::Event &evt, const std::string &truthLabel, 
         const std::string &mcParticleLabel, const std::string &hitLabel, const std::string &backtrackLabel, const std::string &pandoraLabel,
-        SliceMetadataVector &sliceMetadata, int &interactionType, float &nuEnergy);
+        SliceMetadataVector &sliceMetadata, simb::MCNeutrino &mcNeutrino);
 
 private:
     typedef std::unordered_map<art::Ptr<recob::Hit>, bool> HitToBoolMap;

@@ -459,6 +459,10 @@ private:
     bool                                    m_hasMCNeutrino;       ///< If there is an MC neutrino we can use to get truth information
     int                                     m_nuInteractionType;   ///< The interaction type code from MCTruth
     float                                   m_nuEnergy;            ///< The true neutrino energy
+    float                                   m_nuVertexX;           ///< The true neutrino vertex X position
+    float                                   m_nuVertexY;           ///< The true neutrino vertex Y position
+    float                                   m_nuVertexZ;           ///< The true neutrino vertex Z position
+    float                                   m_nuTime;              ///< The time of the true neutrino interaction
     std::string                             m_truthLabel;          ///< The MCTruth producer label
     std::string                             m_mcParticleLabel;     ///< The MCParticle producer label
     std::string                             m_hitLabel;            ///< The Hit producer label
@@ -588,6 +592,10 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
         m_pSliceTree->Branch("nHits"            , &m_outputSliceMetadata.m_nHits         , "nHits/I");
         m_pSliceTree->Branch("nuInteractionType", &m_nuInteractionType                   , "nuInteractionType/F");
         m_pSliceTree->Branch("nuEnergy"         , &m_nuEnergy                            , "nuEnergy/F");
+        m_pSliceTree->Branch("nuInteractionTime", &m_nuTime                              , "nuInteractionTime/F");
+        m_pSliceTree->Branch("nuVertexX"        , &m_nuVertexX                           , "nuVertexX/F");
+        m_pSliceTree->Branch("nuVertexY"        , &m_nuVertexY                           , "nuVertexY/F");
+        m_pSliceTree->Branch("nuVertexZ"        , &m_nuVertexZ                           , "nuVertexZ/F");
     }
 }
 
@@ -837,8 +845,18 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
     LArPandoraSliceIdHelper::SliceMetadataVector sliceMetadata;
     if (m_hasMCNeutrino)
     {
+        simb::MCNeutrino mcNeutrino;
         LArPandoraSliceIdHelper::GetSliceMetadata(slices, evt, m_truthLabel, m_mcParticleLabel, m_hitLabel, m_backtrackLabel,
-            m_pandoraLabel, sliceMetadata, m_nuInteractionType, m_nuEnergy);
+            m_pandoraLabel, sliceMetadata, mcNeutrino);
+
+        m_nuInteractionType = mcNeutrino.InteractionType();
+        const auto nuMCParticle(mcNeutrino.Nu());
+
+        m_nuEnergy = nuMCParticle.E();
+        m_nuVertexX = nuMCParticle.Vx();
+        m_nuVertexY = nuMCParticle.Vy();
+        m_nuVertexZ = nuMCParticle.Vz();
+        m_nuTime = nuMCParticle.T();
     }
 
     if (slices.size() != sliceMetadata.size())
