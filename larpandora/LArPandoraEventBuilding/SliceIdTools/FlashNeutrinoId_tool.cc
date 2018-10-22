@@ -318,6 +318,15 @@ private:
         float GetTotalCharge(const DepositionVector &depositionVector) const;
 
         /**
+         *  @brief  Get the minimum X-position of all deposition points given
+         *
+         *  @param  depositionVector the input charge cluster
+         *
+         *  @return the minimum X-position
+         */
+        float GetMinimumXPosition(const DepositionVector &depositionVector) const;
+
+        /**
          *  @brief  Convert a charge deposition into a light cluster by applying the chargeToPhotonFactor to every point
          *
          *  @param  depositionVector the input charge cluster
@@ -336,6 +345,7 @@ private:
         float                m_centerX;                  ///< The charge weighted center of the slice in X
         float                m_centerY;                  ///< The charge weighted center of the slice in Y
         float                m_centerZ;                  ///< The charge weighted center of the slice in Z
+        float                m_minX;                     ///< The minimum X-coordinate of all spacepoints in the slice
         float                m_deltaY;                   ///< The distance of the slice centroid from the flash centroid in Y
         float                m_deltaZ;                   ///< The distance of the slice centroid from the flash centroid in Z
         float                m_deltaYSigma;              ///< deltaY but in units of the flash width in Y
@@ -568,6 +578,7 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pSliceTree->Branch("centerX"                , &m_outputSlice.m_centerX                 , "centerX/F");
     m_pSliceTree->Branch("centerY"                , &m_outputSlice.m_centerY                 , "centerY/F");
     m_pSliceTree->Branch("centerZ"                , &m_outputSlice.m_centerZ                 , "centerZ/F");
+    m_pSliceTree->Branch("minX"                   , &m_outputSlice.m_minX                    , "minX/F");
     m_pSliceTree->Branch("deltaY"                 , &m_outputSlice.m_deltaY                  , "deltaY/F");
     m_pSliceTree->Branch("deltaZ"                 , &m_outputSlice.m_deltaZ                  , "deltaZ/F");
     m_pSliceTree->Branch("deltaYSigma"            , &m_outputSlice.m_deltaYSigma             , "deltaYSigma/F");
@@ -1042,6 +1053,7 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate() :
     m_centerX(-std::numeric_limits<float>::max()),
     m_centerY(-std::numeric_limits<float>::max()),
     m_centerZ(-std::numeric_limits<float>::max()),
+    m_minX(-std::numeric_limits<float>::max()),
     m_deltaY(-std::numeric_limits<float>::max()),
     m_deltaZ(-std::numeric_limits<float>::max()),
     m_deltaYSigma(-std::numeric_limits<float>::max()),
@@ -1070,6 +1082,7 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const S
     m_centerX(-std::numeric_limits<float>::max()),
     m_centerY(-std::numeric_limits<float>::max()),
     m_centerZ(-std::numeric_limits<float>::max()),
+    m_minX(-std::numeric_limits<float>::max()),
     m_deltaY(-std::numeric_limits<float>::max()),
     m_deltaZ(-std::numeric_limits<float>::max()),
     m_deltaYSigma(-std::numeric_limits<float>::max()),
@@ -1100,6 +1113,7 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const S
     m_centerX(-std::numeric_limits<float>::max()),
     m_centerY(-std::numeric_limits<float>::max()),
     m_centerZ(-std::numeric_limits<float>::max()),
+    m_minX(-std::numeric_limits<float>::max()),
     m_deltaY(-std::numeric_limits<float>::max()),
     m_deltaZ(-std::numeric_limits<float>::max()),
     m_deltaYSigma(-std::numeric_limits<float>::max()),
@@ -1128,6 +1142,8 @@ FlashNeutrinoId::SliceCandidate::SliceCandidate(const art::Event &event, const S
     m_centerX = chargeCenter.GetX();
     m_centerY = chargeCenter.GetY();
     m_centerZ = chargeCenter.GetZ();
+
+    m_minX = this->GetMinimumXPosition(chargeDeposition);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1236,6 +1252,18 @@ float FlashNeutrinoId::SliceCandidate::GetTotalCharge(const DepositionVector &de
         totalCharge += chargePoint.m_charge;
 
     return totalCharge;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float FlashNeutrinoId::SliceCandidate::GetMinimumXPosition(const DepositionVector &depositionVector) const
+{
+    float minX(std::numeric_limits<float>::max());
+
+    for (const auto &chargePoint : depositionVector)
+        minX = std::min(chargePoint.m_x, minX);
+
+    return minX;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
