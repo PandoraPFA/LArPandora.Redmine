@@ -892,6 +892,9 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
 
 void FlashNeutrinoId::IdentifySliceWithBestTopologicalScore(SliceCandidateVector &sliceCandidates) const
 {
+    if (sliceCandidates.empty())
+        return;
+
     float bestTopologicalScore(-std::numeric_limits<float>::max());
     unsigned int bestSliceIndex(std::numeric_limits<unsigned int>::max());
 
