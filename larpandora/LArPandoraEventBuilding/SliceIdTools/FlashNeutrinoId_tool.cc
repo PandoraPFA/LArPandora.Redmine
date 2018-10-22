@@ -154,7 +154,7 @@ private:
         int                 m_subRun;               ///< The subRun number
         int                 m_event;                ///< The event number
         float               m_time;                 ///< Time of the flash
-        std::vector<double> m_peSpectrum;           ///< The number of PEs on each PMT
+        std::vector<float>  m_peSpectrum;           ///< The number of PEs on each PMT
         float               m_totalPE;              ///< The total number of photoelectrons over all PMTs in the flash
         float               m_centerY;              ///< The PE weighted center Y position of the flash
         float               m_centerZ;              ///< The PE weighted center Z position of the flash
@@ -343,7 +343,9 @@ private:
         float m_chargeToLightRatio;       ///< The ratio between the total charge and the total PE of the beam flash
         bool  m_passesPrecuts;            ///< If the slice passes the preselection cuts
         float m_flashMatchScore;          ///< The flash matching score between the slice and the beam flash
+        float m_flashMatchX;              ///< The etimated X coordinate of the flashmatching
         float m_totalPEHypothesis;        ///< The total PE of the hypothesized flash for this slice
+        std::vector<float> m_peHyposthesisSpectrum;     ///< The PE of the hypothesized flash of this slice 
         bool  m_isTaggedAsTarget;         ///< If the slice has been tagged as the target (neutrino)
         bool  m_isConsideredByFlashId;    ///< If the slice was considered by the flash ID tool - this will be false if there wasn't a beam flash found in the event
         float m_topologicalNeutrinoScore; ///< The topological-information-only neutrino ID score from Pandora
@@ -548,7 +550,7 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pFlashTree->Branch("widthY"             , &m_outputFlash.m_widthY             , "widthY/F");
     m_pFlashTree->Branch("widthZ"             , &m_outputFlash.m_widthZ             , "widthZ/F");
     m_pFlashTree->Branch("totalPE"            , &m_outputFlash.m_totalPE            , "totalPE/F");
-    m_pFlashTree->Branch("peSpectrum"         , "std::vector< double >"             ,&m_m_outputFlash.m_peSpectrum);
+    m_pFlashTree->Branch("peSpectrum"         , "std::vector< float >"             ,&m_m_outputFlash.m_peSpectrum);
     m_pFlashTree->Branch("inBeamWindow"       , &m_outputFlash.m_inBeamWindow       , "inBeamWindow/O");
     m_pFlashTree->Branch("isBrightestInWindow", &m_outputFlash.m_isBrightestInWindow, "isBrightestInWindow/O");
     m_pFlashTree->Branch("isBeamFlash"        , &m_outputFlash.m_isBeamFlash        , "isBeamFlash/O");
@@ -569,7 +571,9 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pSliceTree->Branch("chargeToLightRatio"     , &m_outputSlice.m_chargeToLightRatio      , "chargeToLightRatio/F");
     m_pSliceTree->Branch("passesPreCuts"          , &m_outputSlice.m_passesPrecuts           , "passesPrecuts/O");
     m_pSliceTree->Branch("flashMatchScore"        , &m_outputSlice.m_flashMatchScore         , "flashMatchScore/F");
+    m_pSliceTree->Branch("flashMatchX"            , &m_outputSlice.m_flashMatchX             , "flashMatchX/F");
     m_pSliceTree->Branch("totalPEHypothesis"      , &m_outputSlice.m_totalPEHypothesis       , "totalPEHypothesis/F");
+    m_pSliceTree->Branch("peHyposthesisSpectrum"  , "std::vector< float >"                   , &m_outputSlice.m_peHyposthesisSpectrum);
     m_pSliceTree->Branch("isTaggedAsTarget"       , &m_outputSlice.m_isTaggedAsTarget        , "isTaggedAsTarget/O");
     m_pSliceTree->Branch("isConsideredByFlashId"  , &m_outputSlice.m_isConsideredByFlashId   , "isConsideredByFlashId/O");
     m_pSliceTree->Branch("topologicalScore"       , &m_outputSlice.m_topologicalNeutrinoScore, "topologicalScore/F");
@@ -1289,7 +1293,14 @@ float FlashNeutrinoId::SliceCandidate::GetFlashMatchScore(const FlashCandidate &
    
     const auto match(matches.front());
     m_flashMatchScore = match.score;
+    m_flashMatchX = match.match.tpc_point.x;
     m_totalPEHypothesis = std::accumulate(match.hypothesis.begin(), match.hypothesis.end(), 0.f);
+
+    // Fill the flash with the PE spectrum
+    for (unsigned int i = 0; i < nOpDets; ++i)
+    {
+        m_peHyposthesisSpectrum[i] = match.hypothesis.at(i);
+    }
 
     return m_flashMatchScore;
 }
