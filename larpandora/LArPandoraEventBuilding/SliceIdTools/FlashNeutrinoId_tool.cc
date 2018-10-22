@@ -868,10 +868,10 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
         m_nuVertexY = nuMCParticle.Vy();
         m_nuVertexZ = nuMCParticle.Vz();
         m_nuTime = nuMCParticle.T();
+    
+        if (slices.size() != sliceMetadata.size())
+            throw cet::exception("FlashNeutrinoId") << "The number of slice metadata doesn't match the number of slices" << std::endl;
     }
-
-    if (slices.size() != sliceMetadata.size())
-        throw cet::exception("FlashNeutrinoId") << "The number of slice metadata doesn't match the number of slices" << std::endl;
 
     // Output the info for each slice
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
