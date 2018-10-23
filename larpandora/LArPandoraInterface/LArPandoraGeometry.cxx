@@ -217,7 +217,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 
             const float wireAngleU(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
             const float wireAngleV(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat));
-            const float wireAngleW((nWirePlanes < 3) ? 0.f : (useYPlane) ? (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat)) :
+            const float wireAngleW((nWirePlanes < 3) ? 0.f : (useYPlane) ? (std::fabs(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat))) :
                 (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)));
 
             double localCoord1[3] = {0., 0., 0.};
