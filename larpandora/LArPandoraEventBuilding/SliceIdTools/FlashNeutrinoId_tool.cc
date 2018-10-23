@@ -1304,17 +1304,17 @@ bool FlashNeutrinoId::SliceCandidate::IsCompatibleWithBeamFlash(const FlashCandi
         return false;
     
     // Calculate the pre-selection variables
-    m_deltaY = std::abs(m_centerY - beamFlash.m_centerY);
-    m_deltaZ = std::abs(m_centerZ - beamFlash.m_centerZ);
+    m_deltaY = (m_centerY - beamFlash.m_centerY);
+    m_deltaZ = (m_centerZ - beamFlash.m_centerZ);
     m_deltaYSigma = m_deltaY / beamFlash.m_widthY;
     m_deltaZSigma = m_deltaZ / beamFlash.m_widthZ;
     m_chargeToLightRatio = m_totalCharge / beamFlash.m_totalPE;  // TODO ATTN check if this should be total PE or max PE. Code differs from technote
     
     // Check if the slice passes the pre-selection cuts
-    m_passesPrecuts = (m_deltaY < maxDeltaY                           &&
-                       m_deltaZ < maxDeltaZ                           &&
-                       m_deltaYSigma < maxDeltaYSigma                 &&
-                       m_deltaZSigma < maxDeltaZSigma                 &&
+    m_passesPrecuts = (std::abs(m_deltaY) < maxDeltaY                           &&
+                       std::abs(m_deltaZ) < maxDeltaZ                           &&
+                       std::abs(m_deltaYSigma) < maxDeltaYSigma                 &&
+                       std::abs(m_deltaZSigma) < maxDeltaZSigma                 &&
                        m_chargeToLightRatio > minChargeToLightRatio   &&
                        m_chargeToLightRatio < maxChargeToLightRatio   );
 
