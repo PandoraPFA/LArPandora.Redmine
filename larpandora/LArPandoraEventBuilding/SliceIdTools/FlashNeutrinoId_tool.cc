@@ -468,7 +468,9 @@ private:
     bool                                    m_shouldWriteToFile;   ///< If we should write interesting information to a root file
     bool                                    m_hasMCNeutrino;       ///< If there is an MC neutrino we can use to get truth information
     int                                     m_nuInteractionType;   ///< The interaction type code from MCTruth
+    int                                     m_nuCCNC;                ///< Charged current or neutral current?
     float                                   m_nuEnergy;            ///< The true neutrino energy
+    float                                   m_leptonEnergy;        ///< The true energy of the lepton coming from the CC interaction
     float                                   m_nuVertexX;           ///< The true neutrino vertex X position
     float                                   m_nuVertexY;           ///< The true neutrino vertex Y position
     float                                   m_nuVertexZ;           ///< The true neutrino vertex Z position
@@ -554,6 +556,19 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
     m_pEventTree->Branch("nSlices"             , &m_outputEvent.m_nSlices             , "nSlices/I");
     m_pEventTree->Branch("nSlicesAfterPrecuts" , &m_outputEvent.m_nSlicesAfterPrecuts , "nSlicesAfterPrecuts/I");
     m_pEventTree->Branch("foundATargetSlice"   , &m_outputEvent.m_foundATargetSlice   , "foundATarget/O");
+    if (m_hasMCNeutrino)
+    {
+        // Truth MC information about the neutrino
+        m_pEventTree->Branch("nuInteractionType", &m_nuInteractionType                   , "nuInteractionType/I");
+        m_pEventTree->Branch("nuCCNC"           , &m_nuCCNC                              , "nuCCNC/I");
+        m_pEventTree->Branch("nuEnergy"         , &m_nuEnergy                            , "nuEnergy/F");
+        m_pEventTree->Branch("leptonEnergy"     , &m_leptonEnergy                        , "leptonEnergy/F");
+        m_pEventTree->Branch("nuInteractionTime", &m_nuTime                              , "nuInteractionTime/F");
+        m_pEventTree->Branch("nuPdgCode"        , &m_nuPdgCode                           , "nuPdgCode/I");
+        m_pEventTree->Branch("nuVertexX"        , &m_nuVertexX                           , "nuVertexX/F");
+        m_pEventTree->Branch("nuVertexY"        , &m_nuVertexY                           , "nuVertexY/F");
+        m_pEventTree->Branch("nuVertexZ"        , &m_nuVertexZ                           , "nuVertexZ/F");
+    }
 
     m_pFlashTree = fileService->make<TTree>("flashes","");
     m_pFlashTree->Branch("run"                , &m_outputFlash.m_run                , "run/I");
@@ -602,8 +617,10 @@ FlashNeutrinoId::FlashNeutrinoId(fhicl::ParameterSet const &pset) :
         m_pSliceTree->Branch("completeness"     , &m_outputSliceMetadata.m_completeness  , "completeness/F");
         m_pSliceTree->Branch("isMostComplete"   , &m_outputSliceMetadata.m_isMostComplete, "isMostComplete/O");
         m_pSliceTree->Branch("nHits"            , &m_outputSliceMetadata.m_nHits         , "nHits/I");
-        m_pSliceTree->Branch("nuInteractionType", &m_nuInteractionType                   , "nuInteractionType/F");
+        m_pSliceTree->Branch("nuInteractionType", &m_nuInteractionType                   , "nuInteractionType/I");
+        m_pSliceTree->Branch("nuCCNC"           , &m_nuCCNC                              , "nuCCNC/I");
         m_pSliceTree->Branch("nuEnergy"         , &m_nuEnergy                            , "nuEnergy/F");
+        m_pSliceTree->Branch("leptonEnergy"     , &m_leptonEnergy                        , "leptonEnergy/F");
         m_pSliceTree->Branch("nuInteractionTime", &m_nuTime                              , "nuInteractionTime/F");
         m_pSliceTree->Branch("nuPdgCode"        , &m_nuPdgCode                           , "nuPdgCode/I");
         m_pSliceTree->Branch("nuVertexX"        , &m_nuVertexX                           , "nuVertexX/F");
@@ -863,9 +880,12 @@ void FlashNeutrinoId::FillSliceTree(const art::Event &evt, const SliceVector &sl
             m_pandoraLabel, sliceMetadata, mcNeutrino);
 
         m_nuInteractionType = mcNeutrino.InteractionType();
+        m_nuCCNC = mcNeutrino.CCNC();
         const auto nuMCParticle(mcNeutrino.Nu());
+        const auto leptonMCParticle(mcNeutrino.Lepton());
 
         m_nuEnergy = nuMCParticle.E();
+        m_leptonEnergy = leptonMCParticle.E();
         m_nuVertexX = nuMCParticle.Vx();
         m_nuVertexY = nuMCParticle.Vy();
         m_nuVertexZ = nuMCParticle.Vz();

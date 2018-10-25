@@ -68,11 +68,12 @@ art::Ptr<simb::MCTruth> LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth(const ar
         if (mcTruth->Origin() != simb::kBeamNeutrino)
             continue;
 
-        if (foundNeutrino)
-            throw cet::exception("LArPandora") << " LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth - found multiple beam neutrino MCTruth blocks" << std::endl;
+        //if (foundNeutrino)
+        //    throw cet::exception("LArPandora") << " LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth - found multiple beam neutrino MCTruth blocks" << std::endl;
 
         beamNuMCTruth = mcTruth;
         foundNeutrino = true;
+        break;
     }
 
     if (!foundNeutrino)
