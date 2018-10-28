@@ -1,8 +1,0 @@
-BEGIN_PROLOG
-
-simple_neutrino_id_tool :
-{
-    tool_type: "SimpleNeutrinoId"
-}
-
-END_PROLOG
