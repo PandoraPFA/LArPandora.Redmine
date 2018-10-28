@@ -1,0 +1,78 @@
+#include "pandoramodules_microboone.fcl"
+#include "external_event_building.fcl"
+#include "pandora_event_analyser.fcl"
+
+BEGIN_PROLOG
+
+pandoraAllOutcomesTrack:       @local::microboone_pandoraTrackCreation
+pandoraAllOutcomesShower:      @local::microboone_pandoraShowerCreation
+pandoraFlashEventBuilding:     @local::pandora_flash_event_building
+
+END_PROLOG
+
+############################################################################################################################################
+
+#include "services_microboone.fcl"
+#include "time_memory_tracker_microboone.fcl"
+#include "reco_uboone_mcc8.fcl"
+
+services:
+{
+  scheduler:               {defaultExceptions: false}
+  TFileService:            {fileName: "pandora_event_analyser_hist.root"}
+  TimeTracker:             @local::microboone_time_tracker
+  MemoryTracker:           @local::microboone_memory_tracker
+  RandomNumberGenerator:   {}
+  message:                 @local::microboone_message_services_prod_debug
+  FileCatalogMetadata:     @local::art_file_catalog_mc
+  @table::microboone_reco_mcc8_services
+}
+
+process_name: PandoraEventAnalyser
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  0
+  saveMemoryObjectThreshold: 0
+}
+
+physics:
+{
+
+ producers:
+ {
+    pandoraAllOutcomesTrack:   @local::pandoraAllOutcomesTrack
+    pandoraAllOutcomesShower:  @local::pandoraAllOutcomesShower
+    pandoraFlashEventBuilding: @local::pandoraFlashEventBuilding
+ }
+ 
+ analyzers: 
+ {
+    pandoraEventAnalyser:      @local::pandora_event_analyser
+ }
+
+ prod: [ pandoraAllOutcomesTrack, pandoraAllOutcomesShower, pandoraFlashEventBuilding ]
+ ana: [pandoraEventAnalyser]
+
+ stream1:   [ out1 ]
+ trigger_paths: [ prod ]
+ end_paths: [ ana ]
+
+}
+
+# Configuration
+physics.producers.pandoraAllOutcomesTrack.PFParticleLabel:  "pandoraPatRec:allOutcomes"
+physics.producers.pandoraAllOutcomesShower.PFParticleLabel: "pandoraPatRec:allOutcomes"
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_flashEventBuild.root"
+   dataTier: "reconstructed"
+   compressionLevel: 1
+   saveMemoryObjectThreshold: 0
+ }
+}

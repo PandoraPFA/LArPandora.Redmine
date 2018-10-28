@@ -1,4 +1,4 @@
-#include "run_flash_event_building.fcl"
+#include "run_pandora_event_analyser.fcl"
 
 physics.producers.pandoraFlashEventBuilding.SliceIdTool.BeamWindowStartTime: 3.19
 physics.producers.pandoraFlashEventBuilding.SliceIdTool.BeamWindowEndTime:   4.87
