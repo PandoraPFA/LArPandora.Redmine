@@ -6,7 +6,7 @@
 <!ENTITY release "v07_07_03">
 <!ENTITY quals "e17:prof">
 <!ENTITY name "OctMini_MCC9_tag2_BNB_off">
-<!ENTITY dataset "data_extbnb_run1_dev_mcc9_beta1_oct_reco_2d_reco2">
+<!ENTITY dataset "wvdp_data_extbnb_run1_dev_mcc9_beta1_oct_reco_2d_reco2_good_snap">
 <!ENTITY user "wvdp">
 ]>
 
@@ -19,8 +19,8 @@
 
   <!-- Project size -->
   <maxfilesperjob>10</maxfilesperjob>
-  <numevents>20</numevents>
-  <numjobs>1</numjobs>
+  <numevents>100000</numevents>
+  <numjobs>250</numjobs>
 
   <!-- Operating System -->
   <os>SL6</os>
@@ -32,14 +32,14 @@
   <larsoft>
     <tag>&release;</tag>
     <qual>&quals;</qual>
-    <local>/pnfs/uboone/resilient/users/asmith/OctMiniRetreat/</local>
+    <local>/pnfs/uboone/resilient/users/&user;/submission/localprod_22_10_FlashID.tar</local>
   </larsoft>
 
   <!-- Project stages -->
-  <stage name="flashNeutrinoId_MC">
+  <stage name="flashNeutrinoId">
     <inputdef>&dataset;</inputdef>
     <schema>root</schema>
-    <fcl>run_flash_event_building_MC.fcl</fcl>
+    <fcl>run_flash_event_building_beamOffData.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/users/&user;/&name;/flashNeutrinoId_MC</outdir>
     <logdir>/pnfs/uboone/scratch/users/&user;/&name;/flashNeutrinoId_MC</logdir>
     <workdir>/pnfs/uboone/resilient/users/&user;/work/&name;/</workdir>

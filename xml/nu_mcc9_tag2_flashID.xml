@@ -19,8 +19,8 @@
 
   <!-- Project size -->
   <maxfilesperjob>10</maxfilesperjob>
-  <numevents>20</numevents>
-  <numjobs>1</numjobs>
+  <numevents>125800</numevents>
+  <numjobs>629</numjobs>
 
   <!-- Operating System -->
   <os>SL6</os>
@@ -32,11 +32,11 @@
   <larsoft>
     <tag>&release;</tag>
     <qual>&quals;</qual>
-    <local>/pnfs/uboone/resilient/users/asmith/OctMiniRetreat/</local>
+    <local>/pnfs/uboone/resilient/users/&user;/submission/localprod_22_10_FlashID.tar</local>
   </larsoft>
 
   <!-- Project stages -->
-  <stage name="flashNeutrinoId_MC">
+  <stage name="flashNeutrinoId">
     <inputdef>&dataset;</inputdef>
     <schema>root</schema>
     <fcl>run_flash_event_building_MC.fcl</fcl>
