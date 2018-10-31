@@ -41,15 +41,18 @@ public:
     typedef std::unique_ptr< std::vector<recob::SpacePoint> > SpacePointCollection;
     typedef std::unique_ptr< std::vector<anab::T0> > T0Collection;
     typedef std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > PFParticleMetadataCollection;
+    typedef std::unique_ptr< std::vector<recob::Slice> > SliceCollection;
 
     typedef std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > PFParticleToMetadataCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > PFParticleToSpacePointCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> > PFParticleToClusterCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> > PFParticleToVertexCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, anab::T0> > PFParticleToT0Collection;
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Slice> > PFParticleToSliceCollection;
 
     typedef std::unique_ptr< art::Assns<recob::Cluster, recob::Hit> > ClusterToHitCollection;
     typedef std::unique_ptr< art::Assns<recob::SpacePoint, recob::Hit> > SpacePointToHitCollection;
+    typedef std::unique_ptr< art::Assns<recob::Slice, recob::Hit> > SliceToHitCollection;
 
     /**
      *  @brief  Settings class
@@ -72,6 +75,8 @@ public:
         bool                    m_shouldRunStitching;           ///<
         bool                    m_shouldProduceAllOutcomes;     ///< If all outcomes should be produced in separate collections (choose false if you only require the consolidated output)
         std::string             m_allOutcomesInstanceLabel;     ///< The label for the instance producing all outcomes
+        bool                    m_isNeutrinoRecoOnlyNoSlicing;  ///< If we are running the neutrino reconstruction only with no slicing
+        std::string             m_hitfinderModuleLabel;         ///< The hit finder module label
     };
 
     /**
@@ -84,6 +89,12 @@ public:
     static void ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt);
 
 private: 
+    static bool GetPandoraInstance(const pandora::Pandora *const pPrimaryPandora, const std::string &name, const pandora::Pandora *&pPandoraInstance);
+    static void GetPandoraSlices(const pandora::Pandora *const pPrimaryPandora, pandora::PfoVector &slicePfos);
+    static bool IsClearCosmic(const pandora::ParticleFlowObject *const pPfo);
+    static bool IsFromSlice(const pandora::ParticleFlowObject *const pPfo);
+    static unsigned int GetSliceIndex(const pandora::ParticleFlowObject *const pPfo);
+
     /**
      *  @brief  Collect the current pfos (including all downstream pfos) from the master pandora instance
      *
@@ -266,6 +277,21 @@ private:
     static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, 
         const pandora::PfoVector &pfoVector, PFParticleMetadataCollection &outputParticleMetadata,
         PFParticleToMetadataCollection &outputParticlesToMetadata);
+
+    static void BuildSlices(const Settings &settings, const pandora::Pandora *const pPrimaryPandora, const art::Event &event,
+    const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector, 
+    const IdToHitMap &idToHitMap, SliceCollection &outputSlices, PFParticleToSliceCollection &outputParticlesToSlices,
+    SliceToHitCollection &outputSlicesToHits);
+
+    static unsigned int BuildDummySlice(SliceCollection &outputSlices);
+
+    static void CopyAllHitsToSingleSlice(const Settings &settings, const art::Event &event, const art::EDProducer *const pProducer,
+    const std::string &instanceLabel, const pandora::PfoVector &pfoVector, const IdToHitMap &idToHitMap, SliceCollection &outputSlices,
+    PFParticleToSliceCollection &outputParticlesToSlices, SliceToHitCollection &outputSlicesToHits);
+
+    static unsigned int BuildSlice(const pandora::ParticleFlowObject *const pParentPfo, const art::Event &event,
+    const art::EDProducer *const pProducer, const std::string &instanceLabel, const IdToHitMap &idToHitMap, SliceCollection &outputSlices,
+    SliceToHitCollection &outputSlicesToHits);
 
     /**
      *  @brief  Calculate the T0 of each pfos and add them to the output vector
