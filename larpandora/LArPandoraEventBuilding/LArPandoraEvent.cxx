@@ -192,7 +192,7 @@ void LArPandoraEvent::GetCollections()
     art::Handle< std::vector< recob::Track > > trackHandle;
     art::Handle< std::vector< recob::Shower > > showerHandle;
     art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
-    art::Handle< std::vector< larpandoraobj::PFParticleMetadata > > metadataHandle;
+    art::Handle< std::vector< recob::PFParticleMetadata > > metadataHandle;
     art::Handle< std::vector< recob::Hit > > hitHandle;
 
     this->GetCollection(Labels::PFParticleLabel, pfParticleHandle, m_pfParticles);

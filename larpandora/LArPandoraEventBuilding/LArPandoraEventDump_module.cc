@@ -13,6 +13,7 @@
 #include "lardata/Utilities/AssociationUtil.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Vertex.h"
@@ -21,8 +22,6 @@
 #include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
-
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 namespace lar_pandora
 {
@@ -45,7 +44,7 @@ private:
                        const art::FindManyP<recob::SpacePoint>                   &pfPartToSpacePointAssoc,
                        const art::FindManyP<recob::Cluster>                      &pfPartToClusterAssoc,
                        const art::FindManyP<recob::Vertex>                       &pfPartToVertexAssoc,
-                       const art::FindManyP<larpandoraobj::PFParticleMetadata>   &pfPartToMetadataAssoc,
+                       const art::FindManyP<recob::PFParticleMetadata>           &pfPartToMetadataAssoc,
                        const art::FindManyP<recob::Track>                        &pfPartToTrackAssoc,
                        const art::FindManyP<recob::Shower>                       &pfPartToShowerAssoc,
                        const art::FindManyP<recob::PCAxis>                       &pfPartToPCAxisAssoc,
@@ -90,7 +89,7 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
     art::Handle< std::vector< recob::Cluster > > clusterHandle;
     art::Handle< std::vector< recob::Vertex > > vertexHandle;
-    art::Handle< std::vector< larpandoraobj::PFParticleMetadata > > metadataHandle;
+    art::Handle< std::vector< recob::PFParticleMetadata > > metadataHandle;
     art::Handle< std::vector< recob::Track > > trackHandle;
     art::Handle< std::vector< recob::Shower > > showerHandle;
     art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
@@ -108,7 +107,7 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     art::FindManyP<recob::SpacePoint>                   pfPartToSpacePointAssoc(pfParticleHandle, evt, m_PandoraLabel);
     art::FindManyP<recob::Cluster>                      pfPartToClusterAssoc(   pfParticleHandle, evt, m_PandoraLabel);
     art::FindManyP<recob::Vertex>                       pfPartToVertexAssoc(    pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<larpandoraobj::PFParticleMetadata>   pfPartToMetadataAssoc(  pfParticleHandle, evt, m_PandoraLabel);
+    art::FindManyP<recob::PFParticleMetadata>           pfPartToMetadataAssoc(  pfParticleHandle, evt, m_PandoraLabel);
     art::FindManyP<recob::Track>                        pfPartToTrackAssoc(     pfParticleHandle, evt, m_TrackLabel);
     art::FindManyP<recob::Shower>                       pfPartToShowerAssoc(    pfParticleHandle, evt, m_ShowerLabel);
     art::FindManyP<recob::PCAxis>                       pfPartToPCAxisAssoc(    pfParticleHandle, evt, m_ShowerLabel);
@@ -161,7 +160,7 @@ void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle >     
                                         const art::FindManyP<recob::SpacePoint>                   &pfPartToSpacePointAssoc,
                                         const art::FindManyP<recob::Cluster>                      &pfPartToClusterAssoc,
                                         const art::FindManyP<recob::Vertex>                       &pfPartToVertexAssoc,   
-                                        const art::FindManyP<larpandoraobj::PFParticleMetadata>   &pfPartToMetadataAssoc,
+                                        const art::FindManyP<recob::PFParticleMetadata>           &pfPartToMetadataAssoc,
                                         const art::FindManyP<recob::Track>                        &pfPartToTrackAssoc,   
                                         const art::FindManyP<recob::Shower>                       &pfPartToShowerAssoc,    
                                         const art::FindManyP<recob::PCAxis>                       &pfPartToPCAxisAssoc,
@@ -194,7 +193,7 @@ void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle >     
     const std::vector< art::Ptr< recob::SpacePoint > >                  &spacePoints = pfPartToSpacePointAssoc.at( part.key() );
     const std::vector< art::Ptr< recob::Cluster > >                     &clusters    = pfPartToClusterAssoc.at( part.key() );
     const std::vector< art::Ptr< recob::Vertex > >                      &vertices    = pfPartToVertexAssoc.at( part.key() );
-    const std::vector< art::Ptr< larpandoraobj::PFParticleMetadata > >  &metadata    = pfPartToMetadataAssoc.at( part.key() );
+    const std::vector< art::Ptr< recob::PFParticleMetadata > >          &metadata    = pfPartToMetadataAssoc.at( part.key() );
     const std::vector< art::Ptr< recob::Track > >                       &tracks      = pfPartToTrackAssoc.at( part.key() );
     const std::vector< art::Ptr< recob::Shower > >                      &showers     = pfPartToShowerAssoc.at( part.key() );
     const std::vector< art::Ptr< recob::PCAxis > >                      &pcAxes      = pfPartToPCAxisAssoc.at( part.key() );

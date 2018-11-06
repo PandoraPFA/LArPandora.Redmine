@@ -110,7 +110,7 @@ DEFINE_ART_MODULE(ConsolidatedPFParticleAnalysisTemplate)
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 
 #include "Pandora/PdgTable.h"
 
@@ -198,22 +198,22 @@ void ConsolidatedPFParticleAnalysisTemplate::GetPFParticleIdMap(const PFParticle
 
 void ConsolidatedPFParticleAnalysisTemplate::PrintOutScores(const art::Event &evt, const PFParticleHandle &pfParticleHandle) const
 {
-    // Get the associations between PFParticles and larpandoraobj::PFParticleMetadata
-    art::FindManyP< larpandoraobj::PFParticleMetadata > pfPartToMetadataAssoc(pfParticleHandle, evt, m_pandoraLabel);
+    // Get the associations between PFParticles and recob::PFParticleMetadata
+    art::FindManyP< recob::PFParticleMetadata > pfPartToMetadataAssoc(pfParticleHandle, evt, m_pandoraLabel);
 
     for (unsigned int i = 0; i < pfParticleHandle->size(); ++i)
     {
-        const std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > &pfParticleMetadataList(pfPartToMetadataAssoc.at(i));
+        const std::vector< art::Ptr<recob::PFParticleMetadata> > &pfParticleMetadataList(pfPartToMetadataAssoc.at(i));
         if (!pfParticleMetadataList.empty())
         {
             const art::Ptr<recob::PFParticle> pParticle(pfParticleHandle, i);
             for (unsigned int j=0; j<pfParticleMetadataList.size(); ++j)
             {
-                const art::Ptr<larpandoraobj::PFParticleMetadata> &pfParticleMetadata(pfParticleMetadataList.at(j));
-                const pandora::PropertiesMap &pfParticlePropertiesMap(pfParticleMetadata->GetPropertiesMap());
+                const art::Ptr<recob::PFParticleMetadata> &pfParticleMetadata(pfParticleMetadataList.at(j));
+                const recob::PFParticleMetadata::PropertiesMap &pfParticlePropertiesMap(pfParticleMetadata->GetPropertiesMap());
                 if (!pfParticlePropertiesMap.empty())
                     std::cout << " Found PFParticle " << pParticle->Self() << " with: " << std::endl;
-                for (pandora::PropertiesMap::const_iterator it = pfParticlePropertiesMap.begin(); it != pfParticlePropertiesMap.end(); ++it)
+                for (recob::PFParticleMetadata::PropertiesMap::const_iterator it = pfParticlePropertiesMap.begin(); it != pfParticlePropertiesMap.end(); ++it)
                     std::cout << "  - " << it->first << " = " << it->second << std::endl;
             }
         }

@@ -16,6 +16,7 @@
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -36,7 +37,6 @@
 #include "larpandoracontent/LArControlFlow/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <algorithm>
 #include <iterator>
@@ -57,10 +57,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     ClusterCollection               outputClusters( new std::vector<recob::Cluster> );
     SpacePointCollection            outputSpacePoints( new std::vector<recob::SpacePoint> );
     T0Collection                    outputT0s( new std::vector<anab::T0> );
-    PFParticleMetadataCollection    outputParticleMetadata( new std::vector<larpandoraobj::PFParticleMetadata> );
+    PFParticleMetadataCollection    outputParticleMetadata( new std::vector<recob::PFParticleMetadata> );
 
     // Set up the output associations
-    PFParticleToMetadataCollection    outputParticlesToMetadata( new art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> );
+    PFParticleToMetadataCollection    outputParticlesToMetadata( new art::Assns<recob::PFParticle, recob::PFParticleMetadata> );
     PFParticleToSpacePointCollection  outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
     PFParticleToClusterCollection     outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
     PFParticleToVertexCollection      outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
@@ -503,7 +503,8 @@ void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art:
         const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
         
         LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, outputParticleMetadata->size(), outputParticlesToMetadata);
-        outputParticleMetadata->push_back(larpandoraobj::PFParticleMetadata(pPfo));
+        recob::PFParticleMetadata pPFParticleMetadata(LArPandoraHelper::GetPFParticleMetadata(pPfo));
+		outputParticleMetadata->push_back(pPFParticleMetadata);
     }
 }
 

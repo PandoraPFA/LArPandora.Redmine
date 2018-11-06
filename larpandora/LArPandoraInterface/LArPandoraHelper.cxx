@@ -17,6 +17,7 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
@@ -35,7 +36,6 @@
 #include "Pandora/PandoraInternal.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <limits>
 #include <iostream>
@@ -268,16 +268,16 @@ void LArPandoraHelper::CollectPFParticleMetadata(const art::Event &evt, const st
         mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " PFParticles " << std::endl;
     }
 
-    art::FindManyP<larpandoraobj::PFParticleMetadata> theMetadataAssns(theParticles, evt, label);
+    art::FindManyP<recob::PFParticleMetadata> theMetadataAssns(theParticles, evt, label);
     for (unsigned int i = 0; i < theParticles->size(); ++i)
     {
         const art::Ptr<recob::PFParticle> particle(theParticles, i);
         particleVector.push_back(particle);
 
-        const std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > pfParticleMetadataList = theMetadataAssns.at(i);
+        const std::vector< art::Ptr<recob::PFParticleMetadata> > pfParticleMetadataList = theMetadataAssns.at(i);
         for (unsigned int j=0; j<pfParticleMetadataList.size(); ++j)
         {
-            const art::Ptr<larpandoraobj::PFParticleMetadata> pfParticleMetadata = pfParticleMetadataList.at(j);
+            const art::Ptr<recob::PFParticleMetadata> pfParticleMetadata = pfParticleMetadataList.at(j);
             particlesToMetadata[particle].push_back(pfParticleMetadata);
         }
     }
@@ -1096,6 +1096,7 @@ void LArPandoraHelper::BuildMCParticleMap(const MCParticleVector &particleVector
     {
         const art::Ptr<simb::MCParticle> particle = *iter;
         particleMap[particle->TrackId()] = particle;
+        particleMap[particle->TrackId()] = particle;
     }
 }
 
@@ -1375,6 +1376,13 @@ bool LArPandoraHelper::IsVisible(const art::Ptr<simb::MCParticle> particle)
     // TODO: What about ions, neutrons, photons? (Have included neutrons and photons for now)
 
     return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+recob::PFParticleMetadata LArPandoraHelper::GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo)
+{
+	return recob::PFParticleMetadata(pPfo->GetPropertiesMap());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

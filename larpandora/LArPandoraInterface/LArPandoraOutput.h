@@ -11,6 +11,7 @@
 #include "lardata/Utilities/AssociationUtil.h"
 
 #include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 
@@ -39,9 +40,9 @@ public:
     typedef std::unique_ptr< std::vector<recob::Cluster> > ClusterCollection;
     typedef std::unique_ptr< std::vector<recob::SpacePoint> > SpacePointCollection;
     typedef std::unique_ptr< std::vector<anab::T0> > T0Collection;
-    typedef std::unique_ptr< std::vector<larpandoraobj::PFParticleMetadata> > PFParticleMetadataCollection;
+    typedef std::unique_ptr< std::vector<recob::PFParticleMetadata> > PFParticleMetadataCollection;
 
-    typedef std::unique_ptr< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> > PFParticleToMetadataCollection;
+    typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::PFParticleMetadata> > PFParticleToMetadataCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::SpacePoint> > PFParticleToSpacePointCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Cluster> > PFParticleToClusterCollection;
     typedef std::unique_ptr< art::Assns<recob::PFParticle, recob::Vertex> > PFParticleToVertexCollection;
