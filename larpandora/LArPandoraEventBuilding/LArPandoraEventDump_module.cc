@@ -23,6 +23,8 @@
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
 
+#include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
+
 namespace lar_pandora
 {
 
@@ -39,20 +41,116 @@ public:
     void analyze(art::Event const & evt) override;
 
 private:
-    void PrintParticle(const art::Ptr< recob::PFParticle >                       &part,
-                       const std::map< size_t, art::Ptr< recob::PFParticle > >   &pfParticleIdMap,
-                       const art::FindManyP<recob::SpacePoint>                   &pfPartToSpacePointAssoc,
-                       const art::FindManyP<recob::Cluster>                      &pfPartToClusterAssoc,
-                       const art::FindManyP<recob::Vertex>                       &pfPartToVertexAssoc,
-                       const art::FindManyP<larpandoraobj::PFParticleMetadata>   &pfPartToMetadataAssoc,
-                       const art::FindManyP<recob::Track>                        &pfPartToTrackAssoc,
-                       const art::FindManyP<recob::Shower>                       &pfPartToShowerAssoc,
-                       const art::FindManyP<recob::PCAxis>                       &pfPartToPCAxisAssoc,
-                       const int                                                 depth);
+    template <class T>
+        using Collection = art::Handle< std::vector<T> >;
 
-    std::string m_PandoraLabel;
-    std::string m_TrackLabel;
-    std::string m_ShowerLabel;
+    template <class T>
+        using Association = art::FindManyP<T>;
+
+    /**
+     *  @brief  Class holding the handle for all of the data types from Pandora
+     */
+    class PandoraData
+    {
+    public:
+        /**
+         *  @brief  Default constructor
+         *
+         *  @param  evt the art event
+         *  @param  pandoraLabel the pandora producer label
+         *  @param  trackLabel the track producer label (optional)
+         *  @param  showerLabel the shower producer label (optional)
+         */
+        PandoraData(const art::Event &evt, const std::string &pandoraLabel, const std::string &trackLabel = "", const std::string &showerLabel = "");
+
+        /**
+         *  @brief  Default destructor
+         */
+        ~PandoraData();
+
+        // Collections 
+        Collection<recob::PFParticle>           m_pfParticleCollection;                ///< The PFParticle handle
+        Collection<recob::PFParticleMetadata>   m_pfParticleMetadataCollection;        ///< The PFParticleMetadata handle
+        Collection<recob::Cluster>              m_clusterCollection;                   ///< The Cluster handle
+        Collection<recob::SpacePoint>           m_spacePointCollection;                ///< The SpacePoint handle
+        Collection<recob::Vertex>               m_vertexCollection;                    ///< The Vertex handle
+        Collection<recob::Track>                m_trackCollection;                     ///< The Track handle
+        Collection<recob::Shower>               m_showerCollection;                    ///< The Shower handle
+        Collection<recob::PCAxis>               m_pcAxisCollection;                    ///< The PCAxis handle
+        
+        // Associations
+        Association<recob::PFParticleMetadata> *m_pPFParticleToMetadataAssociation;    ///< The PFParticle to metadata association
+        Association<recob::Cluster>            *m_pPFParticleToClusterAssociation;     ///< The PFParticle to cluster association
+        Association<recob::SpacePoint>         *m_pPFParticleToSpacePointAssociation;  ///< The PFParticle to space point association
+        Association<recob::Vertex>             *m_pPFParticleToVertexAssociation;      ///< The PFParticle to vertex association
+        Association<recob::Track>              *m_pPFParticleToTrackAssociation;       ///< The PFParticle to track association
+        Association<recob::Shower>             *m_pPFParticleToShowerAssociation;      ///< The PFParticle to shower association
+        
+        Association<recob::Hit>                *m_pClusterToHitAssociation;            ///< The Cluster to hit association
+        Association<recob::Hit>                *m_pSpacePointToHitAssociation;         ///< The SpacePoint to hit association
+        Association<recob::Hit>                *m_pTrackToHitAssociation;              ///< The Track to hit association
+        Association<recob::Hit>                *m_pShowerToHitAssociation;             ///< The Shower to hit association
+        
+        Association<recob::PCAxis>             *m_pShowerToPCAxisAssociation;          ///< The Shower to PCAxis association
+
+    private:
+        /**
+         *  @brief  Load a collection from the event
+         *
+         *  @param  evt the art event
+         *  @param  label the producer label
+         *  @param  collection the output collection
+         */
+        template <class T>
+        void LoadCollection(const art::Event &evt, const std::string &label, Collection<T> &collection);
+        
+        /**
+         *  @brief  Load an association from the event
+         *
+         *  @param  evt the art event
+         *  @param  label the producer label
+         *  @param  collection the input collection (from which object are associated)
+         *  @param  pAssociation the output association
+         */
+        template <class T, class U>
+        void LoadAssociation(const art::Event &evt, const std::string &label, const Collection<T> &collection, Association<U> *&pAssociation);
+    };
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    void PrintEventMetadata(const art::Event &evt) const;
+
+    void PrintEventSummary(const PandoraData &data) const;
+
+    void PrintPFParticleHierarchy(const PandoraData &data) const;
+
+    void BuildPFParticleMap(const PandoraData &data, PFParticleMap &pfParticleMap) const;
+
+    void PrintParticle(const art::Ptr< recob::PFParticle > &particle, const PFParticleMap &pfParticleMap, const PandoraData &data, const unsigned int depth) const;
+    
+    void PrintHit(const art::Ptr<recob::Hit> &hit, const unsigned int depth) const;
+
+    void PrintCluster(const art::Ptr<recob::Cluster> &cluster, const PandoraData &data, const unsigned int depth) const;
+
+    void PrintVertex(const art::Ptr<recob::Vertex> &vertex, const unsigned int depth) const;
+
+    void PrintSpacePoint(const art::Ptr<recob::SpacePoint> &spacePoint, const PandoraData &data, const unsigned int depth) const;
+
+    void PrintTrack(const art::Ptr<recob::Track> &track, const PandoraData &data, const unsigned int depth) const;
+    
+    void PrintShower(const art::Ptr<recob::Shower> &shower, const PandoraData &data, const unsigned int depth) const;
+
+    void PrintRule(const unsigned int depth) const;
+
+    void PrintTitle(const std::string &name, const unsigned int depth) const;
+
+    template<class T>
+    void PrintProperty(const std::string &name, const T &value, const unsigned int depth) const;
+
+    std::string m_verbosityLevel;
+    std::string m_pandoraLabel;
+    std::string m_trackLabel;
+    std::string m_showerLabel;
 };
 
 DEFINE_ART_MODULE(LArPandoraEventDump)
@@ -67,162 +165,502 @@ namespace lar_pandora
 
 LArPandoraEventDump::LArPandoraEventDump(fhicl::ParameterSet const &pset) :
     EDAnalyzer(pset),
-    m_PandoraLabel(pset.get<std::string>("PandoraLabel")),
-    m_TrackLabel(pset.get<std::string>("TrackLabel" , m_PandoraLabel)),
-    m_ShowerLabel(pset.get<std::string>("ShowerLabel", m_PandoraLabel))
+    m_pandoraLabel(pset.get<std::string>("PandoraLabel")),
+    m_trackLabel(pset.get<std::string>("TrackLabel" , "")),
+    m_showerLabel(pset.get<std::string>("ShowerLabel", ""))
 {
+    m_verbosityLevel = pset.get<std::string>("VerbosityLevel");
+    std::transform(m_verbosityLevel.begin(), m_verbosityLevel.end(), m_verbosityLevel.begin(), ::tolower);
+
+    if (m_verbosityLevel != "brief" &&
+        m_verbosityLevel != "summary" &&
+        m_verbosityLevel != "detailed" &&
+        m_verbosityLevel != "extreme")
+    {
+        throw cet::exception("LArPandoraEventDump") << "Unknown verbosity level: " << m_verbosityLevel << std::endl;
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraEventDump::analyze(art::Event const & evt)
 {
-    std::cout << std::endl << std::endl; 
-    std::cout << std::string(80, '-') << "\r- ";
-    std::cout << "Event " << std::endl;
-    std::cout << evt.id() << std::endl;
-    std::cout << m_PandoraLabel << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
+    // Load the Pandora owned collections from the event
+    PandoraData data(evt, m_pandoraLabel, m_trackLabel, m_showerLabel);
+    
+    this->PrintEventMetadata(evt);
+    this->PrintEventSummary(data);
 
-    // Get the input collections
-    art::Handle< std::vector< recob::PFParticle > > pfParticleHandle;
-    art::Handle< std::vector< recob::SpacePoint > > spacePointHandle;
-    art::Handle< std::vector< recob::Cluster > > clusterHandle;
-    art::Handle< std::vector< recob::Vertex > > vertexHandle;
-    art::Handle< std::vector< larpandoraobj::PFParticleMetadata > > metadataHandle;
-    art::Handle< std::vector< recob::Track > > trackHandle;
-    art::Handle< std::vector< recob::Shower > > showerHandle;
-    art::Handle< std::vector< recob::PCAxis > > pcAxisHandle;
-
-    evt.getByLabel(m_PandoraLabel, pfParticleHandle);
-    evt.getByLabel(m_PandoraLabel, spacePointHandle);
-    evt.getByLabel(m_PandoraLabel, clusterHandle);
-    evt.getByLabel(m_PandoraLabel, vertexHandle);
-    evt.getByLabel(m_PandoraLabel, metadataHandle);
-    evt.getByLabel(m_TrackLabel, trackHandle);
-    evt.getByLabel(m_ShowerLabel, showerHandle);
-    evt.getByLabel(m_ShowerLabel, pcAxisHandle);
-
-    // Get the associations
-    art::FindManyP<recob::SpacePoint>                   pfPartToSpacePointAssoc(pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Cluster>                      pfPartToClusterAssoc(   pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Vertex>                       pfPartToVertexAssoc(    pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<larpandoraobj::PFParticleMetadata>   pfPartToMetadataAssoc(  pfParticleHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Track>                        pfPartToTrackAssoc(     pfParticleHandle, evt, m_TrackLabel);
-    art::FindManyP<recob::Shower>                       pfPartToShowerAssoc(    pfParticleHandle, evt, m_ShowerLabel);
-    art::FindManyP<recob::PCAxis>                       pfPartToPCAxisAssoc(    pfParticleHandle, evt, m_ShowerLabel);
-
-    art::FindManyP<recob::Hit> spacePointToHitAssoc(spacePointHandle, evt, m_PandoraLabel);
-    art::FindManyP<recob::Hit> clusterToHitAssoc(   clusterHandle   , evt, m_PandoraLabel);
-    art::FindManyP<recob::Hit> trackToHitAssoc(     trackHandle     , evt, m_TrackLabel);
-    art::FindManyP<recob::Hit> showerToHitAssoc(    showerHandle    , evt, m_ShowerLabel);
-
-    art::FindManyP<recob::PCAxis> showerToPCAxisAssoc(showerHandle, evt, m_ShowerLabel);
-
-    // Write out the collection sizes
-    std::cout << "N PFParticles : " << pfParticleHandle->size() << std::endl;
-    std::cout << "N SpacePoints : " << spacePointHandle->size() << std::endl;
-    std::cout << "N Clusters    : " << clusterHandle->size()    << std::endl;
-    std::cout << "N Vertices    : " << vertexHandle->size()     << std::endl;
-    std::cout << "N Metadata    : " << metadataHandle->size()   << std::endl;
-    std::cout << "N Tracks      : " << trackHandle->size()      << std::endl;
-    std::cout << "N Showers     : " << showerHandle->size()     << std::endl;
-    std::cout << "N PCAxes      : " << pcAxisHandle->size()     << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
-
-    // Get the PFParticles ID map
-    std::map< size_t, art::Ptr< recob::PFParticle > > pfParticleIdMap;
-    for (unsigned int i = 0; i < pfParticleHandle->size(); ++i)
-    {
-        art::Ptr<recob::PFParticle> part(pfParticleHandle, i);
-        pfParticleIdMap[part->Self()] = part;
-    }
-
-    // Output the PFParticle hierarchy
-    for (auto it = pfParticleIdMap.begin(); it != pfParticleIdMap.end(); ++it)
-    {
-        art::Ptr< recob::PFParticle > part = it->second;
-
-        if (part->IsPrimary())
-        {
-            this->PrintParticle(part, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc,
-                pfPartToMetadataAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, 0);
-        }
-    }
-
-    std::cout << std::string(80, '-') << std::endl;
+    if (m_verbosityLevel != "brief")
+        this->PrintPFParticleHierarchy(data);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle >                       &part, 
-                                        const std::map< size_t, art::Ptr< recob::PFParticle > >   &pfParticleIdMap, 
-                                        const art::FindManyP<recob::SpacePoint>                   &pfPartToSpacePointAssoc,
-                                        const art::FindManyP<recob::Cluster>                      &pfPartToClusterAssoc,
-                                        const art::FindManyP<recob::Vertex>                       &pfPartToVertexAssoc,   
-                                        const art::FindManyP<larpandoraobj::PFParticleMetadata>   &pfPartToMetadataAssoc,
-                                        const art::FindManyP<recob::Track>                        &pfPartToTrackAssoc,   
-                                        const art::FindManyP<recob::Shower>                       &pfPartToShowerAssoc,    
-                                        const art::FindManyP<recob::PCAxis>                       &pfPartToPCAxisAssoc,
-                                        const int                                                 depth) 
+void LArPandoraEventDump::PrintEventMetadata(const art::Event &evt) const
 {
-    const int w(16);
-    const std::string indent(std::string(depth, ' '));
-    const std::string rule(indent + std::string(2 * w, '-'));
+    std::cout << std::string(80, '=')        << std::endl;
+    std::cout << "run    : " << evt.run()    << std::endl;
+    std::cout << "subRun : " << evt.subRun() << std::endl;
+    std::cout << "event  : " << evt.event()  << std::endl;
+    std::cout << std::endl;
+}
 
-    // Output the basic PFParticle information
-    std::cout << std::endl << rule << std::endl;
-    std::cout << indent << "PFParticle" << std::endl;
-    std::cout << rule << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- Key" << part.key() << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- Id"  << part->Self() << std::endl;
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-    if (part->IsPrimary())
+void LArPandoraEventDump::PrintEventSummary(const PandoraData &data) const
+{
+    std::cout << std::string(80, '-') << std::endl;
+    std::cout << "Collection sizes" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+
+    std::cout << "PFParticle         : " << data.m_pfParticleCollection->size() << std::endl;
+    std::cout << "PFParticleMetadata : " << data.m_pfParticleMetadataCollection->size() << std::endl;   
+    std::cout << "Cluster            : " << data.m_clusterCollection->size() << std::endl;
+    std::cout << "SpacePoint         : " << data.m_spacePointCollection->size() << std::endl;
+    std::cout << "Vertex             : " << data.m_vertexCollection->size() << std::endl;
+    std::cout << "Track              : " << data.m_trackCollection->size() << std::endl;
+    std::cout << "Shower             : " << data.m_showerCollection->size() << std::endl;
+    std::cout << "PCAxis             : " << data.m_pcAxisCollection->size() << std::endl;
+    std::cout << std::endl;
+    
+    std::cout << std::string(80, '-') << std::endl;
+    std::cout << "Association sizes" << std::endl;
+    std::cout << std::string(80, '-') << std::endl;
+ 
+    if (data.m_pPFParticleToMetadataAssociation)
+        std::cout << "PFParticle -> Metadata   : " << data.m_pPFParticleToMetadataAssociation->size() << std::endl;
+
+    if (data.m_pPFParticleToClusterAssociation)
+        std::cout << "PFParticle -> Cluster    : " << data.m_pPFParticleToClusterAssociation->size() << std::endl;
+
+    if (data.m_pPFParticleToSpacePointAssociation)
+        std::cout << "PFParticle -> SpacePoint : " << data.m_pPFParticleToSpacePointAssociation->size() << std::endl;
+
+    if (data.m_pPFParticleToVertexAssociation)
+        std::cout << "PFParticle -> Vertex     : " << data.m_pPFParticleToVertexAssociation->size() << std::endl;
+
+    if (data.m_pPFParticleToTrackAssociation)
+        std::cout << "PFParticle -> Track      : " << data.m_pPFParticleToTrackAssociation->size() << std::endl;
+
+    if (data.m_pPFParticleToShowerAssociation)
+        std::cout << "PFParticle -> Shower     : " << data.m_pPFParticleToShowerAssociation->size() << std::endl;
+
+    if (data.m_pClusterToHitAssociation)
+        std::cout << "Cluster    -> Hit        : " << data.m_pClusterToHitAssociation->size() << std::endl;
+
+    if (data.m_pSpacePointToHitAssociation)
+        std::cout << "SpacePoint -> Hit        : " << data.m_pSpacePointToHitAssociation->size() << std::endl;
+
+    if (data.m_pTrackToHitAssociation)
+        std::cout << "Track      -> Hit        : " << data.m_pTrackToHitAssociation->size() << std::endl;
+
+    if (data.m_pShowerToHitAssociation)
+        std::cout << "Shower     -> Hit        : " << data.m_pShowerToHitAssociation->size() << std::endl;
+
+    if (data.m_pShowerToPCAxisAssociation)
+        std::cout << "Shower     -> PCAxis     : " << data.m_pShowerToPCAxisAssociation->size() << std::endl;
+    
+    std::cout << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintPFParticleHierarchy(const PandoraData &data) const
+{
+    // Get the mapping from PFParticle ID to PFParticle
+    PFParticleMap pfParticleMap;
+    this->BuildPFParticleMap(data, pfParticleMap);
+
+    // Print all primary PFParticles
+    for (unsigned int i = 0; i < data.m_pfParticleCollection->size(); ++i)
     {
-        std::cout << indent << std::setw(w) << std::left << "- Primary" << std::endl;
+        const art::Ptr<recob::PFParticle> particle(data.m_pfParticleCollection, i);
+
+        if (!particle->IsPrimary())
+            continue;
+
+        this->PrintParticle(particle, pfParticleMap, data, 0);
     }
-    else
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::BuildPFParticleMap(const PandoraData &data, PFParticleMap &pfParticleMap) const
+{
+    for (unsigned int i = 0; i < data.m_pfParticleCollection->size(); ++i)
     {
-        std::cout << indent << std::setw(w) << std::left << "- Parent" << part->Parent() << std::endl;
+        const art::Ptr<recob::PFParticle> particle(data.m_pfParticleCollection, i);
+        pfParticleMap[particle->Self()] = particle;
     }
+}
 
-    std::cout << indent << std::setw(w) << "- PDG" << part->PdgCode() << std::endl;
-    std::cout << rule << std::endl;
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-    // Get the associated objects
-    const std::vector< art::Ptr< recob::SpacePoint > >                  &spacePoints = pfPartToSpacePointAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Cluster > >                     &clusters    = pfPartToClusterAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Vertex > >                      &vertices    = pfPartToVertexAssoc.at( part.key() );
-    const std::vector< art::Ptr< larpandoraobj::PFParticleMetadata > >  &metadata    = pfPartToMetadataAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Track > >                       &tracks      = pfPartToTrackAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::Shower > >                      &showers     = pfPartToShowerAssoc.at( part.key() );
-    const std::vector< art::Ptr< recob::PCAxis > >                      &pcAxes      = pfPartToPCAxisAssoc.at( part.key() );
+void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle > &particle, const PFParticleMap &pfParticleMap,
+    const PandoraData &data, const unsigned int depth) const
+{
+    this->PrintRule(depth);
+    this->PrintTitle("PFParticle", depth);
+    this->PrintRule(depth);
 
-    // Output the number of associated objects
-    std::cout << indent << std::setw(w) << std::left << "- # SpacePoint" << spacePoints.size() << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Cluster"    << clusters.size()    << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Vertex"     << vertices.size()    << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Track"      << tracks.size()      << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Shower"     << showers.size()     << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # PCAxis"     << pcAxes.size()      << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Metadata"   << metadata.size()    << std::endl;
+    // Print the PFParticle details
+    this->PrintProperty("Key", particle.key(), depth);
+    this->PrintProperty("Id", particle->Self(), depth);
+    this->PrintProperty("PDG", particle->PdgCode(), depth);
+    this->PrintProperty("IsPrimary", particle->IsPrimary(), depth);
 
-    for (unsigned int metadataId = 0; metadataId < metadata.size(); ++metadataId)
+    if (!particle->IsPrimary())
+        this->PrintProperty("Parent", particle->Parent(), depth);
+
+    // Print the metadata
+    if (data.m_pPFParticleToMetadataAssociation)
     {
-        for (const auto &propertiesMapEntry : metadata.at(metadataId)->GetPropertiesMap())
-            std::cout << indent << std::setw(w) << std::left << "-- Property " << propertiesMapEntry.first << ", value " << propertiesMapEntry.second << std::endl;
+        const auto &metadata(data.m_pPFParticleToMetadataAssociation->at(particle.key()));
+        this->PrintProperty("# Metadata", metadata.size(), depth);
+        
+        for (const auto &metadatum : metadata)
+        {
+            const auto &propertiesMap(metadatum->GetPropertiesMap());
+            this->PrintProperty("# Properties", propertiesMap.size(), depth + 2);
+
+            for (const auto &propertiesMapEntry : propertiesMap)
+                this->PrintProperty(propertiesMapEntry.first, propertiesMapEntry.second, depth + 4);
+        }
     }
 
-    std::cout << rule << std::endl;
-    std::cout << indent << std::setw(w) << std::left << "- # Daughters"  << part->NumDaughters() << std::endl;
-    std::cout << rule << std::endl;
-
-    for (auto &daughterId : part->Daughters())
+    // Print the clusters
+    if (data.m_pPFParticleToClusterAssociation)
     {
-        art::Ptr< recob::PFParticle > daughter = pfParticleIdMap.at(daughterId);
-        this->PrintParticle(daughter, pfParticleIdMap, pfPartToSpacePointAssoc, pfPartToClusterAssoc, pfPartToVertexAssoc,
-            pfPartToMetadataAssoc, pfPartToTrackAssoc, pfPartToShowerAssoc, pfPartToPCAxisAssoc, depth + 4);
+        const auto &clusters(data.m_pPFParticleToClusterAssociation->at(particle.key()));
+        this->PrintProperty("# Clusters", clusters.size(), depth);
+        
+        if (m_verbosityLevel != "summary")
+        {
+            for (const auto &cluster : clusters)
+                this->PrintCluster(cluster, data, depth + 2);
+        }
     }
+
+    // Print the space points
+    if (data.m_pPFParticleToSpacePointAssociation)
+    {
+        const auto &spacePoints(data.m_pPFParticleToSpacePointAssociation->at(particle.key()));
+        this->PrintProperty("# SpacePoints", spacePoints.size(), depth);
+
+        if (m_verbosityLevel != "summary")
+        {
+            for (const auto &spacePoint : spacePoints)
+                this->PrintSpacePoint(spacePoint, data, depth + 2);
+        }
+    }
+
+    // Print the vertices
+    if (data.m_pPFParticleToVertexAssociation)
+    {
+        const auto &vertices(data.m_pPFParticleToVertexAssociation->at(particle.key()));
+        this->PrintProperty("# Vertices", vertices.size(), depth);
+
+        if (m_verbosityLevel != "summary")
+        {
+            for (const auto &vertex : vertices)
+                this->PrintVertex(vertex, depth + 2);
+        }
+    }
+
+    // Print the tracks
+    if (data.m_pPFParticleToTrackAssociation)
+    {
+        const auto &tracks(data.m_pPFParticleToTrackAssociation->at(particle.key()));
+        this->PrintProperty("# Tracks", tracks.size(), depth);
+        
+        if (m_verbosityLevel != "summary")
+        {
+            for (const auto &track : tracks)
+                this->PrintTrack(track, data, depth + 2);
+        }
+    }
+    
+    // Print the showers
+    if (data.m_pPFParticleToShowerAssociation)
+    {
+        const auto &showers(data.m_pPFParticleToShowerAssociation->at(particle.key()));
+        this->PrintProperty("# Showers", showers.size(), depth);
+        
+        if (m_verbosityLevel != "summary")
+        {
+            for (const auto &shower : showers)
+                this->PrintShower(shower, data, depth + 2);
+        }
+    }
+
+    // Print the daughters
+    this->PrintProperty("# Daughters", particle->NumDaughters(), depth);
+    this->PrintRule(depth);
+   
+    for (auto &daughterId : particle->Daughters())
+    {
+        const auto daughterIter(pfParticleMap.find(daughterId));
+
+        if (daughterIter == pfParticleMap.end())
+            throw cet::exception("LArPandoraEventDump") << "Couldn't find daughter of PFParticle in the PFParticle map";
+
+        const auto &daughter(daughterIter->second);
+        this->PrintParticle(daughter, pfParticleMap, data, depth + 4);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintHit(const art::Ptr<recob::Hit> &hit, const unsigned int depth) const
+{
+    this->PrintTitle("Hit", depth);
+    this->PrintProperty("Key", hit.key(), depth + 2);
+    this->PrintProperty("Channel", hit->Channel(), depth + 2);
+    this->PrintProperty("View", hit->View(), depth + 2);
+    this->PrintProperty("Peak time", hit->PeakTime(), depth + 2);
+    this->PrintProperty("RMS", hit->RMS(), depth + 2);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintCluster(const art::Ptr<recob::Cluster> &cluster, const PandoraData &data, const unsigned int depth) const
+{
+    this->PrintTitle("Cluster", depth);
+    this->PrintProperty("Key", cluster.key(), depth + 2);
+    this->PrintProperty("ID", cluster->ID(), depth + 2);
+    this->PrintProperty("View", cluster->View(), depth + 2);
+
+    if (!data.m_pClusterToHitAssociation)
+        return;
+
+    const auto &hits(data.m_pClusterToHitAssociation->at(cluster.key()));
+    this->PrintProperty("# Hits", hits.size(), depth + 2);
+
+    if (m_verbosityLevel == "detailed")
+        return;
+
+    // Print each associated hit
+    for (const auto &hit : hits)
+        this->PrintHit(hit, depth + 4);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintSpacePoint(const art::Ptr<recob::SpacePoint> &spacePoint, const PandoraData &data, const unsigned int depth) const
+{
+    this->PrintTitle("SpacePoint", depth);
+    this->PrintProperty("Key", spacePoint.key(), depth + 2);
+    this->PrintProperty("ID", spacePoint->ID(), depth + 2);
+    const auto &position(spacePoint->XYZ());
+    this->PrintProperty("X", position[0], depth + 2);
+    this->PrintProperty("Y", position[1], depth + 2);
+    this->PrintProperty("Z", position[2], depth + 2);
+
+    if (!data.m_pSpacePointToHitAssociation)
+        return;
+
+    const auto &hits(data.m_pSpacePointToHitAssociation->at(spacePoint.key()));
+    this->PrintProperty("# Hits", hits.size(), depth + 2);
+
+    if (m_verbosityLevel == "detailed")
+        return;
+
+    // Print each associated hit
+    for (const auto &hit : hits)
+        this->PrintHit(hit, depth + 4);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintVertex(const art::Ptr<recob::Vertex> &vertex, const unsigned int depth) const
+{
+    this->PrintTitle("Vertex", depth);
+    this->PrintProperty("Key", vertex.key(), depth + 2);
+    this->PrintProperty("ID", vertex->ID(), depth + 2);
+    const auto &position(vertex->position());
+    this->PrintProperty("X", position.X(), depth + 2);
+    this->PrintProperty("Y", position.Y(), depth + 2);
+    this->PrintProperty("Z", position.Z(), depth + 2);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintTrack(const art::Ptr<recob::Track> &track, const PandoraData &data, const unsigned int depth) const
+{
+    this->PrintTitle("Track", depth);
+    this->PrintProperty("Key", track.key(), depth + 2);
+    this->PrintProperty("# Trajectory points", track->NumberTrajectoryPoints(), depth + 2);
+    this->PrintProperty("Length", track->Length(), depth + 2);
+
+    if (!data.m_pTrackToHitAssociation)
+        return;
+
+    const auto &hits(data.m_pTrackToHitAssociation->at(track.key()));
+    this->PrintProperty("# Hits", hits.size(), depth + 2);
+
+    if (m_verbosityLevel == "detailed")
+        return;
+
+    // Print each associated hit
+    for (const auto &hit : hits)
+        this->PrintHit(hit, depth + 4);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintShower(const art::Ptr<recob::Shower> &shower, const PandoraData &data, const unsigned int depth) const
+{
+    this->PrintTitle("Shower", depth);
+    this->PrintProperty("Key", shower.key(), depth + 2);
+    this->PrintProperty("ID", shower->ID(), depth + 2);
+    this->PrintProperty("StartX", shower->ShowerStart().X(), depth + 2);
+    this->PrintProperty("StartY", shower->ShowerStart().Y(), depth + 2);
+    this->PrintProperty("StartZ", shower->ShowerStart().Z(), depth + 2);
+    this->PrintProperty("Length", shower->Length(), depth + 2);
+    this->PrintProperty("OpenAngle", shower->OpenAngle(), depth + 2);
+
+    if (data.m_pShowerToPCAxisAssociation)
+    {
+        const auto &pcAxes(data.m_pShowerToPCAxisAssociation->at(shower.key()));
+        this->PrintProperty("# PCAxes", pcAxes.size(), depth + 2);
+
+        for (const auto &pcAxis : pcAxes)
+        {
+            this->PrintTitle("PCAxis", depth + 4);
+            this->PrintProperty("Key", pcAxis.key(), depth + 6);
+            this->PrintProperty("ID", pcAxis->getID(), depth + 6);
+            this->PrintProperty("# Hits used", pcAxis->getNumHitsUsed(), depth + 6);
+        }
+    }
+
+    if (!data.m_pShowerToHitAssociation)
+        return;
+
+    const auto &hits(data.m_pShowerToHitAssociation->at(shower.key()));
+    this->PrintProperty("# Hits", hits.size(), depth + 2);
+
+    if (m_verbosityLevel == "detailed")
+        return;
+
+    // Print each associated hit
+    for (const auto &hit : hits)
+        this->PrintHit(hit, depth + 4);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintRule(const unsigned int depth) const
+{
+    const unsigned int nDashes(std::max(0, 120 - static_cast<int>(depth)));
+
+    std::cout << std::string(depth, ' ') << std::string(nDashes, '-') << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintTitle(const std::string &name, const unsigned int depth) const
+{
+    std::cout << std::string(depth, ' ') << name << std::endl;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template<class T>
+void LArPandoraEventDump::PrintProperty(const std::string &name, const T &value, const unsigned int depth) const
+{
+    // The separation between the property name and property value
+    const unsigned int separation(std::max(0, 32 - static_cast<int>(depth)));
+
+    std::cout << std::string(depth, ' ') << std::setw(separation) << std::left << ("- " + name) << value << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPandoraEventDump::PandoraData::PandoraData(const art::Event &evt, const std::string &pandoraLabel, const std::string &trackLabel,
+    const std::string &showerLabel) : 
+    m_pPFParticleToMetadataAssociation(nullptr),
+    m_pPFParticleToClusterAssociation(nullptr),
+    m_pPFParticleToSpacePointAssociation(nullptr),
+    m_pPFParticleToVertexAssociation(nullptr),
+    m_pPFParticleToTrackAssociation(nullptr),
+    m_pPFParticleToShowerAssociation(nullptr),
+    m_pClusterToHitAssociation(nullptr),
+    m_pSpacePointToHitAssociation(nullptr),
+    m_pTrackToHitAssociation(nullptr),
+    m_pShowerToHitAssociation(nullptr),
+    m_pShowerToPCAxisAssociation(nullptr)
+{
+
+    // Load the collections
+    this->LoadCollection(evt, pandoraLabel, m_pfParticleCollection);
+    this->LoadCollection(evt, pandoraLabel, m_pfParticleMetadataCollection);
+    this->LoadCollection(evt, pandoraLabel, m_clusterCollection);
+    this->LoadCollection(evt, pandoraLabel, m_spacePointCollection);
+    this->LoadCollection(evt, pandoraLabel, m_vertexCollection);
+    this->LoadCollection(evt, trackLabel  , m_trackCollection);
+    this->LoadCollection(evt, showerLabel , m_showerCollection);
+    this->LoadCollection(evt, showerLabel , m_pcAxisCollection);
+
+    // Load the associations
+    this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToMetadataAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToClusterAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToSpacePointAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToVertexAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_clusterCollection   , m_pClusterToHitAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_spacePointCollection, m_pSpacePointToHitAssociation);
+    
+    this->LoadAssociation(evt, trackLabel  , m_pfParticleCollection, m_pPFParticleToTrackAssociation);
+    this->LoadAssociation(evt, trackLabel  , m_trackCollection     , m_pTrackToHitAssociation);
+    
+    this->LoadAssociation(evt, showerLabel , m_pfParticleCollection, m_pPFParticleToShowerAssociation);
+    this->LoadAssociation(evt, showerLabel , m_showerCollection    , m_pShowerToHitAssociation);
+    this->LoadAssociation(evt, showerLabel , m_showerCollection    , m_pShowerToPCAxisAssociation);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+LArPandoraEventDump::PandoraData::~PandoraData()
+{
+    // Clean up all heap memory
+    delete m_pPFParticleToMetadataAssociation;
+    delete m_pPFParticleToClusterAssociation;
+    delete m_pPFParticleToSpacePointAssociation;
+    delete m_pPFParticleToVertexAssociation;
+    delete m_pPFParticleToTrackAssociation;
+    delete m_pPFParticleToShowerAssociation;
+    delete m_pClusterToHitAssociation;
+    delete m_pSpacePointToHitAssociation;
+    delete m_pTrackToHitAssociation;
+    delete m_pShowerToHitAssociation;
+    delete m_pShowerToPCAxisAssociation;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+        
+template <class T>
+void LArPandoraEventDump::PandoraData::LoadCollection(const art::Event &evt, const std::string &label, Collection<T> &collection)
+{
+    if (label.empty())
+        return;
+    
+    evt.getByLabel(label, collection); 
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+        
+template <class T, class U>
+void LArPandoraEventDump::PandoraData::LoadAssociation(const art::Event &evt, const std::string &label, const Collection<T> &collection, Association<U> *&pAssociation)
+{
+    if (label.empty())
+        return;
+   
+    if (pAssociation)
+        throw cet::exception("LArPandoraEventDump") << "Association supplied type has already been loaded!";
+
+    pAssociation = new Association<U>(collection, evt, label);
 }
 
 } // namespace lar_pandora
