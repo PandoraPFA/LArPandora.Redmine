@@ -22,6 +22,7 @@
 #include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Slice.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
@@ -77,6 +78,7 @@ private:
         Collection<recob::Track>                m_trackCollection;                     ///< The Track handle
         Collection<recob::Shower>               m_showerCollection;                    ///< The Shower handle
         Collection<recob::PCAxis>               m_pcAxisCollection;                    ///< The PCAxis handle
+        Collection<recob::Slice>                m_sliceCollection;                     ///< The Slice handle
         
         // Associations
         Association<recob::PFParticleMetadata> *m_pPFParticleToMetadataAssociation;    ///< The PFParticle to metadata association
@@ -85,11 +87,13 @@ private:
         Association<recob::Vertex>             *m_pPFParticleToVertexAssociation;      ///< The PFParticle to vertex association
         Association<recob::Track>              *m_pPFParticleToTrackAssociation;       ///< The PFParticle to track association
         Association<recob::Shower>             *m_pPFParticleToShowerAssociation;      ///< The PFParticle to shower association
+        Association<recob::Slice>              *m_pPFParticleToSliceAssociation;       ///< The PFParticle to slice association
         
         Association<recob::Hit>                *m_pClusterToHitAssociation;            ///< The Cluster to hit association
         Association<recob::Hit>                *m_pSpacePointToHitAssociation;         ///< The SpacePoint to hit association
         Association<recob::Hit>                *m_pTrackToHitAssociation;              ///< The Track to hit association
         Association<recob::Hit>                *m_pShowerToHitAssociation;             ///< The Shower to hit association
+        Association<recob::Hit>                *m_pSliceToHitAssociation;              ///< The Slice to hit association
         
         Association<recob::PCAxis>             *m_pShowerToPCAxisAssociation;          ///< The Shower to PCAxis association
 
@@ -129,6 +133,8 @@ private:
     void PrintParticle(const art::Ptr< recob::PFParticle > &particle, const PFParticleMap &pfParticleMap, const PandoraData &data, const unsigned int depth) const;
     
     void PrintHit(const art::Ptr<recob::Hit> &hit, const unsigned int depth) const;
+
+    void PrintSlice(const art::Ptr<recob::Slice> &slice, const PandoraData &data, const unsigned int depth) const;
 
     void PrintCluster(const art::Ptr<recob::Cluster> &cluster, const PandoraData &data, const unsigned int depth) const;
 
@@ -222,6 +228,7 @@ void LArPandoraEventDump::PrintEventSummary(const PandoraData &data) const
     std::cout << "Track              : " << data.m_trackCollection->size() << std::endl;
     std::cout << "Shower             : " << data.m_showerCollection->size() << std::endl;
     std::cout << "PCAxis             : " << data.m_pcAxisCollection->size() << std::endl;
+    std::cout << "Slice              : " << data.m_sliceCollection->size() << std::endl;
     std::cout << std::endl;
     
     std::cout << std::string(80, '-') << std::endl;
@@ -245,6 +252,9 @@ void LArPandoraEventDump::PrintEventSummary(const PandoraData &data) const
 
     if (data.m_pPFParticleToShowerAssociation)
         std::cout << "PFParticle -> Shower     : " << data.m_pPFParticleToShowerAssociation->size() << std::endl;
+    
+    if (data.m_pPFParticleToSliceAssociation)
+        std::cout << "PFParticle -> Slice      : " << data.m_pPFParticleToSliceAssociation->size() << std::endl;
 
     if (data.m_pClusterToHitAssociation)
         std::cout << "Cluster    -> Hit        : " << data.m_pClusterToHitAssociation->size() << std::endl;
@@ -260,6 +270,9 @@ void LArPandoraEventDump::PrintEventSummary(const PandoraData &data) const
 
     if (data.m_pShowerToPCAxisAssociation)
         std::cout << "Shower     -> PCAxis     : " << data.m_pShowerToPCAxisAssociation->size() << std::endl;
+    
+    if (data.m_pSliceToHitAssociation)
+        std::cout << "Slice      -> Hit        : " << data.m_pSliceToHitAssociation->size() << std::endl;
     
     std::cout << std::endl;
 }
@@ -327,6 +340,20 @@ void LArPandoraEventDump::PrintParticle(const art::Ptr< recob::PFParticle > &par
             for (const auto &propertiesMapEntry : propertiesMap)
                 this->PrintProperty(propertiesMapEntry.first, propertiesMapEntry.second, depth + 4);
         }
+    }
+
+    // Print the slices
+    if (data.m_pPFParticleToSliceAssociation)
+    {
+        const auto &slices(data.m_pPFParticleToSliceAssociation->at(particle.key()));
+        this->PrintProperty("# Slices", slices.size(), depth);
+        
+        if (m_verbosityLevel != "summary")
+        {
+            for (const auto &slice : slices)
+                this->PrintSlice(slice, data, depth + 2);
+        }
+    
     }
 
     // Print the clusters
@@ -420,6 +447,28 @@ void LArPandoraEventDump::PrintHit(const art::Ptr<recob::Hit> &hit, const unsign
     this->PrintProperty("View", hit->View(), depth + 2);
     this->PrintProperty("Peak time", hit->PeakTime(), depth + 2);
     this->PrintProperty("RMS", hit->RMS(), depth + 2);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraEventDump::PrintSlice(const art::Ptr<recob::Slice> &slice, const PandoraData &data, const unsigned int depth) const
+{
+    this->PrintTitle("Slice", depth);
+    this->PrintProperty("Key", slice.key(), depth + 2);
+    this->PrintProperty("ID", slice->ID(), depth + 2);
+    
+    if (!data.m_pSliceToHitAssociation)
+        return;
+
+    const auto &hits(data.m_pSliceToHitAssociation->at(slice.key()));
+    this->PrintProperty("# Hits", hits.size(), depth + 2);
+
+    if (m_verbosityLevel == "detailed")
+        return;
+
+    // Print each associated hit
+    for (const auto &hit : hits)
+        this->PrintHit(hit, depth + 4);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -587,10 +636,12 @@ LArPandoraEventDump::PandoraData::PandoraData(const art::Event &evt, const std::
     m_pPFParticleToVertexAssociation(nullptr),
     m_pPFParticleToTrackAssociation(nullptr),
     m_pPFParticleToShowerAssociation(nullptr),
+    m_pPFParticleToSliceAssociation(nullptr),
     m_pClusterToHitAssociation(nullptr),
     m_pSpacePointToHitAssociation(nullptr),
     m_pTrackToHitAssociation(nullptr),
     m_pShowerToHitAssociation(nullptr),
+    m_pSliceToHitAssociation(nullptr),
     m_pShowerToPCAxisAssociation(nullptr)
 {
 
@@ -603,14 +654,17 @@ LArPandoraEventDump::PandoraData::PandoraData(const art::Event &evt, const std::
     this->LoadCollection(evt, trackLabel  , m_trackCollection);
     this->LoadCollection(evt, showerLabel , m_showerCollection);
     this->LoadCollection(evt, showerLabel , m_pcAxisCollection);
+    this->LoadCollection(evt, pandoraLabel, m_sliceCollection);
 
     // Load the associations
     this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToMetadataAssociation);
     this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToClusterAssociation);
     this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToSpacePointAssociation);
     this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToVertexAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_pfParticleCollection, m_pPFParticleToSliceAssociation);
     this->LoadAssociation(evt, pandoraLabel, m_clusterCollection   , m_pClusterToHitAssociation);
     this->LoadAssociation(evt, pandoraLabel, m_spacePointCollection, m_pSpacePointToHitAssociation);
+    this->LoadAssociation(evt, pandoraLabel, m_sliceCollection,      m_pSliceToHitAssociation);
     
     this->LoadAssociation(evt, trackLabel  , m_pfParticleCollection, m_pPFParticleToTrackAssociation);
     this->LoadAssociation(evt, trackLabel  , m_trackCollection     , m_pTrackToHitAssociation);
@@ -631,11 +685,13 @@ LArPandoraEventDump::PandoraData::~PandoraData()
     delete m_pPFParticleToVertexAssociation;
     delete m_pPFParticleToTrackAssociation;
     delete m_pPFParticleToShowerAssociation;
+    delete m_pPFParticleToSliceAssociation;
     delete m_pClusterToHitAssociation;
     delete m_pSpacePointToHitAssociation;
     delete m_pTrackToHitAssociation;
     delete m_pShowerToHitAssociation;
     delete m_pShowerToPCAxisAssociation;
+    delete m_pSliceToHitAssociation;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
