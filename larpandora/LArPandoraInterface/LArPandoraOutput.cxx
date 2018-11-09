@@ -45,6 +45,7 @@
 #include <limits>
 
 namespace lar_pandora
+{
 
 void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt)
 {
@@ -55,6 +56,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
     if (!settings.m_pProducer)
         throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- pointer to ART Producer module does not exist ";
+
+    if (settings.m_buildShowersAsTracks)
+         mf::LogDebug("LArPandora") << " LArPandora::ProduceArtOutput --- Pandora is configured to build shower-like PFParticles as tracks " << std::endl;
 
     PandoraInstanceList pandoraInstanceList;
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(settings.m_pPrimaryPandora));
@@ -324,6 +328,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
             if ((settings.m_buildShowersAsTracks && lar_content::LArPfoHelper::IsShower(pPfo)) || lar_content::LArPfoHelper::IsTrack(pPfo))
             {
+                if (lar_content::LArPfoHelper::IsShower(pPfo)) 
+                    mf::LogDebug("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- builiding track for shower-like PFParticle " << std::endl;
+                
                 try
                 {
                     lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, 20, 0.3f, trackStateVector);

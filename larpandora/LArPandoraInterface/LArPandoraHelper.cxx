@@ -291,9 +291,11 @@ void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string la
     else
     {
         mf::LogDebug("LArPandora") << "  Found: " << theTracks->size() << " Tracks " << std::endl;
+        mf::LogDebug("LArPandora") << "  Collecting tracks associated to track-like PFParticles" << std::endl;
     }
 
     art::FindOneP<recob::PFParticle> theParticleAssns(theTracks, evt, label);
+
     for (unsigned int i = 0; i < theTracks->size(); ++i)
     {
         const art::Ptr<recob::Track> track(theTracks, i);
@@ -303,6 +305,10 @@ void LArPandoraHelper::CollectTracks(const art::Event &evt, const std::string la
         trackVector.push_back(track);
         particlesToTracks[particle].push_back(track);
     }
+
+    mf::LogDebug("LArPandora") << "  Found " << particlesToTracks.size() << " tracks associated to track-like PFParticles." 
+      << "\nThe remainder were associated to shower-like PFParticles and have not been collected." << std::endl;
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
