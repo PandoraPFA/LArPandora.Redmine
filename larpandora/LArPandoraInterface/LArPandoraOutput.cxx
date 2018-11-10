@@ -226,7 +226,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         {
             if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
                 continue;
-
+            
             pandora::CaloHitList pandoraHitList2D;
             pCluster->GetOrderedCaloHitList().FillCaloHitList(pandoraHitList2D);
             pandoraHitList2D.insert(pandoraHitList2D.end(), pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
@@ -309,6 +309,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // Associate Vertex and Build High-Level Objects
         if (!pPfo->GetVertexList().empty())
         {
+            auto const& geom = lar::providerFrom<geo::Geometry>();
+            
             if(pPfo->GetVertexList().size() != 1)
                 throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- this particle has multiple interaction vertices ";
 
@@ -329,11 +331,11 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             if ((settings.m_buildShowersAsTracks && lar_content::LArPfoHelper::IsShower(pPfo)) || lar_content::LArPfoHelper::IsTrack(pPfo))
             {
                 if (lar_content::LArPfoHelper::IsShower(pPfo)) 
-                    mf::LogDebug("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- builiding track for shower-like PFParticle " << std::endl;
+                    std::cout << " LArPandoraOutput::ProduceArtOutput --- builiding track for shower-like PFParticle " << std::endl;
                 
                 try
                 {
-                    lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, 20, 0.3f, trackStateVector);
+                    lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, settings.m_slidingFitHalfWindow, geom->WirePitch(0,0,0), trackStateVector);
                 }
                 catch (const pandora::StatusCodeException &)
                 {
@@ -387,7 +389,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     continue;
 
                 // TODO - If possible, we should try to move some of the shower-building code below into the BuildShower method
-                auto const& geom = lar::providerFrom<geo::Geometry>();
 
                 lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
                 lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
@@ -834,7 +835,8 @@ LArPandoraOutput::Settings::Settings() :
     m_buildShowers(true),
     m_buildStitchedParticles(false),
     m_showerEnergyAlg(nullptr),
-    m_buildShowersAsTracks(false)
+    m_buildShowersAsTracks(false),
+    m_slidingFitHalfWindow(20)
 {
 }
 

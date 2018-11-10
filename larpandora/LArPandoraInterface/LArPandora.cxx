@@ -93,6 +93,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_buildShowersAsTracks = pset.get<bool>("BuildShowersAsTracks", false);
     m_outputSettings.m_buildStitchedParticles = (m_runStitchingInstance && pset.get<bool>("BuildStitchedParticles", false));
     m_outputSettings.m_showerEnergyAlg = m_showerEnergyAlg.get(); // may be nullptr
+    m_outputSettings.m_slidingFitHalfWindow = pset.get<float>("SlidingFitHalfWindow", 20);
 
     // Status flags for this module
     m_lineGapsCreated = false;
