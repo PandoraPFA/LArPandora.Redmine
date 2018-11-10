@@ -342,7 +342,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     std::cout << "Exception Caught: Unable to get sliding fit trajectory" << std::endl;
                 }
             }
-            if (trackStateVector.size() >= settings.m_minTrajectoryPoints && settings.m_buildTracks)
+            if (trackStateVector.size() < settings.m_minTrajectoryPoints)
+            {
+                mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- Insufficient input trajectory points to build track ";
+                continue;
+            }
+            if (trackStateVector.size() >= settings.m_minTrajectoryPoints)
             {
 
                 for (const lar_content::LArTrackState &nextPoint : trackStateVector)
@@ -359,18 +364,21 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                         outputSeeds->size() - 1, outputSeeds->size());
                 }
 
-                // Building track objects
-                outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector, idToHitMap));
-
-                util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), particleHitsFromSpacePoints, *(outputTracksToHits.get()));
-                util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()), outputTracks->size() - 1, outputTracks->size());
-
-                // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  track ID code;  T0 ID code]
-                // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
-                if (settings.m_buildStitchedParticles && std::fabs(T0) > 0.0)
+                if (settings.m_buildTracks)
                 {
-                    outputT0s->emplace_back(anab::T0(T0, 3, outputTracks->back().ID(), t0Counter++));
-                    util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), *(outputT0s.get()), *(outputTracksToT0s.get()), outputT0s->size() - 1, outputT0s->size());
+                    // Building track objects
+                    outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector, idToHitMap));
+
+                    util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), particleHitsFromSpacePoints, *(outputTracksToHits.get()));
+                    util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()), outputTracks->size() - 1, outputTracks->size());
+
+                    // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  track ID code;  T0 ID code]
+                    // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
+                    if (settings.m_buildStitchedParticles && std::fabs(T0) > 0.0)
+                    {
+                        outputT0s->emplace_back(anab::T0(T0, 3, outputTracks->back().ID(), t0Counter++));
+                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), *(outputT0s.get()), *(outputTracksToT0s.get()), outputT0s->size() - 1, outputT0s->size());
+                    }
                 }
             }
 
