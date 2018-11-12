@@ -88,11 +88,52 @@ public:
      */
     static void ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt);
 
-private: 
-    static bool GetPandoraInstance(const pandora::Pandora *const pPrimaryPandora, const std::string &name, const pandora::Pandora *&pPandoraInstance);
+private:
+    /**
+     *  @brief  Get the address of a pandora instance with a given name
+     *
+     *  @param  pPrimaryPandora the primary pandora instance
+     *  @param  name the name of the instance to collect
+     *  @param  pPandoraInstance the output address of the pandora instance requested
+     *
+     *  @return if the pandora instance could be found
+     */
+    static bool GetPandoraInstance(const pandora::Pandora *const pPrimaryPandora, const std::string &name,
+        const pandora::Pandora *&pPandoraInstance);
+
+    /**
+     *  @brief  Get the slice pfos - one pfo per slice
+     *
+     *  @param  pPrimaryPandora the primary pandora instance
+     *  @param  slicePfos the output vector of slice pfos
+     */
     static void GetPandoraSlices(const pandora::Pandora *const pPrimaryPandora, pandora::PfoVector &slicePfos);
+
+    /**
+     *  @brief  Check if the input pfo is an unambiguous cosmic ray
+     *
+     *  @param  pPfo the input pfo
+     *
+     *  @return if the input pfo is a clear cosmic ray
+     */
     static bool IsClearCosmic(const pandora::ParticleFlowObject *const pPfo);
+
+    /**
+     *  @brief  Check if the input pfo is from a slice
+     *
+     *  @param  pPfo the input pfo
+     *
+     *  @return if the input pfo is from a slice
+     */
     static bool IsFromSlice(const pandora::ParticleFlowObject *const pPfo);
+
+    /**
+     *  @brief  Get the index of the slice from which this pfo was produced
+     *
+     *  @param  pPfo the input pfo
+     *
+     *  @return the slice index
+     */
     static unsigned int GetSliceIndex(const pandora::ParticleFlowObject *const pPfo);
 
     /**
@@ -278,17 +319,60 @@ private:
         const pandora::PfoVector &pfoVector, PFParticleMetadataCollection &outputParticleMetadata,
         PFParticleToMetadataCollection &outputParticlesToMetadata);
 
+    /**
+     *  @brief  Build slices - collections of hits which each describe a single particle hierarchy
+     *
+     *  @param  settings the settings
+     *  @param  pPrimaryPandora the primary pandora instance
+     *  @param  event the art event
+     *  @param  pProducer the address of the pandora producer 
+     *  @param  instanceLabel the label for the collections to be produced
+     *  @param  pfoVector the input vector of all pfos to be output
+     *  @param  idToHitMap input mapping from pandora hit ID to ART hit
+     *  @param  outputSlices the output collection of slices to populate
+     *  @param  outputParticlesToSlices the output association from particles to slices
+     *  @param  outputSlicesToHits the output association from slices to hits
+     */
     static void BuildSlices(const Settings &settings, const pandora::Pandora *const pPrimaryPandora, const art::Event &event,
     const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector, 
     const IdToHitMap &idToHitMap, SliceCollection &outputSlices, PFParticleToSliceCollection &outputParticlesToSlices,
     SliceToHitCollection &outputSlicesToHits);
 
+    /**
+     *  @brief  Build a new slice object with dummy information
+     *
+     *  @param  outputSlices the output collection of slices to populate
+     */
     static unsigned int BuildDummySlice(SliceCollection &outputSlices);
 
+    /**
+     *  @brief  Ouput a single slice containing all of the input hits
+     *
+     *  @param  settings the settings
+     *  @param  event the art event
+     *  @param  pProducer the address of the pandora producer 
+     *  @param  instanceLabel the label for the collections to be produced
+     *  @param  pfoVector the input vector of all pfos to be output
+     *  @param  idToHitMap input mapping from pandora hit ID to ART hit
+     *  @param  outputSlices the output collection of slices to populate
+     *  @param  outputParticlesToSlices the output association from particles to slices
+     *  @param  outputSlicesToHits the output association from slices to hits
+     */
     static void CopyAllHitsToSingleSlice(const Settings &settings, const art::Event &event, const art::EDProducer *const pProducer,
     const std::string &instanceLabel, const pandora::PfoVector &pfoVector, const IdToHitMap &idToHitMap, SliceCollection &outputSlices,
     PFParticleToSliceCollection &outputParticlesToSlices, SliceToHitCollection &outputSlicesToHits);
 
+    /**
+     *  @brief  Build a new slice object from a PFO, this can be a top-level parent in a hierarchy or a "slice PFO" from the slicing instance
+     *
+     *  @param  pParentPfo the parent pfo from which to build the slice
+     *  @param  event the art event
+     *  @param  pProducer the address of the pandora producer 
+     *  @param  instanceLabel the label for the collections to be produced
+     *  @param  idToHitMap input mapping from pandora hit ID to ART hit
+     *  @param  outputSlices the output collection of slices to populate
+     *  @param  outputSlicesToHits the output association from slices to hits
+     */
     static unsigned int BuildSlice(const pandora::ParticleFlowObject *const pParentPfo, const art::Event &event,
     const art::EDProducer *const pProducer, const std::string &instanceLabel, const IdToHitMap &idToHitMap, SliceCollection &outputSlices,
     SliceToHitCollection &outputSlicesToHits);
