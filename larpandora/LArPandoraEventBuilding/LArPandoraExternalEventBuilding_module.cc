@@ -119,7 +119,7 @@ private:
      *  
      *  @return boolean - if the particle is a target
      */
-    bool IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const;
+    bool IsTarget(const art::Ptr<recob::PFParticleMetadata> &metadata) const;
 
     std::string                         m_inputProducerLabel;  ///< Label for the Pandora instance that produced the collections we want to consolidated
     std::string                         m_trackProducerLabel;  ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
@@ -409,7 +409,7 @@ void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const PFParti
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const
+bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<recob::PFParticleMetadata> &metadata) const
 {
     try
     {
