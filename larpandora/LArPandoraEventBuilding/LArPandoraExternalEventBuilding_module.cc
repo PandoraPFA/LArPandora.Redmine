@@ -112,15 +112,6 @@ private:
      */
     bool IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const;
 
-    /**
-     *  @brief  Query a metadata object to see if it is a target particle
-     *
-     *  @param  metadata the metadata object to query
-     *  
-     *  @return boolean - if the particle is a target
-     */
-    bool IsTarget(const art::Ptr<recob::PFParticleMetadata> &metadata) const;
-
     std::string                         m_inputProducerLabel;  ///< Label for the Pandora instance that produced the collections we want to consolidated
     std::string                         m_trackProducerLabel;  ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
     std::string                         m_showerProducerLabel; ///< Label for the shower producer using the Pandora instance that produced the collections we want to consolidate
@@ -161,7 +152,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_pandoraTag(art::InputTag(m_inputProducerLabel)),
     m_sliceIdTool(art::make_tool<SliceIdBaseTool>(pset.get<fhicl::ParameterSet>("SliceIdTool"))),
     m_useTestBeamMode(pset.get<bool>("ShouldUseTestBeamMode", false)),
-    m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsNeutrino"),
+    m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsTarget"),
     m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore"),
     m_isData(pset.get<bool>("IsData")),
     m_generatorLabel(m_isData ? "" : pset.get<std::string>("GeneratorLabel")),
