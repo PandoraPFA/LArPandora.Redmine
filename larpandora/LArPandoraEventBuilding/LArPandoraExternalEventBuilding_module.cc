@@ -40,7 +40,7 @@ public:
     void produce(art::Event &evt) override;
 
 private:
-    typedef std::map<art::Ptr<recob::PFParticle>, art::Ptr<recob::PFParticleMetadata> > PFParticleToMetadata;
+    typedef std::map<art::Ptr<recob::PFParticle>, art::Ptr<larpandoraobj::PFParticleMetadata> > PFParticleToMetadata;
 
     /**
      *  @brief  Collect PFParticles from the ART event and their mapping to metadata objects
@@ -97,7 +97,7 @@ private:
      *  
      *  @return the value in the metadata corresponding to the input key
      */
-    float GetMetadataValue(const art::Ptr<recob::PFParticleMetadata> &metadata, const std::string &key) const;
+    float GetMetadataValue(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata, const std::string &key) const;
 
     std::string                         m_inputProducerLabel;  ///< Label for the Pandora instance that produced the collections we want to consolidated
     std::string                         m_trackProducerLabel;  ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
@@ -136,7 +136,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     produces< std::vector<recob::Track> >(); 
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
-    produces< std::vector<recob::PFParticleMetadata> >();
+    produces< std::vector<larpandoraobj::PFParticleMetadata> >();
 
     produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
@@ -144,7 +144,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     produces< art::Assns<recob::PFParticle, recob::Track> >();
     produces< art::Assns<recob::PFParticle, recob::Shower> >();
     produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
-    produces< art::Assns<recob::PFParticle, recob::PFParticleMetadata> >();
+    produces< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> >();
     produces< art::Assns<recob::Track, recob::Hit> >();
     produces< art::Assns<recob::Shower, recob::Hit> >();
     produces< art::Assns<recob::Shower, recob::PCAxis> >();
@@ -193,7 +193,7 @@ void LArPandoraExternalEventBuilding::CollectPFParticles(const art::Event &evt, 
     art::Handle<std::vector<recob::PFParticle> > pfParticleHandle;
     evt.getByLabel(m_pandoraTag, pfParticleHandle);
 
-    art::FindManyP<recob::PFParticleMetadata> pfParticleMetadataAssoc(pfParticleHandle, evt, m_pandoraTag);
+    art::FindManyP<larpandoraobj::PFParticleMetadata> pfParticleMetadataAssoc(pfParticleHandle, evt, m_pandoraTag);
   
     for (unsigned int i = 0; i < pfParticleHandle->size(); ++i)
     {
@@ -313,7 +313,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float LArPandoraExternalEventBuilding::GetMetadataValue(const art::Ptr<recob::PFParticleMetadata> &metadata, const std::string &key) const
+float LArPandoraExternalEventBuilding::GetMetadataValue(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata, const std::string &key) const
 {
     const auto &propertiesMap(metadata->GetPropertiesMap());
     const auto &it(propertiesMap.find(key));

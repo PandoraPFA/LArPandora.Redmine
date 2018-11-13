@@ -33,8 +33,8 @@
 namespace lar_pandora
 {
 
-typedef std::vector< art::Ptr<recob::PFParticleMetadata> >                                              MetadataVector;
-typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<recob::PFParticleMetadata> > >     PFParticlesToMetadata;
+typedef std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> >                                              MetadataVector;
+typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > >     PFParticlesToMetadata;
 
 typedef std::vector< art::Ptr<recob::PCAxis> >                                              PCAxisVector;
 typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<recob::PCAxis> > >     PFParticlesToPCAxes;
