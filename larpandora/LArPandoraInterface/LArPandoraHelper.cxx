@@ -268,16 +268,16 @@ void LArPandoraHelper::CollectPFParticleMetadata(const art::Event &evt, const st
         mf::LogDebug("LArPandora") << "  Found: " << theParticles->size() << " PFParticles " << std::endl;
     }
 
-    art::FindManyP<recob::PFParticleMetadata> theMetadataAssns(theParticles, evt, label);
+    art::FindManyP<larpandoraobj::PFParticleMetadata> theMetadataAssns(theParticles, evt, label);
     for (unsigned int i = 0; i < theParticles->size(); ++i)
     {
         const art::Ptr<recob::PFParticle> particle(theParticles, i);
         particleVector.push_back(particle);
 
-        const std::vector< art::Ptr<recob::PFParticleMetadata> > pfParticleMetadataList = theMetadataAssns.at(i);
+        const std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> > pfParticleMetadataList = theMetadataAssns.at(i);
         for (unsigned int j=0; j<pfParticleMetadataList.size(); ++j)
         {
-            const art::Ptr<recob::PFParticleMetadata> pfParticleMetadata = pfParticleMetadataList.at(j);
+            const art::Ptr<larpandoraobj::PFParticleMetadata> pfParticleMetadata = pfParticleMetadataList.at(j);
             particlesToMetadata[particle].push_back(pfParticleMetadata);
         }
     }
@@ -1380,9 +1380,9 @@ bool LArPandoraHelper::IsVisible(const art::Ptr<simb::MCParticle> particle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::PFParticleMetadata LArPandoraHelper::GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo)
+larpandoraobj::PFParticleMetadata LArPandoraHelper::GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo)
 {
-	return recob::PFParticleMetadata(pPfo->GetPropertiesMap());
+	return larpandoraobj::PFParticleMetadata(pPfo->GetPropertiesMap());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
