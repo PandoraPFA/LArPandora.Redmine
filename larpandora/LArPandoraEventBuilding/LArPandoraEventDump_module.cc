@@ -71,7 +71,7 @@ private:
 
         // Collections 
         Collection<recob::PFParticle>           m_pfParticleCollection;                ///< The PFParticle handle
-        Collection<recob::PFParticleMetadata>   m_pfParticleMetadataCollection;        ///< The PFParticleMetadata handle
+        Collection<larpandoraobj::PFParticleMetadata>   m_pfParticleMetadataCollection;        ///< The PFParticleMetadata handle
         Collection<recob::Cluster>              m_clusterCollection;                   ///< The Cluster handle
         Collection<recob::SpacePoint>           m_spacePointCollection;                ///< The SpacePoint handle
         Collection<recob::Vertex>               m_vertexCollection;                    ///< The Vertex handle
@@ -81,7 +81,7 @@ private:
         Collection<recob::Slice>                m_sliceCollection;                     ///< The Slice handle
         
         // Associations
-        Association<recob::PFParticleMetadata> *m_pPFParticleToMetadataAssociation;    ///< The PFParticle to metadata association
+        Association<larpandoraobj::PFParticleMetadata> *m_pPFParticleToMetadataAssociation;    ///< The PFParticle to metadata association
         Association<recob::Cluster>            *m_pPFParticleToClusterAssociation;     ///< The PFParticle to cluster association
         Association<recob::SpacePoint>         *m_pPFParticleToSpacePointAssociation;  ///< The PFParticle to space point association
         Association<recob::Vertex>             *m_pPFParticleToVertexAssociation;      ///< The PFParticle to vertex association
@@ -122,41 +122,135 @@ private:
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Print the metadata about the event
+     *
+     *  @param  evt the art event
+     */
     void PrintEventMetadata(const art::Event &evt) const;
 
+    /**
+     *  @brief  Print a summary of the event similar to the standard event dump
+     *
+     *  @param  data the pandora collections and associations
+     */
     void PrintEventSummary(const PandoraData &data) const;
 
+    /**
+     *  @brief  Print the full PFParticle Hierarchy
+     *
+     *  @param  data the pandora collections and associations
+     */
     void PrintPFParticleHierarchy(const PandoraData &data) const;
 
+    /**
+     *  @brief  Build the map from PFParticle ID to PFParticle from the input data
+     *
+     *  @param  data the pandora collections and associations
+     *  @param  pfParticleMap the output PFParticle map
+     */
     void BuildPFParticleMap(const PandoraData &data, PFParticleMap &pfParticleMap) const;
 
+    /**
+     *  @brief  Print a given PFParticle
+     *
+     *  @param  particle the particle to print
+     *  @param  pfParticleMap the input mapping from PFParticle ID to PFParticle
+     *  @param  data the pandora collections and associations
+     *  @param  depth the number of characters to indent
+     */
     void PrintParticle(const art::Ptr< recob::PFParticle > &particle, const PFParticleMap &pfParticleMap, const PandoraData &data, const unsigned int depth) const;
     
+    /**
+     *  @brief  Print a given Hit
+     *
+     *  @param  hit the hit to print
+     *  @param  depth the number of characters to indent
+     */
     void PrintHit(const art::Ptr<recob::Hit> &hit, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a given Slice
+     *
+     *  @param  slice the slice to print
+     *  @param  data the pandora collections and associations
+     *  @param  depth the number of characters to indent
+     */
     void PrintSlice(const art::Ptr<recob::Slice> &slice, const PandoraData &data, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a given Cluster
+     *
+     *  @param  cluster the cluster to print
+     *  @param  data the pandora collections and associations
+     *  @param  depth the number of characters to indent
+     */
     void PrintCluster(const art::Ptr<recob::Cluster> &cluster, const PandoraData &data, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a given Vertex
+     *
+     *  @param  vertex the vertex to print
+     *  @param  depth the number of characters to indent
+     */
     void PrintVertex(const art::Ptr<recob::Vertex> &vertex, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a given SpacePoint
+     *
+     *  @param  spacePoint the spacePoint to print
+     *  @param  data the pandora collections and associations
+     *  @param  depth the number of characters to indent
+     */
     void PrintSpacePoint(const art::Ptr<recob::SpacePoint> &spacePoint, const PandoraData &data, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a given Track
+     *
+     *  @param  track the track to print
+     *  @param  data the pandora collections and associations
+     *  @param  depth the number of characters to indent
+     */
     void PrintTrack(const art::Ptr<recob::Track> &track, const PandoraData &data, const unsigned int depth) const;
     
+    /**
+     *  @brief  Print a given Shower
+     *
+     *  @param  shower the shower to print
+     *  @param  data the pandora collections and associations
+     *  @param  depth the number of characters to indent
+     */
     void PrintShower(const art::Ptr<recob::Shower> &shower, const PandoraData &data, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a horizontal line
+     *
+     *  @param  depth the number of characters to indent
+     */
     void PrintRule(const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a title line
+     *
+     *  @param  name the title name
+     *  @param  depth the number of characters to indent
+     */
     void PrintTitle(const std::string &name, const unsigned int depth) const;
 
+    /**
+     *  @brief  Print a given property with the correct amount of whitespace
+     *
+     *  @param  name the property name
+     *  @param  value the property value
+     *  @param  depth the number of characters to indent
+     */
     template<class T>
     void PrintProperty(const std::string &name, const T &value, const unsigned int depth) const;
 
-    std::string m_verbosityLevel;
-    std::string m_pandoraLabel;
-    std::string m_trackLabel;
-    std::string m_showerLabel;
+    std::string m_verbosityLevel;  ///< The level of verbosity to use
+    std::string m_pandoraLabel;    ///< The label of the Pandora pattern recognition producer
+    std::string m_trackLabel;      ///< The track producer label
+    std::string m_showerLabel;     ///< The shower producer label
 };
 
 DEFINE_ART_MODULE(LArPandoraEventDump)
@@ -196,6 +290,20 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     
     this->PrintEventMetadata(evt);
     this->PrintEventSummary(data);
+
+    /* BEGIN TEST */
+    std::cout << "TEST - # recob slices = " << data.m_sliceCollection->size() << std::endl;
+    for (unsigned int i = 0; i < data.m_sliceCollection->size(); ++i)
+    {
+        const art::Ptr<recob::Slice> slice(data.m_sliceCollection, i);
+    
+        if (!data.m_pSliceToHitAssociation)
+            continue;
+
+        const auto &hits(data.m_pSliceToHitAssociation->at(slice.key()));
+        std::cout << "TEST - Slice " << i << " : " << hits.size() << std::endl;
+    }
+    /* END TEST */
 
     if (m_verbosityLevel != "brief")
         this->PrintPFParticleHierarchy(data);
@@ -463,7 +571,7 @@ void LArPandoraEventDump::PrintSlice(const art::Ptr<recob::Slice> &slice, const 
     const auto &hits(data.m_pSliceToHitAssociation->at(slice.key()));
     this->PrintProperty("# Hits", hits.size(), depth + 2);
 
-    if (m_verbosityLevel == "detailed")
+    if (m_verbosityLevel != "extreme")
         return;
 
     // Print each associated hit

@@ -641,6 +641,12 @@ void LArPandoraOutput::CopyAllHitsToSingleSlice(const Settings &settings, const 
     LArPandoraHelper::CollectHits(event, settings.m_hitfinderModuleLabel, hits);
     LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, sliceIndex, hits, outputSlicesToHits);
 
+    /* BEGIN DEBUG */
+    std::cout << "Finding hits with label: " << settings.m_hitfinderModuleLabel << std::endl;
+    std::cout << " - Found " << hits.size() << std::endl;
+    std::cout << " - Making associations " << outputSlicesToHits->size() << std::endl;
+    /* END DEBUG */
+
     // Add all of the PFOs to the slice
     for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
         LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, sliceIndex, outputParticlesToSlices);
