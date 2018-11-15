@@ -55,8 +55,6 @@ find_ups_product( pandora v02_00_00 )
 find_ups_product( larpandoracontent v02_04_00 )
 find_ups_product( cetbuildtools v4_09_00 )
 find_ups_product( postgresql v9_1_5 )
-find_ups_product( ubana v1_00_00 )
-
 # macros for dictionary and simple_plugin
 include(ArtDictionary)
 include(ArtMake)

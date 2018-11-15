@@ -38,8 +38,6 @@ set(
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
                         ${ROOT_GENVECTOR}
-                        ubana_SelectionTool_OpT0FinderBase
-                        ubana_SelectionTool_OpT0FinderAlgorithms
                         MODULE_LIBRARIES larpandora_LArPandoraEventBuilding
           )
 
