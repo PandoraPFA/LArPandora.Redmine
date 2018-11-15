@@ -300,8 +300,15 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
         if (!data.m_pSliceToHitAssociation)
             continue;
 
-        const auto &hits(data.m_pSliceToHitAssociation->at(slice.key()));
+        auto hits(data.m_pSliceToHitAssociation->at(slice.key()));
         std::cout << "TEST - Slice " << i << " : " << hits.size() << std::endl;
+
+        std::sort(hits.begin(), hits.end(), [](const art::Ptr<recob::Hit> &a, const art::Ptr<recob::Hit> &b){
+            return a->Integral() < b->Integral();
+        });
+
+        for (const auto &hit : hits)
+            std::cout << "TEST -     " << hit->Integral() << std::endl;
     }
     /* END TEST */
 

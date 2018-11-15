@@ -595,6 +595,22 @@ void LArPandoraOutput::BuildSlices(const Settings &settings, const pandora::Pand
     for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
     {
         const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
+        
+        // If this PFO is the parent of a hierarchy we have yet to use, then add a new slice
+        if (LArPandoraOutput::IsFromSlice(pPfo))
+            continue;
+
+        if (lar_content::LArPfoHelper::GetParentPfo(pPfo) != pPfo)
+            continue;
+
+        if (!parentPfoToSliceIndexMap.emplace(pPfo, LArPandoraOutput::BuildSlice(pPfo, event, pProducer, instanceLabel, idToHitMap, outputSlices, outputSlicesToHits)).second)
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSlices --- found repeated primary particles ";
+    }
+
+    // Add the associations from PFOs to slices
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
+    {
+        const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
 
         // For PFOs that are from a Pandora slice, add the association and move on to the next PFO
         if (LArPandoraOutput::IsFromSlice(pPfo))
@@ -602,12 +618,12 @@ void LArPandoraOutput::BuildSlices(const Settings &settings, const pandora::Pand
             LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, LArPandoraOutput::GetSliceIndex(pPfo), outputParticlesToSlices);
             continue;
         }
-
-        // If this PFO is from a hierarchy we have yet to use, then add a new slice
+       
+        // Get the parent of the particle
         const pandora::ParticleFlowObject *const pParent(lar_content::LArPfoHelper::GetParentPfo(pPfo));
         if (parentPfoToSliceIndexMap.find(pParent) == parentPfoToSliceIndexMap.end())
-            parentPfoToSliceIndexMap.emplace(pParent, LArPandoraOutput::BuildSlice(pParent, event, pProducer, instanceLabel, idToHitMap, outputSlices, outputSlicesToHits));
-        
+            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildSlices --- found pfo without a parent in the input list ";
+
         // Add the association from the PFO to the slice
         LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, parentPfoToSliceIndexMap.at(pParent), outputParticlesToSlices);
     }
