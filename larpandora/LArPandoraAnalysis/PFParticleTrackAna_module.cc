@@ -186,18 +186,18 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
 
     std::cout << "  Tracks: " << trackVector.size() << std::endl;
 
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    // art::ServiceHandle<geo::Geometry> theGeometry;
+    // auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     ///// microboone_calorimetryalgmc.CalAreaConstants: [ 5.0142e-3, 5.1605e-3, 5.4354e-3 ]
     ///// lbne35t_calorimetryalgmc.CalAreaConstants: [ 5.1822e-3, 5.2682e-3, 5.3962e-3 ]
 
-    const double adc2eU(5.1e-3);
-    const double adc2eV(5.2e-3);
-    const double adc2eW(5.4e-3);
-    const double adc2eCheat(theDetector->ElectronsToADC());
+    // const double adc2eU(5.1e-3);
+    // const double adc2eV(5.2e-3);
+    // const double adc2eW(5.4e-3);
+    // const double adc2eCheat(theDetector->ElectronsToADC());
 
-    const double tau(theDetector->ElectronLifetime());
+    // const double tau(theDetector->ElectronLifetime());
 
     m_ntracks = trackVector.size();
 
@@ -223,9 +223,8 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
 
         for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
 	{
-	    TVector3 pos(0.0, 0.0, 0.0);
-            TVector3 dir(0.0, 0.0, 0.0);      
-            track->TrajectoryAtPoint(p, pos, dir);
+            auto pos = track->LocationAtPoint(p);
+            auto dir = track->DirectionAtPoint(p);
 
             m_residualRange = track->Length(p);
 
@@ -236,6 +235,17 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
             m_py = dir.y();
             m_pz = dir.z();
 
+	    /*************************************************************/
+	    /*                          WARNING                          */
+	    /*************************************************************/
+	    /* The dQdx information in recob::Track has been deprecated  */
+	    /* since 2016 and in 11/2018 the recob::Track interface was  */
+	    /* changed and DQdxAtPoint and NumberdQdx were removed.      */
+	    /* Therefore the code below is now commented out             */
+	    /* (note that it was most likely not functional anyways).    */
+	    /* For any issue please contact: larsoft-team@fnal.gov       */
+	    /*************************************************************/
+	    /*
             const double dQdxU(track->DQdxAtPoint(p, geo::kU)); // plane 0
             const double dQdxV(track->DQdxAtPoint(p, geo::kV)); // plane 1
             const double dQdxW(track->DQdxAtPoint(p, geo::kW)); // plane 2
@@ -251,6 +261,8 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
             m_dNdx = ((m_dQdx / adc2e) * exp((m_x / theDetector->GetXTicksCoefficient()) * theDetector->SamplingRate() * 1.e-3 / tau));
 
             m_dEdx = (m_useModBox ? theDetector->ModBoxCorrection(m_dNdx) : theDetector->BirksCorrection(m_dNdx));
+	    */
+	    /*************************************************************/
 
             m_pCaloTree->Fill();
             ++m_index;
