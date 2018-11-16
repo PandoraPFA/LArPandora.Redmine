@@ -112,22 +112,23 @@ private:
      */
     bool IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const;
 
-    std::string                         m_inputProducerLabel;  ///< Label for the Pandora instance that produced the collections we want to consolidated
-    std::string                         m_trackProducerLabel;  ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
-    std::string                         m_showerProducerLabel; ///< Label for the shower producer using the Pandora instance that produced the collections we want to consolidate
-    std::string                         m_hitProducerLabel;    ///< Label for the hit producer that was used as input to the Pandora instance specified
-    bool                                m_shouldProduceT0s;    ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
-    art::InputTag                       m_pandoraTag;          ///< The input tag for the pandora producer
-    std::unique_ptr<SliceIdBaseTool>    m_sliceIdTool;         ///< The slice id tool
-    bool                                m_useTestBeamMode;     ///< If we should expect a test-beam (instead of a neutrino) slice
-    std::string                         m_targetKey;           ///< The metadata key for a PFParticle to determine if it is the target
-    std::string                         m_scoreKey;            ///< The metadata key for the score of the target slice from Pandora
-    bool                                m_isData;              ///< If this is a data event
-    std::string                         m_generatorLabel;      ///< The label of the generator for MC event POT counting
-    int                                 m_run;                 ///< The run number
-    int                                 m_subRun;              ///< The subRun number
-    float                               m_pot;                 ///< The total amount of POT for the current sub run
-    TTree                              *m_pSubRunTree;         ///< The tree holding subrun information for POT counting of MC samples
+    std::string                         m_inputProducerLabel;      ///< Label for the Pandora instance that produced the collections we want to consolidated
+    std::string                         m_trackProducerLabel;      ///< Label for the track producer using the Pandora instance that produced the collections we want to consolidate
+    std::string                         m_showerProducerLabel;     ///< Label for the shower producer using the Pandora instance that produced the collections we want to consolidate
+    std::string                         m_hitProducerLabel;        ///< Label for the hit producer that was used as input to the Pandora instance specified
+    bool                                m_shouldProduceT0s;        ///< If we should produce T0s (relevant when stitching over multiple drift volumes)
+    art::InputTag                       m_pandoraTag;              ///< The input tag for the pandora producer
+    std::unique_ptr<SliceIdBaseTool>    m_sliceIdTool;             ///< The slice id tool
+    bool                                m_useTestBeamMode;         ///< If we should expect a test-beam (instead of a neutrino) slice
+    std::string                         m_targetKey;               ///< The metadata key for a PFParticle to determine if it is the target
+    std::string                         m_scoreKey;                ///< The metadata key for the score of the target slice from Pandora
+    bool                                m_shouldOutputSubrunsTree; ///< If we should output the subrun information to tree
+    bool                                m_isData;                  ///< If this is a data event
+    std::string                         m_generatorLabel;          ///< The label of the generator for MC event POT counting
+    int                                 m_run;                     ///< The run number
+    int                                 m_subRun;                  ///< The subRun number
+    float                               m_pot;                     ///< The total amount of POT for the current sub run
+    TTree                              *m_pSubRunTree;             ///< The tree holding subrun information for POT counting of MC samples
 };
 
 DEFINE_ART_MODULE(LArPandoraExternalEventBuilding)
@@ -154,7 +155,8 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_useTestBeamMode(pset.get<bool>("ShouldUseTestBeamMode", false)),
     m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsNeutrino"),
     m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore"),
-    m_isData(pset.get<bool>("IsData")),
+    m_shouldOutputSubrunsTree(pset.get<bool>("ShouldOutputSubrunsTree", false)),
+    m_isData(m_shouldOutputSubrunsTree ? pset.get<bool>("IsData") : false),
     m_generatorLabel(m_isData ? "" : pset.get<std::string>("GeneratorLabel")),
     m_run(std::numeric_limits<unsigned int>::max()),
     m_subRun(std::numeric_limits<unsigned int>::max()),
@@ -189,15 +191,18 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
         produces< art::Assns<recob::PFParticle, anab::T0> >();
     }
 
-    if (!m_isData)
-    {
-        art::ServiceHandle<art::TFileService> fileService;
+    if (!m_shouldOutputSubrunsTree)
+        return;
+    
+    if (m_isData)
+        throw cet::exception("LArPandora") << " LArPandoraExternalEventBuilding -- Can't output subrun information for data file" << std::endl;
 
-        m_pSubRunTree = fileService->make<TTree>("subruns","");
-        m_pSubRunTree->Branch("run"   , &m_run   , "run/I");
-        m_pSubRunTree->Branch("subRun", &m_subRun, "subRun/I");
-        m_pSubRunTree->Branch("pot"   , &m_pot   , "pot/F");
-    }
+    art::ServiceHandle<art::TFileService> fileService;
+
+    m_pSubRunTree = fileService->make<TTree>("subruns","");
+    m_pSubRunTree->Branch("run"   , &m_run   , "run/I");
+    m_pSubRunTree->Branch("subRun", &m_subRun, "subRun/I");
+    m_pSubRunTree->Branch("pot"   , &m_pot   , "pot/F");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -416,6 +421,9 @@ bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFP
     
 void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
 {
+    if (!m_shouldOutputSubrunsTree)
+        return;
+
     if (m_isData)
         return;
 
