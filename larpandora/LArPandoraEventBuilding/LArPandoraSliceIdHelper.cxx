@@ -58,8 +58,9 @@ art::Ptr<simb::MCTruth> LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth(const ar
     if (!mcTruthHandle.isValid())
         throw cet::exception("LArPandora") << " LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth - invalid MCTruth handle" << std::endl;
 
-    // Look for the truth block that is from the beam neutrino, and ensure there is only one
+    // Look for the truth block that is from the beam neutrino, and ensure we choose the one with the highest energy if there are multiple
     bool foundNeutrino(false);
+    float maxNeutrinoEnergy(-std::numeric_limits<float>::max());
     art::Ptr<simb::MCTruth> beamNuMCTruth;   
     for (unsigned int i = 0; i < mcTruthHandle->size(); ++i)
     {
@@ -68,12 +69,14 @@ art::Ptr<simb::MCTruth> LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth(const ar
         if (mcTruth->Origin() != simb::kBeamNeutrino)
             continue;
 
-        //if (foundNeutrino)
-        //    throw cet::exception("LArPandora") << " LArPandoraSliceIdHelper::GetBeamNeutrinoMCTruth - found multiple beam neutrino MCTruth blocks" << std::endl;
+        const float nuEnergy(mcTruth->GetNeutrino().Nu().E());
+        if (nuEnergy < maxNeutrinoEnergy)
+            continue;
 
+        // Select this as the beam neutrino
+        maxNeutrinoEnergy = nuEnergy;
         beamNuMCTruth = mcTruth;
         foundNeutrino = true;
-        break;
     }
 
     if (!foundNeutrino)
