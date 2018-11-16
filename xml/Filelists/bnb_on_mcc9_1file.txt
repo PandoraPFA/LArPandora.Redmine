@@ -1,1 +1,0 @@
-/pnfs/uboone/data/uboone/reconstructed/prod_v07_07_00_01/data_bnb_rolling_unblind_mcc9/reco_2d/00/00/66/96/PhysicsRun-2016_6_28_16_41_45-0006696-00015_20160629T065404_bnb_20160629T122807_merged_20181015T224236_reco1_postdl_20181016T194641_reco2.root
