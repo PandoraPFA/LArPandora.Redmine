@@ -345,7 +345,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             if (trackStateVector.size() < settings.m_minTrajectoryPoints)
             {
                 mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- Insufficient input trajectory points to build track ";
-                continue;
             }
             if (trackStateVector.size() >= settings.m_minTrajectoryPoints)
             {
