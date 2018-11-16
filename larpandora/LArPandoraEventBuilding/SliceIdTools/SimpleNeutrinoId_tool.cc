@@ -62,15 +62,12 @@ void SimpleNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &/*e
     for (unsigned int sliceIndex = 0; sliceIndex < slices.size(); ++sliceIndex)
     {
         const float nuScore(slices.at(sliceIndex).GetTopologicalScore());
-        std::cout << "Slice " << sliceIndex << " - " << nuScore << std::endl;
         if (nuScore > highestNuScore)
         {
             highestNuScore = nuScore;
             mostProbableSliceIndex = sliceIndex;
         }
     }
-
-    std::cout << "Tagging slice " << mostProbableSliceIndex << std::endl;
 
     // Tag the most probable slice as a neutrino
     slices.at(mostProbableSliceIndex).TagAsTarget();
