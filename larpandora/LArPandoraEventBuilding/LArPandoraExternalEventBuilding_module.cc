@@ -152,7 +152,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_pandoraTag(art::InputTag(m_inputProducerLabel)),
     m_sliceIdTool(art::make_tool<SliceIdBaseTool>(pset.get<fhicl::ParameterSet>("SliceIdTool"))),
     m_useTestBeamMode(pset.get<bool>("ShouldUseTestBeamMode", false)),
-    m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsTarget"),
+    m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsNeutrino"),
     m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore"),
     m_isData(pset.get<bool>("IsData")),
     m_generatorLabel(m_isData ? "" : pset.get<std::string>("GeneratorLabel")),
@@ -216,12 +216,7 @@ void LArPandoraExternalEventBuilding::produce(art::Event &evt)
 
     SliceVector slices;
     this->CollectSlices(particles, particlesToMetadata, particleMap, slices);
-    
-    for (auto slice: slices)
-    {
-        std::cout << "slice.GetTargetHypothesis: " << slice.GetTargetHypothesis().size() << std::endl;
-    }
-    
+
     m_sliceIdTool->ClassifySlices(slices, evt);
 
     PFParticleVector consolidatedParticles;
@@ -330,7 +325,6 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
             targetScores[sliceId] = targetScore;
         }
 
-        std::cout << "[LArPandoraExternalEventBuilding::CollectSlices] parentIt->second: " << parentIt->second << std::endl;
         if (this->IsTarget(parentIt->second))
         {
             targetHypotheses[sliceId].push_back(part);
