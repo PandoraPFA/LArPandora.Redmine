@@ -217,6 +217,11 @@ void LArPandoraExternalEventBuilding::produce(art::Event &evt)
     SliceVector slices;
     this->CollectSlices(particles, particlesToMetadata, particleMap, slices);
     
+    for (auto slice: slices)
+    {
+        std::cout << "slice.GetTargetHypothesis: " << slice.GetTargetHypothesis().size() << std::endl;
+    }
+    
     m_sliceIdTool->ClassifySlices(slices, evt);
 
     PFParticleVector consolidatedParticles;
@@ -325,6 +330,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
             targetScores[sliceId] = targetScore;
         }
 
+        std::cout << "[LArPandoraExternalEventBuilding::CollectSlices] parentIt->second: " << parentIt->second << std::endl;
         if (this->IsTarget(parentIt->second))
         {
             targetHypotheses[sliceId].push_back(part);
@@ -400,7 +406,7 @@ void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const PFParti
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<recob::PFParticleMetadata> &metadata) const
+bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata) const
 {
     try
     {

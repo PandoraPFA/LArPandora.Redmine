@@ -1,5 +1,0 @@
-#include "run_pandora_event_analyser.fcl"
-
-physics.producers.pandoraFlashEventBuilding.SliceIdTool.BeamWindowStartTime: 3.16
-physics.producers.pandoraFlashEventBuilding.SliceIdTool.BeamWindowEndTime:   4.84
-physics.producers.pandoraFlashEventBuilding.SliceIdTool.HasMCNeutrino:       true 
