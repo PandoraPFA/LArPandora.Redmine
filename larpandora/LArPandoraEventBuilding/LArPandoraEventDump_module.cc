@@ -291,27 +291,6 @@ void LArPandoraEventDump::analyze(art::Event const & evt)
     this->PrintEventMetadata(evt);
     this->PrintEventSummary(data);
 
-    /* BEGIN TEST */
-    std::cout << "TEST - # recob slices = " << data.m_sliceCollection->size() << std::endl;
-    for (unsigned int i = 0; i < data.m_sliceCollection->size(); ++i)
-    {
-        const art::Ptr<recob::Slice> slice(data.m_sliceCollection, i);
-    
-        if (!data.m_pSliceToHitAssociation)
-            continue;
-
-        auto hits(data.m_pSliceToHitAssociation->at(slice.key()));
-        std::cout << "TEST - Slice " << i << " : " << hits.size() << std::endl;
-
-        std::sort(hits.begin(), hits.end(), [](const art::Ptr<recob::Hit> &a, const art::Ptr<recob::Hit> &b){
-            return a->Integral() < b->Integral();
-        });
-
-        for (const auto &hit : hits)
-            std::cout << "TEST -     " << hit->Integral() << std::endl;
-    }
-    /* END TEST */
-
     if (m_verbosityLevel != "brief")
         this->PrintPFParticleHierarchy(data);
 }
