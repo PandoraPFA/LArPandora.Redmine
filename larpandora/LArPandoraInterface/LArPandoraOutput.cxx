@@ -331,7 +331,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
             if ((settings.m_buildShowersAsTracks && lar_content::LArPfoHelper::IsShower(pPfo)) || lar_content::LArPfoHelper::IsTrack(pPfo))
             {
                 if (lar_content::LArPfoHelper::IsShower(pPfo)) 
-                    std::cout << " LArPandoraOutput::ProduceArtOutput --- builiding track for shower-like PFParticle " << std::endl;
+                    std::cout << " LArPandoraOutput::ProduceArtOutput --- building track for shower-like PFParticle " << std::endl;
                 
                 try
                 {
