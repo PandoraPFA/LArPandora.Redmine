@@ -437,10 +437,10 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
 
             m_trackLength = trackLength;    
 
-            const TVector3 &trackVtxPosition = track->Vertex();
-            const TVector3 &trackVtxDirection = track->VertexDirection();
-            const TVector3 &trackEndPosition = track->End();
-            const TVector3 &trackEndDirection = track->EndDirection();
+            const auto &trackVtxPosition = track->Vertex();
+            const auto &trackVtxDirection = track->VertexDirection();
+            const auto &trackEndPosition = track->End();
+            const auto &trackEndDirection = track->EndDirection();
                 
             m_trackVtxX    = trackVtxPosition.x();
             m_trackVtxY    = trackVtxPosition.y();

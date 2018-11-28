@@ -1049,9 +1049,9 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                         std::cout << " Warning: Found particle with more than one associated track " << std::endl;
 
                     const art::Ptr<recob::Track> recoTrack = *(trackVector.begin());
-                    const TVector3 &vtxPosition = recoTrack->Vertex();
-                    const TVector3 &endPosition = recoTrack->End();
-                    const TVector3 &vtxDirection = recoTrack->VertexDirection();
+                    const auto &vtxPosition = recoTrack->Vertex();
+                    const auto &endPosition = recoTrack->End();
+                    const auto &vtxDirection = recoTrack->VertexDirection();
 
                     m_pfoTrack = 1;
                     m_pfoVtxX = vtxPosition.x();
@@ -1063,7 +1063,7 @@ void PFParticleMonitoring::analyze(const art::Event &evt)
                     m_pfoDirX = vtxDirection.x();
                     m_pfoDirY = vtxDirection.y();
                     m_pfoDirZ = vtxDirection.z();
-                    m_pfoStraightLength = (endPosition - vtxPosition).Mag();
+                    m_pfoStraightLength = (endPosition - vtxPosition).R();
                     m_pfoLength = recoTrack->Length();
                 }
             }

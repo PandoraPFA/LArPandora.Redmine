@@ -431,7 +431,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
 
             for (unsigned int p = 0; p < track->NumberTrajectoryPoints(); ++p)
             {
-                const TVector3 position(track->LocationAtPoint(p));
+                const auto position(track->LocationAtPoint(p));
                 m_x = position.x();
                 m_y = position.y();
                 m_z = position.z();
