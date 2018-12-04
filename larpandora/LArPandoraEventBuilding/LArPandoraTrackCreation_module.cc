@@ -207,13 +207,28 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
             continue;
         }
 
-        HitVector hitsInParticle;
-        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToClustersIter->second, hitsInParticle);
+        HitVector hitsFromSpacePoints, hitsFromClusters, hitsInParticle;
+        HitSet hitsInParticleSet;
+
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToSpacePointIter->second, hitsFromSpacePoints, &indexVector);
+        LArPandoraHelper::GetAssociatedHits(evt, m_pfParticleLabel, particleToClustersIter->second, hitsFromClusters);
+        //ATTN: hits ordered from space points if available, rest added at the end
+        for (unsigned int hitIndex = 0; hitIndex < hitsFromSpacePoints.size(); hitIndex++)
+        {
+	    hitsInParticle.push_back(hitsFromSpacePoints.at(hitIndex));
+            (void) hitsInParticleSet.insert(hitsFromSpacePoints.at(hitIndex));
+        }
+
+        for (unsigned int hitIndex = 0; hitIndex < hitsFromClusters.size(); hitIndex++)
+        {
+            if (hitsInParticleSet.count(hitsFromClusters.at(hitIndex)) == 0)
+                hitsInParticle.push_back(hitsFromClusters.at(hitIndex));
+        }
 
         // Add invalid points at the end of the vector, so that the number of the trajectory points is the same as the number of hits
-        if (trackStateVector.size()>hitsInParticle.size())
+        if (trackStateVector.size()>hitsFromSpacePoints.size())
         {
-            throw cet::exception("LArPandoraTrackCreation") << "trackStateVector.size() is greater than hitsInParticle.size()";
+            throw cet::exception("LArPandoraTrackCreation") << "trackStateVector.size() is greater than hitsFromSpacePoints.size()";
         }
         const unsigned int nInvalidPoints = hitsInParticle.size()-trackStateVector.size();
         for (unsigned int i=0;i<nInvalidPoints;++i) {
@@ -229,10 +244,12 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
         util::CreateAssn(*this, evt, pTrack, pPFParticle, *(outputParticlesToTracks.get()));
         util::CreateAssn(*this, evt, *(outputTracks.get()), hitsInParticle, *(outputTracksToHits.get()));
 
+	//ATTN: metadata added with index from space points if available, null for others
         for (unsigned int hitIndex = 0; hitIndex < hitsInParticle.size(); hitIndex++)
         {
             const art::Ptr<recob::Hit> pHit(hitsInParticle.at(hitIndex));
-            recob::TrackHitMeta metadata(hitIndex, -std::numeric_limits<double>::max());
+            const int index((hitIndex < hitsFromSpacePoints.size()) ? hitIndex : std::numeric_limits<int>::max());
+            recob::TrackHitMeta metadata(index, -std::numeric_limits<double>::max());
             outputTracksToHitsWithMeta->addSingle(pTrack, pHit, metadata);
         }
     }

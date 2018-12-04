@@ -11,6 +11,7 @@
 #include "lardata/Utilities/AssociationUtil.h"
 
 #include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 
 #include "larreco/RecoAlg/ClusterRecoUtil/ClusterParamsAlgBase.h"
 

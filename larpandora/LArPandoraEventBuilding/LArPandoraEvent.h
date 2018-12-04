@@ -12,6 +12,7 @@
 #include "lardata/Utilities/AssociationUtil.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Cluster.h"
@@ -24,7 +25,6 @@
 #include "lardataobj/AnalysisBase/T0.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <memory>
 #include <algorithm>

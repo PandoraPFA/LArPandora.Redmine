@@ -470,10 +470,10 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                     std::cout << " Warning: Found particle with more than one associated track " << std::endl;
 
                 const art::Ptr<recob::Track> track = *(trackVector.begin());
-                const TVector3 &trackVtxPosition = track->Vertex();
-                const TVector3 &trackVtxDirection = track->VertexDirection();
-                const TVector3 &trackEndPosition = track->End();
-                const TVector3 &trackEndDirection = track->EndDirection();
+                const auto &trackVtxPosition = track->Vertex();
+                const auto &trackVtxDirection = track->VertexDirection();
+                const auto &trackEndPosition = track->End();
+                const auto &trackEndDirection = track->EndDirection();
 
                 m_track = 1;
                 m_trackid = track->ID();
@@ -491,7 +491,7 @@ void PFParticleAnalysis::analyze(const art::Event &evt)
                 m_trkenddiry = trackEndDirection.y();
                 m_trkenddirz = trackEndDirection.z();
                 m_trklength = track->Length();
-                m_trkstraightlength = (trackEndPosition - trackVtxPosition).Mag();
+                m_trkstraightlength = (trackEndPosition - trackVtxPosition).R();
 
                 TracksToHits::const_iterator trkIter2 = tracksToHits.find(track);
                 if (tracksToHits.end() != trkIter2)

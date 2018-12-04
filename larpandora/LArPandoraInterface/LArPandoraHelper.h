@@ -16,9 +16,9 @@
 #include <vector>
 
 namespace anab {class CosmicTag; class T0;}
-namespace larpandoraobj {class PFParticleMetadata;}
 namespace pandora {class ParticleFlowObject; class Vertex; typedef std::vector<int> IntVector;}
 namespace recob {class Cluster; class Hit; class PFParticle; class Seed; class Shower; class SpacePoint; class Track; class Vertex; class Wire;}
+namespace larpandoraobj {class PFParticleMetadata;}
 namespace sim {class SimChannel; struct TrackIDE;}
 namespace simb {class MCParticle; class MCTruth;}
 
@@ -46,6 +46,8 @@ typedef std::vector< sim::TrackIDE >                TrackIDEVector;
 typedef std::vector< art::Ptr<anab::CosmicTag> >    CosmicTagVector;
 typedef std::vector< art::Ptr<anab::T0> >           T0Vector;
 typedef std::vector< art::Ptr<larpandoraobj::PFParticleMetadata> >  MetadataVector;
+
+typedef std::unordered_set< art::Ptr<recob::Hit> > HitSet;
 
 typedef std::map< art::Ptr<recob::PFParticle>, TrackVector >                  PFParticlesToTracks;
 typedef std::map< art::Ptr<recob::PFParticle>, ShowerVector >                 PFParticlesToShowers;
@@ -608,6 +610,8 @@ public:
      *  @return true/false
      */
     static bool IsVisible(const art::Ptr<simb::MCParticle> particle);
+	
+	static larpandoraobj::PFParticleMetadata GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo);
 };
 
 } // namespace lar_pandora

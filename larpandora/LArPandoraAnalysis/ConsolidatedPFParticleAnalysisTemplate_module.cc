@@ -110,7 +110,7 @@ DEFINE_ART_MODULE(ConsolidatedPFParticleAnalysisTemplate)
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 
 #include "Pandora/PdgTable.h"
 
@@ -210,10 +210,10 @@ void ConsolidatedPFParticleAnalysisTemplate::PrintOutScores(const art::Event &ev
             for (unsigned int j=0; j<pfParticleMetadataList.size(); ++j)
             {
                 const art::Ptr<larpandoraobj::PFParticleMetadata> &pfParticleMetadata(pfParticleMetadataList.at(j));
-                const pandora::PropertiesMap &pfParticlePropertiesMap(pfParticleMetadata->GetPropertiesMap());
+                const larpandoraobj::PFParticleMetadata::PropertiesMap &pfParticlePropertiesMap(pfParticleMetadata->GetPropertiesMap());
                 if (!pfParticlePropertiesMap.empty())
                     std::cout << " Found PFParticle " << pParticle->Self() << " with: " << std::endl;
-                for (pandora::PropertiesMap::const_iterator it = pfParticlePropertiesMap.begin(); it != pfParticlePropertiesMap.end(); ++it)
+                for (larpandoraobj::PFParticleMetadata::PropertiesMap::const_iterator it = pfParticlePropertiesMap.begin(); it != pfParticlePropertiesMap.end(); ++it)
                     std::cout << "  - " << it->first << " = " << it->second << std::endl;
             }
         }

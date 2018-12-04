@@ -16,6 +16,7 @@
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -36,7 +37,6 @@
 #include "larpandoracontent/LArControlFlow/MultiPandoraApi.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraOutput.h"
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 #include <algorithm>
 #include <iterator>
@@ -503,7 +503,8 @@ void LArPandoraOutput::BuildParticleMetadata(const art::Event &event, const art:
         const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
         
         LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, outputParticleMetadata->size(), outputParticlesToMetadata);
-        outputParticleMetadata->push_back(larpandoraobj::PFParticleMetadata(pPfo));
+        larpandoraobj::PFParticleMetadata pPFParticleMetadata(LArPandoraHelper::GetPFParticleMetadata(pPfo));
+		outputParticleMetadata->push_back(pPFParticleMetadata);
     }
 }
 

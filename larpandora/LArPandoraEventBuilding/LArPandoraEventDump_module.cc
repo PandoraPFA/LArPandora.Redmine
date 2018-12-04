@@ -13,6 +13,7 @@
 #include "lardata/Utilities/AssociationUtil.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Vertex.h"
@@ -21,8 +22,6 @@
 #include "lardataobj/RecoBase/Seed.h"
 #include "lardataobj/RecoBase/PCAxis.h"
 #include "lardataobj/RecoBase/Hit.h"
-
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
 
 namespace lar_pandora
 {

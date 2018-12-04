@@ -22,7 +22,7 @@
 #include "larpandora/LArPandoraEventBuilding/LArPandoraEvent.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
-#include "larpandora/LArPandoraObjects/PFParticleMetadata.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 
 namespace lar_pandora
 {
