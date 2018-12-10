@@ -50,6 +50,8 @@ public:
         bool                    m_buildShowers;                 ///<
         bool                    m_buildStitchedParticles;       ///<
         calo::LinearEnergyAlg const* m_showerEnergyAlg;         ///<
+        bool                    m_buildShowersAsTracks;         ///<
+        float                   m_slidingFitHalfWindow;         ///<
     };
 
     /**

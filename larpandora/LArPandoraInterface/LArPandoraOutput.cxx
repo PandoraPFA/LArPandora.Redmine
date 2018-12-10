@@ -57,6 +57,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     if (!settings.m_pProducer)
         throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- pointer to ART Producer module does not exist ";
 
+    if (settings.m_buildShowersAsTracks)
+         mf::LogDebug("LArPandora") << " LArPandora::ProduceArtOutput --- Pandora is configured to build shower-like PFParticles as tracks " << std::endl;
+
     PandoraInstanceList pandoraInstanceList;
     const PandoraInstanceList &daughterInstances(MultiPandoraApi::GetDaughterPandoraInstanceList(settings.m_pPrimaryPandora));
 
@@ -223,7 +226,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         {
             if (pandora::TPC_3D == lar_content::LArClusterHelper::GetClusterHitType(pCluster))
                 continue;
-
+            
             pandora::CaloHitList pandoraHitList2D;
             pCluster->GetOrderedCaloHitList().FillCaloHitList(pandoraHitList2D);
             pandoraHitList2D.insert(pandoraHitList2D.end(), pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
@@ -306,6 +309,8 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         // Associate Vertex and Build High-Level Objects
         if (!pPfo->GetVertexList().empty())
         {
+            auto const& geom = lar::providerFrom<geo::Geometry>();
+            
             if(pPfo->GetVertexList().size() != 1)
                 throw cet::exception("LArPandora") << " LArPandoraOutput::ProduceArtOutput --- this particle has multiple interaction vertices ";
 
@@ -320,23 +325,29 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                 vtxElement, vtxElement + 1);
 
             // Build Seeds, Tracks, T0s
-            if (lar_content::LArPfoHelper::IsTrack(pPfo) && pPfo->GetMomentum().GetMagnitudeSquared() > std::numeric_limits<float>::epsilon())
+            // Calculate sliding fit trajectory
+            lar_content::LArTrackStateVector trackStateVector;
+
+            if ((settings.m_buildShowersAsTracks && lar_content::LArPfoHelper::IsShower(pPfo)) || lar_content::LArPfoHelper::IsTrack(pPfo))
             {
-                const lar_content::LArTrackPfo *const pLArTrackPfo = dynamic_cast<const lar_content::LArTrackPfo*>(pPfo);
-
-                if (!pLArTrackPfo)
+                if (lar_content::LArPfoHelper::IsShower(pPfo)) 
+                    std::cout << " LArPandoraOutput::ProduceArtOutput --- building track for shower-like PFParticle " << std::endl;
+                
+                try
                 {
-                    mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- input pfo is track-like but is not a LArTrackPfo ";
-                    continue;
+                    lar_content::LArPfoHelper::GetSlidingFitTrajectory(pPfo, pVertex, settings.m_slidingFitHalfWindow, geom->WirePitch(0,0,0), trackStateVector);
                 }
-
-                const lar_content::LArTrackStateVector &trackStateVector = pLArTrackPfo->m_trackStateVector;
-
-                if (trackStateVector.size() < settings.m_minTrajectoryPoints)
+                catch (const pandora::StatusCodeException &)
                 {
-                    mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- Insufficient input trajectory points to build track ";
-                    continue;
+                    std::cout << "Exception Caught: Unable to get sliding fit trajectory" << std::endl;
                 }
+            }
+            if (trackStateVector.size() < settings.m_minTrajectoryPoints)
+            {
+                mf::LogDebug("LArPandora") << " LArPandoraOutput::BuildTrack --- Insufficient input trajectory points to build track ";
+            }
+            else 
+            {
 
                 for (const lar_content::LArTrackState &nextPoint : trackStateVector)
                 {
@@ -352,26 +363,26 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                         outputSeeds->size() - 1, outputSeeds->size());
                 }
 
-                if (!settings.m_buildTracks)
-                    continue;
-
-                // Building track objects
-                outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector, idToHitMap));
-
-                util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), particleHitsFromSpacePoints, *(outputTracksToHits.get()));
-                util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()), outputTracks->size() - 1, outputTracks->size());
-
-                // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  track ID code;  T0 ID code]
-                // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
-                if (settings.m_buildStitchedParticles && std::fabs(T0) > 0.0)
+                if (settings.m_buildTracks)
                 {
-                    outputT0s->emplace_back(anab::T0(T0, 3, outputTracks->back().ID(), t0Counter++));
-                    util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), *(outputT0s.get()), *(outputTracksToT0s.get()), outputT0s->size() - 1, outputT0s->size());
+                    // Building track objects
+                    outputTracks->emplace_back(LArPandoraOutput::BuildTrack(trackCounter++, &trackStateVector, idToHitMap));
+
+                    util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), particleHitsFromSpacePoints, *(outputTracksToHits.get()));
+                    util::CreateAssn(*(settings.m_pProducer), evt, *(outputParticles.get()), *(outputTracks.get()), *(outputParticlesToTracks.get()), outputTracks->size() - 1, outputTracks->size());
+
+                    // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  track ID code;  T0 ID code]
+                    // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
+                    if (settings.m_buildStitchedParticles && std::fabs(T0) > 0.0)
+                    {
+                        outputT0s->emplace_back(anab::T0(T0, 3, outputTracks->back().ID(), t0Counter++));
+                        util::CreateAssn(*(settings.m_pProducer), evt, *(outputTracks.get()), *(outputT0s.get()), *(outputTracksToT0s.get()), outputT0s->size() - 1, outputT0s->size());
+                    }
                 }
             }
 
             // Build Showers, PCAxes
-            else if (lar_content::LArPfoHelper::IsShower(pPfo))
+            if (lar_content::LArPfoHelper::IsShower(pPfo))
             {
                 const lar_content::LArShowerPfo *const pLArShowerPfo = dynamic_cast<const lar_content::LArShowerPfo*>(pPfo);
 
@@ -385,7 +396,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
                     continue;
 
                 // TODO - If possible, we should try to move some of the shower-building code below into the BuildShower method
-                auto const& geom = lar::providerFrom<geo::Geometry>();
 
                 lar::PtrMaker<recob::Shower> makeShowerPtr(evt, *(settings.m_pProducer));
                 lar::PtrMaker<recob::PCAxis> makePCAxisPtr(evt, *(settings.m_pProducer));
@@ -831,7 +841,9 @@ LArPandoraOutput::Settings::Settings() :
     m_minTrajectoryPoints(2),
     m_buildShowers(true),
     m_buildStitchedParticles(false),
-    m_showerEnergyAlg(nullptr)
+    m_showerEnergyAlg(nullptr),
+    m_buildShowersAsTracks(false),
+    m_slidingFitHalfWindow(20)
 {
 }
 
