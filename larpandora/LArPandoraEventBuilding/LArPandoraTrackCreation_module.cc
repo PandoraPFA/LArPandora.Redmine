@@ -133,7 +133,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     const float wirePitchW((nWirePlanes < 3) ? 0.5f * (wirePitchU + wirePitchV) : (useYPlane) ? theGeometry->WirePitch(geo::kY) : theGeometry->WirePitch(geo::kW));
 
     int trackCounter(0);
-    const art::PtrMaker<recob::Track> makeTrackPtr(evt, *this);
+    const art::PtrMaker<recob::Track> makeTrackPtr(evt);
 
     // Organise inputs
     PFParticleVector pfParticleVector, extraPfParticleVector;
