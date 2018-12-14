@@ -40,10 +40,11 @@ private:
     /**
      *  @brief  Build a recob::Shower object
      *
+     *  @param  id the id code for the shower
      *  @param  larShowerPCA the lar shower pca parameters extracted from pandora
      *  @param  vertexPosition the shower vertex position
      */
-    recob::Shower BuildShower(const lar_content::LArShowerPCA &larShowerPCA, const pandora::CartesianVector &vertexPosition) const;
+    recob::Shower BuildShower(const int id, const lar_content::LArShowerPCA &larShowerPCA, const pandora::CartesianVector &vertexPosition) const;
 
     /**
      *  @brief  Build a recob::PCAxis object
@@ -122,6 +123,8 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
     const art::PtrMaker<recob::Shower> makeShowerPtr(evt);
     const art::PtrMaker<recob::PCAxis> makePCAxisPtr(evt);
 
+    int showerCounter(0);
+
     // Organise inputs
     PFParticleVector pfParticleVector, extraPfParticleVector;
     PFParticlesToSpacePoints pfParticlesToSpacePoints;
@@ -180,7 +183,7 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         {
             // Ensure successful creation of all structures before placing results in output containers
             const lar_content::LArShowerPCA larShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, vertexPosition));
-            const recob::Shower shower(LArPandoraShowerCreation::BuildShower(larShowerPCA, vertexPosition));
+            const recob::Shower shower(LArPandoraShowerCreation::BuildShower(showerCounter++, larShowerPCA, vertexPosition));
             const recob::PCAxis pcAxis(LArPandoraShowerCreation::BuildPCAxis(larShowerPCA));
             outputShowers->emplace_back(shower);
             outputPCAxes->emplace_back(pcAxis);
@@ -218,7 +221,7 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-recob::Shower LArPandoraShowerCreation::BuildShower(const lar_content::LArShowerPCA &larShowerPCA, const pandora::CartesianVector &vertexPosition) const
+recob::Shower LArPandoraShowerCreation::BuildShower(const int id, const lar_content::LArShowerPCA &larShowerPCA, const pandora::CartesianVector &vertexPosition) const
 {
     const pandora::CartesianVector &showerLength(larShowerPCA.GetAxisLengths());
     const pandora::CartesianVector &showerDirection(larShowerPCA.GetPrimaryAxis());
@@ -237,7 +240,7 @@ recob::Shower LArPandoraShowerCreation::BuildShower(const lar_content::LArShower
     const std::vector<double> totalEnergy;
     const int bestplane(0);
 
-    return recob::Shower(direction, directionErr, vertex, vertexErr, totalEnergy, totalEnergyErr, dEdx, dEdxErr, bestplane, util::kBogusI, length, openingAngle);
+    return recob::Shower(direction, directionErr, vertex, vertexErr, totalEnergy, totalEnergyErr, dEdx, dEdxErr, bestplane, id, length, openingAngle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
