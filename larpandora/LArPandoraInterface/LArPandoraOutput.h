@@ -383,14 +383,13 @@ private:
      *
      *  @param  event the art event
      *  @param  pProducer the address of the producer module
+     *  @param  instanceLabel the label for the collections to be produced
      *  @param  pfoVector the input list of pfos
      *  @param  outputT0s the output vector of T0s
-     *  @param  pandoraHitToArtHitMap the input mapping from pandora hits to ART hits
      *  @param  outputParticlesToT0s the output associations between PFParticles and T0s
      */
     static void BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
-        const pandora::PfoVector &pfoVector, T0Collection &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
-        PFParticleToT0Collection &outputParticlesToT0s);
+        const pandora::PfoVector &pfoVector, T0Collection &outputT0s, PFParticleToT0Collection &outputParticlesToT0s);
 
     /**
      *  @brief  Convert from a pandora vertex to an ART vertex
@@ -401,7 +400,7 @@ private:
      *  @param  the ART vertex
      */
     static recob::Vertex BuildVertex(const pandora::Vertex *const pVertex, const size_t vertexId);
-    
+
     /**
      *  @brief  Convert from a pandora 3D hit to an ART spacepoint
      *
@@ -451,7 +450,7 @@ private:
      */
     static recob::Cluster BuildCluster(const size_t id, const HitVector &hitVector, const HitList &isolatedHits,
         cluster::ClusterParamsAlgBase &algo);
-    
+
     /**
      *  @brief  Convert from a pfo to and ART PFParticle
      *
@@ -469,14 +468,12 @@ private:
      *  @param  pPfo the input pfo
      *  @param  pfoVector the input list of pfos
      *  @param  nextId the ID of the T0 - will be incremented if the t0 was produced
-     *  @param  pandoraHitToArtHitMap the input mapping from pandora hits to ART hits
      *  @param  t0 the output T0
      *
      *  @return if a T0 was produced (calculated from the stitching hit shift distance)
      */
-    static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector, size_t &nextId,
-        const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0);
-    
+    static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector, size_t &nextId, anab::T0 &t0);
+
     /**
      *  @brief  Convert X0 correction into T0 correction
      *
