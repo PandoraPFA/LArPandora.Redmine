@@ -475,16 +475,6 @@ private:
     static bool BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector, size_t &nextId, anab::T0 &t0);
 
     /**
-     *  @brief  Convert X0 correction into T0 correction
-     *
-     *  @param  hit the input ART hit
-     *  @param  pCaloHit the output Pandora hit
-     *
-     *  @return T0 relative to input hit in nanoseconds
-     */
-    static double CalculateT0(const art::Ptr<recob::Hit> hit, const pandora::CaloHit *const pCaloHit);
-
-    /**
      *  @brief  Add an association between objects with two given ids
      *
      *  @param  event the ART event

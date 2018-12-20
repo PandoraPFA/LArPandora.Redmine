@@ -936,30 +936,6 @@ bool LArPandoraOutput::BuildT0(const pandora::ParticleFlowObject *const pPfo, co
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-
-double LArPandoraOutput::CalculateT0(const art::Ptr<recob::Hit> hit, const pandora::CaloHit *const pCaloHit)
-{
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
-
-    const geo::WireID hit_WireID(hit->WireID());
-    const geo::TPCGeo &theTpc = theGeometry->Cryostat(hit_WireID.Cryostat).TPC(hit_WireID.TPC);
-
-    // Calculate shift in x position between input and output hits
-    const double input_xpos_cm(theDetector->ConvertTicksToX(hit->PeakTime(), hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
-    const double output_xpos_dm(pCaloHit->GetPositionVector().GetX());
-    const double x0_cm(output_xpos_dm - input_xpos_cm);
-
-    // The ingredients for the T0 calculation all come from the detector properties service
-    const double dir((theTpc.DriftDirection() == geo::kNegX) ? 1.0 : -1.0);
-    const double cm_per_tick(theDetector->GetXTicksCoefficient());
-    const double ns_per_tick(theDetector->SamplingRate());
-
-    // This calculation should give the T0 in nanoseconds relative to the initial 2D hit
-    return (- dir * x0_cm * ns_per_tick / cm_per_tick);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 LArPandoraOutput::Settings::Settings() :
