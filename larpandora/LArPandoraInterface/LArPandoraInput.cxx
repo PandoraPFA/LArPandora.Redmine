@@ -49,6 +49,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    const unsigned int isDualPhase(theGeometry->MaxPlanes() == 2);
 
     // Loop over ART hits
     int hitCounter(0);
@@ -109,19 +110,19 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
 
             const geo::View_t pandora_View(LArPandoraGeometry::GetGlobalView(hit_WireID.Cryostat, hit_WireID.TPC, hit_View));
 
-            if (pandora_View == geo::kW)
+            if (!isDualPhase && (pandora_View == geo::kW || pandora_View == geo::kY))
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_W;
                 const double wpos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoW(y0_cm, z0_cm));
                 caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., wpos_cm);
             }
-            else if(pandora_View == geo::kU)
+            else if ((!isDualPhase && pandora_View == geo::kU) || (isDualPhase && pandora_View == geo::kW))
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_U;
                 const double upos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoU(y0_cm, z0_cm));
                 caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., upos_cm);
             }
-            else if(pandora_View == geo::kV)
+            else if ((!isDualPhase && pandora_View == geo::kV) || (isDualPhase && pandora_View == geo::kY))
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_V;
                 const double vpos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoV(y0_cm, z0_cm));
@@ -320,7 +321,7 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
                         const geo::View_t iview = (geo::View_t)iplane;
                         const geo::View_t pandoraView(LArPandoraGeometry::GetGlobalView(icstat, itpc, iview));
 
-                        if (pandoraView == geo::kW)
+                        if (pandoraView == geo::kW || pandoraView == geo::kY)
                         {
                             const float firstW(firstXYZ[2]);
                             const float lastW(lastXYZ[2]);

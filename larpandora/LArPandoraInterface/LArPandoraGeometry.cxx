@@ -115,7 +115,7 @@ geo::View_t LArPandoraGeometry::GetGlobalView(const unsigned int cstat, const un
     // ATTN This implicitly assumes that there will be u, v and (maybe) one of either w or y views
     if ((hit_View == geo::kW) || (hit_View == geo::kY))
     {
-        return geo::kW;
+        return hit_View;
     }
     else if(hit_View == geo::kU)
     {
@@ -188,13 +188,15 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
     for (unsigned int iPlane = 0; iPlane < nWirePlanes; ++iPlane)
         (void) planeSet.insert(theGeometry->TPC(0, 0).Plane(iPlane).View());
 
-    if ((nWirePlanes != planeSet.size()) || !planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY)))
+    const bool isDualPhase(planeSet.size() == 2 && planeSet.count(geo::kW) && planeSet.count(geo::kY));
+
+    if (((nWirePlanes != planeSet.size()) || !planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY))) && !isDualPhase)
         throw cet::exception("LArPandora") << " LArPandoraGeometry::LoadGeometry --- expect to find u and v views; if there is one further view, it must be w or y ";
 
     const bool useYPlane((nWirePlanes > 2) && planeSet.count(geo::kY));
 
-    const float wirePitchU(theGeometry->WirePitch(geo::kU));
-    const float wirePitchV(theGeometry->WirePitch(geo::kV));
+    const float wirePitchU(theGeometry->WirePitch((isDualPhase ? geo::kW : geo::kU)));
+    const float wirePitchV(theGeometry->WirePitch((isDualPhase ? geo::kY : geo::kV)));
     const float wirePitchW((nWirePlanes < 3) ? 0.5f * (wirePitchU + wirePitchV) : (useYPlane) ? theGeometry->WirePitch(geo::kY) :
         theGeometry->WirePitch(geo::kW));
 
@@ -215,9 +217,9 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
             const geo::TPCGeo &theTpc1(theGeometry->TPC(itpc1, icstat));
             cstatList.insert(itpc1);
 
-            const float wireAngleU(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
-            const float wireAngleV(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat));
-            const float wireAngleW((nWirePlanes < 3) ? 0.f : (useYPlane) ? (std::fabs(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat))) :
+            const float wireAngleU(isDualPhase ? theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat) : 0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
+            const float wireAngleV(isDualPhase ? theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat) : 0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat));
+            const float wireAngleW((nWirePlanes < 3) ? std::numeric_limits<float>::epsilon() : (useYPlane) ? (std::fabs(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat))) :
                 (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)));
 
             double localCoord1[3] = {0., 0., 0.};
@@ -250,9 +252,11 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
                 if (theTpc1.DriftDirection() != theTpc2.DriftDirection())
                     continue;
 
-                const float dThetaU(theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kU, itpc2, icstat));
-                const float dThetaV(theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kV, itpc2, icstat));
-                const float dThetaW((nWirePlanes < 3) ? 0.f : (useYPlane) ? (theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kY, itpc2, icstat)) :
+                const geo::View_t pandoraUView(isDualPhase ? geo::kW : geo::kU);
+                const geo::View_t pandoraVView(isDualPhase ? geo::kY : geo::kV);
+                const float dThetaU(theGeometry->WireAngleToVertical(pandoraUView, itpc1, icstat) - theGeometry->WireAngleToVertical(pandoraUView, itpc2, icstat));
+                const float dThetaV(theGeometry->WireAngleToVertical(pandoraVView, itpc1, icstat) - theGeometry->WireAngleToVertical(pandoraVView, itpc2, icstat));
+                const float dThetaW((nWirePlanes < 3) ? std::numeric_limits<float>::epsilon() : (useYPlane) ? (theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kY, itpc2, icstat)) :
                     (theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat) - theGeometry->WireAngleToVertical(geo::kW, itpc2, icstat)));
 
                 if (dThetaU > maxDeltaTheta || dThetaV > maxDeltaTheta || dThetaW > maxDeltaTheta)
