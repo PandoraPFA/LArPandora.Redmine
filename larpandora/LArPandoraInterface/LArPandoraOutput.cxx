@@ -103,7 +103,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     LArPandoraOutput::BuildSlices(settings, settings.m_pPrimaryPandora, evt, settings.m_pProducer, instanceLabel, pfoVector, idToHitMap, outputSlices, outputParticlesToSlices, outputSlicesToHits);
 
     if (settings.m_shouldRunStitching)
-        LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoVector, outputT0s, pandoraHitToArtHitMap, outputParticlesToT0s);
+        LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoVector, outputT0s, outputParticlesToT0s);
 
     // Add the outputs to the event
     evt.put(std::move(outputParticles), instanceLabel);
@@ -700,8 +700,7 @@ unsigned int LArPandoraOutput::BuildSlice(const pandora::ParticleFlowObject *con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector, 
-    T0Collection &outputT0s, const CaloHitToArtHitMap &pandoraHitToArtHitMap,
-    PFParticleToT0Collection &outputParticlesToT0s)
+    T0Collection &outputT0s, PFParticleToT0Collection &outputParticlesToT0s)
 {
     size_t nextT0Id(0);
     for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
@@ -709,8 +708,8 @@ void LArPandoraOutput::BuildT0s(const art::Event &event, const art::EDProducer *
         const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
 
         anab::T0 t0;
-        if (!LArPandoraOutput::BuildT0(pPfo, pfoVector, nextT0Id, pandoraHitToArtHitMap, t0)) continue;
-        
+        if (!LArPandoraOutput::BuildT0(pPfo, pfoVector, nextT0Id, t0)) continue;
+
         LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, nextT0Id - 1, outputParticlesToT0s);
         outputT0s->push_back(t0);
     }
@@ -915,67 +914,25 @@ recob::SpacePoint LArPandoraOutput::BuildSpacePoint(const pandora::CaloHit *cons
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 bool LArPandoraOutput::BuildT0(const pandora::ParticleFlowObject *const pPfo, const pandora::PfoVector &pfoVector, size_t &nextId,
-    const CaloHitToArtHitMap &pandoraHitToArtHitMap, anab::T0 &t0)
+    anab::T0 &t0)
 {
-    pandora::CaloHitVector sorted3DHits;
-    LArPandoraOutput::Collect3DHits(pPfo, sorted3DHits);
+    const pandora::ParticleFlowObject *const pParent(lar_content::LArPfoHelper::GetParentPfo(pPfo));
+    const float x0(pParent->GetPropertiesMap().count("X0") ? pParent->GetPropertiesMap().at("X0") : 0.f);
 
-    double sumT(0.), sumN(0.);
-
-    for (const pandora::CaloHit *const pCaloHit3D : sorted3DHits)
-    {
-        if (pandora::TPC_3D != pCaloHit3D->GetHitType())
-            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildT0 --- found a 2D hit in a 3D cluster";
-
-        const pandora::CaloHit *const pCaloHit2D = static_cast<const pandora::CaloHit*>(pCaloHit3D->GetParentAddress());
-
-        CaloHitToArtHitMap::const_iterator it(pandoraHitToArtHitMap.find(pCaloHit2D));
-        if (it == pandoraHitToArtHitMap.end())
-            throw cet::exception("LArPandora") << " LArPandoraOutput::BuildClusters --- couldn't find art hit for input pandora hit ";
-            
-        const art::Ptr<recob::Hit> hit(it->second);
-
-        HitVector spacePointHits;
-        spacePointHits.push_back(hit);
-
-        // ATTN: We assume that the 2D Pandora hits have been shifted
-        sumT += LArPandoraOutput::CalculateT0(hit, pCaloHit2D);
-        sumN += 1.;
-    }
+    auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    const double cm_per_tick(theDetector->GetXTicksCoefficient());
+    const double ns_per_tick(theDetector->SamplingRate());
 
     // ATTN: T0 values are currently calculated in nanoseconds relative to the trigger offset. Only non-zero values are outputted.
-    const double T0((sumN > 0. && std::fabs(sumT) > sumN) ? (sumT / sumN) : 0.);
+    const double T0(x0 * ns_per_tick / cm_per_tick);
 
-    if (std::fabs(T0) <= std::numeric_limits<double>::epsilon()) return false;
+    if (std::fabs(T0) <= std::numeric_limits<double>::epsilon())
+        return false;
 
     // Output T0 objects [arguments are:  time (nanoseconds);  trigger type (3 for TPC stitching!);  pfparticle SelfID code;  T0 ID code]
     t0 = anab::T0(T0, 3, LArPandoraOutput::GetId(pPfo, pfoVector), nextId++);
 
     return true;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-double LArPandoraOutput::CalculateT0(const art::Ptr<recob::Hit> hit, const pandora::CaloHit *const pCaloHit)
-{
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
-
-    const geo::WireID hit_WireID(hit->WireID());
-    const geo::TPCGeo &theTpc = theGeometry->Cryostat(hit_WireID.Cryostat).TPC(hit_WireID.TPC);
-
-    // Calculate shift in x position between input and output hits
-    const double input_xpos_cm(theDetector->ConvertTicksToX(hit->PeakTime(), hit_WireID.Plane, hit_WireID.TPC, hit_WireID.Cryostat));
-    const double output_xpos_dm(pCaloHit->GetPositionVector().GetX());
-    const double x0_cm(output_xpos_dm - input_xpos_cm);
-
-    // The ingredients for the T0 calculation all come from the detector properties service
-    const double dir((theTpc.DriftDirection() == geo::kNegX) ? 1.0 : -1.0);
-    const double cm_per_tick(theDetector->GetXTicksCoefficient());
-    const double ns_per_tick(theDetector->SamplingRate());
-
-    // This calculation should give the T0 in nanoseconds relative to the initial 2D hit
-    return (- dir * x0_cm * ns_per_tick / cm_per_tick);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
