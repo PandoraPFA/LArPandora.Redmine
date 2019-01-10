@@ -764,8 +764,8 @@ void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::stri
 
 void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string &label, MCParticleVector &particleVector)
 {
-    if (evt.isRealData())
-        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+    //if (evt.isRealData())
+    //    throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
     art::Handle< RawMCParticleVector > theParticles;
     evt.getByLabel(label, theParticles);
@@ -824,8 +824,8 @@ void LArPandoraHelper::CollectGeneratorMCParticles(const art::Event &evt, const 
 void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string &label, MCTruthToMCParticles &truthToParticles,
     MCParticlesToMCTruth &particlesToTruth)
 {
-    if (evt.isRealData())
-        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+    //if (evt.isRealData())
+    //    throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
     art::Handle< RawMCParticleVector > theParticles;
     evt.getByLabel(label, theParticles);
