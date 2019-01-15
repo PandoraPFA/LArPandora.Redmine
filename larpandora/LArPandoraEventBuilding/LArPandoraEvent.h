@@ -8,6 +8,8 @@
 #define LAR_PANDORA_EVENT_H 1
 
 #include "art/Persistency/Common/PtrMaker.h"
+#include "canvas/Persistency/Common/Assns.h"
+#include "art/Framework/Principal/Event.h"
 
 #include "lardata/Utilities/AssociationUtil.h"
 
@@ -416,21 +418,10 @@ template <typename T, typename U>
 inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLabel, art::Handle<std::vector<T> > &inputHandleT,
     std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &outputAssociationMap) const
 {
-    art::FindManyP< U > assoc(inputHandleT, (*m_pEvent), m_labels.GetLabel(inputLabel));
+    const auto &assocHandle(m_pEvent->getValidHandle<art::Assns<T, U> >(m_labels.GetLabel(inputLabel)));
 
-    for (unsigned int iT = 0; iT < inputHandleT->size(); iT++)
-    {
-        art::Ptr<T> objectT(inputHandleT, iT);
-
-        if (outputAssociationMap.find(objectT) == outputAssociationMap.end())
-        {
-            std::vector< art::Ptr< U > > emptyVect;
-            outputAssociationMap.insert(typename std::map< art::Ptr< T >, std::vector< art::Ptr< U > > >::value_type(objectT, emptyVect));
-        }
-
-        for (art::Ptr<U> objectU : assoc.at(objectT.key()))
-            outputAssociationMap[objectT].push_back(objectU);
-    } 
+    for (const auto &entry : *assocHandle)
+        outputAssociationMap[entry.first].push_back(entry.second);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
