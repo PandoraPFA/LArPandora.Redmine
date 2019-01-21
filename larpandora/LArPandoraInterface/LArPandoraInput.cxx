@@ -49,7 +49,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
 
     art::ServiceHandle<geo::Geometry> theGeometry;
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
-    const unsigned int isDualPhase(theGeometry->MaxPlanes() == 2);
+    const bool isDualPhase(theGeometry->MaxPlanes() == 2);
 
     // Loop over ART hits
     int hitCounter(0);
@@ -108,21 +108,23 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
             caloHitParameters.m_pParentAddress = (void*)((intptr_t)(++hitCounter));
             caloHitParameters.m_larTPCVolumeId = LArPandoraGeometry::GetVolumeID(driftVolumeMap, hit_WireID.Cryostat, hit_WireID.TPC);
 
-            const geo::View_t pandora_View(LArPandoraGeometry::GetGlobalView(hit_WireID.Cryostat, hit_WireID.TPC, hit_View));
+            const geo::View_t pandora_GlobalView(LArPandoraGeometry::GetGlobalView(hit_WireID.Cryostat, hit_WireID.TPC, hit_View));
+            const geo::View_t pandora_View(isDualPhase ? ((pandora_GlobalView == geo::kW) ? geo::kU :
+                ((pandora_GlobalView == geo::kY) ? geo::kV : geo::kUnknown)) : pandora_GlobalView);
 
-            if (!isDualPhase && (pandora_View == geo::kW || pandora_View == geo::kY))
+            if (pandora_View == geo::kW || pandora_View == geo::kY)
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_W;
                 const double wpos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoW(y0_cm, z0_cm));
                 caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., wpos_cm);
             }
-            else if ((!isDualPhase && pandora_View == geo::kU) || (isDualPhase && pandora_View == geo::kW))
+            else if (pandora_View == geo::kU)
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_U;
                 const double upos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoU(y0_cm, z0_cm));
                 caloHitParameters.m_positionVector = pandora::CartesianVector(xpos_cm, 0., upos_cm);
             }
-            else if ((!isDualPhase && pandora_View == geo::kV) || (isDualPhase && pandora_View == geo::kY))
+            else if (pandora_View == geo::kV)
             {
                 caloHitParameters.m_hitType = pandora::TPC_VIEW_V;
                 const double vpos_cm(pPandora->GetPlugins()->GetLArTransformationPlugin()->YZtoV(y0_cm, z0_cm));
