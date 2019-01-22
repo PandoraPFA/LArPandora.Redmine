@@ -158,6 +158,11 @@ bool LArPandoraGeometry::ShouldSwitchUV(const unsigned int cstat, const unsigned
 
 bool LArPandoraGeometry::ShouldSwitchUV(const bool isPositiveDrift)
 {
+    // ATTN: In the dual phase scenario the wire planes pointing along two orthogonal directions and so interchanging U and V is unnecessary
+    art::ServiceHandle<geo::Geometry> theGeometry;
+    if (theGeometry->MaxPlanes() == 2)
+        return false;
+
     // We assume that all multiple drift volume detectors have the APA - CPA - APA - CPA design
     return isPositiveDrift;
 }
@@ -230,9 +235,12 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
             // ATTN: In dual phase scenario propagate the W->U and Y->V mapping and set wire angle for remaining view to epsilon to
             // avoid identical wire angles clashes (dual phase W and Y wires are horizontal and vertical).  Inside LArSoft the
             // WireAngleToVertical function returns the wire angle to the positive Z axis, but Pandora expects to recieve the wire
-            // angle to the vertical, hence there is a conversion here.
-            const float wireAngleU(isDualPhase ? theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat) : 0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kU, itpc1, icstat));
-            const float wireAngleV(isDualPhase ? theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat) : 0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kV, itpc1, icstat));
+            // angle to the vertical, hence the conversion.  The fabs() in wireAngleW for the kY case is due to the ICARUS geometry
+            // having a wire angle of PI instead of 0.
+            const geo::View_t targetViewU(isDualPhase ? geo::kW : geo::kU);
+            const geo::View_t targetViewV(isDualPhase ? geo::kY : geo::kV);
+            const float wireAngleU(0.5f * M_PI - theGeometry->WireAngleToVertical(targetViewU, itpc1, icstat));
+            const float wireAngleV(0.5f * M_PI - theGeometry->WireAngleToVertical(targetViewV, itpc1, icstat));
             const float wireAngleW((nWirePlanes < 3) ? std::numeric_limits<float>::epsilon() : (useYPlane) ? (std::fabs(0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kY, itpc1, icstat))) :
                 (0.5f * M_PI - theGeometry->WireAngleToVertical(geo::kW, itpc1, icstat)));
 
@@ -337,7 +345,7 @@ void LArPandoraGeometry::LoadGlobalDaughterGeometry(const LArDriftVolumeList &dr
     // Create daughter drift volumes
     for (const LArDriftVolume &driftVolume : driftVolumeList)
     {
-        const bool   switchViews(LArPandoraGeometry::ShouldSwitchUV(driftVolume.IsPositiveDrift()));
+        const bool switchViews(LArPandoraGeometry::ShouldSwitchUV(driftVolume.IsPositiveDrift()));
         const float daughterWirePitchU(switchViews ? driftVolume.GetWirePitchV() : driftVolume.GetWirePitchU());
         const float daughterWirePitchV(switchViews ? driftVolume.GetWirePitchU() : driftVolume.GetWirePitchV());
         const float daughterWirePitchW(driftVolume.GetWirePitchW());
