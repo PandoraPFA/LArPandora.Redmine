@@ -234,7 +234,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
 
             // ATTN: In dual phase scenario propagate the W->U and Y->V mapping and set wire angle for remaining view to epsilon to
             // avoid identical wire angles clashes (dual phase W and Y wires are horizontal and vertical).  Inside LArSoft the
-            // WireAngleToVertical function returns the wire angle to the positive Z axis, but Pandora expects to recieve the wire
+            // WireAngleToVertical function returns the wire angle to the positive Z axis, but Pandora expects to receive the wire
             // angle to the vertical, hence the conversion.  The fabs() in wireAngleW for the kY case is due to the ICARUS geometry
             // having a wire angle of PI instead of 0.
             const geo::View_t targetViewU(isDualPhase ? geo::kW : geo::kU);
