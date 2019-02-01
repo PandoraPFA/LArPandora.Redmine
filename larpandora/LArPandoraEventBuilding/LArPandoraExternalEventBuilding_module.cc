@@ -436,6 +436,7 @@ void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
     m_subRun = subrun.subRun();
     m_pot = subrun.getByLabel(m_generatorLabel, potSummaryHandle) ? static_cast<float>(potSummaryHandle->totpot) : 0.f;
     
+    std::cout << "[LArPandoraExternalEventBuilding::endSubRun] Storing POT info!" << std::endl;
     m_pSubRunTree->Fill();  
 }
 
