@@ -155,7 +155,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_useTestBeamMode(pset.get<bool>("ShouldUseTestBeamMode", false)),
     m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsNeutrino"),
     m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore"),
-    m_shouldOutputSubrunsTree(pset.get<bool>("ShouldOutputSubrunsTree", false)),
+    m_shouldOutputSubrunsTree(pset.get<bool>("ShouldOutputSubrunsTree", true)),
     m_isData(m_shouldOutputSubrunsTree ? pset.get<bool>("IsData") : false),
     m_generatorLabel(m_isData ? "" : pset.get<std::string>("GeneratorLabel")),
     m_run(std::numeric_limits<unsigned int>::max()),
@@ -163,6 +163,11 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_pot(-std::numeric_limits<float>::max()),
     m_pSubRunTree(nullptr)
 {
+    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_shouldOutputSubrunsTree: " << m_shouldOutputSubrunsTree << std::endl;
+    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_isData: " << m_isData << std::endl;
+    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_generatorLabel: " << m_generatorLabel << std::endl;
+    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_inputProducerLabel: " << m_inputProducerLabel << std::endl;
+
     produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
@@ -193,16 +198,15 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
 
     if (!m_shouldOutputSubrunsTree)
         return;
-    
-    if (m_isData)
-        throw cet::exception("LArPandora") << " LArPandoraExternalEventBuilding -- Can't output subrun information for data file" << std::endl;
 
     art::ServiceHandle<art::TFileService> fileService;
 
     m_pSubRunTree = fileService->make<TTree>("subruns","");
     m_pSubRunTree->Branch("run"   , &m_run   , "run/I");
     m_pSubRunTree->Branch("subRun", &m_subRun, "subRun/I");
-    m_pSubRunTree->Branch("pot"   , &m_pot   , "pot/F");
+    
+    if (!m_isData)
+        m_pSubRunTree->Branch("pot"   , &m_pot   , "pot/F");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -424,19 +428,18 @@ void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
     if (!m_shouldOutputSubrunsTree)
         return;
 
-    if (m_isData)
-        return;
-
     if (!m_pSubRunTree)
         throw cet::exception("LArPandora") << " LArPandoraExternalEventBuilding::endSubRun -- output tree not configured." << std::endl;
 
-    art::Handle<sumdata::POTSummary> potSummaryHandle;
+    if (!m_isData)
+    {
+        art::Handle<sumdata::POTSummary> potSummaryHandle;
+        m_pot = subrun.getByLabel(m_generatorLabel, potSummaryHandle) ? static_cast<float>(potSummaryHandle->totpot) : 0.f;
+        std::cout << "[LArPandoraExternalEventBuilding::endSubRun] Storing POT info!" << std::endl;
+    }
 
     m_run = subrun.run();
     m_subRun = subrun.subRun();
-    m_pot = subrun.getByLabel(m_generatorLabel, potSummaryHandle) ? static_cast<float>(potSummaryHandle->totpot) : 0.f;
-    
-    std::cout << "[LArPandoraExternalEventBuilding::endSubRun] Storing POT info!" << std::endl;
     m_pSubRunTree->Fill();  
 }
 
