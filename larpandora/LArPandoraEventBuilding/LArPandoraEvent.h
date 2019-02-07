@@ -44,6 +44,8 @@ typedef std::map< art::Ptr<recob::PFParticle>, std::vector< art::Ptr<recob::PFPa
 typedef std::map< art::Ptr<recob::Shower>, std::vector< art::Ptr<recob::PCAxis> > >         ShowersToPCAxes;
 typedef std::map< art::Ptr<recob::SpacePoint>, std::vector< art::Ptr<recob::Hit> > >        SpacePointsToHitVector;
 
+// typedef std::map< art::Ptr<recob::Track>, std::vector< std::pair< art::Ptr<recob::Track>, art::Ptr<recob::TrackHitMetadata> > > TrackToHitsMetadata;
+
 /**
  *  @brief LArPandoraEvent class
  */
@@ -158,15 +160,6 @@ public:
     LArPandoraEvent FilterByPdgCode(const bool shouldProduceNeutrinos) const;
 
     /**
-     *  @brief  Produce a copy of the event keeping only the collections that are associated with a top-level particle that is not 
-     *          tagged as a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
-     *
-     *  @param  shouldProduceNeutrinos if the returned event should contain neutrinos (or non-neutrinos)
-     *  @param  tagProducerLabel label for the producer of the CRTags
-     */
-    LArPandoraEvent FilterByCRTag(const bool shouldProduceNeutrinos, const std::string &tagProducerLabel) const;
-
-    /**
      *  @brief  Write (put) the collections in this LArPandoraEvent to the art::Event
      */
     void WriteToEvent() const;
@@ -212,6 +205,19 @@ private:
     template <typename T, typename U>
     void GetAssociationMap(const Labels::LabelType &inputLabel, art::Handle<std::vector<T> > &inputHandleT,
         std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &outputAssociationMap) const;
+    
+    /**
+     *  @brief  Get the mapping between two collections with metadata using the specified label
+     *
+     *  @param  inputLabel a label for the producer of the association required
+     *  @param  inputHandleT the input art Handle to the first collection
+     *  @param  outputAssociationMap output mapping between the two data types supplied (T -> U + V)
+     */
+    /*
+    template <typename T, typename U, typename V>
+    void GetAssociationMap(const Labels::LabelType &inputLabel, art::Handle<std::vector<T> > &inputHandleT,
+        std::map<art::Ptr<T>, std::vector<std::pair<art::Ptr<U>, art::Ptr<V> > > > &outputAssociationMap) const;
+    */
 
     /**
      *  @brief  Get the mapping from PFParticles to their daughters 
@@ -233,17 +239,6 @@ private:
      *  @param  filteredPFParticles output vector of filtered PFParticles
      */
     void GetFilteredParticlesByPdgCode(const bool shouldProduceNeutrinos, const PFParticleVector &inputPFParticles, PFParticleVector &outputPFParticles) const;
-
-    /**
-     *  @brief  Filters PFParticles based on their Pdg from the inputPFParticles
-     *
-     *  @param  shouldProduceNeutrinos if the filtered particle vector should contain neutrinos (or non-neutrinos)
-     *  @param  tagProducerLabel the label for the producer of the CR tags
-     *  @param  inputPFParticles input vector of PFParticles
-     *  @param  filteredPFParticles output vector of filtered PFParticles
-     */
-    void GetFilteredParticlesByCRTag(const bool shouldProduceNeutrinos, const std::string &tagProducerLabel, const PFParticleVector &inputPFParticles,
-        PFParticleVector &outputPFParticles) const;
 
     /**
      *  @brief  Filters the hierarchy map using a given vector of filteredParticles
@@ -425,6 +420,18 @@ inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLab
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+/*
+template <typename T, typename U, typename V>
+inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLabel, art::Handle<std::vector<T> > &inputHandleT,
+        std::map<art::Ptr<T>, std::vector<std::pair<art::Ptr<U>, art::Ptr<V> > > > &outputAssociationMap) const
+{
+    const auto &assocHandle(m_pEvent->getValidHandle<art::Assns<T, U, V> >(m_labels.GetLabel(inputLabel)));
+
+    for (typename art::Assns<T, U, V>::const_iterator it : *assocHandle)
+        outputAssociationMap[it.first].push_back({it.second, it.data});
+}
+*/
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T, typename U>
 inline void LArPandoraEvent::CollectAssociated(const art::Ptr<T> &anObject, const std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &associationTtoU,
@@ -459,7 +466,7 @@ inline void LArPandoraEvent::GetFilteredAssociationMap(const std::vector<art::Pt
         }
     }
 }
-        
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>

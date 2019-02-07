@@ -88,24 +88,6 @@ LArPandoraEvent LArPandoraEvent::FilterByPdgCode(const bool shouldProduceNeutrin
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-LArPandoraEvent LArPandoraEvent::FilterByCRTag(const bool shouldProduceNeutrinos, const std::string &tagProducerLabel) const
-{
-    PFParticleVector primaryPFParticles;
-    this->GetPrimaryPFParticles(primaryPFParticles);
-
-    PFParticleVector filteredPFParticles;
-    this->GetFilteredParticlesByCRTag(shouldProduceNeutrinos, tagProducerLabel, primaryPFParticles, filteredPFParticles);
-
-    PFParticleVector selectedPFParticles;
-    this->GetDownstreamPFParticles(filteredPFParticles, selectedPFParticles);
-
-    LArPandoraEvent filteredEvent(*this, selectedPFParticles);
-
-    return filteredEvent;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 void LArPandoraEvent::WriteToEvent() const
 {
     this->WriteCollection(m_pfParticles);
@@ -274,32 +256,6 @@ void LArPandoraEvent::GetFilteredParticlesByPdgCode(const bool shouldProduceNeut
     {
         unsigned int pdg = std::abs(part->PdgCode());
         bool isNeutrino = (pdg == nue || pdg == numu || pdg == nutau);
-
-        if ((shouldProduceNeutrinos && isNeutrino) || (!shouldProduceNeutrinos && !isNeutrino)) 
-            outputPFParticles.push_back(part);
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void LArPandoraEvent::GetFilteredParticlesByCRTag(const bool shouldProduceNeutrinos, const std::string &tagProducerLabel, const PFParticleVector &inputPFParticles,
-    PFParticleVector &outputPFParticles) const
-{
-
-    art::Handle< std::vector< recob::PFParticle > > pfParticleHandle;
-    m_pEvent->getByLabel(m_labels.GetLabel(Labels::PFParticleLabel), pfParticleHandle);
-
-    art::FindManyP< anab::CosmicTag > pfParticleTagAssoc(pfParticleHandle, *m_pEvent, tagProducerLabel);
-    
-    for (art::Ptr< recob::PFParticle > part : inputPFParticles) 
-    {
-        const CosmicTagVector cosmicTags = pfParticleTagAssoc.at(part.key());
-
-        if (cosmicTags.size() != 1) 
-            throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredParticlesByCRTag -- Found " << cosmicTags.size() << " CR tags for a PFParticle (require 1)." << std::endl;
-
-        art::Ptr< anab::CosmicTag > cosmicTag = cosmicTags.front();
-        bool isNeutrino = (cosmicTag->CosmicType() == anab::kNotTagged);
 
         if ((shouldProduceNeutrinos && isNeutrino) || (!shouldProduceNeutrinos && !isNeutrino)) 
             outputPFParticles.push_back(part);
