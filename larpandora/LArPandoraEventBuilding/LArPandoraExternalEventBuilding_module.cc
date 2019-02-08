@@ -172,6 +172,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
     produces< std::vector<recob::Vertex> >();
+    produces< std::vector<recob::Slice> >();
     produces< std::vector<recob::Track> >(); 
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
@@ -184,11 +185,12 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     produces< art::Assns<recob::PFParticle, recob::Shower> >();
     produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
     produces< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> >();
-    produces< art::Assns<recob::Track, recob::Hit> >();
+    produces< art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta> >();
     produces< art::Assns<recob::Shower, recob::Hit> >();
     produces< art::Assns<recob::Shower, recob::PCAxis> >();
     produces< art::Assns<recob::SpacePoint, recob::Hit> >();
     produces< art::Assns<recob::Cluster, recob::Hit> >();
+    produces< art::Assns<recob::Slice, recob::Hit> >();
 
     if (m_shouldProduceT0s)
     {
