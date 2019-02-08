@@ -204,20 +204,24 @@ private:
     /**
      *  @brief  Get the mapping between two collections with metadata using the specified label
      *
+     *  @param  collectionL the collection from which the associations should be retrieved
      *  @param  inputLabel a label for the producer of the association required
      *  @param  outputAssociationMap output mapping between the two data types supplied (L -> R + D)
      */
     template <typename L, typename R, typename D>
-    void GetAssociationMap(const Labels::LabelType &inputLabel, Association<L, R, D> &outputAssociationMap) const;
+    void GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
+        Association<L, R, D> &outputAssociationMap) const;
     
     /**
      *  @brief  Get the mapping between two collections with metadata using the specified label
      *
+     *  @param  collectionL the collection from which the associations should be retrieved
      *  @param  inputLabel a label for the producer of the association required
      *  @param  outputAssociationMap output mapping between the two data types supplied (L -> R no metadata)
      */
     template <typename L, typename R>
-    void GetAssociationMap(const Labels::LabelType &inputLabel, Association<L, R, void*> &outputAssociationMap) const;
+    void GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
+        Association<L, R, void*> &outputAssociationMap) const;
 
     /**
      *  @brief  Collects all objects of type R with metadata D associated to a given object of type L
@@ -336,23 +340,45 @@ inline void LArPandoraEvent::GetCollection(const Labels::LabelType &inputLabel, 
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename L, typename R, typename D>
-inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLabel, Association<L, R, D> &outputAssociationMap) const
+inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
+    Association<L, R, D> &outputAssociationMap) const
 {
     const auto &assocHandle(m_pEvent->getValidHandle<art::Assns<L, R, D> >(m_labels.GetLabel(inputLabel)));
+    
+    // Ensure there is an entry for every object of type L
+    for (const auto &objectL : collectionL)
+        outputAssociationMap[objectL];
 
     for (const auto &entry : *assocHandle)
-        outputAssociationMap[entry.first].emplace_back(entry.second, *entry.data);
+    {
+        auto it(outputAssociationMap.find(entry.first));
+        if (it == outputAssociationMap.end())
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetAssociationMap -- Found object in association that isn't in the supplied collection" << std::endl;
+
+        it->second.emplace_back(entry.second, *entry.data);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
     
 template <typename L, typename R>
-inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLabel, Association<L, R, void*> &outputAssociationMap) const
+inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
+    Association<L, R, void*> &outputAssociationMap) const
 {
     const auto &assocHandle(m_pEvent->getValidHandle<art::Assns<L, R> >(m_labels.GetLabel(inputLabel)));
+    
+    // Ensure there is an entry for every object of type L
+    for (const auto &objectL : collectionL)
+        outputAssociationMap[objectL];
 
     for (const auto &entry : *assocHandle)
-        outputAssociationMap[entry.first].emplace_back(entry.second, nullptr);
+    {
+        auto it(outputAssociationMap.find(entry.first));
+        if (it == outputAssociationMap.end())
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetAssociationMap -- Found object in association that isn't in the supplied collection" << std::endl;
+
+        it->second.emplace_back(entry.second, nullptr);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -365,7 +391,11 @@ inline void LArPandoraEvent::CollectAssociated(const art::Ptr<L> &anObject, cons
         throw cet::exception("LArPandora") << " LArPandoraEvent::CollectAssociated -- Can not find association for object supplied." << std::endl;
 
     for (const auto &entry : associationLtoR.at(anObject))
-        associatedR.push_back(entry.first);
+    {
+        // Ensure we don't repeat objects in the output collection
+        if (std::find(associatedR.begin(), associatedR.end(), entry.first) == associatedR.end())
+            associatedR.push_back(entry.first);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -411,7 +441,6 @@ template <typename L, typename R, typename D>
 inline void LArPandoraEvent::WriteAssociation(const Association<L, R, D> &associationMap, const Collection<L> &collectionL,
     const Collection<R> &collectionR, const bool thisProducesR) const
 {
-    std::cout << "Writing assoc with data (thisProducesR = " << thisProducesR << ")" << std::endl;
     // The output assocation to populate
     std::unique_ptr<art::Assns<L, R, D> > outputAssn(new art::Assns<L, R, D>);
 
@@ -444,7 +473,6 @@ inline void LArPandoraEvent::WriteAssociation(const Association<L, R, D> &associ
     }
 
     m_pEvent->put(std::move(outputAssn));
-    std::cout << "    done" << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -453,7 +481,6 @@ template <typename L, typename R>
 inline void LArPandoraEvent::WriteAssociation(const Association<L, R, void*> &associationMap, const Collection<L> &collectionL,
     const Collection<R> &collectionR, const bool thisProducesR) const
 {
-    std::cout << "Writing assoc (thisProducesR = " << thisProducesR << ")" << std::endl;
     // The output assocation to populate
     std::unique_ptr<art::Assns<L, R> > outputAssn(new art::Assns<L, R>);
 
@@ -485,7 +512,6 @@ inline void LArPandoraEvent::WriteAssociation(const Association<L, R, void*> &as
     }
 
     m_pEvent->put(std::move(outputAssn));
-    std::cout << "    done" << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

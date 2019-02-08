@@ -62,6 +62,9 @@ LArPandoraEvent::LArPandoraEvent(const LArPandoraEvent &event, const PFParticleV
     this->GetFilteredAssociationMap(m_tracks, event.m_hits, event.m_trackHitMap, m_trackHitMap);
     this->GetFilteredAssociationMap(m_showers, event.m_hits, event.m_showerHitMap, m_showerHitMap);
     this->GetFilteredAssociationMap(m_showers, m_pcAxes, event.m_showerPCAxisMap, m_showerPCAxisMap);
+        
+    if (m_shouldProduceT0s)
+        this->GetFilteredAssociationMap(m_pfParticles, m_t0s, event.m_pfParticleT0Map, m_pfParticleT0Map);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,25 +118,25 @@ void LArPandoraEvent::GetCollections()
     this->GetCollection(Labels::PFParticleMetadataLabel, m_metadata); 
     this->GetCollection(Labels::HitLabel, m_hits); 
 
-    this->GetAssociationMap(Labels::PFParticleToSpacePointLabel, m_pfParticleSpacePointMap);
-    this->GetAssociationMap(Labels::PFParticleToClusterLabel, m_pfParticleClusterMap);
-    this->GetAssociationMap(Labels::PFParticleToVertexLabel, m_pfParticleVertexMap);
-    this->GetAssociationMap(Labels::PFParticleToSliceLabel, m_pfParticleSliceMap);
-    this->GetAssociationMap(Labels::PFParticleToTrackLabel, m_pfParticleTrackMap);
-    this->GetAssociationMap(Labels::PFParticleToShowerLabel, m_pfParticleShowerMap);
-    this->GetAssociationMap(Labels::PFParticleToPCAxisLabel, m_pfParticlePCAxisMap);
-    this->GetAssociationMap(Labels::PFParticleToMetadataLabel, m_pfParticleMetadataMap);
-    this->GetAssociationMap(Labels::SpacePointToHitLabel, m_spacePointHitMap);
-    this->GetAssociationMap(Labels::ClusterToHitLabel, m_clusterHitMap);
-    this->GetAssociationMap(Labels::SliceToHitLabel, m_sliceHitMap);
-    this->GetAssociationMap(Labels::TrackToHitLabel, m_trackHitMap);
-    this->GetAssociationMap(Labels::ShowerToHitLabel, m_showerHitMap);
-    this->GetAssociationMap(Labels::ShowerToPCAxisLabel, m_showerPCAxisMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToSpacePointLabel, m_pfParticleSpacePointMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToClusterLabel, m_pfParticleClusterMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToVertexLabel, m_pfParticleVertexMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToSliceLabel, m_pfParticleSliceMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToTrackLabel, m_pfParticleTrackMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToShowerLabel, m_pfParticleShowerMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToPCAxisLabel, m_pfParticlePCAxisMap);
+    this->GetAssociationMap(m_pfParticles, Labels::PFParticleToMetadataLabel, m_pfParticleMetadataMap);
+    this->GetAssociationMap(m_spacePoints, Labels::SpacePointToHitLabel, m_spacePointHitMap);
+    this->GetAssociationMap(m_clusters, Labels::ClusterToHitLabel, m_clusterHitMap);
+    this->GetAssociationMap(m_slices, Labels::SliceToHitLabel, m_sliceHitMap);
+    this->GetAssociationMap(m_tracks, Labels::TrackToHitLabel, m_trackHitMap);
+    this->GetAssociationMap(m_showers, Labels::ShowerToHitLabel, m_showerHitMap);
+    this->GetAssociationMap(m_showers, Labels::ShowerToPCAxisLabel, m_showerPCAxisMap);
 
     if (m_shouldProduceT0s)
     {
         this->GetCollection(Labels::T0Label, m_t0s); 
-        this->GetAssociationMap(Labels::PFParticleToT0Label, m_pfParticleT0Map);
+        this->GetAssociationMap(m_pfParticles, Labels::PFParticleToT0Label, m_pfParticleT0Map);
     }
 }
 

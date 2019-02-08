@@ -181,6 +181,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     produces< art::Assns<recob::PFParticle, recob::SpacePoint> >();
     produces< art::Assns<recob::PFParticle, recob::Cluster> >();
     produces< art::Assns<recob::PFParticle, recob::Vertex> >();
+    produces< art::Assns<recob::PFParticle, recob::Slice> >();
     produces< art::Assns<recob::PFParticle, recob::Track> >();
     produces< art::Assns<recob::PFParticle, recob::Shower> >();
     produces< art::Assns<recob::PFParticle, recob::PCAxis> >();
