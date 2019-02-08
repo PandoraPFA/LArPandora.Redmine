@@ -61,6 +61,7 @@ namespace lar_pandora
 {
 
 CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const &pset) : 
+    EDProducer{pset},
     m_InputProducerLabel(pset.get<std::string>("InputProducerLabel")),
     m_TrackProducerLabel(pset.get<std::string>("TrackProducerLabel")),
     m_ShowerProducerLabel(pset.get<std::string>("ShowerProducerLabel")),
@@ -120,4 +121,3 @@ void CollectionSplitting::produce(art::Event &evt)
 }
 
 } // namespace lar_pandora
-

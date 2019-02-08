@@ -85,6 +85,7 @@ namespace lar_pandora
 {
 
 LArPandoraTrackCreation::LArPandoraTrackCreation(fhicl::ParameterSet const &pset) :
+    EDProducer{pset},
     m_pfParticleLabel(pset.get<std::string>("PFParticleLabel")),
     m_minTrajectoryPoints(pset.get<unsigned int>("MinTrajectoryPoints", 2)),
     m_slidingFitHalfWindow(pset.get<unsigned int>("SlidingFitHalfWindow", 20)),

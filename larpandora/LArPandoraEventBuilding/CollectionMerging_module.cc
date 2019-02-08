@@ -72,6 +72,7 @@ namespace lar_pandora
 {
 
 CollectionMerging::CollectionMerging(fhicl::ParameterSet const &pset) :
+    EDProducer{pset},
     m_AllHitsCRProducerLabel(pset.get<std::string>("AllHitsCRProducerLabel")),
     m_AllHitsCRTrackProducerLabel(pset.get<std::string>("AllHitsCRTrackProducerLabel")),
     m_AllHitsCRShowerProducerLabel(pset.get<std::string>("AllHitsCRShowerProducerLabel")),

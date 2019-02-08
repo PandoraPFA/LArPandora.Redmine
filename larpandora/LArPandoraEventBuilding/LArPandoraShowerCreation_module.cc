@@ -98,6 +98,7 @@ namespace lar_pandora
 {
 
 LArPandoraShowerCreation::LArPandoraShowerCreation(fhicl::ParameterSet const &pset) :
+    EDProducer{pset},
     m_pfParticleLabel(pset.get<std::string>("PFParticleLabel")),
     m_useAllParticles(pset.get<bool>("UseAllParticles", false))
 {

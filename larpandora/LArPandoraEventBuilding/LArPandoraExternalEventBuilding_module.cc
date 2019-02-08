@@ -121,6 +121,7 @@ namespace lar_pandora
 {
 
 LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::ParameterSet const &pset) :
+    EDProducer{pset},
     m_inputProducerLabel(pset.get<std::string>("InputProducerLabel")),
     m_trackProducerLabel(pset.get<std::string>("TrackProducerLabel")),
     m_showerProducerLabel(pset.get<std::string>("ShowerProducerLabel")),
@@ -347,4 +348,3 @@ void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const PFParti
 }
 
 } // namespace lar_pandora
-
