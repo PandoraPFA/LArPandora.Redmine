@@ -7,6 +7,8 @@
 #ifndef LAR_PANDORA_GEOMETRY_H
 #define LAR_PANDORA_GEOMETRY_H 1
 
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+
 #include <map>
 #include <vector>
 
