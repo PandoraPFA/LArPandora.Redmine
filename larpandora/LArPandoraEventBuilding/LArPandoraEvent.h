@@ -148,7 +148,7 @@ public:
          *
          *  @return the label
          */
-        const std::string GetLabel(const LabelType type) const;
+        const std::string & GetLabel(const LabelType type) const;
         
         /**
          *  @brief  Set the label of a given type
@@ -288,7 +288,7 @@ private:
      *  @return the index of the object in the collection
      */
     template<typename T>
-    inline size_t GetIndex(const art::Ptr<T> object, const Collection<T> &collection) const;
+    size_t GetIndex(const art::Ptr<T> object, const Collection<T> &collection) const;
 
     art::EDProducer            *m_pProducer;                    ///<  The producer which should write the output collections and associations
     art::Event                 *m_pEvent;                       ///<  The event to consider
@@ -344,19 +344,22 @@ inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL,
     Association<L, R, D> &outputAssociationMap) const
 {
     const auto &assocHandle(m_pEvent->getValidHandle<art::Assns<L, R, D> >(m_labels.GetLabel(inputLabel)));
+   
+    // Check that there are no associaions from objects not in collectionL
+    for (const auto &entry : *assocHandle)
+    {
+        auto it(std::find(collectionL.begin(), collectionL.end(), entry.first));
+        if (it == collectionL.end())
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetAssociationMap -- Found object in association that isn't in the supplied collection" << std::endl;
+    }
     
     // Ensure there is an entry for every object of type L
     for (const auto &objectL : collectionL)
         outputAssociationMap[objectL];
 
+    // Fill the association map
     for (const auto &entry : *assocHandle)
-    {
-        auto it(outputAssociationMap.find(entry.first));
-        if (it == outputAssociationMap.end())
-            throw cet::exception("LArPandora") << " LArPandoraEvent::GetAssociationMap -- Found object in association that isn't in the supplied collection" << std::endl;
-
-        it->second.emplace_back(entry.second, *entry.data);
-    }
+        outputAssociationMap.at(entry.first).emplace_back(entry.second, *entry.data);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -367,18 +370,21 @@ inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL,
 {
     const auto &assocHandle(m_pEvent->getValidHandle<art::Assns<L, R> >(m_labels.GetLabel(inputLabel)));
     
+    // Check that there are no associaions from objects not in collectionL
+    for (const auto &entry : *assocHandle)
+    {
+        auto it(std::find(collectionL.begin(), collectionL.end(), entry.first));
+        if (it == collectionL.end())
+            throw cet::exception("LArPandora") << " LArPandoraEvent::GetAssociationMap -- Found object in association that isn't in the supplied collection" << std::endl;
+    }
+    
     // Ensure there is an entry for every object of type L
     for (const auto &objectL : collectionL)
         outputAssociationMap[objectL];
 
+    // Fill the association map
     for (const auto &entry : *assocHandle)
-    {
-        auto it(outputAssociationMap.find(entry.first));
-        if (it == outputAssociationMap.end())
-            throw cet::exception("LArPandora") << " LArPandoraEvent::GetAssociationMap -- Found object in association that isn't in the supplied collection" << std::endl;
-
-        it->second.emplace_back(entry.second, nullptr);
-    }
+        outputAssociationMap.at(entry.first).emplace_back(entry.second, nullptr);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

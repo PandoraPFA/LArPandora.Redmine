@@ -210,7 +210,7 @@ LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-const std::string LArPandoraEvent::Labels::GetLabel(const LabelType type) const
+const std::string & LArPandoraEvent::Labels::GetLabel(const LabelType type) const
 {
     if (m_labels.find(type) == m_labels.end())
         throw cet::exception("LArPandora") << " LArPandoraEvent::GetLabel -- Label map doesn't contain label of requested type" << std::endl;
