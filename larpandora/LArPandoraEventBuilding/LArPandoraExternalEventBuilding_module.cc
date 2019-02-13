@@ -155,19 +155,14 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_useTestBeamMode(pset.get<bool>("ShouldUseTestBeamMode", false)),
     m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsNeutrino"),
     m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore"),
-    m_shouldOutputSubrunsTree(pset.get<bool>("ShouldOutputSubrunsTree", true)),
+    m_shouldOutputSubrunsTree(pset.get<bool>("ShouldOutputSubrunsTree", false)),
     m_isData(m_shouldOutputSubrunsTree ? pset.get<bool>("IsData") : false),
-    m_generatorLabel(m_isData ? "" : pset.get<std::string>("GeneratorLabel")),
+    m_generatorLabel((!m_isData && m_shouldOutputSubrunsTree)? pset.get<std::string>("GeneratorLabel") : ""),
     m_run(std::numeric_limits<unsigned int>::max()),
     m_subRun(std::numeric_limits<unsigned int>::max()),
     m_pot(-std::numeric_limits<float>::max()),
     m_pSubRunTree(nullptr)
 {
-    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_shouldOutputSubrunsTree: " << m_shouldOutputSubrunsTree << std::endl;
-    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_isData: " << m_isData << std::endl;
-    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_generatorLabel: " << m_generatorLabel << std::endl;
-    std::cout << "[LArPandoraExternalEventBuilding Constructor] " << "m_inputProducerLabel: " << m_inputProducerLabel << std::endl;
-
     produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
@@ -438,7 +433,6 @@ void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
     {
         art::Handle<sumdata::POTSummary> potSummaryHandle;
         m_pot = subrun.getByLabel(m_generatorLabel, potSummaryHandle) ? static_cast<float>(potSummaryHandle->totpot) : 0.f;
-        std::cout << "[LArPandoraExternalEventBuilding::endSubRun] Storing POT info!" << std::endl;
     }
 
     m_run = subrun.run();
