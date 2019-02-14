@@ -50,13 +50,13 @@ public:
 
     template <typename R, typename D>
     using PairVector = std::vector< std::pair< art::Ptr<R>, D > >;
-    
+
     /**
      *  @brief General purpose short-hand with optional D parameter
      */
     template <typename L, typename R, typename D>
     using Association = std::map< art::Ptr<L>, PairVector<R, D> >;
-    
+
     // Collection typedef specializations
     typedef Collection<recob::Hit>                         HitCollection;
     typedef Collection<recob::PFParticle>                  PFParticleCollection;
@@ -149,7 +149,7 @@ public:
          *  @return the label
          */
         const std::string & GetLabel(const LabelType type) const;
-        
+
         /**
          *  @brief  Set the label of a given type
          *
@@ -211,7 +211,7 @@ private:
     template <typename L, typename R, typename D>
     void GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
         Association<L, R, D> &outputAssociationMap) const;
-    
+
     /**
      *  @brief  Get the mapping between two collections with metadata using the specified label
      *
@@ -266,7 +266,7 @@ private:
     template <typename L, typename R, typename D>
     void WriteAssociation(const Association<L, R, D> &associationMap, const Collection<L> &collectionL, const Collection<R> &collectionR,
         const bool thisProducesR = true) const;
-    
+
     /**
      *  @brief  Write a given association to the event
      *
@@ -338,7 +338,7 @@ inline void LArPandoraEvent::GetCollection(const Labels::LabelType &inputLabel, 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 template <typename L, typename R, typename D>
 inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
     Association<L, R, D> &outputAssociationMap) const
@@ -363,7 +363,7 @@ inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL,
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 template <typename L, typename R>
 inline void LArPandoraEvent::GetAssociationMap(const Collection<L> &collectionL, const Labels::LabelType &inputLabel,
     Association<L, R, void*> &outputAssociationMap) const

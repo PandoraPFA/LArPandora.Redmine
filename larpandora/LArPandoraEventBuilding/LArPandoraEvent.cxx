@@ -175,7 +175,7 @@ LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, cons
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-        
+
 LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, const std::string &trackProducerLabel, const std::string &showerProducerLabel,
     const std::string &hitProducerLabel)
 {
