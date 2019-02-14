@@ -41,7 +41,6 @@ public:
     LArPandoraExternalEventBuilding & operator = (LArPandoraExternalEventBuilding &&) = delete;
 
     void produce(art::Event &evt) override;
-    void endSubRun(art::SubRun &subrun);
 
 private:
     typedef std::map<art::Ptr<recob::PFParticle>, art::Ptr<larpandoraobj::PFParticleMetadata> > PFParticleToMetadata;
@@ -122,13 +121,6 @@ private:
     bool                                m_useTestBeamMode;         ///< If we should expect a test-beam (instead of a neutrino) slice
     std::string                         m_targetKey;               ///< The metadata key for a PFParticle to determine if it is the target
     std::string                         m_scoreKey;                ///< The metadata key for the score of the target slice from Pandora
-    bool                                m_shouldOutputSubrunsTree; ///< If we should output the subrun information to tree
-    bool                                m_isData;                  ///< If this is a data event
-    std::string                         m_generatorLabel;          ///< The label of the generator for MC event POT counting
-    int                                 m_run;                     ///< The run number
-    int                                 m_subRun;                  ///< The subRun number
-    float                               m_pot;                     ///< The total amount of POT for the current sub run
-    TTree                              *m_pSubRunTree;             ///< The tree holding subrun information for POT counting of MC samples
 };
 
 DEFINE_ART_MODULE(LArPandoraExternalEventBuilding)
@@ -139,7 +131,6 @@ DEFINE_ART_MODULE(LArPandoraExternalEventBuilding)
 // implementation follows
 
 #include "Pandora/PdgTable.h"
-#include "larcoreobj/SummaryData/POTSummary.h"
 
 namespace lar_pandora
 {
@@ -154,14 +145,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     m_sliceIdTool(art::make_tool<SliceIdBaseTool>(pset.get<fhicl::ParameterSet>("SliceIdTool"))),
     m_useTestBeamMode(pset.get<bool>("ShouldUseTestBeamMode", false)),
     m_targetKey(m_useTestBeamMode ? "IsTestBeam" : "IsNeutrino"),
-    m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore"),
-    m_shouldOutputSubrunsTree(pset.get<bool>("ShouldOutputSubrunsTree", false)),
-    m_isData(m_shouldOutputSubrunsTree ? pset.get<bool>("IsData") : false),
-    m_generatorLabel((!m_isData && m_shouldOutputSubrunsTree)? pset.get<std::string>("GeneratorLabel") : ""),
-    m_run(std::numeric_limits<unsigned int>::max()),
-    m_subRun(std::numeric_limits<unsigned int>::max()),
-    m_pot(-std::numeric_limits<float>::max()),
-    m_pSubRunTree(nullptr)
+    m_scoreKey(m_useTestBeamMode ? "TestBeamScore" : "NuScore")
 {
     produces< std::vector<recob::PFParticle> >();
     produces< std::vector<recob::SpacePoint> >();
@@ -193,18 +177,6 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
         produces< std::vector<anab::T0> >();
         produces< art::Assns<recob::PFParticle, anab::T0> >();
     }
-
-    if (!m_shouldOutputSubrunsTree)
-        return;
-
-    art::ServiceHandle<art::TFileService> fileService;
-
-    m_pSubRunTree = fileService->make<TTree>("subruns","");
-    m_pSubRunTree->Branch("run"   , &m_run   , "run/I");
-    m_pSubRunTree->Branch("subRun", &m_subRun, "subRun/I");
-    
-    if (!m_isData)
-        m_pSubRunTree->Branch("pot"   , &m_pot   , "pot/F");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -417,27 +389,6 @@ bool LArPandoraExternalEventBuilding::IsTarget(const art::Ptr<larpandoraobj::PFP
     {
         return false;
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-    
-void LArPandoraExternalEventBuilding::endSubRun(art::SubRun &subrun)
-{
-    if (!m_shouldOutputSubrunsTree)
-        return;
-
-    if (!m_pSubRunTree)
-        throw cet::exception("LArPandora") << " LArPandoraExternalEventBuilding::endSubRun -- output tree not configured." << std::endl;
-
-    if (!m_isData)
-    {
-        art::Handle<sumdata::POTSummary> potSummaryHandle;
-        m_pot = subrun.getByLabel(m_generatorLabel, potSummaryHandle) ? static_cast<float>(potSummaryHandle->totpot) : 0.f;
-    }
-
-    m_run = subrun.run();
-    m_subRun = subrun.subRun();
-    m_pSubRunTree->Fill();  
 }
 
 } // namespace lar_pandora

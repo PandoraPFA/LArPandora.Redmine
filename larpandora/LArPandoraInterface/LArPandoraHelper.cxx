@@ -764,9 +764,8 @@ void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::stri
 
 void LArPandoraHelper::CollectMCParticles(const art::Event &evt, const std::string &label, MCParticleVector &particleVector)
 {
-    // ATTN check removed by wvdp so the function will work on neutrino MC + cosmic data overlay samples - for which isRealData() returns true
-    //if (evt.isRealData())
-    //    throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
+    if (evt.isRealData())
+        throw cet::exception("LArPandora") << " PandoraCollector::CollectMCParticles --- Trying to access MC truth from real data ";
 
     art::Handle< RawMCParticleVector > theParticles;
     evt.getByLabel(label, theParticles);
