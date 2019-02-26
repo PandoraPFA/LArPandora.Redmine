@@ -124,14 +124,27 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
     for (unsigned int iPlane = 0; iPlane < nWirePlanes; ++iPlane)
         (void) planeSet.insert(theGeometry->TPC(0, 0).Plane(iPlane).View());
 
-    if ((nWirePlanes != planeSet.size()) || !planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY)))
-        throw cet::exception("LArPandoraTrackCreation") << " LArPandoraTrackCreation::produce --- expect to find u and v views; if there is one further view, it must be w or y ";
+    // ATTN: Expectations here are that the input geometry corresponds to either a single or dual phase LArTPC.  For single phase we expect
+    // three views, U, V and either W or Y, for dual phase we expect two views, W and Y.
+    const bool isDualPhase(theGeometry->MaxPlanes() == 2);
+
+    if (nWirePlanes != planeSet.size())
+        throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- geometry description for wire plane(s) missing ";
+
+    if (isDualPhase && (!planeSet.count(geo::kW) || !planeSet.count(geo::kY)))
+        throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- dual phase scenario; expect to find w and y views ";
+
+    if (!isDualPhase && (!planeSet.count(geo::kU) || !planeSet.count(geo::kV) || (planeSet.count(geo::kW) && planeSet.count(geo::kY))))
+        throw cet::exception("LArPandoraTrackCreation") << " LArPandoraGeometry::LoadGeometry --- single phase scenatio; expect to find u and v views; if there is one further view, it must be w or y ";
 
     const bool useYPlane((nWirePlanes > 2) && planeSet.count(geo::kY));
 
-    const float wirePitchU(theGeometry->WirePitch(geo::kU));
-    const float wirePitchV(theGeometry->WirePitch(geo::kV));
-    const float wirePitchW((nWirePlanes < 3) ? 0.5f * (wirePitchU + wirePitchV) : (useYPlane) ? theGeometry->WirePitch(geo::kY) : theGeometry->WirePitch(geo::kW));
+    // ATTN: In the dual phase mode, map the wire planes as follows W->U and Y->V.  This mapping was chosen so that the dual phase wire
+    // planes, which are inherently induction only, are mapped to induction planes in the single phase geometry.
+    const float wirePitchU(theGeometry->WirePitch((isDualPhase ? geo::kW : geo::kU)));
+    const float wirePitchV(theGeometry->WirePitch((isDualPhase ? geo::kY : geo::kV)));
+    const float wirePitchW((nWirePlanes < 3) ? 0.5f * (wirePitchU + wirePitchV) : (useYPlane) ? theGeometry->WirePitch(geo::kY) :
+        theGeometry->WirePitch(geo::kW));
 
     int trackCounter(0);
     const art::PtrMaker<recob::Track> makeTrackPtr(evt);
