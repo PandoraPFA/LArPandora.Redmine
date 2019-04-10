@@ -201,7 +201,7 @@ void PFParticleCosmicAna::beginJob()
     mf::LogDebug("LArPandora") << " *** PFParticleCosmicAna::beginJob() *** " << std::endl; 
 
     // 
-    art::ServiceHandle<art::TFileService> tfs;
+    art::ServiceHandle<art::TFileService const> tfs;
  
     m_pRecoTree = tfs->make<TTree>("recoTree", "LAr Cosmic Reco Tree");
     m_pRecoTree->Branch("run", &m_run, "run/I");
@@ -334,7 +334,7 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
 {   
     // Set up Geometry Service
     // =======================
-    art::ServiceHandle<geo::Geometry> theGeometry;   
+    art::ServiceHandle<geo::Geometry const> theGeometry;   
 
     const double xmin(0.0);
     const double xmax(2.0 * theGeometry->DetHalfWidth());

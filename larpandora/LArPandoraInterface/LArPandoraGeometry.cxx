@@ -147,7 +147,7 @@ unsigned int LArPandoraGeometry::GetTpcID(const unsigned int cstat, const unsign
 bool LArPandoraGeometry::ShouldSwitchUV(const unsigned int cstat, const unsigned int tpc)
 {
     // We determine whether U and V views should be switched by checking the drift direction
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     const geo::TPCGeo &theTpc(theGeometry->TPC(tpc, cstat));
 
     const bool isPositiveDrift(theTpc.DriftDirection() == geo::kPosX);
@@ -159,7 +159,7 @@ bool LArPandoraGeometry::ShouldSwitchUV(const unsigned int cstat, const unsigned
 bool LArPandoraGeometry::ShouldSwitchUV(const bool isPositiveDrift)
 {
     // ATTN: In the dual phase scenario the wire planes pointing along two orthogonal directions and so interchanging U and V is unnecessary
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     if (theGeometry->MaxPlanes() == 2)
         return false;
 
@@ -179,7 +179,7 @@ void LArPandoraGeometry::LoadGeometry(LArDriftVolumeList &driftVolumeList)
     typedef std::set<unsigned int> UIntSet;
 
     // Pandora requires three independent images, and ability to correlate features between images (via wire angles and transformation plugin).
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     const unsigned int nWirePlanes(theGeometry->MaxPlanes());
 
     if (nWirePlanes > 3)

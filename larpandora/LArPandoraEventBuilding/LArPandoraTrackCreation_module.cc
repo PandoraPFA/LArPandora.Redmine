@@ -111,7 +111,7 @@ void LArPandoraTrackCreation::produce(art::Event &evt)
 
     // 'wirePitchW` is here used only to provide length scale for binning hits and performing sliding/local linear fits.
     // Fits should be robust against the precise choice, provided length scale is comparable to the granularity of the images.
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     const unsigned int nWirePlanes(theGeometry->MaxPlanes());
 
     if (nWirePlanes > 3)

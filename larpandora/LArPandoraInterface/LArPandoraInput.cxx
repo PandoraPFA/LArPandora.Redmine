@@ -47,7 +47,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
 
     const pandora::Pandora *pPandora(settings.m_pPrimaryPandora);
 
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
     const bool isDualPhase(theGeometry->MaxPlanes() == 2);
 
@@ -263,8 +263,8 @@ void LArPandoraInput::CreatePandoraReadoutGaps(const Settings &settings, const L
 
     const pandora::Pandora *pPandora(settings.m_pPrimaryPandora);
 
-    art::ServiceHandle<geo::Geometry> theGeometry;
-    const lariov::ChannelStatusProvider &channelStatus(art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider());
+    art::ServiceHandle<geo::Geometry const> theGeometry;
+    const lariov::ChannelStatusProvider &channelStatus(art::ServiceHandle<lariov::ChannelStatusService const>()->GetProvider());
 
     for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat)
     {
@@ -378,7 +378,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
     const MCParticlesToMCTruth &particleToTruthMap, const RawMCParticleVector &generatorMCParticleVector)
 {
     mf::LogDebug("LArPandora") << " *** LArPandoraInput::CreatePandoraMCParticles(...) *** " << std::endl;
-    art::ServiceHandle<cheat::ParticleInventoryService> particleInventoryService;
+    art::ServiceHandle<cheat::ParticleInventoryService const> particleInventoryService;
 
     if (!settings.m_pPrimaryPandora)
         throw cet::exception("LArPandora") << "CreatePandoraMCParticles - primary Pandora instance does not exist ";
@@ -671,7 +671,7 @@ void LArPandoraInput::CreatePandoraMCLinks2D(const Settings &settings, const IdT
 
 void LArPandoraInput::GetTrueStartAndEndPoints(const Settings &settings, const art::Ptr<simb::MCParticle> &particle, int &firstT, int &lastT)
 {
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     firstT = -1;  lastT  = -1;
 
     for (unsigned int icstat = 0; icstat < theGeometry->Ncryostats(); ++icstat)
@@ -698,7 +698,7 @@ void LArPandoraInput::GetTrueStartAndEndPoints(const Settings &settings, const a
 void LArPandoraInput::GetTrueStartAndEndPoints(const unsigned int cstat, const unsigned int tpc, const art::Ptr<simb::MCParticle> &particle,
     int &startT, int &endT)
 {
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
 
     bool foundStartPosition(false);
     const int numTrajectoryPoints(static_cast<int>(particle->NumberTrajectoryPoints()));
@@ -728,7 +728,7 @@ void LArPandoraInput::GetTrueStartAndEndPoints(const unsigned int cstat, const u
 
 float LArPandoraInput::GetTrueX0(const art::Ptr<simb::MCParticle> &particle, const int nt)
 {
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const* theTime = lar::providerFrom<detinfo::DetectorClocksService>();
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
@@ -750,7 +750,7 @@ float LArPandoraInput::GetTrueX0(const art::Ptr<simb::MCParticle> &particle, con
 
 double LArPandoraInput::GetMips(const Settings &settings, const double hit_Charge, const geo::View_t hit_View)
 {
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // TODO: Unite this procedure with other calorimetry procedures under development

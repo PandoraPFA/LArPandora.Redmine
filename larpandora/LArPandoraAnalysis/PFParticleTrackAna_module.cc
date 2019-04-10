@@ -122,7 +122,7 @@ void PFParticleTrackAna::reconfigure(fhicl::ParameterSet const &pset)
 void PFParticleTrackAna::beginJob()
 {
     // 
-    art::ServiceHandle<art::TFileService> tfs;
+    art::ServiceHandle<art::TFileService const> tfs;
  
     m_pCaloTree = tfs->make<TTree>("calorimetry", "LAr Track Calo Tree");
     m_pCaloTree->Branch("run",            &m_run,            "run/I");
@@ -185,7 +185,7 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
 
     std::cout << "  Tracks: " << trackVector.size() << std::endl;
 
-    // art::ServiceHandle<geo::Geometry> theGeometry;
+    // art::ServiceHandle<geo::Geometry const> theGeometry;
     // auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     ///// microboone_calorimetryalgmc.CalAreaConstants: [ 5.0142e-3, 5.1605e-3, 5.4354e-3 ]

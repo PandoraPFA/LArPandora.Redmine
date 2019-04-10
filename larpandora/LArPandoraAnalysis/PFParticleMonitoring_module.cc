@@ -315,7 +315,7 @@ void PFParticleMonitoring::beginJob()
     mf::LogDebug("LArPandora") << " *** PFParticleMonitoring::beginJob() *** " << std::endl;
 
     //
-    art::ServiceHandle<art::TFileService> tfs;
+    art::ServiceHandle<art::TFileService const> tfs;
 
     m_pRecoTree = tfs->make<TTree>("pandora", "LAr Reco vs True");
     m_pRecoTree->Branch("run", &m_run,"run/I");
@@ -1328,7 +1328,7 @@ int PFParticleMonitoring::CountHitsByType(const int view, const HitVector &hitVe
 
 void PFParticleMonitoring::GetStartAndEndPoints(const art::Ptr<simb::MCParticle> particle, int &startT, int &endT) const
 {
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
 
     bool foundStartPosition(false);
 

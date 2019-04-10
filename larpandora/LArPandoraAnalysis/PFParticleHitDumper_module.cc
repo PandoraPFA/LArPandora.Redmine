@@ -226,7 +226,7 @@ void PFParticleHitDumper::beginJob()
     mf::LogDebug("LArPandora") << " *** PFParticleHitDumper::beginJob() *** " << std::endl; 
 
     // 
-    art::ServiceHandle<art::TFileService> tfs;
+    art::ServiceHandle<art::TFileService const> tfs;
 
     m_pRecoTracks = tfs->make<TTree>("pandoraTracks", "LAr Reco Tracks");
     m_pRecoTracks->Branch("run", &m_run,"run/I");
@@ -328,7 +328,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     //  auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Need geometry service to convert channel to wire ID
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
 
     // Get particles, tracks, space points, hits (and wires)
     // ====================================================
@@ -662,7 +662,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
     }
 
     // Need geometry service to convert channel to wire ID
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
 
     // Need DetectorProperties service to convert from ticks to X
     auto const* theDetector = lar::providerFrom<detinfo::DetectorPropertiesService>();
@@ -714,7 +714,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
 double PFParticleHitDumper::GetUVW(const geo::WireID &wireID) const
 {
     // define UVW as closest distance from (0,0) to wire axis
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
      
     double xyzStart[3];
     theGeometry->Cryostat(wireID.Cryostat).TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetStart(xyzStart);
@@ -742,7 +742,7 @@ double PFParticleHitDumper::GetUVW(const geo::WireID &wireID) const
 double PFParticleHitDumper::YZtoU(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const
 {
     // TODO: Check that this stills works in DUNE
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     const double m_theta(theGeometry->WireAngleToVertical(geo::kU, tpc, cstat));
     return z * std::sin(m_theta) - y * std::cos(m_theta);
 }
@@ -752,7 +752,7 @@ double PFParticleHitDumper::YZtoU(const unsigned int cstat, const unsigned int t
 double PFParticleHitDumper::YZtoV(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const
 {
     // TODO; Check that this still works in DUNE
-    art::ServiceHandle<geo::Geometry> theGeometry;
+    art::ServiceHandle<geo::Geometry const> theGeometry;
     const double m_theta(theGeometry->WireAngleToVertical(geo::kV, tpc, cstat));
     return z * std::sin(m_theta) - y * std::cos(m_theta);
 }

@@ -164,7 +164,7 @@ void PFParticleAnalysis::beginJob()
     mf::LogDebug("LArPandora") << " *** PFParticleAnalysis::beginJob() *** " << std::endl;
 
     //
-    art::ServiceHandle<art::TFileService> tfs;
+    art::ServiceHandle<art::TFileService const> tfs;
 
     m_pRecoTree = tfs->make<TTree>("pandora", "LAr PFParticles");
     m_pRecoTree->Branch("run", &m_run, "run/I");
