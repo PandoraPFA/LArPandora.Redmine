@@ -37,7 +37,7 @@ public:
      *  @brief Get the slice as reconstructed under the neutrino hypothesis
      */
     const PFParticleVector &GetNeutrinoHypothesis() const;
-    
+
     /**
      *  @brief Get the slice as reconstructed under the cosmic-ray hypothesis
      */
@@ -69,7 +69,7 @@ typedef std::vector<Slice> SliceVector;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Slice::Slice(const float nuScore, const PFParticleVector &nuHypothesis, const PFParticleVector &crHypothesis, const bool isNeutrino) : 
+inline Slice::Slice(const float nuScore, const PFParticleVector &nuHypothesis, const PFParticleVector &crHypothesis, const bool isNeutrino) :
     m_nuScore(nuScore),
     m_nuHypothesis(nuHypothesis),
     m_crHypothesis(crHypothesis),
@@ -99,7 +99,7 @@ inline const PFParticleVector &Slice::GetCosmicRayHypothesis() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 inline bool Slice::IsTaggedAsNeutrino() const
 {
     return m_isNeutrino;

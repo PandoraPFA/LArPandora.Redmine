@@ -36,7 +36,7 @@ public:
      *  @param  pset the set of input fhicl parameters
      */
     ConsolidatedPFParticleAnalysisTemplate(fhicl::ParameterSet const &pset);
-    
+
     /**
      *  @brief  Configure memeber variables using FHiCL parameters
      *
@@ -138,7 +138,7 @@ void ConsolidatedPFParticleAnalysisTemplate::analyze(const art::Event &evt)
     // Collect the PFParticles from the event
     PFParticleHandle pfParticleHandle;
     evt.getByLabel(m_pandoraLabel, pfParticleHandle);
-   
+
     if (!pfParticleHandle.isValid())
     {
         mf::LogDebug("ConsolidatedPFParticleAnalysisTemplate") << "  Failed to find the PFParticles." << std::endl;
@@ -148,7 +148,7 @@ void ConsolidatedPFParticleAnalysisTemplate::analyze(const art::Event &evt)
     // Produce a map of the PFParticle IDs for fast navigation through the hierarchy
     PFParticleIdMap pfParticleMap;
     this->GetPFParticleIdMap(pfParticleHandle, pfParticleMap);
-    
+
     /// Investigate scores associated as larpandoraobject::metadata for the PFParticles
     if (m_printOutScores)
         this->PrintOutScores(evt, pfParticleHandle);
@@ -163,7 +163,7 @@ void ConsolidatedPFParticleAnalysisTemplate::analyze(const art::Event &evt)
     // Use as required!
     // -----------------------------
     //   What follows is an example showing how one might access the reconstructed neutrino final-state tracks and showers
-    
+
     // These are the vectors to hold the tracks and showers for the final-states of the reconstructed neutrino
     std::vector< art::Ptr<recob::Track> > tracks;
     std::vector< art::Ptr<recob::Shower> > showers;
@@ -218,7 +218,7 @@ void ConsolidatedPFParticleAnalysisTemplate::PrintOutScores(const art::Event &ev
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 void ConsolidatedPFParticleAnalysisTemplate::GetFinalStatePFParticleVectors(const PFParticleIdMap &pfParticleMap, PFParticleVector &crParticles, PFParticleVector &nuParticles)
 {
     for (PFParticleIdMap::const_iterator it = pfParticleMap.begin(); it != pfParticleMap.end(); ++it)
@@ -258,13 +258,13 @@ void ConsolidatedPFParticleAnalysisTemplate::GetFinalStatePFParticleVectors(cons
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 void ConsolidatedPFParticleAnalysisTemplate::CollectTracksAndShowers(const PFParticleVector &particles, const PFParticleHandle &pfParticleHandle, const art::Event &evt, TrackVector &tracks, ShowerVector &showers)
 {
     // Get the associations between PFParticles and tracks/showers from the event
     art::FindManyP< recob::Track > pfPartToTrackAssoc(pfParticleHandle, evt, m_trackLabel);
     art::FindManyP< recob::Shower > pfPartToShowerAssoc(pfParticleHandle, evt, m_showerLabel);
-   
+
     for (const art::Ptr<recob::PFParticle> &pParticle : particles)
     {
         const std::vector< art::Ptr<recob::Track> > associatedTracks(pfPartToTrackAssoc.at(pParticle.key()));

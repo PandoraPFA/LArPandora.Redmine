@@ -24,7 +24,7 @@ class PFParticleTrackAna : public art::EDAnalyzer
 public:
     /**
      *  @brief  Constructor
-     * 
+     *
      *  @param  pset
      */
      PFParticleTrackAna(fhicl::ParameterSet const &pset);
@@ -41,21 +41,21 @@ public:
 
 private:
 
-     TTree       *m_pCaloTree;              ///< 
+     TTree       *m_pCaloTree;              ///<
 
-     int          m_run;                    ///< 
-     int          m_event;                  ///< 
+     int          m_run;                    ///<
+     int          m_event;                  ///<
      int          m_index;                  ///<
      int          m_ntracks;                ///<
      int          m_trkid;                  ///<
      int          m_plane;                  ///<
-     
+
      double       m_length;                 ///<
      double       m_dEdx;                   ///<
      double       m_dNdx;                   ///<
      double       m_dQdx;                   ///<
      double       m_residualRange;          ///<
-     
+
      double       m_x;                      ///<
      double       m_y;                      ///<
      double       m_z;                      ///<
@@ -111,7 +111,7 @@ PFParticleTrackAna::~PFParticleTrackAna()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleTrackAna::reconfigure(fhicl::ParameterSet const &pset)
-{ 
+{
     m_useModBox = pset.get<bool>("UeModBox",true);
     m_isCheated = pset.get<bool>("IsCheated",false);
     m_trackModuleLabel = pset.get<std::string>("TrackModule","pandora");
@@ -121,9 +121,9 @@ void PFParticleTrackAna::reconfigure(fhicl::ParameterSet const &pset)
 
 void PFParticleTrackAna::beginJob()
 {
-    // 
+    //
     art::ServiceHandle<art::TFileService const> tfs;
- 
+
     m_pCaloTree = tfs->make<TTree>("calorimetry", "LAr Track Calo Tree");
     m_pCaloTree->Branch("run",            &m_run,            "run/I");
     m_pCaloTree->Branch("event",          &m_event,          "event/I");
@@ -177,7 +177,7 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
     m_pz = 0.0;
 
     std::cout << "  Run: " << m_run << std::endl;
-    std::cout << "  Event: " << m_event << std::endl; 
+    std::cout << "  Event: " << m_event << std::endl;
 
     TrackVector trackVector;
     TracksToHits tracksToHits;
@@ -250,7 +250,7 @@ void PFParticleTrackAna::analyze(const art::Event &evt)
             const double dQdxW(track->DQdxAtPoint(p, geo::kW)); // plane 2
 
             m_plane = ((dQdxU > 0.0) ? geo::kU : (dQdxV > 0.0) ? geo::kV : geo::kW);
- 
+
             const double adc2e(m_isCheated ? adc2eCheat : (geo::kU == m_plane) ? adc2eU : (geo::kV == m_plane) ? adc2eV : adc2eW);
 
             m_dQdx = ((geo::kU == m_plane) ? dQdxU : (geo::kV == m_plane) ? dQdxV : dQdxW);

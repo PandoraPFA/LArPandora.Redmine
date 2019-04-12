@@ -27,7 +27,7 @@ class PFParticleHitDumper : public art::EDAnalyzer
 public:
     /**
      *  @brief  Constructor
-     * 
+     *
      *  @param  pset
      */
      PFParticleHitDumper(fhicl::ParameterSet const &pset);
@@ -60,15 +60,15 @@ private:
      */
      void FillReco3D(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints,
         const SpacePointsToHits &spacePointsToHits);
-    
-    /** 
+
+    /**
      *  @brief Store 2D hits
      *
      *  @param hitVector the input vector of 2D hits
      *  @param hitsToParticles mapping between 2D hits and PFParticles
      */
      void FillReco2D(const HitVector &hitVector, const HitsToPFParticles &hitsToParticles);
-    
+
     /**
      *  @brief Store number of 2D hits associated to PFParticle in different ways
      *
@@ -94,13 +94,13 @@ private:
      *  @param wireID the input wire ID
      */
      double GetUVW(const geo::WireID &wireID) const;
-  
+
     /**
      *  @brief Convert from (Y,Z) to U coordinate
      *
      *  @param cstat the cryostat
      *  @param tpc the tpc
-     *  @param y the y coordinate 
+     *  @param y the y coordinate
      *  @param z the z coordinate
      */
      double YZtoU(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const;
@@ -116,17 +116,17 @@ private:
      double YZtoV(const unsigned int cstat, const unsigned int tpc, const double y, const double z) const;
 
      TTree       *m_pRecoTracks;     ///<
-     TTree       *m_pReco3D;         ///< 
+     TTree       *m_pReco3D;         ///<
      TTree       *m_pReco2D;         ///<
      TTree       *m_pRecoComparison; ///<
      TTree       *m_pRecoWire;       ///<
 
-     int          m_run;             ///< 
-     int          m_event;           ///< 
+     int          m_run;             ///<
+     int          m_event;           ///<
      int          m_particle;        ///<
      int          m_primary;         ///<
      int          m_pdgcode;         ///<
-     
+
      int          m_cstat;           ///<
      int          m_tpc;             ///<
      int          m_plane;           ///<
@@ -147,7 +147,7 @@ private:
      std::string  m_calwireLabel;    ///<
      std::string  m_hitfinderLabel;  ///<
      std::string  m_clusterLabel;    ///<
-     std::string  m_spacepointLabel; ///< 
+     std::string  m_spacepointLabel; ///<
      std::string  m_particleLabel;   ///<
      std::string  m_trackLabel;      ///<
      std::string  m_showerLabel;     ///<
@@ -223,9 +223,9 @@ void PFParticleHitDumper::reconfigure(fhicl::ParameterSet const &pset)
 
 void PFParticleHitDumper::beginJob()
 {
-    mf::LogDebug("LArPandora") << " *** PFParticleHitDumper::beginJob() *** " << std::endl; 
+    mf::LogDebug("LArPandora") << " *** PFParticleHitDumper::beginJob() *** " << std::endl;
 
-    // 
+    //
     art::ServiceHandle<art::TFileService const> tfs;
 
     m_pRecoTracks = tfs->make<TTree>("pandoraTracks", "LAr Reco Tracks");
@@ -304,7 +304,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     m_particle = -1;
     m_primary = 0;
     m_pdgcode = 0;
-     
+
     m_cstat = 0;
     m_tpc = 0;
     m_plane = 0;
@@ -321,7 +321,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
     if (m_printDebug)
     {
         std::cout << "  Run: " << m_run << std::endl;
-        std::cout << "  Event: " << m_event << std::endl; 
+        std::cout << "  Event: " << m_event << std::endl;
     }
 
     // Need DetectorProperties service to convert from ticks to X
@@ -362,8 +362,8 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
         LArPandoraHelper::CollectWires(evt, m_calwireLabel, wireVector);
 
     if (m_printDebug)
-        std::cout << "  PFParticles: " << particleVector.size() << std::endl; 
-   
+        std::cout << "  PFParticles: " << particleVector.size() << std::endl;
+
     // Loop over Tracks (Fill 3D Track Tree)
     // =====================================
     if (m_printDebug)
@@ -398,7 +398,7 @@ void PFParticleHitDumper::analyze(const art::Event &evt)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToTracks)
-{ 
+{
     // Initialise variables
     m_particle = -1;
     m_x = 0.0;
@@ -416,7 +416,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
     {
         const art::Ptr<recob::PFParticle> particle = iter->first;
         const TrackVector &trackVector = iter->second;
-  
+
         m_particle = particle->Self();
 
         if (!trackVector.empty())
@@ -446,7 +446,7 @@ void PFParticleHitDumper::FillRecoTracks(const PFParticlesToTracks &particlesToT
 
 void PFParticleHitDumper::FillReco3D(const PFParticleVector &particleVector, const PFParticlesToSpacePoints &particlesToSpacePoints,
     const SpacePointsToHits &spacePointsToHits)
-{ 
+{
     // Initialise variables
     m_particle = -1;
     m_primary = 0;
@@ -599,7 +599,7 @@ void PFParticleHitDumper::FillAssociated2DHits(const art::Event &evt, const PFPa
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFParticles &hitsToParticles)
-{ 
+{
     // Initialise variables
     m_particle = -1;
     m_pdgcode = 0;
@@ -611,7 +611,7 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
     m_w = 0.0;
     m_q = 0.0;
 
-    // Create dummy entry if there are no 2D hits 
+    // Create dummy entry if there are no 2D hits
     if (hitVector.empty())
     {
         m_pReco2D->Fill();
@@ -635,17 +635,17 @@ void PFParticleHitDumper::FillReco2D(const HitVector &hitVector, const HitsToPFP
             m_particle = particle->Self();
             m_pdgcode = particle->PdgCode();
         }
-                
+
         const geo::WireID &wireID(hit->WireID());
         m_cstat = wireID.Cryostat;
         m_tpc   = wireID.TPC;
         m_plane = wireID.Plane;
-        m_wire  = wireID.Wire; 
+        m_wire  = wireID.Wire;
 
         m_q = hit->Integral();
         m_x = theDetector->ConvertTicksToX(hit->PeakTime(), wireID.Plane, wireID.TPC, wireID.Cryostat);
         m_w = this->GetUVW(wireID);
-     
+
         m_pReco2D->Fill();
     }
 }
@@ -673,7 +673,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
     for (unsigned int i = 0; i<wireVector.size(); ++i)
     {
         const art::Ptr<recob::Wire> wire = wireVector.at(i);
-       
+
         const std::vector<float> &signals(wire->Signal());
         const std::vector<geo::WireID> wireIds = theGeometry->ChannelToWire(wire->Channel());
 
@@ -694,11 +694,11 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
 
             for (std::vector<geo::WireID>::const_iterator wIter = wireIds.begin(), wIterEnd = wireIds.end(); wIter != wIterEnd; ++wIter)
             {
-                const geo::WireID &wireID = *wIter; 
+                const geo::WireID &wireID = *wIter;
                 m_cstat = wireID.Cryostat;
                 m_tpc   = wireID.TPC;
                 m_plane = wireID.Plane;
-                m_wire  = wireID.Wire; 
+                m_wire  = wireID.Wire;
 
                 m_x = theDetector->ConvertTicksToX(time, wireID.Plane, wireID.TPC, wireID.Cryostat);
                 m_w = this->GetUVW(wireID);
@@ -706,7 +706,7 @@ void PFParticleHitDumper::FillRecoWires(const WireVector &wireVector)
                 m_pRecoWire->Fill();
             }
         }
-    } 
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -715,7 +715,7 @@ double PFParticleHitDumper::GetUVW(const geo::WireID &wireID) const
 {
     // define UVW as closest distance from (0,0) to wire axis
     art::ServiceHandle<geo::Geometry const> theGeometry;
-     
+
     double xyzStart[3];
     theGeometry->Cryostat(wireID.Cryostat).TPC(wireID.TPC).Plane(wireID.Plane).Wire(wireID.Wire).GetStart(xyzStart);
     const double ay(xyzStart[1]);

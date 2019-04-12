@@ -40,7 +40,7 @@ private:
     std::string     m_CRRemHitsNuTrackProducerLabel;   ///< Label of the track producer using the pandora instance that ran Nu reco on CR removed hits
     std::string     m_CRRemHitsNuShowerProducerLabel;  ///< Label of the shower producer using the pandora instance that ran Nu reco on CR removed hits
 
-    std::string     m_AllHitProducerLabel;             ///< Label of the primary hit producer 
+    std::string     m_AllHitProducerLabel;             ///< Label of the primary hit producer
     std::string     m_CRRemHitProducerLabel;           ///< Label of the CR removed hit producer
 
     std::string     m_ClearCRTagProducerLabel;         ///< Label of the unabiguous CR tag producer
@@ -93,7 +93,7 @@ CollectionMerging::CollectionMerging(fhicl::ParameterSet const &pset) :
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
     produces< std::vector<recob::Vertex> >();
-    produces< std::vector<recob::Track> >(); 
+    produces< std::vector<recob::Track> >();
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
     produces< std::vector<larpandoraobj::PFParticleMetadata> >();

@@ -49,7 +49,7 @@ class LArPandoraEvent
 {
 public:
     /**
-     *  @brief  Class to handle the required producer labels 
+     *  @brief  Class to handle the required producer labels
      */
     class Labels
     {
@@ -86,7 +86,7 @@ public:
 
         /**
          *  @brief  Minimal parametrised constructor.
-         *          Sets all collection labels to be the same as the PFParticle producer label 
+         *          Sets all collection labels to be the same as the PFParticle producer label
          */
         Labels(const std::string &pfParticleProducerLabel, const std::string &hitProducerLabel);
 
@@ -139,9 +139,9 @@ public:
     LArPandoraEvent(art::EDProducer *pProducer, art::Event *pEvent, const Labels &inputLabels, const bool shouldProduceT0s = false, const size_t shift = 100000);
 
     /**
-     *  @brief  Construct by copying an existing LArPandoraEvent, replacing the collections and associations 
+     *  @brief  Construct by copying an existing LArPandoraEvent, replacing the collections and associations
      *          by any objects associated with a PFParticle in the selection supplied.
-     * 
+     *
      *  @param  event input event to copy and filter
      *  @param  pfParticleVector input vector of selected particles
      */
@@ -156,7 +156,7 @@ public:
     LArPandoraEvent FilterByPdgCode(const bool shouldProduceNeutrinos) const;
 
     /**
-     *  @brief  Produce a copy of the event keeping only the collections that are associated with a top-level particle that is not 
+     *  @brief  Produce a copy of the event keeping only the collections that are associated with a top-level particle that is not
      *          tagged as a neutrino (non-neutrino) if shouldProduceNeutrinos is set to true (false)
      *
      *  @param  shouldProduceNeutrinos if the returned event should contain neutrinos (or non-neutrinos)
@@ -212,7 +212,7 @@ private:
         std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &outputAssociationMap) const;
 
     /**
-     *  @brief  Get the mapping from PFParticles to their daughters 
+     *  @brief  Get the mapping from PFParticles to their daughters
      */
     void GetPFParticleHierarchy();
 
@@ -263,7 +263,7 @@ private:
     /**
      *  @brief  Get particles downstream of any particle in an input vector
      *
-     *  @param  inputPFParticles input vector of PFParticles 
+     *  @param  inputPFParticles input vector of PFParticles
      *  @param  downstreamPFParticles output vector of PFParticles downstream of those in the input vector
      */
     void GetDownstreamPFParticles(const PFParticleVector &inputPFParticles, PFParticleVector &downstreamPFParticles) const;
@@ -278,7 +278,7 @@ private:
 
     /**
      *  @brief  Fills the PFParticleToOriginIdMap using an existing map from another LArPandoraEvent
-     * 
+     *
      *  @param  existingMap input map from PFParticles to origin IDs
      */
     void FillPFParticleToOriginIdMap(const std::map<art::Ptr<recob::PFParticle>, unsigned int> &existingMap);
@@ -295,7 +295,7 @@ private:
         std::vector<art::Ptr<U> > &associatedU) const;
 
     /**
-     *   @brief  Gets the mapping between two filtered collections 
+     *   @brief  Gets the mapping between two filtered collections
      *
      *   @param  collectionT a first filtered collection
      *   @param  collectionU a second filtered collection
@@ -401,17 +401,17 @@ private:
 template <typename T>
 inline void LArPandoraEvent::GetCollection(const Labels::LabelType &inputLabel, art::Handle<std::vector<T> > &outputHandle, std::vector<art::Ptr<T> > &outputCollection) const
 {
-    m_pEvent->getByLabel(m_labels.GetLabel(inputLabel), outputHandle);   
+    m_pEvent->getByLabel(m_labels.GetLabel(inputLabel), outputHandle);
 
     for (unsigned int i = 0; i != outputHandle->size(); i++)
     {
         art::Ptr< T > object(outputHandle, i);
         outputCollection.push_back(object);
-    } 
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 template <typename T, typename U>
 inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLabel, art::Handle<std::vector<T> > &inputHandleT,
     std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &outputAssociationMap) const
@@ -430,7 +430,7 @@ inline void LArPandoraEvent::GetAssociationMap(const Labels::LabelType &inputLab
 
         for (art::Ptr<U> objectU : assoc.at(objectT.key()))
             outputAssociationMap[objectT].push_back(objectU);
-    } 
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -452,23 +452,23 @@ template <typename T, typename U>
 inline void LArPandoraEvent::GetFilteredAssociationMap(const std::vector<art::Ptr<T> > &collectionT, const std::vector<art::Ptr<U> > &collectionU,
     const std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &inputAssociationTtoU, std::map<art::Ptr<T>, std::vector<art::Ptr<U> > > &outputAssociationTtoU) const
 {
-    for (art::Ptr< T > objectT : collectionT) 
+    for (art::Ptr< T > objectT : collectionT)
     {
         std::vector<art::Ptr<U> > emptyVector;
         if (!outputAssociationTtoU.insert(typename std::map<art::Ptr<T>, std::vector<art::Ptr<U> > >::value_type(objectT, emptyVector)).second)
             throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredAssociationMap -- Can not have multiple association map entries for a single object." << std::endl;
 
-        for (art::Ptr< U > objectU : inputAssociationTtoU.at(objectT)) 
+        for (art::Ptr< U > objectU : inputAssociationTtoU.at(objectT))
         {
             typename std::vector<art::Ptr<U> >::const_iterator associatedObjectIter = std::find(collectionU.begin(), collectionU.end(), objectU);
             if (associatedObjectIter == collectionU.end())
                 continue;
-       
+
             outputAssociationTtoU[objectT].push_back(objectU);
         }
     }
 }
-        
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
@@ -505,7 +505,7 @@ inline void LArPandoraEvent::WriteCollection(const std::vector<art::Ptr<recob::P
 
         const std::vector<size_t> &daughters(part->Daughters());
         std::vector<size_t> adjustedDaughters;
-        for (unsigned int d = 0; d < daughters.size(); d++) 
+        for (unsigned int d = 0; d < daughters.size(); d++)
             adjustedDaughters.push_back(daughters[d] + offset);
 
         recob::PFParticle adjustedPart(part->PdgCode(), adjustedSelf, adjustedParent, adjustedDaughters);
@@ -524,14 +524,14 @@ inline void LArPandoraEvent::WriteAssociation(const std::map<art::Ptr<T>, std::v
     const art::PtrMaker<T> makePtrT(*m_pEvent);
     std::unique_ptr<art::Assns<T, U> > outputAssn(new art::Assns<T, U>);
 
-    for (typename std::map<art::Ptr<T>, std::vector<art::Ptr<U> > >::const_iterator it = associationMap.begin(); it != associationMap.end(); ++it) 
+    for (typename std::map<art::Ptr<T>, std::vector<art::Ptr<U> > >::const_iterator it = associationMap.begin(); it != associationMap.end(); ++it)
     {
         typename std::vector<art::Ptr<T> >::const_iterator itT = std::find(collectionT.begin(), collectionT.end(), it-> first);
-        if (itT == collectionT.end()) 
+        if (itT == collectionT.end())
             throw cet::exception("LArPandora") << " LArPandoraEvent::WriteAssociation -- association map contains object not in collectionT." << std::endl;
-        
+
         art::Ptr<T> newObjectT(makePtrT(std::distance(collectionT.begin(), itT)));
-    
+
         for (const art::Ptr<U> &objectU : it->second)
         {
             if (thisProducesU)
@@ -539,15 +539,15 @@ inline void LArPandoraEvent::WriteAssociation(const std::map<art::Ptr<T>, std::v
                 const art::PtrMaker<U> makePtrU(*m_pEvent);
 
                 typename std::vector<art::Ptr<U> >::const_iterator itU = std::find(collectionU.begin(), collectionU.end(), objectU);
-                if (itU == collectionU.end()) 
+                if (itU == collectionU.end())
                     throw cet::exception("LArPandora") << " LArPandoraEvent::WriteAssociation -- association map contains object not in collectionU." << std::endl;
-                
+
                 art::Ptr<U> newObjectU(makePtrU(std::distance(collectionU.begin(), itU)));
-                util::CreateAssn(*m_pProducer, *m_pEvent, newObjectU, newObjectT, *outputAssn);  
+                util::CreateAssn(*m_pProducer, *m_pEvent, newObjectU, newObjectT, *outputAssn);
             }
             else
             {
-                util::CreateAssn(*m_pProducer, *m_pEvent, objectU, newObjectT, *outputAssn);  
+                util::CreateAssn(*m_pProducer, *m_pEvent, objectU, newObjectT, *outputAssn);
             }
         }
     }

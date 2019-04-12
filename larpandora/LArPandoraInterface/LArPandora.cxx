@@ -219,7 +219,7 @@ void LArPandora::ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHit
     {
         m_outputSettings.m_shouldProduceAllOutcomes = false;
         LArPandoraOutput::ProduceArtOutput(m_outputSettings, idToHitMap, evt);
-        
+
         if (m_shouldProduceAllOutcomes)
         {
             m_outputSettings.m_shouldProduceAllOutcomes = true;

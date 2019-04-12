@@ -40,7 +40,7 @@ private:
 
     /**
      *  @brief  Pass external steering parameters, read from fhicl parameter set, to LArMaster Pandora algorithm
-     * 
+     *
      *  @param  pPandora the address of the relevant pandora instance
      */
     void ProvideExternalSteeringParameters(const pandora::Pandora *const pPandora) const;

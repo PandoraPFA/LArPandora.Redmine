@@ -585,7 +585,7 @@ void LArPandoraInput::CreatePandoraMCParticles(const Settings &settings, const M
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraInput::FindPrimaryParticles(const RawMCParticleVector &mcParticleVector, std::map<const simb::MCParticle, bool> &primaryMCParticleMap)  
+void LArPandoraInput::FindPrimaryParticles(const RawMCParticleVector &mcParticleVector, std::map<const simb::MCParticle, bool> &primaryMCParticleMap)
 {
     for (const simb::MCParticle &mcParticle : mcParticleVector)
     {
@@ -598,7 +598,7 @@ void LArPandoraInput::FindPrimaryParticles(const RawMCParticleVector &mcParticle
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool LArPandoraInput::IsPrimaryMCParticle(const art::Ptr<simb::MCParticle> &mcParticle, std::map<const simb::MCParticle, bool> &primaryMCParticleMap) 
+bool LArPandoraInput::IsPrimaryMCParticle(const art::Ptr<simb::MCParticle> &mcParticle, std::map<const simb::MCParticle, bool> &primaryMCParticleMap)
 {
     for (auto &mcParticleIter : primaryMCParticleMap)
     {
@@ -606,8 +606,8 @@ bool LArPandoraInput::IsPrimaryMCParticle(const art::Ptr<simb::MCParticle> &mcPa
         {
             const simb::MCParticle primaryMCParticle(mcParticleIter.first);
 
-            if (std::fabs(primaryMCParticle.Px() - mcParticle->Px()) < std::numeric_limits<double>::epsilon() && 
-                std::fabs(primaryMCParticle.Py() - mcParticle->Py()) < std::numeric_limits<double>::epsilon() && 
+            if (std::fabs(primaryMCParticle.Px() - mcParticle->Px()) < std::numeric_limits<double>::epsilon() &&
+                std::fabs(primaryMCParticle.Py() - mcParticle->Py()) < std::numeric_limits<double>::epsilon() &&
                 std::fabs(primaryMCParticle.Pz() - mcParticle->Pz()) < std::numeric_limits<double>::epsilon())
             {
                 mcParticleIter.second = true;

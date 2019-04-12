@@ -11,7 +11,7 @@ namespace lar_pandora
 
 LArPandoraEvent::LArPandoraEvent(art::EDProducer *pProducer, art::Event *pEvent, const Labels &inputLabels, const bool shouldProduceT0s, const size_t shift) :
     m_pProducer(pProducer),
-    m_pEvent(pEvent), 
+    m_pEvent(pEvent),
     m_labels(inputLabels),
     m_shouldProduceT0s(shouldProduceT0s),
     m_shift(shift)
@@ -59,7 +59,7 @@ LArPandoraEvent::LArPandoraEvent(const LArPandoraEvent &event, const PFParticleV
     this->GetFilteredAssociationMap(m_pfParticles, m_showers, event.m_pfParticleShowerMap, m_pfParticleShowerMap);
     this->GetFilteredAssociationMap(m_pfParticles, m_pcAxes, event.m_pfParticlePCAxisMap, m_pfParticlePCAxisMap);
     this->GetFilteredAssociationMap(m_pfParticles, m_metadata, event.m_pfParticleMetadataMap, m_pfParticleMetadataMap);
-    this->GetFilteredAssociationMap(m_spacePoints, event.m_hits, event.m_spacePointHitMap, m_spacePointHitMap); 
+    this->GetFilteredAssociationMap(m_spacePoints, event.m_hits, event.m_spacePointHitMap, m_spacePointHitMap);
     this->GetFilteredAssociationMap(m_clusters, event.m_hits, event.m_clusterHitMap, m_clusterHitMap);
     this->GetFilteredAssociationMap(m_tracks, event.m_hits, event.m_trackHitMap, m_trackHitMap);
     this->GetFilteredAssociationMap(m_showers, event.m_hits, event.m_showerHitMap, m_showerHitMap);
@@ -196,14 +196,14 @@ void LArPandoraEvent::GetCollections()
     art::Handle< std::vector< recob::Hit > > hitHandle;
 
     this->GetCollection(Labels::PFParticleLabel, pfParticleHandle, m_pfParticles);
-    this->GetCollection(Labels::SpacePointLabel, spacePointHandle, m_spacePoints); 
-    this->GetCollection(Labels::ClusterLabel, clusterHandle, m_clusters); 
-    this->GetCollection(Labels::VertexLabel, vertexHandle, m_vertices); 
-    this->GetCollection(Labels::TrackLabel, trackHandle, m_tracks); 
-    this->GetCollection(Labels::ShowerLabel, showerHandle, m_showers); 
-    this->GetCollection(Labels::PCAxisLabel, pcAxisHandle, m_pcAxes); 
-    this->GetCollection(Labels::PFParticleMetadataLabel, metadataHandle, m_metadata); 
-    this->GetCollection(Labels::HitLabel, hitHandle, m_hits); 
+    this->GetCollection(Labels::SpacePointLabel, spacePointHandle, m_spacePoints);
+    this->GetCollection(Labels::ClusterLabel, clusterHandle, m_clusters);
+    this->GetCollection(Labels::VertexLabel, vertexHandle, m_vertices);
+    this->GetCollection(Labels::TrackLabel, trackHandle, m_tracks);
+    this->GetCollection(Labels::ShowerLabel, showerHandle, m_showers);
+    this->GetCollection(Labels::PCAxisLabel, pcAxisHandle, m_pcAxes);
+    this->GetCollection(Labels::PFParticleMetadataLabel, metadataHandle, m_metadata);
+    this->GetCollection(Labels::HitLabel, hitHandle, m_hits);
 
     this->GetAssociationMap(Labels::PFParticleToSpacePointLabel, pfParticleHandle, m_pfParticleSpacePointMap);
     this->GetAssociationMap(Labels::PFParticleToClusterLabel, pfParticleHandle, m_pfParticleClusterMap);
@@ -221,7 +221,7 @@ void LArPandoraEvent::GetCollections()
     if (m_shouldProduceT0s)
     {
         art::Handle< std::vector< anab::T0 > > t0Handle;
-        this->GetCollection(Labels::T0Label, t0Handle, m_t0s); 
+        this->GetCollection(Labels::T0Label, t0Handle, m_t0s);
         this->GetAssociationMap(Labels::PFParticleToT0Label, pfParticleHandle, m_pfParticleT0Map);
     }
 
@@ -251,7 +251,7 @@ void LArPandoraEvent::GetPFParticleHierarchy()
                 throw cet::exception("LArPandora") << " LArPandoraEvent::GetPFParticleHierarchy -- Can't have the same daughter twice!" << std::endl;
 
             m_pfParticleDaughterMap[part].push_back(daughter);
-        }        
+        }
     }
 }
 
@@ -275,7 +275,7 @@ void LArPandoraEvent::GetFilteredParticlesByPdgCode(const bool shouldProduceNeut
         unsigned int pdg = std::abs(part->PdgCode());
         bool isNeutrino = (pdg == nue || pdg == numu || pdg == nutau);
 
-        if ((shouldProduceNeutrinos && isNeutrino) || (!shouldProduceNeutrinos && !isNeutrino)) 
+        if ((shouldProduceNeutrinos && isNeutrino) || (!shouldProduceNeutrinos && !isNeutrino))
             outputPFParticles.push_back(part);
     }
 }
@@ -290,18 +290,18 @@ void LArPandoraEvent::GetFilteredParticlesByCRTag(const bool shouldProduceNeutri
     m_pEvent->getByLabel(m_labels.GetLabel(Labels::PFParticleLabel), pfParticleHandle);
 
     art::FindManyP< anab::CosmicTag > pfParticleTagAssoc(pfParticleHandle, *m_pEvent, tagProducerLabel);
-    
-    for (art::Ptr< recob::PFParticle > part : inputPFParticles) 
+
+    for (art::Ptr< recob::PFParticle > part : inputPFParticles)
     {
         const CosmicTagVector cosmicTags = pfParticleTagAssoc.at(part.key());
 
-        if (cosmicTags.size() != 1) 
+        if (cosmicTags.size() != 1)
             throw cet::exception("LArPandora") << " LArPandoraEvent::GetFilteredParticlesByCRTag -- Found " << cosmicTags.size() << " CR tags for a PFParticle (require 1)." << std::endl;
 
         art::Ptr< anab::CosmicTag > cosmicTag = cosmicTags.front();
         bool isNeutrino = (cosmicTag->CosmicType() == anab::kNotTagged);
 
-        if ((shouldProduceNeutrinos && isNeutrino) || (!shouldProduceNeutrinos && !isNeutrino)) 
+        if ((shouldProduceNeutrinos && isNeutrino) || (!shouldProduceNeutrinos && !isNeutrino))
             outputPFParticles.push_back(part);
     }
 }
@@ -417,7 +417,7 @@ LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, cons
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-        
+
 LArPandoraEvent::Labels::Labels(const std::string &pfParticleProducerLabel, const std::string &trackProducerLabel, const std::string &showerProducerLabel,
     const std::string &hitProducerLabel)
 {
@@ -511,7 +511,7 @@ void LArPandoraEvent::Labels::SetPCAxisProducerLabel(const std::string &label)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-        
+
 void LArPandoraEvent::Labels::SetPFParticleToSpacePointProducerLabel(const std::string &label)
 {
     m_labels[PFParticleToSpacePointLabel] = label;

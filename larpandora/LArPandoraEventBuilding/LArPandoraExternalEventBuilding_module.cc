@@ -31,7 +31,7 @@ class LArPandoraExternalEventBuilding : public art::EDProducer
 {
 public:
     explicit LArPandoraExternalEventBuilding(fhicl::ParameterSet const & pset);
-    
+
     LArPandoraExternalEventBuilding(LArPandoraExternalEventBuilding const &) = delete;
     LArPandoraExternalEventBuilding(LArPandoraExternalEventBuilding &&) = delete;
     LArPandoraExternalEventBuilding & operator = (LArPandoraExternalEventBuilding const &) = delete;
@@ -70,7 +70,7 @@ private:
     void CollectClearCosmicRays(const PFParticleVector &allParticles, const PFParticleToMetadata &particlesToMetadata, const PFParticleMap &particleMap, PFParticleVector &clearCosmics) const;
 
     /**
-     *  @brief  Collect slices 
+     *  @brief  Collect slices
      *
      *  @param  allParticles input vector of all particles
      *  @param  particlesToMetadata the input mapping from PFParticles to their metadata
@@ -85,7 +85,7 @@ private:
      *  @param  allParticles input vector of all particles
      *  @param  clearCosmics the input vector of clear cosmic ray muons
      *  @param  slices the input vector of slices
-     *  @param  consolidatedParticles the output vector of particles to include in the consolidated output 
+     *  @param  consolidatedParticles the output vector of particles to include in the consolidated output
      */
     void CollectConsolidatedParticles(const PFParticleVector &allParticles, const PFParticleVector &clearCosmics, const SliceVector &slices, PFParticleVector &consolidatedParticles) const;
 
@@ -94,7 +94,7 @@ private:
      *
      *  @param  metadata the metadata object to query
      *  @param  key the key to search for
-     *  
+     *
      *  @return the value in the metadata corresponding to the input key
      */
     float GetMetadataValue(const art::Ptr<larpandoraobj::PFParticleMetadata> &metadata, const std::string &key) const;
@@ -134,7 +134,7 @@ LArPandoraExternalEventBuilding::LArPandoraExternalEventBuilding(fhicl::Paramete
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
     produces< std::vector<recob::Vertex> >();
-    produces< std::vector<recob::Track> >(); 
+    produces< std::vector<recob::Track> >();
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
     produces< std::vector<larpandoraobj::PFParticleMetadata> >();
@@ -175,13 +175,13 @@ void LArPandoraExternalEventBuilding::produce(art::Event &evt)
 
     SliceVector slices;
     this->CollectSlices(particles, particlesToMetadata, particleMap, slices);
-    
+
     m_neutrinoIdTool->ClassifySlices(slices, evt);
 
     PFParticleVector consolidatedParticles;
     this->CollectConsolidatedParticles(particles, clearCosmics, slices, consolidatedParticles);
 
-    const LArPandoraEvent::Labels labels(m_inputProducerLabel, m_trackProducerLabel, m_showerProducerLabel, m_hitProducerLabel); 
+    const LArPandoraEvent::Labels labels(m_inputProducerLabel, m_trackProducerLabel, m_showerProducerLabel, m_hitProducerLabel);
     const LArPandoraEvent consolidatedEvent(LArPandoraEvent(this, &evt, labels, m_shouldProduceT0s), consolidatedParticles);
 
     consolidatedEvent.WriteToEvent();
@@ -195,7 +195,7 @@ void LArPandoraExternalEventBuilding::CollectPFParticles(const art::Event &evt, 
     evt.getByLabel(m_pandoraTag, pfParticleHandle);
 
     art::FindManyP<larpandoraobj::PFParticleMetadata> pfParticleMetadataAssoc(pfParticleHandle, evt, m_pandoraTag);
-  
+
     for (unsigned int i = 0; i < pfParticleHandle->size(); ++i)
     {
         const art::Ptr<recob::PFParticle> part(pfParticleHandle, i);
@@ -203,7 +203,7 @@ void LArPandoraExternalEventBuilding::CollectPFParticles(const art::Event &evt, 
 
         particles.push_back(part);
 
-        if (metadata.size() != 1) 
+        if (metadata.size() != 1)
             throw cet::exception("LArPandora") << " LArPandoraExternalEventBuilding::CollectPFParticles -- Found a PFParticle without exactly 1 metadata associated." << std::endl;
 
         if (!particlesToMetadata.insert(PFParticleToMetadata::value_type(part, metadata.front())).second)
@@ -260,7 +260,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         const auto parentIt(particlesToMetadata.find(LArPandoraHelper::GetParentPFParticle(particleMap, part)));
         if (parentIt == particlesToMetadata.end())
             throw cet::exception("LArPandoraExternalEventBuilding") << "Found PFParticle without metadata" << std::endl;
-       
+
         // Skip PFParticles that are clear cosmics
         try
         {
@@ -280,7 +280,7 @@ void LArPandoraExternalEventBuilding::CollectSlices(const PFParticleVector &allP
         {
             nuHypotheses[sliceId].push_back(part);
         }
-        else 
+        else
         {
             crHypotheses[sliceId].push_back(part);
         }
@@ -338,7 +338,7 @@ void LArPandoraExternalEventBuilding::CollectConsolidatedParticles(const PFParti
         collectedParticles.insert(collectedParticles.end(), particles.begin(), particles.end());
     }
 
-    // ATTN the collected particles are the ones we want to output, but here we loop over all particles to ensure that the consolidated 
+    // ATTN the collected particles are the ones we want to output, but here we loop over all particles to ensure that the consolidated
     // particles have the same ordering.
     for (const auto &part : allParticles)
     {

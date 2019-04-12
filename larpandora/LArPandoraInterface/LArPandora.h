@@ -48,7 +48,7 @@ protected:
     bool                            m_shouldProduceAllOutcomes;     ///< Steering: whether to produce all reconstruction outcomes
     bool                            m_printOverallRecoStatus;       ///< Steering: whether to print current operation status messages
 
-private:        
+private:
     void CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap);
     void ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap);
 
@@ -57,7 +57,7 @@ private:
     std::string                     m_simChannelModuleLabel;        ///< The SimChannel producer module label
     std::string                     m_hitfinderModuleLabel;         ///< The hit finder module label
     std::string                     m_backtrackerModuleLabel;       ///< The back tracker module label
-    
+
     std::string                     m_allOutcomesInstanceLabel;     ///< The instance label for all outcomes
 
     bool                            m_enableProduction;             ///< Whether to persist output products

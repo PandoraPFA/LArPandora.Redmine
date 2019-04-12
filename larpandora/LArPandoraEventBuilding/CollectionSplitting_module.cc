@@ -60,7 +60,7 @@ DEFINE_ART_MODULE(CollectionSplitting)
 namespace lar_pandora
 {
 
-CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const &pset) : 
+CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const &pset) :
     EDProducer{pset},
     m_InputProducerLabel(pset.get<std::string>("InputProducerLabel")),
     m_TrackProducerLabel(pset.get<std::string>("TrackProducerLabel")),
@@ -74,7 +74,7 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const &pset) :
     produces< std::vector<recob::SpacePoint> >();
     produces< std::vector<recob::Cluster> >();
     produces< std::vector<recob::Vertex> >();
-    produces< std::vector<recob::Track> >(); 
+    produces< std::vector<recob::Track> >();
     produces< std::vector<recob::Shower> >();
     produces< std::vector<recob::PCAxis> >();
     produces< std::vector<larpandoraobj::PFParticleMetadata> >();
@@ -103,10 +103,10 @@ CollectionSplitting::CollectionSplitting(fhicl::ParameterSet const &pset) :
 
 void CollectionSplitting::produce(art::Event &evt)
 {
-    if (!m_ShouldProduceNeutrinos && !m_ShouldProduceCosmics) 
+    if (!m_ShouldProduceNeutrinos && !m_ShouldProduceCosmics)
         throw cet::exception("LArPandora") << " CollectionSplitting -- Must be configured to produce neutrinos or cosmics or both.";
 
-    const lar_pandora::LArPandoraEvent::Labels labels(m_InputProducerLabel, m_TrackProducerLabel, m_ShowerProducerLabel, m_HitProducerLabel); 
+    const lar_pandora::LArPandoraEvent::Labels labels(m_InputProducerLabel, m_TrackProducerLabel, m_ShowerProducerLabel, m_HitProducerLabel);
     const lar_pandora::LArPandoraEvent fullEvent(this, &evt, labels, m_ShouldProduceT0s);
 
     if (m_ShouldProduceNeutrinos && m_ShouldProduceCosmics)

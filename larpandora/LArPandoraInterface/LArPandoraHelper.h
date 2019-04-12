@@ -610,7 +610,7 @@ public:
      *  @return true/false
      */
     static bool IsVisible(const art::Ptr<simb::MCParticle> particle);
-	
+
 	static larpandoraobj::PFParticleMetadata GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo);
 };
 

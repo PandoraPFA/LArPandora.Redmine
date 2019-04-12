@@ -34,7 +34,7 @@ public:
     typedef std::vector<size_t> IdVector;
     typedef std::map<size_t, IdVector> IdToIdVectorMap;
     typedef std::map<const pandora::CaloHit *, art::Ptr<recob::Hit> > CaloHitToArtHitMap;
-  
+
     typedef std::unique_ptr< std::vector<recob::PFParticle> > PFParticleCollection;
     typedef std::unique_ptr< std::vector<recob::Vertex> > VertexCollection;
     typedef std::unique_ptr< std::vector<recob::Cluster> > ClusterCollection;
@@ -144,7 +144,7 @@ private:
      *  @return a sorted list of all pfos to convert to ART PFParticles
      */
     static pandora::PfoVector CollectPfos(const pandora::Pandora *const pPrimaryPandora);
-    
+
     /**
      *  @brief  Collect the pfos (including all downstream pfos) from the master and daughter pandora instances
      *
@@ -183,7 +183,7 @@ private:
      *  @return the list of clusters collected
      */
     static pandora::ClusterList CollectClusters(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToClustersMap);
-    
+
     /**
      *  @brief  Collect a sorted vector of all 3D hits in the input pfo
      *
@@ -208,23 +208,23 @@ private:
      *
      *  @param  pT the input object for which the ID should be found
      *  @param  tList a list of objects of type pT to query
-     *  
+     *
      *  @return the ID of the input object
      */
     template <typename T>
     static size_t GetId(const T *const pT, const std::list<const T*> &tList);
-    
+
     /**
      *  @brief  Find the index of an input object in an input vector. Throw an exception if it doesn't exist
      *
      *  @param  pT the input object for which the ID should be found
      *  @param  tVector a list of objects of type pT to query
-     *  
+     *
      *  @return the ID of the input object
      */
     template <typename T>
     static size_t GetId(const T *const pT, const std::vector<const T*> &tVector);
-    
+
     /**
      *  @brief  Collect all 2D and 3D hits that were used / produced in the reconstruction and map them to their corresponding ART hit
      *
@@ -301,8 +301,8 @@ private:
      *  @param  outputParticlesToClusters the output associations between PFParticles and clusters
      */
     static void BuildPFParticles(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
-        const pandora::PfoVector &pfoVector, const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap, 
-        const IdToIdVectorMap &pfoToArtClustersMap, PFParticleCollection &outputParticles, 
+        const pandora::PfoVector &pfoVector, const IdToIdVectorMap &pfoToVerticesMap, const IdToIdVectorMap &pfoToThreeDHitsMap,
+        const IdToIdVectorMap &pfoToArtClustersMap, PFParticleCollection &outputParticles,
         PFParticleToVertexCollection &outputParticlesToVertices, PFParticleToSpacePointCollection &outputParticlesToSpacePoints,
         PFParticleToClusterCollection &outputParticlesToClusters);
 
@@ -315,7 +315,7 @@ private:
      *  @param  outputParticleMetadata the output vector of PFParticleMetadata
      *  @param  outputParticlesToMetadata the output associations between PFParticles and metadata
      */
-    static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, 
+    static void BuildParticleMetadata(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel,
         const pandora::PfoVector &pfoVector, PFParticleMetadataCollection &outputParticleMetadata,
         PFParticleToMetadataCollection &outputParticlesToMetadata);
 
@@ -325,7 +325,7 @@ private:
      *  @param  settings the settings
      *  @param  pPrimaryPandora the primary pandora instance
      *  @param  event the art event
-     *  @param  pProducer the address of the pandora producer 
+     *  @param  pProducer the address of the pandora producer
      *  @param  instanceLabel the label for the collections to be produced
      *  @param  pfoVector the input vector of all pfos to be output
      *  @param  idToHitMap input mapping from pandora hit ID to ART hit
@@ -334,7 +334,7 @@ private:
      *  @param  outputSlicesToHits the output association from slices to hits
      */
     static void BuildSlices(const Settings &settings, const pandora::Pandora *const pPrimaryPandora, const art::Event &event,
-    const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector, 
+    const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector,
     const IdToHitMap &idToHitMap, SliceCollection &outputSlices, PFParticleToSliceCollection &outputParticlesToSlices,
     SliceToHitCollection &outputSlicesToHits);
 
@@ -350,7 +350,7 @@ private:
      *
      *  @param  settings the settings
      *  @param  event the art event
-     *  @param  pProducer the address of the pandora producer 
+     *  @param  pProducer the address of the pandora producer
      *  @param  instanceLabel the label for the collections to be produced
      *  @param  pfoVector the input vector of all pfos to be output
      *  @param  idToHitMap input mapping from pandora hit ID to ART hit
@@ -367,7 +367,7 @@ private:
      *
      *  @param  pParentPfo the parent pfo from which to build the slice
      *  @param  event the art event
-     *  @param  pProducer the address of the pandora producer 
+     *  @param  pProducer the address of the pandora producer
      *  @param  instanceLabel the label for the collections to be produced
      *  @param  idToHitMap input mapping from pandora hit ID to ART hit
      *  @param  outputSlices the output collection of slices to populate
@@ -442,7 +442,7 @@ private:
      *  @param  hitVector the input vector of hits
      *  @param  isolatedHits the input list of isolated hits
      *  @param  algo algorithm set to fill cluster members
-     * 
+     *
      *  @return the ART cluster
      *
      *  If you don't know which algorithm to pick, StandardClusterParamsAlg is a good default.
@@ -541,7 +541,7 @@ inline size_t LArPandoraOutput::GetId(const T *const pT, const std::vector<const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 template <typename A, typename B>
 inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const,
     const std::string &instanceLabel, const size_t idA, const size_t idB, std::unique_ptr< art::Assns<A, B> > &association)
@@ -551,12 +551,12 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 
     const art::PtrMaker<B> makePtrB(event, instanceLabel);
     art::Ptr<B> pB(makePtrB(idB));
-    
+
     association->addSingle(pA, pB);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 template <typename A, typename B>
 inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const,
     const std::string &instanceLabel, const size_t idA, const IdToIdVectorMap &aToBMap, std::unique_ptr< art::Assns<A, B> > &association)
@@ -577,7 +577,7 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 template <typename A, typename B>
 inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art::EDProducer *const,
     const std::string &instanceLabel, const size_t idA, const std::vector< art::Ptr<B> > &bVector,
@@ -585,7 +585,7 @@ inline void LArPandoraOutput::AddAssociation(const art::Event &event, const art:
 {
     const art::PtrMaker<A> makePtrA(event, instanceLabel);
     art::Ptr<A> pA(makePtrA(idA));
-    
+
     for (const art::Ptr<B> &pB : bVector)
         association->addSingle(pA, pB);
 }

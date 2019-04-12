@@ -26,7 +26,7 @@ class PFParticleCosmicAna : public art::EDAnalyzer
 public:
     /**
      *  @brief  Constructor
-     * 
+     *
      *  @param  pset
      */
      PFParticleCosmicAna(fhicl::ParameterSet const &pset);
@@ -50,11 +50,11 @@ private:
      *  @param  recoParticlesToTracks  mapping from particles to tracks
      *  @param  recoTracksToCosmicTags  mapping from tracks to cosmic tags
      */
-     void FillRecoTree(const PFParticlesToHits &recoParticlesToHits, const PFParticlesToTracks &recoParticlesToTracks, 
+     void FillRecoTree(const PFParticlesToHits &recoParticlesToHits, const PFParticlesToTracks &recoParticlesToTracks,
          const TracksToCosmicTags &recoTracksToCosmicTags);
 
     /**
-     *  @brief Fill track-level variables using input maps between reconstructed objects 
+     *  @brief Fill track-level variables using input maps between reconstructed objects
      *
      *  @param  hitVector  input vector of reconstructed hits
      *  @param  trueHitsToParticles  mapping between true hits and particles
@@ -65,7 +65,7 @@ private:
      */
      void FillTrueTree(const HitVector &hitVector, const HitsToMCParticles &trueHitsToParticles, const HitsToPFParticles &recoHitsToParticles,
 	 const MCParticlesToMCTruth &particlesToTruth, const PFParticlesToTracks &particlesToTracks, const TracksToCosmicTags &tracksToCosmicTags);
-    
+
     /**
      *  @brief Get cosmic score for a PFParticle using track-level information
      *
@@ -73,14 +73,14 @@ private:
      *  @param  recoParticlesToTracks  mapping between reconstructed particles and tracks
      *  @param  recoTracksToCosmicTags  mapping between reconstructed tracks and cosmic tags
      */
-     float GetCosmicScore(const art::Ptr<recob::PFParticle> particle, const PFParticlesToTracks &recoParticlesToTracks, 
+     float GetCosmicScore(const art::Ptr<recob::PFParticle> particle, const PFParticlesToTracks &recoParticlesToTracks,
          const TracksToCosmicTags &recoTracksToCosmicTags) const;
 
-     TTree       *m_pRecoTree;              ///< 
-     TTree       *m_pTrueTree;              ///< 
+     TTree       *m_pRecoTree;              ///<
+     TTree       *m_pTrueTree;              ///<
 
-     int          m_run;                    ///< 
-     int          m_event;                  ///< 
+     int          m_run;                    ///<
+     int          m_event;                  ///<
      int          m_index;                  ///<
 
      int          m_self;                   ///<
@@ -90,38 +90,38 @@ private:
      float        m_cosmicScore;            ///<
      int          m_nTracks;                ///<
      int          m_nHits;                  ///<
-    
-     float        m_trackVtxX;              ///< 
-     float        m_trackVtxY;              ///< 
-     float        m_trackVtxZ;              ///< 
-     float        m_trackEndX;              ///< 
-     float        m_trackEndY;              ///< 
-     float        m_trackEndZ;              ///< 
-     float        m_trackVtxDirX;           ///< 
-     float        m_trackVtxDirY;           ///< 
-     float        m_trackVtxDirZ;           ///< 
-     float        m_trackEndDirX;           ///< 
-     float        m_trackEndDirY;           ///< 
-     float        m_trackEndDirZ;           ///< 
-     float        m_trackLength;            ///< 
-     float        m_trackWidthX;            ///<
-     float        m_trackWidthY;            ///<    
-     float        m_trackWidthZ;            ///<  
-     float        m_trackVtxDeltaYZ;        ///<
-     float        m_trackEndDeltaYZ;        ///< 
 
-     int          m_trackVtxContained;      ///< 
+     float        m_trackVtxX;              ///<
+     float        m_trackVtxY;              ///<
+     float        m_trackVtxZ;              ///<
+     float        m_trackEndX;              ///<
+     float        m_trackEndY;              ///<
+     float        m_trackEndZ;              ///<
+     float        m_trackVtxDirX;           ///<
+     float        m_trackVtxDirY;           ///<
+     float        m_trackVtxDirZ;           ///<
+     float        m_trackEndDirX;           ///<
+     float        m_trackEndDirY;           ///<
+     float        m_trackEndDirZ;           ///<
+     float        m_trackLength;            ///<
+     float        m_trackWidthX;            ///<
+     float        m_trackWidthY;            ///<
+     float        m_trackWidthZ;            ///<
+     float        m_trackVtxDeltaYZ;        ///<
+     float        m_trackEndDeltaYZ;        ///<
+
+     int          m_trackVtxContained;      ///<
      int          m_trackEndContained;      ///<
 
      int          m_nNeutrinoHits;
-     int          m_nNeutrinoHitsFullyTagged; 
+     int          m_nNeutrinoHitsFullyTagged;
      int          m_nNeutrinoHitsSemiTagged;
      int          m_nNeutrinoHitsNotTagged;
      int          m_nNeutrinoHitsNotReconstructed;
      int          m_nNeutrinoHitsReconstructed;
 
      int          m_nCosmicHits;
-     int          m_nCosmicHitsFullyTagged; 
+     int          m_nCosmicHitsFullyTagged;
      int          m_nCosmicHitsSemiTagged;
      int          m_nCosmicHitsNotTagged;
      int          m_nCosmicHitsNotReconstructed;
@@ -181,7 +181,7 @@ PFParticleCosmicAna::~PFParticleCosmicAna()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void PFParticleCosmicAna::reconfigure(fhicl::ParameterSet const &pset)
-{ 
+{
     m_cosmicLabel = pset.get<std::string>("CosmicTagModule","cosmictagger");
     m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
     m_trackfitLabel = pset.get<std::string>("TrackFitModule","trackfit");
@@ -198,17 +198,17 @@ void PFParticleCosmicAna::reconfigure(fhicl::ParameterSet const &pset)
 
 void PFParticleCosmicAna::beginJob()
 {
-    mf::LogDebug("LArPandora") << " *** PFParticleCosmicAna::beginJob() *** " << std::endl; 
+    mf::LogDebug("LArPandora") << " *** PFParticleCosmicAna::beginJob() *** " << std::endl;
 
-    // 
+    //
     art::ServiceHandle<art::TFileService const> tfs;
- 
+
     m_pRecoTree = tfs->make<TTree>("recoTree", "LAr Cosmic Reco Tree");
     m_pRecoTree->Branch("run", &m_run, "run/I");
     m_pRecoTree->Branch("event", &m_event, "event/I");
     m_pRecoTree->Branch("index", &m_index, "index/I");
     m_pRecoTree->Branch("self", &m_self, "self/I");
-    m_pRecoTree->Branch("pdgCode", &m_pdgCode, "pdgCode/I"); 
+    m_pRecoTree->Branch("pdgCode", &m_pdgCode, "pdgCode/I");
     m_pRecoTree->Branch("isTrackLike", &m_isTrackLike, "isTrackLike/I");
     m_pRecoTree->Branch("isPrimary", &m_isPrimary, "isPrimary/I");
     m_pRecoTree->Branch("cosmicScore", &m_cosmicScore, "cosmicScore/F");
@@ -233,12 +233,12 @@ void PFParticleCosmicAna::beginJob()
     m_pRecoTree->Branch("trackVtxContained", &m_trackVtxContained, "trackVtxContained/I");
     m_pRecoTree->Branch("trackEndContained", &m_trackEndContained, "trackEndContained/I");
     m_pRecoTree->Branch("nTracks", &m_nTracks, "nTracks/I");
-    m_pRecoTree->Branch("nHits", &m_nHits, "nHits/I");  
+    m_pRecoTree->Branch("nHits", &m_nHits, "nHits/I");
 
     m_pTrueTree = tfs->make<TTree>("trueTree", "LAr Cosmic True Tree");
     m_pTrueTree->Branch("run", &m_run, "run/I");
     m_pTrueTree->Branch("event", &m_event, "event/I");
-    m_pTrueTree->Branch("nHits", &m_nHits, "nHits/I");  
+    m_pTrueTree->Branch("nHits", &m_nHits, "nHits/I");
     m_pTrueTree->Branch("nNeutrinoHits", &m_nNeutrinoHits, "nNeutrinoHits/I");
     m_pTrueTree->Branch("nNeutrinoHitsFullyTagged", &m_nNeutrinoHitsFullyTagged, "nNeutrinoHitsFullyTagged/I");
     m_pTrueTree->Branch("nNeutrinoHitsSemiTagged", &m_nNeutrinoHitsSemiTagged, "nNeutrinoHitsSemiTagged/I");
@@ -265,15 +265,15 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
 {
     std::cout << " *** PFParticleCosmicAna::analyze(...) *** " << std::endl;
 
-    // 
+    //
     // Note: I've made this is MicroBooNE-only module
     //
 
     m_run = evt.run();
     m_event = evt.id().event();
-  
+
     std::cout << "  Run: " << m_run << std::endl;
-    std::cout << "  Event: " << m_event << std::endl; 
+    std::cout << "  Event: " << m_event << std::endl;
 
 
     // Collect True Particles
@@ -297,7 +297,7 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
     HitsToPFParticles recoHitsToParticles;
 
     LArPandoraHelper::CollectPFParticles(evt, m_particleLabel, recoParticleVector);
-    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_particleLabel, recoParticlesToHits, recoHitsToParticles, 
+    LArPandoraHelper::BuildPFParticleHitMaps(evt, m_particleLabel, m_particleLabel, recoParticlesToHits, recoHitsToParticles,
         (m_useDaughterPFParticles ? LArPandoraHelper::kAddDaughters : LArPandoraHelper::kIgnoreDaughters));
 
     std::cout << "  PFParticles: " << recoParticleVector.size() << std::endl;
@@ -328,13 +328,13 @@ void PFParticleCosmicAna::analyze(const art::Event &evt)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
-void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToHits, const PFParticlesToTracks &recoParticlesToTracks, 
+
+void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToHits, const PFParticlesToTracks &recoParticlesToTracks,
     const TracksToCosmicTags &recoTracksToCosmicTags)
-{   
+{
     // Set up Geometry Service
     // =======================
-    art::ServiceHandle<geo::Geometry const> theGeometry;   
+    art::ServiceHandle<geo::Geometry const> theGeometry;
 
     const double xmin(0.0);
     const double xmax(2.0 * theGeometry->DetHalfWidth());
@@ -342,7 +342,7 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
     const double ymax(+theGeometry->DetHalfHeight());
     const double zmin(0.0);
     const double zmax(theGeometry->DetLength());
-    const double xyzCut(m_cosmicContainmentCut); 
+    const double xyzCut(m_cosmicContainmentCut);
 
     m_index = 0;
 
@@ -376,7 +376,7 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
 
     m_nTracks = 0;
     m_nHits = 0;
-    
+
     // Loop over Reco Particles
     // ========================
     for (PFParticlesToHits::const_iterator iter1 = recoParticlesToHits.begin(), iterEnd1 = recoParticlesToHits.end();
@@ -395,9 +395,9 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
         const TrackVector &trackVector = iter2->second;
         if (trackVector.empty())
 	    continue;
-  
+
         m_nHits           = hitVector.size();
-        m_nTracks         = trackVector.size(); 
+        m_nTracks         = trackVector.size();
 
         m_self            = recoParticle->Self();
         m_pdgCode         = recoParticle->PdgCode();
@@ -422,10 +422,10 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
         m_trackWidthY     = 0.f;
         m_trackWidthZ     = 0.f;
         m_trackVtxDeltaYZ = 0.f;
-        m_trackEndDeltaYZ = 0.f; 
+        m_trackEndDeltaYZ = 0.f;
 
         m_trackVtxContained = 0;
-        m_trackEndContained = 0;  
+        m_trackEndContained = 0;
 
         for (TrackVector::const_iterator iter3 = trackVector.begin(), iterEnd3 = trackVector.end(); iter3 != iterEnd3; ++iter3)
         {
@@ -435,13 +435,13 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
             if (trackLength < m_trackLength)
 	        continue;
 
-            m_trackLength = trackLength;    
+            m_trackLength = trackLength;
 
             const auto &trackVtxPosition = track->Vertex();
             const auto &trackVtxDirection = track->VertexDirection();
             const auto &trackEndPosition = track->End();
             const auto &trackEndDirection = track->EndDirection();
-                
+
             m_trackVtxX    = trackVtxPosition.x();
             m_trackVtxY    = trackVtxPosition.y();
             m_trackVtxZ    = trackVtxPosition.z();
@@ -458,7 +458,7 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
             m_trackWidthX = std::fabs(m_trackEndX - m_trackVtxX);
             m_trackWidthY = std::fabs(m_trackEndY - m_trackVtxY);
             m_trackWidthZ = std::fabs(m_trackEndZ - m_trackVtxZ);
-        
+
             m_trackVtxDeltaYZ = std::min((ymax - m_trackVtxY), std::min((m_trackVtxZ - zmin), (zmax - m_trackVtxZ)));
             m_trackEndDeltaYZ = std::min((m_trackEndY - ymin), std::min((m_trackEndZ - zmin), (zmax - m_trackEndZ)));
 
@@ -470,7 +470,7 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
 			           (m_trackEndZ > zmin + xyzCut && m_trackEndZ < zmax - xyzCut));
         }
 
-        std::cout << "   PFParticle: [" << m_index << "] nHits=" << m_nHits 
+        std::cout << "   PFParticle: [" << m_index << "] nHits=" << m_nHits
                   << ", nTracks=" << m_nTracks << ", cosmicScore=" << m_cosmicScore << std::endl;
 
         m_pRecoTree->Fill();
@@ -479,22 +479,22 @@ void PFParticleCosmicAna::FillRecoTree(const PFParticlesToHits &recoParticlesToH
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
- 
-void PFParticleCosmicAna::FillTrueTree(const HitVector &hitVector, const HitsToMCParticles &trueHitsToParticles, 
-    const HitsToPFParticles &recoHitsToParticles, const MCParticlesToMCTruth &particlesToTruth, const PFParticlesToTracks &particlesToTracks, 
+
+void PFParticleCosmicAna::FillTrueTree(const HitVector &hitVector, const HitsToMCParticles &trueHitsToParticles,
+    const HitsToPFParticles &recoHitsToParticles, const MCParticlesToMCTruth &particlesToTruth, const PFParticlesToTracks &particlesToTracks,
     const TracksToCosmicTags &tracksToCosmicTags)
 {
     m_nHits = 0;
 
     m_nNeutrinoHits = 0;
-    m_nNeutrinoHitsFullyTagged = 0; 
+    m_nNeutrinoHitsFullyTagged = 0;
     m_nNeutrinoHitsSemiTagged = 0;
     m_nNeutrinoHitsNotTagged = 0;
     m_nNeutrinoHitsNotReconstructed = 0;
     m_nNeutrinoHitsReconstructed = 0;
 
     m_nCosmicHits = 0;
-    m_nCosmicHitsFullyTagged = 0; 
+    m_nCosmicHitsFullyTagged = 0;
     m_nCosmicHitsSemiTagged = 0;
     m_nCosmicHitsNotTagged = 0;
     m_nCosmicHitsNotReconstructed = 0;
@@ -513,7 +513,7 @@ void PFParticleCosmicAna::FillTrueTree(const HitVector &hitVector, const HitsToM
         MCParticlesToMCTruth::const_iterator iter4 = particlesToTruth.find(trueParticle);
         if (particlesToTruth.end() == iter4)
             throw cet::exception("LArPandora") << " PFParticleCosmicAna::analyze --- Found a true particle without any ancestry information ";
-        
+
         const art::Ptr<simb::MCTruth> truth = iter4->second;
 
         float cosmicScore(-0.2);
@@ -529,34 +529,34 @@ void PFParticleCosmicAna::FillTrueTree(const HitVector &hitVector, const HitsToM
 
         if (truth->NeutrinoSet())
         {
-            ++m_nNeutrinoHits; 
-        
+            ++m_nNeutrinoHits;
+
             if (cosmicScore >= 0) ++m_nNeutrinoHitsReconstructed;
             else                  ++m_nNeutrinoHitsNotReconstructed;
 
             if (cosmicScore > 0.51)       ++m_nNeutrinoHitsFullyTagged;
             else if ( cosmicScore > 0.39) ++m_nNeutrinoHitsSemiTagged;
-            else                          ++m_nNeutrinoHitsNotTagged;  
+            else                          ++m_nNeutrinoHitsNotTagged;
         }
         else
 	{
             ++m_nCosmicHits;
-                       
+
             if (cosmicScore >= 0) ++m_nCosmicHitsReconstructed;
             else                  ++m_nCosmicHitsNotReconstructed;
 
             if (cosmicScore > 0.51)       ++m_nCosmicHitsFullyTagged;
             else if ( cosmicScore > 0.39) ++m_nCosmicHitsSemiTagged;
-            else                          ++m_nCosmicHitsNotTagged;   
+            else                          ++m_nCosmicHitsNotTagged;
         }
-    } 
+    }
 
     m_pTrueTree->Fill();
 }
- 
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float PFParticleCosmicAna::GetCosmicScore(const art::Ptr<recob::PFParticle> particle, const PFParticlesToTracks &recoParticlesToTracks, 
+float PFParticleCosmicAna::GetCosmicScore(const art::Ptr<recob::PFParticle> particle, const PFParticlesToTracks &recoParticlesToTracks,
     const TracksToCosmicTags &recoTracksToCosmicTags) const
 {
     float cosmicScore(0.f);
@@ -568,11 +568,11 @@ float PFParticleCosmicAna::GetCosmicScore(const art::Ptr<recob::PFParticle> part
         for (TrackVector::const_iterator iter3 = iter2->second.begin(), iterEnd3 = iter2->second.end(); iter3 != iterEnd3; ++iter3)
         {
             const art::Ptr<recob::Track> track = *iter3;
-                
+
              TracksToCosmicTags::const_iterator iter4 = recoTracksToCosmicTags.find(track);
              if (recoTracksToCosmicTags.end() != iter4)
              {
-                 for (CosmicTagVector::const_iterator iter5 = iter4->second.begin(), iterEnd5 = iter4->second.end(); 
+                 for (CosmicTagVector::const_iterator iter5 = iter4->second.begin(), iterEnd5 = iter4->second.end();
                      iter5 != iterEnd5; ++iter5)
                  {
                      const art::Ptr<anab::CosmicTag> cosmicTag = *iter5;

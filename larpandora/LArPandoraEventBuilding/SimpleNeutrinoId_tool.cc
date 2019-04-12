@@ -44,14 +44,14 @@ DEFINE_ART_CLASS_TOOL(SimpleNeutrinoId)
 
 namespace lar_pandora
 {
-    
+
 SimpleNeutrinoId::SimpleNeutrinoId(fhicl::ParameterSet const &/*pset*/)
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void SimpleNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &/*evt*/) 
+void SimpleNeutrinoId::ClassifySlices(SliceVector &slices, const art::Event &/*evt*/)
 {
     if (slices.empty()) return;
 
