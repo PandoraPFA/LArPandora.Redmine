@@ -15,7 +15,6 @@
 
 #include <iomanip>
 #include <set>
-#include <sstream>
 
 namespace lar_pandora
 {
