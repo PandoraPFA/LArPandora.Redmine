@@ -84,7 +84,8 @@ protected:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline ILArPandora::ILArPandora(fhicl::ParameterSet const &/*pset*/) :
+inline ILArPandora::ILArPandora(fhicl::ParameterSet const &pset) :
+    EDProducer(pset),
     m_pPrimaryPandora(nullptr)
 {
 }

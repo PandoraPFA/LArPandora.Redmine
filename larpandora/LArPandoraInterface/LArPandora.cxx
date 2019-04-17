@@ -6,6 +6,7 @@
  */
 
 #include "art/Framework/Principal/Event.h"
+#include "art_root_io/TFileService.h"
 #include "cetlib/cpu_timer.h"
 
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
