@@ -359,8 +359,9 @@ public:
      *  @param evt the ART event record
      *  @param label the label for the truth information in the event
      *  @param simChannelVector output vector of SimChannel objects
+     *  @param isValid boolean parameter indicating if the sim channel collection exists
      */
-    static void CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector);
+    static void CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector, bool &isValid);
 
     /**
      *  @brief Collect a vector of MCParticle objects from the ART event record
