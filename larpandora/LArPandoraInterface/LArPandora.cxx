@@ -175,6 +175,8 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
     MCTruthToMCParticles artMCTruthToMCParticles;
     MCParticlesToMCTruth artMCParticlesToMCTruth;
 
+    bool validSimChannels(false);
+
     LArPandoraHelper::CollectHits(evt, m_hitfinderModuleLabel, artHits);
 
     if (m_enableMCParticles && !evt.isRealData())
@@ -186,20 +188,25 @@ void LArPandora::CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap)
 
         LArPandoraHelper::CollectMCParticles(evt, m_geantModuleLabel, artMCTruthToMCParticles, artMCParticlesToMCTruth);
 
-        LArPandoraHelper::CollectSimChannels(evt, m_simChannelModuleLabel, artSimChannels);
+	LArPandoraHelper::CollectSimChannels(evt, m_geantModuleLabel, artSimChannels, validSimChannels);
         if (!artSimChannels.empty())
         {
             LArPandoraHelper::BuildMCParticleHitMaps(artHits, artSimChannels, artHitsToTrackIDEs);
         }
         else
         {
-            if (m_backtrackerModuleLabel.empty())
-            {
-              throw cet::exception("LArPandora") << "LArPandora::CreatePandoraInput - Can't build MCParticle to Hit map." << std::endl <<
-                  "No SimChannels found with label \"" << m_simChannelModuleLabel << "\", and BackTrackerModuleLabel isn't set in FHiCL." << std::endl;
+	    if (!validSimChannels)
+	    {
+              if (m_backtrackerModuleLabel.empty())
+	        throw cet::exception("LArPandora") << "LArPandora::CreatePandoraInput - Can't build MCParticle to Hit map." << std::endl <<
+                    "No SimChannels found with label \"" << m_simChannelModuleLabel << "\", and BackTrackerModuleLabel isn't set in FHiCL." << std::endl;
+  
+              LArPandoraHelper::BuildMCParticleHitMaps(evt, m_hitfinderModuleLabel, m_backtrackerModuleLabel, artHitsToTrackIDEs);         
+	    }
+            else
+	    {
+	      mf::LogDebug("LArPandora") << " *** LArPandora::CreatePandoraInput - empty list of sim channels found " << std::endl;
             }
-
-            LArPandoraHelper::BuildMCParticleHitMaps(evt, m_hitfinderModuleLabel, m_backtrackerModuleLabel, artHitsToTrackIDEs);
         }
     }
 
