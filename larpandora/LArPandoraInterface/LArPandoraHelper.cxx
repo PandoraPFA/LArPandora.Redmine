@@ -735,7 +735,7 @@ void LArPandoraHelper::CollectT0s(const art::Event &evt, const std::string &labe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector, bool &isValid)
+void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector, bool &areSimChannelsValid)
 {
     if (evt.isRealData())
         throw cet::exception("LArPandora") << " PandoraCollector::CollectSimChannels --- Trying to access MC truth from real data ";
@@ -746,13 +746,13 @@ void LArPandoraHelper::CollectSimChannels(const art::Event &evt, const std::stri
     if (!theSimChannels.isValid())
     {
         mf::LogDebug("LArPandora") << "  Failed to find sim channels... " << std::endl;
-        isValid = false;
+        areSimChannelsValid = false;
         return;
     }
     else
     {
         mf::LogDebug("LArPandora") << "  Found: " << theSimChannels->size() << " SimChannels " << std::endl;
-        isValid = true;
+        areSimChannelsValid = true;
     }
 
     for (unsigned int i = 0; i < theSimChannels->size(); ++i)
@@ -978,8 +978,8 @@ void LArPandoraHelper::BuildMCParticleHitMaps(const art::Event &evt, const std::
     MCParticlesToMCTruth particlesToTruth;
     HitsToTrackIDEs hitsToTrackIDEs;
 
-    bool validSimChannels;
-    LArPandoraHelper::CollectSimChannels(evt, label, simChannelVector, validSimChannels);
+    bool areSimChannelsValid(false);
+    LArPandoraHelper::CollectSimChannels(evt, label, simChannelVector, areSimChannelsValid);
 
     LArPandoraHelper::CollectMCParticles(evt, label, truthToParticles, particlesToTruth);
     LArPandoraHelper::BuildMCParticleHitMaps(hitVector, simChannelVector, hitsToTrackIDEs);
