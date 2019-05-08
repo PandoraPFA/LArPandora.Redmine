@@ -359,9 +359,9 @@ public:
      *  @param evt the ART event record
      *  @param label the label for the truth information in the event
      *  @param simChannelVector output vector of SimChannel objects
-     *  @param isValid boolean parameter indicating if the sim channel collection exists
+     *  @param areSimChannelsValid boolean parameter indicating if the sim channel collection exists
      */
-    static void CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector, bool &isValid);
+    static void CollectSimChannels(const art::Event &evt, const std::string &label, SimChannelVector &simChannelVector, bool &areSimChannelsValid);
 
     /**
      *  @brief Collect a vector of MCParticle objects from the ART event record
@@ -612,7 +612,14 @@ public:
      */
     static bool IsVisible(const art::Ptr<simb::MCParticle> particle);
 
-	static larpandoraobj::PFParticleMetadata GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo);
+    /**
+     *  @brief  Get metadata associated to a PFO
+     *
+     *  @param  pPfo input ParticleFlowObject
+     *
+     *  @return larpandoraobj::PFParticleMetadata
+     */
+    static larpandoraobj::PFParticleMetadata GetPFParticleMetadata(const pandora::ParticleFlowObject *const pPfo);
 };
 
 } // namespace lar_pandora
