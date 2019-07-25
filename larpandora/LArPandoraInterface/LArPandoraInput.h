@@ -37,6 +37,7 @@ public:
         bool                    m_useHitWidths;             ///<
         bool                    m_useBirksCorrection;       ///<
         int                     m_uidOffset;                ///<
+        int                     m_hitCounterOffset;         ///<
         double                  m_dx_cm;                    ///<
         double                  m_int_cm;                   ///<
         double                  m_rad_cm;                   ///<

@@ -73,6 +73,7 @@ public:
         const pandora::Pandora *m_pPrimaryPandora;              ///<
         art::EDProducer        *m_pProducer;                    ///<
         bool                    m_shouldRunStitching;           ///<
+        bool                    m_shouldProduceSlices;          ///< Whether to produce output slices e.g. may not want to do this if only (re)processing single slices
         bool                    m_shouldProduceAllOutcomes;     ///< If all outcomes should be produced in separate collections (choose false if you only require the consolidated output)
         std::string             m_allOutcomesInstanceLabel;     ///< The label for the instance producing all outcomes
         bool                    m_isNeutrinoRecoOnlyNoSlicing;  ///< If we are running the neutrino reconstruction only with no slicing
@@ -88,7 +89,6 @@ public:
      */
     static void ProduceArtOutput(const Settings &settings, const IdToHitMap &idToHitMap, art::Event &evt);
 
-private:
     /**
      *  @brief  Get the address of a pandora instance with a given name
      *

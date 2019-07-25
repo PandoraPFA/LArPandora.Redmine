@@ -36,6 +36,9 @@ public:
     void produce(art::Event &evt);
 
 protected:
+    void CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap);
+    void ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap);
+
     std::string                     m_configFile;                   ///< The config file
 
     bool                            m_shouldRunAllHitsCosmicReco;   ///< Steering: whether to run all hits cosmic-ray reconstruction
@@ -47,10 +50,6 @@ protected:
     bool                            m_shouldPerformSliceId;         ///< Steering: whether to identify slices and select most appropriate pfos
     bool                            m_shouldProduceAllOutcomes;     ///< Steering: whether to produce all reconstruction outcomes
     bool                            m_printOverallRecoStatus;       ///< Steering: whether to print current operation status messages
-
-private:
-    void CreatePandoraInput(art::Event &evt, IdToHitMap &idToHitMap);
-    void ProcessPandoraOutput(art::Event &evt, const IdToHitMap &idToHitMap);
 
     std::string                     m_generatorModuleLabel;         ///< The generator module label
     std::string                     m_geantModuleLabel;             ///< The geant module label

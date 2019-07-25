@@ -100,7 +100,9 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, instanceLabel, pfoVector, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
 
     LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, instanceLabel, pfoVector, outputParticleMetadata, outputParticlesToMetadata);
-    LArPandoraOutput::BuildSlices(settings, settings.m_pPrimaryPandora, evt, settings.m_pProducer, instanceLabel, pfoVector, idToHitMap, outputSlices, outputParticlesToSlices, outputSlicesToHits);
+
+    if (settings.m_shouldProduceSlices)
+        LArPandoraOutput::BuildSlices(settings, settings.m_pPrimaryPandora, evt, settings.m_pProducer, instanceLabel, pfoVector, idToHitMap, outputSlices, outputParticlesToSlices, outputSlicesToHits);
 
     if (settings.m_shouldRunStitching)
         LArPandoraOutput::BuildT0s(evt, settings.m_pProducer, instanceLabel, pfoVector, outputT0s, outputParticlesToT0s);
@@ -111,7 +113,6 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputClusters), instanceLabel);
     evt.put(std::move(outputVertices), instanceLabel);
     evt.put(std::move(outputParticleMetadata), instanceLabel);
-    evt.put(std::move(outputSlices), instanceLabel);
 
     evt.put(std::move(outputParticlesToMetadata), instanceLabel);
     evt.put(std::move(outputParticlesToSpacePoints), instanceLabel);
@@ -120,12 +121,17 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputParticlesToSlices), instanceLabel);
     evt.put(std::move(outputSpacePointsToHits), instanceLabel);
     evt.put(std::move(outputClustersToHits), instanceLabel);
-    evt.put(std::move(outputSlicesToHits), instanceLabel);
 
     if (settings.m_shouldRunStitching)
     {
         evt.put(std::move(outputT0s), instanceLabel);
         evt.put(std::move(outputParticlesToT0s), instanceLabel);
+    }
+
+    if (settings.m_shouldProduceSlices)
+    {
+        evt.put(std::move(outputSlices), instanceLabel);
+        evt.put(std::move(outputSlicesToHits), instanceLabel);
     }
 }
 
