@@ -101,7 +101,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< art::Assns<recob::PFParticle, recob::SpacePoint> >(instanceName);
             produces< art::Assns<recob::PFParticle, recob::Cluster> >(instanceName);
             produces< art::Assns<recob::PFParticle, recob::Vertex> >(instanceName);
-            produces< art::Assns<recob::PFParticle, recob::Slice> >(instanceName);
             produces< art::Assns<recob::SpacePoint, recob::Hit> >(instanceName);
             produces< art::Assns<recob::Cluster, recob::Hit> >(instanceName);
 
@@ -115,6 +114,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             {
                 produces< std::vector<recob::Slice> >(instanceName);
                 produces< art::Assns<recob::Slice, recob::Hit> >(instanceName);
+                produces< art::Assns<recob::PFParticle, recob::Slice> >(instanceName);
             }
         }
     }
