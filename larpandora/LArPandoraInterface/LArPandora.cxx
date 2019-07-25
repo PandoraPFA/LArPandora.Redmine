@@ -78,6 +78,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_inputSettings.m_recombination_factor = pset.get<double>("RecombinationFactor", 0.63);
     m_outputSettings.m_pProducer = this;
     m_outputSettings.m_shouldRunStitching = m_shouldRunStitching;
+    m_outputSettings.m_shouldProduceSlices = pset.get<bool>("ShouldProduceSlices", true);
     m_outputSettings.m_isNeutrinoRecoOnlyNoSlicing = (!m_shouldRunSlicing && m_shouldRunNeutrinoRecoOption && !m_shouldRunCosmicRecoOption);
     m_outputSettings.m_hitfinderModuleLabel = m_hitfinderModuleLabel;
 
@@ -95,7 +96,6 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< std::vector<recob::Cluster> >(instanceName);
             produces< std::vector<recob::Vertex> >(instanceName);
             produces< std::vector<larpandoraobj::PFParticleMetadata> >(instanceName);
-            produces< std::vector<recob::Slice> >(instanceName);
 
             produces< art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> >(instanceName);
             produces< art::Assns<recob::PFParticle, recob::SpacePoint> >(instanceName);
@@ -104,12 +104,17 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< art::Assns<recob::PFParticle, recob::Slice> >(instanceName);
             produces< art::Assns<recob::SpacePoint, recob::Hit> >(instanceName);
             produces< art::Assns<recob::Cluster, recob::Hit> >(instanceName);
-            produces< art::Assns<recob::Slice, recob::Hit> >(instanceName);
 
             if (m_outputSettings.m_shouldRunStitching)
             {
                 produces< std::vector<anab::T0> >(instanceName);
                 produces< art::Assns<recob::PFParticle, anab::T0> >(instanceName);
+            }
+
+            if (m_outputSettings.m_shouldProduceSlices)
+            {
+                produces< std::vector<recob::Slice> >(instanceName);
+                produces< art::Assns<recob::Slice, recob::Hit> >(instanceName);
             }
         }
     }

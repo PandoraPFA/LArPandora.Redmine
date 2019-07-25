@@ -52,7 +52,7 @@ void LArPandoraInput::CreatePandoraHits2D(const Settings &settings, const LArDri
     const bool isDualPhase(theGeometry->MaxPlanes() == 2);
 
     // Loop over ART hits
-    int hitCounter(0);
+    int hitCounter(settings.m_hitCounterOffset);
 
     lar_content::LArCaloHitFactory caloHitFactory;
 
@@ -776,6 +776,7 @@ LArPandoraInput::Settings::Settings() :
     m_useHitWidths(true),
     m_useBirksCorrection(false),
     m_uidOffset(100000000),
+    m_hitCounterOffset(0),
     m_dx_cm(0.5),
     m_int_cm(84.),
     m_rad_cm(14.),
