@@ -8,6 +8,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include <string>

@@ -10,6 +10,7 @@
 
 #include "TTree.h"
 
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
 #include <string>
