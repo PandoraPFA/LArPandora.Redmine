@@ -182,9 +182,17 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
         // Call pandora "fast" shower fitter
         try
         {
-            // Ensure successful creation of all structures before placing results in output containers
-            const lar_content::LArShowerPCA larShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, vertexPosition));
-            const recob::Shower shower(LArPandoraShowerCreation::BuildShower(showerCounter++, larShowerPCA, vertexPosition));
+            // Access centroid of shower via this method
+            const lar_content::LArShowerPCA initialLArShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, vertexPosition));
+
+            // Project the PFParticle vertex onto the PCA axis
+            const pandora::CartesianVector centroid(initialLArShowerPCA.GetCentroid());
+            const pandora::CartesianVector primaryAxis(initialLArShowerPCA.GetPrimaryAxis());
+            const pandora::CartesianVector projectedVertexPosition(centroid - primaryAxis.GetUnitVector() * (centroid - vertexPosition).GetDotProduct(primaryAxis));
+
+            // Ensure successful creation of all structures before placing results in output containers, remaking LArShowerPCA with updated vertex
+            const lar_content::LArShowerPCA larShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, projectedVertexPosition));
+            const recob::Shower shower(LArPandoraShowerCreation::BuildShower(showerCounter++, larShowerPCA, projectedVertexPosition));
             const recob::PCAxis pcAxis(LArPandoraShowerCreation::BuildPCAxis(larShowerPCA));
             outputShowers->emplace_back(shower);
             outputPCAxes->emplace_back(pcAxis);
