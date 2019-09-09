@@ -185,13 +185,21 @@ void LArPandoraShowerCreation::produce(art::Event &evt)
             // Access centroid of shower via this method
             const lar_content::LArShowerPCA initialLArShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, vertexPosition));
 
+            // Ensure successful creation of all structures before placing results in output containers, remaking LArShowerPCA with updated vertex
+            const pandora::CartesianVector &centroid(initialLArShowerPCA.GetCentroid());
+            const pandora::CartesianVector &primaryAxis(initialLArShowerPCA.GetPrimaryAxis());
+            const pandora::CartesianVector &secondaryAxis(initialLArShowerPCA.GetSecondaryAxis());
+            const pandora::CartesianVector &tertiaryAxis(initialLArShowerPCA.GetTertiaryAxis());
+            const pandora::CartesianVector &eigenvalues(initialLArShowerPCA.GetEigenValues());
+
             // Project the PFParticle vertex onto the PCA axis
-            const pandora::CartesianVector centroid(initialLArShowerPCA.GetCentroid());
-            const pandora::CartesianVector primaryAxis(initialLArShowerPCA.GetPrimaryAxis());
             const pandora::CartesianVector projectedVertexPosition(centroid - primaryAxis.GetUnitVector() * (centroid - vertexPosition).GetDotProduct(primaryAxis));
 
-            // Ensure successful creation of all structures before placing results in output containers, remaking LArShowerPCA with updated vertex
-            const lar_content::LArShowerPCA larShowerPCA(lar_content::LArPfoHelper::GetPrincipalComponents(cartesianPointVector, projectedVertexPosition));
+            // By convention, principal axis should always point away from vertex
+            const float testProjection(primaryAxis.GetDotProduct(projectedVertexPosition - centroid));
+            const float directionScaleFactor((testProjection > std::numeric_limits<float>::epsilon()) ? -1.f : 1.f);
+
+            const lar_content::LArShowerPCA larShowerPCA(centroid, primaryAxis * directionScaleFactor, secondaryAxis * directionScaleFactor, tertiaryAxis * directionScaleFactor, eigenvalues);
             const recob::Shower shower(LArPandoraShowerCreation::BuildShower(showerCounter++, larShowerPCA, projectedVertexPosition));
             const recob::PCAxis pcAxis(LArPandoraShowerCreation::BuildPCAxis(larShowerPCA));
             outputShowers->emplace_back(shower);
