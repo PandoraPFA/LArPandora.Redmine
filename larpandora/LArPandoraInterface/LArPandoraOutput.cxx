@@ -51,10 +51,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 {
     settings.Validate();
     const std::string instanceLabel(settings.m_shouldProduceAllOutcomes ? settings.m_allOutcomesInstanceLabel : "");
+    const std::string testBeamInteractionVertexInstanceLabel("TestBeamInteractionVertices");
 
     // Set up the output collections
     PFParticleCollection            outputParticles( new std::vector<recob::PFParticle> );
     VertexCollection                outputVertices( new std::vector<recob::Vertex> );
+    VertexCollection                outputTestBeamInteractionVertices( new std::vector<recob::Vertex> );
     ClusterCollection               outputClusters( new std::vector<recob::Cluster> );
     SpacePointCollection            outputSpacePoints( new std::vector<recob::SpacePoint> );
     T0Collection                    outputT0s( new std::vector<anab::T0> );
@@ -66,6 +68,7 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     PFParticleToSpacePointCollection  outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
     PFParticleToClusterCollection     outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
     PFParticleToVertexCollection      outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
+    PFParticleToVertexCollection      outputParticlesToTestBeamInteractionVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
     PFParticleToT0Collection          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
     PFParticleToSliceCollection       outputParticlesToSlices( new art::Assns<recob::PFParticle, recob::Slice> );
     ClusterToHitCollection            outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
@@ -77,8 +80,10 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
         LArPandoraOutput::CollectAllPfoOutcomes(settings.m_pPrimaryPandora) :
         LArPandoraOutput::CollectPfos(settings.m_pPrimaryPandora));
 
-    IdToIdVectorMap pfoToVerticesMap;
-    const pandora::VertexVector vertexVector(LArPandoraOutput::CollectVertices(pfoVector, pfoToVerticesMap));
+    IdToIdVectorMap pfoToVerticesMap, pfoToTestBeamInteractionVerticesMap;
+    const pandora::VertexVector vertexVector(LArPandoraOutput::CollectVertices(pfoVector, pfoToVerticesMap, lar_content::LArPfoHelper::GetVertex));
+    const pandora::VertexVector testBeamInteractionVertexVector(true ? LArPandoraOutput::CollectVertices(pfoVector, pfoToTestBeamInteractionVerticesMap,
+        lar_content::LArPfoHelper::GetTestBeamInteractionVertex) : pandora::VertexVector());
 
     IdToIdVectorMap pfoToClustersMap;
     const pandora::ClusterList clusterList(LArPandoraOutput::CollectClusters(pfoVector, pfoToClustersMap));
@@ -92,12 +97,19 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 
     // Build the ART outputs from the pandora objects
     LArPandoraOutput::BuildVertices(vertexVector, outputVertices);
+
+    if (true)
+        LArPandoraOutput::BuildVertices(testBeamInteractionVertexVector, outputTestBeamInteractionVertices);
+
     LArPandoraOutput::BuildSpacePoints(evt, settings.m_pProducer, instanceLabel, threeDHitList, pandoraHitToArtHitMap, outputSpacePoints, outputSpacePointsToHits);
 
     IdToIdVectorMap pfoToArtClustersMap;
     LArPandoraOutput::BuildClusters(evt, settings.m_pProducer, instanceLabel, clusterList, pandoraHitToArtHitMap, pfoToClustersMap, outputClusters, outputClustersToHits, pfoToArtClustersMap);
 
     LArPandoraOutput::BuildPFParticles(evt, settings.m_pProducer, instanceLabel, pfoVector, pfoToVerticesMap, pfoToThreeDHitsMap, pfoToArtClustersMap, outputParticles, outputParticlesToVertices, outputParticlesToSpacePoints, outputParticlesToClusters);
+
+    if (true)
+        LArPandoraOutput::AssociateAdditionalVertices(evt, settings.m_pProducer, instanceLabel, pfoVector, pfoToTestBeamInteractionVerticesMap, outputParticlesToTestBeamInteractionVertices);
 
     LArPandoraOutput::BuildParticleMetadata(evt, settings.m_pProducer, instanceLabel, pfoVector, outputParticleMetadata, outputParticlesToMetadata);
 
@@ -121,6 +133,12 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
     evt.put(std::move(outputParticlesToSlices), instanceLabel);
     evt.put(std::move(outputSpacePointsToHits), instanceLabel);
     evt.put(std::move(outputClustersToHits), instanceLabel);
+
+    if (true)
+    {
+        evt.put(std::move(outputTestBeamInteractionVertices), testBeamInteractionVertexInstanceLabel);
+        evt.put(std::move(outputParticlesToTestBeamInteractionVertices), testBeamInteractionVertexInstanceLabel);
+    }
 
     if (settings.m_shouldRunStitching)
     {
@@ -297,7 +315,7 @@ void LArPandoraOutput::CollectPfos(const pandora::PfoList &parentPfoList, pandor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::VertexVector LArPandoraOutput::CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap)
+pandora::VertexVector LArPandoraOutput::CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap, std::function<const pandora::Vertex *const(const pandora::ParticleFlowObject *const)> fCriteria)
 {
     pandora::VertexVector vertexVector;
 
@@ -308,7 +326,7 @@ pandora::VertexVector LArPandoraOutput::CollectVertices(const pandora::PfoVector
         if (pPfo->GetVertexList().empty())
             continue;
 
-        const pandora::Vertex *const pVertex(lar_content::LArPfoHelper::GetVertex(pPfo));
+        const pandora::Vertex *const pVertex(fCriteria(pPfo));
 
         // Get the vertex ID and add it to the vertex list if required
         const auto it(std::find(vertexVector.begin(), vertexVector.end(), pVertex));
@@ -555,6 +573,18 @@ void LArPandoraOutput::BuildPFParticles(const art::Event &event, const art::EDPr
 
         if (pfoToArtClustersMap.find(pfoId) != pfoToArtClustersMap.end())
             LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToArtClustersMap, outputParticlesToClusters);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void LArPandoraOutput::AssociateAdditionalVertices(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector,
+    const IdToIdVectorMap &pfoToVerticesMap, PFParticleToVertexCollection &outputParticlesToVertices)
+{
+    for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
+    {
+        if (pfoToVerticesMap.find(pfoId) != pfoToVerticesMap.end())
+            LArPandoraOutput::AddAssociation(event, pProducer, instanceLabel, pfoId, pfoToVerticesMap, outputParticlesToVertices);
     }
 }
 
