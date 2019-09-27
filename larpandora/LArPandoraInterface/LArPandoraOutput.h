@@ -168,10 +168,11 @@ public:
      *
      *  @param  pfoVector the input list of pfos
      *  @param  pfoToVerticesMap the output mapping from pfo ID to vertex IDs (zero or one)
+     *  @param  fCriteria function to extract vertex from pfo
      *
      *  @return the list of vertices collected
      */
-    static pandora::VertexVector CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap);
+    static pandora::VertexVector CollectVertices(const pandora::PfoVector &pfoVector, IdToIdVectorMap &pfoToVerticesMap, std::function<const pandora::Vertex *const(const pandora::ParticleFlowObject *const)> fCriteria);
 
     /**
      *  @brief  Collect a sorted list of all 2D clusters contained in the input pfo list
@@ -305,6 +306,19 @@ public:
         const IdToIdVectorMap &pfoToArtClustersMap, PFParticleCollection &outputParticles,
         PFParticleToVertexCollection &outputParticlesToVertices, PFParticleToSpacePointCollection &outputParticlesToSpacePoints,
         PFParticleToClusterCollection &outputParticlesToClusters);
+
+    /**
+     *  @brief  Convert Create the associations between pre-existing PFParticle and additional vertices
+     *
+     *  @param  event the art event
+     *  @param  pProducer the address of the producer module
+     *  @param  instanceLabel instance label
+     *  @param  pfoVector the input list of pfos to convert
+     *  @param  pfoToVerticesMap the input mapping from pfo ID to vertex IDs
+     *  @param  outputParticlesToVertices the output associations between PFParticles and vertices
+     */
+    static void AssociateAdditionalVertices(const art::Event &event, const art::EDProducer *const pProducer, const std::string &instanceLabel, const pandora::PfoVector &pfoVector,
+        const IdToIdVectorMap &pfoToVerticesMap, PFParticleToVertexCollection &outputParticlesToVertices);
 
     /**
      *  @brief  Build metadata objects from a list of input pfos
