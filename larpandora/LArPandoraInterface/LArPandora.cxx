@@ -79,6 +79,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_pProducer = this;
     m_outputSettings.m_shouldRunStitching = m_shouldRunStitching;
     m_outputSettings.m_shouldProduceSlices = pset.get<bool>("ShouldProduceSlices", true);
+    m_outputSettings.m_shouldProduceTestBeamInteractionVertices = pset.get<bool>("ShouldProduceTestBeamInteractionVertices", false);
     m_outputSettings.m_isNeutrinoRecoOnlyNoSlicing = (!m_shouldRunSlicing && m_shouldRunNeutrinoRecoOption && !m_shouldRunCosmicRecoOption);
     m_outputSettings.m_hitfinderModuleLabel = m_hitfinderModuleLabel;
 
@@ -104,7 +105,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< art::Assns<recob::SpacePoint, recob::Hit> >(instanceName);
             produces< art::Assns<recob::Cluster, recob::Hit> >(instanceName);
 
-            if (true)
+            if (m_outputSettings.m_shouldProduceTestBeamInteractionVertices)
             {
                 const std::string testBeamInteractionVertexInstanceLabel("TestBeamInteractionVertices");
                 produces< std::vector<recob::Vertex> >(testBeamInteractionVertexInstanceLabel);
