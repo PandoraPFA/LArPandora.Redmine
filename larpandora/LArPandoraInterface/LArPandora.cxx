@@ -104,6 +104,13 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
             produces< art::Assns<recob::SpacePoint, recob::Hit> >(instanceName);
             produces< art::Assns<recob::Cluster, recob::Hit> >(instanceName);
 
+            if (true)
+            {
+                const std::string testBeamInteractionVertexInstanceLabel("TestBeamInteractionVertices");
+                produces< std::vector<recob::Vertex> >(testBeamInteractionVertexInstanceLabel);
+                produces< art::Assns<recob::PFParticle, recob::Vertex> >(testBeamInteractionVertexInstanceLabel);
+            }
+
             if (m_outputSettings.m_shouldRunStitching)
             {
                 produces< std::vector<anab::T0> >(instanceName);
