@@ -80,6 +80,7 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
     m_outputSettings.m_shouldRunStitching = m_shouldRunStitching;
     m_outputSettings.m_shouldProduceSlices = pset.get<bool>("ShouldProduceSlices", true);
     m_outputSettings.m_shouldProduceTestBeamInteractionVertices = pset.get<bool>("ShouldProduceTestBeamInteractionVertices", false);
+    m_outputSettings.m_testBeamInteractionVerticesInstanceLabel = pset.get<std::string>("TestBeamInteractionVerticesInstanceLabel", "testBeamInteractionVertices");
     m_outputSettings.m_isNeutrinoRecoOnlyNoSlicing = (!m_shouldRunSlicing && m_shouldRunNeutrinoRecoOption && !m_shouldRunCosmicRecoOption);
     m_outputSettings.m_hitfinderModuleLabel = m_hitfinderModuleLabel;
 
@@ -107,9 +108,9 @@ LArPandora::LArPandora(fhicl::ParameterSet const &pset) :
 
             if (m_outputSettings.m_shouldProduceTestBeamInteractionVertices)
             {
-                const std::string testBeamInteractionVertexInstanceLabel("TestBeamInteractionVertices");
-                produces< std::vector<recob::Vertex> >(testBeamInteractionVertexInstanceLabel);
-                produces< art::Assns<recob::PFParticle, recob::Vertex> >(testBeamInteractionVertexInstanceLabel);
+                // ATTN: Test beam interaction vertex instance label appended to current instance name to preserve unique label in multiple instance case
+                produces< std::vector<recob::Vertex> >(instanceName + m_outputSettings.m_testBeamInteractionVerticesInstanceLabel);
+                produces< art::Assns<recob::PFParticle, recob::Vertex> >(instanceName + m_outputSettings.m_testBeamInteractionVerticesInstanceLabel);
             }
 
             if (m_outputSettings.m_shouldRunStitching)

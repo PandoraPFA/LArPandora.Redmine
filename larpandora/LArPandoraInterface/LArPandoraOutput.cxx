@@ -51,29 +51,33 @@ void LArPandoraOutput::ProduceArtOutput(const Settings &settings, const IdToHitM
 {
     settings.Validate();
     const std::string instanceLabel(settings.m_shouldProduceAllOutcomes ? settings.m_allOutcomesInstanceLabel : "");
-    const std::string testBeamInteractionVertexInstanceLabel(instanceLabel + "TestBeamInteractionVertices");
+    const std::string testBeamInteractionVertexInstanceLabel(instanceLabel + settings.m_testBeamInteractionVerticesInstanceLabel);
 
-    // Set up the output collections
+    // Set up mandatory output collections
     PFParticleCollection            outputParticles( new std::vector<recob::PFParticle> );
     VertexCollection                outputVertices( new std::vector<recob::Vertex> );
-    VertexCollection                outputTestBeamInteractionVertices( new std::vector<recob::Vertex> );
     ClusterCollection               outputClusters( new std::vector<recob::Cluster> );
     SpacePointCollection            outputSpacePoints( new std::vector<recob::SpacePoint> );
-    T0Collection                    outputT0s( new std::vector<anab::T0> );
     PFParticleMetadataCollection    outputParticleMetadata( new std::vector<larpandoraobj::PFParticleMetadata> );
-    SliceCollection                 outputSlices( new std::vector<recob::Slice> );
 
-    // Set up the output associations
+    // Set up optional output collections
+    VertexCollection                outputTestBeamInteractionVertices(settings.m_shouldProduceTestBeamInteractionVertices ? new std::vector<recob::Vertex> : nullptr);
+    T0Collection                    outputT0s(settings.m_shouldRunStitching ? new std::vector<anab::T0> : nullptr);
+    SliceCollection                 outputSlices(settings.m_shouldProduceSlices ? new std::vector<recob::Slice> : nullptr);
+
+    // Set up mandatory output associations
     PFParticleToMetadataCollection    outputParticlesToMetadata( new art::Assns<recob::PFParticle, larpandoraobj::PFParticleMetadata> );
     PFParticleToSpacePointCollection  outputParticlesToSpacePoints( new art::Assns<recob::PFParticle, recob::SpacePoint> );
     PFParticleToClusterCollection     outputParticlesToClusters( new art::Assns<recob::PFParticle, recob::Cluster> );
     PFParticleToVertexCollection      outputParticlesToVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
-    PFParticleToVertexCollection      outputParticlesToTestBeamInteractionVertices( new art::Assns<recob::PFParticle, recob::Vertex> );
-    PFParticleToT0Collection          outputParticlesToT0s( new art::Assns<recob::PFParticle, anab::T0> );
-    PFParticleToSliceCollection       outputParticlesToSlices( new art::Assns<recob::PFParticle, recob::Slice> );
     ClusterToHitCollection            outputClustersToHits( new art::Assns<recob::Cluster, recob::Hit> );
     SpacePointToHitCollection         outputSpacePointsToHits( new art::Assns<recob::SpacePoint, recob::Hit> );
     SliceToHitCollection              outputSlicesToHits( new art::Assns<recob::Slice, recob::Hit> );
+
+    // Set up optional output associations
+    PFParticleToVertexCollection      outputParticlesToTestBeamInteractionVertices(settings.m_shouldProduceTestBeamInteractionVertices ? new art::Assns<recob::PFParticle, recob::Vertex> : nullptr);
+    PFParticleToT0Collection          outputParticlesToT0s(settings.m_shouldRunStitching ? new art::Assns<recob::PFParticle, anab::T0> : nullptr);
+    PFParticleToSliceCollection       outputParticlesToSlices(settings.m_shouldProduceSlices ? new art::Assns<recob::PFParticle, recob::Slice> : nullptr);
 
     // Collect immutable lists of pandora collections that we should convert to ART format
     const pandora::PfoVector pfoVector(settings.m_shouldProduceAllOutcomes ?
@@ -357,7 +361,7 @@ pandora::ClusterList LArPandoraOutput::CollectClusters(const pandora::PfoVector 
     pandora::ClusterList clusterList;
 
     for (unsigned int pfoId = 0; pfoId < pfoVector.size(); ++pfoId)
-     {
+    {
         const pandora::ParticleFlowObject *const pPfo(pfoVector.at(pfoId));
 
         // Get the sorted list of clusters from the pfo
