@@ -1,14 +1,14 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	larpandora	v08_07_18
+parent	larpandora	v08_07_19
 defaultqual	e17
 #
 fcldir  product_dir job
 fwdir   product_dir scripts
 #
 product         version
-larreco         v08_18_04
-larpandoracontent v03_15_05
+larreco         v08_19_00
+larpandoracontent v03_15_06
 
 cetbuildtools	v7_13_02	-	only_for_build
 end_product_list
