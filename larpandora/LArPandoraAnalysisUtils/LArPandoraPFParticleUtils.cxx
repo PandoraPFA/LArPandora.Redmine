@@ -16,6 +16,7 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/AnalysisBase/T0.h"
 
 namespace lar_pandora
@@ -172,6 +173,19 @@ namespace lar_pandora
         }
         return theseShowers.at(0);
 
+    }
+
+    const art::Ptr<larpandoraobj::PFParticleMetadata> LArPandoraPFParticleUtils::GetMetadata(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label)
+    {
+        std::vector<art::Ptr<larpandoraobj::PFParticleMetadata>> theseMetadata;
+        GetAssocProductVector(part,evt,label,label,theseMetadata);
+
+        if (theseMetadata.size() == 0)
+        {
+          mf::LogError("LArPandora") << "No associated metadata found... exiting." << std::endl;
+          assert(0);
+        }
+        return theseMetadata.at(0);
     }
 
     bool LArPandoraPFParticleUtils::IsTrack(const art::Ptr<recob::PFParticle> particle)
