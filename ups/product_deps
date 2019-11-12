@@ -10,7 +10,7 @@ product         version
 larreco         v08_22_01
 larpandoracontent v03_15_08
 
-cetbuildtools	v7_13_02	-	only_for_build
+cetbuildtools	v7_14_00	-	only_for_build
 end_product_list
 
   
