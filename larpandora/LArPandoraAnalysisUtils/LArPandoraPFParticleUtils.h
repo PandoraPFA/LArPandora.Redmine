@@ -68,6 +68,8 @@ public:
 
     static bool IsShower(const art::Ptr<recob::PFParticle> particle);
 
+    static bool IsNeutrino(const art::Ptr<recob::PFParticle particle);
+
 private:
 
 //    template <typename T> static void GetAssocProductVector(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);

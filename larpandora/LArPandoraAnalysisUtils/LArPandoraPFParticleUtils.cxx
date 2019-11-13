@@ -14,6 +14,7 @@
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -62,9 +63,17 @@ namespace lar_pandora
 
     const std::vector<art::Ptr<recob::Hit>> LArPandoraPFParticleUtils::GetHits(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label)
     {    
+        // There isn't a direct association between PFParticles and hits, so we go via clusters
+        std::vector<art::Ptr<recob::Cluster>> theseClusters;
+        GetAssocProductVector(part,evt,label,label,theseClusters);
 
         std::vector<art::Ptr<recob::Hit>> theseHits;
-        GetAssocProductVector(part,evt,label,label,theseHits);
+        for (const art::Ptr<recob::Cluster> cluster : theseClusters)
+        {
+          std::vector<art::Ptr<recob::Hit>> tempHits;
+          GetAssocProductVector(cluster,evt,label,label,tempHits);
+          theseHits.insert(theseHits.end(),tempHits.begin(),tempHits.end());
+        }
         return theseHits;
     }
 
@@ -78,9 +87,9 @@ namespace lar_pandora
 
     const art::Ptr<recob::Track> LArPandoraPFParticleUtils::GetTrack(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel)
     {
-
         std::vector<art::Ptr<recob::Track>> theseTracks;
         GetAssocProductVector(part,evt,particleLabel,trackLabel,theseTracks);
+
         if (theseTracks.size() == 0)
         {
             throw cet::exception("LArPandora") << "LArPandoraPFParticleUtils::GetTrack --- No associated track found";
@@ -116,12 +125,31 @@ namespace lar_pandora
 
     bool LArPandoraPFParticleUtils::IsTrack(const art::Ptr<recob::PFParticle> particle)
     {
-        return LArPandoraHelper::IsTrack(particle);
+        // This function needs to fail if GetTrack would fail
+        std::vector<art::Ptr<recob::Track>> theseTracks;
+        GetAssocProductVector(part,evt,particleLabel,trackLabel,theseTracks);
+        if (theseTracks.size() == 0)
+        {
+            return false;
+        }
+        else return true;
     }
 
     bool LArPandoraPFParticleUtils::IsShower(const art::Ptr<recob::PFParticle> particle)
     {
-        return LArPandoraHelper::IsShower(particle);
+        std::vector<art::Ptr<recob::Shower>> theseShowers;
+        GetAssocProductVector(part,evt,particleLabel,showerLabel,theseShowers);
+
+        if (theseShowers.size() == 0)
+        {
+            return false;
+        }
+        else return true;
+    }
+
+    bool LArPandoraPFParticleUtils::IsNeutrino(const art::Ptr<recob::PFParticle> particle)
+    {
+        return LArPandoraHelper::IsNeutrino(particle);
     }
 
 
