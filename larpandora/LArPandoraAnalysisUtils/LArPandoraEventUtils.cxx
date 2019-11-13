@@ -54,4 +54,15 @@ namespace lar_pandora
      
         return theseShowers;
     }
+
+    const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraEventUtils::GetSpacePoints(art::Event const &evt, const std::string &label)
+    {
+
+        std::vector<art::Ptr<recob::SpacePoint>> theseSpacePoints;
+        GetProductVector(evt,label,theseSpacePoints);
+
+        return theseSpacePoints;
+    }
+
 } // namespace lar_pandora
+
