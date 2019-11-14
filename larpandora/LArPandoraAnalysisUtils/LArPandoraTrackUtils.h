@@ -34,11 +34,11 @@ class LArPandoraTrackUtils:LArPandoraUtilsBase
 
 public:
 
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Track> track, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Track> &track, art::Event const &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::Track> track, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::Track> &track, art::Event const &evt, const std::string &label);
 
-    static const art::Ptr<recob::PFParticle> GetParticle(const art::Ptr<recob::Track> track, art::Event const &evt, const std::string &label);
+    static const art::Ptr<recob::PFParticle> GetParticle(const art::Ptr<recob::Track> &track, art::Event const &evt, const std::string &label);
 
 private:
 

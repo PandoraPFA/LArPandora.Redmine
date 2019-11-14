@@ -41,7 +41,7 @@ public:
     * @param evt is the underlying art event
     * @param label is the label for the PFParticle producer
     */ 
-    static const std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
     /**
     * @brief Get the Cosmic Tag(s) associated with the particle.
@@ -50,29 +50,31 @@ public:
     * @param evt is the underlying art event
     * @param label is the label for the PFParticle producer
     */
-    static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::PFParticle>> GetDaughterParticles(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::PFParticle>> GetDaughterParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
-    static const art::Ptr<recob::Track> GetTrack(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
+    static const art::Ptr<recob::Track> GetTrack(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
 
-    static const art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
+    static const art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
 
-    static const art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel);
+    static const art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel);
 
-    static const art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
+    static const art::Ptr<recob::Slice> GetSlice(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel);
 
-    static bool IsTrack(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
+    static const art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
-    static bool IsShower(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
+    static bool IsTrack(const art::Ptr<recob::PFParticle> &particle, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
 
-    static bool IsClearCosmic(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel);
+    static bool IsShower(const art::Ptr<recob::PFParticle> &particle, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
 
-    static bool IsNeutrino(const art::Ptr<recob::PFParticle> particle);
+    static bool IsClearCosmic(const art::Ptr<recob::PFParticle> &particle, art::Event const &evt, const std::string &particleLabel);
+
+    static bool IsNeutrino(const art::Ptr<recob::PFParticle> &particle);
 
 private:
 

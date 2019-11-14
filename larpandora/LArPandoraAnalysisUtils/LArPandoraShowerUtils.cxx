@@ -20,7 +20,7 @@
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::Hit>> LArPandoraShowerUtils::GetHits(const art::Ptr<recob::Shower> shower, art::Event const &evt, const std::string &label)
+    const std::vector<art::Ptr<recob::Hit>> LArPandoraShowerUtils::GetHits(const art::Ptr<recob::Shower> &shower, art::Event const &evt, const std::string &label)
     {    
 
         std::vector<art::Ptr<recob::Hit>> theseHits;
@@ -28,7 +28,7 @@ namespace lar_pandora
         return theseHits;
     }
 
-    const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraShowerUtils::GetSpacePoints(const art::Ptr<recob::Shower> shower, art::Event const &evt, const std::string &label)
+    const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraShowerUtils::GetSpacePoints(const art::Ptr<recob::Shower> &shower, art::Event const &evt, const std::string &label)
     {
 
         std::vector<art::Ptr<recob::SpacePoint>> theseSPs;
@@ -36,7 +36,7 @@ namespace lar_pandora
         return theseSPs;
     }
 
-    const art::Ptr<recob::PFParticle> LArPandoraShowerUtils::GetParticle(const art::Ptr<recob::Shower> shower, art::Event const &evt, const std::string &label)
+    const art::Ptr<recob::PFParticle> LArPandoraShowerUtils::GetParticle(const art::Ptr<recob::Shower> &shower, art::Event const &evt, const std::string &label)
     {
 
         std::vector<art::Ptr<recob::PFParticle>> theseParticles;

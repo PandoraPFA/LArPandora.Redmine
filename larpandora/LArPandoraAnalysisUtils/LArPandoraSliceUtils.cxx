@@ -20,7 +20,7 @@
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::Hit>> LArPandoraSliceUtils::GetHits(const art::Ptr<recob::Slice> slice, art::Event const &evt, const std::string &label)
+    const std::vector<art::Ptr<recob::Hit>> LArPandoraSliceUtils::GetHits(const art::Ptr<recob::Slice> &slice, art::Event const &evt, const std::string &label)
     {    
 
         std::vector<art::Ptr<recob::Hit>> theseHits;

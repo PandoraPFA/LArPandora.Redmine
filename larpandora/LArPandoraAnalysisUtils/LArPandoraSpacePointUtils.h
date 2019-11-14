@@ -34,7 +34,7 @@ class LArPandoraSpacePointUtils:LArPandoraUtilsBase
 
 public:
 
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::SpacePoint> spacepoint, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::SpacePoint> &spacepoint, art::Event const &evt, const std::string &label);
 
 private:
 
