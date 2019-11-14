@@ -17,6 +17,7 @@
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/PFParticleMetadata.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -111,6 +112,19 @@ namespace lar_pandora
 
     }
 
+    const art::Ptr<recob::Vertex> LArPandoraPFParticleUtils::GetVertex(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel)
+    {
+
+        std::vector<art::Ptr<recob::Vertex>> theseVertices;
+        GetAssocProductVector(part,evt,particleLabel,particleLabel,theseVertices);
+
+        if (theseVertices.size() == 0)
+        {
+            throw cet::exception("LArPandora") << "LArPandoraPFParticleUtils::GetVertex --- No associated vertex found";
+        }
+        return theseVertices.at(0);
+    }
+
     const art::Ptr<larpandoraobj::PFParticleMetadata> LArPandoraPFParticleUtils::GetMetadata(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label)
     {
         std::vector<art::Ptr<larpandoraobj::PFParticleMetadata>> theseMetadata;
@@ -123,7 +137,7 @@ namespace lar_pandora
         return theseMetadata.at(0);
     }
 
-    bool LArPandoraPFParticleUtils::IsTrack(const art::Ptr<recob::PFParticle> particle)
+    bool LArPandoraPFParticleUtils::IsTrack(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel)
     {
         // This function needs to fail if GetTrack would fail
         std::vector<art::Ptr<recob::Track>> theseTracks;
@@ -135,7 +149,7 @@ namespace lar_pandora
         else return true;
     }
 
-    bool LArPandoraPFParticleUtils::IsShower(const art::Ptr<recob::PFParticle> particle)
+    bool LArPandoraPFParticleUtils::IsShower(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel)
     {
         std::vector<art::Ptr<recob::Shower>> theseShowers;
         GetAssocProductVector(part,evt,particleLabel,showerLabel,theseShowers);

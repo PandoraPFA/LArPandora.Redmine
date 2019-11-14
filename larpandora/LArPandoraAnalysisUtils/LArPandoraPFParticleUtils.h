@@ -62,13 +62,15 @@ public:
 
     static const art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
 
+    static const art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel);
+
     static const art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label);
 
-    static bool IsTrack(const art::Ptr<recob::PFParticle> particle);
+    static bool IsTrack(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
 
-    static bool IsShower(const art::Ptr<recob::PFParticle> particle);
+    static bool IsShower(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
 
-    static bool IsNeutrino(const art::Ptr<recob::PFParticle particle);
+    static bool IsNeutrino(const art::Ptr<recob::PFParticle> particle);
 
 private:
 
