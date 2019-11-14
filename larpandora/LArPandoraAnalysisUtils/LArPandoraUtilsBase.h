@@ -34,7 +34,7 @@ class LArPandoraUtilsBase
 protected:
 
     template <typename T> static void GetProductVector(art::Event const &evt, const std::string &label, std::vector<art::Ptr<T>> &productVector);
-    template <typename T, typename U> static void GetAssocProductVector(const art::Ptr<U> part, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);
+    template <typename T, typename U> static void GetAssocProductVector(const art::Ptr<U> &part, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);
 
 };
 
@@ -63,7 +63,7 @@ protected:
     }
 
     // Implementation of the template function to get the associated products from the event
-    template <typename T, typename U> void LArPandoraUtilsBase::GetAssocProductVector(const art::Ptr<U> prod, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector)
+    template <typename T, typename U> void LArPandoraUtilsBase::GetAssocProductVector(const art::Ptr<U> &prod, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector)
     {
 
         art::Handle<std::vector<U>> products;
