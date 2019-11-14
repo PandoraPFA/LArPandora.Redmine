@@ -78,31 +78,7 @@ public:
 
 private:
 
-//    template <typename T> static void GetAssocProductVector(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);
-
 };
-
-    // Implementation of the template function to get the associated products from the event
-//    template <typename T> void LArPandoraPFParticleUtils::GetAssocProductVector(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector)
-//    {
-//
-//        art::Handle<std::vector<recob::PFParticle>> particles;
-//        evt.getByLabel(label,particles);
-//
-//        if (!particles.isValid())
-//        {
-//            mf::LogError("LArPandora") << " Failed to find PFParticles... returning empty vector" << std::endl;
-//            productVector = std::vector<art::Ptr<T>>();
-//            return;
-//        }
-//
-//        const art::FindManyP<T> findParticleAssocs(particles,evt,assocLabel);
-//
-//        const std::vector<art::Ptr<T>> theseAssocs = findParticleAssocs.at(part.key());
-//
-//        productVector = theseAssocs;
-//    }
-
 
 } // namespace lar_pandora
 

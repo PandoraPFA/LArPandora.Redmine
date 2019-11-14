@@ -125,8 +125,25 @@ void UtilityExample::analyze(const art::Event &evt)
     const art::Ptr<recob::PFParticle> neutrino = LArPandoraEventUtils::GetNeutrino(evt,m_particleLabel);  
     // And its children
     const std::vector<art::Ptr<recob::PFParticle>> neutrinoChildren = LArPandoraPFParticleUtils::GetChildParticles(neutrino,evt,m_particleLabel);
-
     std::cout << "Found the neutrino, and it has pdg code " << neutrino->PdgCode() << " and " << neutrinoChildren.size() << " child particles" << std::endl;
+
+    // Lets see how many of the children are track- or shower-like
+    for (unsigned int c = 0; c < neutrinoChildren.size(); ++c)
+    {
+        if (LArPandoraPFParticleUtils::IsTrack(neutrinoChildren.at(c),evt,m_particleLabel,m_trackLabel))
+        {
+            std::cout << "Child " << c << " is track-like" << std::endl;
+        }
+        else if (LArPandoraPFParticleUtils::IsShower(neutrinoChildren.at(c),evt,m_particleLabel,m_showerLabel))
+        {
+            std::cout << "Child " << c << " is shower-like" << std::endl;
+        }
+        else
+        {
+            std::cout << "Child " << c << " has no track or shower association" << std::endl;   
+        }
+    }
+
   
     // Start by getting the PFParticles
  //   const std::vector<art::Ptr<recob::PFParticle>> recoParticles = LArPandoraEventUtils::GetPFParticles(evt,m_particleLabel);
