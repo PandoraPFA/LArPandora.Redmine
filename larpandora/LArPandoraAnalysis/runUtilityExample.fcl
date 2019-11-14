@@ -7,13 +7,7 @@ source : {
     maxEvents   : -1
 }
 
-source.inputCommands: [
-"keep *",
-"drop *_opdigi_*_*"
-]
-
-services :
-{
+services : {
 }
 
 outputs: {
@@ -27,12 +21,11 @@ physics: {
     util: @local::standard_pandora_utility_example
   }
   filters : {
-     # ParameterSets for zero or more filter modules
   }
- path0 : [  util ]
 
-#here, just a shorthand: could have done ana: [ myana ] then end_paths: [ ana ]
-    end_paths: [ path0 ]
+  path0 : [  util ]
+
+  end_paths: [ path0 ]
 
 }
 

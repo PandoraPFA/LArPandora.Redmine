@@ -144,6 +144,11 @@ void UtilityExample::analyze(const art::Event &evt)
         }
     }
 
+    // Look for the vertex
+    const art::Ptr<recob::Vertex> neutrinoVertex = LArPandoraPFParticleUtils::GetVertex(neutrino,evt,m_particleLabel);
+    std::cout << "Interaction vertex at " << neutrinoVertex->position().X() << ", "
+                                          << neutrinoVertex->position().Y() << ", "
+                                          << neutrinoVertex->position().Z() << std::endl;
   
     // Start by getting the PFParticles
  //   const std::vector<art::Ptr<recob::PFParticle>> recoParticles = LArPandoraEventUtils::GetPFParticles(evt,m_particleLabel);
