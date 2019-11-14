@@ -38,6 +38,8 @@ public:
     
     static const std::vector<art::Ptr<recob::Shower>> GetShowers(art::Event const &evt, const std::string &label);
 
+    static const std::vector<art::Ptr<recob::Vertex>> GetVertices(art::Event const &evt, const std::string &label);
+
     static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(art::Event const &evt, const std::string &label);
 
     static const std::vector<art::Ptr<recob::Slice>> GetSlices(art::Event const &evt, const std::string &label);

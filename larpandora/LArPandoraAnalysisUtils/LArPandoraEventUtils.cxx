@@ -17,6 +17,7 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/RecoBase/Slice.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/PFParticleMetadata.h"
@@ -56,6 +57,15 @@ namespace lar_pandora
         GetProductVector(evt,label,theseShowers);
      
         return theseShowers;
+    }
+
+    const std::vector<art::Ptr<recob::Vertex>> LArPandoraEventUtils::GetVertices(art::Event const &evt, const std::string &label)
+    {
+
+        std::vector<art::Ptr<recob::Vertex>> theseVertices;
+        GetProductVector(evt,label,theseVertices);
+
+        return theseVertices;
     }
 
     const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraEventUtils::GetSpacePoints(art::Event const &evt, const std::string &label)
