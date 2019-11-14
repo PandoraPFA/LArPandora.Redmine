@@ -40,6 +40,15 @@ public:
 
     static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(art::Event const &evt, const std::string &label);
 
+    static const std::vector<art::Ptr<recob::Slice>> GetSlices(art::Event const &evt, const std::string &label);
+
+    static const std::vector<art::Ptr<recob::PFParticle>> GetClearCosmics(art::Event const &evt, const std::string &label);
+
+    static const art::Ptr<recob::PFParticle> GetNeutrino(art::Event const &, const std::string &label);
+
+    static const bool HasNeutrino(art::Event const &evt, const std::string &label);
+    
+
 private:
 
 };
