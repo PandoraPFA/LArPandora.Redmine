@@ -70,6 +70,8 @@ public:
 
     static bool IsShower(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
 
+    static bool IsClearCosmic(const art::Ptr<recob::PFParticle> particle, art::Event const &evt, const std::string &particleLabel);
+
     static bool IsNeutrino(const art::Ptr<recob::PFParticle> particle);
 
 private:

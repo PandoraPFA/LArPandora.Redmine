@@ -161,6 +161,22 @@ namespace lar_pandora
         else return true;
     }
 
+    bool LArPandoraPFParticleUtils::IsClearCosmic(const art::Ptr<recob::PFParticle> part, art::Event const &evt, const std::string &particleLabel)
+    {
+        const art::Ptr<larpandoraobj::PFParticleMetadata> metadata = GetMetadata(part,evt,particleLabel);
+
+        std::map<std::string,float> metaMap = metadata->GetPropertiesMap();
+
+        if (metaMap.find("IsClearCosmic") != metaMap.end())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     bool LArPandoraPFParticleUtils::IsNeutrino(const art::Ptr<recob::PFParticle> particle)
     {
         return LArPandoraHelper::IsNeutrino(particle);
