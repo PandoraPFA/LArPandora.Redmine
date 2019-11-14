@@ -42,7 +42,7 @@ namespace lar_pandora
         return theseTags;
     }
 
-    const std::vector<art::Ptr<recob::PFParticle>> LArPandoraPFParticleUtils::GetDaughterParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label)
+    const std::vector<art::Ptr<recob::PFParticle>> LArPandoraPFParticleUtils::GetChildParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label)
     {
 
         art::Handle<std::vector<recob::PFParticle>> particles;
@@ -50,17 +50,18 @@ namespace lar_pandora
 
         unsigned int thisParticleIndex = part.key();
 
-        std::vector<art::Ptr<recob::PFParticle>> daughters;
+        std::vector<art::Ptr<recob::PFParticle>> children;
 
         for (unsigned int p = 0; p < particles->size(); ++p)
         {     
             if (particles->at(p).Parent() == thisParticleIndex)
             {
                 art::Ptr<recob::PFParticle> pPtr(particles,p);
+                children.push_back(pPtr);
             }
         }
 
-        return daughters;
+        return children;
     }
 
     const std::vector<art::Ptr<recob::Hit>> LArPandoraPFParticleUtils::GetHits(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label)

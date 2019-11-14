@@ -1,0 +1,38 @@
+#include "UtilityExample.fcl"
+
+process_name : pandoraUtilExample
+
+source : {
+    module_type : RootInput
+    maxEvents   : -1
+}
+
+source.inputCommands: [
+"keep *",
+"drop *_opdigi_*_*"
+]
+
+services :
+{
+}
+
+outputs: {
+}
+
+physics: {
+  producers : {
+  }
+
+  analyzers: {
+    util: @local::standard_pandora_utility_example
+  }
+  filters : {
+     # ParameterSets for zero or more filter modules
+  }
+ path0 : [  util ]
+
+#here, just a shorthand: could have done ana: [ myana ] then end_paths: [ ana ]
+    end_paths: [ path0 ]
+
+}
+

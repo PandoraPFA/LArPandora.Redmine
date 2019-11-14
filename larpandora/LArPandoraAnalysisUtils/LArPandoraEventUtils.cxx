@@ -28,7 +28,6 @@ namespace lar_pandora
 
     const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetPFParticles(art::Event const &evt, const std::string &label)
     {
-
         std::vector<art::Ptr<recob::PFParticle>> theseParticles;
         GetProductVector(evt,label,theseParticles);
 
@@ -119,7 +118,8 @@ namespace lar_pandora
         {
             if (LArPandoraPFParticleUtils::IsNeutrino(particle))
             {
-                neutrino = particle;      
+                neutrino = particle;
+                break; 
             }
         }
         return neutrino;

@@ -1,0 +1,14 @@
+BEGIN_PROLOG
+
+# Configuration for the Utility Example module
+
+standard_pandora_utility_example:
+{
+  module_type:        UtilityExample
+  #==================
+  PFParticleLabel: "pandora"
+  TrackLabel     : "pandoraTrack"
+  ShowerLabel    : "pandoraShower"
+}
+
+END_PROLOG

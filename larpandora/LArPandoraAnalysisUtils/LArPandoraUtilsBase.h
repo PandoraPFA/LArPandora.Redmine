@@ -53,13 +53,12 @@ protected:
         }
 
         // We need to convert these to art pointers
-        std::vector<art::Ptr<T>> pointerVersion;
-        for(unsigned int i = 0; theseProds->size(); ++i){
+        productVector.clear();
+        for(unsigned int i = 0; i < theseProds->size(); ++i){
           art::Ptr<T> ptr(theseProds,i);
-          pointerVersion.push_back(ptr);
+          productVector.push_back(ptr);
         }
 
-        productVector = pointerVersion;
     }
 
     // Implementation of the template function to get the associated products from the event

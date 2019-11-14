@@ -1,6 +1,7 @@
+include_directories( $ENV{PANDORA_INC} )
+include_directories( $ENV{LARPANDORACONTENT_INC} )
 
 art_make( 
-
     LIB_LIBRARIES larcorealg_Geometry
     larcore_Geometry_Geometry_service
     larsim_Simulation lardataobj_Simulation
@@ -20,7 +21,6 @@ art_make(
     art_Utilities
     canvas
     ${MF_MESSAGELOGGER}
-
     ${FHICLCPP}
     cetlib cetlib_except
     ${Boost_SYSTEM_LIBRARY}

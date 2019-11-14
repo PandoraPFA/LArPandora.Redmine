@@ -52,7 +52,7 @@ public:
     */
     static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::PFParticle>> GetDaughterParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::PFParticle>> GetChildParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
     static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
