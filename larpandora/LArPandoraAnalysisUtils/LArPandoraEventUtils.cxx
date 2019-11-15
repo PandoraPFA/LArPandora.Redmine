@@ -93,9 +93,15 @@ namespace lar_pandora
 
         std::vector<art::Ptr<recob::PFParticle>> theseCosmics;
 
+        // We only want primary cosmic rays
         for (art::Ptr<recob::PFParticle> particle : theseParticles)
         {
-            if(LArPandoraPFParticleUtils::IsClearCosmic(particle, evt, label))
+            if (!particle->IsPrimary())
+            {
+                continue;
+            } 
+
+            if (LArPandoraPFParticleUtils::IsClearCosmic(particle, evt, label))
             {
                 theseCosmics.push_back(particle);
             }
