@@ -1,7 +1,9 @@
 /**
  *  @file   larpandora/LArPandoraAnalysis/UtilityExample_module.cc
  *
- *  @brief  Analysis module for created particles
+ *  @brief  This module uses the analysis utilities to demonstrate 
+ *          some of their usage. This can be used as a basis for 
+ *          writing analysis code using these tools
  */
 
 #include "art/Framework/Core/ModuleMacros.h"
@@ -12,6 +14,8 @@
 
 #include "larpandora/LArPandoraAnalysisUtils/LArPandoraEventUtils.h"
 #include "larpandora/LArPandoraAnalysisUtils/LArPandoraPFParticleUtils.h"
+#include "larpandora/LArPandoraAnalysisUtils/LArPandoraTrackUtils.h"
+#include "larpandora/LArPandoraAnalysisUtils/LArPandoraShowerUtils.h"
 
 #include <string>
 
@@ -150,9 +154,32 @@ void UtilityExample::analyze(const art::Event &evt)
                                           << neutrinoVertex->position().Y() << ", "
                                           << neutrinoVertex->position().Z() << std::endl;
   
-    // Start by getting the PFParticles
- //   const std::vector<art::Ptr<recob::PFParticle>> recoParticles = LArPandoraEventUtils::GetPFParticles(evt,m_particleLabel);
+    // Let's have a look at all of the particles
+    const std::vector<art::Ptr<recob::PFParticle>> recoParticles = LArPandoraEventUtils::GetPFParticles(evt,m_particleLabel);
 
+    unsigned int nTracks = 0;
+    unsigned int nShowers = 0;
+    unsigned int nHits = 0;
+    for (const art::Ptr<recob::PFParticle> &p : recoParticles)
+    {
+        if (LArPandoraPFParticleUtils::IsTrack(p,evt,m_particleLabel,m_trackLabel))
+        {
+            const art::Ptr<recob::Track> track = LArPandoraPFParticleUtils::GetTrack(p,evt,m_particleLabel,m_trackLabel);
+            nHits += LArPandoraTrackUtils::GetHits(track,evt,m_trackLabel).size();
+            ++nTracks;
+        }
+        else if (LArPandoraPFParticleUtils::IsShower(p,evt,m_particleLabel,m_showerLabel))
+        {
+            const art::Ptr<recob::Shower> shower = LArPandoraPFParticleUtils::GetShower(p,evt,m_particleLabel,m_showerLabel);
+            nHits += LArPandoraShowerUtils::GetHits(shower,evt,m_showerLabel).size();
+            ++nShowers;
+        }
+        else
+        {
+            nHits += LArPandoraPFParticleUtils::GetHits(p,evt,m_particleLabel).size();
+        }
+    }
+    std::cout << "Total number of hits in all " << recoParticles.size() << " PFParticles = " << nHits << std::endl; 
 
 }
 

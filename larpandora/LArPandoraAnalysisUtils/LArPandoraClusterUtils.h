@@ -33,7 +33,15 @@ class LArPandoraClusterUtils:LArPandoraUtilsBase
 {
 
 public:
-
+    /**
+    * @brief Get the hits associated with the cluster.
+    *
+    * @param cluster is the cluster for which we want the hits
+    * @param evt is the underlying art event
+    * @param label is the label for the cluster producer
+    * 
+    * @return vector of art::Ptrs to the hits 
+    */
     static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Cluster> &cluster, art::Event const &evt, const std::string &label);
 
 private:

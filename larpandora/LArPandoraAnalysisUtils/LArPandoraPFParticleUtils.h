@@ -40,6 +40,8 @@ public:
     * @param part particle for which we want the T0
     * @param evt is the underlying art event
     * @param label is the label for the PFParticle producer
+    * 
+    * @return vector of art::Ptrs to the T0(s)
     */ 
     static const std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
@@ -49,9 +51,20 @@ public:
     * @param part particle for which we want the cosmic tag
     * @param evt is the underlying art event
     * @param label is the label for the PFParticle producer
+    * 
+    * @return vector of art::Ptrs to the cosmic tag(s) 
     */
     static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
+    /**
+    * @brief Get the child particles (one step down in the hierarchy) of this particle.
+    *
+    * @param part particle for which we want the child particles
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * 
+    * @return vector of art::Ptrs to the child particles 
+    */
     static const std::vector<art::Ptr<recob::PFParticle>> GetChildParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
 
     static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
