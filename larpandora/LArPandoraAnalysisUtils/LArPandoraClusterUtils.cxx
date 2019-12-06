@@ -20,7 +20,7 @@
 namespace lar_pandora
 {
 
-const std::vector<art::Ptr<recob::Hit>> LArPandoraClusterUtils::GetHits(const art::Ptr<recob::Cluster> &pCluster, const art::Event &evt, const std::string &label)
+std::vector<art::Ptr<recob::Hit>> LArPandoraClusterUtils::GetHits(const art::Ptr<recob::Cluster> &pCluster, const art::Event &evt, const std::string &label)
 {    
     return LArPandoraClusterUtils::GetAssocProductVector<recob::Hit>(pCluster,evt,label,label);
 }

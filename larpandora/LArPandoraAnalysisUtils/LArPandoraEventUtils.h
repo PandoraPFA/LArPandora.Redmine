@@ -33,7 +33,7 @@ public:
     *
     * @return vector of art::Ptrs to particles
     */
-    static const std::vector<art::Ptr<recob::PFParticle>> GetPFParticles(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::PFParticle>> GetPFParticles(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the tracks from the event. This function shouldn't be used as the basis of an analysis.
@@ -43,7 +43,7 @@ public:
     *
     * @return vector of art::Ptrs to tracks
     */
-    static const std::vector<art::Ptr<recob::Track>> GetTracks(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::Track>> GetTracks(const art::Event &evt, const std::string &label);
     
     /**
     * @brief Get the showers from the event. This function shouldn't be used as the basis of an analysis.
@@ -53,7 +53,7 @@ public:
     *
     * @return vector of art::Ptrs to showers
     */
-    static const std::vector<art::Ptr<recob::Shower>> GetShowers(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::Shower>> GetShowers(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the vertices from the event
@@ -63,7 +63,7 @@ public:
     *
     * @return vector of art::Ptrs to vertices
     */
-    static const std::vector<art::Ptr<recob::Vertex>> GetVertices(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::Vertex>> GetVertices(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the spacepoints from the event
@@ -73,7 +73,7 @@ public:
     *
     * @return vector of art::Ptrs to spacepoints
     */
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the slices from the event
@@ -83,7 +83,7 @@ public:
     *
     * @return vector of art::Ptrs to slices
     */
-    static const std::vector<art::Ptr<recob::Slice>> GetSlices(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::Slice>> GetSlices(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the clear cosmic ray primaries from the event
@@ -93,7 +93,7 @@ public:
     *
     * @return vector of art::Ptrs to cosmic particles
     */
-    static const std::vector<art::Ptr<recob::PFParticle>> GetClearCosmics(const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::PFParticle>> GetClearCosmics(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the neutrino from the event
@@ -103,7 +103,7 @@ public:
     *
     * @return atr::Ptr to the neutrino
     */
-    static const art::Ptr<recob::PFParticle> GetNeutrino(const art::Event &evt, const std::string &label);
+    static art::Ptr<recob::PFParticle> GetNeutrino(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Check to see if the event has a reconstructed neutrino
@@ -113,7 +113,7 @@ public:
     *
     * @return true if the event has a reconstructed neutrino
     */
-    static const bool HasNeutrino(const art::Event &evt, const std::string &label);    
+    static bool HasNeutrino(const art::Event &evt, const std::string &label);    
 };
 
 } // namespace lar_pandora

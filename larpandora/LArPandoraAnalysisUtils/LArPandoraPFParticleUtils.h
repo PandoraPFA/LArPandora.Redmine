@@ -38,7 +38,7 @@ public:
     * 
     * @return vector of art::Ptrs to the T0(s)
     */ 
-    static const std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the Cosmic Tag(s) associated with the particle.
@@ -49,7 +49,7 @@ public:
     * 
     * @return vector of art::Ptrs to the cosmic tag(s) 
     */
-    static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the child particles (one step down in the hierarchy) of this particle.
@@ -60,7 +60,7 @@ public:
     * 
     * @return vector of art::Ptrs to the child particles 
     */
-    static const std::vector<art::Ptr<recob::PFParticle>> GetChildParticles(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::PFParticle>> GetChildParticles(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the hits associated to this particle.
@@ -71,7 +71,7 @@ public:
     * 
     * @return vector of art::Ptrs to the hits 
     */
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the hits associated to this particle in a given view.
@@ -83,7 +83,7 @@ public:
     *
     * @return vector of art::Ptrs to the hits 
     */
-    static const std::vector<art::Ptr<recob::Hit>> GetViewHits(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label, const unsigned short &view);
+    static std::vector<art::Ptr<recob::Hit>> GetViewHits(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label, const unsigned short &view);
 
     /**
     * @brief Get the spacepoints associated to this particle.
@@ -94,7 +94,7 @@ public:
     * 
     * @return vector of art::Ptrs to the spacepoints 
     */
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the track associated to this particle. Should only be called if IsTrack method succeeds
@@ -106,7 +106,7 @@ public:
     *
     * @return art::Ptr to the track 
     */
-    static const art::Ptr<recob::Track> GetTrack(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel, const std::string &trackLabel);
+    static art::Ptr<recob::Track> GetTrack(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel, const std::string &trackLabel);
 
     /**
     * @brief Get the shower associated to this particle. Should only be called if IsShower method succeeds
@@ -118,7 +118,7 @@ public:
     *
     * @return art::Ptr to the shower
     */
-    static const art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel, const std::string &showerLabel);
+    static art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel, const std::string &showerLabel);
     
     /**
     * @brief Get the vertex associated to this particle.
@@ -129,7 +129,7 @@ public:
     * 
     * @return art::Ptr to the vertex
     */
-    static const art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel);
+    static art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel);
 
     /**
     * @brief Get the slice associated to this particle.
@@ -140,7 +140,7 @@ public:
     * 
     * @return art::Ptr to the slice
     */
-    static const art::Ptr<recob::Slice> GetSlice(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel);
+    static art::Ptr<recob::Slice> GetSlice(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &pParticleLabel);
 
     /**
     * @brief Get the metadata associated to this particle.
@@ -151,7 +151,7 @@ public:
     * 
     * @return art::Ptr to the metadata
     */
-    static const art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
+    static art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> &pParticle, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Check if this particle has an associated track

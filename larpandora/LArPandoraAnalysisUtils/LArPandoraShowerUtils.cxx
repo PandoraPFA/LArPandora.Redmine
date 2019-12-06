@@ -20,21 +20,21 @@
 namespace lar_pandora
 {
 
-const std::vector<art::Ptr<recob::Hit>> LArPandoraShowerUtils::GetHits(const art::Ptr<recob::Shower> &pShower, const art::Event &evt, const std::string &label)
+std::vector<art::Ptr<recob::Hit>> LArPandoraShowerUtils::GetHits(const art::Ptr<recob::Shower> &pShower, const art::Event &evt, const std::string &label)
 {    
     return LArPandoraShowerUtils::GetAssocProductVector<recob::Hit>(pShower,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraShowerUtils::GetSpacePoints(const art::Ptr<recob::Shower> &pShower, const art::Event &evt, const std::string &label)
+std::vector<art::Ptr<recob::SpacePoint>> LArPandoraShowerUtils::GetSpacePoints(const art::Ptr<recob::Shower> &pShower, const art::Event &evt, const std::string &label)
 {
     return LArPandoraShowerUtils::GetAssocProductVector<recob::SpacePoint>(pShower,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-const art::Ptr<recob::PFParticle> LArPandoraShowerUtils::GetPFParticle(const art::Ptr<recob::Shower> &pShower, const art::Event &evt, const std::string &label)
+art::Ptr<recob::PFParticle> LArPandoraShowerUtils::GetPFParticle(const art::Ptr<recob::Shower> &pShower, const art::Event &evt, const std::string &label)
 {
     return LArPandoraShowerUtils::GetAssocProduct<recob::PFParticle>(pShower,evt,label,label);
 }    

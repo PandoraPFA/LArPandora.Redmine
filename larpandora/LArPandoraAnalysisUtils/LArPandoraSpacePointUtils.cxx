@@ -18,7 +18,7 @@
 namespace lar_pandora
 {
 
-const std::vector<art::Ptr<recob::Hit>> LArPandoraSpacePointUtils::GetHits(const art::Ptr<recob::SpacePoint> &pSpacepoint, const art::Event &evt, const std::string &label)
+std::vector<art::Ptr<recob::Hit>> LArPandoraSpacePointUtils::GetHits(const art::Ptr<recob::SpacePoint> &pSpacepoint, const art::Event &evt, const std::string &label)
 {    
     return LArPandoraSpacePointUtils::GetAssocProductVector<recob::Hit>(pSpacepoint,evt,label,label);
 }

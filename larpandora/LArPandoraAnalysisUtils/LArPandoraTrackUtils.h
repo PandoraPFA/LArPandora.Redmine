@@ -41,7 +41,7 @@ public:
     * 
     * @return vector of art::Ptrs to the hits 
     */
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the spacepoints associated with the track.
@@ -52,7 +52,7 @@ public:
     * 
     * @return vector of art::Ptrs to the spacepoints 
     */
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label);
+    static std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the particle associated with the track.
@@ -63,7 +63,7 @@ public:
     * 
     * @return art::Ptr to the particle
     */
-    static const art::Ptr<recob::PFParticle> GetPFParticle(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label);
+    static art::Ptr<recob::PFParticle> GetPFParticle(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the particle associated with the track.
@@ -75,7 +75,7 @@ public:
     *
     * @return art::Ptr to the particle
     */
-    static const art::Ptr<anab::Calorimetry> GetCalorimetry(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &trackLabel, const std::string &caloLabel);
+    static art::Ptr<anab::Calorimetry> GetCalorimetry(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &trackLabel, const std::string &caloLabel);
 };
 
 } // namespace lar_pandora

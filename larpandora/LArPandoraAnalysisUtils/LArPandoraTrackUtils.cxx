@@ -24,28 +24,28 @@ namespace lar_pandora
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-const std::vector<art::Ptr<recob::Hit>> LArPandoraTrackUtils::GetHits(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label)
+std::vector<art::Ptr<recob::Hit>> LArPandoraTrackUtils::GetHits(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label)
 {    
     return LArPandoraTrackUtils::GetAssocProductVector<recob::Hit>(pTrack,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraTrackUtils::GetSpacePoints(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label)
+std::vector<art::Ptr<recob::SpacePoint>> LArPandoraTrackUtils::GetSpacePoints(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label)
 {
     return LArPandoraTrackUtils::GetAssocProductVector<recob::SpacePoint>(pTrack,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-const art::Ptr<recob::PFParticle> LArPandoraTrackUtils::GetPFParticle(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label)
+art::Ptr<recob::PFParticle> LArPandoraTrackUtils::GetPFParticle(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &label)
 {
     return LArPandoraTrackUtils::GetAssocProduct<recob::PFParticle>(pTrack,evt,label,label);
 }    
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-const art::Ptr<anab::Calorimetry> LArPandoraTrackUtils::GetCalorimetry(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &trackLabel, const std::string &caloLabel)
+art::Ptr<anab::Calorimetry> LArPandoraTrackUtils::GetCalorimetry(const art::Ptr<recob::Track> &pTrack, const art::Event &evt, const std::string &trackLabel, const std::string &caloLabel)
 {
     return LArPandoraTrackUtils::GetAssocProduct<anab::Calorimetry>(pTrack,evt,trackLabel,caloLabel);
 }
