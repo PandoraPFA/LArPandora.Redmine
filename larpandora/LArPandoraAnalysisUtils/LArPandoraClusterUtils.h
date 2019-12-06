@@ -38,7 +38,7 @@ public:
     * 
     * @return vector of art::Ptrs to the hits 
     */
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Cluster> &cluster, const art::Event &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Cluster> &pCluster, const art::Event &evt, const std::string &label);
 };
 
 } // namespace lar_pandora
