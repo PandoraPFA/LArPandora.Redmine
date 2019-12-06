@@ -3,8 +3,6 @@
  * @file larpandora/LArPandoraAnalysisUtils/LArPandoraSliceUtils.h
  *
  * @brief Utility containing helpful functions for end users to access information about Slices
- *
- * @author leigh.howard.whitehead@cern.ch
 */
 
 #ifndef LAR_PANDORA_SLICE_UTILS_H
@@ -23,7 +21,6 @@
 
 namespace lar_pandora
 {
-
 /**
  *
  * @brief LArPandoraSliceUtils class
@@ -31,7 +28,6 @@ namespace lar_pandora
 */
 class LArPandoraSliceUtils:LArPandoraUtilsBase
 {
-
 public:
     /**
     * @brief Get the hits associated with the slice.
@@ -42,14 +38,10 @@ public:
     * 
     * @return vector of art::Ptrs to the hits
     */
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Slice> &slice, art::Event const &evt, const std::string &label);
-
-private:
-
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Slice> &slice, const art::Event &evt, const std::string &label);
 };
 
 } // namespace lar_pandora
-
 
 #endif // LAR_PANDORA_SLICE_UTILS_H
 

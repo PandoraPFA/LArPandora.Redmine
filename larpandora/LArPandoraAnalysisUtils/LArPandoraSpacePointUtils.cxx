@@ -14,20 +14,14 @@
 
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/PFParticle.h"
 
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::Hit>> LArPandoraSpacePointUtils::GetHits(const art::Ptr<recob::SpacePoint> &spacepoint, art::Event const &evt, const std::string &label)
-    {    
-
-        std::vector<art::Ptr<recob::Hit>> theseHits;
-        GetAssocProductVector(spacepoint,evt,label,label,theseHits);
-        return theseHits;
-    }
-
+const std::vector<art::Ptr<recob::Hit>> LArPandoraSpacePointUtils::GetHits(const art::Ptr<recob::SpacePoint> &spacepoint, const art::Event &evt, const std::string &label)
+{    
+    return GetAssocProductVector<recob::Hit>(spacepoint,evt,label,label);
+}
 
 } // namespace lar_pandora
 

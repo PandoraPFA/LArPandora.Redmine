@@ -3,16 +3,12 @@
  * @file larpandora/LArPandoraAnalysisUtils/LArPandoraEventUtils.h
  *
  * @brief Utility containing helpful functions for end users to access products from events
- *
- * @author leigh.howard.whitehead@cern.ch
 */
 
 #ifndef LAR_PANDORA_EVENT_UTILS_H
 #define LAR_PANDORA_EVENT_UTILS_H
 
 #include "art/Framework/Principal/Event.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 
 #include "larpandora/LArPandoraAnalysisUtils/LArPandoraUtilsBase.h"
 
@@ -21,7 +17,6 @@
 
 namespace lar_pandora
 {
-
 /**
  *
  * @brief LArPandoraEventUtils class
@@ -29,7 +24,6 @@ namespace lar_pandora
 */
 class LArPandoraEventUtils:LArPandoraUtilsBase
 {
-
 public:
     /**
     * @brief Get the particles from the event
@@ -39,7 +33,7 @@ public:
     *
     * @return vector of art::Ptrs to particles
     */
-    static const std::vector<art::Ptr<recob::PFParticle>> GetPFParticles(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::PFParticle>> GetPFParticles(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the tracks from the event. This function shouldn't be used as the basis of an analysis.
@@ -49,7 +43,7 @@ public:
     *
     * @return vector of art::Ptrs to tracks
     */
-    static const std::vector<art::Ptr<recob::Track>> GetTracks(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Track>> GetTracks(const art::Event &evt, const std::string &label);
     
     /**
     * @brief Get the showers from the event. This function shouldn't be used as the basis of an analysis.
@@ -59,7 +53,7 @@ public:
     *
     * @return vector of art::Ptrs to showers
     */
-    static const std::vector<art::Ptr<recob::Shower>> GetShowers(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Shower>> GetShowers(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the vertices from the event
@@ -69,7 +63,7 @@ public:
     *
     * @return vector of art::Ptrs to vertices
     */
-    static const std::vector<art::Ptr<recob::Vertex>> GetVertices(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Vertex>> GetVertices(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the spacepoints from the event
@@ -79,7 +73,7 @@ public:
     *
     * @return vector of art::Ptrs to spacepoints
     */
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the slices from the event
@@ -89,7 +83,7 @@ public:
     *
     * @return vector of art::Ptrs to slices
     */
-    static const std::vector<art::Ptr<recob::Slice>> GetSlices(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Slice>> GetSlices(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the clear cosmic ray primaries from the event
@@ -99,7 +93,7 @@ public:
     *
     * @return vector of art::Ptrs to cosmic particles
     */
-    static const std::vector<art::Ptr<recob::PFParticle>> GetClearCosmics(art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::PFParticle>> GetClearCosmics(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the neutrino from the event
@@ -119,15 +113,10 @@ public:
     *
     * @return true if the event has a reconstructed neutrino
     */
-    static const bool HasNeutrino(art::Event const &evt, const std::string &label);
-    
-
-private:
-
+    static const bool HasNeutrino(const art::Event &evt, const std::string &label);    
 };
 
 } // namespace lar_pandora
-
 
 #endif // LAR_PANDORA_EVENT_UTILS_H
 

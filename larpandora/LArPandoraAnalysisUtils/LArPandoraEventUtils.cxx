@@ -26,125 +26,121 @@
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetPFParticles(art::Event const &evt, const std::string &label)
+const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetPFParticles(const art::Event &evt, const std::string &label)
+{
+    return GetProductVector<recob::PFParticle>(evt,label);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const std::vector<art::Ptr<recob::Track>> LArPandoraEventUtils::GetTracks(const art::Event &evt, const std::string &label)
+{
+    mf::LogWarning("LArPandora") << " Please note: accessing PFParticle tracks through this method is not the recommended workflow.\n"
+                                 << " Please use LArPandoraEventUtils::GetPFParticles and access the tracks with LArPandoraPFParticleUtils::GetTrack."
+                                 << std::endl;
+
+    return GetProductVector<recob::Track>(evt,label);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const std::vector<art::Ptr<recob::Shower>> LArPandoraEventUtils::GetShowers(const art::Event &evt, const std::string &label)
+{
+    mf::LogWarning("LArPandora") << " Please note: accessing PFParticle showers through this method is not the recommended workflow.\n"
+                                 << " Please use LArPandoraEventUtils::GetPFParticles and access the tracks with LArPandoraPFParticleUtils::GetShower."
+                                 << std::endl;
+
+    return GetProductVector<recob::Shower>(evt,label);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const std::vector<art::Ptr<recob::Vertex>> LArPandoraEventUtils::GetVertices(const art::Event &evt, const std::string &label)
+{
+    return GetProductVector<recob::Vertex>(evt,label);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraEventUtils::GetSpacePoints(const art::Event &evt, const std::string &label)
+{
+    return GetProductVector<recob::SpacePoint>(evt,label);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const std::vector<art::Ptr<recob::Slice>> LArPandoraEventUtils::GetSlices(const art::Event &evt, const std::string &label)
+{
+    return GetProductVector<recob::Slice>(evt,label);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetClearCosmics(const art::Event &evt, const std::string &label)
+{
+    std::vector<art::Ptr<recob::PFParticle>> theseParticles = GetProductVector<recob::PFParticle>(evt,label);
+
+    std::vector<art::Ptr<recob::PFParticle>> theseCosmics;
+
+    // We only want primary cosmic rays
+    for (art::Ptr<recob::PFParticle> pParticle : theseParticles)
     {
-        std::vector<art::Ptr<recob::PFParticle>> theseParticles;
-        GetProductVector(evt,label,theseParticles);
-
-        return theseParticles;
-    }
-
-    const std::vector<art::Ptr<recob::Track>> LArPandoraEventUtils::GetTracks(art::Event const &evt, const std::string &label)
-    {
-        mf::LogWarning("LArPandora") << " Please note: accessing PFParticle tracks through this method is not the recommended workflow.\n"
-                                     << " Please use LArPandoraEventUtils::GetPFParticles and access the tracks with LArPandoraPFParticleUtils::GetTrack."
-                                     << std::endl;
-
-        std::vector<art::Ptr<recob::Track>> theseTracks;
-        GetProductVector(evt,label,theseTracks);
-
-        return theseTracks;
-    }
-
-    const std::vector<art::Ptr<recob::Shower>> LArPandoraEventUtils::GetShowers(art::Event const &evt, const std::string &label)
-    {
-        mf::LogWarning("LArPandora") << " Please note: accessing PFParticle showers through this method is not the recommended workflow.\n"
-                                     << " Please use LArPandoraEventUtils::GetPFParticles and access the tracks with LArPandoraPFParticleUtils::GetShower."
-                                     << std::endl;
-
-        std::vector<art::Ptr<recob::Shower>> theseShowers;
-        GetProductVector(evt,label,theseShowers);
-     
-        return theseShowers;
-    }
-
-    const std::vector<art::Ptr<recob::Vertex>> LArPandoraEventUtils::GetVertices(art::Event const &evt, const std::string &label)
-    {
-
-        std::vector<art::Ptr<recob::Vertex>> theseVertices;
-        GetProductVector(evt,label,theseVertices);
-
-        return theseVertices;
-    }
-
-    const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraEventUtils::GetSpacePoints(art::Event const &evt, const std::string &label)
-    {
-
-        std::vector<art::Ptr<recob::SpacePoint>> theseSpacePoints;
-        GetProductVector(evt,label,theseSpacePoints);
-
-        return theseSpacePoints;
-    }
-
-    const std::vector<art::Ptr<recob::Slice>> LArPandoraEventUtils::GetSlices(art::Event const &evt, const std::string &label)
-    {
-
-        std::vector<art::Ptr<recob::Slice>> theseSlices;
-        GetProductVector(evt,label,theseSlices);
-
-        return theseSlices;
-    }
-
-    const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetClearCosmics(art::Event const &evt, const std::string &label)
-    {
-
-        std::vector<art::Ptr<recob::PFParticle>> theseParticles;
-        GetProductVector(evt,label,theseParticles);
-
-        std::vector<art::Ptr<recob::PFParticle>> theseCosmics;
-
-        // We only want primary cosmic rays
-        for (art::Ptr<recob::PFParticle> particle : theseParticles)
+        if (!pParticle->IsPrimary())
         {
-            if (!particle->IsPrimary())
-            {
-                continue;
-            } 
+            continue;
+        } 
 
-            if (LArPandoraPFParticleUtils::IsClearCosmic(particle, evt, label))
-            {
-                theseCosmics.push_back(particle);
-            }
+        if (LArPandoraPFParticleUtils::IsClearCosmic(pParticle, evt, label))
+        {
+            theseCosmics.push_back(pParticle);
         }
-
-        return theseCosmics;
     }
 
-    const art::Ptr<recob::PFParticle> LArPandoraEventUtils::GetNeutrino(art::Event const &evt, const std::string &label)
+    return theseCosmics;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const art::Ptr<recob::PFParticle> LArPandoraEventUtils::GetNeutrino(const art::Event &evt, const std::string &label)
+{
+    if (!HasNeutrino(evt,label))
     {
-
-        if (!HasNeutrino(evt,label))
-        {
-          throw cet::exception("LArPandora") << "LArPandoraEventUtils::GetNeutrino --- No neutrino found";
-        }
-        
-        art::Ptr<recob::PFParticle> neutrino;
-        const std::vector<art::Ptr<recob::PFParticle>> particles = GetPFParticles(evt,label);
-        for (art::Ptr<recob::PFParticle> particle : particles)
-        {
-            if (LArPandoraPFParticleUtils::IsNeutrino(particle))
-            {
-                neutrino = particle;
-                break; 
-            }
-        }
-        return neutrino;
+        throw cet::exception("LArPandora") << "LArPandoraEventUtils::GetNeutrino --- No neutrino found";
     }
-
-    const bool LArPandoraEventUtils::HasNeutrino(art::Event const &evt, const std::string &label)
+    
+    art::Ptr<recob::PFParticle> pNeutrino;
+    const std::vector<art::Ptr<recob::PFParticle>> particles = GetPFParticles(evt,label);
+    for (art::Ptr<recob::PFParticle> pParticle : particles)
     {
-        bool hasNeutrino = false;
-        const std::vector<art::Ptr<recob::PFParticle>> particles = GetPFParticles(evt,label);
-        for (art::Ptr<recob::PFParticle> particle : particles)
+        if (LArPandoraPFParticleUtils::IsNeutrino(pParticle))
         {
-            if (LArPandoraPFParticleUtils::IsNeutrino(particle))
-            {
-                hasNeutrino = true;
-                break;
-            }
+            pNeutrino = pParticle;
+            break; 
         }
-        return hasNeutrino;
     }
+    return pNeutrino;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const bool LArPandoraEventUtils::HasNeutrino(const art::Event &evt, const std::string &label)
+{
+    bool hasNeutrino = false;
+    const std::vector<art::Ptr<recob::PFParticle>> particles = GetPFParticles(evt,label);
+    for (art::Ptr<recob::PFParticle> pParticle : particles)
+    {
+        if(!pParticle->IsPrimary())
+        {
+            continue;
+        }
+        if (LArPandoraPFParticleUtils::IsNeutrino(pParticle))
+        {
+            hasNeutrino = true;
+            break;
+        }
+    }
+    return hasNeutrino;
+}
 
 } // namespace lar_pandora
 

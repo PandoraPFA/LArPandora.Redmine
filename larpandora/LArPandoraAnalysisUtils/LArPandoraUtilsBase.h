@@ -3,8 +3,6 @@
  * @file larpandora/LArPandoraAnalysisUtils/LArPandoraUtilsBase.h
  *
  * @brief Base class containing functionality to extract products from the event
- *
- * @author leigh.howard.whitehead@cern.ch
 */
 
 #ifndef LAR_PANDORA_UTILS_BASE_H
@@ -22,7 +20,6 @@
 
 namespace lar_pandora
 {
-
 /**
  *
  * @brief LArPandoraUtilsBase class containing some template functions
@@ -30,61 +27,67 @@ namespace lar_pandora
 */
 class LArPandoraUtilsBase
 {
-
 protected:
+//    template <typename T> static void GetProductVector(const art::Event &evt, const std::string &label, std::vector<art::Ptr<T>> &productVector);
+//    template <typename T, typename U> static void GetAssocProductVector(const art::Ptr<U> &part, const art::Event &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);
 
-    template <typename T> static void GetProductVector(art::Event const &evt, const std::string &label, std::vector<art::Ptr<T>> &productVector);
-    template <typename T, typename U> static void GetAssocProductVector(const art::Ptr<U> &part, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);
+    template <typename T> static std::vector<art::Ptr<T>> GetProductVector(const art::Event &evt, const std::string &label);
+    template <typename T, typename U> static std::vector<art::Ptr<T>> GetAssocProductVector(const art::Ptr<U> &part, const art::Event &evt, const std::string &label, const std::string &assocLabel);
+    template <typename T, typename U> static art::Ptr<T> GetAssocProduct(const art::Ptr<U> &part, const art::Event &evt, const std::string &label, const std::string &assocLabel); 
 
 };
 
-    // Implementation of the template function to get the products from the event
-    template <typename T> void LArPandoraUtilsBase::GetProductVector(art::Event const &evt, const std::string &label, std::vector<art::Ptr<T>> &productVector)
+// Implementation of the template function to get the products from the event
+template <typename T> std::vector<art::Ptr<T>> LArPandoraUtilsBase::GetProductVector(const art::Event &evt, const std::string &label)
+{
+    art::Handle<std::vector<T>> theseProds;
+    bool success = evt.getByLabel(label,theseProds);
+
+    if (!success)
     {
-
-        art::Handle<std::vector<T>> theseProds;
-        evt.getByLabel(label,theseProds);
-
-        if (!theseProds.isValid())
-        {
-            mf::LogError("LArPandora") << " Failed to find product with label " << label << " ... returning empty vector" << std::endl;
-            productVector = std::vector<art::Ptr<T>>();
-            return;
-        }
-
-        // We need to convert these to art pointers
-        productVector.clear();
-        for(unsigned int i = 0; i < theseProds->size(); ++i){
-          art::Ptr<T> ptr(theseProds,i);
-          productVector.push_back(ptr);
-        }
-
+        mf::LogError("LArPandora") << " Failed to find product with label " << label << " ... returning empty vector" << std::endl;
+        return std::vector<art::Ptr<T>>();
     }
 
-    // Implementation of the template function to get the associated products from the event
-    template <typename T, typename U> void LArPandoraUtilsBase::GetAssocProductVector(const art::Ptr<U> &prod, art::Event const &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector)
-    {
-
-        art::Handle<std::vector<U>> products;
-        evt.getByLabel(label,products);
-
-        if (!products.isValid())
-        {
-            mf::LogError("LArPandora") << " Failed to find product with label " << label << " ... returning empty vector" << std::endl;
-            productVector = std::vector<art::Ptr<T>>();
-            return;
-        }
-
-        const art::FindManyP<T> findParticleAssocs(products,evt,assocLabel);
-
-        const std::vector<art::Ptr<T>> theseAssocs = findParticleAssocs.at(prod.key());
-
-        productVector = theseAssocs;
+    // We need to convert these to art pointers
+    std::vector<art::Ptr<T>> productVector;
+    for(unsigned int i = 0; i < theseProds->size(); ++i){
+      art::Ptr<T> ptr(theseProds,i);
+      productVector.push_back(ptr);
     }
+    return productVector;
+}
+
+// Implementation of the template function to get the associated products from the event
+template <typename T, typename U> std::vector<art::Ptr<T>> LArPandoraUtilsBase::GetAssocProductVector(const art::Ptr<U> &pProd, const art::Event &evt, const std::string &label, const std::string &assocLabel)
+{
+    art::Handle<std::vector<U>> products;
+    bool success = evt.getByLabel(label,products);
+
+    if (!success)
+    {
+        mf::LogError("LArPandora") << " Failed to find product with label " << label << " ... returning empty vector" << std::endl;
+        return std::vector<art::Ptr<T>>();
+    }
+
+    const art::FindManyP<T> findParticleAssocs(products,evt,assocLabel);
+
+    return findParticleAssocs.at(pProd.key());
+}
+
+// Implementation of the template function to get the associated product from the event
+template <typename T, typename U> art::Ptr<T> LArPandoraUtilsBase::GetAssocProduct(const art::Ptr<U> &pProd, const art::Event &evt, const std::string &label, const std::string &assocLabel)
+{   
+    std::vector<art::Ptr<T>> associatedProducts = GetAssocProductVector<T>(pProd,evt,label,assocLabel); 
+    if (associatedProducts.empty())
+    {
+        throw cet::exception("LArPandora") << "LArPandoraUtilsBase::GetShower --- No associated object found";
+    }
+    return associatedProducts.at(0);
+}
 
 
 } // namespace lar_pandora
-
 
 #endif // LAR_PANDORA_PFPARTICLE_UTILS_H
 

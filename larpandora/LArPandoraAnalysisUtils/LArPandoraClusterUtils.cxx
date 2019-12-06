@@ -20,13 +20,10 @@
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::Hit>> LArPandoraClusterUtils::GetHits(const art::Ptr<recob::Cluster> &cluster, art::Event const &evt, const std::string &label)
-    {    
-
-        std::vector<art::Ptr<recob::Hit>> theseHits;
-        GetAssocProductVector(cluster,evt,label,label,theseHits);
-        return theseHits;
-    }
+const std::vector<art::Ptr<recob::Hit>> LArPandoraClusterUtils::GetHits(const art::Ptr<recob::Cluster> &cluster, const art::Event &evt, const std::string &label)
+{    
+    return GetAssocProductVector<recob::Hit>(cluster,evt,label,label);
+}
 
 
 } // namespace lar_pandora

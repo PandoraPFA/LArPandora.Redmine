@@ -3,8 +3,6 @@
  * @file larpandora/LArPandoraAnalysisUtils/LArPandoraPFParticleUtils.h
  *
  * @brief Utility containing helpful functions for end users to access information about PFParticles
- *
- * @author leigh.howard.whitehead@cern.ch
 */
 
 #ifndef LAR_PANDORA_PFPARTICLE_UTILS_H
@@ -23,7 +21,6 @@
 
 namespace lar_pandora
 {
-
 /**
  *
  * @brief LArPandoraPFParticleUtils class
@@ -31,9 +28,7 @@ namespace lar_pandora
 */
 class LArPandoraPFParticleUtils:LArPandoraUtilsBase
 {
-
 public:
-
     /**
     * @brief Get the T0(s) associated with the particle.
     *
@@ -43,7 +38,7 @@ public:
     * 
     * @return vector of art::Ptrs to the T0(s)
     */ 
-    static const std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<anab::T0>> GetT0(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the Cosmic Tag(s) associated with the particle.
@@ -54,7 +49,7 @@ public:
     * 
     * @return vector of art::Ptrs to the cosmic tag(s) 
     */
-    static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<anab::CosmicTag>> GetCosmicTag(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the child particles (one step down in the hierarchy) of this particle.
@@ -65,36 +60,145 @@ public:
     * 
     * @return vector of art::Ptrs to the child particles 
     */
-    static const std::vector<art::Ptr<recob::PFParticle>> GetChildParticles(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::PFParticle>> GetChildParticles(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    /**
+    * @brief Get the hits associated to this particle.
+    *
+    * @param part particle for which we want the hits
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * 
+    * @return vector of art::Ptrs to the hits 
+    */
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label);
 
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    /**
+    * @brief Get the hits associated to this particle in a given view.
+    *
+    * @param part particle for which we want the hits
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * @param view is the view for which we want the hits 
+    *
+    * @return vector of art::Ptrs to the hits 
+    */
+    static const std::vector<art::Ptr<recob::Hit>> GetViewHits(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label, const unsigned short &view);
 
-    static const art::Ptr<recob::Track> GetTrack(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
+    /**
+    * @brief Get the spacepoints associated to this particle.
+    *
+    * @param part particle for which we want the spacepoints
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * 
+    * @return vector of art::Ptrs to the spacepoints 
+    */
+    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label);
 
-    static const art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
+    /**
+    * @brief Get the track associated to this particle. Should only be called if IsTrack method succeeds
+    *
+    * @param part particle for which we want the track
+    * @param evt is the underlying art event
+    * @param particleLabel is the label for the PFParticle producer
+    * @param trackLabel is the label for the Track producer
+    *
+    * @return art::Ptr to the track 
+    */
+    static const art::Ptr<recob::Track> GetTrack(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel, const std::string &trackLabel);
 
-    static const art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel);
+    /**
+    * @brief Get the shower associated to this particle. Should only be called if IsShower method succeeds
+    *
+    * @param part particle for which we want the shower
+    * @param evt is the underlying art event
+    * @param particleLabel is the label for the PFParticle producer
+    * @param trackLabel is the label for the Shower producer
+    *
+    * @return art::Ptr to the shower
+    */
+    static const art::Ptr<recob::Shower> GetShower(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel, const std::string &showerLabel);
+    
+    /**
+    * @brief Get the vertex associated to this particle.
+    *
+    * @param part particle for which we want the vertex
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * 
+    * @return art::Ptr to the vertex
+    */
+    static const art::Ptr<recob::Vertex> GetVertex(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel);
 
-    static const art::Ptr<recob::Slice> GetSlice(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &particleLabel);
+    /**
+    * @brief Get the slice associated to this particle.
+    *
+    * @param part particle for which we want the slice
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * 
+    * @return art::Ptr to the slice
+    */
+    static const art::Ptr<recob::Slice> GetSlice(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel);
 
-    static const art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> &part, art::Event const &evt, const std::string &label);
+    /**
+    * @brief Get the metadata associated to this particle.
+    *
+    * @param part particle for which we want the slice
+    * @param evt is the underlying art event
+    * @param label is the label for the PFParticle producer
+    * 
+    * @return art::Ptr to the metadata
+    */
+    static const art::Ptr<larpandoraobj::PFParticleMetadata> GetMetadata(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label);
 
-    static bool IsTrack(const art::Ptr<recob::PFParticle> &particle, art::Event const &evt, const std::string &particleLabel, const std::string &trackLabel);
+    /**
+    * @brief Check if this particle has an associated track
+    *
+    * @param part particle for which we want the track-like confirmation
+    * @param evt is the underlying art event
+    * @param particleLabel is the label for the PFParticle producer
+    * @param trackLabel is the label for the track producer
+    *
+    * @return bool stating if the object is track-like
+    */
+    static bool IsTrack(const art::Ptr<recob::PFParticle> &particle, const art::Event &evt, const std::string &particleLabel, const std::string &trackLabel);
 
-    static bool IsShower(const art::Ptr<recob::PFParticle> &particle, art::Event const &evt, const std::string &particleLabel, const std::string &showerLabel);
+    /**
+    * @brief Check if this particle has an associated shower
+    *
+    * @param part particle for which we want the shower-like confirmation
+    * @param evt is the underlying art event
+    * @param particleLabel is the label for the PFParticle producer
+    * @param showerLabel is the label for the shower producer
+    *
+    * @return bool stating if the object is shower-like
+    */
+    static bool IsShower(const art::Ptr<recob::PFParticle> &particle, const art::Event &evt, const std::string &particleLabel, const std::string &showerLabel);
 
-    static bool IsClearCosmic(const art::Ptr<recob::PFParticle> &particle, art::Event const &evt, const std::string &particleLabel);
+    /**
+    * @brief Check if this particle is a clear cosmic ray
+    *
+    * @param part particle for which we want the clear cosmic confirmation
+    * @param evt is the underlying art event
+    * @param particleLabel is the label for the PFParticle producer
+    *
+    * @return bool stating if the object is a clear cosmic ray
+    */
+    static bool IsClearCosmic(const art::Ptr<recob::PFParticle> &particle, const art::Event &evt, const std::string &particleLabel);
 
+    /**
+    * @brief Check if this particle is a neutrino
+    *
+    * @param part particle for which we want the neutrino confirmation
+    *
+    * @return bool stating if the object is a neutrino
+    */
     static bool IsNeutrino(const art::Ptr<recob::PFParticle> &particle);
-
-private:
-
 };
 
 } // namespace lar_pandora
-
 
 #endif // LAR_PANDORA_PFPARTICLE_UTILS_H
 

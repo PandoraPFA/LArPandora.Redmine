@@ -17,37 +17,38 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::Hit>> LArPandoraTrackUtils::GetHits(const art::Ptr<recob::Track> &track, art::Event const &evt, const std::string &label)
-    {    
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
-        std::vector<art::Ptr<recob::Hit>> theseHits;
-        GetAssocProductVector(track,evt,label,label,theseHits);
-        return theseHits;
-    }
+const std::vector<art::Ptr<recob::Hit>> LArPandoraTrackUtils::GetHits(const art::Ptr<recob::Track> &track, const art::Event &evt, const std::string &label)
+{    
+    return GetAssocProductVector<recob::Hit>(track,evt,label,label);
+}
 
-    const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraTrackUtils::GetSpacePoints(const art::Ptr<recob::Track> &track, art::Event const &evt, const std::string &label)
-    {
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
-        std::vector<art::Ptr<recob::SpacePoint>> theseSPs;
-        GetAssocProductVector(track,evt,label,label,theseSPs);
-        return theseSPs;
-    }
+const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraTrackUtils::GetSpacePoints(const art::Ptr<recob::Track> &track, const art::Event &evt, const std::string &label)
+{
+    return GetAssocProductVector<recob::SpacePoint>(track,evt,label,label);
+}
 
-    const art::Ptr<recob::PFParticle> LArPandoraTrackUtils::GetParticle(const art::Ptr<recob::Track> &track, art::Event const &evt, const std::string &label)
-    {
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
-        std::vector<art::Ptr<recob::PFParticle>> theseParticles;
-        GetAssocProductVector(track,evt,label,label,theseParticles);
-        if (theseParticles.size() == 0)
-        {
-            throw cet::exception("LArPandora") << "LArPandoraTrackUtils::GetParticle --- No associated particle found";
-        }
-        return theseParticles.at(0);
-    }    
+const art::Ptr<recob::PFParticle> LArPandoraTrackUtils::GetPFParticle(const art::Ptr<recob::Track> &track, const art::Event &evt, const std::string &label)
+{
+    return GetAssocProduct<recob::PFParticle>(track,evt,label,label);
+}    
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+const art::Ptr<anab::Calorimetry> LArPandoraTrackUtils::GetCalorimetry(const art::Ptr<recob::Track> &track, const art::Event &evt, const std::string &trackLabel, const std::string &caloLabel)
+{
+    return GetAssocProduct<anab::Calorimetry>(track,evt,trackLabel,caloLabel);
+}
 
 } // namespace lar_pandora
-
 

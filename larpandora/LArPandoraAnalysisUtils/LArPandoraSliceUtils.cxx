@@ -13,21 +13,15 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 
 #include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Slice.h"
-#include "lardataobj/RecoBase/PFParticle.h"
 
 namespace lar_pandora
 {
 
-    const std::vector<art::Ptr<recob::Hit>> LArPandoraSliceUtils::GetHits(const art::Ptr<recob::Slice> &slice, art::Event const &evt, const std::string &label)
-    {    
-
-        std::vector<art::Ptr<recob::Hit>> theseHits;
-        GetAssocProductVector(slice,evt,label,label,theseHits);
-        return theseHits;
-    }
-
+const std::vector<art::Ptr<recob::Hit>> LArPandoraSliceUtils::GetHits(const art::Ptr<recob::Slice> &slice, const art::Event &evt, const std::string &label)
+{    
+    return GetAssocProductVector<recob::Hit>(slice,evt,label,label);
+}
 
 } // namespace lar_pandora
 
