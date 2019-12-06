@@ -20,7 +20,7 @@ namespace lar_pandora
 
 const std::vector<art::Ptr<recob::Hit>> LArPandoraSliceUtils::GetHits(const art::Ptr<recob::Slice> &slice, const art::Event &evt, const std::string &label)
 {    
-    return GetAssocProductVector<recob::Hit>(slice,evt,label,label);
+    return LArPandoraSliceUtils::GetAssocProductVector<recob::Hit>(slice,evt,label,label);
 }
 
 } // namespace lar_pandora

@@ -22,21 +22,21 @@ namespace lar_pandora
 
 const std::vector<art::Ptr<recob::Hit>> LArPandoraShowerUtils::GetHits(const art::Ptr<recob::Shower> &shower, const art::Event &evt, const std::string &label)
 {    
-    return GetAssocProductVector<recob::Hit>(shower,evt,label,label);
+    return LArPandoraShowerUtils::GetAssocProductVector<recob::Hit>(shower,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraShowerUtils::GetSpacePoints(const art::Ptr<recob::Shower> &shower, const art::Event &evt, const std::string &label)
 {
-    return GetAssocProductVector<recob::SpacePoint>(shower,evt,label,label);
+    return LArPandoraShowerUtils::GetAssocProductVector<recob::SpacePoint>(shower,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const art::Ptr<recob::PFParticle> LArPandoraShowerUtils::GetPFParticle(const art::Ptr<recob::Shower> &shower, const art::Event &evt, const std::string &label)
 {
-    return GetAssocProduct<recob::PFParticle>(shower,evt,label,label);
+    return LArPandoraShowerUtils::GetAssocProduct<recob::PFParticle>(shower,evt,label,label);
 }    
 
 } // namespace lar_pandora

@@ -103,7 +103,7 @@ public:
     *
     * @return atr::Ptr to the neutrino
     */
-    static const art::Ptr<recob::PFParticle> GetNeutrino(art::Event const &, const std::string &label);
+    static const art::Ptr<recob::PFParticle> GetNeutrino(const art::Event &evt, const std::string &label);
 
     /**
     * @brief Check to see if the event has a reconstructed neutrino

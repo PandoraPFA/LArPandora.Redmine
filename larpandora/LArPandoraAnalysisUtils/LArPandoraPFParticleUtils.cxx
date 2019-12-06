@@ -28,14 +28,14 @@ namespace lar_pandora
 
 const std::vector<art::Ptr<anab::T0>> LArPandoraPFParticleUtils::GetT0(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label)
 {
-    return GetAssocProductVector<anab::T0>(part,evt,label,label);
+    return LArPandoraPFParticleUtils::GetAssocProductVector<anab::T0>(part,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const std::vector<art::Ptr<anab::CosmicTag>> LArPandoraPFParticleUtils::GetCosmicTag(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label)
 {
-    return GetAssocProductVector<anab::CosmicTag>(part,evt,label,label); 
+    return LArPandoraPFParticleUtils::GetAssocProductVector<anab::CosmicTag>(part,evt,label,label); 
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -70,12 +70,12 @@ const std::vector<art::Ptr<recob::PFParticle>> LArPandoraPFParticleUtils::GetChi
 const std::vector<art::Ptr<recob::Hit>> LArPandoraPFParticleUtils::GetHits(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label)
 {    
     // There isn't a direct association between PFParticles and hits, so we go via clusters
-    std::vector<art::Ptr<recob::Cluster>> theseClusters = GetAssocProductVector<recob::Cluster>(part,evt,label,label);
+    std::vector<art::Ptr<recob::Cluster>> theseClusters = LArPandoraPFParticleUtils::GetAssocProductVector<recob::Cluster>(part,evt,label,label);
 
     std::vector<art::Ptr<recob::Hit>> theseHits;
     for (const art::Ptr<recob::Cluster> pCluster : theseClusters)
     {
-      std::vector<art::Ptr<recob::Hit>> tempHits = GetAssocProductVector<recob::Hit>(pCluster,evt,label,label);
+      std::vector<art::Ptr<recob::Hit>> tempHits = LArPandoraPFParticleUtils::GetAssocProductVector<recob::Hit>(pCluster,evt,label,label);
       theseHits.insert(theseHits.end(),tempHits.begin(),tempHits.end());
     }
     return theseHits;
@@ -86,12 +86,12 @@ const std::vector<art::Ptr<recob::Hit>> LArPandoraPFParticleUtils::GetHits(const
 const std::vector<art::Ptr<recob::Hit>> LArPandoraPFParticleUtils::GetViewHits(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label, const unsigned short &view)
 {
     // There isn't a direct association between PFParticles and hits, so we go via clusters
-    std::vector<art::Ptr<recob::Cluster>> theseClusters = GetAssocProductVector<recob::Cluster>(part,evt,label,label);
+    std::vector<art::Ptr<recob::Cluster>> theseClusters = LArPandoraPFParticleUtils::GetAssocProductVector<recob::Cluster>(part,evt,label,label);
 
     std::vector<art::Ptr<recob::Hit>> theseHits;
     for (const art::Ptr<recob::Cluster> cluster : theseClusters)
     { 
-        std::vector<art::Ptr<recob::Hit>> tempHits = GetAssocProductVector<recob::Hit>(cluster,evt,label,label);
+        std::vector<art::Ptr<recob::Hit>> tempHits = LArPandoraPFParticleUtils::GetAssocProductVector<recob::Hit>(cluster,evt,label,label);
         for(const art::Ptr<recob::Hit> hit : tempHits)
         {
             if (hit->View() == view)
@@ -107,35 +107,35 @@ const std::vector<art::Ptr<recob::Hit>> LArPandoraPFParticleUtils::GetViewHits(c
 
 const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraPFParticleUtils::GetSpacePoints(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label)
 {
-    return GetAssocProductVector<recob::SpacePoint>(part,evt,label,label);
+    return LArPandoraPFParticleUtils::GetAssocProductVector<recob::SpacePoint>(part,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const art::Ptr<recob::Track> LArPandoraPFParticleUtils::GetTrack(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel, const std::string &trackLabel)
 {
-    return GetAssocProduct<recob::Track>(part,evt,particleLabel,trackLabel);
+    return LArPandoraPFParticleUtils::GetAssocProduct<recob::Track>(part,evt,particleLabel,trackLabel);
 }    
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const art::Ptr<recob::Shower> LArPandoraPFParticleUtils::GetShower(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel, const std::string &showerLabel)
 {
-    return GetAssocProduct<recob::Shower>(part,evt,particleLabel,showerLabel);
+    return LArPandoraPFParticleUtils::GetAssocProduct<recob::Shower>(part,evt,particleLabel,showerLabel);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const art::Ptr<recob::Vertex> LArPandoraPFParticleUtils::GetVertex(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel)
 {
-    return GetAssocProduct<recob::Vertex>(part,evt,particleLabel,particleLabel);
+    return LArPandoraPFParticleUtils::GetAssocProduct<recob::Vertex>(part,evt,particleLabel,particleLabel);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const art::Ptr<recob::Slice> LArPandoraPFParticleUtils::GetSlice(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label)
 {
-    const art::Ptr<larpandoraobj::PFParticleMetadata> thisMetadata = GetMetadata(part,evt,label);
+    const art::Ptr<larpandoraobj::PFParticleMetadata> thisMetadata = LArPandoraPFParticleUtils::GetMetadata(part,evt,label);
     std::map<std::string,float> metaMap = thisMetadata->GetPropertiesMap();
 
     unsigned int sliceIndex;
@@ -149,14 +149,14 @@ const art::Ptr<recob::Slice> LArPandoraPFParticleUtils::GetSlice(const art::Ptr<
         sliceIndex = mapItr->second;
     }
 
-    return GetProductVector<recob::Slice>(evt,label).at(sliceIndex);
+    return LArPandoraPFParticleUtils::GetProductVector<recob::Slice>(evt,label).at(sliceIndex);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const art::Ptr<larpandoraobj::PFParticleMetadata> LArPandoraPFParticleUtils::GetMetadata(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &label)
 {
-    return GetAssocProduct<larpandoraobj::PFParticleMetadata>(part,evt,label,label);
+    return LArPandoraPFParticleUtils::GetAssocProduct<larpandoraobj::PFParticleMetadata>(part,evt,label,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ const art::Ptr<larpandoraobj::PFParticleMetadata> LArPandoraPFParticleUtils::Get
 bool LArPandoraPFParticleUtils::IsTrack(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel, const std::string &trackLabel)
 {
     // This function needs to fail if GetTrack would fail
-    std::vector<art::Ptr<recob::Track>> theseTracks = GetAssocProductVector<recob::Track>(part,evt,particleLabel,trackLabel);
+    std::vector<art::Ptr<recob::Track>> theseTracks = LArPandoraPFParticleUtils::GetAssocProductVector<recob::Track>(part,evt,particleLabel,trackLabel);
 
     return !theseTracks.empty();
 }
@@ -173,7 +173,7 @@ bool LArPandoraPFParticleUtils::IsTrack(const art::Ptr<recob::PFParticle> &part,
 
 bool LArPandoraPFParticleUtils::IsShower(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel, const std::string &showerLabel)
 {
-    std::vector<art::Ptr<recob::Shower>> theseShowers = GetAssocProductVector<recob::Shower>(part,evt,particleLabel,showerLabel);
+    std::vector<art::Ptr<recob::Shower>> theseShowers = LArPandoraPFParticleUtils::GetAssocProductVector<recob::Shower>(part,evt,particleLabel,showerLabel);
    
     return !theseShowers.empty();
 }
@@ -182,7 +182,7 @@ bool LArPandoraPFParticleUtils::IsShower(const art::Ptr<recob::PFParticle> &part
 
 bool LArPandoraPFParticleUtils::IsClearCosmic(const art::Ptr<recob::PFParticle> &part, const art::Event &evt, const std::string &particleLabel)
 {
-    const art::Ptr<larpandoraobj::PFParticleMetadata> metadata = GetMetadata(part,evt,particleLabel);
+    const art::Ptr<larpandoraobj::PFParticleMetadata> metadata = LArPandoraPFParticleUtils::GetMetadata(part,evt,particleLabel);
 
     std::map<std::string,float> metaMap = metadata->GetPropertiesMap();
 

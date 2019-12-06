@@ -37,7 +37,7 @@ public:
     * 
     * @return vector of art::Ptrs to the hits
     */
-    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Shower> &shower, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::Hit>> GetHits(const art::Ptr<recob::Shower> &shower, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the spacepoints associated with the shower.
@@ -48,7 +48,7 @@ public:
     * 
     * @return vector of art::Ptrs to the spacepoints
     */
-    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::Shower> &shower, art::Event const &evt, const std::string &label);
+    static const std::vector<art::Ptr<recob::SpacePoint>> GetSpacePoints(const art::Ptr<recob::Shower> &shower, const art::Event &evt, const std::string &label);
 
     /**
     * @brief Get the particle associated with the shower.
@@ -59,7 +59,7 @@ public:
     * 
     * @return art::Ptr to the particle 
     */
-    static const art::Ptr<recob::PFParticle> GetPFParticle(const art::Ptr<recob::Shower> &shower, art::Event const &evt, const std::string &label);
+    static const art::Ptr<recob::PFParticle> GetPFParticle(const art::Ptr<recob::Shower> &shower, const art::Event &evt, const std::string &label);
 };
 
 } // namespace lar_pandora

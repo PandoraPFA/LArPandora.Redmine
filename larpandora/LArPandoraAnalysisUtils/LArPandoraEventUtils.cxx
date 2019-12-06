@@ -28,7 +28,7 @@ namespace lar_pandora
 
 const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetPFParticles(const art::Event &evt, const std::string &label)
 {
-    return GetProductVector<recob::PFParticle>(evt,label);
+    return LArPandoraEventUtils::GetProductVector<recob::PFParticle>(evt,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ const std::vector<art::Ptr<recob::Track>> LArPandoraEventUtils::GetTracks(const 
                                  << " Please use LArPandoraEventUtils::GetPFParticles and access the tracks with LArPandoraPFParticleUtils::GetTrack."
                                  << std::endl;
 
-    return GetProductVector<recob::Track>(evt,label);
+    return LArPandoraEventUtils::GetProductVector<recob::Track>(evt,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -50,35 +50,35 @@ const std::vector<art::Ptr<recob::Shower>> LArPandoraEventUtils::GetShowers(cons
                                  << " Please use LArPandoraEventUtils::GetPFParticles and access the tracks with LArPandoraPFParticleUtils::GetShower."
                                  << std::endl;
 
-    return GetProductVector<recob::Shower>(evt,label);
+    return LArPandoraEventUtils::GetProductVector<recob::Shower>(evt,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const std::vector<art::Ptr<recob::Vertex>> LArPandoraEventUtils::GetVertices(const art::Event &evt, const std::string &label)
 {
-    return GetProductVector<recob::Vertex>(evt,label);
+    return LArPandoraEventUtils::GetProductVector<recob::Vertex>(evt,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const std::vector<art::Ptr<recob::SpacePoint>> LArPandoraEventUtils::GetSpacePoints(const art::Event &evt, const std::string &label)
 {
-    return GetProductVector<recob::SpacePoint>(evt,label);
+    return LArPandoraEventUtils::GetProductVector<recob::SpacePoint>(evt,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const std::vector<art::Ptr<recob::Slice>> LArPandoraEventUtils::GetSlices(const art::Event &evt, const std::string &label)
 {
-    return GetProductVector<recob::Slice>(evt,label);
+    return LArPandoraEventUtils::GetProductVector<recob::Slice>(evt,label);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 const std::vector<art::Ptr<recob::PFParticle>> LArPandoraEventUtils::GetClearCosmics(const art::Event &evt, const std::string &label)
 {
-    std::vector<art::Ptr<recob::PFParticle>> theseParticles = GetProductVector<recob::PFParticle>(evt,label);
+    std::vector<art::Ptr<recob::PFParticle>> theseParticles = LArPandoraEventUtils::GetProductVector<recob::PFParticle>(evt,label);
 
     std::vector<art::Ptr<recob::PFParticle>> theseCosmics;
 
@@ -109,7 +109,7 @@ const art::Ptr<recob::PFParticle> LArPandoraEventUtils::GetNeutrino(const art::E
     }
     
     art::Ptr<recob::PFParticle> pNeutrino;
-    const std::vector<art::Ptr<recob::PFParticle>> particles = GetPFParticles(evt,label);
+    const std::vector<art::Ptr<recob::PFParticle>> particles = LArPandoraEventUtils::GetPFParticles(evt,label);
     for (art::Ptr<recob::PFParticle> pParticle : particles)
     {
         if (LArPandoraPFParticleUtils::IsNeutrino(pParticle))
@@ -126,7 +126,7 @@ const art::Ptr<recob::PFParticle> LArPandoraEventUtils::GetNeutrino(const art::E
 const bool LArPandoraEventUtils::HasNeutrino(const art::Event &evt, const std::string &label)
 {
     bool hasNeutrino = false;
-    const std::vector<art::Ptr<recob::PFParticle>> particles = GetPFParticles(evt,label);
+    const std::vector<art::Ptr<recob::PFParticle>> particles = LArPandoraEventUtils::GetPFParticles(evt,label);
     for (art::Ptr<recob::PFParticle> pParticle : particles)
     {
         if(!pParticle->IsPrimary())

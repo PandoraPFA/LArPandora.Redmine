@@ -78,7 +78,7 @@ template <typename T, typename U> std::vector<art::Ptr<T>> LArPandoraUtilsBase::
 // Implementation of the template function to get the associated product from the event
 template <typename T, typename U> art::Ptr<T> LArPandoraUtilsBase::GetAssocProduct(const art::Ptr<U> &pProd, const art::Event &evt, const std::string &label, const std::string &assocLabel)
 {   
-    std::vector<art::Ptr<T>> associatedProducts = GetAssocProductVector<T>(pProd,evt,label,assocLabel); 
+    std::vector<art::Ptr<T>> associatedProducts = LArPandoraUtilsBase::GetAssocProductVector<T>(pProd,evt,label,assocLabel); 
     if (associatedProducts.empty())
     {
         throw cet::exception("LArPandora") << "LArPandoraUtilsBase::GetShower --- No associated object found";
