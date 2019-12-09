@@ -28,13 +28,9 @@ namespace lar_pandora
 class LArPandoraUtilsBase
 {
 protected:
-//    template <typename T> static void GetProductVector(const art::Event &evt, const std::string &label, std::vector<art::Ptr<T>> &productVector);
-//    template <typename T, typename U> static void GetAssocProductVector(const art::Ptr<U> &part, const art::Event &evt, const std::string &label, const std::string &assocLabel, std::vector<art::Ptr<T>> &productVector);
-
     template <typename T> static std::vector<art::Ptr<T>> GetProductVector(const art::Event &evt, const std::string &label);
     template <typename T, typename U> static std::vector<art::Ptr<T>> GetAssocProductVector(const art::Ptr<U> &part, const art::Event &evt, const std::string &label, const std::string &assocLabel);
     template <typename T, typename U> static art::Ptr<T> GetAssocProduct(const art::Ptr<U> &part, const art::Event &evt, const std::string &label, const std::string &assocLabel); 
-
 };
 
 // Implementation of the template function to get the products from the event
