@@ -123,19 +123,19 @@ void AnalysisUtilityExample::analyze(const art::Event &evt)
     std::cout << "Found the neutrino, and it has pdg code " << neutrino->PdgCode() << " and " << neutrinoChildren.size() << " child particles" << std::endl;
 
     // Lets see how many of the children are track- or shower-like
-    for (unsigned int child = 0; child < neutrinoChildren.size(); ++child)
+    for (unsigned int iChild = 0; iChild < neutrinoChildren.size(); ++iChild)
     {
-        if (LArPandoraPFParticleUtils::IsTrack(neutrinoChildren.at(child),evt,m_particleLabel,m_trackLabel))
+        if (LArPandoraPFParticleUtils::IsTrack(neutrinoChildren.at(iChild),evt,m_particleLabel,m_trackLabel))
         {
-            std::cout << "Child " << child << " is track-like" << std::endl;
+            std::cout << "Child " << iChild << " is track-like" << std::endl;
         }
-        else if (LArPandoraPFParticleUtils::IsShower(neutrinoChildren.at(child),evt,m_particleLabel,m_showerLabel))
+        else if (LArPandoraPFParticleUtils::IsShower(neutrinoChildren.at(iChild),evt,m_particleLabel,m_showerLabel))
         {
-            std::cout << "Child " << child << " is shower-like" << std::endl;
+            std::cout << "Child " << iChild << " is shower-like" << std::endl;
         }
         else
         {
-            std::cout << "Child " << child << " has no track or shower association" << std::endl;   
+            std::cout << "Child " << iChild << " has no track or shower association" << std::endl;   
         }
     }
 

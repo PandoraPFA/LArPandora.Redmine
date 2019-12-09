@@ -53,11 +53,11 @@ std::vector<art::Ptr<recob::PFParticle>> LArPandoraPFParticleUtils::GetChildPart
 
     std::vector<art::Ptr<recob::PFParticle>> children;
 
-    for (unsigned int index = 0; index < pParticles->size(); ++index)
+    for (unsigned int iPart = 0; iPart < pParticles->size(); ++iPart)
     {     
-        if (pParticles->at(index).Parent() == pParticle.key())
+        if (pParticles->at(iPart).Parent() == pParticle.key())
         {
-            art::Ptr<recob::PFParticle> pChild(pParticles,index);
+            art::Ptr<recob::PFParticle> pChild(pParticles,iPart);
             children.push_back(pChild);
         }
     }
