@@ -47,9 +47,10 @@ template <typename T> std::vector<art::Ptr<T>> LArPandoraUtilsBase::GetProductVe
 
     // We need to convert these to art pointers
     std::vector<art::Ptr<T>> productVector;
-    for(unsigned int productIndex = 0; productIndex < theseProds->size(); ++productIndex){
-      art::Ptr<T> ptr(theseProds,productIndex);
-      productVector.push_back(ptr);
+    for(unsigned int productIndex = 0; productIndex < theseProds->size(); ++productIndex)
+    {
+        art::Ptr<T> ptr(theseProds,productIndex);
+        productVector.push_back(ptr);
     }
     return productVector;
 }
