@@ -1,5 +1,5 @@
 /**
- *  @file   larpandora/LArPandoraAnalysis/UtilityExample_module.cc
+ *  @file   larpandora/LArPandoraAnalysis/AnalysisUtilityExample_module.cc
  *
  *  @brief  This module uses the analysis utilities to demonstrate 
  *          some of their usage. This can be used as a basis for 
@@ -25,9 +25,9 @@ namespace lar_pandora
 {
 
 /**
- *  @brief  UtilityExample class
+ *  @brief  AnalysisUtilityExample class
  */
-class UtilityExample : public art::EDAnalyzer
+class AnalysisUtilityExample : public art::EDAnalyzer
 {
 public:
     /**
@@ -35,17 +35,16 @@ public:
      *
      *  @param  pset
      */
-     UtilityExample(fhicl::ParameterSet const &pset);
+     AnalysisUtilityExample(fhicl::ParameterSet const &pset);
 
     /**
      *  @brief  Destructor
      */
-     virtual ~UtilityExample();
+     virtual ~AnalysisUtilityExample();
 
      void beginJob();
      void endJob();
      void analyze(const art::Event &evt);
-     void reconfigure(fhicl::ParameterSet const &pset);
 
 private:
 
@@ -54,7 +53,7 @@ private:
      std::string  m_showerLabel;           ///<
 };
 
-DEFINE_ART_MODULE(UtilityExample)
+DEFINE_ART_MODULE(AnalysisUtilityExample)
 
 } // namespace lar_pandora
 
@@ -82,43 +81,35 @@ DEFINE_ART_MODULE(UtilityExample)
 namespace lar_pandora
 {
 
-UtilityExample::UtilityExample(fhicl::ParameterSet const &pset) : art::EDAnalyzer(pset)
-{
-    this->reconfigure(pset);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-UtilityExample::~UtilityExample()
+AnalysisUtilityExample::AnalysisUtilityExample(fhicl::ParameterSet const &pset) : art::EDAnalyzer(pset),
+    m_particleLabel(pset.get<std::string>("PFParticleModule","pandora")),
+    m_trackLabel(pset.get<std::string>("TrackModule","pandoraTrack")),
+    m_showerLabel(pset.get<std::string>("ShowerModule","pandoraShower"))
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void UtilityExample::reconfigure(fhicl::ParameterSet const &pset)
-{
-    m_particleLabel = pset.get<std::string>("PFParticleModule","pandora");
-    m_trackLabel = pset.get<std::string>("TrackModule","pandoraTrack");
-    m_showerLabel = pset.get<std::string>("ShowerModule","pandoraShower");
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void UtilityExample::beginJob()
+AnalysisUtilityExample::~AnalysisUtilityExample()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void UtilityExample::endJob()
+void AnalysisUtilityExample::beginJob()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void UtilityExample::analyze(const art::Event &evt)
+void AnalysisUtilityExample::endJob()
 {
+}
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void AnalysisUtilityExample::analyze(const art::Event &evt)
+{
     // In this example, if we have no neutrino then move on
     const bool hasNeutrino = LArPandoraEventUtils::HasNeutrino(evt,m_particleLabel);
     if (!hasNeutrino)
@@ -132,19 +123,19 @@ void UtilityExample::analyze(const art::Event &evt)
     std::cout << "Found the neutrino, and it has pdg code " << neutrino->PdgCode() << " and " << neutrinoChildren.size() << " child particles" << std::endl;
 
     // Lets see how many of the children are track- or shower-like
-    for (unsigned int c = 0; c < neutrinoChildren.size(); ++c)
+    for (unsigned int child = 0; child < neutrinoChildren.size(); ++child)
     {
-        if (LArPandoraPFParticleUtils::IsTrack(neutrinoChildren.at(c),evt,m_particleLabel,m_trackLabel))
+        if (LArPandoraPFParticleUtils::IsTrack(neutrinoChildren.at(child),evt,m_particleLabel,m_trackLabel))
         {
-            std::cout << "Child " << c << " is track-like" << std::endl;
+            std::cout << "Child " << child << " is track-like" << std::endl;
         }
-        else if (LArPandoraPFParticleUtils::IsShower(neutrinoChildren.at(c),evt,m_particleLabel,m_showerLabel))
+        else if (LArPandoraPFParticleUtils::IsShower(neutrinoChildren.at(child),evt,m_particleLabel,m_showerLabel))
         {
-            std::cout << "Child " << c << " is shower-like" << std::endl;
+            std::cout << "Child " << child << " is shower-like" << std::endl;
         }
         else
         {
-            std::cout << "Child " << c << " has no track or shower association" << std::endl;   
+            std::cout << "Child " << child << " has no track or shower association" << std::endl;   
         }
     }
 
@@ -180,7 +171,6 @@ void UtilityExample::analyze(const art::Event &evt)
         }
     }
     std::cout << "Total number of hits in all " << recoParticles.size() << " PFParticles = " << nHits << std::endl; 
-
 }
 
 } //namespace lar_pandora

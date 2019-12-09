@@ -4,7 +4,7 @@ BEGIN_PROLOG
 
 standard_pandora_utility_example:
 {
-  module_type:        UtilityExample
+  module_type:        AnalysisUtilityExample
   #==================
   PFParticleLabel: "pandora"
   TrackLabel     : "pandoraTrack"
