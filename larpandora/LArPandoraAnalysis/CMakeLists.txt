@@ -26,6 +26,7 @@ art_make(
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
            MODULE_LIBRARIES larpandora_LArPandoraInterface
+           larpandora_LArPandoraAnalysisUtils
           )
 
 install_headers()
