@@ -77,7 +77,7 @@ template <typename T, typename U> art::Ptr<T> LArPandoraUtilsBase::GetAssocProdu
     std::vector<art::Ptr<T>> associatedProducts = LArPandoraUtilsBase::GetAssocProductVector<T>(pProd,evt,label,assocLabel); 
     if (associatedProducts.empty())
     {
-        throw cet::exception("LArPandora") << "LArPandoraUtilsBase::GetShower --- No associated object found";
+        throw cet::exception("LArPandora") << "LArPandoraUtilsBase::GetAssocProduct --- No associated object found";
     }
     return associatedProducts.at(0);
 }
